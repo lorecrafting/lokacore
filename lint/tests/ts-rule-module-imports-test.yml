@@ -1,0 +1,9 @@
+id: ts-rule-module-imports
+valid:
+  - "import { accepted, type Rule } from '../decision.ts';"
+  - "import type { Key } from '../contracts.gen.ts';"
+invalid:
+  - "import { readFileSync } from 'node:fs';"
+  - "import { decide } from './movement.ts';"
+  - "import x from 'lodash';"
+  - "import { y } from '../../play/obs.ts';"

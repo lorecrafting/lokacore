@@ -520,6 +520,8 @@ The smallest compilable subset, used as the first R4 fixture and the R1 spike mo
 
 *Amendment 2026-09-25 (R4, [owner decision](../decisions/owner-decisions-r4-2026-09-25.md) item 3):* R4 compiles this fixture's frozen subset: its manifest, capability lock, facts, policies and actions. The full fixture compiles after R5/R7/R8 freeze rooms, NPCs, schedules, quests and dialogue. Its `fact_equals` condition and its fact declaration take the frozen shapes (`fact_compare` in `protocol/policy.schema.json`, FactSpec in `protocol/fact.schema.json`), and its manifest gains the `title` that CartridgeManifest (`protocol/manifest.schema.json`) requires.
 
+*Amendment 2026-09-25 (R5 S1, [PM rulings](../reviews/2026-09-25-r5-s1-review.md), review F8):* rooms take the frozen shape of `protocol/room.schema.json`, which supersedes this example's room files: `rooms/<key>.json` carries `title` and `description` text keys (not `components.description.short`/`long`) and `exits` keyed by compass direction, each `{to: DefinitionRef}` (not `connections`); the strings live in the cartridge's default-locale `text.json` catalog (`TextCatalog`, `protocol/text.schema.json`), not `localization/en.yaml`; and the start room is `entry` in `cartridge.json`. Description variants and details join as optional fields in later R5 slices.
+
 ```yaml
 # cartridge.yaml
 api_version: loka/v3

@@ -51,3 +51,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Observability design: ADR-075 and observation contracts](2026-09-25-observability-design-review.md): PR #29 at `fd0ab9f`, APPROVE WITH NOTES; Astra relay; fixes `59b55e2` (head `e2847af`), APPROVE WITH NOTES; final `dc44543`, APPROVE.
 - [CI: native mobile builds only on native inputs](2026-09-25-ci-mobile-split-review.md): PR #30 at `2f34de8`, APPROVE WITH NOTES.
 - [ADR-075 accepted; first dev-evidence entries](2026-09-25-adr-075-accept-review.md): PR #33 at `544b263`, APPROVE WITH NOTES; fixes `7311cf3`, APPROVE.
+
+## R5
+
+- [R5 S1: rooms and exits, first world, look/move, `loka play`, rule lint lockdown](2026-09-25-r5-s1-review.md): PR #34 at `b76025e`, APPROVE WITH NOTES (Fable); Astra relay; fixes `740349c`, APPROVE WITH NOTES; final `86d65ac`, APPROVE.

@@ -124,5 +124,23 @@
     },
     "statement": "job.complete is proposed only by that job's own run_job at its visited due time (protocol/delta.schema.json job.complete).",
     "implemented_in": "r5"
+  },
+  {
+    "id": "player_in_one_room",
+    "citation": {
+      "document": "21-composable-world-primitives.md",
+      "heading": "### Containment"
+    },
+    "statement": "The player's body has exactly one container, and it is a room of the world.",
+    "implemented_in": "r5"
+  },
+  {
+    "id": "exits_resolve",
+    "citation": {
+      "document": "05-cartridges-content-capabilities.md",
+      "heading": "## 17. World topology"
+    },
+    "statement": "Every exit of every room names a room of the world.",
+    "implemented_in": "r5"
   }
 ]

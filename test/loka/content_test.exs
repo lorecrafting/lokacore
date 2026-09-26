@@ -152,12 +152,13 @@ defmodule Loka.ContentTest do
                ".hidden/x.json" => policy(@present),
                "notes.txt" => {:raw, "ignored"},
                "actions/talk.json" => Map.put(@talk, "key", "talk"),
-               "cartridge.json" => Map.merge(@manifest, %{"entry" => %{}, "key" => "c"})
+               "cartridge.json" =>
+                 Map.merge(@manifest, %{"time_policy" => "play_time", "key" => "c"})
              }) == [
                d("UNKNOWN_FIELD", ~S(".hidden/x.json")),
                d("UNKNOWN_FIELD", "actions/talk.key"),
-               d("UNKNOWN_FIELD", "cartridge.entry"),
                d("UNKNOWN_FIELD", "cartridge.key"),
+               d("UNKNOWN_FIELD", "cartridge.time_policy"),
                d("UNKNOWN_FIELD", "polices/x")
              ]
     end

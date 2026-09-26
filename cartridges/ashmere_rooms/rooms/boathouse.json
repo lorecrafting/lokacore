@@ -1,0 +1,14 @@
+{
+  "title": "room.boathouse.title",
+  "description": "room.boathouse.description",
+  "exits": {
+    "east": {
+      "to": {
+        "cartridge_id": "ashmere_rooms",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "ferry_landing"
+      }
+    }
+  }
+}

@@ -223,5 +223,10 @@
     "code": "budget_exceeded",
     "category": "evaluation_fault",
     "description": "The delta exceeds a composition-profile budget (04 §5.4; conformance/composition-profile.json)."
+  },
+  {
+    "code": "unowned_event",
+    "category": "evaluation_fault",
+    "description": "A rule proposed an event type its capability does not own (04 §5.2 step 7; 05 §6; capability_registry.json); the whole proposal is discarded."
   }
 ]

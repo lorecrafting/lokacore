@@ -1,0 +1,23 @@
+id: ts-rule-registration
+language: tsx
+severity: error
+message: The rule table binds each capability to an imported rule module's decide (kernel/ts/src/world.ts RULES; owner decision, docs/decisions/owner-decision-r5-setup-2026-09-25.md). A RULES value is $MODULE.decide, and world.ts takes namespace imports only from ./rules/; an object with a decide key outside rules/ is ts-rule-module-location's.
+files: [kernel/ts/src/world.ts]
+rule:
+  any:
+    - kind: pair
+      inside:
+        kind: object
+        inside: { kind: variable_declarator, has: { field: name, regex: ^RULES$ } }
+      not: { has: { field: value, pattern: $M.decide } }
+    - kind: shorthand_property_identifier
+      inside:
+        kind: object
+        inside: { kind: variable_declarator, has: { field: name, regex: ^RULES$ } }
+    - kind: spread_element
+      inside:
+        kind: object
+        inside: { kind: variable_declarator, has: { field: name, regex: ^RULES$ } }
+    - kind: import_statement
+      has: { kind: import_clause, has: { kind: namespace_import } }
+      not: { has: { field: source, regex: "^['\"]\\./rules/[a-z_]+\\.ts['\"]$" } }

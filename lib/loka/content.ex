@@ -8,8 +8,10 @@ defmodule Loka.Content do
   `cartridge.json` (the CartridgeManifest object form), `facts.json` (`{"facts": {name:
   FactSpec without key}}`, a dotted name mapping to its snake_case key) and one file per
   definition, `policies/<key>.json` and `actions/<key>.json`, the frozen shape without `key`.
-  References are full DefinitionRef objects naming this cartridge. Other files are ignored,
-  except that a `.json` file anywhere else is UNKNOWN_FIELD.
+  R5 adds `rooms/<key>.json` (RoomDefinition without `key`), `text.json` (the TextCatalog)
+  and an optional `entry` room in `cartridge.json`; a source with any of them compiles to
+  loka-cartridge-v2. References are full DefinitionRef objects naming this cartridge. Other
+  files are ignored, except that a `.json` file anywhere else is UNKNOWN_FIELD.
   """
   use Boundary, deps: [Loka.Core], exports: []
 

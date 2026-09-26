@@ -90,6 +90,11 @@ The table below describes the files as imported. Later amendments are in git his
 - 2026-09-25, R4 S1 ([owner decision](../decisions/owner-decisions-r4-2026-09-25.md)):
   notes in 05 §2 (source is JSON for now, YAML later) and 00a §12 (R4 compiles the hello
   fixture's frozen subset; the rest after R5/R7/R8).
+- 2026-09-25, R5 S1 ([review](../reviews/2026-09-25-r5-s1-review.md) F4, F8, Astra A6):
+  [conformance/numeric-profile.md](conformance/numeric-profile.md) gains the initial world
+  ids rule beside IdSource (additive; the nil CommandId reserved for world creation, one
+  allocation counter per decision); 00a §12 notes the frozen room, text and entry shapes.
+  No existing rule or fixture changed.
 
 ## Link rewrites (the only byte changes at import)
 

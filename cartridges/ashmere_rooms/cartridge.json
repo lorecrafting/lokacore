@@ -1,0 +1,28 @@
+{
+  "api_version": "loka/v3",
+  "id": "ashmere_rooms",
+  "version": "0.0.1",
+  "title": "Ashmere — Rooms",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.0",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "description_variant": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": {
+    "cartridge_id": "ashmere_rooms",
+    "cartridge_version": "0.0.1",
+    "kind": "room",
+    "key": "ferry_landing"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_rooms (05 \u00a711; CartridgeArtifact.content_hash): the compiled cartridge assembled by hand from the source files (manifest without entry, the lock, empty facts, policies and actions, each room keyed by its DefinitionRefString with key added, entry, text), its canonical bytes and SHA-256 of those bytes. canonical was produced by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by shasum -a 256 over its UTF-8 bytes, never by the kernels. For these values (integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_rooms",
+      "version": "0.0.1",
+      "title": "Ashmere \u2014 Rooms",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "description_variant": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "description_variant": 1
+      }
+    },
+    "facts": {},
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_rooms@0.0.1:room/boathouse": {
+        "key": "boathouse",
+        "title": "room.boathouse.title",
+        "description": "room.boathouse.description",
+        "exits": {
+          "east": {
+            "to": {
+              "cartridge_id": "ashmere_rooms",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        }
+      },
+      "ashmere_rooms@0.0.1:room/ferry_landing": {
+        "key": "ferry_landing",
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_rooms",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "well_lane"
+            }
+          },
+          "west": {
+            "to": {
+              "cartridge_id": "ashmere_rooms",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "boathouse"
+            }
+          }
+        }
+      },
+      "ashmere_rooms@0.0.1:room/well_lane": {
+        "key": "well_lane",
+        "title": "room.well_lane.title",
+        "description": "room.well_lane.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_rooms",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        }
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_rooms",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "ferry_landing"
+    },
+    "text": {
+      "room.ferry_landing.title": "Ferry Landing",
+      "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A mooring post leans into the current.",
+      "room.boathouse.title": "Boathouse",
+      "room.boathouse.description": "Oars and nets hang from the rafters above Bram's ferry.",
+      "room.well_lane.title": "Well Lane",
+      "room.well_lane.description": "Worn steps lead to the village well. A bucket hangs from its chain."
+    }
+  },
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere \u2014 Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"}}",
+  "sha256": "c72b59ac7353dcf055438427dcaa59bcb1c2474058531aab5686116d16e7b671"
+}

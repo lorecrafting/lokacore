@@ -76,6 +76,25 @@
           "bindings": {}
         }
       ]
+    },
+    "TextCatalog": {
+      "description": "The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room (title, description) or an action (label, accessibility) uses has an entry; the compiler and loader report a missing one as UNRESOLVED_REFERENCE.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_.]{0,127}$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "examples": [
+        {
+          "room.ferry_landing.title": "Ferry Landing",
+          "room.ferry_landing.description": "Reeds crowd a slick wooden landing."
+        },
+        {}
+      ]
     }
   }
 }

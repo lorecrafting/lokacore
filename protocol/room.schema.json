@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Room and connection contracts",
+  "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need. Details, tags, description variants and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
+  "$defs": {
+    "Connection": {
+      "description": "One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction, so a later optional barrier field (a DefinitionRef to one shared Barrier state, 21 §5 Barrier; 05 §25 coherent connections) adds state without changing what an exit without one means. A reciprocal exit is authored in the destination room (00a §2).",
+      "type": "object",
+      "properties": {
+        "to": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        }
+      },
+      "required": [
+        "to"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "to": {
+            "cartridge_id": "ashmere_rooms",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "village_green"
+          }
+        }
+      ]
+    },
+    "RoomDefinition": {
+      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent). Custom named connections (05 §17) join later as a separate optional field.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "exits": {
+          "type": "object",
+          "properties": {
+            "north": {
+              "$ref": "#/$defs/Connection"
+            },
+            "south": {
+              "$ref": "#/$defs/Connection"
+            },
+            "east": {
+              "$ref": "#/$defs/Connection"
+            },
+            "west": {
+              "$ref": "#/$defs/Connection"
+            },
+            "up": {
+              "$ref": "#/$defs/Connection"
+            },
+            "down": {
+              "$ref": "#/$defs/Connection"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "key",
+        "title",
+        "description",
+        "exits"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "ferry_landing",
+          "title": "room.ferry_landing.title",
+          "description": "room.ferry_landing.description",
+          "exits": {
+            "north": {
+              "to": {
+                "cartridge_id": "ashmere_rooms",
+                "cartridge_version": "0.0.1",
+                "kind": "room",
+                "key": "village_green"
+              }
+            }
+          }
+        },
+        {
+          "key": "cell",
+          "title": "room.cell.title",
+          "description": "room.cell.description",
+          "exits": {}
+        }
+      ]
+    }
+  }
+}

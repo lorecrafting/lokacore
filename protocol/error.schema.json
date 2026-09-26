@@ -50,7 +50,8 @@
         "containment_cycle",
         "capacity_exceeded",
         "nonfuture_job",
-        "budget_exceeded"
+        "budget_exceeded",
+        "unowned_event"
       ],
       "examples": [
         "not_found",

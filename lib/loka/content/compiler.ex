@@ -22,24 +22,59 @@ defmodule Loka.Content.Compiler do
   @spec compile([{String.t(), term(), term()}], [map()], [map()]) ::
           {:ok, map()} | {:error, [map()]}
   def compile(files, loaded, registry) do
-    {manifest, d1} = manifest(of(files, :manifest), registry)
+    {manifest, entry, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files)
+    {text, d3} = text(of(files, :text))
+    v2 = v2(defs, entry, text)
 
-    case loaded ++ d1 ++ d2 ++ Checks.check(manifest, defs, registry) do
-      [] -> {:ok, cartridge(manifest, defs)}
+    case loaded ++
+           d1 ++
+           d2 ++
+           d3 ++
+           Checks.check(manifest, defs, registry) ++
+           Checks.rooms(manifest, defs, v2, registry) do
+      [] -> {:ok, cartridge(manifest, defs, v2)}
       diags -> {:error, diags}
     end
   end
 
+  # v2 exactly when the source has rooms, an entry or a text catalog (CompiledCartridge).
+  defp v2(defs, entry, text) do
+    if defs["room"] != %{} or entry != nil or text != nil, do: {entry, text || %{}}
+  end
+
   defp of(files, kind), do: for({rel, ^kind, v} <- files, do: {rel, v})
 
-  defp manifest([], _), do: {nil, [diag("MISSING_MANIFEST", "cartridge")]}
-  defp manifest([{_, :invalid}], _), do: {nil, []}
+  defp manifest([], _), do: {nil, nil, [diag("MISSING_MANIFEST", "cartridge")]}
+  defp manifest([{_, :invalid}], _), do: {nil, nil, []}
 
+  # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), which the
+  # compiled v2 cartridge carries beside the manifest.
   defp manifest([{rel, m}], registry) do
-    case validated(rel, [], "CartridgeManifest", m) do
-      [] -> {m, Checks.requirements(rel, m, registry)}
-      diags -> {nil, diags}
+    defs = Contracts.defs()
+
+    file =
+      put_in(defs["CartridgeManifest"], ["properties", "entry"], %{"$ref" => "DefinitionRef"})
+
+    case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
+      [] ->
+        {entry, manifest} = Map.pop(m, "entry")
+        {manifest, entry, Checks.requirements(rel, manifest, registry)}
+
+      diags ->
+        {nil, nil, diags}
+    end
+  end
+
+  # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
+  # not resolved against it).
+  defp text([]), do: {nil, []}
+  defp text([{_, :invalid}]), do: {:unknown, []}
+
+  defp text([{rel, t}]) do
+    case validated(rel, [], "TextCatalog", t) do
+      [] -> {t, []}
+      diags -> {:unknown, diags}
     end
   end
 
@@ -47,7 +82,10 @@ defmodule Loka.Content.Compiler do
     {facts, d1} = facts(of(files, :facts))
     {policies, d2} = files(files, :policy, "VersionedPolicy")
     {actions, d3} = files(files, :action, "ActionDefinition")
-    {%{"fact" => facts, "policy" => policies, "action" => actions}, d1 ++ d2 ++ d3}
+    {rooms, d4} = files(files, :room, "RoomDefinition")
+
+    {%{"fact" => facts, "policy" => policies, "action" => actions, "room" => rooms},
+     d1 ++ d2 ++ d3 ++ d4}
   end
 
   defp files(files, kind, contract),
@@ -149,7 +187,7 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  defp cartridge(m, defs) do
+  defp cartridge(m, defs, nil) do
     %{
       "format" => "loka-cartridge-v1",
       "manifest" => m,
@@ -161,6 +199,12 @@ defmodule Loka.Content.Compiler do
       "policies" => keyed(m, "policy", defs),
       "actions" => keyed(m, "action", defs)
     }
+  end
+
+  defp cartridge(m, defs, {entry, text}) do
+    cartridge(m, defs, nil)
+    |> Map.merge(%{"format" => "loka-cartridge-v2", "rooms" => keyed(m, "room", defs)})
+    |> Map.merge(%{"entry" => entry, "text" => text})
   end
 
   defp keyed(m, kind, defs),
