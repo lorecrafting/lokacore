@@ -3,14 +3,15 @@
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
 // offers, some it does not (unknown and unowned types, wrong and stale ids, foreign actors and
 // worlds, the nil CommandId), wait to time boundaries, and repeats. Each step must return a
-// DecisionResult, never throw, and keep every registered invariant that applies (CHECKED); its
-// canonical decision and state hash feed the sequence digest. A failure is shrunk by greedy step
-// deletion and reported with its seed, the generator version and a `loka play` transcript.
+// DecisionResult, never throw, keep every registered invariant that applies (CHECKED) and, when
+// accepted, adopt exactly what its delta composes to; its canonical decision and state hash feed
+// the sequence digest. A failure is shrunk by greedy step deletion and reported with its seed,
+// the generator version, the command that reproduces it and a `loka play` playback.
 //   node kernel/ts/test/sim.ts <seed>...   prints each seed's digest and failure, if any
 import { createHash } from 'node:crypto';
 import { globSync, mkdirSync, writeFileSync } from 'node:fs';
 import { encode, hash } from '../src/canonical.ts';
-import { compose, key } from '../src/compose.ts';
+import { compose, key, same } from '../src/compose.ts';
 import type { Command, DecisionResult } from '../src/contracts.gen.ts';
 import { id } from '../src/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
@@ -20,7 +21,7 @@ import { resourceRef } from '../src/resource.ts';
 import { next, type RngState } from '../src/rng.ts';
 import { utf8 } from '../src/sha256.ts';
 import { resolve } from '../src/target.ts';
-import { gameView, holds, step } from '../src/world.ts';
+import { gameView, holds, row, step } from '../src/world.ts';
 import { append, kernelVersion, line, ROOT } from '../play/obs.ts';
 import { decide } from '../play/run.ts';
 import { read } from './read.ts';
@@ -179,7 +180,11 @@ function checked(kernel: Kernel, before: World, command: Command): Checked {
   try {
     const view = kernel.gameView(before);
     const { decision, world } = kernel.step(before, command);
-    const bad = violated(before, command, view, decision, world);
+    const bad =
+      violated(before, command, view, decision, world) ??
+      (decision.kind === 'accepted' && !adopted(before, decision, world)
+        ? 'adopt_mismatch'
+        : undefined);
     const code = decision.kind === 'accepted' ? 'accepted' : kindCode(decision);
     const bytes = `${encode(decision as never)}\n${hash(world.state as never)}\n`;
     return { world, bytes, code, ...(bad && { failure: { id: bad, detail: code } }) };
@@ -238,6 +243,22 @@ function violated(
       : undefined)
   );
 }
+
+// An accepted step's State is the State before with its delta's composed changes and its rng,
+// and nothing else (world.ts adopt); a delta that does not compose is never accepted. A simulator
+// failure (adopt_mismatch), not a registered invariant.
+function adopted(before: World, decision: Accepted, after: World): boolean {
+  const result = compose(base(before) as never, decision.delta);
+  if ('fault' in result) return false;
+  const want: Record<string, unknown> = { ...before.state, rng: decision.rng };
+  for (const { target, value } of result.changes) {
+    if (target.kind === 'clock') want.clock = value;
+    const at = row(target);
+    if (at) want[at[0]] = { ...(want[at[0]] as object), [at[1]]: value };
+  }
+  return same(want, after.state);
+}
+type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 
 // Words two or more things of the world answer to, so a lookup can be ambiguous.
 function shared(world: World): string[] {
@@ -360,17 +381,20 @@ function boundaries(world: World): number[] {
   );
 }
 
-/** The failure report: seed, generator, shrunk commands and, for a fresh start, the replay. */
+/** The failure report: seed, generator, the reproducer, shrunk commands and, for a fresh */
+/** start, a playback. */
 export function report(o: Outcome, kernel = KERNEL): string {
   const f = o.failure!;
   const commands = shrink(o, f.id, kernel);
   const name = o.loaded.cartridge.manifest.id;
-  const head = `simulation failure: ${f.id} (${f.detail}) at step ${f.at + 1}\ngenerator ${GENERATOR}, seed ${o.seed}, cartridge ${name}, ${o.drained ? `drained start: ${o.drained}` : 'fresh start'}\n`;
+  const head = `simulation failure: ${f.id} (${f.detail}) at step ${f.at + 1}\ngenerator ${GENERATOR}, seed ${o.seed}, cartridge ${name}, ${o.drained ? `drained start: ${o.drained}` : 'fresh start'}\nreproduce (re-checks every invariant): node kernel/ts/test/sim.ts ${o.seed}\n`;
   const body = `shrunk from ${o.commands.length} to ${commands.length} commands:\n${commands.map((c) => `${encode(c as never)}\n`).join('')}`;
-  return head + body + (o.drained ? '' : transcript(o, commands));
+  const none = 'no playback: `loka play` starts fresh, not drained; use the reproduce command\n';
+  return head + body + (o.drained ? none : transcript(o, commands));
 }
 
-// The shrunk commands as a game_trace `loka play --replay` re-decides on the real kernel.
+// The shrunk commands as a game_trace `loka play --replay` re-decides on the real kernel: a
+// playback, not a reproducer (no invariant is checked, and a stray command ends it).
 function transcript(o: Outcome, commands: readonly Command[]): string {
   const run_id = id(SIM, String(o.seed), 1);
   const r = {
@@ -406,7 +430,8 @@ function transcript(o: Outcome, commands: readonly Command[]): string {
   mkdirSync(`${ROOT}tmp/sim`, { recursive: true });
   writeFileSync(ROOT + artifact, o.loaded.artifact);
   const trace = append('game_trace', `sim-${o.seed}`, text, 'w');
-  return `${stop}replay: node kernel/ts/play/main.ts ${artifact} --replay ${trace}\n`;
+  const label = 'playback (re-decides; checks no invariant; ends at the first stray command)';
+  return `${stop}${label}: node kernel/ts/play/main.ts ${artifact} --replay ${trace}\n`;
 }
 
 if (import.meta.main)

@@ -15,6 +15,7 @@ import {
   type DeltaOp,
   type EntityId,
   type ErrorCode,
+  type MutationTarget,
   type Owned,
   type WorldContextId,
 } from './contracts.gen.ts';
@@ -169,16 +170,16 @@ function place(
  * unsupported_capability when that capability is not in the lock or has no rule here.
  */
 export function step(world: World, command: Command): Stepped {
-  const type = command.payload.type;
-  // Own keys only: a type such as `constructor` names no command (unknown_types_fail_closed).
-  const [owner] = (
-    Object.hasOwn(CAPABILITY_OWNERS.command, type) ? CAPABILITY_OWNERS.command[type] : ''
-  ).split('@');
+  const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
     return { decision: rejected('unsupported_capability'), world };
   return decideWith(world, command, owner, rule);
 }
+
+// The capability owning a command or event type; own keys only, so `constructor` names none.
+const ownerOf = (owners: Readonly<Record<string, string>>, type: string) =>
+  Object.hasOwn(owners, type) ? owners[type]!.split('@')[0] : undefined;
 
 type Stepped = { decision: DecisionResult; world: World };
 type Actor = Parameters<typeof event>[1];
@@ -238,10 +239,10 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
   let clock = world.state.clock;
   for (const { target, value } of result.changes) {
     if (target.kind === 'clock') clock = value as number;
-    const name = SECTIONS[target.kind];
+    const [name, at] = row(target) ?? [];
     if (!name) continue;
     written[name] ??= { ...world.state[name] };
-    written[name][target.kind === 'containment' ? target.entity_id : key(target)] = value;
+    written[name][at!] = value;
   }
   const events = factChanged(world, command, mint, assigns, decision.events);
   const out = events === decision.events ? decision : { ...decision, events };
@@ -264,6 +265,11 @@ const SECTIONS: Readonly<
   barrier: 'barriers',
 };
 
+/** Where adopt() keeps a written MutationTarget: its State section and row (not the clock). */
+export const row = (t: MutationTarget) =>
+  SECTIONS[t.kind] &&
+  ([SECTIONS[t.kind]!, t.kind === 'containment' ? t.entity_id : key(t)] as const);
+
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 
 /**
@@ -272,12 +278,10 @@ type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
  * proposal. adopt() checks the output budget once the host's events are added.
  */
 export function admit(owner: string, decision: DecisionResult): Admitted {
-  const fault = (code: ErrorCode) => ({ kind: 'fault', code }) as Admitted;
   if (decision.kind !== 'accepted') return decision as Admitted;
-  const owners = CAPABILITY_OWNERS.event;
-  const may: readonly string[] = [owner, ...(COMPOSES[owner as keyof typeof COMPOSES] ?? [])];
-  if (decision.events.some((e) => !may.includes(owners[e.payload.type]?.split('@')[0])))
-    return fault('unowned_event');
+  const may: readonly unknown[] = [owner, ...(COMPOSES[owner as keyof typeof COMPOSES] ?? [])];
+  if (decision.events.some((e) => !may.includes(ownerOf(CAPABILITY_OWNERS.event, e.payload.type))))
+    return { kind: 'fault', code: 'unowned_event' } as Admitted;
   return decision as Admitted;
 }
 

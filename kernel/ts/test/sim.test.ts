@@ -5,17 +5,18 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { test } from 'node:test';
-import type { Command } from '../src/contracts.gen.ts';
+import type { AdvertisedAction, Command, DecisionResult } from '../src/contracts.gen.ts';
+import type { World } from '../src/index.ts';
 import { gameView, step } from '../src/world.ts';
 import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
 
-const SEEDS: { generator: number; seeds: { seed: number }[] } = read(
+const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = read(
   'kernel/ts/test/sim_seeds.json',
 );
 const seeds = SEEDS.seeds.map((s) => s.seed);
 const FRESH = 10_000;
-// Every outcome the demo cartridges can give; the generator must reach each one.
+// Outcomes the demo cartridges give; the generator must reach each one (a new one may join).
 const REACHED = [
   'accepted',
   'cooldown',
@@ -31,6 +32,12 @@ const REACHED = [
   'permission_denied',
   'unsupported_capability',
 ];
+// Each v2 demo cartridge, and the unregistered command types (Object prototype keys among them,
+// the bug class of the regression seeds): each must turn up in the fresh sequences.
+const PICKED = ['bell', 'details', 'dusk', 'facts', 'gate', 'items', 'road', 'rooms'].map(
+  (c) => `ashmere_${c}`,
+);
+const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 
 // Breaks: an invariant registered with no per-step check and no stated reason.
 test('every registered invariant is checked per step, or says why not', () => {
@@ -40,12 +47,13 @@ test('every registered invariant is checked per step, or says why not', () => {
 });
 
 // Breaks: any kernel change that throws out of step or breaks a registered invariant on a
-// generated sequence; a generator that stops reaching most refusal codes.
+// generated sequence; a generator that stops reaching a refusal code, a cartridge or an
+// unregistered command type.
 test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`, (t) => {
   assert.equal(SEEDS.generator, GENERATOR, 'sim_seeds.json is of another generator: re-curate it');
   const first = Date.now(); // the fresh seeds, printed so a failure can be rerun
   const lengths = Array<number>(8).fill(0);
-  const codes = new Set<string>();
+  const [codes, seen] = [new Set<string>(), new Set<string>()]; // outcomes; cartridges, types
   let steps = 0;
   for (const seed of [...seeds, ...Array.from({ length: FRESH }, (_, i) => first + i)]) {
     const o = simulate(seed);
@@ -53,13 +61,26 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
     lengths[(o.commands.length - 1) >> 3]! += 1;
     steps += o.commands.length;
     for (const c of o.codes) codes.add(c);
+    seen.add(o.loaded.cartridge.manifest.id);
+    for (const c of o.commands) seen.add(c.payload.type);
   }
   t.diagnostic(
     `generator ${GENERATOR}; regression seeds ${seeds.join(' ')}; fresh seeds ${first} to ` +
       `${first + FRESH - 1}; ${seeds.length + FRESH} sequences, ${steps} steps; lengths 1-8, 9-16, ... 57-64: ` +
       `${lengths.join(' ')}; outcomes ${[...codes].sort().join(', ')}`,
   );
-  assert.deepEqual([...codes].sort(), REACHED);
+  const missing = [...PICKED, ...UNKNOWN].filter((x) => !seen.has(x));
+  assert.deepEqual([...REACHED.filter((c) => !codes.has(c)), ...missing], [], 'never reached');
+});
+
+// Breaks: a generator change after which a regression seed no longer issues the command type it
+// was kept for, so it stops guarding that bug.
+test('each regression seed still issues the command type it was kept for', () => {
+  for (const { seed, type } of SEEDS.seeds)
+    assert.ok(
+      simulate(seed).commands.some((c) => c.payload.type === type),
+      `seed ${seed}: ${type}`,
+    );
 });
 
 // Breaks: anything nondeterministic in the kernel or the generator (time, Math.random, host
@@ -102,7 +123,10 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   );
   assert.equal(f.id, 'containment_acyclic');
   assert.ok(f.shrunk.length <= 3 && types(f.shrunk).at(-1) === 'drop', f.text);
-  assert.match(f.text, /^simulation failure: containment_acyclic .*\ngenerator 1, seed \d+/);
+  assert.match(
+    f.text,
+    /^simulation failure: containment_acyclic .*\ngenerator 1, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+  );
   assert.match(f.text, /shrunk from \d+ to [1-3] commands:\n/);
 });
 
@@ -157,6 +181,74 @@ test('red control: a GameView that disagrees with admission trips gameview_agree
     const f = caught(kernel);
     assert.equal(f.id, 'gameview_agrees_with_admission');
     assert.ok(f.shrunk.length <= 2, f.text);
+  }
+});
+
+// Breaks: the recipe half of the check (a perform's view entry, its shown codes) or the
+// reason-code clause is lost, and a view offering a recipe admission refuses goes unseen.
+test('red control: a recipe shown available, or refused for another code, trips gameview_agrees_with_admission', () => {
+  const view = (f: (a: AdvertisedAction) => AdvertisedAction) =>
+    planted({ gameView: (w) => ({ ...gameView(w), actions: gameView(w).actions.map(f) }) });
+  const all = view((a) => ({ ...a, available: true }));
+  const swapped = view((a) =>
+    a.available
+      ? a
+      : { ...a, reason: { code: a.reason.code === 'cooldown' ? 'invalid_state' : 'cooldown' } },
+  );
+  for (const kernel of [all, swapped]) {
+    const f = caught(kernel);
+    assert.equal(f.id, 'gameview_agrees_with_admission');
+    assert.equal(types(f.shrunk).at(-1), 'perform', f.text);
+  }
+});
+
+// Breaks: unknown_types_fail_closed stops validating an accepted decision, so an unregistered
+// event type passes.
+test('red control: an accepted decision with an unregistered event trips unknown_types_fail_closed', () => {
+  const f = caught(
+    planted({
+      step: (w, c) => {
+        const s = step(w, c);
+        if (s.decision.kind !== 'accepted') return s;
+        const events = [...s.decision.events, { type: 'bogus' } as never];
+        return { ...s, decision: { ...s.decision, events } };
+      },
+    }),
+  );
+  assert.equal(f.id, 'unknown_types_fail_closed');
+  assert.equal(f.shrunk.length, 1, f.text);
+});
+
+// Breaks: an accepted step whose adopted State is not its proposal's (a clock off by one, the
+// RNG not advanced), or whose delta does not compose, passes unseen.
+test('red control: an accepted step adopted wrong, or not composing, is adopt_mismatch', () => {
+  type Stepped = ReturnType<typeof step>;
+  const on = (type: string, f: (s: Stepped, before: World) => Stepped) =>
+    planted({
+      step: (w, c) => {
+        const s = step(w, c);
+        return c.payload.type === type && s.decision.kind === 'accepted' ? f(s, w) : s;
+      },
+    });
+  const state = (s: Stepped, change: Partial<World['state']>) => ({
+    ...s,
+    world: { ...s.world, state: { ...s.world.state, ...change } },
+  });
+  const late = on('wait', (s) => state(s, { clock: s.world.state.clock - 1 }));
+  const stuck = on('perform', (s, before) => state(s, { rng: before.state.rng }));
+  const stale = on('wait', (s) => {
+    const d = s.decision as Extract<DecisionResult, { kind: 'accepted' }>;
+    const ops = d.delta.ops.map((o) => (o.op === 'time.advance' ? { ...o, from: o.from + 1 } : o));
+    return { ...s, decision: { ...d, delta: { ...d.delta, ops } } };
+  });
+  for (const [kernel, type] of [
+    [late, 'wait'],
+    [stuck, 'perform'],
+    [stale, 'wait'],
+  ] as const) {
+    const f = caught(kernel);
+    assert.equal(f.id, 'adopt_mismatch');
+    assert.equal(types(f.shrunk).at(-1), type, f.text);
   }
 });
 

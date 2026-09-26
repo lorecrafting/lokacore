@@ -148,7 +148,8 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   gameview_agrees_with_admission: ({ view, command, decision }) => {
     const entry = advertised(view, command.payload);
     const code = decision.kind === 'rejected' ? decision.error.code : undefined;
-    const shown = SHOWN[command.payload.type] ?? [];
+    const type = command.payload.type; // own keys only: an action may be keyed `constructor`
+    const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
     if (!entry) return true;
     if (entry.available) return !shown.includes(code);
     return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
