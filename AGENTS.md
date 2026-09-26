@@ -133,9 +133,10 @@ A test exists to catch a specific break. Adapted from
   (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) stay pure; in `mobile/`,
   shared packages never import an authority, Story and Realm never import each other, and
   only `authority/local-story` imports the kernel (spec documents 10 §2, 14 §R2); rule
-  modules live only in `kernel/ts/src/rules/`, never mutate and import only kernel modules,
-  and the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`) keeps each to its own
-  capability's commands and events. Every
+  modules live only in `kernel/ts/src/rules/`, are registered in `world.ts` only as
+  `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
+  import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
+  and `step`'s event-ownership check keep each to its capability's commands and events. Every
   rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh` plants a
   violation at each rule's real path and requires the scan to report it.
 - TypeScript: Prettier (`.prettierrc.json`, scope in `.prettierignore`, `npm ci` at the

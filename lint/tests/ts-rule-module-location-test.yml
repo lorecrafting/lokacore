@@ -9,3 +9,4 @@ invalid:
   - "export const decide = (w, c) => rejected('not_found');"
   - "export function decide(w: W, c: C) { return rejected('not_found'); }"
   - "const helper: Rule<'containment'> = (w) => accepted(w, 'x', [], []);"
+  - "const fake = { decide: (w) => rejected('not_found') };"

@@ -1,7 +1,7 @@
 id: ts-rule-module-pure
 language: tsx
 severity: error
-message: A rule module returns a proposal and never mutates (ADR-072; 04 §5.1). No assignment to a property or element, ++/--/+=, delete, mutating methods or Object.assign, and no casts or any (they would evade the typed ownership check, kernel/ts/src/decision.ts Rule).
+message: A rule module returns a proposal and never mutates (ADR-072; 04 §5.1). No assignment to a property or element, ++/--/+=, delete or mutating methods; no casts or any (they would evade the typed ownership check, kernel/ts/src/decision.ts Rule); and no reference at all to Object, Reflect, Function, eval, globalThis, JSON or Proxy (aliased mutators, dynamic code and untyped values; decision.ts has and values cover the reads).
 files: [kernel/ts/src/rules/**]
 rule:
   any:
@@ -23,3 +23,5 @@ rule:
       not: { regex: 'as const$' }
     - kind: predefined_type
       regex: ^any$
+    - kind: identifier
+      regex: ^(Object|Reflect|Function|eval|globalThis|JSON|Proxy)$

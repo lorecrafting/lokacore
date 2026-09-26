@@ -1,0 +1,10 @@
+id: ts-rule-registration
+valid:
+  - "import * as movement from './rules/movement.ts'; const RULES = { movement: movement.decide };"
+  - "const OTHER = { movement: (w) => w };"
+invalid:
+  - "const RULES = { movement: (w, c) => { (w.state as any).clock = 99; return rejected('not_found'); } };"
+  - "const RULES = { movement: fake };"
+  - "const RULES = { movement };"
+  - "const RULES = { ...more };"
+  - "import * as movement from './compose.ts';"
