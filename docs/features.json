@@ -1,0 +1,61 @@
+{
+  "movement": {
+    "spec": "21 \u00a75 Place/Room, Connection; 05 \u00a717; 04 \u00a75; 00 \u00a74.10",
+    "contracts": [
+      "RoomDefinition",
+      "Connection",
+      "CommandPayload"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_rooms_hash.json",
+      "protocol/fixtures/cartridge_details_hash.json"
+    ],
+    "invariants": [
+      "player_in_one_room",
+      "exits_resolve"
+    ],
+    "implemented_in": "R5 S1 (#34)"
+  },
+  "description_variant": {
+    "spec": "21 \u00a76 InspectableDetail, DescriptionVariant; 21 \u00a77 TargetResolution; 04 \u00a714, \u00a717-\u00a718",
+    "contracts": [
+      "CommandPayload",
+      "InspectableDetail",
+      "TargetResolution",
+      "TargetUnresolved"
+    ],
+    "modules": [
+      "kernel/ts/src/target.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_details_hash.json"
+    ],
+    "invariants": [
+      "target_candidates_ordered"
+    ],
+    "implemented_in": "R5 S1 (#34) look; R5 S2 look at a detail"
+  },
+  "inspectable_detail": {
+    "spec": "21 \u00a76 InspectableDetail",
+    "contracts": [
+      "InspectableDetail",
+      "Alias"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_details_hash.json"
+    ]
+  },
+  "target_resolution": {
+    "spec": "21 \u00a77 TargetSpec / TargetResolution; 04 \u00a717-\u00a718",
+    "contracts": [
+      "TargetSpec",
+      "TargetResolution"
+    ],
+    "modules": [
+      "kernel/ts/src/target.ts"
+    ],
+    "invariants": [
+      "target_candidates_ordered"
+    ]
+  }
+}
