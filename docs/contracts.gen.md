@@ -164,6 +164,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `lock`: Lock the closed barrier on the exit in `direction` with its key_item, which the actor holds (barrier@1).
   - `unlock`: Unlock the locked barrier on the exit in `direction` with its key_item, which the actor holds (barrier@1).
   - `look`: Observe the current place, or, with target_id, one thing in it: an id the authority's target resolution returned as unique (21 §7; 04 §17, §18), never the player's words.
+  - `scan`: List what the actor sees through each exit of its room (movement@1; 00 §4.1 scan): the barrier of an exit it bars, else the destination room and the NPCs and items there. It changes nothing, draws no RNG and takes no time, like look; it emits no event.
   - `take`: Take an item into the actor's inventory.
   - `drop`: Drop a held item into the current place.
   - `give`: Give a held item to another character in the same place (00 §4.4).

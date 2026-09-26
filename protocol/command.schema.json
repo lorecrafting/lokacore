@@ -173,6 +173,23 @@
           "additionalProperties": false
         },
         {
+          "description": "List what the actor sees through each exit of its room (movement@1; 00 §4.1 scan): the barrier of an exit it bars, else the destination room and the NPCs and items there. It changes nothing, draws no RNG and takes no time, like look; it emits no event.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "scan"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Take an item into the actor's inventory.",
           "type": "object",
           "properties": {

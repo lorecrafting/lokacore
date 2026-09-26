@@ -10,6 +10,7 @@ import type { Command } from '../src/contracts.gen.ts';
 import { accepted, allocator } from '../src/decision.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { describe } from '../src/rules/description_variant.ts';
+import { sight } from '../src/rules/movement.ts';
 import { resolve } from '../src/target.ts';
 import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
 import { read } from './read.ts';
@@ -239,4 +240,20 @@ test('look with a target_id examines an item or NPC here or held, else not_prese
   assert.deepEqual(look(run(fresh(), take(SATCHEL), move('north')), SATCHEL), examined);
   assert.deepEqual(look(fresh(), LANTERN), { kind: 'rejected', error: { code: 'not_present' } });
   assert.deepEqual(look(fresh(), OIL), { kind: 'rejected', error: { code: 'not_present' } });
+});
+
+// Breaks: scan omitting an NPC or an item in the room beyond, listing one inside a container
+// there (the oil in the satchel), or changing anything: state, RNG, time, events (00 §4.1).
+test('scan lists the NPCs and items in each room beyond, and changes nothing', () => {
+  const w = fresh();
+  const s = step(w, cmd({ type: 'scan' }));
+  const nothing = { delta: { ops: [] }, events: [], effects: [], rng: SEED };
+  assert.deepEqual(s.decision, { kind: 'accepted', outcome: 'scanned', ...nothing });
+  assert.deepEqual(s.world.state, w.state);
+  assert.deepEqual(sight(w, BODY as never), [
+    { direction: 'north', room: GREEN, entities: [LANTERN] },
+  ]);
+  const green = run(w, move('north'));
+  const back = [{ direction: 'south', room: FERRY, entities: [BRAM, SATCHEL] }];
+  assert.deepEqual(sight(green, BODY as never), back);
 });

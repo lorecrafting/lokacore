@@ -173,7 +173,12 @@ defmodule Loka.Core.RegistriesTest do
       end
 
     assert Enum.sort(ownership_problems(planted)) ==
-             [{:two_owners, "take"}, {:unknown, "fly"}, {:unowned, "move"}]
+             [
+               {:two_owners, "take"},
+               {:unknown, "fly"},
+               {:unowned, "move"},
+               {:unowned, "scan"}
+             ]
   end
 
   # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a

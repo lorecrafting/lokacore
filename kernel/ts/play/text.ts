@@ -7,6 +7,7 @@ import { key } from '../src/compose.ts';
 import { COMPASS, exitOf, refString } from '../src/decision.ts';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/rules/description_variant.ts';
+import { sight } from '../src/rules/movement.ts';
 import { normalize } from '../src/target.ts';
 import { level, resourceRef } from '../src/resource.ts';
 
@@ -18,6 +19,7 @@ import { level, resourceRef } from '../src/resource.ts';
  */
 export type Parsed =
   | { type: 'look' }
+  | { type: 'scan' }
   | { type: 'move'; direction: string }
   | { lookup: string; verb?: 'take' | 'drop' | 'give'; to?: string }
   | { door: (typeof DOORS)[number]; direction?: string; words?: string }
@@ -32,6 +34,7 @@ const NOT_A_DIRECTION = "That isn't a direction.";
 const WORDS: Record<string, Parsed> = {
   look: { type: 'look' },
   l: { type: 'look' },
+  scan: { type: 'scan' },
   quit: 'quit',
   q: 'quit',
   inventory: 'inventory',
@@ -53,7 +56,7 @@ const VERBS: Record<string, 'take' | 'drop' | 'give'> = {
  * `look`/`l`, `look`/`l`/`examine`/`x` <words> (a lookup; `look at the post` and `look post`
  * alike, target.ts normalize), `get`/`take` <words>, `drop` <words>, `give` <words> `to`
  * <words>, `open`/`close`/`lock`/`unlock` <a direction, its initial, or words naming a door>,
- * `inventory`/`i`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
+ * `scan`, `inventory`/`i`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
  * omitted], `brief` (brief mode on or off), `quit`/`q`. Only the
  * six compass words become a move: any other word after `go` is a message, never a Command, so
  * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand
@@ -127,6 +130,20 @@ export function room(cartridge: Cartridge, world: World, brief = false): string 
 }
 
 const BARRED: Record<string, string> = { exit_closed: ' (closed)', exit_locked: ' (locked)' };
+
+/**
+ * scan, LegendMUD-style (movement.ts sight): `north (Well Lane): Bram the ferryman, a lantern.`
+ * per exit, `north: the oak door (closed).` for one a barrier bars, in the cartridge's text.
+ */
+export function scan(cartridge: Cartridge, world: World): string {
+  const lines = sight(world, world.body).map((s) => {
+    if (!s.entities)
+      return `${s.direction}: ${door(cartridge, world, s.direction)}${BARRED[s.code]}.`;
+    const seen = s.entities.map((id) => say(cartridge, world.entities[id].short)).join(', ');
+    return `${s.direction} (${say(cartridge, world.rooms[s.room].title)})${seen && `: ${seen}`}.`;
+  });
+  return lines.length ? `${lines.join('\n')}\n` : 'You see no exits.\n';
+}
 
 /** The short description of the barrier on the current room's exit in `direction`, if any. */
 export function door(cartridge: Cartridge, world: World, direction: string): string {

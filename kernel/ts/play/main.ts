@@ -25,6 +25,7 @@ import {
   reason,
   room,
   say,
+  scan,
   status,
   which,
 } from './text.ts';
@@ -172,7 +173,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
             ? detail(cartridge, r.world, p.target_id)
             : decision.outcome === 'moved'
               ? arrived(r)
-              : room(cartridge, r.world)));
+              : (decision.outcome === 'scanned' ? scan : room)(cartridge, r.world)));
   const micros = latency.data.value;
   const state = hash(r.world.state as never);
   process.stdout.write(`${shown}${status(r.world)}[state ${state}  step ${micros} µs]\n`);

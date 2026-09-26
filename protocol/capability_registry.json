@@ -5,7 +5,8 @@
     "portability": "portable",
     "residency": "portable_capability",
     "commands": [
-      "move"
+      "move",
+      "scan"
     ],
     "definitions": [
       "room"
