@@ -26,8 +26,9 @@ import { holds } from './policy.ts';
 import { cmp } from './validate.ts';
 
 /**
- * One action of a set: what the GameView advertises, the Command type it resolves to, and the
- * recipe when it is one (whose invocation needs no target: the recipe names its own).
+ * One action of a set: what the GameView advertises, the Command type it resolves to, the
+ * recipe when it is one (whose invocation needs no target: the recipe names its own), and
+ * whether it is an engine verb, whose rule is its target and input contract (see accepts).
  */
 export type Offered = {
   readonly key: Key;
@@ -38,6 +39,7 @@ export type Offered = {
   readonly policy: VersionedPolicy;
   readonly command: Key;
   readonly recipe?: ActionRecipe;
+  readonly engine?: true;
 };
 export type ActionSet = Readonly<Record<string, Offered>>;
 
@@ -65,7 +67,10 @@ const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
   scopes: [scope],
 });
 // ponytail: every engine verb has priority 0, so they list in key order; give them priorities
-// when a host's presentation needs one first.
+// when a host's presentation needs one first. ponytail: this table names other capabilities'
+// verbs; each verb's target and input move onto its command's registry entry when dialogue's
+// talk or schedule's wait lands, and that slice decides how choose and close_choice (answers to
+// a pending choice, not ActionSet actions) pass admission.
 const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   look: [{ kind: 'none' }, []],
   move: [{ kind: 'none' }, ['direction']],
@@ -84,13 +89,15 @@ function engine(world: World): ActionSet {
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
-        return [key, { key, label, target, input, priority: 0, policy: ALWAYS, command: key }];
+        const verb_ = { key, label, target, input, priority: 0, policy: ALWAYS, command: key };
+        return [key, { ...verb_, engine: true }];
       }),
   );
 }
 
-// The cartridge's actions and recipes by key (the compiler rejects a recipe sharing an action's
-// key, DUPLICATE_DEFINITION).
+// The cartridge's actions and recipes by key: disjoint, since the compiler and the loader reject
+// a recipe whose key is an action's or a registered command's (DUPLICATE_DEFINITION), so no key
+// has two definitions here.
 function cartridge(world: World): ActionSet {
   const recipes = Object.values(world.cartridge.recipes ?? {}).map((recipe): [string, Offered] => {
     const { key, label, priority, policy } = recipe;
@@ -131,18 +138,55 @@ export const detailOf = (world: World, t: RecipeTarget): EntityId =>
   ) as EntityId;
 
 /**
- * Why `actor` may not issue `payload` now, if it may not: no action of its set resolves to that
- * Command type (unsupported_capability), or for perform no recipe of that key (not_found), or
- * none that does is available, its policy failing (invalid_state).
+ * Why `actor` may not issue `payload` now, if it may not (04 §19; ACT-09): no action of its set
+ * resolves to that Command and accepts its target and input (unsupported_capability), or for
+ * perform a key that names no recipe of the cartridge (not_found), or none that does is
+ * available, its policy failing (invalid_state).
  */
 export function refusal(world: World, payload: CommandPayload): ErrorCode | undefined {
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;
   const matching = Object.values(resolved(world, actor)).filter((a) =>
-    perform ? a.recipe && a.key === payload.action : a.command === payload.type,
+    perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload),
   );
-  if (!matching.length) return perform ? 'not_found' : 'unsupported_capability';
+  if (!matching.length)
+    return perform && !recipeKeys(world).includes(payload.action)
+      ? 'not_found'
+      : 'unsupported_capability';
   return matching.some((a) => holds(world, actor, a.policy.root)) ? undefined : 'invalid_state';
+}
+
+const recipeKeys = (world: World) => Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
+
+// Payload fields that are ActionInput parameters (action.schema.json ActionInput).
+const INPUTS: readonly string[] = ['direction', 'choice_id', 'continuation_id', 'until'];
+
+/**
+ * True when action `a` resolves to `payload`'s Command and accepts its target and input. An
+ * engine verb's contract is its rule, which re-validates the target with typed codes (a held
+ * item's take is invalid_state, not refused here). Another action's is its TargetSpec: none
+ * takes no target id, an entity one the id (target_id or item_id) of an entity in one of its
+ * scopes for the actor (a room's detail is in none); and its input lists exactly the payload's
+ * input parameters.
+ */
+function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandPayload): boolean {
+  if (a.command !== payload.type) return false;
+  if (a.engine) return true;
+  const p = payload as { target_id?: EntityId; item_id?: EntityId };
+  const id = p.target_id ?? p.item_id;
+  const inputs = Object.keys(payload).filter((k) => INPUTS.includes(k));
+  if (inputs.length !== a.input.length || !a.input.every((i) => inputs.includes(i))) return false;
+  if (a.target.kind === 'none') return id === undefined;
+  const body = bodyOf(world, actor);
+  const at = id === undefined ? undefined : world.state.containers[id];
+  const kind = id === undefined ? undefined : world.entities[id]?.kind;
+  const scope = {
+    self: id !== undefined && id === body,
+    inventory: at !== undefined && at === body,
+    room_contents: kind === 'item' && at === world.state.containers[body!],
+    room_occupants: kind === 'npc' && at === world.state.containers[body!],
+  };
+  return a.target.scopes.some((s) => scope[s]);
 }
 
 /**

@@ -43,8 +43,8 @@ const sorted = (v: any): any =>
         )
       : v;
 // The bell known answer with `f` applied, loaded (re-hashed when changed).
-const load = (f: (c: any) => void = () => {}) => {
-  const c = structuredClone(kat.value);
+const load = (f: (c: any) => void = () => {}, from = kat) => {
+  const c = structuredClone(from.value);
   f(c);
   const text = JSON.stringify(sorted(c));
   const h = createHash('sha256').update(text).digest('hex');
@@ -84,6 +84,10 @@ const bellRung = (id: string, position: number) => ({
   ...base(id, position),
   payload: { type: 'custom_event', event: ref('event', 'bell_rung'), subject_id: BELL },
 });
+const completed = (id: string, position: number) => ({
+  ...base(id, position),
+  payload: { type: 'action_completed', action: 'ring_bell', subject_id: BELL },
+});
 const factChanged = (id: string, position: number) => ({
   ...base(id, position),
   scope: instance,
@@ -114,15 +118,15 @@ test('the five ActionSet operations compose by stable key', () => {
 });
 
 // Breaks (04 §5.2 steps 4-5; S4 review F1): fact_changed after the recipe's own event, the
-// assign not proposed or its change not adopted, a missing event or narration, or the S3
-// variants not following the committed fact.
+// assign not proposed or its change not adopted, a missing event, action_completed missing or
+// not last (review F2), no narration, or the S3 variants not following the committed fact.
 test('ring bell assigns the fact, then fact_changed, then the custom event, and narrates', () => {
   const { decision, world: w } = step(world(), ring(BELL));
   assert.deepEqual(plain(decision), {
     kind: 'accepted',
     outcome: 'performed',
     delta: { ops: [assign(false, true)] },
-    events: [factChanged(IDS[1], 1), bellRung(IDS[0], 2)],
+    events: [factChanged(IDS[2], 1), bellRung(IDS[0], 2), completed(IDS[1], 3)],
     effects: [],
     rng: SEED,
     narration: [{ key: 'narration.ring_bell.actor' }],
@@ -147,7 +151,11 @@ test('an assign that keeps its value takes no position and emits no fact_changed
   const { decision } = step(w, ring());
   assert.ok(decision.kind === 'accepted');
   assert.deepEqual(plain(decision.delta.ops), [assign(false, true), assign(true, true)]);
-  assert.deepEqual(plain(decision.events), [factChanged(IDS[1], 1), bellRung(IDS[0], 2)]);
+  assert.deepEqual(plain(decision.events), [
+    factChanged(IDS[2], 1),
+    bellRung(IDS[0], 2),
+    completed(IDS[1], 3),
+  ]);
 });
 
 // Breaks: the authority trusting the invocation (06 §20: it re-resolves the action), a
@@ -156,9 +164,11 @@ test('perform is rejected for another target, key or room, and once its policy f
   const w = world();
   const rung = step(w, ring()).world;
   const down = step(w, cmd({ type: 'move', direction: 'down' })).world;
+  const gone = world((c) => (c.rooms[ROOM].actions = [{ op: 'subtract', actions: ['ring_bell'] }]));
   const rows: [World, Command, string][] = [
     [w, ring(ROPE), 'invalid_target'],
     [w, cmd({ type: 'perform', action: 'ring_rope' }), 'not_found'],
+    [gone, ring(), 'unsupported_capability'], // exists, not offered here (review N2)
     [down, ring(), 'not_present'],
     [rung, ring(), 'invalid_state'],
   ];
@@ -242,8 +252,8 @@ test("a room's contributions shape its actions, and step admits only what they o
   assert.deepEqual(refused, { kind: 'rejected', error: { code: 'unsupported_capability' } });
 });
 
-// Breaks: a cartridge action not overriding the engine verb of its key (06 §19 override), or a
-// verb whose policy fails still admitted.
+// Breaks: a cartridge action not overriding the engine verb of its key (06 §19 override), its
+// TargetSpec none admitting a target (Astra A1), or a verb whose policy fails still admitted.
 test('a cartridge action overrides the engine verb of its key, policy included', () => {
   const w = world((c) => {
     c.actions['ashmere_bell@0.0.1:action/look'] = {
@@ -258,6 +268,11 @@ test('a cartridge action overrides the engine verb of its key, policy included',
     };
   });
   assert.deepEqual(plain(gameView(w).actions[0]), shown('look', 'actions.ring_bell'));
+  assert.equal(step(w, cmd({ type: 'look' })).decision.kind, 'accepted');
+  assert.deepEqual(step(w, cmd({ type: 'look', target_id: BELL })).decision, {
+    kind: 'rejected',
+    error: { code: 'unsupported_capability' }, // its target is none: no examine
+  });
   const rung = step(w, ring()).world;
   assert.deepEqual(step(rung, cmd({ type: 'look' })).decision, {
     kind: 'rejected',
@@ -284,4 +299,68 @@ test('the output budget counts the fact_changed events adopt adds', () => {
     allocator(w, SET),
   );
   assert.equal(small.decision.kind, 'accepted');
+});
+
+// Astra A1. Breaks: admission matching only the Command type, so an action narrowed to held items
+// authorizes a look at nothing or at a room's detail, or a move without the input it requires.
+test("a command no offered action's target or input accepts is refused like an unoffered one", () => {
+  const w = world((c) => {
+    const action = (key: string, command: string, target: object, input: string[]) => ({
+      key,
+      label: 'actions.ring_bell',
+      target,
+      command,
+      priority: 0,
+      input,
+      policy: c.recipes[RECIPE].policy,
+      accessibility: 'actions.ring_bell',
+    });
+    const inventory = { kind: 'entity', scopes: ['inventory'] };
+    c.actions['ashmere_bell@0.0.1:action/inspect_inventory'] = action(
+      'inspect_inventory',
+      'look',
+      inventory,
+      [],
+    );
+    c.actions['ashmere_bell@0.0.1:action/walk'] = action('walk', 'move', { kind: 'none' }, []);
+    c.rooms[ROOM].actions = [{ op: 'replace', actions: ['inspect_inventory', 'walk'] }];
+  });
+  const refused = { kind: 'rejected', error: { code: 'unsupported_capability' } };
+  for (const c of [
+    cmd({ type: 'look' }),
+    cmd({ type: 'look', target_id: BELL }),
+    cmd({ type: 'move', direction: 'down' }),
+  ])
+    assert.deepEqual(step(w, c).decision, refused, JSON.stringify(c));
+});
+
+// Breaks: an entity TargetSpec that accepts nothing, or its scope read from the wrong container
+// (items known answer: the satchel starts at the ferry landing, a detail is the mooring post).
+test("an entity target in the action's scope is admitted", () => {
+  const items = read('protocol/fixtures/cartridge_items_hash.json');
+  const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
+  const POST = '953a909b-3a29-8c5c-9e3f-4105b9a47c4b';
+  const loaded = load((c) => {
+    c.actions['ashmere_items@0.0.1:action/inspect_inventory'] = {
+      key: 'inspect_inventory',
+      label: 'item.satchel.short',
+      target: { kind: 'entity', scopes: ['inventory'] },
+      command: 'look',
+      priority: 0,
+      input: [],
+      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      accessibility: 'item.satchel.short',
+    };
+    c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;
+    const ferry = c.rooms['ashmere_items@0.0.1:room/ferry_landing'];
+    ferry.actions = [{ op: 'replace', actions: ['inspect_inventory', 'take'] }];
+  }, items);
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  const w = newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], SEED);
+  const look = (target_id: string) => cmd({ type: 'look', target_id });
+  const refused = { kind: 'rejected', error: { code: 'unsupported_capability' } };
+  assert.deepEqual(step(w, look(SATCHEL)).decision, refused); // in the room, not held
+  const held = step(w, cmd({ type: 'take', item_id: SATCHEL })).world;
+  assert.equal(step(held, look(SATCHEL)).decision.kind, 'accepted');
+  assert.deepEqual(step(held, look(POST)).decision, refused);
 });

@@ -198,7 +198,8 @@
       "recipe"
     ],
     "events": [
-      "custom_event"
+      "custom_event",
+      "action_completed"
     ]
   },
   {

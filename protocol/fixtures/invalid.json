@@ -9802,5 +9802,36 @@
         "code": "pattern_mismatch"
       }
     ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "action_completed"
+    },
+    "errors": [
+      {
+        "path": "/action",
+        "code": "missing_property"
+      },
+      {
+        "path": "/subject_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "action_completed",
+      "action": "ring_bell",
+      "subject_id": "11111111-2222-4333-8444-555555555555",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

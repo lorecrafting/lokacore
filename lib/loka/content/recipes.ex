@@ -22,8 +22,8 @@ defmodule Loka.Content.Recipes do
   For a v2 source with a valid manifest (else none): each recipe's owner (action_recipe) and
   each step's (by its event) is required; its target names a room of this cartridge and a detail
   of that room, each fact.assign a fact with a value of its type, and its label and narration
-  have catalog entries (unless `text` is `:unknown`); no recipe shares an action's key
-  (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
+  have catalog entries (unless `text` is `:unknown`); no recipe's key is an action's or a
+  registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
   contribution names a registered command, an action or a recipe.
   """
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
@@ -36,8 +36,8 @@ defmodule Loka.Content.Recipes do
   end
 
   defp recipe({rel, r}, ctx) do
-    duplicate =
-      if r["key"] in ctx.actions, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
+    taken = r["key"] in ctx.actions or r["key"] in commands()
+    duplicate = if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
 
     owners(rel, r, ctx) ++ refs(rel, r, ctx) ++ texts(rel, r, ctx.text) ++ duplicate
   end

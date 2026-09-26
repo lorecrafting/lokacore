@@ -13,7 +13,7 @@ import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '
 import { sha256Hex } from '../src/sha256.ts';
 import { validate } from '../src/validate.ts';
 import { resolve, normalize } from '../src/target.ts';
-import { resolved } from '../src/actions.ts';
+import { detailOf, resolved, type Offered } from '../src/actions.ts';
 import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
 import { detail, inventory, parse, room, say, which } from './text.ts';
 import { decide, type Run } from './run.ts';
@@ -148,24 +148,39 @@ function lookup(r: Run, p: { lookup: string; verb?: 'take' | 'drop' | 'give'; to
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 
-// A recipe of the player's ActionSet whose alias is the longest leading phrase of the words
-// (actions.ts; 06 §20 aliases), and the words after it.
-function recipe(r: Run, text: string): { perform: string; rest: string } | undefined {
+// The recipes of the player's ActionSet with the longest leading phrase of the words as an
+// alias (actions.ts; 06 §20 aliases; two recipes may share one), and the words after it.
+function recipe(r: Run, text: string): { perform: Offered[]; rest: string } | undefined {
   const words = text.trim().toLowerCase().split(/\s+/);
   const recipes = Object.values(resolved(r.world, r.world.character)).filter((a) => a.recipe);
   for (let n = words.length; n > 0; n--) {
     const alias = words.slice(0, n).join('_');
-    const a = recipes.find((x) => x.recipe!.aliases.includes(alias as never));
-    if (a) return { perform: a.key, rest: words.slice(n).join(' ') };
+    const perform = recipes.filter((x) => x.recipe!.aliases.includes(alias as never));
+    if (perform.length) return { perform, rest: words.slice(n).join(' ') };
   }
 }
 
-// A perform Command for the recipe, with the unique id of the words after its alias if any
-// (the authority checks it is the recipe's target); none and ambiguous build no Command.
-function perform(r: Run, p: { perform: string; rest: string }) {
-  const id = normalize(p.rest).length ? found(r, p.rest) : undefined;
-  if (normalize(p.rest).length && !id) return;
-  const payload = { type: 'perform', action: p.perform, ...(id && { target_id: id }) };
+// The target first: the unique id of the words after the alias (none and ambiguous build no
+// Command), else the room. Then the recipes whose detail that is: one builds a perform Command,
+// several ask which (by label, in key order), none builds nothing.
+function perform(r: Run, p: { perform: Offered[]; rest: string }) {
+  const named = normalize(p.rest).length > 0;
+  const id = named ? found(r, p.rest) : undefined;
+  if (named && !id) return;
+  const here = r.world.state.containers[r.world.body];
+  const fits = p.perform
+    .filter((a) => {
+      const detail = detailOf(r.world, a.recipe!.target);
+      return named ? detail === id : r.world.details[detail].room === here;
+    })
+    .sort((a, b) => (a.key < b.key ? -1 : 1));
+  if (fits.length !== 1) {
+    const labels = fits.map((a) => say(cartridge, a.label));
+    const none = named ? "You can't do that to that.\n" : "You don't see that here.\n";
+    const which = `Which do you mean: ${labels.slice(0, -1).join(', ')} or ${labels.at(-1)}?\n`;
+    return void process.stdout.write(fits.length ? which : none);
+  }
+  const payload = { type: 'perform', action: fits[0].key, ...(id && { target_id: id }) };
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 

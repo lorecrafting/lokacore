@@ -5,8 +5,9 @@
 // the detail outside the actor's room not_present. Accepted: the success sequence in order, each
 // fact.assign a delta op whose expected value is the fact as the steps before it left it, each
 // event.emit a custom_event at its causal position; a fact.assign that changes its fact leaves
-// the next position free for the fact_changed the host puts there (world.ts adopt). The actor
-// reads the narration. Costs, checks and result bands join here in S6.
+// the next position free for the fact_changed the host puts there (world.ts adopt). Then
+// action_completed, engine-owned, and the actor reads the narration. Costs, checks and result
+// bands join here in S6.
 import type { DeltaOp, EntityId, EventPayload, FactValue, RecipeStep } from '../contracts.gen.ts';
 import { detailOf, resolved } from '../actions.ts';
 import { key, same } from '../compose.ts';
@@ -32,8 +33,10 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   if (world.details[subject_id].room !== world.state.containers[body])
     return rejected('not_present');
   const { sequence, narration } = recipe.outcomes.success;
-  const { ops, events } = sequence.reduce(step(world, command, mint, subject_id), START);
-  return accepted(world, 'performed', ops, events, [{ key: narration.actor }]);
+  const { ops, events, position } = sequence.reduce(step(world, command, mint, subject_id), START);
+  const done = { type: 'action_completed', action, subject_id } as const;
+  const completed = event(world, command, mint, position + 1, done);
+  return accepted(world, 'performed', ops, [...events, completed], [{ key: narration.actor }]);
 };
 
 type Command = Parameters<Rule<'action_recipe'>>[1];

@@ -352,6 +352,27 @@
             "subject_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "A performed ActionRecipe completed (06 §20; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (action_recipe@1): the rule emits it after the recipe's sequence on every accepted perform, and no content step can emit it, so a quest objective on it never depends on a recipe's own steps.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "action_completed"
+            },
+            "action": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "action",
+            "subject_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -431,6 +452,11 @@
             "kind": "event",
             "key": "bell_rung"
           },
+          "subject_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "type": "action_completed",
+          "action": "ring_bell",
           "subject_id": "11111111-2222-4333-8444-555555555555"
         }
       ]

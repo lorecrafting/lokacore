@@ -113,7 +113,8 @@ defmodule Loka.ContentRecipesTest do
   end
 
   # Breaks: a recipe or a step's operation compiles without its owner required (05 §6), or a
-  # recipe shares an action's key, one ActionSet identity with two definitions.
+  # recipe shares an action's or an engine verb's key, one ActionSet identity with two
+  # definitions (review F1).
   test "recipes need their owners and a key no action has", %{tmp_dir: dir} do
     caps = src("cartridge.json")["requires"]["capabilities"]
 
@@ -144,6 +145,14 @@ defmodule Loka.ContentRecipesTest do
 
     assert compile(dir, %{"actions/ring_bell.json" => action}) ==
              {:error, [d("DUPLICATE_DEFINITION", "recipes/ring_bell")]}
+
+    look = %{
+      "recipes/ring_bell.json" => nil,
+      "recipes/look.json" => src("recipes/ring_bell.json")
+    }
+
+    assert compile(Path.join(dir, "verb"), look) ==
+             {:error, [d("DUPLICATE_DEFINITION", "recipes/look")]}
   end
 
   # Breaks: the fact capability not required by a recipe that assigns a fact.

@@ -78,6 +78,36 @@ test("a recipe's unknown target, fact or text is UNRESOLVED_REFERENCE", () => {
   assert.ok(load('cartridge_bell_hash.json', (c) => delete success(c).narration.observers).ok);
 });
 
+// Review F1, Astra A3. Breaks: an artifact whose recipe shares an action's or an engine verb's
+// key installs, and one definition silently wins at play time.
+test("a recipe with an action's or a registered command's key is DUPLICATE_DEFINITION", () => {
+  const renamed = (key: string) => (c: any) => {
+    const r = { ...recipe(c), key };
+    delete c.recipes[RECIPE];
+    c.recipes[`ashmere_bell@0.0.1:recipe/${key}`] = r;
+  };
+  fails(
+    renamed('look'),
+    'DUPLICATE_DEFINITION',
+    '.cartridge.recipes["ashmere_bell@0.0.1:recipe/look"]',
+  );
+  fails(
+    (c) =>
+      (c.actions['ashmere_bell@0.0.1:action/ring_bell'] = {
+        key: 'ring_bell',
+        label: 'actions.ring_bell',
+        target: { kind: 'none' },
+        command: 'look',
+        priority: 0,
+        input: [],
+        policy: recipe(c).policy,
+        accessibility: 'actions.ring_bell',
+      }),
+    'DUPLICATE_DEFINITION',
+    AT,
+  );
+});
+
 // Breaks: a room contribution naming no action loads (a typo silently changes nothing).
 test("a room's contribution naming no verb, action or recipe is UNRESOLVED_REFERENCE", () => {
   const room = (c: any) => c.rooms['ashmere_bell@0.0.1:room/belfry'];

@@ -28,8 +28,9 @@ file covers: [the protocol map](../../protocol/README.md).
   needs an entry there and a short-ref test; otherwise the compiler emits an artifact the
   loader rejects
   ([owner decision](../decisions/owner-decision-short-refs-2026-09-25.md)).
-- A command reaches its rule only if the actor's ActionSet offers it (`refusal` in
-  `kernel/ts/src/actions.ts`): a new player verb needs its entry in `VERBS` there, or `step`
-  rejects it `unsupported_capability`. A rule that emits events after a `fact.assign` leaves
+- A command reaches its rule only if an action of the actor's ActionSet resolves to it and
+  accepts its target and input (`refusal` in `kernel/ts/src/actions.ts`; an engine verb's rule
+  is its own contract): a new player verb needs its entry in `VERBS` there, or `step` rejects
+  it `unsupported_capability`. A rule that emits events after a `fact.assign` leaves
   that assign's causal position free; the host puts its `fact_changed` there (`factChanged` in
   `kernel/ts/src/fact.ts`).

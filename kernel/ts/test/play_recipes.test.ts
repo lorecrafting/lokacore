@@ -3,6 +3,7 @@
 // words) and the terminal's words for each outcome.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -15,10 +16,10 @@ const kat = read('protocol/fixtures/cartridge_bell_hash.json');
 const artifact = join(dir, 'bell.json');
 writeFileSync(artifact, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);
 
-function play(lines: string[]) {
+function play(lines: string[], file = artifact) {
   const script = join(dir, 'script.txt');
   writeFileSync(script, `${lines.join('\n')}\n`);
-  const r = spawnSync('node', [`${ROOT}kernel/ts/play/main.ts`, artifact, script], {
+  const r = spawnSync('node', [`${ROOT}kernel/ts/play/main.ts`, file, script], {
     encoding: 'utf8',
   });
   assert.equal(r.status, 0, r.stderr);
@@ -43,4 +44,74 @@ test('ring bell rings once, narrates, and the rooms and bell read differently af
     "ring bell\nYou don't see that here.\n", // the bell is in the belfry
     "ring gong\nYou don't see that here.\n",
   ]);
+});
+
+const sorted = (v: any): any =>
+  Array.isArray(v)
+    ? v.map(sorted)
+    : v && typeof v === 'object'
+      ? Object.fromEntries(
+          Object.keys(v)
+            .sort()
+            .map((k) => [k, sorted(v[k])]),
+        )
+      : v;
+
+// Astra A2: the bell known answer plus a gong in the bell tower rung by ring_gong and a second
+// bell recipe, all with the alias ring. Written twice, the recipes map in either order: the
+// content hash is the same, so the answers must be too.
+function gongs(): string[] {
+  const c = sorted(structuredClone(kat.value));
+  const ref = (kind: string, key: string) => ({ ...c.entry, kind, key });
+  const bell = c.recipes['ashmere_bell@0.0.1:recipe/ring_bell'];
+  const tower = c.rooms['ashmere_bell@0.0.1:room/bell_tower'];
+  tower.details = { gong: { aliases: ['gong'], description: 'detail.rope' } };
+  const gong = {
+    ...bell,
+    key: 'ring_gong',
+    label: 'actions.ring_gong',
+    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+  };
+  gong.target = { kind: 'detail', room: ref('room', 'bell_tower'), detail: 'gong' };
+  const success = {
+    ...bell.outcomes.success,
+    sequence: [{ op: 'event.emit', event: 'gong_rung' }],
+  };
+  gong.outcomes = { success }; // leaves the bell unrung
+  c.recipes['ashmere_bell@0.0.1:recipe/ring_gong'] = gong;
+  c.recipes['ashmere_bell@0.0.1:recipe/toll_bell'] = {
+    ...bell,
+    key: 'toll_bell',
+    label: 'actions.toll_bell',
+  };
+  c.text['actions.ring_gong'] = 'Ring the gong';
+  c.text['actions.toll_bell'] = 'Toll the bell';
+  const text = JSON.stringify(sorted(c));
+  const h = createHash('sha256').update(text).digest('hex');
+  return [
+    text,
+    JSON.stringify({ ...c, recipes: Object.fromEntries(Object.entries(c.recipes).reverse()) }),
+  ].map((t, i) => {
+    const file = join(dir, `gongs${i}.json`);
+    writeFileSync(file, `{"cartridge":${t},"content_hash":"${h}"}`);
+    return file;
+  });
+}
+
+// Breaks: the first recipe with the alias chosen before the target is resolved (so ring gong
+// reaches ring_bell and is refused), the choice depending on the recipes map's order, or two
+// recipes that both take the target not asked about.
+test('an alias shared by recipes picks the one whose target the words name', () => {
+  for (const file of gongs())
+    assert.deepEqual(
+      play(['d', 'ring gong', 'u', 'ring bell', 'ring rope'], file),
+      [
+        'd\nBell Tower\nA narrow stair climbs through the dark. Pigeon feathers drift on the steps.\nExits: up\n',
+        'ring gong\nYou haul on the rope. The bell swings, and its voice rolls out over the fen.\n',
+        'u\nBelfry\nThe great bronze bell hangs still from an oak beam. A frayed rope drops from its wheel.\nExits: down\n',
+        'ring bell\nWhich do you mean: Ring the bell or Toll the bell?\n',
+        "ring rope\nYou can't do that to that.\n",
+      ],
+      file,
+    );
 });

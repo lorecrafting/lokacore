@@ -135,14 +135,20 @@ export function refStage(c: Obj): Diagnostic[] {
 type Named = (r: Obj, kind: string, path: string) => void;
 type Texts = (def: Obj, fields: string[], at: string) => void;
 
-// Each recipe's target names a room of this cartridge and a detail of that room, each
-// fact.assign a fact of it, and its label and narration have catalog entries; each key of a
-// room's action contribution names an engine verb (a registered command), an action or a recipe
-// of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
+// Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
+// one ActionSet identity), its target names a room of this cartridge and a detail of that room,
+// each fact.assign a fact of it, and its label and narration have catalog entries; each key of
+// a room's action contribution names an engine verb (a registered command), an action or a
+// recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
 function recipes(c: Obj, named: Named, text: Texts): Diagnostic[] {
   const out: Diagnostic[] = [];
+  const taken = new Set([
+    ...Object.keys(CAPABILITY_OWNERS.command),
+    ...Object.values(c.actions as Obj).map((a) => a.key),
+  ]);
   for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
     const at = `.cartridge.recipes${step(ref)}`;
+    if (taken.has(r.key)) out.push(diag('DUPLICATE_DEFINITION', at));
     const { room, detail } = r.target;
     const there = c.rooms[refString(room)]; // this cartridge's room, as named() requires
     if (!there) named(room, 'room', `${at}.target.room`);
