@@ -110,7 +110,7 @@ defmodule Loka.Content.Checks do
   defp details(defs, text) do
     for {_, {rel, [], r}} <- defs["room"],
         ds = Map.get(r, "details", %{}),
-        {key, detail} <- Enum.sort(ds),
+        {key, detail} <- ds,
         d <- detail_text(rel, key, detail, text) ++ reachable(rel, key, detail, ds),
         do: d
   end
