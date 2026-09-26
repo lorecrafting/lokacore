@@ -14,3 +14,5 @@ invalid:
   - "jest.mock('../../kernel/ts/src', () => ({}));"
   - "const a = jest.requireActual('../../kernel/ts/src');"
   - "const p = require.resolve('../../kernel/ts/src');"
+  - "jest.setMock('../../kernel/ts/src', {});"
+  - "const f = jest.createMockFromModule('../../kernel/ts/src');"

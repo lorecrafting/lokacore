@@ -16,3 +16,5 @@ invalid:
   - "jest.mock('../realm', () => ({}));"
   - "const a = jest.requireActual('../realm');"
   - "const p = require.resolve('../realm');"
+  - "jest.setMock('../realm', {});"
+  - "const f = jest.createMockFromModule('../realm');"

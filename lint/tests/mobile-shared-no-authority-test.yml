@@ -15,3 +15,5 @@ invalid:
   - "jest.mock('../../authority/local-story', () => ({}));"
   - "const a = jest.requireActual('../../authority/local-story');"
   - "const p = require.resolve('../../authority/local-story');"
+  - "jest.setMock('../../authority/local-story', {});"
+  - "const f = jest.createMockFromModule('../../authority/local-story');"

@@ -15,3 +15,5 @@ invalid:
   - "jest.mock('../story', () => ({}));"
   - "const a = jest.requireActual('../story');"
   - "const p = require.resolve('../story');"
+  - "jest.setMock('../story', {});"
+  - "const f = jest.createMockFromModule('../story');"

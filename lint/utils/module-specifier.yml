@@ -1,7 +1,7 @@
 # A string or template literal that is a module specifier: import/export ... from '<here>',
 # import('<here>'), require('<here>'), require.resolve('<here>'), and jest's module paths
-# (jest.mock, doMock, unmock, requireActual, requireMock). The mobile import-boundary rules
-# match only inside one. ponytail: a specifier built at run time (require(name)) is not
+# (jest.mock, doMock, unmock, setMock, requireActual, requireMock, createMockFromModule). The
+# mobile import-boundary rules match only inside one. ponytail: a specifier built at run time (require(name)) is not
 # seen; the bundler's graph would be the next check if one appears.
 id: module-specifier
 language: tsx
@@ -17,4 +17,4 @@ rule:
               kind: call_expression
               has:
                 field: function
-                regex: '^(import|require|require\.resolve|jest\.(mock|doMock|unmock|requireActual|requireMock))$'
+                regex: '^(import|require|require\.resolve|jest\.(mock|doMock|unmock|setMock|requireActual|requireMock|createMockFromModule))$'
