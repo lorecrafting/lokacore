@@ -5,8 +5,11 @@ import type { Cartridge, World } from '../src/index.ts';
 import { COMPASS } from '../src/decision.ts';
 import { gameView } from '../src/index.ts';
 
-export type Parsed = { type: 'look' } | { type: 'move'; direction: string } | 'quit' | null;
+/** A Command's payload without its actor, 'quit', a message for the player, or null. */
+export type Parsed =
+  { type: 'look' } | { type: 'move'; direction: string } | 'quit' | string | null;
 
+const NOT_A_DIRECTION = "That isn't a direction.";
 const WORDS: Record<string, Parsed> = {
   look: { type: 'look' },
   l: { type: 'look' },
@@ -16,17 +19,19 @@ const WORDS: Record<string, Parsed> = {
 for (const d of COMPASS) WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d };
 
 /**
- * `look`/`l`, a direction or its initial, `go <direction>`, `quit`/`q`; null for anything
- * else. `go <word>` with an unknown word is still a move, which the rule rejects.
+ * `look`/`l`, a direction or its initial, `go <direction>`, `quit`/`q`. Only the six compass
+ * words become a move: any other word after `go` is a message, never a Command, so free text
+ * never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand that."
  */
 export function parse(text: string): Parsed {
   const words = text.trim().toLowerCase().split(/\s+/);
   const word = (w: string) => (Object.hasOwn(WORDS, w) ? WORDS[w] : null);
-  if (words.length === 1) return word(words[0]);
-  if (words.length !== 2 || words[0] !== 'go') return null;
-  const known = word(words[1]);
-  if (known && typeof known === 'object' && known.type === 'move') return known;
-  return /^[a-z][a-z0-9_]{0,63}$/.test(words[1]) ? { type: 'move', direction: words[1] } : null;
+  if (words[0] === '') return null;
+  if (words.length === 2 && words[0] === 'go') {
+    const known = word(words[1]);
+    return known && typeof known === 'object' && known.type === 'move' ? known : NOT_A_DIRECTION;
+  }
+  return (words.length === 1 && word(words[0])) || "I don't understand that.";
 }
 
 /** The current room's title, description and exits, in the cartridge's text. */

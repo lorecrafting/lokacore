@@ -1,0 +1,5 @@
+{
+  "description": "Known answer for the content.diagnostic input_digest of the TypeScript loader through loka play (ADR-075 \u00a73: SHA-256 of the artifact file's bytes, never the content hash): artifact is the file's text (its UTF-8 bytes, final newline included, are the input; it fails with UNKNOWN_FORMAT) and sha256 was computed by Python hashlib.sha256 over those bytes, never by the kernels.",
+  "artifact": "{\"cartridge\":{\"format\":\"loka-cartridge-v0\"},\"content_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\"}\n",
+  "sha256": "8e1a57fbe1d15bbe664fd17860f0e721fb5c795bd2c6b33b1eb381c1b33adbff"
+}

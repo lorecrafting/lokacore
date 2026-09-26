@@ -2,7 +2,7 @@
 // single-player, MUD-style terminal over the TypeScript kernel on Node (owner decisions
 // 2026-09-25, R5 setup and R5 plan). Each session writes its transcript, the game_trace
 // (ADR-075 §4: the header plus the Commands by ordinal is the complete replay input);
-// --replay re-decides those Commands and requires byte-identical records.
+// --replay re-decides those Commands and requires a byte-identical transcript file.
 import { randomUUID, getRandomValues } from 'node:crypto';
 import { createReadStream, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
@@ -50,9 +50,9 @@ function seed(): number[] {
 
 async function session(script: string | undefined) {
   const tty = !script && process.stdin.isTTY;
-  const r = start(randomUUID(), randomUUID(), seed());
+  const r = start(randomUUID(), randomUUID(), seed(), kernel_version);
   const rel = append('game_trace', r.ids.run_id, header(r));
-  process.stdout.write(room(cartridge, r.world));
+  shown(r);
   const input = createInterface({
     input: script ? createReadStream(script) : process.stdin,
     output: tty ? process.stdout : undefined,
@@ -63,16 +63,16 @@ async function session(script: string | undefined) {
     if (!tty) process.stdout.write(`> ${text}\n`);
     const parsed = parse(text);
     if (parsed === 'quit') break;
-    if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
-    else if (text.trim()) process.stdout.write("I don't understand that.\n");
+    if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
+    else if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
     if (tty) input.prompt();
   }
   input.close();
   process.stdout.write(`transcript: ${rel}\n`);
 }
 
-const start = (run_id: string, context: string, s: number[]): Run => ({
-  ids: { content_hash, kernel_version, seed: s, run_id },
+const start = (run_id: string, context: string, s: number[], version: string): Run => ({
+  ids: { content_hash, kernel_version: version, seed: s, run_id },
   world: newWorld(cartridge, context as World['context'], s),
   ordinal: 0,
   revision: 0,
@@ -85,12 +85,17 @@ const header = (r: Run) =>
     store: 'game_trace',
     ids: r.ids,
     data: {
+      world_context_id: r.world.context,
       initial_state: { state: 'fresh' },
       fault_schedule: { state: 'unavailable', reason: 'not_applicable' },
     },
   });
 
-const command = (r: Run, parsed: Exclude<Parsed, 'quit' | null>): Command =>
+// The room on arrival and the initial state hash.
+const shown = (r: Run) =>
+  process.stdout.write(`${room(cartridge, r.world)}[state ${hash(r.world.state as never)}]\n`);
+
+const command = (r: Run, parsed: Exclude<Parsed, string | null>): Command =>
   ({
     id: commandId(r.ids.run_id, randomUUID()),
     world_context_id: r.world.context,
@@ -118,26 +123,34 @@ function reason(d: { kind: string; error?: { code: string }; code?: string }): s
   return words[code!] ?? `(${d.kind}: ${code})`;
 }
 
-// Re-decides the transcript's Commands from its header and prints each state hash; exits 1
-// unless every regenerated record is byte-identical to the transcript's.
+// Re-decides the transcript's Commands from its header (run, seed, world, and the recorded
+// kernel_version, which is reported, not compared: ADR-075 §4) and prints each state hash;
+// exits 1 unless the regenerated transcript is the file, byte for byte.
 function replay(path: string | undefined) {
   if (!path) fail('usage: loka play <artifact> --replay <transcript>');
-  const lines = readFileSync(path, 'utf8').split('\n').filter(Boolean);
-  const records = lines.map((l) => decode(l) as { event: string; ids: any; data: any });
-  records.forEach((rec, i) => {
-    if (validate('ObservationRecord', rec).length)
-      fail(`${path}:${i + 1}: not an ObservationRecord`);
-  });
+  const file = readFileSync(path, 'utf8');
+  const records = file
+    .split('\n')
+    .slice(0, -1)
+    .map((l, i) => {
+      try {
+        const rec = decode(l) as { event: string; ids: any; data: any };
+        if (!validate('ObservationRecord', rec).length) return rec;
+      } catch {}
+      return fail(`${path}:${i + 1}: not an ObservationRecord line`);
+    });
   const [head, ...entries] = records;
   if (head?.event !== 'trace.run' || entries.some((e) => e.event !== 'trace.command'))
     fail(`${path}: not a game_trace (one trace.run, then trace.command entries)`);
   if (head.ids.content_hash !== content_hash) fail(`${path}: a transcript of another cartridge`);
-  const context = entries[0]?.data.command.world_context_id ?? randomUUID();
-  const r = start(head.ids.run_id, context, head.ids.seed);
-  const out = [header(r), ...entries.map((e) => turn(r, e.data.command, false))];
-  const differs = out.findIndex((l, i) => l !== `${lines[i]}\n`);
-  if (differs >= 0) fail(`replay differs at ${path}:${differs + 1}`);
-  process.stdout.write(`replay: ${out.length} records identical\n`);
+  const { run_id, seed, kernel_version: recorded } = head.ids;
+  const r = start(run_id, head.data.world_context_id, seed, recorded);
+  if (recorded !== kernel_version)
+    process.stdout.write(`recorded by ${recorded}\nreplayed on ${kernel_version}\n`);
+  shown(r);
+  const out = header(r) + entries.map((e) => turn(r, e.data.command, false)).join('');
+  if (out !== file) fail(`replay differs from ${path}`);
+  process.stdout.write(`replay: ${entries.length} commands identical\n`);
 }
 
 if (flag === '--replay') replay(transcript);

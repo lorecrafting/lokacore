@@ -1,7 +1,9 @@
 # ADR-075 — One observation record format, four stores, a registered name list — 2026-09-25
 
 **Status: Accepted by the owner 2026-09-25 ([record](owner-decision-adr-075-2026-09-25.md));
-entered [document 16](../spec/16-decision-register.md) 2026-09-25.** Written by the developer agent
+entered [document 16](../spec/16-decision-register.md) 2026-09-25.** Amended 2026-09-25 by R5 slice 1's
+review ([record](../reviews/2026-09-25-r5-s1-review.md), Astra A4, A5; Fable F1): the three
+*Amendment* notes in §4 and §6. Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
 ([owner decision](owner-decisions-observability-astra-2026-09-25.md)).
 
@@ -107,7 +109,11 @@ exactly one follow-up entry repeats that ordinal with an identical command and d
 carries the resolved commit outcome (03 §15); the first entry stays as written. A retry (a
 new decision for the same `command_id` after a confirmed non-commit) takes the next
 ordinal. The schema cannot relate records, so each producer's tests check these rules (§7).
-Header plus the Commands by ordinal are the complete replay input.
+Header plus the Commands by ordinal are the complete replay input. *Amendment (A4):* the
+`RunHeader` carries the run's `world_context_id`, so a run with no commands still reconstructs
+its initial world. *Amendment (F1):* replay regenerates under the recorded `kernel_version` and
+reports the running one beside it; the kernel version is reported, never compared, so the same
+inputs can be replayed before and after a fix.
 
 | Decision | Possible commit outcomes |
 |---|---|
@@ -168,7 +174,10 @@ team or certificate id, or home, scratch or worktree path in any record (the AGE
 content facts only; game traces never leave the device by default (11 §11). The schema
 cannot catch a schema-valid leak, so each producer's acceptance tests include one: an
 absolute home or worktree path in `Diagnostic.path` and a device serial in
-`Diagnostic.data`, which its redaction must strip or reject.
+`Diagnostic.data`, which its redaction must strip or reject. *Amendment (A5):* free player text
+enters a Command only where its contract needs it, and then passes the producer's redaction or
+rejection before the Command is built; a word no command needs is a host parse message, never a
+Command or a record.
 
 ## 7. Adding a name, and validating producers
 
