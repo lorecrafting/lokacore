@@ -334,33 +334,45 @@ test("a command no offered action's target or input accepts is refused like an u
     assert.deepEqual(step(w, c).decision, refused, JSON.stringify(c));
 });
 
-// Breaks: an entity TargetSpec that accepts nothing, or its scope read from the wrong container
-// (items known answer: the satchel starts at the ferry landing, a detail is the mooring post).
+// Breaks: an entity TargetSpec that accepts nothing, its scope read from the wrong container, or
+// (#44 N4) room_contents admitting an NPC or room_occupants an item (items known answer: the
+// satchel starts at the ferry landing with Bram, a detail is the mooring post).
 test("an entity target in the action's scope is admitted", () => {
   const items = read('protocol/fixtures/cartridge_items_hash.json');
   const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
+  const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
   const POST = '953a909b-3a29-8c5c-9e3f-4105b9a47c4b';
-  const loaded = load((c) => {
-    c.actions['ashmere_items@0.0.1:action/inspect_inventory'] = {
-      key: 'inspect_inventory',
-      label: 'item.satchel.short',
-      target: { kind: 'entity', scopes: ['inventory'] },
-      command: 'look',
-      priority: 0,
-      input: [],
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
-      accessibility: 'item.satchel.short',
-    };
-    c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;
-    const ferry = c.rooms['ashmere_items@0.0.1:room/ferry_landing'];
-    ferry.actions = [{ op: 'replace', actions: ['inspect_inventory', 'take'] }];
-  }, items);
-  assert.ok(loaded.ok, JSON.stringify(loaded));
-  const w = newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], SEED);
+  // The items known answer whose ferry landing offers only a look at `scope` (and take).
+  const offering = (scope: string) => {
+    const loaded = load((c) => {
+      c.actions['ashmere_items@0.0.1:action/inspect'] = {
+        key: 'inspect',
+        label: 'item.satchel.short',
+        target: { kind: 'entity', scopes: [scope] },
+        command: 'look',
+        priority: 0,
+        input: [],
+        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        accessibility: 'item.satchel.short',
+      };
+      c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;
+      const ferry = c.rooms['ashmere_items@0.0.1:room/ferry_landing'];
+      ferry.actions = [{ op: 'replace', actions: ['inspect', 'take'] }];
+    }, items);
+    assert.ok(loaded.ok, JSON.stringify(loaded));
+    return newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], SEED);
+  };
   const look = (target_id: string) => cmd({ type: 'look', target_id });
   const refused = { kind: 'rejected', error: { code: 'unsupported_capability' } };
+  const w = offering('inventory');
   assert.deepEqual(step(w, look(SATCHEL)).decision, refused); // in the room, not held
   const held = step(w, cmd({ type: 'take', item_id: SATCHEL })).world;
   assert.equal(step(held, look(SATCHEL)).decision.kind, 'accepted');
   assert.deepEqual(step(held, look(POST)).decision, refused);
+  const contents = offering('room_contents');
+  assert.equal(step(contents, look(SATCHEL)).decision.kind, 'accepted');
+  assert.deepEqual(step(contents, look(BRAM)).decision, refused); // an NPC is no room content
+  const occupants = offering('room_occupants');
+  assert.equal(step(occupants, look(BRAM)).decision.kind, 'accepted');
+  assert.deepEqual(step(occupants, look(SATCHEL)).decision, refused); // an item is no occupant
 });

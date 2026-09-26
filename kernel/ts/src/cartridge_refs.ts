@@ -87,7 +87,8 @@ const TEXT: Readonly<Record<string, string[]>> = {
 };
 
 // Every fact_compare names a fact and every has_item an item of this cartridge (the kernel reads
-// them; any format, since v1 action policies are evaluated too). v2: the entry and every exit
+// them; any format, since v1 action policies are evaluated too), and no time_of_day window is
+// empty (EMPTY_TIME_WINDOW). v2: the entry and every exit
 // name a room of this cartridge, every text key a room, a detail, an NPC, an item, a variant, an
 // action or a recipe uses has a catalog entry, every detail's first alias is its own and
 // typable, items and NPCs start where containment allows, and recipes and rooms' action
@@ -105,6 +106,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [n, at] of nodes(c)) {
     if (n.op === 'fact_compare') named(n.fact, 'fact', `${at}.fact`);
     if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
+    if (n.op === 'time_of_day' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }
   if (c.format !== 'loka-cartridge-v2') return out;
   const text = (def: Obj, fields: string[], at: string) => {
@@ -137,7 +139,8 @@ type Texts = (def: Obj, fields: string[], at: string) => void;
 
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
 // one ActionSet identity), its target names a room of this cartridge and a detail of that room,
-// each fact.assign a fact of it, and its label and narration have catalog entries; each key of
+// it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), each outcome's
+// fact.assign names a fact of it, and its label and narrations have catalog entries; each key of
 // a room's action contribution names an engine verb (a registered command), an action or a
 // recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
 function recipes(c: Obj, named: Named, text: Texts): Diagnostic[] {
@@ -154,13 +157,15 @@ function recipes(c: Obj, named: Named, text: Texts): Diagnostic[] {
     if (!there) named(room, 'room', `${at}.target.room`);
     else if (!Object.hasOwn(there.details ?? {}, detail))
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.target.detail`, { target: detail }));
-    const success = r.outcomes.success;
-    success.sequence.forEach((s: Obj, i: number) => {
-      if (s.op === 'fact.assign')
-        named(s.fact, 'fact', `${at}.outcomes.success.sequence[${i}].fact`);
-    });
+    if (!r.check !== !r.outcomes.failure) out.push(diag('OUTCOME_MISMATCH', `${at}.outcomes`));
+    for (const [name, o] of Object.entries(r.outcomes as Obj)) {
+      o.sequence.forEach((s: Obj, i: number) => {
+        if (s.op === 'fact.assign')
+          named(s.fact, 'fact', `${at}.outcomes.${name}.sequence[${i}].fact`);
+      });
+      text(o.narration, ['actor', 'observers'], `${at}.outcomes.${name}.narration`);
+    }
     text(r, ['label'], at);
-    text(success.narration, ['actor', 'observers'], `${at}.outcomes.success.narration`);
   }
   const defs: Obj[] = [...Object.values(c.actions as Obj), ...Object.values(c.recipes ?? {})];
   const keys = new Set([...Object.keys(CAPABILITY_OWNERS.command), ...defs.map((d) => d.key)]);
