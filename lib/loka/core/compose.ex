@@ -250,7 +250,8 @@ defmodule Loka.Core.Compose do
     do: check(read(t, ctx) == op["from"] and at == state["clock"], at)
 
   defp apply_op(%{"op" => "barrier.transition", "from" => from, "to" => to} = op, t, ctx) do
-    now = read(t, ctx) || section(elem(ctx, 0), "barrier_initial")[key(op["barrier"])]
+    now =
+      with nil <- read(t, ctx), do: section(elem(ctx, 0), "barrier_initial")[key(op["barrier"])]
 
     check(now == from and to in Map.get(@door, from, []), to)
   end

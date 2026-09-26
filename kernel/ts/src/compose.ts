@@ -164,7 +164,10 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
     case 'barrier.transition': {
       const now = row ?? get(section(ctx.state, 'barrier_initial'), key(op.barrier));
-      return check(now === op.from && (DOOR[op.from] ?? []).includes(op.to), op.to);
+      return check(
+        now === op.from && Object.hasOwn(DOOR, op.from) && DOOR[op.from].includes(op.to),
+        op.to,
+      );
     }
   }
 }

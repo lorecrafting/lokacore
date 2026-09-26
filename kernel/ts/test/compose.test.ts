@@ -216,3 +216,29 @@ test('composition-profile budgets: at the limit composes with the expected chang
     ),
   );
 });
+
+// Review #50 A3/N1: the twin kernels agree on malformed barrier states (test/loka/core/
+// compose_test.exs has the same cases). Breaks: a stored false read as unset (the initial
+// state then used), or an Object.prototype name taken as a legal from-state (a throw).
+test('a malformed barrier state faults precondition_failed', () => {
+  const barrier = { cartridge_id: 'c', cartridge_version: '1.0.0', kind: 'barrier', key: 'd' };
+  const target = { kind: 'barrier', barrier };
+  const fault = { fault: { kind: 'fault', code: 'precondition_failed', target } };
+  const op = (from: string) => ({
+    op: 'barrier.transition',
+    writer_group: 0,
+    barrier,
+    from,
+    to: 'open',
+  });
+  const at = (initial: string, stored?: Json) => ({
+    clock: 0,
+    barrier_initial: { [key(barrier)]: initial },
+    ...(stored === undefined ? {} : { barriers: { [key(target)]: stored } }),
+  });
+  for (const [s, from] of [
+    [at('closed', false), 'closed'],
+    [at('toString'), 'toString'],
+  ] as const)
+    assert.equal(encode(compose(s as never, { ops: [op(from)] } as never) as Json), encode(fault));
+});
