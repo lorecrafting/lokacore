@@ -11,12 +11,14 @@ import { normalize } from '../src/target.ts';
 /**
  * A Command's payload without its actor, a lookup (the player's words after the verb, which
  * the authority resolves before any Command: they never enter one) for look, take, drop or give
- * (`to` the recipient's words), 'inventory', 'quit', a message for the player, or null.
+ * (`to` the recipient's words), a wait of whole hours (the caller adds them to the clock),
+ * 'inventory', 'quit', a message for the player, or null.
  */
 export type Parsed =
   | { type: 'look' }
   | { type: 'move'; direction: string }
   | { lookup: string; verb?: 'take' | 'drop' | 'give'; to?: string }
+  | { wait: number }
   | 'inventory'
   | 'quit'
   | string
@@ -44,7 +46,8 @@ const VERBS: Record<string, 'take' | 'drop' | 'give'> = {
 /**
  * `look`/`l`, `look`/`l`/`examine`/`x` <words> (a lookup; `look at the post` and `look post`
  * alike, target.ts normalize), `get`/`take` <words>, `drop` <words>, `give` <words> `to`
- * <words>, `inventory`/`i`, a direction or its initial, `go <direction>`, `quit`/`q`. Only the
+ * <words>, `inventory`/`i`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24;
+ * one when omitted], `quit`/`q`. Only the
  * six compass words become a move: any other word after `go` is a message, never a Command, so
  * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand
  * that."
@@ -64,6 +67,10 @@ export function parse(text: string): Parsed {
   if (LOOK.includes(words[0])) {
     if (normalize(rest).length) return { lookup: rest };
     return words[0] === 'examine' || words[0] === 'x' ? 'Examine what?' : WORDS.look;
+  }
+  if (words[0] === 'wait' && words.length <= 2) {
+    const hours = words.length === 1 ? 1 : Number(words[1]);
+    return /^([1-9]|1[0-9]|2[0-4])$/.test(String(hours)) ? { wait: hours } : 'Wait how many hours?';
   }
   if (words.length === 2 && words[0] === 'go') {
     const known = word(words[1]);
@@ -121,4 +128,14 @@ export const which = (cartridge: Cartridge, world: World, ids: readonly EntityId
       : say(cartridge, world.entities[id].short),
   );
   return `Which do you mean: ${names.slice(0, -1).join(', ')} or ${names.at(-1)}?\n`;
+};
+
+/** A LogicalTime as the player reads it: one unit a second, time 0 midnight of day 1. */
+export const clock = (t: number): string => {
+  const [day, hh, mm] = [
+    Math.floor(t / 86400) + 1,
+    Math.floor(t / 3600) % 24,
+    Math.floor(t / 60) % 60,
+  ];
+  return `day ${day}, ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
 };
