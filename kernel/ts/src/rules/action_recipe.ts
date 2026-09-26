@@ -9,8 +9,9 @@
 // its draw, time and steps exactly like success (04 §5.0). Then that outcome's sequence in order,
 // each fact.assign a delta op whose expected value is the fact as the steps before it left it,
 // each event.emit a custom_event at its causal position; a fact.assign that changes its fact
-// leaves the next position free for the fact_changed the host puts there (world.ts adopt). Then
-// action_completed, engine-owned, and the actor reads the outcome's narration. A duration adds
+// leaves the next position free for the fact_changed the host puts there (world.ts adopt). Then,
+// unless the outcome is failure, action_completed, engine-owned; the actor reads the outcome's
+// narration. A duration adds
 // one time.advance after the steps; events keep the admission time. Costs, cooldowns and result
 // bands join in S6b and later.
 import type {
@@ -52,8 +53,11 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const start = rolled ? { ...START, events: [rolled.event], position: 1 } : START;
   const { ops, events, position } = sequence.reduce(step(world, command, mint, subject_id), start);
   const done = { type: 'action_completed', action, subject_id } as const;
-  const completed = event(world, command, mint, position + 1, done);
+  const completed =
+    rolled?.outcome === 'failure' ? [] : [event(world, command, mint, position + 1, done)];
   const from = world.state.clock;
+  // ponytail: no jobs exist yet; once they do, this advance runs its due set like wait's
+  // (04 §5.4: an action's time cost is an explicit advance that may not skip a due job).
   const time: DeltaOp[] = duration
     ? [{ op: 'time.advance', writer_group: 0, from, to: add(from, duration) }]
     : [];
@@ -61,7 +65,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
     world,
     rolled?.outcome ?? 'performed',
     [...ops, ...time],
-    [...events, completed],
+    [...events, ...completed],
     [{ key: narration.actor }],
     rolled?.rng,
   );

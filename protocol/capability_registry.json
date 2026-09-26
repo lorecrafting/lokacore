@@ -228,7 +228,7 @@
       "run_job"
     ],
     "policies": [
-      "time_of_day"
+      "time_window"
     ]
   },
   {

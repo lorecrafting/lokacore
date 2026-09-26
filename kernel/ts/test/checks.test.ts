@@ -138,7 +138,8 @@ test('a luck check of chance 21 passes on the roll of 20 and runs success', () =
   assert.equal(w.state.clock, 90);
 });
 
-// 04 §5.0. Breaks: a failed check rejected (or its RNG restored, its time not committed), the
+// 04 §5.0. Breaks: a failed check rejected (or its RNG restored, its time not committed),
+// action_completed emitted for a failed attempt (review S3), the
 // success outcome run anyway, or a retry rerolling the same state instead of the advanced one.
 test('a luck check of chance 20 fails on the roll of 20: accepted, draw and time commit', () => {
   const before = checked(20);
@@ -149,8 +150,7 @@ test('a luck check of chance 20 fails on the roll of 20: accepted, draw and time
     delta: { ops: [advance] },
     events: [
       at(IDS[0], 1, check('check_failed')),
-      at(IDS[1], 2, custom('bell_muffled')),
-      at(IDS[2], 3, completed),
+      at(IDS[1], 2, custom('bell_muffled')), // no action_completed on failure (review S3)
     ],
     effects: [],
     rng: AFTER_ONE_DRAW,
@@ -224,11 +224,11 @@ test('wait advances the clock to until, later than now only', () => {
 
 // 00 §4.2 dusk at 18. One unit is one second; hour h starts at h * 3600. Breaks: a window that
 // does not wrap midnight, an off-by-one at either edge, or the day not wrapping at 24 hours.
-test('time_of_day holds in its window, wrapping midnight when to < from', () => {
+test('time_window holds in its window, wrapping midnight when to < from', () => {
   const w = world();
   const at = (t: number, from: number, to: number) =>
     holds({ ...w, state: { ...w.state, clock: t } }, w.character, {
-      op: 'time_of_day',
+      op: 'time_window',
       from,
       to,
     });
@@ -248,4 +248,23 @@ test('time_of_day holds in its window, wrapping midnight when to < from', () => 
     [18 * 3600, 6, 18, false],
   ];
   for (const [t, from, to, want] of rows) assert.equal(at(t, from, to), want, `${t} ${from}-${to}`);
+});
+
+// Review S1, Astra A2. Breaks: a numeric-profile error in a rule (here the duration's clock
+// addition past 2^53 - 1 after a legal wait) escaping step as an exception instead of a typed
+// fault that leaves the world, RNG and clock as they were (04 §5.2 step 7).
+test('a clock overflow in a rule is an evaluator_error fault that changes nothing', () => {
+  const dusk = read('protocol/fixtures/cartridge_dusk_hash.json');
+  const bytes = new TextEncoder().encode(
+    `{"cartridge":${dusk.canonical},"content_hash":"${dusk.sha256}"}`,
+  );
+  const loaded = loadCartridge(bytes, INSTALLED);
+  assert.ok(loaded.ok);
+  const fresh = newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], SEED);
+  const late = step(fresh, cmd({ type: 'wait', until: Number.MAX_SAFE_INTEGER }));
+  assert.equal(late.world.state.clock, Number.MAX_SAFE_INTEGER);
+  const pick = { ...cmd({ type: 'perform', action: 'pick_lock' }), id: IDS[0] } as Command;
+  const r = step(late.world, pick);
+  assert.deepEqual(r.decision, { kind: 'fault', code: 'evaluator_error' });
+  assert.equal(r.world, late.world);
 });

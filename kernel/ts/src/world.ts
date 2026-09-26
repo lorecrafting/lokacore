@@ -3,6 +3,7 @@
 // (lint/rules/ts-rule-module-*.yml); this module routes each command to the rule of the
 // capability that owns it (capability_registry.json), composes the delta and commits it.
 import { encode } from './canonical.ts';
+import { KernelError } from './error.ts';
 import type { Installed } from './cartridge.ts';
 import { compose, key, target } from './compose.ts';
 import {
@@ -172,8 +173,8 @@ type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
  * for world creation (permission_denied; R6 must keep this refusal before any receipt); a
  * command for another world (not_found) or another actor (not_found) is rejected, and so is one
  * the actor's ActionSet does not offer or offers unavailable (actions.ts refusal; 04 §19, ACT-09).
- * After it: admit() checks the result, then the delta composes or faults before the changes are
- * adopted.
+ * A KernelError thrown while deciding is an evaluator_error fault with the world unchanged. After it: admit() checks the
+ * result, then the delta composes or faults before the changes are adopted.
  */
 function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
@@ -184,7 +185,13 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   const refused = refusal(world, command.payload);
   if (refused) return reject(refused);
   const mint = allocator(world, command);
-  return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
+  try {
+    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
+  } catch (e) {
+    // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
+    if (!(e instanceof KernelError)) throw e;
+    return { decision: { kind: 'fault', code: 'evaluator_error' }, world };
+  }
 }
 
 /**

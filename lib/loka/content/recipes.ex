@@ -22,6 +22,7 @@ defmodule Loka.Content.Recipes do
   check's (check@1, by its events) and each step's of any outcome (by its event) is required; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
   of this cartridge and a detail of that room, each fact.assign a fact with a value of its type,
+  its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
   and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
   key is an action's or a
   registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
@@ -32,7 +33,16 @@ defmodule Loka.Content.Recipes do
 
   def check(m, defs, {_, text}, registry) do
     actions = for {_, {_, [], a}} <- defs["action"], into: MapSet.new(), do: a["key"]
-    ctx = %{m: m, defs: defs, text: text, registry: registry, actions: actions}
+
+    ctx = %{
+      m: m,
+      defs: defs,
+      text: text,
+      registry: registry,
+      actions: actions,
+      shared: shared(defs)
+    }
+
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
   end
 
@@ -44,8 +54,21 @@ defmodule Loka.Content.Recipes do
       refs(rel, r, ctx) ++
       texts(rel, r, ctx.text) ++
       duplicate ++
-      mismatch(rel, r)
+      mismatch(rel, r) ++
+      shared(rel, r, ctx.shared)
   end
+
+  # An inline check's key is its check definition's key: two recipes' checks may not share one.
+  defp shared(defs) do
+    checks = for {_, r} <- all(defs), is_map_key(r, "check"), do: r["check"]["key"]
+    for {k, n} <- Enum.frequencies(checks), n > 1, into: MapSet.new(), do: k
+  end
+
+  defp shared(rel, %{"check" => %{"key" => k}}, shared) do
+    if k in shared, do: [diag("DUPLICATE_DEFINITION", at(rel, ["check"]))], else: []
+  end
+
+  defp shared(_, _, _), do: []
 
   defp mismatch(rel, r) do
     if is_map_key(r, "check") == is_map_key(r["outcomes"], "failure"),

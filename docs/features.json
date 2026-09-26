@@ -190,6 +190,6 @@
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "R5 S6a wait (no jobs yet), time_of_day"
+    "implemented_in": "R5 S6a wait (no jobs yet), time_window"
   }
 }

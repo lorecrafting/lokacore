@@ -236,7 +236,7 @@ defmodule Loka.Content.Checks do
       end
   end
 
-  defp empty_window(rel, steps, %{"op" => "time_of_day", "from" => t, "to" => t}),
+  defp empty_window(rel, steps, %{"op" => "time_window", "from" => t, "to" => t}),
     do: [diag("EMPTY_TIME_WINDOW", at(rel, steps))]
 
   defp empty_window(_, _, _), do: []

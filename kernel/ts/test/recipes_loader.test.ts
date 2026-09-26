@@ -212,11 +212,11 @@ test("a failure outcome's references and owners, and the check's, are checked", 
     );
 });
 
-// Breaks: a time_of_day node loads without schedule@1 locked, or with an empty window (from
+// Breaks: a time_window node loads without schedule@1 locked, or with an empty window (from
 // equal to to) that never holds.
-test('time_of_day needs schedule@1 and a non-empty window', () => {
+test('time_window needs schedule@1 and a non-empty window', () => {
   const window = (from: number, to: number) => (c: any) =>
-    (recipe(c).policy.root = { op: 'time_of_day', from, to });
+    (recipe(c).policy.root = { op: 'time_window', from, to });
   assert.ok(load('cartridge_bell_hash.json', and(window(18, 6))).ok);
   fails(and(window(18, 18)), 'EMPTY_TIME_WINDOW', `${AT}.policy.root`);
   fails(
@@ -225,5 +225,45 @@ test('time_of_day needs schedule@1 and a non-empty window', () => {
     `${AT}.policy.root.op`,
     { capability: 'schedule' },
     ['schedule@1'],
+  );
+});
+
+// Astra A1. Breaks: a fact.assign value (any outcome) or a fact_compare value not of the fact's
+// type installs although the compiler rejects its source (FACT_TYPE_MISMATCH), so a failed check
+// faults at play time instead.
+test("a recipe's or a policy's fact value outside its FactSpec is FACT_TYPE_MISMATCH", () => {
+  const PICK = 'ashmere_dusk@0.0.1:recipe/pick_lock';
+  const gate = {
+    cartridge_id: 'ashmere_dusk',
+    cartridge_version: '0.0.1',
+    kind: 'fact',
+    key: 'crypt_gate_open',
+  };
+  fails(
+    (c) => {
+      c.recipes[PICK].check.chance = 20;
+      c.recipes[PICK].outcomes.failure.sequence = [{ op: 'fact.assign', fact: gate, value: 1 }];
+    },
+    'FACT_TYPE_MISMATCH',
+    `.cartridge.recipes["${PICK}"].outcomes.failure.sequence[0].value`,
+    {},
+    [],
+    'cartridge_dusk_hash.json',
+  );
+  fails(
+    (c) => (recipe(c).policy.root.item.equals = 'rung'),
+    'FACT_TYPE_MISMATCH',
+    `${AT}.policy.root.item.equals`,
+  );
+});
+
+// Review S2. Breaks: two recipes' checks with one key load, so one check DefinitionRef names two
+// checks and a check_passed objective completes on either.
+test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
+  const toll = 'ashmere_bell@0.0.1:recipe/toll_bell';
+  fails(
+    and((c) => (c.recipes[toll] = { ...structuredClone(recipe(c)), key: 'toll_bell' })),
+    'DUPLICATE_DEFINITION',
+    `${AT}.check`,
   );
 });

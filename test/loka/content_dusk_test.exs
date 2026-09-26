@@ -1,6 +1,6 @@
 defmodule Loka.ContentDuskTest do
-  # Luck checks, failure outcomes, durations and time_of_day in the compiler (R5 S6a;
-  # action.schema.json ActionRecipe, RecipeCheck; policy.schema.json time_of_day). Expected
+  # Luck checks, failure outcomes, durations and time_window in the compiler (R5 S6a;
+  # action.schema.json ActionRecipe, RecipeCheck; policy.schema.json time_window). Expected
   # diagnostics are hand-written from protocol/cartridge.schema.json DiagnosticCode, with the
   # loader's paths in kernel/ts/test/recipes_loader.test.ts; the known answer is
   # protocol/fixtures/cartridge_dusk_hash.json (Python).
@@ -48,7 +48,7 @@ defmodule Loka.ContentDuskTest do
     }
   end
 
-  # Breaks: the check, a failure outcome, a duration or a time_of_day node dropped or reshaped,
+  # Breaks: the check, a failure outcome, a duration or a time_window node dropped or reshaped,
   # or a failure step's short fact reference left short.
   test "ashmere_dusk compiles to its Python known answer without warnings", %{tmp_dir: dir} do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
@@ -136,8 +136,8 @@ defmodule Loka.ContentDuskTest do
            ) in diags
   end
 
-  # Breaks: time_of_day compiles without schedule@1, or with an empty window.
-  test "time_of_day needs schedule@1 and a non-empty window", %{tmp_dir: dir} do
+  # Breaks: time_window compiles without schedule@1, or with an empty window.
+  test "time_window needs schedule@1 and a non-empty window", %{tmp_dir: dir} do
     assert compile(dir, without("schedule")) ==
              {:error,
               [
@@ -153,5 +153,21 @@ defmodule Loka.ContentDuskTest do
 
     assert compile(Path.join(dir, "b"), %{"recipes/ring_bell.json" => ring}) ==
              {:error, [d("EMPTY_TIME_WINDOW", "recipes/ring_bell.policy.root")]}
+  end
+
+  # Review S2. Breaks: two recipes' checks with one key compile, so one check DefinitionRef names
+  # two checks.
+  test "two recipes' checks with one key are DUPLICATE_DEFINITION", %{tmp_dir: dir} do
+    ring = Map.put(src("recipes/ring_bell.json"), "check", src("recipes/pick_lock.json")["check"])
+
+    ring =
+      put_in(ring, ["outcomes", "failure"], src("recipes/pick_lock.json")["outcomes"]["failure"])
+
+    assert compile(dir, %{"recipes/ring_bell.json" => ring}) ==
+             {:error,
+              [
+                d("DUPLICATE_DEFINITION", "recipes/pick_lock.check"),
+                d("DUPLICATE_DEFINITION", "recipes/ring_bell.check")
+              ]}
   end
 end
