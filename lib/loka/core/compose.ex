@@ -19,7 +19,11 @@ defmodule Loka.Core.Compose do
   - `"quests"`: QuestInstanceId => `quest`, `scope`, `state`, optional `outcome`;
   - `"choices"`: ContinuationId => the `choice.open` fields plus `status` and the
     host-assigned `opened_revision`;
-  - `"jobs"`: JobId => `job`, `due_time`, `status`.
+  - `"jobs"`: JobId => `job`, `due_time`, `status`;
+  - `"resource_specs"`: canonical DefinitionRef text => ResourceSpec (`minimum`, `maximum`,
+    `start`, `gain`); `"resources"`: canonical resource MutationTarget text => `value`, `at`
+    (the time it was stored); a resource's current value is `current/3`;
+  - `"cooldowns"`: canonical cooldown MutationTarget text => the LogicalTime it last started.
 
   Result: `%{"changes" => rows}`, one `%{"target", "value"}` per written MutationTarget,
   sorted by canonical target text (the rows the host commits, ADR-072; a new continuation
@@ -78,6 +82,23 @@ defmodule Loka.Core.Compose do
 
   def target(%{"op" => "job." <> _, "job_id" => j}), do: %{"kind" => "job", "job_id" => j}
   def target(%{"op" => "time.advance"}), do: %{"kind" => "clock"}
+
+  def target(%{"op" => "resource.adjust"} = op),
+    do: Map.put(Map.take(op, ~w(resource entity_id)), "kind", "resource")
+
+  def target(%{"op" => "cooldown.start"} = op),
+    do: Map.put(Map.take(op, ~w(actor_id action)), "kind", "cooldown")
+
+  @doc """
+  A resource's current value at `now` (ResourceSpec regeneration): the stored value (`start` at
+  time 0 when unset) plus `gain` for each hour boundary crossed since it was stored, stopping at
+  `maximum`.
+  """
+  @spec current(map() | nil, map(), integer()) :: integer()
+  def current(row, spec, now) do
+    %{"value" => v, "at" => at} = row || %{"value" => spec["start"], "at" => 0}
+    min(spec["maximum"], v + spec["gain"] * (div(now, 3600) - div(at, 3600)))
+  end
 
   @doc "Canonical text of a JSON value: the identity of a target or DefinitionRef."
   @spec key(term()) :: binary()
@@ -205,6 +226,16 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "time.advance", "from" => from, "to" => to}, t, ctx),
     do: check(read(t, ctx) == from and to > from, to)
 
+  defp apply_op(%{"op" => "resource.adjust", "from" => from, "to" => to} = op, t, ctx) do
+    now = elem(ctx, 0)["clock"]
+    spec = section(elem(ctx, 0), "resource_specs")[key(op["resource"])]
+    in_bounds = spec != nil and to in spec["minimum"]..spec["maximum"]//1
+    check(in_bounds and current(read(t, ctx), spec, now) == from, %{"value" => to, "at" => now})
+  end
+
+  defp apply_op(%{"op" => "cooldown.start", "at" => at} = op, t, {state, _, _} = ctx),
+    do: check(read(t, ctx) == op["from"] and at == state["clock"], at)
+
   defp check(true, value), do: {:ok, value}
   defp check(false, _), do: {:error, "precondition_failed"}
 
@@ -222,6 +253,8 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "choice", "continuation_id" => c}, s), do: section(s, "choices")[c]
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
   defp base(%{"kind" => "clock"}, s), do: s["clock"]
+  defp base(%{"kind" => "resource"} = t, s), do: section(s, "resources")[key(t)]
+  defp base(%{"kind" => "cooldown"} = t, s), do: section(s, "cooldowns")[key(t)]
 
   # d is e or inside it. A walk longer than the containment rows means a cyclic base: fail closed.
   defp inside?(nil, _, _, _), do: false

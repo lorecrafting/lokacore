@@ -258,7 +258,7 @@ defmodule Loka.Core.ComposeTest do
   @peer "kernel/ts/test/differential_peer.ts"
   test "differential: Elixir and TypeScript compose identically" do
     :rand.seed(:exsss, {5, 5, 5})
-    pool = for c <- cases(), c["state"] == "base", op <- c["ops"], do: op
+    pool = for c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op
     cases = for _ <- 1..1000, do: random_case(pool)
 
     ours =
@@ -291,7 +291,7 @@ defmodule Loka.Core.ComposeTest do
     state =
       index(%{
         @base
-        | "clock" => pick(0..10),
+        | "clock" => pick([pick(0..10), 3599, 3600, 7300]),
           "capacities" => Map.new(@base["capacities"], fn {e, _} -> {e, pick(0..1)} end),
           "facts" => Enum.take(@base["facts"], pick(0..1))
       })
@@ -316,5 +316,19 @@ defmodule Loka.Core.ComposeTest do
     do: %{op | "from" => pick([s["clock"], pick(0..10)]), "to" => pick(0..20)}
 
   defp vary(%{"op" => "job.schedule"} = op, _), do: %{op | "due_time" => pick(0..30)}
+
+  defp vary(%{"op" => "cooldown.start"} = op, s), do: %{op | "at" => pick([s["clock"], 6])}
+
+  # Often the current value, so adjustments pass and chain; `to` sometimes out of bounds.
+  defp vary(%{"op" => "resource.adjust"} = op, s) do
+    spec = s["resource_specs"][Compose.key(op["resource"])]
+
+    now =
+      spec && Compose.current(s["resources"][Compose.key(Compose.target(op))], spec, s["clock"])
+
+    from = pick([now || 0, now || 0, pick(0..90)])
+    %{op | "from" => from, "to" => from + pick(-12..3)}
+  end
+
   defp vary(op, _), do: op
 end

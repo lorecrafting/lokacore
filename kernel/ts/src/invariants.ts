@@ -1,7 +1,7 @@
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds.
 import type { Json } from './canonical.ts';
-import { key, same, target, type Result } from './compose.ts';
+import { current, key, same, target, type Result } from './compose.ts';
 import { EVALUATION_FAULTS, type DeltaOp } from './contracts.gen.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
@@ -35,6 +35,7 @@ function link(op: Any): [Json | undefined, Json] {
   if (fixed[op.op]) return fixed[op.op]!;
   if (op.op === 'fact.assign') return [op.expected, op.value];
   if (op.op === 'entity.transfer') return [op.source_id, op.destination_id];
+  if (op.op === 'cooldown.start') return [op.from, op.at];
   return [op.from, op.to];
 }
 
@@ -45,6 +46,11 @@ function initial(op: Any, s: Any): Json | undefined {
   if (family === 'quest') return s.quests?.[op.instance_id]?.state;
   if (family === 'choice') return s.choices?.[op.continuation_id]?.status;
   if (family === 'job') return s.jobs?.[op.job_id]?.status;
+  if (family === 'cooldown') return s.cooldowns?.[key(target(op))];
+  if (family === 'resource') {
+    const spec = s.resource_specs?.[key(op.resource)];
+    return spec && current(s.resources?.[key(target(op))], spec, s.clock);
+  }
   return s.clock;
 }
 
@@ -80,8 +86,8 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     }
     return 'fault' in result || [...groups.values()].every((g) => g.size === 1);
   },
-  // Checks only the read -> write value chain per target, not capacity, revision, cycle or
-  // time bounds.
+  // Checks only the read -> write value chain per target (a resource's current value, derived),
+  // not capacity, revision, cycle, resource or time bounds.
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     const seen = new Map<string, Json | undefined>();

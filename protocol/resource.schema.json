@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Resource contracts",
+  "description": "ResourceSpec (21 §4 Resource; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources), owned by resource@1.",
+  "$defs": {
+    "ResourceInt": {
+      "description": "A resource bound, value or amount: a 32-bit signed integer, so that every derived value (regeneration, costs, adjustments) stays exact in every kernel's arithmetic.",
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647,
+      "examples": [
+        0,
+        20,
+        -2147483648,
+        2147483647
+      ]
+    },
+    "ResourceSpec": {
+      "description": "A typed bounded integer resource each body holds (21 §4 Resource), keyed in CompiledCartridge.resources by DefinitionRefString of kind resource: inclusive bounds minimum <= start <= maximum (RESOURCE_SPEC_INVALID otherwise), start its value on a new body, and gain its regeneration per game hour: each hour boundary the clock crosses (floor(time / 3600) increases) adds gain, stopping at maximum; that stop is the regeneration rule, never a clamp of an adjustment (delta.schema.json resource.adjust). The value is derived, never ticked (02 derived state): it is stored only when written. A body's resources belong to the body, not the character driving it (owner decision on puppeting). Keys hp, ma and mv are the engine's default pools (00 §4 amendment, DikuMUD): the compiler adds them to every loka-cartridge-v2 cartridge, with resource@1, as hp 0..20 start 20 gain 5, ma 0..100 start 100 gain 4 and mv 0..82 start 82 gain 18, each field overridable in the source's resources.json; mv is the pool a move pays 1 from (movement@1), in a cartridge that declares it. resource@1 emits no events.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "minimum": {
+          "$ref": "#/$defs/ResourceInt"
+        },
+        "maximum": {
+          "$ref": "#/$defs/ResourceInt"
+        },
+        "start": {
+          "$ref": "#/$defs/ResourceInt"
+        },
+        "gain": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "key",
+        "minimum",
+        "maximum",
+        "start",
+        "gain"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "mv",
+          "minimum": 0,
+          "maximum": 82,
+          "start": 82,
+          "gain": 18
+        },
+        {
+          "key": "coins",
+          "minimum": 0,
+          "maximum": 1000,
+          "start": 5,
+          "gain": 0
+        },
+        {
+          "key": "favor",
+          "minimum": -100,
+          "maximum": 100,
+          "start": 0,
+          "gain": 2147483647
+        }
+      ]
+    }
+  }
+}

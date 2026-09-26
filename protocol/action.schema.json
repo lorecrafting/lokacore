@@ -494,7 +494,7 @@
       ]
     },
     "RecipeStep": {
-      "description": "One registered operation of a recipe outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target.",
+      "description": "One registered operation of a recipe outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it; a result outside the resource's bounds faults the whole decision (precondition_failed), never a rejection or a clamp.",
       "oneOf": [
         {
           "description": "Assign a fact.",
@@ -533,6 +533,27 @@
             "event"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Adjust a resource of the actor's body.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "resource.adjust"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "by": {
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
+            }
+          },
+          "required": [
+            "op",
+            "resource",
+            "by"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -549,11 +570,21 @@
         {
           "op": "event.emit",
           "event": "bell_rung"
+        },
+        {
+          "op": "resource.adjust",
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "by": -3
         }
       ]
     },
     "ActionRecipe": {
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Costs, cooldowns and result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Result bands join later.",
       "type": "object",
       "properties": {
         "key": {
@@ -658,6 +689,18 @@
           "$ref": "#/$defs/RecipeCheck"
         },
         "duration": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "costs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RecipeCost"
+          },
+          "minItems": 1,
+          "maxItems": 8
+        },
+        "cooldown": {
           "type": "integer",
           "minimum": 1
         }
@@ -919,27 +962,57 @@
       ]
     },
     "RecipeCheck": {
-      "description": "An ActionRecipe's Check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two recipes' checks may not share one (DUPLICATE_DEFINITION). Deterministic thresholds, difficulty, modifiers, opposed checks and result bands join as further kinds and fields (result bands as more outcomes keys).",
-      "type": "object",
-      "properties": {
-        "key": {
-          "$ref": "#/$defs/Key"
+      "description": "An ActionRecipe's Check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two recipes' checks may not share one (DUPLICATE_DEFINITION). threshold (R5 S6b) passes when the actor's body holds at least difficulty of a resource of the cartridge, read at admission before the recipe's costs; it draws nothing and emits the same events. Modifiers, opposed checks and result bands join as further kinds and fields (result bands as more outcomes keys).",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/Key"
+            },
+            "kind": {
+              "const": "luck"
+            },
+            "chance": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "chance"
+          ],
+          "additionalProperties": false,
+          "description": "A luck roll."
         },
-        "kind": {
-          "const": "luck"
-        },
-        "chance": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 99
+        {
+          "description": "A deterministic threshold: passes when the actor's body's current resource value (derived, at admission, before the recipe's costs) is at least difficulty. Draws no RNG.",
+          "type": "object",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/Key"
+            },
+            "kind": {
+              "const": "threshold"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "difficulty": {
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
+            }
+          },
+          "required": [
+            "key",
+            "kind",
+            "resource",
+            "difficulty"
+          ],
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "key",
-        "kind",
-        "chance"
       ],
-      "additionalProperties": false,
       "examples": [
         {
           "key": "pry_lid",
@@ -955,6 +1028,47 @@
           "key": "k",
           "kind": "luck",
           "chance": 99
+        },
+        {
+          "key": "shove_door",
+          "kind": "threshold",
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "difficulty": 10
+        }
+      ]
+    },
+    "RecipeCost": {
+      "description": "One resource cost of an ActionRecipe (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.",
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "amount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "resource",
+        "amount"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "amount": 5
         }
       ]
     }

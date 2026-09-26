@@ -130,7 +130,7 @@
       ]
     },
     "DeltaOp": {
-      "description": "One registered delta operation (04 §5.3 families). Each description names the op's target and precondition. Resource adjustment arrives with the resource capability.",
+      "description": "One registered delta operation (04 §5.3 families). Each description names the op's target and precondition.",
       "oneOf": [
         {
           "description": "Target: fact (fact, scope, subject_id). Precondition: current value equals `expected` (the fact's default if unset).",
@@ -431,6 +431,71 @@
             "to"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Resource adjustment (04 §5.3). Target: resource (resource, entity_id). Preconditions: the resource has a spec (ResourceSpec); its current value equals `from`; `to` is within the spec's bounds; never clamped. The current value is derived: the stored value (start, stored at time 0, when unset) plus gain for each hour boundary (floor(time / 3600)) the base clock has crossed since it was stored, stopping at maximum (regeneration). Writes {value: to, at: the base clock}, so a write stores the derived value. The rule does the arithmetic; a same-group sequence chains (each op's `from` the previous op's `to`).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "resource.adjust"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "from": {
+              "type": "integer"
+            },
+            "to": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "resource",
+            "entity_id",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Start an actor's cooldown of an action at the attempt's admission time (21 §4 Time, §7 Cost). Target: cooldown (actor_id, action). Preconditions: the stored start equals `from` (both absent when it never started); `at` equals the base clock. Writes `at`. Whether the action is still cooling down is derived by the rule that owns it (rules/action_recipe.ts), not by composition.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "cooldown.start"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "action": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "from": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "actor_id",
+            "action",
+            "at"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -548,6 +613,34 @@
           "writer_group": 0,
           "from": 0,
           "to": 19
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "11111111-2222-4333-8444-555555555555",
+          "from": 82,
+          "to": 81
+        },
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "action": "pick_lock",
+          "at": 3600
+        },
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "action": "pick_lock",
+          "from": 3600,
+          "at": 7200
         }
       ]
     },
@@ -658,6 +751,48 @@
             "kind"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "A body's resource.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "resource"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "resource",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "An actor's cooldown of one action.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "cooldown"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "action": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id",
+            "action"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -692,6 +827,21 @@
         },
         {
           "kind": "clock"
+        },
+        {
+          "kind": "resource",
+          "resource": {
+            "cartridge_id": "ashmere_dusk",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "kind": "cooldown",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "action": "pick_lock"
         }
       ]
     }
