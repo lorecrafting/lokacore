@@ -10,7 +10,7 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Opus | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Opus; Fable for design judgment | independent review, review record |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Opus; Fable for design judgment (suspended, see below) | independent review, review record |
 
 **Fable reviews design judgment:** a slice that freezes semantics later work cannot cheaply
 change (a spec amendment, a canonical encoding, an identity or delta contract, a gate
