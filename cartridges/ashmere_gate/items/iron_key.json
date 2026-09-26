@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "key",
+    "iron_key"
+  ],
+  "short": "item.iron_key.short",
+  "room_line": "item.iron_key.room",
+  "description": "item.iron_key.description",
+  "location": {
+    "in": "room",
+    "room": "courtyard"
+  }
+}

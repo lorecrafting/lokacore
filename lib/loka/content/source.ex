@@ -13,7 +13,7 @@ defmodule Loka.Content.Source do
           | :facts
           | :text
           | :resources
-          | {:policy | :action | :room | :item | :npc | :recipe, String.t()}
+          | {:policy | :action | :room | :item | :npc | :recipe | :barrier, String.t()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
@@ -80,14 +80,19 @@ defmodule Loka.Content.Source do
   defp classify("text.json"), do: :text
   defp classify("resources.json"), do: :resources
 
+  @dirs %{
+    "policies" => :policy,
+    "actions" => :action,
+    "rooms" => :room,
+    "items" => :item,
+    "npcs" => :npc,
+    "recipes" => :recipe,
+    "barriers" => :barrier
+  }
+
   defp classify(rel) do
     case Path.split(rel) do
-      ["policies", file] -> {:policy, Path.rootname(file)}
-      ["actions", file] -> {:action, Path.rootname(file)}
-      ["rooms", file] -> {:room, Path.rootname(file)}
-      ["items", file] -> {:item, Path.rootname(file)}
-      ["npcs", file] -> {:npc, Path.rootname(file)}
-      ["recipes", file] -> {:recipe, Path.rootname(file)}
+      [dir, file] when is_map_key(@dirs, dir) -> {@dirs[dir], Path.rootname(file)}
       _ -> :unknown
     end
   end

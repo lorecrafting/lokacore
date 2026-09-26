@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "knocked": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Someone knocked on the gatehouse's oak door."
+    }
+  }
+}

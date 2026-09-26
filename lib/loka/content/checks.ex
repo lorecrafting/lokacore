@@ -5,8 +5,10 @@ defmodule Loka.Content.Checks do
   protocol/capability_registry.json); ownership comes from its commands and policies.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
+
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
-  alias Loka.Content.{Entities, Recipes, RoomParts}
+
+  alias Loka.Content.{Barriers, Entities, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
   @supported_pin 1
@@ -14,7 +16,8 @@ defmodule Loka.Content.Checks do
     "fact_compare" => "fact",
     "has_item" => "item",
     "quest_state" => "quest",
-    "fact.assign" => "fact"
+    "fact.assign" => "fact",
+    "barrier_state" => "barrier"
   }
   # A definition sits inside the artifact, the cartridge and its kind's map.
   @enclosing 3
@@ -56,9 +59,10 @@ defmodule Loka.Content.Checks do
 
   @doc """
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
-  node's reference (fact, item, quest), in any policy tree (a variant's condition included), a
-  recipe's fact.assign fact, its target's room or the resource of its cost, threshold check or
-  resource.adjust step, an exit's `to`, an item's location (its room,
+  node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
+  included), a recipe's fact.assign fact, its target's room or the resource of its cost,
+  threshold check or resource.adjust step, an exit's `to` and `barrier`, a barrier's
+  `key_item`, an item's location (its room,
   npc or item, as `in` selects) or an NPC's room goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
   """
@@ -68,9 +72,14 @@ defmodule Loka.Content.Checks do
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
-    to = fn {d, e} -> {d, Map.update!(e, "to", &ref(&1, "room", m))} end
-    room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, to))
+    field = fn {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)} end
+    exit = fn {d, e} -> {d, Map.new(e, field)} end
+    room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
   end
+
+  # A barrier (a details map may have a detail keyed key_item, whose value is a map).
+  def expand(%{"key_item" => k} = barrier, m) when is_binary(k),
+    do: Map.put(barrier, "key_item", ref(k, "item", m))
 
   # An ItemLocation (`in` a kind, and that kind's field) or an NPC (its room_line a text key).
   def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
@@ -135,6 +144,7 @@ defmodule Loka.Content.Checks do
       if(m,
         do:
           Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++
+            Barriers.check(m, defs, registry) ++
             entities(m, defs, registry) ++
             Enum.flat_map(Entities.all(defs), fn {_, rel, e} -> located(rel, e, m, defs) end),
         else: []
@@ -158,7 +168,11 @@ defmodule Loka.Content.Checks do
 
   defp texts(defs, text) do
     for(
-      {kind, fields} <- [{"room", ~w(title description)}, {"action", ~w(label accessibility)}],
+      {kind, fields} <- [
+        {"room", ~w(title description)},
+        {"action", ~w(label accessibility)},
+        {"barrier", ["short"]}
+      ],
       {_, {rel, [], def}} <- defs[kind],
       d <- text_keys({rel, def}, fields, text),
       do: d

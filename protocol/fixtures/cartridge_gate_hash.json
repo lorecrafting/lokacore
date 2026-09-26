@@ -1,0 +1,314 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_gate (R5 S7; 05 §11; CartridgeArtifact.content_hash): barrier@1 with two barriers (the oak door, closed, and the cell door, locked, with an iron key item as its key_item; room.schema.json BarrierDefinition), three rooms whose exits name them from both faces (Connection.barrier), a detail with a barrier_state description variant, a knock recipe setting an instance bool fact, and the default pools with resource@1 and schedule@1 added by the compiler. Assembled by hand from the source files (manifest without entry plus resource@1 and schedule@1, the lock, empty policies and actions, facts, rooms, items, recipes and barriers with key added and short references expanded, the default pools, entry, text), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_gate",
+      "version": "0.0.1",
+      "title": "Ashmere — Gate",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "inspectable_detail": 1,
+          "description_variant": 1,
+          "containment": 1,
+          "barrier": 1,
+          "fact": 1,
+          "policy": 1,
+          "action_recipe": 1,
+          "resource": 1,
+          "schedule": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "inspectable_detail": 1,
+        "description_variant": 1,
+        "containment": 1,
+        "barrier": 1,
+        "fact": 1,
+        "policy": 1,
+        "action_recipe": 1,
+        "resource": 1,
+        "schedule": 1
+      }
+    },
+    "facts": {
+      "ashmere_gate@0.0.1:fact/knocked": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "Someone knocked on the gatehouse's oak door.",
+        "key": "knocked"
+      }
+    },
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_gate@0.0.1:room/cell": {
+        "title": "room.cell.title",
+        "description": "room.cell.description",
+        "exits": {
+          "west": {
+            "to": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gatehouse"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "barrier",
+              "key": "cell_door"
+            }
+          }
+        },
+        "key": "cell"
+      },
+      "ashmere_gate@0.0.1:room/courtyard": {
+        "title": "room.courtyard.title",
+        "description": "room.courtyard.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "gatehouse"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "barrier",
+              "key": "oak_door"
+            }
+          }
+        },
+        "key": "courtyard"
+      },
+      "ashmere_gate@0.0.1:room/gatehouse": {
+        "title": "room.gatehouse.title",
+        "description": "room.gatehouse.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "courtyard"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "barrier",
+              "key": "oak_door"
+            }
+          },
+          "east": {
+            "to": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "cell"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_gate",
+              "cartridge_version": "0.0.1",
+              "kind": "barrier",
+              "key": "cell_door"
+            }
+          }
+        },
+        "details": {
+          "oak_door": {
+            "aliases": [
+              "oak_door",
+              "door"
+            ],
+            "description": "detail.oak_door",
+            "variants": [
+              {
+                "when": {
+                  "policy_version": 1,
+                  "root": {
+                    "op": "barrier_state",
+                    "barrier": {
+                      "cartridge_id": "ashmere_gate",
+                      "cartridge_version": "0.0.1",
+                      "kind": "barrier",
+                      "key": "oak_door"
+                    },
+                    "equals": "open"
+                  }
+                },
+                "description": "detail.oak_door.open"
+              }
+            ]
+          }
+        },
+        "key": "gatehouse"
+      }
+    },
+    "items": {
+      "ashmere_gate@0.0.1:item/iron_key": {
+        "keywords": [
+          "key",
+          "iron_key"
+        ],
+        "short": "item.iron_key.short",
+        "room_line": "item.iron_key.room",
+        "description": "item.iron_key.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_gate",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "courtyard"
+          }
+        },
+        "key": "iron_key"
+      }
+    },
+    "recipes": {
+      "ashmere_gate@0.0.1:recipe/knock": {
+        "label": "actions.knock",
+        "aliases": [
+          "knock"
+        ],
+        "target": {
+          "kind": "detail",
+          "room": {
+            "cartridge_id": "ashmere_gate",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "gatehouse"
+          },
+          "detail": "oak_door"
+        },
+        "priority": 5,
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "outcomes": {
+          "success": {
+            "sequence": [
+              {
+                "op": "fact.assign",
+                "fact": {
+                  "cartridge_id": "ashmere_gate",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "knocked"
+                },
+                "value": true
+              }
+            ],
+            "narration": {
+              "actor": "narration.knock.actor"
+            }
+          }
+        },
+        "key": "knock"
+      }
+    },
+    "barriers": {
+      "ashmere_gate@0.0.1:barrier/cell_door": {
+        "keywords": [
+          "door",
+          "cell_door"
+        ],
+        "short": "barrier.cell_door.short",
+        "initial": "locked",
+        "key_item": {
+          "cartridge_id": "ashmere_gate",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "iron_key"
+        },
+        "key": "cell_door"
+      },
+      "ashmere_gate@0.0.1:barrier/oak_door": {
+        "keywords": [
+          "door",
+          "oak_door"
+        ],
+        "short": "barrier.oak_door.short",
+        "initial": "closed",
+        "key": "oak_door"
+      }
+    },
+    "resources": {
+      "ashmere_gate@0.0.1:resource/hp": {
+        "key": "hp",
+        "minimum": 0,
+        "maximum": 20,
+        "start": 20,
+        "gain": 5
+      },
+      "ashmere_gate@0.0.1:resource/ma": {
+        "key": "ma",
+        "minimum": 0,
+        "maximum": 100,
+        "start": 100,
+        "gain": 4
+      },
+      "ashmere_gate@0.0.1:resource/mv": {
+        "key": "mv",
+        "minimum": 0,
+        "maximum": 82,
+        "start": 82,
+        "gain": 18
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_gate",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "gatehouse"
+    },
+    "text": {
+      "room.gatehouse.title": "Gatehouse",
+      "room.gatehouse.description": "Arrow slits light a draughty stone gatehouse. An [oak door](oak_door) leads north to the courtyard; a squat iron-bound door stands to the east.",
+      "detail.oak_door": "A heavy oak door, banded with iron and shut fast.",
+      "detail.oak_door.open": "The heavy oak door stands open to the courtyard.",
+      "room.courtyard.title": "Courtyard",
+      "room.courtyard.description": "Weeds push up between the flagstones of a small walled courtyard.",
+      "room.cell.title": "Cell",
+      "room.cell.description": "A cramped cell. Old straw rots in one corner, and a chain hangs from the wall.",
+      "item.iron_key.short": "an iron key",
+      "item.iron_key.room": "An [iron key] lies among the weeds.",
+      "item.iron_key.description": "A heavy iron key, its bow shaped like a ring.",
+      "barrier.oak_door.short": "the oak door",
+      "barrier.cell_door.short": "the cell door",
+      "actions.knock": "Knock on the oak door",
+      "narration.knock.actor": "You rap on the oak door. The knocks echo in the courtyard beyond; no one answers."
+    }
+  },
+  "canonical": "{\"actions\":{},\"barriers\":{\"ashmere_gate@0.0.1:barrier/cell_door\":{\"initial\":\"locked\",\"key\":\"cell_door\",\"key_item\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"iron_key\",\"kind\":\"item\"},\"keywords\":[\"door\",\"cell_door\"],\"short\":\"barrier.cell_door.short\"},\"ashmere_gate@0.0.1:barrier/oak_door\":{\"initial\":\"closed\",\"key\":\"oak_door\",\"keywords\":[\"door\",\"oak_door\"],\"short\":\"barrier.oak_door.short\"}},\"entry\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"},\"facts\":{\"ashmere_gate@0.0.1:fact/knocked\":{\"key\":\"knocked\",\"meaning\":\"Someone knocked on the gatehouse's oak door.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_gate@0.0.1:item/iron_key\":{\"description\":\"item.iron_key.description\",\"key\":\"iron_key\",\"keywords\":[\"key\",\"iron_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"courtyard\",\"kind\":\"room\"}},\"room_line\":\"item.iron_key.room\",\"short\":\"item.iron_key.short\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"barrier\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_gate\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"barrier\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Gate\",\"version\":\"0.0.1\"},\"policies\":{},\"recipes\":{\"ashmere_gate@0.0.1:recipe/knock\":{\"aliases\":[\"knock\"],\"key\":\"knock\",\"label\":\"actions.knock\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.knock.actor\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"knocked\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":5,\"target\":{\"detail\":\"oak_door\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}}},\"resources\":{\"ashmere_gate@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_gate@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_gate@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_gate@0.0.1:room/cell\":{\"description\":\"room.cell.description\",\"exits\":{\"west\":{\"barrier\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}},\"key\":\"cell\",\"title\":\"room.cell.title\"},\"ashmere_gate@0.0.1:room/courtyard\":{\"description\":\"room.courtyard.description\",\"exits\":{\"south\":{\"barrier\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"gatehouse\",\"kind\":\"room\"}}},\"key\":\"courtyard\",\"title\":\"room.courtyard.title\"},\"ashmere_gate@0.0.1:room/gatehouse\":{\"description\":\"room.gatehouse.description\",\"details\":{\"oak_door\":{\"aliases\":[\"oak_door\",\"door\"],\"description\":\"detail.oak_door\",\"variants\":[{\"description\":\"detail.oak_door.open\",\"when\":{\"policy_version\":1,\"root\":{\"barrier\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"equals\":\"open\",\"op\":\"barrier_state\"}}}]}},\"exits\":{\"east\":{\"barrier\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"cell\",\"kind\":\"room\"}},\"north\":{\"barrier\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"oak_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_gate\",\"cartridge_version\":\"0.0.1\",\"key\":\"courtyard\",\"kind\":\"room\"}}},\"key\":\"gatehouse\",\"title\":\"room.gatehouse.title\"}},\"text\":{\"actions.knock\":\"Knock on the oak door\",\"barrier.cell_door.short\":\"the cell door\",\"barrier.oak_door.short\":\"the oak door\",\"detail.oak_door\":\"A heavy oak door, banded with iron and shut fast.\",\"detail.oak_door.open\":\"The heavy oak door stands open to the courtyard.\",\"item.iron_key.description\":\"A heavy iron key, its bow shaped like a ring.\",\"item.iron_key.room\":\"An [iron key] lies among the weeds.\",\"item.iron_key.short\":\"an iron key\",\"narration.knock.actor\":\"You rap on the oak door. The knocks echo in the courtyard beyond; no one answers.\",\"room.cell.description\":\"A cramped cell. Old straw rots in one corner, and a chain hangs from the wall.\",\"room.cell.title\":\"Cell\",\"room.courtyard.description\":\"Weeds push up between the flagstones of a small walled courtyard.\",\"room.courtyard.title\":\"Courtyard\",\"room.gatehouse.description\":\"Arrow slits light a draughty stone gatehouse. An [oak door](oak_door) leads north to the courtyard; a squat iron-bound door stands to the east.\",\"room.gatehouse.title\":\"Gatehouse\"}}",
+  "sha256": "d9c505168718d0e5b11e8f824b3939a2be703b91673ea4301e668d352c62a58c"
+}

@@ -42,10 +42,11 @@ defmodule Loka.Content.Compiler do
       Recipes.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
   end
 
-  # v2 exactly when the source has rooms, items, NPCs, recipes, an entry, a text catalog or
-  # resources.json (CompiledCartridge).
+  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, an entry, a text
+  # catalog or resources.json (CompiledCartridge).
   defp v2(defs, entry, text, resources) do
-    if Enum.any?(~w(room item npc recipe), &(defs[&1] != %{})) or entry != nil or text != nil or
+    if Enum.any?(~w(room item npc recipe barrier), &(defs[&1] != %{})) or entry != nil or
+         text != nil or
          resources != [],
        do: {entry, text || %{}}
   end
@@ -91,7 +92,8 @@ defmodule Loka.Content.Compiler do
     {"room", :room, "RoomDefinition"},
     {"item", :item, "ItemDefinition"},
     {"npc", :npc, "NpcDefinition"},
-    {"recipe", :recipe, "ActionRecipe"}
+    {"recipe", :recipe, "ActionRecipe"},
+    {"barrier", :barrier, "BarrierDefinition"}
   ]
 
   defp definitions(files, m) do
@@ -239,13 +241,18 @@ defmodule Loka.Content.Compiler do
     }
   end
 
-  # items, npcs and recipes are optional maps (CompiledCartridge): absent when empty. The
+  # items, npcs, recipes and barriers are optional maps (CompiledCartridge): absent when empty. The
   # default pools are always there, with resource@1 (Resources).
   defp cartridge(m, defs, {entry, text}) do
     m = Resources.requires(m)
 
     optional =
-      for {k, map} <- [{"item", "items"}, {"npc", "npcs"}, {"recipe", "recipes"}],
+      for {k, map} <- [
+            {"item", "items"},
+            {"npc", "npcs"},
+            {"recipe", "recipes"},
+            {"barrier", "barriers"}
+          ],
           defs[k] != %{},
           into: %{},
           do: {map, keyed(m, k, defs)}

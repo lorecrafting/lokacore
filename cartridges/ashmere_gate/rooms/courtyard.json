@@ -1,0 +1,10 @@
+{
+  "title": "room.courtyard.title",
+  "description": "room.courtyard.description",
+  "exits": {
+    "south": {
+      "to": "gatehouse",
+      "barrier": "oak_door"
+    }
+  }
+}

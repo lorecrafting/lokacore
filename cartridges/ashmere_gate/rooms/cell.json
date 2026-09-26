@@ -1,0 +1,10 @@
+{
+  "title": "room.cell.title",
+  "description": "room.cell.description",
+  "exits": {
+    "west": {
+      "to": "gatehouse",
+      "barrier": "cell_door"
+    }
+  }
+}

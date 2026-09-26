@@ -1,3 +1,4 @@
+# size: allow 315, the delta algebra stays one module like its twin kernel/ts/src/compose.ts
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/compose.ts` is the
@@ -249,8 +250,7 @@ defmodule Loka.Core.Compose do
     do: check(read(t, ctx) == op["from"] and at == state["clock"], at)
 
   defp apply_op(%{"op" => "barrier.transition", "from" => from, "to" => to} = op, t, ctx) do
-    now =
-      with nil <- read(t, ctx), do: section(elem(ctx, 0), "barrier_initial")[key(op["barrier"])]
+    now = read(t, ctx) || section(elem(ctx, 0), "barrier_initial")[key(op["barrier"])]
 
     check(now == from and to in Map.get(@door, from, []), to)
   end
