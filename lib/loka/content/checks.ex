@@ -144,9 +144,8 @@ defmodule Loka.Content.Checks do
       if(m,
         do:
           Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++
-            Barriers.check(m, defs, registry) ++
-            entities(m, defs, registry) ++
-            Enum.flat_map(Entities.all(defs), fn {_, rel, e} -> located(rel, e, m, defs) end),
+            Barriers.check(m, entry, defs, registry) ++
+            entities(m, defs, registry) ++ locations(m, defs),
         else: []
       )
   end
@@ -160,6 +159,9 @@ defmodule Loka.Content.Checks do
           d <- owned(at(rel, steps), k, required),
           do: d
   end
+
+  defp locations(m, defs),
+    do: Enum.flat_map(Entities.all(defs), fn {_, rel, e} -> located(rel, e, m, defs) end)
 
   defp located(rel, %{"location" => %{"in" => k} = loc}, m, defs),
     do: reference(rel, ["location"], {k, k}, loc, m, defs)

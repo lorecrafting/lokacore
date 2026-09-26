@@ -180,4 +180,59 @@ defmodule Loka.ContentGateTest do
                 undeclared.("rooms/gatehouse.details.oak_door.variants[0].when.root.op")
               ]}
   end
+
+  # Review #50 A2/N2. Breaks: faces paired by destination room rather than by connection (room and
+  # opposite direction), so two passages between the same rooms cannot carry two doors.
+  test "two passages between the same rooms may carry different barriers", %{tmp_dir: dir} do
+    blue = %{"keywords" => ["hatch"], "short" => "barrier.oak_door.short", "initial" => "open"}
+    way = fn b -> %{"to" => "courtyard", "barrier" => b} end
+    back = fn b -> %{"to" => "gatehouse", "barrier" => b} end
+
+    files = fn b ->
+      %{
+        "barriers/blue.json" => blue,
+        "rooms/gatehouse.json" =>
+          put_in(src("rooms/gatehouse.json"), ["exits", "west"], way.("blue")),
+        # and Opus N2's chute: a way back with no reciprocal face and no barrier
+        "rooms/courtyard.json" =>
+          src("rooms/courtyard.json")
+          |> put_in(["exits", "east"], back.(b))
+          |> put_in(["exits", "down"], %{"to" => "gatehouse"})
+      }
+    end
+
+    assert {:ok, _, []} = compile(Path.join(dir, "a"), files.("blue"))
+
+    assert compile(Path.join(dir, "b"), files.("oak_door")) ==
+             {:error,
+              [
+                d("BARRIER_MISMATCH", "rooms/courtyard.exits.east"),
+                d("BARRIER_MISMATCH", "rooms/gatehouse.exits.west")
+              ]}
+  end
+
+  # Review #50 A1. Breaks: a locked door whose key lies only behind it (or that has no key)
+  # compiling into a cartridge no one can finish. ashmere_gate itself is the passing case: the
+  # iron key lies past the oak door, which starts closed, not locked.
+  test "a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY", %{tmp_dir: dir} do
+    behind = edit("items/iron_key.json", ["location", "room"], "cell")
+    stuck = {:error, [d("BARRIER_UNREACHABLE_KEY", "barriers/cell_door")]}
+    assert compile(Path.join(dir, "a"), behind) == stuck
+
+    keyless = %{
+      "barriers/cell_door.json" => Map.delete(src("barriers/cell_door.json"), "key_item")
+    }
+
+    assert compile(Path.join(dir, "b"), keyless) == stuck
+
+    oak = edit("barriers/oak_door.json", ["initial"], "locked")
+
+    assert compile(Path.join(dir, "c"), oak) ==
+             {:error,
+              [
+                # the key the oak door now hides: the cell door is out of reach too
+                d("BARRIER_UNREACHABLE_KEY", "barriers/cell_door"),
+                d("BARRIER_UNREACHABLE_KEY", "barriers/oak_door")
+              ]}
+  end
 end

@@ -311,3 +311,47 @@ test('the loader checks barrier references, texts, faces and the lock', () => {
     { field: 'key', declared: 'oak_door', expected: 'gate' },
   );
 });
+
+// Review #50 A2/N2. Breaks: faces paired by destination room rather than by connection, so two
+// passages between the same rooms cannot carry two doors (twin: test/loka/content_gate_test.exs).
+test('two passages between the same rooms may carry different barriers', () => {
+  const blue = { ...OAK, key: 'blue' };
+  const passages = (c: any, back: object) => {
+    c.barriers[`${G}:barrier/blue`] = {
+      key: 'blue',
+      keywords: ['hatch'],
+      short: 'barrier.oak_door.short',
+      initial: 'open',
+    };
+    room(c, 'gatehouse').exits.west = {
+      to: { ...OAK, kind: 'room', key: 'courtyard' },
+      barrier: blue,
+    };
+    room(c, 'courtyard').exits.east = {
+      to: { ...OAK, kind: 'room', key: 'gatehouse' },
+      barrier: back,
+    };
+    room(c, 'courtyard').exits.down = { to: { ...OAK, kind: 'room', key: 'gatehouse' } }; // a chute: no face
+  };
+  assert.ok(load((c) => passages(c, blue)).ok);
+  fails((c) => passages(c, OAK), 'BARRIER_MISMATCH', `${ROOM('courtyard')}.exits.east`);
+});
+
+// Review #50 A1. Breaks: a locked door whose key lies only behind it (or that has no key) loading
+// into a cartridge no one can finish. The gate known answer itself is the passing case (the key
+// lies past the oak door, closed, not locked); the carried-bag test above passes a key in a bag.
+test('a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY', () => {
+  const CELL = `.cartridge.barriers["${G}:barrier/cell_door"]`;
+  const key = (c: any) => c.items[`${G}:item/iron_key`];
+  fails((c) => (key(c).location.room.key = 'cell'), 'BARRIER_UNREACHABLE_KEY', CELL);
+  fails(
+    (c) => delete c.barriers[`${G}:barrier/cell_door`].key_item,
+    'BARRIER_UNREACHABLE_KEY',
+    CELL,
+  );
+  fails(
+    (c) => (c.barriers[`${G}:barrier/oak_door`].initial = 'locked'),
+    'BARRIER_UNREACHABLE_KEY',
+    CELL,
+  );
+});

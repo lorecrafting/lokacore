@@ -12,7 +12,7 @@ import {
 } from './contracts.gen.ts';
 import { refString } from './decision.ts';
 import { typed } from './fact.ts';
-import { same } from './compose.ts';
+import { barriers } from './cartridge_barriers.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -155,7 +155,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
-  out.push(...recipes(c, check), ...holders(c), ...barriers(c, check)); // checkers push to out too
+  out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named)); // checkers push to out too
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj))
     if (!(s.minimum <= s.start && s.start <= s.maximum))
       out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));
@@ -206,23 +206,6 @@ function recipes(c: Obj, { named, typedValue, text }: ReturnType<typeof checkers
     text(r, ['label'], at);
   }
   return [...out, ...contributions(c)];
-}
-
-// Each exit's barrier names a barrier of this cartridge, which each exit of its destination back
-// to its room names too (BARRIER_MISMATCH), and each barrier's key_item an item of it.
-function barriers(c: Obj, { named }: ReturnType<typeof checkers>): Diagnostic[] {
-  const out: Diagnostic[] = [];
-  for (const [ref, r] of Object.entries(c.rooms as Obj))
-    for (const [dir, exit] of Object.entries(r.exits as Obj)) {
-      const at = `.cartridge.rooms${step(ref)}.exits.${dir}`;
-      if (exit.barrier) named(exit.barrier, 'barrier', `${at}.barrier`);
-      const back = Object.values((c.rooms[refString(exit.to)]?.exits ?? {}) as Obj);
-      if (back.some((b) => refString(b.to) === ref && !same(b.barrier, exit.barrier)))
-        out.push(diag('BARRIER_MISMATCH', at));
-    }
-  for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
-    if (b.key_item) named(b.key_item, 'item', `.cartridge.barriers${step(ref)}.key_item`);
-  return out;
 }
 
 // Each key of a room's action contribution names a registered command, an action or a recipe.
