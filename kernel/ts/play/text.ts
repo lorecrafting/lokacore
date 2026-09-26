@@ -70,7 +70,9 @@ export function parse(text: string): Parsed {
   }
   if (words[0] === 'wait' && words.length <= 2) {
     const hours = words.length === 1 ? 1 : Number(words[1]);
-    return /^([1-9]|1[0-9]|2[0-4])$/.test(String(hours)) ? { wait: hours } : 'Wait how many hours?';
+    return Number.isInteger(hours) && hours >= 1 && hours <= 24
+      ? { wait: hours }
+      : 'Wait how many hours?';
   }
   if (words.length === 2 && words[0] === 'go') {
     const known = word(words[1]);

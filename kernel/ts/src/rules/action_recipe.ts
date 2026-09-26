@@ -88,12 +88,8 @@ function roll(
     check: { cartridge_id, cartridge_version, kind: 'check', key: check.key },
     subject_id,
   };
-  const e = event(world, command, mint, 1, payload);
-  return {
-    outcome: passed ? ('success' as const) : ('failure' as const),
-    rng,
-    event: e,
-  };
+  const outcome = passed ? ('success' as const) : ('failure' as const);
+  return { outcome, rng, event: event(world, command, mint, 1, payload) };
 }
 
 type Command = Parameters<Rule<'action_recipe'>>[1];
