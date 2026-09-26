@@ -1,0 +1,46 @@
+{
+  "title": "room.ferry_landing.title",
+  "description": "room.ferry_landing.description",
+  "exits": {
+    "north": {
+      "to": {
+        "cartridge_id": "ashmere_details",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "well_lane"
+      }
+    },
+    "west": {
+      "to": {
+        "cartridge_id": "ashmere_details",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "boathouse"
+      }
+    }
+  },
+  "details": {
+    "mooring_post": {
+      "aliases": [
+        "mooring_post",
+        "post",
+        "mooring"
+      ],
+      "description": "detail.mooring_post"
+    },
+    "notice": {
+      "aliases": [
+        "notice",
+        "post"
+      ],
+      "description": "detail.notice"
+    },
+    "tide_marks": {
+      "aliases": [
+        "tide_marks",
+        "marks"
+      ],
+      "description": "detail.tide_marks"
+    }
+  }
+}

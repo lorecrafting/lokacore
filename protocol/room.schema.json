@@ -1,8 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Room and connection contracts",
-  "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need. Details, tags, description variants and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
+  "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need; slice 2: inspectable details. Tags, description variants and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
   "$defs": {
+    "Alias": {
+      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_]*$",
+      "maxLength": 64,
+      "examples": [
+        "post",
+        "mooring_post",
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    },
     "Connection": {
       "description": "One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction, so a later optional barrier field (a DefinitionRef to one shared Barrier state, 21 §5 Barrier; 05 §25 coherent connections) adds state without changing what an exit without one means. A reciprocal exit is authored in the destination room (00a §2).",
       "type": "object",
@@ -26,8 +37,61 @@
         }
       ]
     },
+    "InspectableDetail": {
+      "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but each needs one alias no other detail of its room has, or the player could never pick it (UNREACHABLE_DETAIL). Condition variants, perception, reveal facts and contextual actions join as optional fields.",
+      "type": "object",
+      "properties": {
+        "aliases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Alias"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "aliases",
+        "description"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "aliases": [
+            "mooring_post",
+            "post",
+            "mooring"
+          ],
+          "description": "detail.mooring_post"
+        },
+        {
+          "aliases": [
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p",
+            "p"
+          ],
+          "description": "d"
+        }
+      ]
+    },
     "RoomDefinition": {
-      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent). Custom named connections (05 §17) join later as a separate optional field.",
+      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), and optionally its inspectable details by key, at most 64. Custom named connections (05 §17) join later as a separate optional field.",
       "type": "object",
       "properties": {
         "key": {
@@ -62,6 +126,16 @@
             }
           },
           "additionalProperties": false
+        },
+        "details": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/InspectableDetail"
+          },
+          "maxProperties": 64
         }
       },
       "required": [
@@ -92,6 +166,21 @@
           "title": "room.cell.title",
           "description": "room.cell.description",
           "exits": {}
+        },
+        {
+          "key": "well_lane",
+          "title": "room.well_lane.title",
+          "description": "room.well_lane.description",
+          "exits": {},
+          "details": {
+            "bucket": {
+              "aliases": [
+                "bucket",
+                "well_bucket"
+              ],
+              "description": "detail.bucket"
+            }
+          }
         }
       ]
     }

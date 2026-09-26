@@ -6,6 +6,7 @@ defmodule Loka.ContentRoomsTest do
 
   @moduletag :tmp_dir
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_rooms_hash.json"))
+  @details_kat JSON.decode!(File.read!("protocol/fixtures/cartridge_details_hash.json"))
 
   defp ref(key, kind \\ "room"),
     do: %{"cartridge_id" => "c", "cartridge_version" => "1.0.0", "kind" => kind, "key" => key}
@@ -171,5 +172,38 @@ defmodule Loka.ContentRoomsTest do
     assert compile(dir, Map.put(no_rooms, "text.json", nil)) ==
              {:error,
               [d("UNRESOLVED_REFERENCE", "cartridge.entry", %{"target" => "c@1.0.0:room/a"})]}
+  end
+
+  # R5 S2. Breaks: details dropped or reshaped in the artifact.
+  test "ashmere_details compiles to its Python known answer" do
+    expected =
+      ~s({"cartridge":#{@details_kat["canonical"]},"content_hash":"#{@details_kat["sha256"]}"})
+
+    assert Loka.Content.compile("cartridges/ashmere_details") == {:ok, expected}
+  end
+
+  defp detail(aliases, text \\ "r.d"), do: %{"aliases" => aliases, "description" => text}
+
+  # Breaks: a detail's description key unchecked (the player reads the raw key), or a detail
+  # no lookup can pick accepted; a shared alias with a unique one each must stay valid.
+  test "a detail's missing text is UNRESOLVED_REFERENCE; one without its own alias is UNREACHABLE_DETAIL",
+       %{tmp_dir: dir} do
+    details = %{
+      "lamp" => detail(["post"]),
+      "notice" => detail(["notice", "post"], "d.missing"),
+      "post" => detail(["post", "mooring_post"])
+    }
+
+    assert compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", details)}) ==
+             {:error,
+              [
+                d("UNREACHABLE_DETAIL", "rooms/b.details.lamp"),
+                d("UNRESOLVED_REFERENCE", "rooms/b.details.notice.description", %{
+                  "target" => "d.missing"
+                })
+              ]}
+
+    shared = Map.delete(details, "lamp") |> put_in(["notice", "description"], "r.d")
+    assert {:ok, _} = compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", shared)})
   end
 end

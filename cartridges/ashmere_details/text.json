@@ -1,0 +1,14 @@
+{
+  "room.ferry_landing.title": "Ferry Landing",
+  "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A mooring post leans into the current.",
+  "room.boathouse.title": "Boathouse",
+  "room.boathouse.description": "Oars and nets hang from the rafters above Bram's ferry.",
+  "room.well_lane.title": "Well Lane",
+  "room.well_lane.description": "Worn steps lead to the village well. A bucket hangs from its chain.",
+  "detail.mooring_post": "Rope has worn a groove into the post. Someone has carved a fox into it.",
+  "detail.notice": "A notice nailed to the post: no ferry after dark.",
+  "detail.tide_marks": "Dark lines on the pilings show how high the river climbs.",
+  "detail.well": "Mossy stones ring a deep shaft. Cold air rises from below.",
+  "detail.bucket": "A wooden bucket on a rusted chain, still damp from the last draw.",
+  "detail.steps": "The steps are worn hollow by a century of feet."
+}

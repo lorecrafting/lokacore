@@ -1,8 +1,8 @@
-// The loader on loka-cartridge-v2 (protocol/cartridge.schema.json DiagnosticCode: rooms, entry
-// and text). Artifacts derive from protocol/fixtures/cartridge_rooms_hash.json; each mutant's
-// content_hash is recomputed with node:crypto over sorted-key JSON.stringify (the canonical
-// form for these ASCII-and-one-dash values), never by the kernel; expected diagnostics are
-// hand-written literals.
+// The loader on loka-cartridge-v2 (protocol/cartridge.schema.json DiagnosticCode: rooms, entry,
+// details and text). Artifacts derive from protocol/fixtures/cartridge_rooms_hash.json and
+// cartridge_details_hash.json; each mutant's content_hash is recomputed with node:crypto over
+// sorted-key JSON.stringify (the canonical form for these ASCII-and-one-dash values), never by
+// the kernel; expected diagnostics are hand-written literals.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
@@ -150,4 +150,38 @@ test('an action text key missing from the catalog is UNRESOLVED_REFERENCE', () =
     'UNRESOLVED_REFERENCE',
     '.cartridge.actions["ashmere_rooms@0.0.1:action/go"].accessibility',
     { target: 'actions.go.a11y' },
+  ));
+
+// R5 S2 details (room.schema.json InspectableDetail), from cartridge_details_hash.json.
+const details = read('protocol/fixtures/cartridge_details_hash.json');
+const DFL = 'ashmere_details@0.0.1:room/ferry_landing';
+const withDetails = (f: (c: any) => void) => {
+  const c = structuredClone(details.value);
+  f(c);
+  return c;
+};
+
+test('the details known answer loads with its fixture hash', () => {
+  const bytes = `{"cartridge":${details.canonical},"content_hash":"${details.sha256}"}`;
+  const result = loadCartridge(new TextEncoder().encode(bytes), installed);
+  assert.ok(result.ok);
+  assert.equal(result.hash, details.sha256);
+});
+
+// Breaks: the loader trusts a compiled detail's text key (play prints the raw key).
+test("a detail's text key missing from the catalog is UNRESOLVED_REFERENCE", () =>
+  fails(
+    withDetails((c) => delete c.text['detail.notice']),
+    'UNRESOLVED_REFERENCE',
+    `.cartridge.rooms["${DFL}"].details.notice.description`,
+    { target: 'detail.notice' },
+  ));
+
+// Breaks: a detail every alias of which another detail shares loads, and no lookup reaches it.
+test('a detail without an alias of its own is UNREACHABLE_DETAIL', () =>
+  fails(
+    withDetails((c) => (c.rooms[DFL].details.notice.aliases = ['post'])),
+    'UNREACHABLE_DETAIL',
+    `.cartridge.rooms["${DFL}"].details.notice`,
+    {},
   ));
