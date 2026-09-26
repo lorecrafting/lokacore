@@ -159,14 +159,20 @@ function recipes(c: Obj, named: Named, text: Texts): Diagnostic[] {
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.target.detail`, { target: detail }));
     if (!r.check !== !r.outcomes.failure) out.push(diag('OUTCOME_MISMATCH', `${at}.outcomes`));
     for (const [name, o] of Object.entries(r.outcomes as Obj)) {
+      const path = `${at}.outcomes.${name}`;
       o.sequence.forEach((s: Obj, i: number) => {
-        if (s.op === 'fact.assign')
-          named(s.fact, 'fact', `${at}.outcomes.${name}.sequence[${i}].fact`);
+        if (s.op === 'fact.assign') named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
       });
-      text(o.narration, ['actor', 'observers'], `${at}.outcomes.${name}.narration`);
+      text(o.narration, ['actor', 'observers'], `${path}.narration`);
     }
     text(r, ['label'], at);
   }
+  return [...out, ...contributions(c)];
+}
+
+// Each key of a room's action contribution names a registered command, an action or a recipe.
+function contributions(c: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
   const defs: Obj[] = [...Object.values(c.actions as Obj), ...Object.values(c.recipes ?? {})];
   const keys = new Set([...Object.keys(CAPABILITY_OWNERS.command), ...defs.map((d) => d.key)]);
   for (const [ref, r] of Object.entries(c.rooms as Obj))
