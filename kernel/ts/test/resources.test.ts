@@ -185,6 +185,12 @@ test('a resource.adjust step stops at the maximum; at full value it changes noth
   // hp 23 + 5 stops at 25.
   const hurt = world((c) => (c.resources['ashmere_road@0.0.1:resource/hp'].start = 23));
   assert.deepEqual(ops(run(hurt, move('east')), perform('pray'))[1], adjust('hp', 23, 25));
+  // Review N4: -10 at hp 3 stops at the minimum, 0.
+  const harm = world((c) => {
+    c.resources['ashmere_road@0.0.1:resource/hp'].start = 3;
+    c.recipes[PRAY].outcomes.success.sequence[0].by = -10;
+  });
+  assert.deepEqual(ops(run(harm, move('east')), perform('pray'))[1], adjust('hp', 3, 0));
 });
 
 // Breaks: the cooldown end computed as last + cooldown, which overflows for a huge cooldown
