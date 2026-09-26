@@ -73,9 +73,9 @@ export function redact<T extends Json>(value: T): T {
  * built, never recorded as an empty string.
  */
 export function lookupWords(text: string) {
-  // Every letters-and-digits piece of a secret (a path's user name, a hostname's labels), as a
-  // word can hold only those.
-  const pieces = secrets
+  // Every letters-and-digits piece of a host identifier (user name, hostname labels, serial):
+  // a word can hold only those, and a path's pieces (`home`, `users`) are ordinary words.
+  const pieces = [hostname(), userInfo().username, process.env.ANDROID_SERIAL ?? '']
     .flatMap((x) => x.toLowerCase().split(/[^a-z0-9]+/))
     .filter((x) => x.length > 3);
   const hidden = (w: string) => pieces.some((x) => w.includes(x));

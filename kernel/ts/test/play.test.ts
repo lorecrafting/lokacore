@@ -314,13 +314,17 @@ test('look <words> examines one detail, lists an ambiguity, and records failed l
 });
 
 // ADR-075 §6 (A5, R5 S2): a serial or the user name named in a lookup reaches no record, the failed-lookup
-// record included, where it is marked redacted. Breaks: words recorded unredacted, redaction
-// that misses another case, or the words entering a Command.
+// record included, where it is marked redacted; a path's pieces (home, users) stay words.
+// Breaks: words recorded unredacted, redaction that misses another case, redaction keyed on
+// path pieces, or the words entering a Command.
 test('look <serial> or <user name> leaves neither in any record', () => {
   const serial = 'r58m12abcde';
   const path = join(dir, 'look-serial.txt');
   const user = userInfo().username;
-  writeFileSync(path, `look ${serial}\nx the ${serial.toUpperCase()} post\nlook ${user}\n`);
+  writeFileSync(
+    path,
+    `look ${serial}\nx the ${serial.toUpperCase()} post\nlook ${user}\nlook home\nlook users\n`,
+  );
   const r = play([detailsArtifact, path], { ANDROID_SERIAL: serial });
   const rel = r.out.match(/transcript: (\S+)/)![1];
   for (const store of ['game_trace', 'diagnostics']) {
@@ -334,6 +338,8 @@ test('look <serial> or <user name> leaves neither in any record', () => {
       [{ kind: 'redacted' }],
       [{ kind: 'redacted' }, { kind: 'word', word: 'post' }],
       [{ kind: 'redacted' }],
+      [{ kind: 'word', word: 'home' }],
+      [{ kind: 'word', word: 'users' }],
     ],
   );
   assert.equal(records(rel).length, 1); // the header only: no lookup became a Command
