@@ -59,6 +59,7 @@ device sessions.
 Re-estimate after R5 S2 ([owner decision](decisions/owner-decision-review-lever-2026-09-25.md)):
 observed harness tokens were 2.64M for S1 (#34, without Astra) and 1.08M for S2 (#35),
 against about 0.35M planned; the figures may count per-run context and overstate. For the
-about 21 slices left after S2b: about 14 to 17 million, with Fable and Astra kept for about
-six foundational slices (about 23 million at S1-S2's review style). PM coordination stays
+about 21 slices left after S2b: about 14 to 18 million, with Fable and Astra kept for about
+six foundational slices at S2's to the S1-S2 average rate and the rest at S2b's 0.48M (#37);
+about 23 million with every slice at S2's rate. PM coordination stays
 extra and unmeasured.
