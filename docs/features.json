@@ -129,27 +129,67 @@
     "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs"
   },
   "action_recipe": {
-    "spec": "06 §19 ActionSet algebra, §20 ActionRecipe; 21 §7 ActionRecipe / ComposedAction; 05 §28; 04 §5.2; ADR-016",
+    "spec": "06 §19 ActionSet algebra, §20 ActionRecipe; 21 §7 ActionRecipe / ComposedAction; 05 §28; 04 §5.2; ADR-016; 21 §7 Check, Cost (time); 04 §5.0",
     "contracts": [
       "ActionRecipe",
       "RecipeStep",
       "RecipeTarget",
       "ActionContribution",
       "CommandPayload",
-      "EventPayload"
+      "EventPayload",
+      "RecipeCheck"
     ],
     "modules": [
       "kernel/ts/src/actions.ts",
       "kernel/ts/src/fact.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/cartridge_bell_hash.json"
+      "protocol/fixtures/cartridge_bell_hash.json",
+      "protocol/fixtures/cartridge_dusk_hash.json"
     ],
     "invariants": [
       "facts_typed",
       "fault_discards_whole_proposal",
       "unknown_types_fail_closed"
     ],
-    "implemented_in": "R5 S5 ActionSet algebra, perform, fact.assign and event.emit steps"
+    "implemented_in": "R5 S5 ActionSet algebra, perform, fact.assign and event.emit steps; R5 S6a luck check, failure outcome, duration"
+  },
+  "check": {
+    "spec": "21 §7 Check; 21 §4 Deterministic RNG; 04 §5.0; 00a check_passed objectives",
+    "contracts": [
+      "RecipeCheck",
+      "EventPayload"
+    ],
+    "modules": [
+      "kernel/ts/src/rules/action_recipe.ts",
+      "kernel/ts/src/rng.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_dusk_hash.json"
+    ],
+    "invariants": [
+      "rejection_consumes_nothing",
+      "fault_discards_whole_proposal"
+    ],
+    "implemented_in": "R5 S6a luck check in recipes, check_passed and check_failed"
+  },
+  "schedule": {
+    "spec": "21 §4 Time; 04 §5.4; 00 §4.2; command.schema.json LogicalTime",
+    "contracts": [
+      "CommandPayload",
+      "LogicalTime",
+      "Policy"
+    ],
+    "modules": [
+      "kernel/ts/src/policy.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_dusk_hash.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "rejection_consumes_nothing"
+    ],
+    "implemented_in": "R5 S6a wait (no jobs yet), time_window"
   }
 }

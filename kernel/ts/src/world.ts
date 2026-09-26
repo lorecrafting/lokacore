@@ -3,6 +3,7 @@
 // (lint/rules/ts-rule-module-*.yml); this module routes each command to the rule of the
 // capability that owns it (capability_registry.json), composes the delta and commits it.
 import { encode } from './canonical.ts';
+import { KernelError } from './error.ts';
 import type { Installed } from './cartridge.ts';
 import { compose, key, target } from './compose.ts';
 import {
@@ -26,6 +27,7 @@ import {
 import {
   allocator,
   COMPASS,
+  COMPOSES,
   event,
   refString,
   rejected,
@@ -45,6 +47,7 @@ import * as action_recipe from './rules/action_recipe.ts';
 import * as containment from './rules/containment.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
+import * as schedule from './rules/schedule.ts';
 import { cmp } from './validate.ts';
 
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
@@ -53,11 +56,13 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   description_variant: description_variant.decide,
   containment: containment.decide,
   action_recipe: action_recipe.decide,
+  schedule: schedule.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
-// them (fact.ts, policy.ts; details in target.ts and look). Each has feature map cells.
-const RULELESS = ['fact', 'policy', 'inspectable_detail'];
+// them (fact.ts, policy.ts; details in target.ts and look; a recipe's check in
+// rules/action_recipe.ts). Each has feature map cells.
+const RULELESS = ['fact', 'policy', 'inspectable_detail', 'check'];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
@@ -168,8 +173,8 @@ type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
  * for world creation (permission_denied; R6 must keep this refusal before any receipt); a
  * command for another world (not_found) or another actor (not_found) is rejected, and so is one
  * the actor's ActionSet does not offer or offers unavailable (actions.ts refusal; 04 §19, ACT-09).
- * After it: admit() checks the result, then the delta composes or faults before the changes are
- * adopted.
+ * A KernelError thrown while deciding is an evaluator_error fault with the world unchanged. After it: admit() checks the
+ * result, then the delta composes or faults before the changes are adopted.
  */
 function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
@@ -180,12 +185,18 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   const refused = refusal(world, command.payload);
   if (refused) return reject(refused);
   const mint = allocator(world, command);
-  return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
+  try {
+    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
+  } catch (e) {
+    // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
+    if (!(e instanceof KernelError)) throw e;
+    return { decision: { kind: 'fault', code: 'evaluator_error' }, world };
+  }
 }
 
 /**
  * Composes an admitted decision's delta over the state, the fact defaults and the declared
- * capacities and adopts its containment and fact changes; only admit() makes an Admitted. A
+ * capacities and adopts its containment, fact and clock changes; only admit() makes an Admitted. A
  * fact.assign whose fact, scope kind or value its FactSpec does not allow faults
  * precondition_failed (03 §7; 04 §5.1). Each that changes its fact adds a fact_changed at its
  * causal position (fact.ts factChanged). A result, these events included, over output_bytes
@@ -203,10 +214,12 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
   // ponytail: copies the containers and facts maps per step (O(rows)); persistent maps when big.
   const containers = { ...world.state.containers };
   const facts: Record<string, FactValue> = { ...world.state.facts };
+  let clock = world.state.clock;
   for (const { target, value } of result.changes)
     if (target.kind === 'containment') containers[target.entity_id] = value as EntityId;
     else if (target.kind === 'fact') facts[key(target)] = value as FactValue;
-  const state = { ...world.state, containers, rng: decision.rng };
+    else if (target.kind === 'clock') clock = value as number;
+  const state = { ...world.state, clock, containers, rng: decision.rng };
   const events = factChanged(world, command, mint, assigns, decision.events);
   const out = events === decision.events ? decision : { ...decision, events };
   if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
@@ -221,15 +234,16 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 
 /**
- * An accepted rule result as the host admits it (04 §5.2 step 7): an event type the owning
- * capability does not own faults unowned_event, which discards the whole proposal. adopt()
- * checks the output budget once the host's events are added.
+ * An accepted rule result as the host admits it (04 §5.2 step 7): an event type neither the
+ * owning capability nor one it COMPOSES owns faults unowned_event, which discards the whole
+ * proposal. adopt() checks the output budget once the host's events are added.
  */
 export function admit(owner: string, decision: DecisionResult): Admitted {
   const fault = (code: ErrorCode) => ({ kind: 'fault', code }) as Admitted;
   if (decision.kind !== 'accepted') return decision as Admitted;
   const owners = CAPABILITY_OWNERS.event;
-  if (decision.events.some((e) => owners[e.payload.type]?.split('@')[0] !== owner))
+  const may: readonly string[] = [owner, ...(COMPOSES[owner as keyof typeof COMPOSES] ?? [])];
+  if (decision.events.some((e) => !may.includes(owners[e.payload.type]?.split('@')[0])))
     return fault('unowned_event');
   return decision as Admitted;
 }

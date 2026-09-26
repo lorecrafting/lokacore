@@ -135,7 +135,11 @@
     "key": "check",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "events": [
+      "check_passed",
+      "check_failed"
+    ]
   },
   {
     "key": "combat",
@@ -222,6 +226,9 @@
     "commands": [
       "wait",
       "run_job"
+    ],
+    "policies": [
+      "time_window"
     ]
   },
   {

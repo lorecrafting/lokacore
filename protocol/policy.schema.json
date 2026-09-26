@@ -4,7 +4,7 @@
   "description": "The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). Typed, pure and fail-closed: an unknown operator is invalid.",
   "$defs": {
     "VersionedPolicy": {
-      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new operator or a changed meaning takes a new version.",
+      "description": "A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.",
       "type": "object",
       "properties": {
         "policy_version": {
@@ -43,7 +43,7 @@
       ]
     },
     "Policy": {
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md); the rest are added, versioned, with their first use. fact_compare compares FactValue.",
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue.",
       "oneOf": [
         {
           "description": "Every item holds; an empty list is the policy with no condition.",
@@ -174,6 +174,31 @@
             "equals"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "06 §21 time_window, a window of hours of the day: the world's hour of day (command.schema.json LogicalTime: floor(time / 3600) mod 24) is in the window from `from` (inclusive) to `to` (exclusive), wrapping midnight when `to` is less than `from`: from 18 to 6 is dusk to dawn (00 §4.2). from equal to to is no window: the compiler and the loader reject it (EMPTY_TIME_WINDOW). Owned by schedule@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "time_window"
+            },
+            "from": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            },
+            "to": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 23
+            }
+          },
+          "required": [
+            "op",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -221,6 +246,16 @@
               }
             }
           ]
+        },
+        {
+          "op": "time_window",
+          "from": 18,
+          "to": 6
+        },
+        {
+          "op": "time_window",
+          "from": 0,
+          "to": 23
         }
       ]
     }

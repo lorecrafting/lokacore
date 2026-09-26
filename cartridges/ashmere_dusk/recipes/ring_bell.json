@@ -1,0 +1,34 @@
+{
+  "label": "actions.ring_bell",
+  "aliases": [
+    "ring"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "churchyard",
+    "detail": "bell"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "time_window",
+      "from": 18,
+      "to": 6
+    }
+  },
+  "duration": 60,
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "bell_rung"
+        }
+      ],
+      "narration": {
+        "actor": "narration.ring_bell.actor"
+      }
+    }
+  }
+}

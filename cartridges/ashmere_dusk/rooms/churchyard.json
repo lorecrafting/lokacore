@@ -1,0 +1,35 @@
+{
+  "title": "room.churchyard.title",
+  "description": "room.churchyard.description",
+  "exits": {},
+  "details": {
+    "bell": {
+      "aliases": [
+        "bell",
+        "lych_bell"
+      ],
+      "description": "detail.bell"
+    },
+    "gate": {
+      "aliases": [
+        "gate",
+        "lock",
+        "crypt_gate"
+      ],
+      "description": "detail.gate",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "crypt_gate_open",
+              "equals": true
+            }
+          },
+          "description": "detail.gate.open"
+        }
+      ]
+    }
+  }
+}

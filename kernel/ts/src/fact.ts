@@ -32,7 +32,8 @@ export function value(world: World, actor: CharacterId, fact: DefinitionRef): Fa
   return world.state.facts?.[key({ kind: 'fact', fact, scope })] ?? world.factDefaults[key(fact)];
 }
 
-const typed = (v: FactValue, t: FactType): boolean =>
+/** True when `v` is of FactType `t` (the loader checks authored values with it too). */
+export const typed = (v: FactValue, t: FactType): boolean =>
   t.type === 'bool'
     ? typeof v === 'boolean'
     : t.type === 'enum'

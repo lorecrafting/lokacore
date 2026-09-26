@@ -7,9 +7,8 @@ defmodule Loka.Content.Recipes do
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
 
-  # A step uses its op through the event it produces.
+  # A step uses its op through the event it produces, a check through check@1's events.
   @step_event %{"fact.assign" => "fact_changed", "event.emit" => "custom_event"}
-  @success ["outcomes", "success"]
 
   @doc "Each schema-valid recipe's policy root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
@@ -19,10 +18,13 @@ defmodule Loka.Content.Recipes do
   defp all(defs), do: for({_, {rel, [], r}} <- defs["recipe"], do: {rel, r})
 
   @doc """
-  For a v2 source with a valid manifest (else none): each recipe's owner (action_recipe) and
-  each step's (by its event) is required; its target names a room of this cartridge and a detail
-  of that room, each fact.assign a fact with a value of its type, and its label and narration
-  have catalog entries (unless `text` is `:unknown`); no recipe's key is an action's or a
+  For a v2 source with a valid manifest (else none): each recipe's owner (action_recipe), its
+  check's (check@1, by its events) and each step's of any outcome (by its event) is required; it
+  has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
+  of this cartridge and a detail of that room, each fact.assign a fact with a value of its type,
+  its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
+  and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
+  key is an action's or a
   registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
   contribution names a registered command, an action or a recipe.
   """
@@ -31,7 +33,16 @@ defmodule Loka.Content.Recipes do
 
   def check(m, defs, {_, text}, registry) do
     actions = for {_, {_, [], a}} <- defs["action"], into: MapSet.new(), do: a["key"]
-    ctx = %{m: m, defs: defs, text: text, registry: registry, actions: actions}
+
+    ctx = %{
+      m: m,
+      defs: defs,
+      text: text,
+      registry: registry,
+      actions: actions,
+      shared: shared(defs)
+    }
+
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
   end
 
@@ -39,26 +50,57 @@ defmodule Loka.Content.Recipes do
     taken = r["key"] in ctx.actions or r["key"] in commands()
     duplicate = if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
 
-    owners(rel, r, ctx) ++ refs(rel, r, ctx) ++ texts(rel, r, ctx.text) ++ duplicate
+    owners(rel, r, ctx) ++
+      refs(rel, r, ctx) ++
+      texts(rel, r, ctx.text) ++
+      duplicate ++
+      mismatch(rel, r) ++
+      shared(rel, r, ctx.shared)
   end
 
-  defp steps(r), do: Enum.with_index(r["outcomes"]["success"]["sequence"])
-  defp step(i), do: @success ++ ["sequence", i]
+  # An inline check's key is its check definition's key: two recipes' checks may not share one.
+  defp shared(defs) do
+    checks = for {_, r} <- all(defs), is_map_key(r, "check"), do: r["check"]["key"]
+    for {k, n} <- Enum.frequencies(checks), n > 1, into: MapSet.new(), do: k
+  end
+
+  defp shared(rel, %{"check" => %{"key" => k}}, shared) do
+    if k in shared, do: [diag("DUPLICATE_DEFINITION", at(rel, ["check"]))], else: []
+  end
+
+  defp shared(_, _, _), do: []
+
+  defp mismatch(rel, r) do
+    if is_map_key(r, "check") == is_map_key(r["outcomes"], "failure"),
+      do: [],
+      else: [diag("OUTCOME_MISMATCH", at(rel, ["outcomes"]))]
+  end
+
+  # Each step of each outcome, with its path.
+  defp steps(r) do
+    for {name, o} <- r["outcomes"],
+        {s, i} <- Enum.with_index(o["sequence"]),
+        do: {s, ["outcomes", name, "sequence", i]}
+  end
 
   defp owners(rel, r, %{m: m, registry: registry}) do
     caps = m["requires"]["capabilities"]
     events = {caps, owners(registry, ["events"])}
 
+    check =
+      if is_map_key(r, "check"), do: owned(at(rel, ["check"]), "check_passed", events), else: []
+
     owned(at(rel, []), "recipe", {caps, owners(registry, ["definitions"])}) ++
-      Enum.flat_map(steps(r), fn {s, i} ->
-        owned(at(rel, step(i) ++ ["op"]), @step_event[s["op"]], events)
+      check ++
+      Enum.flat_map(steps(r), fn {s, steps} ->
+        owned(at(rel, steps ++ ["op"]), @step_event[s["op"]], events)
       end)
   end
 
   defp refs(rel, r, %{m: m, defs: defs}) do
     target(rel, r["target"], m, defs) ++
-      for {%{"op" => "fact.assign"} = s, i} <- steps(r),
-          d <- reference(rel, step(i), "fact", s, m, defs),
+      for {%{"op" => "fact.assign"} = s, steps} <- steps(r),
+          d <- reference(rel, steps, "fact", s, m, defs),
           do: d
   end
 
@@ -78,11 +120,13 @@ defmodule Loka.Content.Recipes do
   defp texts(_, _, :unknown), do: []
 
   defp texts(rel, r, text) do
-    narration = r["outcomes"]["success"]["narration"]
-
     for {steps, key} <- [
           {["label"], r["label"]}
-          | for({k, v} <- narration, do: {@success ++ ["narration", k], v})
+          | for(
+              {name, o} <- r["outcomes"],
+              {k, v} <- o["narration"],
+              do: {["outcomes", name, "narration", k], v}
+            )
         ],
         not is_map_key(text, key),
         do: unresolved(rel, steps, key)

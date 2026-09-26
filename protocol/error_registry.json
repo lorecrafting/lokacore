@@ -228,5 +228,10 @@
     "code": "unowned_event",
     "category": "evaluation_fault",
     "description": "A rule proposed an event type its capability does not own (04 §5.2 step 7; 05 §6; capability_registry.json); the whole proposal is discarded."
+  },
+  {
+    "code": "evaluator_error",
+    "category": "evaluation_fault",
+    "description": "A rule's evaluation raised a numeric-profile error (integer_overflow, rng_budget_exhausted: numeric-profile.md), for example a clock advance past 2^53 - 1; the whole proposal is discarded, world, RNG and clock unchanged (04 §5.2 step 7)."
   }
 ]

@@ -229,9 +229,15 @@ defmodule Loka.Content.Checks do
 
   defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do
     owned(at(rel, steps ++ ["op"]), op, required) ++
+      empty_window(rel, steps, n) ++
       case @ref_fields[op] do
         nil -> []
         field -> reference(rel, steps, field, n, m, defs)
       end
   end
+
+  defp empty_window(rel, steps, %{"op" => "time_window", "from" => t, "to" => t}),
+    do: [diag("EMPTY_TIME_WINDOW", at(rel, steps))]
+
+  defp empty_window(_, _, _), do: []
 end

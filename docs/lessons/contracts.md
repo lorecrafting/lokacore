@@ -31,6 +31,7 @@ file covers: [the protocol map](../../protocol/README.md).
 - A command reaches its rule only if an action of the actor's ActionSet resolves to it and
   accepts its target and input (`refusal` in `kernel/ts/src/actions.ts`; an engine verb's rule
   is its own contract): a new player verb needs its entry in `VERBS` there, or `step` rejects
-  it `unsupported_capability`. A rule that emits events after a `fact.assign` leaves
-  that assign's causal position free; the host puts its `fact_changed` there (`factChanged` in
-  `kernel/ts/src/fact.ts`).
+  it `unsupported_capability`. A cartridge action that overrides an engine verb narrows that
+  verb to exactly its own spec: overriding `look` with a no-target spec also disables examine.
+  A rule that emits events after a `fact.assign` leaves that assign's causal position free; the
+  host puts its `fact_changed` there (`factChanged` in `kernel/ts/src/fact.ts`).

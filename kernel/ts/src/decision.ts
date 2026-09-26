@@ -84,9 +84,18 @@ export type Decision<E> =
 /** The command's IdSource allocator: each call is the next ordinal, from 0 (numeric profile). */
 export type Mint = () => string;
 /**
- * A rule of capability C: only C's commands in, only C's events out. Typecheck enforces it for
- * typed code; step() re-checks event ownership at admission, and lint/rules/ts-rule-module-*.yml
- * ban the untyped and mutating escapes.
+ * The capabilities whose events a capability's rule also emits, because it runs them inside its
+ * own decision: a recipe resolves its check (check@1) in the perform decision (21 §7: costs,
+ * checks and outcomes join one proposal).
+ */
+export const COMPOSES = { action_recipe: ['check'] } as const;
+type Composed<C> = C extends keyof typeof COMPOSES
+  ? Owned[(typeof COMPOSES)[C][number]]['event']
+  : never;
+/**
+ * A rule of capability C: only C's commands in, only C's events (and those of the capabilities
+ * it COMPOSES) out. Typecheck enforces it for typed code; step() re-checks event ownership at
+ * admission, and lint/rules/ts-rule-module-*.yml ban the untyped and mutating escapes.
  */
 export type Rule<C extends keyof Owned> = (
   world: World,
@@ -94,7 +103,7 @@ export type Rule<C extends keyof Owned> = (
     readonly payload: Extract<CommandPayload, { type: Owned[C]['command'] }>;
   },
   mint: Mint,
-) => Decision<Owned[C]['event']>;
+) => Decision<Owned[C]['event'] | Composed<C>>;
 
 /** The six compass directions, in RoomDefinition exits order (room.schema.json). */
 export const COMPASS: readonly Key[] = Object.keys(
@@ -142,7 +151,7 @@ export function event<P extends EventPayload>(
 
 /**
  * An accepted decision with its typed outcome and, when it has any, its narration (04 §5; 06
- * §43): no effects, the RNG untouched.
+ * §43): no effects, the RNG `rng` (by default untouched).
  */
 export const accepted = <E>(
   world: World,
@@ -150,13 +159,14 @@ export const accepted = <E>(
   ops: StateDelta['ops'],
   events: readonly Event<E>[],
   narration?: readonly Text[],
+  rng: RngState = world.state.rng,
 ): Decision<E> => ({
   kind: 'accepted',
   outcome: outcome as Key,
   delta: { ops },
   events,
   effects: [],
-  rng: world.state.rng,
+  rng,
   ...(narration && { narration }),
 });
 
