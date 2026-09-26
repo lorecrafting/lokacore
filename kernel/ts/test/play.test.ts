@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { tmpdir, userInfo } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { encode } from '../src/canonical.ts';
@@ -313,23 +313,28 @@ test('look <words> examines one detail, lists an ambiguity, and records failed l
   assert.match(again.out, /replay: 3 commands identical/);
 });
 
-// ADR-075 §6 (A5, R5 S2): a serial named in a lookup reaches no record, the failed-lookup
+// ADR-075 §6 (A5, R5 S2): a serial or the user name named in a lookup reaches no record, the failed-lookup
 // record included, where it is marked redacted. Breaks: words recorded unredacted, redaction
 // that misses another case, or the words entering a Command.
-test('look <serial> leaves the serial in no record', () => {
+test('look <serial> or <user name> leaves neither in any record', () => {
   const serial = 'r58m12abcde';
   const path = join(dir, 'look-serial.txt');
-  writeFileSync(path, `look ${serial}\nx the ${serial.toUpperCase()} post\n`);
+  const user = userInfo().username;
+  writeFileSync(path, `look ${serial}\nx the ${serial.toUpperCase()} post\nlook ${user}\n`);
   const r = play([detailsArtifact, path], { ANDROID_SERIAL: serial });
   const rel = r.out.match(/transcript: (\S+)/)![1];
   for (const store of ['game_trace', 'diagnostics']) {
     const text = readFileSync(ROOT + rel.replace('game_trace', store), 'utf8');
-    assert.ok(!text.toLowerCase().includes(serial), store);
+    assert.ok(!text.toLowerCase().includes(serial) && !text.includes(`"${user}"`), store);
   }
   assert.ok(!existsSync(ROOT + rel.replace('game_trace', 'operations'))); // no command ran
   assert.deepEqual(
     records(rel.replace('game_trace', 'diagnostics')).map((f) => f.data.words),
-    [[{ kind: 'redacted' }], [{ kind: 'redacted' }, { kind: 'word', word: 'post' }]],
+    [
+      [{ kind: 'redacted' }],
+      [{ kind: 'redacted' }, { kind: 'word', word: 'post' }],
+      [{ kind: 'redacted' }],
+    ],
   );
   assert.equal(records(rel).length, 1); // the header only: no lookup became a Command
 });

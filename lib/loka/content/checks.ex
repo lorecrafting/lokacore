@@ -105,8 +105,8 @@ defmodule Loka.Content.Checks do
     ) ++ details(defs, text)
   end
 
-  # Each detail's description has a catalog entry, and each detail has an alias no other
-  # detail of its room has (room.schema.json InspectableDetail).
+  # Each detail's description has a catalog entry, and its first alias is one no other detail
+  # of its room has, in the form a lookup produces (room.schema.json InspectableDetail).
   defp details(defs, text) do
     for {_, {rel, [], r}} <- defs["room"],
         ds = Map.get(r, "details", %{}),
@@ -128,7 +128,9 @@ defmodule Loka.Content.Checks do
   defp reachable(rel, key, detail, ds) do
     others = for {k, o} <- ds, k != key, a <- o["aliases"], into: MapSet.new(), do: a
 
-    if Enum.all?(detail["aliases"], &(&1 in others)),
+    [first | _] = words = String.split(hd(detail["aliases"]), "_")
+
+    if "" in words or first in ~w(at the a an) or hd(detail["aliases"]) in others,
       do: [diag("UNREACHABLE_DETAIL", at(rel, ["details", key]))],
       else: []
   end

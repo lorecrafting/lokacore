@@ -2,7 +2,7 @@
 // JSON lines, the store files under tmp/obs/, and redaction of diagnostics (§6).
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, realpathSync, writeFileSync } from 'node:fs';
-import { homedir, hostname, tmpdir } from 'node:os';
+import { homedir, hostname, tmpdir, userInfo } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { encode, type Json } from '../src/canonical.ts';
 import { KERNEL_ID } from '../src/index.ts';
@@ -47,6 +47,7 @@ const secrets = [
   tmpdir(),
   realpathSync(tmpdir()),
   hostname(),
+  userInfo().username,
   process.env.ANDROID_SERIAL ?? '',
 ]
   .filter((s) => s.length > 3)
@@ -72,7 +73,12 @@ export function redact<T extends Json>(value: T): T {
  * built, never recorded as an empty string.
  */
 export function lookupWords(text: string) {
-  const hidden = (w: string) => secrets.some((x) => w.includes(x.toLowerCase()));
+  // Every letters-and-digits piece of a secret (a path's user name, a hostname's labels), as a
+  // word can hold only those.
+  const pieces = secrets
+    .flatMap((x) => x.toLowerCase().split(/[^a-z0-9]+/))
+    .filter((x) => x.length > 3);
+  const hidden = (w: string) => pieces.some((x) => w.includes(x));
   return normalize(text)
     .slice(0, 16)
     .map((word) =>

@@ -185,25 +185,30 @@ defmodule Loka.ContentRoomsTest do
   defp detail(aliases, text \\ "r.d"), do: %{"aliases" => aliases, "description" => text}
 
   # Breaks: a detail's description key unchecked (the player reads the raw key), or a detail
-  # no lookup can pick accepted; a shared alias with a unique one each must stay valid.
+  # whose first alias (its name in "Which do you mean") is shared or untypable accepted; a
+  # shared later alias must stay valid.
   test "a detail's missing text is UNRESOLVED_REFERENCE; one without its own alias is UNREACHABLE_DETAIL",
        %{tmp_dir: dir} do
     details = %{
-      "lamp" => detail(["post"]),
+      "bell" => detail(["the_bell", "bell"]),
+      "gap" => detail(["x__y"]),
+      "lamp" => detail(["post", "lamp"]),
       "notice" => detail(["notice", "post"], "d.missing"),
-      "post" => detail(["post", "mooring_post"])
+      "post" => detail(["mooring_post", "post"])
     }
 
     assert compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", details)}) ==
              {:error,
               [
+                d("UNREACHABLE_DETAIL", "rooms/b.details.bell"),
+                d("UNREACHABLE_DETAIL", "rooms/b.details.gap"),
                 d("UNREACHABLE_DETAIL", "rooms/b.details.lamp"),
                 d("UNRESOLVED_REFERENCE", "rooms/b.details.notice.description", %{
                   "target" => "d.missing"
                 })
               ]}
 
-    shared = Map.delete(details, "lamp") |> put_in(["notice", "description"], "r.d")
+    shared = Map.drop(details, ~w(bell gap lamp)) |> put_in(["notice", "description"], "r.d")
     assert {:ok, _} = compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", shared)})
   end
 end

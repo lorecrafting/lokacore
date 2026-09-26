@@ -38,7 +38,7 @@
       ]
     },
     "InspectableDetail": {
-      "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but each needs one alias no other detail of its room has, or the player could never pick it (UNREACHABLE_DETAIL). Condition variants, perception, reveal facts and contextual actions join as optional fields.",
+      "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but the first alias must be the detail's own and in the form a lookup produces (no empty word, not starting with at, the, a or an), or the player could not pick it by name (UNREACHABLE_DETAIL). Condition variants, perception, reveal facts and contextual actions join as optional fields.",
       "type": "object",
       "properties": {
         "aliases": {

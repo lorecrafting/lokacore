@@ -177,11 +177,14 @@ test("a detail's text key missing from the catalog is UNRESOLVED_REFERENCE", () 
     { target: 'detail.notice' },
   ));
 
-// Breaks: a detail every alias of which another detail shares loads, and no lookup reaches it.
-test('a detail without an alias of its own is UNREACHABLE_DETAIL', () =>
-  fails(
-    withDetails((c) => (c.rooms[DFL].details.notice.aliases = ['post'])),
-    'UNREACHABLE_DETAIL',
-    `.cartridge.rooms["${DFL}"].details.notice`,
-    {},
-  ));
+// Breaks: a detail whose first alias (its name in "Which do you mean") is shared, or is no
+// form a lookup produces (an empty word, a leading at or article), loads.
+test('a detail whose first alias is shared or untypable is UNREACHABLE_DETAIL', () => {
+  for (const first of ['post', 'the_notice', 'notice_', 'a'])
+    fails(
+      withDetails((c) => (c.rooms[DFL].details.notice.aliases = [first, 'notice'])),
+      'UNREACHABLE_DETAIL',
+      `.cartridge.rooms["${DFL}"].details.notice`,
+      {},
+    );
+});

@@ -201,7 +201,7 @@ function lockStage(c: Obj): Diagnostic[] {
 }
 
 // v2: the entry and every exit name a room of this cartridge, every text key a room, a detail
-// or an action uses has a catalog entry, and every detail has an alias of its own.
+// or an action uses has a catalog entry, and every detail's first alias is its own and typable.
 function refStage(c: Obj): Diagnostic[] {
   if (c.format !== 'loka-cartridge-v2') return [];
   const { id, version } = c.manifest;
@@ -227,7 +227,9 @@ function refStage(c: Obj): Diagnostic[] {
     for (const [key, d] of Object.entries(details)) {
       text(d, ['description'], `${at}.details.${key}`);
       const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
-      if (d.aliases.every((a: string) => others.includes(a)))
+      const [first, ...words] = d.aliases[0].split('_');
+      const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
+      if (!typable || others.includes(d.aliases[0]))
         out.push(diag('UNREACHABLE_DETAIL', `${at}.details.${key}`));
     }
   }
