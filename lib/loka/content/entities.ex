@@ -34,8 +34,7 @@ defmodule Loka.Content.Entities do
   def texts(_, :unknown), do: []
 
   def texts(defs, text) do
-    for {_, rel, e} <- all(defs),
-        {steps, key} <- for(f <- @text, do: {[f], e[f]}) ++ variant_texts(e),
+    for {rel, _, steps, key} <- text_keys(defs),
         not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => key})
   end
