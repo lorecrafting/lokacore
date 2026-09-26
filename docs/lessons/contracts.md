@@ -16,12 +16,12 @@ file covers: [the protocol map](../../protocol/README.md).
   ids with the `Loka.Core.Contracts` constructors at the boundary and match the tag
   explicitly (`{:character_id, id}`) in every domain function head.
 - Rules take the actor from the command (`payload.actor_id`), never from `world.character`;
-  only the admission boundary and hosts should name the player. The actor's body is `world.body`
-  today (one body, no actor-to-body lookup yet). Before admission accepts a second actor,
-  these sites must take the body and actor from the command: `event()` in
-  `kernel/ts/src/decision.ts`, `rules/movement.ts`, `rules/description_variant.ts` and
-  `target.ts`. A rule that assumes "the actor is the player" blocks puppeting and
-  NPC-issued commands
+  only the admission boundary and hosts should name the player. An actor's body comes from
+  `bodyOf(world, actor)` in `kernel/ts/src/decision.ts`, the one place that still assumes one
+  body per world; `event()` takes the actor from the command. Before admission accepts a
+  second actor, `bodyOf` must change (and the invariant `player_in_one_room`, which checks the
+  one body). A rule that assumes "the actor is the player" blocks puppeting and NPC-issued
+  commands
   ([owner decision](../decisions/owner-decision-puppeting-2026-09-25.md)).
 - Cartridge source accepts a short reference (a Key) at every DefinitionRef, but only the
   fields `Loka.Content.Checks.expand/2` lists get expanded. A new source reference field
