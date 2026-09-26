@@ -274,6 +274,42 @@ defmodule Loka.ContentTest do
              ]
     end
 
+    # Short references (owner decision 2026-09-25). Break: a short reference is not
+    # expanded, is expanded to another kind or cartridge, or skips the Key pattern.
+    test "a short reference names this cartridge's definition of its field's kind",
+         %{tmp_dir: tmp} do
+      root = %{
+        "op" => "all",
+        "items" => [
+          %{"op" => "fact_compare", "fact" => "a_b", "equals" => 1},
+          %{"op" => "not", "item" => %{"op" => "has_item", "item" => "a_b"}},
+          %{"op" => "fact_compare", "fact" => "missing", "equals" => true},
+          %{"op" => "quest_state", "quest" => "q", "state" => "active"}
+        ]
+      }
+
+      caps = Map.merge(@manifest["requires"]["capabilities"], %{"containment" => 1, "quest" => 1})
+      bad = %{"op" => "fact_compare", "fact" => "A-b", "equals" => true}
+
+      assert errors(tmp, %{
+               "policies/p.json" => policy(root),
+               "policies/q.json" => policy(bad),
+               "cartridge.json" => manifest(["requires", "capabilities"], caps)
+             }) == [
+               d("FACT_TYPE_MISMATCH", "policies/p.root.items[0].equals"),
+               d("UNRESOLVED_REFERENCE", "policies/p.root.items[1].item.item", %{
+                 "target" => "c@1.0.0:item/a_b"
+               }),
+               d("UNRESOLVED_REFERENCE", "policies/p.root.items[2].fact", %{
+                 "target" => "c@1.0.0:fact/missing"
+               }),
+               d("UNRESOLVED_REFERENCE", "policies/p.root.items[3].quest", %{
+                 "target" => "c@1.0.0:quest/q"
+               }),
+               d("SCHEMA_VIOLATION", "policies/q.root.fact", %{"error" => "pattern_mismatch"})
+             ]
+    end
+
     # Break: a reference to a definition that failed validation adds a false second cause.
     test "a reference to an invalid fact reports only the fact", %{tmp_dir: tmp} do
       compare = %{"op" => "fact_compare", "fact" => ref("fact", "a_b"), "equals" => true}

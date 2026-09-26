@@ -23,3 +23,8 @@ file covers: [the protocol map](../../protocol/README.md).
   `target.ts`. A rule that assumes "the actor is the player" blocks puppeting and
   NPC-issued commands
   ([owner decision](../decisions/owner-decision-puppeting-2026-09-25.md)).
+- Cartridge source accepts a short reference (a Key) at every DefinitionRef, but only the
+  fields `Loka.Content.Checks.expand/2` lists get expanded. A new source reference field
+  needs an entry there and a short-ref test; otherwise the compiler emits an artifact the
+  loader rejects
+  ([owner decision](../decisions/owner-decision-short-refs-2026-09-25.md)).
