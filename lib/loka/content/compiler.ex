@@ -23,8 +23,7 @@ defmodule Loka.Content.Compiler do
           {:ok, map()} | {:error, [map()]}
   def compile(files, loaded, registry) do
     {manifest, entry, d1} = manifest(of(files, :manifest), registry)
-    {defs, d2} = definitions(files)
-    {entry, defs} = expanded(manifest, entry, defs)
+    {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
     v2 = v2(defs, entry, text)
 
@@ -38,22 +37,6 @@ defmodule Loka.Content.Compiler do
       diags -> {:error, diags}
     end
   end
-
-  # Short references become full ones once a valid manifest names the cartridge; without one
-  # the build fails anyway and reference checks are skipped.
-  defp expanded(nil, entry, defs), do: {entry, defs}
-
-  defp expanded(m, entry, defs) do
-    defs =
-      for {kind, ds} <- defs, into: %{} do
-        {kind, if(is_map(ds), do: Map.new(ds, fn {k, d} -> {k, expand(d, m)} end), else: ds)}
-      end
-
-    {ref(entry, "room", m), defs}
-  end
-
-  defp expand({rel, steps, v}, m), do: {rel, steps, Checks.expand(v, m)}
-  defp expand(:invalid, _), do: :invalid
 
   # v2 exactly when the source has rooms, an entry or a text catalog (CompiledCartridge).
   defp v2(defs, entry, text) do
@@ -76,7 +59,7 @@ defmodule Loka.Content.Compiler do
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
         {entry, manifest} = Map.pop(m, "entry")
-        {manifest, entry, Checks.requirements(rel, manifest, registry)}
+        {manifest, ref(entry, "room", m), Checks.requirements(rel, manifest, registry)}
 
       diags ->
         {nil, nil, diags}
@@ -95,15 +78,28 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  defp definitions(files) do
+  defp definitions(files, m) do
     {facts, d1} = facts(of(files, :facts))
     {policies, d2} = files(files, :policy, "VersionedPolicy")
     {actions, d3} = files(files, :action, "ActionDefinition")
     {rooms, d4} = files(files, :room, "RoomDefinition")
+    defs = %{"policy" => policies, "action" => actions, "room" => rooms}
 
-    {%{"fact" => facts, "policy" => policies, "action" => actions, "room" => rooms},
-     d1 ++ d2 ++ d3 ++ d4}
+    {Map.put(expanded(defs, m), "fact", facts), d1 ++ d2 ++ d3 ++ d4}
   end
+
+  # Short references become full ones once a valid manifest names the cartridge; without one
+  # the build fails anyway and reference checks are skipped.
+  defp expanded(defs, nil), do: defs
+
+  defp expanded(defs, m) do
+    for {kind, ds} <- defs, into: %{} do
+      {kind, Map.new(ds, fn {k, d} -> {k, expand(d, m)} end)}
+    end
+  end
+
+  defp expand({rel, steps, v}, m), do: {rel, steps, Checks.expand(v, m)}
+  defp expand(:invalid, _), do: :invalid
 
   defp files(files, kind, contract),
     do: collect(for {rel, {^kind, k}, v} <- files, do: {k, definition(rel, [], k, v, contract)})
