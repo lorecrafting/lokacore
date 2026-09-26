@@ -8,15 +8,8 @@ import { test } from 'node:test';
 import { hash } from '../src/canonical.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { accepted, event, rejected } from '../src/decision.ts';
-import {
-  decideWith,
-  gameView,
-  holds,
-  INSTALLED,
-  newWorld,
-  step as kernelStep,
-} from '../src/world.ts';
+import { accepted, allocator, event, rejected } from '../src/decision.ts';
+import { admit, gameView, holds, INSTALLED, newWorld, step as kernelStep } from '../src/world.ts';
 import { read } from './read.ts';
 
 // Every rule call sees a deep-frozen world, so a rule that mutates it throws here (ADR-072).
@@ -196,25 +189,32 @@ test('the delta digest construction matches the Python known answer', () => {
   assert.equal(hash(value), sha256);
 });
 
-// Planted rules through the admission boundary (Astra A2 counterexamples 1 and 3). Breaks: the
-// event-ownership check is removed, or the world a rule sees is writable.
-test('a rule emitting a foreign event is rejected, and one mutating the world throws', () => {
+// Planted rules (Astra A2 counterexamples 1 and 3; review R1-1). Breaks: the event-ownership
+// check is removed or returns a rejection (04 §5.2 step 7: an evaluator fault), or the world a
+// rule sees is writable.
+test('a foreign event faults unowned_event, and a rule mutating the world throws', () => {
   const w = freeze(fresh());
-  const foreign = (world: World, c: Command, mint: () => string) => {
-    const payload = JSON.parse(
-      `{"type":"item_acquired","item_id":"${BODY}","holder_id":"${BODY}"}`,
-    );
-    return accepted(world, 'moved', [], [event(world, c, mint, 1, payload)]);
-  };
-  assert.deepEqual(decideWith(w, move('north'), 'movement', foreign as never).decision, {
-    kind: 'rejected',
-    error: { code: 'unsupported_capability' },
-  });
+  const payload = JSON.parse(`{"type":"item_acquired","item_id":"${BODY}","holder_id":"${BODY}"}`);
+  const mint = allocator(w, { id: CMD as Command['id'] });
+  const foreign = accepted(w, 'moved', [], [event(w, move('north'), mint, 1, payload)]);
+  assert.deepEqual(admit('movement', foreign as never), { kind: 'fault', code: 'unowned_event' });
+  const own = step(w, move('north')).decision;
+  assert.equal(admit('movement', own), own);
   const mutating = (world: World) => {
     const { assign } = Object;
     assign(world.state, { clock: 123 });
     return rejected('invalid_target');
   };
-  assert.throws(() => decideWith(w, move('north'), 'movement', mutating as never), TypeError);
+  assert.throws(() => mutating(w), TypeError);
   assert.equal(w.state.clock, 0);
+});
+
+// Review R1-2. Breaks: the per-command counter never advances or starts at 1 (numeric profile:
+// ordinals from 0, each used once). Expected ids: Python, ["loka-id-v1", context, command, n].
+test("a decision's allocator mints ordinals 0, 1, ... under its command", () => {
+  const mint = allocator(fresh(), { id: CMD as Command['id'] });
+  assert.deepEqual(
+    [mint(), mint()],
+    ['e2870386-6797-8a1b-8e1a-b2c028c16c49', '2ed1ae6f-befe-8e6a-a5b1-bce1b3d1e5d9'],
+  );
 });

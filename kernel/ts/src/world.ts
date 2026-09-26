@@ -89,27 +89,19 @@ type Stepped = { decision: DecisionResult; world: World };
 type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
 
 /**
- * The admission boundary around one rule call (step's only production use). Before the rule:
- * the nil CommandId is reserved for world creation (permission_denied); a command for another
- * world (not_found) or another actor (not_found) is rejected. After it: an event type another
- * capability owns is rejected (unsupported_capability), a result over output_bytes faults
- * budget_exceeded, and the delta composes or faults before the changes are adopted.
+ * The admission boundary around one rule call. Before the rule: the nil CommandId is reserved
+ * for world creation (permission_denied; R6 must keep this refusal before any receipt); a
+ * command for another world (not_found) or another actor (not_found) is rejected. After it:
+ * admit() checks the result, then the delta composes or faults before the changes are adopted.
  */
-export function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
+function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
   if (command.id === NIL) return reject('permission_denied');
   if (command.world_context_id !== world.context) return reject('not_found');
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
-  const decision = rule(world, command, allocator(world, command));
+  const decision = admit(owner, rule(world, command, allocator(world, command)));
   if (decision.kind !== 'accepted') return { decision, world };
-  const owners = CAPABILITY_OWNERS.event;
-  if (decision.events.some((e) => owners[e.payload.type]?.split('@')[0] !== owner))
-    return reject('unsupported_capability');
-  // ponytail: unreachable with look and move (fixed-size results); tested with the first rule
-  // whose output size varies (S5, ActionRecipe).
-  if (utf8(encode(decision as never)).length > LIMITS.output_bytes!)
-    return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
   const result = compose(world.state as unknown as Parameters<typeof compose>[0], decision.delta);
   if ('fault' in result) return { decision: result.fault, world };
   // ponytail: copies the containers map per move (O(entities)); a persistent map when big.
@@ -120,6 +112,23 @@ export function decideWith(world: World, command: Command, owner: string, rule: 
     decision,
     world: { ...world, state: { ...world.state, containers, rng: decision.rng } },
   };
+}
+
+/**
+ * An accepted rule result as the host admits it (04 §5.2 step 7): an event type the owning
+ * capability does not own faults unowned_event, and a result over output_bytes faults
+ * budget_exceeded; both discard the whole proposal.
+ */
+export function admit(owner: string, decision: DecisionResult): DecisionResult {
+  if (decision.kind !== 'accepted') return decision;
+  const owners = CAPABILITY_OWNERS.event;
+  if (decision.events.some((e) => owners[e.payload.type]?.split('@')[0] !== owner))
+    return { kind: 'fault', code: 'unowned_event' };
+  // ponytail: unreachable with look and move (fixed-size results); tested with the first rule
+  // whose output size varies (S5, ActionRecipe).
+  if (utf8(encode(decision as never)).length > LIMITS.output_bytes!)
+    return { kind: 'fault', code: 'budget_exceeded' };
+  return decision;
 }
 
 const INVARIANTS = { ...movement.invariants };
