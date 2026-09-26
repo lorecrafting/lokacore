@@ -2,12 +2,7 @@
   "policy_version": 1,
   "root": {
     "op": "fact_compare",
-    "fact": {
-      "cartridge_id": "ashmere_hello",
-      "cartridge_version": "0.0.1",
-      "kind": "fact",
-      "key": "village_arrived"
-    },
+    "fact": "village_arrived",
     "equals": true
   }
 }

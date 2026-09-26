@@ -522,6 +522,8 @@ The smallest compilable subset, used as the first R4 fixture and the R1 spike mo
 
 *Amendment 2026-09-25 (R5 S1, [PM rulings](../reviews/2026-09-25-r5-s1-review.md), review F8):* rooms take the frozen shape of `protocol/room.schema.json`, which supersedes this example's room files: `rooms/<key>.json` carries `title` and `description` text keys (not `components.description.short`/`long`) and `exits` keyed by compass direction, each `{to: DefinitionRef}` (not `connections`); the strings live in the cartridge's default-locale `text.json` catalog (`TextCatalog`, `protocol/text.schema.json`), not `localization/en.yaml`; and the start room is `entry` in `cartridge.json`. Description variants and details join as optional fields in later R5 slices.
 
+*Amendment 2026-09-25 (R5 S2b, [owner decision](../decisions/owner-decision-short-refs-2026-09-25.md)):* a reference in JSON source (an exit's `to`, the `entry`, a policy node's `fact`, `item` or `quest`) may be the definition's key alone (`"to": "well_lane"`); the compiler expands it to the full DefinitionRef of this cartridge's definition of the kind its field takes, so the artifact is unchanged.
+
 ```yaml
 # cartridge.yaml
 api_version: loka/v3

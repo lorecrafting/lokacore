@@ -90,6 +90,22 @@ defmodule Loka.ContentRoomsTest do
               ]}
   end
 
+  # Short references (owner decision 2026-09-25); ashmere_details' known answer covers the
+  # resolved case. Break: a short exit or entry is expanded to another kind or not checked.
+  test "a short exit or entry naming no room is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+    files = %{
+      "cartridge.json" => Map.put(@manifest, "entry", "nowhere"),
+      "rooms/a.json" => room(%{"north" => %{"to" => "b"}, "up" => %{"to" => "x"}})
+    }
+
+    assert compile(dir, files) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "cartridge.entry", %{"target" => "c@1.0.0:room/nowhere"}),
+                d("UNRESOLVED_REFERENCE", "rooms/a.exits.up.to", %{"target" => "c@1.0.0:room/x"})
+              ]}
+  end
+
   test "a room without movement required is UNDECLARED_CAPABILITY", %{tmp_dir: dir} do
     m = put_in(@manifest, ["requires", "capabilities"], %{"fact" => 1})
 

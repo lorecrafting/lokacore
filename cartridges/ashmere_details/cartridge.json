@@ -19,10 +19,5 @@
   "supported_profiles": [
     "offline_private"
   ],
-  "entry": {
-    "cartridge_id": "ashmere_details",
-    "cartridge_version": "0.0.1",
-    "kind": "room",
-    "key": "ferry_landing"
-  }
+  "entry": "ferry_landing"
 }

@@ -6,7 +6,7 @@ defmodule Loka.Content.Compiler do
   """
   alias Loka.Content.Checks
   alias Loka.Core.Contracts
-  import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4]
+  import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
 
   @facts_file %{
     "type" => "object",
@@ -23,7 +23,7 @@ defmodule Loka.Content.Compiler do
           {:ok, map()} | {:error, [map()]}
   def compile(files, loaded, registry) do
     {manifest, entry, d1} = manifest(of(files, :manifest), registry)
-    {defs, d2} = definitions(files)
+    {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
     v2 = v2(defs, entry, text)
 
@@ -51,7 +51,7 @@ defmodule Loka.Content.Compiler do
   # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), which the
   # compiled v2 cartridge carries beside the manifest.
   defp manifest([{rel, m}], registry) do
-    defs = Contracts.defs()
+    defs = source_defs()
 
     file =
       put_in(defs["CartridgeManifest"], ["properties", "entry"], %{"$ref" => "DefinitionRef"})
@@ -59,7 +59,7 @@ defmodule Loka.Content.Compiler do
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
         {entry, manifest} = Map.pop(m, "entry")
-        {manifest, entry, Checks.requirements(rel, manifest, registry)}
+        {manifest, ref(entry, "room", m), Checks.requirements(rel, manifest, registry)}
 
       diags ->
         {nil, nil, diags}
@@ -78,15 +78,28 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  defp definitions(files) do
+  defp definitions(files, m) do
     {facts, d1} = facts(of(files, :facts))
     {policies, d2} = files(files, :policy, "VersionedPolicy")
     {actions, d3} = files(files, :action, "ActionDefinition")
     {rooms, d4} = files(files, :room, "RoomDefinition")
+    defs = %{"policy" => policies, "action" => actions, "room" => rooms}
 
-    {%{"fact" => facts, "policy" => policies, "action" => actions, "room" => rooms},
-     d1 ++ d2 ++ d3 ++ d4}
+    {Map.put(expanded(defs, m), "fact", facts), d1 ++ d2 ++ d3 ++ d4}
   end
+
+  # Short references become full ones once a valid manifest names the cartridge; without one
+  # the build fails anyway and reference checks are skipped.
+  defp expanded(defs, nil), do: defs
+
+  defp expanded(defs, m) do
+    for {kind, ds} <- defs, into: %{} do
+      {kind, Map.new(ds, fn {k, d} -> {k, expand(d, m)} end)}
+    end
+  end
+
+  defp expand({rel, steps, v}, m), do: {rel, steps, Checks.expand(v, m)}
+  defp expand(:invalid, _), do: :invalid
 
   defp files(files, kind, contract),
     do: collect(for {rel, {^kind, k}, v} <- files, do: {k, definition(rel, [], k, v, contract)})
@@ -180,12 +193,16 @@ defmodule Loka.Content.Compiler do
 
   defp authored_key(_, _, _), do: []
 
-  defp validated(rel, steps, contract, value, defs \\ Contracts.defs()) do
+  defp validated(rel, steps, contract, value, defs \\ source_defs()) do
     case Contracts.validate(contract, value, defs) do
       :ok -> []
       {:error, es} -> schema(rel, steps, value, es)
     end
   end
+
+  # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
+  defp source_defs,
+    do: Map.update!(Contracts.defs(), "DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
 
   defp cartridge(m, defs, nil) do
     %{
