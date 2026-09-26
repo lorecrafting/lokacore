@@ -15,3 +15,7 @@ file covers: [the protocol map](../../protocol/README.md).
   are unchecked (`test/loka/core/nominal_ids_test.exs` records which shapes warn). Build
   ids with the `Loka.Core.Contracts` constructors at the boundary and match the tag
   explicitly (`{:character_id, id}`) in every domain function head.
+- Rules read the acting entity from the command (`payload.actor_id`), never from
+  `world.character`. Only the admission boundary and hosts may name the player; a rule that
+  assumes "the actor is the player" blocks puppeting and NPC-issued commands later
+  ([owner decision](../decisions/owner-decision-puppeting-2026-09-25.md)).
