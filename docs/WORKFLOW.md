@@ -22,7 +22,7 @@ all reviews run on Opus until the owner says Fable is available again
 ([owner decision](decisions/owner-decision-opus-reviews-2026-09-25.md)); meanwhile Astra
 reviews the remaining Fable slots (the simulation slice, R6 authority/save, GameView for
 touch).
-**Cross-vendor review (Astra)** runs beside the Fable review only where the PM judges a
+**Cross-vendor review (Astra)** runs beside the design-judgment review only where the PM judges a
 slice foundational: a freeze later work builds on (a spec amendment, a new encoding or
 hash domain, an identity, delta or other core contract, a gate review), not the
 implementation of a contract Astra already reviewed. The owner delegated this judgment to
