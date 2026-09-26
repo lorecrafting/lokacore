@@ -36,3 +36,7 @@ skipped (docs/config only).
   S1-S2 mean, 6 x 1.86M + 15 x 0.48M (#37's observed Opus-only cost) = about 18.4M. A reader
   taking "S1-S2" literally under-reads both figures. Say "at S2's rate" in the ROADMAP (the
   decision's summary is a record of what was proposed; leave it).
+
+## Fix round 1 (`4085939`)
+
+Nit resolved: 6 x 1.08M + 15 x 0.48M = 13.6M and 6 x 1.86M + 15 x 0.48M = 18.3M give "about 14 to 18 million"; 21 x 1.08M = 22.7M gives "about 23 million with every slice at S2's rate". Wording is accurate. **APPROVE.**
