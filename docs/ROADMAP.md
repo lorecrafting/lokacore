@@ -26,6 +26,8 @@ filter on top. Adapted from Datadog's
   the TypeScript hosts (Node bytes replayed on Hermes; a device sample at R6P). A
   failure reproduces from its seed and is shrunk to a minimal case. Seed counts follow
   the [envelope's differential target](spec/r1-acceptance-envelope.md) (every fast CI run).
+  Built in the R5 +1 slice: `kernel/ts/test/sim.ts`, its seeds in `sim_seeds.json`; its real
+  proposals feed the compose differential (`test/loka/core/compose_test.exs`).
 - **Fault simulation (R6).** The same runs through the local authority with injected
   host faults: failed commit, unknown commit outcome, kill after commit before reply,
   duplicate delivery. Storage faults are real SQLite faults (AGENTS.md).

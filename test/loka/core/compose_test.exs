@@ -314,8 +314,24 @@ defmodule Loka.Core.ComposeTest do
   test "differential: Elixir and TypeScript compose identically" do
     :rand.seed(:exsss, {5, 5, 5})
     pool = for c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op
-    cases = for _ <- 1..1000, do: random_case(pool)
+    ours = differential(for _ <- 1..1000, do: random_case(pool))
+    faults = Enum.frequencies_by(ours, &get_in(&1, ["result", "fault", "code"]))
+    assert map_size(faults) >= 6, "generator too narrow: #{inspect(faults)}"
+  end
 
+  # The simulator's accepted proposals (kernel/ts/test/sim_sample.ts, generated each run): real
+  # deltas over real world states, composed by both kernels. Breaks: the kernels disagreeing on
+  # a delta a rule actually proposes (a resource row, a barrier, a fact default).
+  test "differential on 300 simulator proposals" do
+    {out, 0} = System.cmd("node", ["kernel/ts/test/sim_sample.ts", "300"])
+    ours = differential(JSON.decode!(out))
+    assert length(ours) == 300
+    assert Enum.all?(ours, &Map.has_key?(&1["result"], "changes"))
+  end
+
+  # Composes each {state, delta} in Elixir (every invariant holding) and through the TypeScript
+  # peer; the canonical results and invariant outcomes must be identical.
+  defp differential(cases) do
     ours =
       for %{"state" => s, "delta" => d} <- cases do
         result = Compose.compose(s, d)
@@ -335,8 +351,7 @@ defmodule Loka.Core.ComposeTest do
     {theirs, 0} = System.cmd("node", [@peer, path])
     File.rm!(path)
     assert theirs == elem(Canonical.encode(ours), 1)
-    faults = Enum.frequencies_by(ours, &get_in(&1, ["result", "fault", "code"]))
-    assert map_size(faults) >= 6, "generator too narrow: #{inspect(faults)}"
+    ours
   end
 
   @base @fixture["states"]["base"]

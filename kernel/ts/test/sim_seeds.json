@@ -1,0 +1,13 @@
+{
+  "generator": 1,
+  "seeds": [
+    {
+      "seed": 3,
+      "found": "step threw on a command type that is an Object prototype key (__proto__), fixed in world.ts step"
+    },
+    {
+      "seed": 1,
+      "found": "step threw on a command type that is an Object prototype key (toString), from a drained start"
+    }
+  ]
+}

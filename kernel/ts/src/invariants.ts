@@ -1,8 +1,17 @@
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
-// observation fields). check(id, observation) is true when the invariant holds.
+// observation fields). check(id, observation) is true when the invariant holds. The checks
+// after STEP read one kernel step and are TypeScript only (rules are TypeScript, ADR-074).
 import type { Json } from './canonical.ts';
 import { current, key, same, target, type Result } from './compose.ts';
-import { EVALUATION_FAULTS, type DeltaOp } from './contracts.gen.ts';
+import {
+  CAPABILITY_OWNERS,
+  EVALUATION_FAULTS,
+  type AdvertisedAction,
+  type DeltaOp,
+  type ExitView,
+  type GameView,
+} from './contracts.gen.ts';
+import { validate } from './validate.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
 type Any = any;
@@ -120,7 +129,50 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
       : [];
     return published.every((p: Json) => allowed.some((a: Json) => same(a, p)));
   },
+  // STEP: `before` and `after` are the State around step(command) = decision; `view` is the
+  // actor's GameView of the world before it.
+  // A rejection or fault leaves the State (clock, containers, RNG, facts, resources, cooldowns,
+  // barriers) byte for byte as it was (04 §5.0; §5.2 for a fault).
+  rejection_consumes_nothing: ({ decision, before, after }) =>
+    decision.kind === 'accepted' || same(before, after),
+  // An unregistered command type is never accepted, and an accepted decision is valid against
+  // its closed contract, so it names only registered delta ops, events and effects. Policy
+  // operators are closed at the cartridge loader (lockStage).
+  unknown_types_fail_closed: ({ command, decision }) =>
+    decision.kind !== 'accepted' ||
+    (Object.hasOwn(CAPABILITY_OWNERS.command, command.payload.type) &&
+      validate('DecisionResult', decision).length === 0),
+  // The view's entry for the command (its exit for a move, else its action) and admission agree
+  // (04 §15, §19): available is never refused with a code the view shows for that entry;
+  // unavailable is never accepted, and a refusal with such a code is the view's code.
+  gameview_agrees_with_admission: ({ view, command, decision }) => {
+    const entry = advertised(view, command.payload);
+    const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+    const shown = SHOWN[command.payload.type] ?? [];
+    if (!entry) return true;
+    if (entry.available) return !shown.includes(code);
+    return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
+  },
 };
+
+// The codes the view can show on an entry: an exit's passage and fare; a recipe's policy and
+// admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
+// action with a policy on an engine command joins when a cartridge authors one.
+const SHOWN: Readonly<Record<string, readonly string[]>> = {
+  move: ['exit_closed', 'exit_locked', 'insufficient_resource'],
+  perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
+};
+
+function advertised(view: GameView, p: Any): ExitView | AdvertisedAction | undefined {
+  if (p.type === 'move') return view.exits.find((e) => e.direction === p.direction);
+  const id = p.type === 'perform' ? undefined : (p.item_id ?? p.target_id);
+  if (id === undefined) {
+    const key = p.type === 'perform' ? p.action : p.type;
+    return view.actions.find((a) => a.action_key === key);
+  }
+  const held = [...view.entities, ...view.inventory].find((e) => e.id === id);
+  return held?.actions.find((a) => a.action_key === p.type);
+}
 
 /** True when the invariant holds; throws for an unknown id. */
 export function check(id: string, observation: { [field: string]: unknown }): boolean {
