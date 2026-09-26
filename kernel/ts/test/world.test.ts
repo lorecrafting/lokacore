@@ -234,14 +234,20 @@ test('the delta digest construction matches the Python known answer', () => {
 });
 
 // Planted rules (Astra A2 counterexamples 1 and 3; review R1-1). Breaks: the event-ownership
-// check is removed or returns a rejection (04 §5.2 step 7: an evaluator fault), or the world a
-// rule sees is writable.
+// check is removed, returns a rejection (04 §5.2 step 7: an evaluator fault) or reads an event
+// type's owner through Object's prototype (throws), or the world a rule sees is writable.
 test('a foreign event faults unowned_event, and a rule mutating the world throws', () => {
   const w = freeze(fresh());
   const payload = JSON.parse(`{"type":"item_acquired","item_id":"${BODY}","holder_id":"${BODY}"}`);
   const mint = allocator(w, { id: CMD as Command['id'] });
   const foreign = accepted(w, 'moved', [], [event(w, move('north') as never, mint, 1, payload)]);
   assert.deepEqual(admit('movement', foreign as never), { kind: 'fault', code: 'unowned_event' });
+  // An Object prototype key names no owner (a plain lookup finds Object and throws).
+  const proto = {
+    ...foreign,
+    events: [event(w, move('north') as never, mint, 1, { type: 'constructor' } as never)],
+  };
+  assert.deepEqual(admit('movement', proto as never), { kind: 'fault', code: 'unowned_event' });
   const own = step(w, move('north')).decision;
   assert.equal(admit('movement', own), own);
   const mutating = (world: World) => {

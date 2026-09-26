@@ -170,9 +170,9 @@ A test exists to catch a specific break. Adapted from
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `mobile.yml` builds the native apps on pull requests that change native
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
-  on pull requests that touch `mobile/` or `kernel/`. Planned: the differential (the foundation across both kernels; rules on
-  Node, a Hermes replay sample at R6P: ADR-074) runs at least 10,000 fresh sequences on
-  every fast CI run (r1-acceptance-envelope.md §3).
+  on pull requests that touch `mobile/` or `kernel/`. The simulator (`kernel/ts/test/sim.ts`) runs its
+  regression seeds and 10,000 fresh sequences in `npm test` on every fast CI run
+  (r1-acceptance-envelope.md §3); the Hermes replay sample comes at R6P (ADR-074).
 
 Run everything locally: `bin/check_all.sh` (what pre-push runs).
 
