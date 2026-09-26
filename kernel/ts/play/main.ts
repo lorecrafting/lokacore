@@ -12,10 +12,10 @@ import { commandId } from '../src/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { sha256Hex } from '../src/sha256.ts';
 import { validate } from '../src/validate.ts';
-import { resolve, normalize } from '../src/target.ts';
+import { doors, resolve, normalize } from '../src/target.ts';
 import { detailOf, resolved, type Offered } from '../src/actions.ts';
 import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
-import { clock, detail, inventory, parse, room, say, status, which } from './text.ts';
+import { clock, detail, door, inventory, parse, reason, room, say, status, which } from './text.ts';
 import { decide, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
@@ -66,7 +66,10 @@ async function session(script: string | undefined) {
     const action = recipe(r, text);
     const parsed = action ?? parse(text);
     if (parsed === 'quit') break;
-    if (parsed === 'inventory') process.stdout.write(inventory(cartridge, r.world));
+    if (parsed === 'brief')
+      process.stdout.write(`Brief mode ${(brief = !brief) ? 'on' : 'off'}.\n`);
+    else if (parsed && typeof parsed === 'object' && 'door' in parsed) opening(r, parsed);
+    else if (parsed === 'inventory') process.stdout.write(inventory(cartridge, r.world));
     else if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
     else if (parsed && 'perform' in parsed) perform(r, parsed);
     else if (parsed && 'lookup' in parsed) lookup(r, parsed);
@@ -100,11 +103,22 @@ const header = (r: Run) =>
     },
   });
 
+// Brief mode (00 §4.1; owner decision R5 S4 Q1b), on by default: entering a room already
+// visited this session shows its title and contents, not its description; look shows all.
+// ponytail: presentation only, so the visited rooms live in this session, not in the kernel or
+// the GameView; persistent visited state arrives with map discovery (21 §5).
+let brief = true;
+const visited = new Set<string>();
+const arrived = (r: Run) => {
+  const here = r.world.state.containers[r.world.body];
+  const text = room(cartridge, r.world, brief && visited.has(here));
+  visited.add(here);
+  return text;
+};
+
 // The room on arrival, the status line and the initial state hash.
 const shown = (r: Run) =>
-  process.stdout.write(
-    `${room(cartridge, r.world)}${status(r.world)}[state ${hash(r.world.state as never)}]\n`,
-  );
+  process.stdout.write(`${arrived(r)}${status(r.world)}[state ${hash(r.world.state as never)}]\n`);
 
 const command = (r: Run, parsed: { type: string }): Command =>
   ({
@@ -120,11 +134,16 @@ function turn(r: Run, cmd: Command, measured = true): string {
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
   const p = cmd.payload as { type: string; target_id?: EntityId; item_id?: EntityId };
   const name = (id?: string) => say(cartridge, r.world.entities[id!]?.short ?? '');
+  const it = door(cartridge, r.world, (p as { direction?: string }).direction ?? '');
   const done: Record<string, string> = {
     taken: `You take ${name(p.item_id)}.\n`,
     dropped: `You drop ${name(p.item_id)}.\n`,
     given: `You give ${name(p.item_id)} to ${name((p as { recipient_id?: string }).recipient_id)}.\n`,
     waited: `Time passes. It is ${clock(r.world.state.clock)}.\n`,
+    opened: `You open ${it}.\n`,
+    closed: `You close ${it}.\n`,
+    locked: `You lock ${it}.\n`,
+    unlocked: `You unlock ${it}.\n`,
   };
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
@@ -133,7 +152,11 @@ function turn(r: Run, cmd: Command, measured = true): string {
       : narrated
         ? narrated.map((t) => `${say(cartridge, t.key)}\n`).join('')
         : (done[decision.outcome] ??
-          (p.target_id ? detail(cartridge, r.world, p.target_id) : room(cartridge, r.world)));
+          (p.target_id
+            ? detail(cartridge, r.world, p.target_id)
+            : decision.outcome === 'moved'
+              ? arrived(r)
+              : room(cartridge, r.world)));
   const micros = latency.data.value;
   const state = hash(r.world.state as never);
   process.stdout.write(`${shown}${status(r.world)}[state ${state}  step ${micros} µs]\n`);
@@ -152,6 +175,19 @@ function lookup(r: Run, p: { lookup: string; verb?: 'take' | 'drop' | 'give'; to
       : p.verb
         ? { type: p.verb, item_id: id }
         : { type: 'look', target_id: id };
+  append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+}
+
+// open, close, lock or unlock the door in a direction, or the one the words name (target.ts
+// doors): several ask which, none builds no Command.
+function opening(r: Run, p: { door: string; direction?: string; words?: string }) {
+  const ds = p.direction ? [p.direction] : doors(r.world, r.world.character, p.words!);
+  if (ds.length !== 1) {
+    const names = ds.map((d) => door(cartridge, r.world, d));
+    const which = `Which do you mean: ${names.slice(0, -1).join(', ')} or ${names.at(-1)}?\n`;
+    return void process.stdout.write(ds.length ? which : "You don't see that here.\n");
+  }
+  const payload = { type: p.door, direction: ds[0] };
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 
@@ -211,35 +247,6 @@ function found(r: Run, words: string): EntityId | undefined {
   };
   const record = { format: 'loka-obs-v1', event: 'target.unresolved', store: 'diagnostics' };
   append('diagnostics', r.ids.run_id, line({ ...record, ids: r.ids, data }));
-}
-
-// The player's words for a rejection of a command of `type`, else the kind and code.
-function reason(
-  d: { kind: string; error?: { code: string }; code?: string },
-  type: string,
-): string {
-  const code = d.error?.code ?? d.code;
-  const words: Record<string, string> = {
-    'move not_found': "You can't go that way.",
-    'move invalid_target': "That isn't a direction.",
-    'take invalid_state': 'You already have that.',
-    'take not_found': "You can't take that.",
-    'take invalid_target': "You can't take that.",
-    'drop not_found': "You aren't carrying that.",
-    'drop invalid_target': "You aren't carrying that.",
-    'give not_found': "You can't give things to that.",
-    'give invalid_target': "You can't give things to that.",
-    'give invalid_state': "They can't carry any more.",
-    'move insufficient_resource': 'You are too exhausted.',
-    insufficient_resource: "You don't have the strength for that.",
-    cooldown: "You can't do that again yet.",
-    'perform invalid_target': "You can't do that to that.",
-    invalid_state: "You can't do that now.",
-    not_present: "You don't see that here.",
-    not_owned: "You aren't carrying that.",
-    unsupported_capability: "You can't do that here.",
-  };
-  return words[`${type} ${code}`] ?? words[code!] ?? `(${d.kind}: ${code})`;
 }
 
 // Re-decides the transcript's Commands from its header (run, seed, world, and the recorded

@@ -60,8 +60,8 @@ test('take, drop, give, inventory and examine read as a player expects', () => {
       'A brass lantern lies in the weeds, dry. The oil you carry would fill it.\nExits: south\n',
     'x lantern\nDented brass, its reservoir dry. It would light a fen path.\n',
     'take lantern\nYou take a brass lantern.\n',
-    's\nFerry Landing\nReeds crowd a slick wooden landing. A mooring post leans into the current.\n' +
-      'Bram the ferryman stands here, one boot on the ferry.\nExits: north\n',
+    // Brief mode (R5 S7): back at a visited room, its title and contents only.
+    's\nFerry Landing\nBram the ferryman stands here, one boot on the ferry.\nExits: north\n',
     'give lantern to ferryman\nYou give a brass lantern to Bram the ferryman.\n',
     "give satchel to bram\nThey can't carry any more.\n",
     'drop satchel\nYou drop a leather satchel.\n',
