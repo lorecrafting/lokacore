@@ -280,6 +280,8 @@ Room count: 25 + 22 + 13 + 17 + 32 = 109. By level: z+3: 1, z+2: 4, z+1: 14, z0:
 
 Everything the game uses, grouped the way a classic-MUD player recognizes it. Each row names where it appears and the v3 primitive it pulls. Phase is where the primitive must first exist. Rows marked **NEW** are not in document 21 yet; see §11.
 
+*Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), maximums 300/120/200 unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV (terrain costs stay R8), and the pools regenerate per game hour, derived from the clock.
+
 ### 4.1 World and movement
 
 | Mechanic | In this game | Primitive | Phase |
@@ -291,9 +293,9 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Lockpicking and forcing | lockpick skill or STR force | Check + skill | R7 |
 | Hidden exits and secret doors | hidden treasury, fence alley | Connection + PerceptionPolicy | R8 |
 | Dark rooms and dark-sight | fen at night, barrow, crypt, deep shaft; hill-folk see in dark | room tag + light resource + ancestry | R8 |
-| Water rooms: swim, boat, drowning | mire, pool, shallows, tide flats, flooded gallery; stamina drain, drown at 0 | terrain + skill + Resource | R8 |
+| Water rooms: swim, boat, drowning | mire, pool, shallows, tide flats, flooded gallery; MV drain, drown at 0 | terrain + skill + Resource | R8 |
 | Tides | mire crossing and tide flats passable at low tide only, 6-hour cycle | **NEW** tide window (calendar-derived) | R8 |
-| Terrain movement cost | fen 2 stamina, road 1, mine 2, mounted halves | travel cost | R8 |
+| Terrain movement cost | 1 MV per room from R5; fen 2 MV, road 1, mine 2, mounted halves | travel cost | R5 (1 MV), R8 (terrain) |
 | Indoor/outdoor, weather exposure | rain outdoors chills; fog lowers PER; cloak negates | room tag + status | R8 |
 | Traps: pit, dart, cave-in | barrow passage, deep shaft, mine event | Check + consequence | R8 |
 | Climbing and rope | descend into barrow mouth or deep shaft without rope = fall damage | item requirement + Check | R8 |
@@ -315,7 +317,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Moon phase | full moon: wights stronger, portal opens, wisp visible | derived from calendar | R8 |
 | Real-elapsed jobs | smithy, brewing, tanning, mining quota, inn rest | ADR-049 resume input | R6 |
 | Weather | clear/rain/fog/storm; storm closes the ferry | seeded weather capability | R8 |
-| Regeneration | HP/stamina/spirit per hour; doubled resting; halved hungry | derived resource | R5 |
+| Regeneration | HP/MA/MV per hour; doubled resting; halved hungry | derived resource | R5 |
 | Light burn-down | torch 2 h, lantern 8 h, refill oil at chandler | derived temporal state | R8 |
 | Shop and service hours | per NPC; bank closed Sundays; ferry no night crossing | schedule | R8 |
 | Timed world events | cave-in at the mine on day 6; storm on day 9; Lantern Night after the main story | WorldEventPlan | R8 |
@@ -327,7 +329,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 |---|---|---|---|
 | Ancestry and guild | four ancestries, five guilds, secondary guild at level 5 | creation facts + policy | R7 |
 | Six stats, trainable | STR, DEX, CON, INT, SPI, PER; train at guildhall for pennies and level | attributes + trainer | R7 |
-| Resources | HP, stamina, spirit; hunger, thirst | Resource | R5 |
+| Resources | HP, MA (mana), MV (movement), LegendMUD-style, default 300/120/200; hunger, thirst | Resource | R5 |
 | Levels 1–15, XP from kills, quests, exploration, first-crafts | level titles per guild | progression | R7 |
 | Skills as percentages, learn by use and by training | 22 skills: swords, daggers, clubs, bows, thrown, dodge, parry, bash, kick, disarm, backstab, sneak, hide, pick lock, steal, bandage, swim, climb, haggle, herbalism, brewing, cooking, smithing, tanning, mining, fishing, ride, track, appraise | skills + practice + **NEW** learn-by-doing | R7 |
 | Spell words | light, mend, ward, calm, reveal, chill, bind; two words combine (`ward + light` = sanctuary) | skills + Check + **NEW** word combination | R7 |
@@ -379,7 +381,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Weapon classes | sword, dagger, club, bow, thrown; ranged from adjacent room | equipment + skill + **NEW** adjacent-room targeting | R7 |
 | Armor absorption by location | head/body/shield; called shots (stretch) | derived stat | R7 |
 | Special attacks | bash (stun), kick, disarm, trip, backstab (sneaking, ×3), rescue (swap target to you) | ActionRecipes + cooldowns | R7 |
-| Flee and wimpy | flee costs stamina; wimpy auto-flees below N% | Action + player setting | R7 |
+| Flee and wimpy | flee costs MV; wimpy auto-flees below N% | Action + player setting | R7 |
 | Consider | `consider hound` gives odds band | derived projection | R7 |
 | Stances | aggressive/normal/defensive shift hit vs dodge | **NEW** stance state | R7 |
 | Poisoned weapons and fire | apply adder venom to dagger; torch as weapon burns wights | consumable + material rule | R8 |
@@ -631,7 +633,7 @@ Each tier is cumulative. A row's chapter is where the mechanic first appears; it
 |---|---|---|---|
 | Movement | rooms, six exits, doors, keys, tides, dark rooms and lantern, water rooms (swim only), map discovery, details, variants, sense cues | hidden exits, traps, climbing and rope, moon portal, scan from `view` rooms | mounts, cart, terrain cost, toll bridge |
 | Time | day/night, dusk gate, regen, shop hours, cooldowns, light burn-down, inn rest (`play_time` only) | moon phase, weather, `real_elapsed` for brewing and rest, Wight Night event | seasons, cave-in and storm events, Lantern Night finale |
-| Character | four ancestries, six stats, HP/stamina/spirit, positions, encumbrance, levels 1–5, six skills (swords, dodge, bandage, swim, herbalism, haggle), learn-by-doing, titles | guilds (Warden, Lantern-bearer, Fen-walker), levels to 10, spell words and combination, stances, collection log, ironman | Cutpurse and Hedge-mage guilds, secondary guild, levels to 15, attribute training, remaining skills (bows, thrown, sneak, hide, pick lock, steal, cooking, smithing, tanning, mining, fishing, ride, track, appraise) |
+| Character | four ancestries, six stats, HP/MA/MV, positions, encumbrance, levels 1–5, six skills (swords, dodge, bandage, swim, herbalism, haggle), learn-by-doing, titles | guilds (Warden, Lantern-bearer, Fen-walker), levels to 10, spell words and combination, stances, collection log, ironman | Cutpurse and Hedge-mage guilds, secondary guild, levels to 15, attribute training, remaining skills (bows, thrown, sneak, hide, pick lock, steal, cooking, smithing, tanning, mining, fishing, ride, track, appraise) |
 | Items | containment, stacking, 14 slots, wear/wield, consumables, keys, liquids, unique items, readables, corpses | durability (no repair yet), item affects, cursed items, identify, silver material, skinning, trophies | repair, salvage, forging, quality bands, level and guild restrictions, tools, instruments |
 | Combat | melee rounds, hit/dodge/parry, damage bands, flee, wimpy, consider, bleed and poison, bandage, aggressive and flee behaviors, death with corpse and shrine respawn | ghost-walk and resurrection, special attacks (bash, kick, rescue), dual wield, hireling with orders, assist, boss phases, mob memory and hunt, sanctuary rooms, calm and bind words, pets | ranged from adjacent rooms, backstab, disarm, trip, poisoned weapons, torch vs wights, hard-mode XP loss |
 | Economy | one shop (chandler), inn food and drink, ferry fare | second shop (priory alms for potions), healer, trainers for the three guilds | armorer, apothecary, bank, haggle, faction pricing, liquidity and restock, stables, smithy jobs, mine quota, NPC-to-NPC trade, housing, mail |

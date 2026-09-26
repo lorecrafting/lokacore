@@ -85,7 +85,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 ## Git hygiene
 
 - Every developer works in its own worktree on its own branch; the main checkout stays
-  with the PM. The reviewer mutates code only in a throwaway detached worktree
+  with the PM. Developer worktrees sit beside the repository (`../lokacore-<slice>`), outside
+  the tree the checks scan, and are removed after merge. The reviewer mutates code only in a throwaway detached worktree
   (`git worktree add --detach`) and removes it before finishing.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
