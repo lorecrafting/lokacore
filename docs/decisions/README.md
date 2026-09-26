@@ -52,3 +52,4 @@ text. This directory also holds the owner's decisions retained verbatim.
 ## R5
 
 - Owner decisions: [R5 slice plan; MUD-style `loka play`, networked terminal later (R14)](owner-decisions-r5-plan-2026-09-25.md).
+- Owner decision: [short references in cartridge source (S2b)](owner-decision-short-refs-2026-09-25.md).
