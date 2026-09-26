@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "crypt.gate_open": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The crypt gate's lock was picked; the gate stands open."
+    }
+  }
+}
