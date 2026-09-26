@@ -2527,7 +2527,7 @@
     "value": {
       "id": "one_container_per_item",
       "statement": "s",
-      "implemented_in": "r3_pr5"
+      "implemented_in": "elixir_and_typescript"
     },
     "errors": [
       {
@@ -2545,7 +2545,7 @@
         "heading": "h"
       },
       "statement": "s",
-      "implemented_in": "r3_pr5"
+      "implemented_in": "elixir_and_typescript"
     },
     "errors": [
       {
@@ -2593,7 +2593,7 @@
         "heading": "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
       },
       "statement": "",
-      "implemented_in": "r3_pr5"
+      "implemented_in": "elixir_and_typescript"
     },
     "errors": [
       {
@@ -3544,7 +3544,7 @@
       "id": "a",
       "citation": {},
       "statement": "s",
-      "implemented_in": "r6"
+      "implemented_in": "none"
     },
     "errors": [
       {

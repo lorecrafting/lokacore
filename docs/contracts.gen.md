@@ -340,9 +340,9 @@ Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id i
 
 ## Invariant registry contract (`protocol/invariant.schema.json`)
 
-Registered invariants (docs/ROADMAP.md, verification harness): stable id, spec citation, statement, and the slice that implements the check.
+Registered invariants (docs/ROADMAP.md, verification harness): stable id, spec citation, statement, and where a check by that id runs today.
 
-- **InvariantEntry**: One entry of protocol/invariants.json. citation names a docs/spec/ document and one of its exact heading lines (the contract-links.json convention); a test requires both to exist. implemented_in is the slice whose check enforces it.
+- **InvariantEntry**: One entry of protocol/invariants.json. citation names a docs/spec/ document and one of its exact heading lines (the contract-links.json convention); a test requires both to exist. implemented_in is where a check by this id runs today (test/loka/core/registries_test.exs holds it to the code): elixir_and_typescript, Loka.Core.Invariants.check/2 and its twin kernel/ts/src/invariants.ts check, on composition and commit observations (protocol/fixtures/composition.json); typescript, only the TypeScript kernel, kernel/ts/src/world.ts holds, on a world (TypeScript-first rules, ADR-074); none, no check by id yet, whatever the code and tests enforce (the slice that adds one sets the value; docs/ROADMAP.md plans it).
 
 ## Manifest contracts (`protocol/manifest.schema.json`)
 

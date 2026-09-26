@@ -11,7 +11,7 @@ import { read } from './read.ts';
 const fixture = read('protocol/fixtures/composition.json');
 const limits = read('docs/spec/conformance/composition-profile.json').limits;
 const registered: string[] = read('protocol/invariants.json')
-  .filter((i: { implemented_in: string }) => i.implemented_in === 'r3_pr5')
+  .filter((i: { implemented_in: string }) => i.implemented_in === 'elixir_and_typescript')
   .map((i: { id: string }) => i.id);
 const COMPOSE_INVARIANTS = [
   'one_container_per_item',
@@ -105,7 +105,7 @@ test('composition known answers', () => {
   }
 });
 
-test('invariant checks known answers, a holding and a violated case per r3_pr5 invariant', () => {
+test('invariant checks known answers, a holding and a violated case per invariant checked in both kernels', () => {
   const covered = new Set<string>();
   for (const c of fixture.invariants) {
     const obs = { ...c.observation };

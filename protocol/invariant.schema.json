@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Invariant registry contract",
-  "description": "Registered invariants (docs/ROADMAP.md, verification harness): stable id, spec citation, statement, and the slice that implements the check.",
+  "description": "Registered invariants (docs/ROADMAP.md, verification harness): stable id, spec citation, statement, and where a check by that id runs today.",
   "$defs": {
     "InvariantEntry": {
-      "description": "One entry of protocol/invariants.json. citation names a docs/spec/ document and one of its exact heading lines (the contract-links.json convention); a test requires both to exist. implemented_in is the slice whose check enforces it.",
+      "description": "One entry of protocol/invariants.json. citation names a docs/spec/ document and one of its exact heading lines (the contract-links.json convention); a test requires both to exist. implemented_in is where a check by this id runs today (test/loka/core/registries_test.exs holds it to the code): elixir_and_typescript, Loka.Core.Invariants.check/2 and its twin kernel/ts/src/invariants.ts check, on composition and commit observations (protocol/fixtures/composition.json); typescript, only the TypeScript kernel, kernel/ts/src/world.ts holds, on a world (TypeScript-first rules, ADR-074); none, no check by id yet, whatever the code and tests enforce (the slice that adds one sets the value; docs/ROADMAP.md plans it).",
       "type": "object",
       "properties": {
         "id": {
@@ -37,10 +37,9 @@
         },
         "implemented_in": {
           "enum": [
-            "r3_pr3",
-            "r3_pr5",
-            "r5",
-            "r6"
+            "elixir_and_typescript",
+            "typescript",
+            "none"
           ]
         }
       },
@@ -59,7 +58,7 @@
             "heading": "## 23. Inventory/location invariant"
           },
           "statement": "Every item has exactly one authoritative container.",
-          "implemented_in": "r3_pr5"
+          "implemented_in": "elixir_and_typescript"
         },
         {
           "id": "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
@@ -68,7 +67,7 @@
             "heading": "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
           },
           "statement": "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss",
-          "implemented_in": "r6"
+          "implemented_in": "none"
         }
       ]
     }
