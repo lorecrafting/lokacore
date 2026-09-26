@@ -156,11 +156,14 @@ A test exists to catch a specific break. Adapted from
   [capability/schema docs](docs/contracts.gen.md) and the capability/residency matrix
   (`docs/residency.gen.json`) match `protocol/` (run without `--check` to regenerate); an
   Elixir host adapter on a `portable_capability` without a differential fails (ADR-074).
+- `elixir bin/features.exs --check`: the [feature map](docs/features.gen.md) matches the
+  capability registry and `docs/features.json`; an implemented capability (a rule module) with
+  a missing cell fails.
 - `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
-  out-of-subset schema, an Elixir adapter without a differential, and a PartyId passed
-  where a CharacterId is matched (nominal ids, `Loka.Core.Contracts`), and requires each
-  check to fail.
+  out-of-subset schema, an Elixir adapter without a differential, a stale feature map, an
+  implemented capability without its map cells, and a PartyId passed where a CharacterId is
+  matched (nominal ids, `Loka.Core.Contracts`), and requires each check to fail.
 - `elixir bin/check_docs.exs`: relative links resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).

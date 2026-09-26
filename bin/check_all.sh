@@ -10,6 +10,7 @@ m mix deps.get --check-locked
 m mix format --check-formatted
 m mix compile --warnings-as-errors
 m elixir bin/contracts.exs --check
+m elixir bin/features.exs --check
 m mix xref graph --format cycles --fail-above 0
 m mix xref graph --label compile-connected --fail-above 0
 m mix test
