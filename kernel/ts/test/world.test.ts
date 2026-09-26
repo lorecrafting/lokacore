@@ -45,7 +45,9 @@ const cmd = (payload: object): Command =>
 const move = (direction: string) => cmd({ type: 'move', direction });
 const title = (w: World) => gameView(w).place.title.key;
 
-// Breaks: ids minted from another input or order, or the body not placed in the entry room.
+// Breaks: ids minted from another input or order, the body not placed in the entry room, or the
+// place's actions not the engine verbs of the locked capabilities (look, move; not take).
+const none = { kind: 'none' };
 test('a fresh world mints IdSource ids and puts the player in the entry room', () => {
   const w = fresh();
   assert.equal(w.character, CHARACTER);
@@ -66,7 +68,16 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
       { available: true, direction: 'north' },
       { available: true, direction: 'west' },
     ],
-    actions: [],
+    actions: [
+      { available: true, action_key: 'look', label: 'action.look', target: none, input: [] },
+      {
+        available: true,
+        action_key: 'move',
+        label: 'action.move',
+        target: none,
+        input: ['direction'],
+      },
+    ],
     entities: [],
     inventory: [],
     journal: [],

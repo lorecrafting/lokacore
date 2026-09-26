@@ -12,7 +12,8 @@ import { commandId } from '../src/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { sha256Hex } from '../src/sha256.ts';
 import { validate } from '../src/validate.ts';
-import { resolve } from '../src/target.ts';
+import { resolve, normalize } from '../src/target.ts';
+import { resolved } from '../src/actions.ts';
 import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
 import { detail, inventory, parse, room, say, which } from './text.ts';
 import { decide, type Run } from './run.ts';
@@ -62,10 +63,12 @@ async function session(script: string | undefined) {
   if (tty) input.prompt();
   for await (const text of input) {
     if (!tty) process.stdout.write(`> ${text}\n`);
-    const parsed = parse(text);
+    const action = recipe(r, text);
+    const parsed = action ?? parse(text);
     if (parsed === 'quit') break;
     if (parsed === 'inventory') process.stdout.write(inventory(cartridge, r.world));
     else if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
+    else if (parsed && 'perform' in parsed) perform(r, parsed);
     else if (parsed && 'lookup' in parsed) lookup(r, parsed);
     else if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
     if (tty) input.prompt();
@@ -117,11 +120,14 @@ function turn(r: Run, cmd: Command, measured = true): string {
     dropped: `You drop ${name(p.item_id)}.\n`,
     given: `You give ${name(p.item_id)} to ${name((p as { recipient_id?: string }).recipient_id)}.\n`,
   };
+  const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
     decision.kind !== 'accepted'
       ? `${reason(decision, p.type)}\n`
-      : (done[decision.outcome] ??
-        (p.target_id ? detail(cartridge, r.world, p.target_id) : room(cartridge, r.world)));
+      : narrated
+        ? narrated.map((t) => `${say(cartridge, t.key)}\n`).join('')
+        : (done[decision.outcome] ??
+          (p.target_id ? detail(cartridge, r.world, p.target_id) : room(cartridge, r.world)));
   const micros = latency.data.value;
   process.stdout.write(`${shown}[state ${hash(r.world.state as never)}  step ${micros} µs]\n`);
   return line(trace);
@@ -139,6 +145,27 @@ function lookup(r: Run, p: { lookup: string; verb?: 'take' | 'drop' | 'give'; to
       : p.verb
         ? { type: p.verb, item_id: id }
         : { type: 'look', target_id: id };
+  append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+}
+
+// A recipe of the player's ActionSet whose alias is the longest leading phrase of the words
+// (actions.ts; 06 §20 aliases), and the words after it.
+function recipe(r: Run, text: string): { perform: string; rest: string } | undefined {
+  const words = text.trim().toLowerCase().split(/\s+/);
+  const recipes = Object.values(resolved(r.world, r.world.character)).filter((a) => a.recipe);
+  for (let n = words.length; n > 0; n--) {
+    const alias = words.slice(0, n).join('_');
+    const a = recipes.find((x) => x.recipe!.aliases.includes(alias as never));
+    if (a) return { perform: a.key, rest: words.slice(n).join(' ') };
+  }
+}
+
+// A perform Command for the recipe, with the unique id of the words after its alias if any
+// (the authority checks it is the recipe's target); none and ambiguous build no Command.
+function perform(r: Run, p: { perform: string; rest: string }) {
+  const id = normalize(p.rest).length ? found(r, p.rest) : undefined;
+  if (normalize(p.rest).length && !id) return;
+  const payload = { type: 'perform', action: p.perform, ...(id && { target_id: id }) };
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 
@@ -181,6 +208,8 @@ function reason(
     'give not_found': "You can't give things to that.",
     'give invalid_target': "You can't give things to that.",
     'give invalid_state': "They can't carry any more.",
+    'perform invalid_target': "You can't do that to that.",
+    invalid_state: "You can't do that now.",
     not_present: "You don't see that here.",
     not_owned: "You aren't carrying that.",
     unsupported_capability: "You can't do that here.",

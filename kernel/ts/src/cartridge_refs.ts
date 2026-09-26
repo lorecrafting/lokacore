@@ -2,7 +2,13 @@
 // (cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
 import { encode } from './canonical.ts';
-import type { DefinitionRef, Diagnostic, DiagnosticCode, TextKey } from './contracts.gen.ts';
+import {
+  CAPABILITY_OWNERS,
+  type DefinitionRef,
+  type Diagnostic,
+  type DiagnosticCode,
+  type TextKey,
+} from './contracts.gen.ts';
 import { refString } from './decision.ts';
 
 export type Data = Record<string, string | number>;
@@ -51,7 +57,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   return out;
 }
 
-// Each node, with its path, of every action's, named policy's and variant's condition.
+// Each node, with its path, of every action's, named policy's, recipe's and variant's condition.
 export function nodes(c: Obj): [Obj, string][] {
   const walk = (p: Obj, at: string): [Obj, string][] => [
     [p, at],
@@ -65,6 +71,9 @@ export function nodes(c: Obj): [Obj, string][] {
     ...Object.entries(c.policies as Obj).flatMap(([ref, p]) =>
       walk(p.root, `.cartridge.policies${step(ref)}.root`),
     ),
+    ...Object.entries((c.recipes ?? {}) as Obj).flatMap(([ref, r]) =>
+      walk(r.policy.root, `.cartridge.recipes${step(ref)}.policy.root`),
+    ),
     ...parts(c).flatMap(([k, v, at]) =>
       k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
     ),
@@ -77,25 +86,31 @@ const TEXT: Readonly<Record<string, string[]>> = {
   item: ['short', 'room_line', 'description'],
 };
 
-// v2: the entry and every exit name a room of this cartridge, every text key a room, a detail,
-// an NPC, an item, a variant or an action uses has a catalog entry, every fact_compare names a
-// fact and every has_item an item of this cartridge (the kernel reads them), every detail's
-// first alias is its own and typable, and items and NPCs start where containment allows.
+// Every fact_compare names a fact and every has_item an item of this cartridge (the kernel reads
+// them; any format, since v1 action policies are evaluated too). v2: the entry and every exit
+// name a room of this cartridge, every text key a room, a detail, an NPC, an item, a variant, an
+// action or a recipe uses has a catalog entry, every detail's first alias is its own and
+// typable, items and NPCs start where containment allows, and recipes and rooms' action
+// contributions name what exists (recipes).
 export function refStage(c: Obj): Diagnostic[] {
-  if (c.format !== 'loka-cartridge-v2') return [];
   const { id, version } = c.manifest;
   const out: Diagnostic[] = [];
-  const text = (def: Obj, fields: string[], at: string) => {
-    for (const field of fields)
-      if (!Object.hasOwn(c.text, def[field]))
-        out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`, { target: def[field] }));
-  };
   // A DefinitionRef naming a definition of `kind` in this cartridge's map of that kind.
   const named = (r: Obj, kind: string, path: string) => {
     const target = refString(r as DefinitionRef);
     const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === kind;
     if (!(ok && Object.hasOwn(c[`${kind}s`] ?? {}, target)))
       out.push(diag('UNRESOLVED_REFERENCE', path, { target }));
+  };
+  for (const [n, at] of nodes(c)) {
+    if (n.op === 'fact_compare') named(n.fact, 'fact', `${at}.fact`);
+    if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
+  }
+  if (c.format !== 'loka-cartridge-v2') return out;
+  const text = (def: Obj, fields: string[], at: string) => {
+    for (const field of fields)
+      if (def[field] !== undefined && !Object.hasOwn(c.text, def[field]))
+        out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`, { target: def[field] }));
   };
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
@@ -106,20 +121,57 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj))
     named(n.room, 'room', `.cartridge.npcs${step(ref)}.room`);
-  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj))
-    named(
-      i.location[i.location.in],
-      i.location.in,
-      `.cartridge.items${step(ref)}.location.${i.location.in}`,
-    );
+  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
+    const { in: k } = i.location;
+    named(i.location[k], k, `.cartridge.items${step(ref)}.location.${k}`);
+  }
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
-  for (const [n, at] of nodes(c)) {
-    if (n.op === 'fact_compare') named(n.fact, 'fact', `${at}.fact`);
-    if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
+  out.push(...recipes(c, named, text), ...holders(c)); // recipes' named and text push to out too
+  return out;
+}
+
+type Named = (r: Obj, kind: string, path: string) => void;
+type Texts = (def: Obj, fields: string[], at: string) => void;
+
+// Each recipe's target names a room of this cartridge and a detail of that room, each
+// fact.assign a fact of it, and its label and narration have catalog entries; each key of a
+// room's action contribution names an engine verb (a registered command), an action or a recipe
+// of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
+function recipes(c: Obj, named: Named, text: Texts): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
+    const at = `.cartridge.recipes${step(ref)}`;
+    const { room, detail } = r.target;
+    const there = c.rooms[refString(room)]; // this cartridge's room, as named() requires
+    if (!there) named(room, 'room', `${at}.target.room`);
+    else if (!Object.hasOwn(there.details ?? {}, detail))
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}.target.detail`, { target: detail }));
+    const success = r.outcomes.success;
+    success.sequence.forEach((s: Obj, i: number) => {
+      if (s.op === 'fact.assign')
+        named(s.fact, 'fact', `${at}.outcomes.success.sequence[${i}].fact`);
+    });
+    text(r, ['label'], at);
+    text(success.narration, ['actor', 'observers'], `${at}.outcomes.success.narration`);
   }
-  return [...out, ...holders(c)];
+  const defs: Obj[] = [...Object.values(c.actions as Obj), ...Object.values(c.recipes ?? {})];
+  const keys = new Set([...Object.keys(CAPABILITY_OWNERS.command), ...defs.map((d) => d.key)]);
+  for (const [ref, r] of Object.entries(c.rooms as Obj))
+    (r.actions ?? []).forEach((a: Obj, i: number) =>
+      a.actions.forEach((k: string, j: number) => {
+        if (!keys.has(k))
+          out.push(
+            diag(
+              'UNRESOLVED_REFERENCE',
+              `.cartridge.rooms${step(ref)}.actions[${i}].actions[${j}]`,
+              { target: k },
+            ),
+          );
+      }),
+    );
+  return out;
 }
 
 // UNREACHABLE_DETAIL for each detail of the room at `at` whose first alias another detail has

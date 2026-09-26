@@ -4,7 +4,7 @@
 // capability that owns it (capability_registry.json), composes the delta and commits it.
 import { encode } from './canonical.ts';
 import type { Installed } from './cartridge.ts';
-import { compose, key, same, target } from './compose.ts';
+import { compose, key, target } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
   LIMITS,
@@ -36,10 +36,12 @@ import {
   type Rule,
   type World,
 } from './decision.ts';
-import { invariants as factInvariants, typedFact } from './fact.ts';
+import { factChanged, invariants as factInvariants, typedFact } from './fact.ts';
 import { id } from './id_source.ts';
 import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
+import { lists, refusal } from './actions.ts';
+import * as action_recipe from './rules/action_recipe.ts';
 import * as containment from './rules/containment.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
@@ -50,6 +52,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   movement: movement.decide,
   description_variant: description_variant.decide,
   containment: containment.decide,
+  action_recipe: action_recipe.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
@@ -163,8 +166,10 @@ type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
 /**
  * The admission boundary around one rule call. Before the rule: the nil CommandId is reserved
  * for world creation (permission_denied; R6 must keep this refusal before any receipt); a
- * command for another world (not_found) or another actor (not_found) is rejected. After it:
- * admit() checks the result, then the delta composes or faults before the changes are adopted.
+ * command for another world (not_found) or another actor (not_found) is rejected, and so is one
+ * the actor's ActionSet does not offer or offers unavailable (actions.ts refusal; 04 §19, ACT-09).
+ * After it: admit() checks the result, then the delta composes or faults before the changes are
+ * adopted.
  */
 function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
@@ -172,6 +177,8 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (command.world_context_id !== world.context) return reject('not_found');
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
+  const refused = refusal(world, command.payload);
+  if (refused) return reject(refused);
   const mint = allocator(world, command);
   return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
 }
@@ -180,8 +187,9 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
  * Composes an admitted decision's delta over the state, the fact defaults and the declared
  * capacities and adopts its containment and fact changes; only admit() makes an Admitted. A
  * fact.assign whose fact, scope kind or value its FactSpec does not allow faults
- * precondition_failed (03 §7; 04 §5.1), and each that changes its fact appends fact_changed
- * after the rule's events, in op order, with ids from the command's `mint` (04 §5.2).
+ * precondition_failed (03 §7; 04 §5.1). Each that changes its fact adds a fact_changed at its
+ * causal position (fact.ts factChanged). A result, these events included, over output_bytes
+ * faults budget_exceeded (04 §5.4). A fault discards the whole proposal.
  */
 export function adopt(world: World, decision: Admitted, command: Actor, mint: Mint): Stepped {
   if (decision.kind !== 'accepted') return { decision, world };
@@ -199,25 +207,13 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
     if (target.kind === 'containment') containers[target.entity_id] = value as EntityId;
     else if (target.kind === 'fact') facts[key(target)] = value as FactValue;
   const state = { ...world.state, containers, rng: decision.rng };
-  const changed = assigns.filter((o) => !same(o.expected, o.value));
-  const events = changed.map((o, i) => {
-    const subject = o.subject_id === undefined ? {} : { subject_id: o.subject_id };
-    const payload = {
-      type: 'fact_changed',
-      fact: o.fact,
-      ...subject,
-      old: o.expected,
-      new: o.value,
-    };
-    // ponytail: appended after the rule's events, because a rule result keeps its changes and
-    // events in separate lists; S5 ActionRecipe must interleave them at each assign's causal
-    // position (04 §5.2 steps 4-5).
-    const position = decision.events.length + i + 1;
-    return { ...event(world, command, mint, position, payload as never), scope: o.scope };
-  });
+  const events = factChanged(world, command, mint, assigns, decision.events);
+  const out = events === decision.events ? decision : { ...decision, events };
+  if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
+    return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
   // No facts key until one is set, so a world without facts keeps its pre-fact state hash.
   return {
-    decision: events.length ? { ...decision, events: [...decision.events, ...events] } : decision,
+    decision: out,
     world: { ...world, state: Object.keys(facts).length ? { ...state, facts } : state },
   };
 }
@@ -226,8 +222,8 @@ type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 
 /**
  * An accepted rule result as the host admits it (04 §5.2 step 7): an event type the owning
- * capability does not own faults unowned_event, and a result over output_bytes faults
- * budget_exceeded; both discard the whole proposal.
+ * capability does not own faults unowned_event, which discards the whole proposal. adopt()
+ * checks the output budget once the host's events are added.
  */
 export function admit(owner: string, decision: DecisionResult): Admitted {
   const fault = (code: ErrorCode) => ({ kind: 'fault', code }) as Admitted;
@@ -235,11 +231,6 @@ export function admit(owner: string, decision: DecisionResult): Admitted {
   const owners = CAPABILITY_OWNERS.event;
   if (decision.events.some((e) => owners[e.payload.type]?.split('@')[0] !== owner))
     return fault('unowned_event');
-  // ponytail: unreachable with look and move (fixed-size results); tested with the first rule
-  // whose output size varies (S5, ActionRecipe). The fact_changed events adopt() appends later
-  // are not counted here; count them once a rule sets facts (S5).
-  if (utf8(encode(decision as never)).length > LIMITS.output_bytes!)
-    return fault('budget_exceeded');
   return decision as Admitted;
 }
 
@@ -257,16 +248,25 @@ export function holds(id: string, world: World): boolean {
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
- * the player sees (description_variant.describe), exits in compass order, the NPCs and items in
- * the room and the items the player's body holds (03 §23), each named by its short description,
- * NPCs first, then in DefinitionRefString order.
+ * the player sees (description_variant.describe), exits in compass order, the place's actions,
+ * the NPCs and items in the room and the items the player's body holds (03 §23), each named by
+ * its short description with its actions (actions.ts lists: an item here by the room_contents
+ * scope, an NPC by room_occupants, a held item by inventory), NPCs first, then in
+ * DefinitionRefString order.
  */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
+  const actions = lists(world, world.character);
+  const scope = { item: 'room_contents', npc: 'room_occupants' } as const;
   const within = (holder: EntityId): EntityView[] =>
     Object.entries(world.entities)
       .filter(([id]) => world.state.containers[id] === holder)
-      .map(([id, e]) => ({ id: id as EntityId, name: e.short, kind: e.kind as Key, actions: [] }));
+      .map(([id, e]) => ({
+        id: id as EntityId,
+        name: e.short,
+        kind: e.kind as Key,
+        actions: actions.of(holder === world.body ? 'inventory' : scope[e.kind]),
+      }));
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
@@ -277,7 +277,7 @@ export function gameView(world: World): GameView {
       available: true,
       direction,
     })),
-    actions: [],
+    actions: actions.place,
     entities: within(here),
     inventory: within(world.body),
     journal: [],
