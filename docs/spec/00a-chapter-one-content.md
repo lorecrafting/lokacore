@@ -524,6 +524,8 @@ The smallest compilable subset, used as the first R4 fixture and the R1 spike mo
 
 *Amendment 2026-09-25 (R5 S2b, [owner decision](../decisions/owner-decision-short-refs-2026-09-25.md)):* a reference in JSON source (an exit's `to`, the `entry`, a policy node's `fact`, `item` or `quest`) may be the definition's key alone (`"to": "well_lane"`); the compiler expands it to the full DefinitionRef of this cartridge's definition of the kind its field takes, so the artifact is unchanged.
 
+*Amendment 2026-09-25 (R5 S3):* description variants take the frozen shape of `protocol/room.schema.json` (`DescriptionVariant`): a `variants` list on the room or on a detail (not under `components.description`), each `{when, description}` where `when` is a VersionedPolicy (this example's `fact_equals` is `fact_compare`) and `description` a text key. Variants are tried in order; the first whose condition holds replaces the description, and when none holds the base description shows. A cartridge with details requires `inspectable_detail@1`, and one with variants `description_variant@1`.
+
 ```yaml
 # cartridge.yaml
 api_version: loka/v3

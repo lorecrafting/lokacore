@@ -101,6 +101,14 @@ controls = [
   {"features: a capability implemented without its feature map cells",
    %{"kernel/ts/src/rules/barrier.ts" => "export {};\n"}, ~w(elixir bin/features.exs --check),
    "barrier@1: missing spec"},
+  {"features: a ruleless capability implemented without its feature map cells",
+   %{
+     "tmp/red-features.json" =>
+       File.read!(Path.join(root, "docs/features.json"))
+       |> JSON.decode!()
+       |> Map.put("barrier", %{"implemented_in" => "planted"})
+       |> JSON.encode!()
+   }, ~w(elixir bin/features.exs --check tmp/red-features.json), "barrier@1: missing spec"},
   {"features: a transcript added without regenerating the feature map",
    %{"cartridges/ashmere_details/transcripts/barrier.jsonl" => ""},
    ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"}
