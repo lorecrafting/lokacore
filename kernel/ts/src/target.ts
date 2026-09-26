@@ -1,8 +1,8 @@
 // Target resolution (21 §7 TargetSpec / TargetResolution; 04 §17-§18; 14 §R5): the authority's
 // Search over what a player names, run before any Command is built, so a Command carries only
-// the resolved id and never the player's words. Scope: the details of the actor's room.
-import type { EntityId, TargetResolution } from './contracts.gen.ts';
-import type { World } from './decision.ts';
+// the resolved id and never the player's words.
+import type { CharacterId, EntityId, TargetResolution } from './contracts.gen.ts';
+import { bodyOf, type World } from './decision.ts';
 import { cmp } from './validate.ts';
 
 /**
@@ -18,17 +18,27 @@ export function normalize(text: string): string[] {
 }
 
 /**
- * The details of the actor's room with an alias equal to the normalized words joined by `_`
- * (exact match, never a prefix): none, unique, or ambiguous with the candidate ids in ascending
- * code-point order (invariant target_candidates_ordered). At most 64 details per room
- * (room.schema.json), so within the contract's 1024.
+ * What `actor` can name (21 §7 scopes: InspectableDetails, room contents, room occupants,
+ * inventory): the details of its room, and the items and NPCs in its room or held by its body,
+ * with an alias or keyword equal to the normalized words joined by `_` (exact match, never a
+ * prefix): none, unique, or ambiguous with the candidate ids in ascending code-point order
+ * (invariant target_candidates_ordered). ponytail: at most 64 details per room
+ * (room.schema.json) plus one entity per item or NPC definition in reach, so over the contract's
+ * 1024 candidates only if a cartridge puts that many same-named definitions in one room; add
+ * an overflow outcome when stacking or spawning can.
  */
-export function resolve(world: World, text: string): TargetResolution {
+export function resolve(world: World, actor: CharacterId, text: string): TargetResolution {
   const phrase = normalize(text).join('_');
-  const here = world.state.containers[world.body];
-  // ponytail: scans every detail of the world per lookup; index details by room when it shows.
-  const ids = Object.entries(world.details)
-    .filter(([, d]) => d.room === here && (d.aliases as readonly string[]).includes(phrase))
+  const body = bodyOf(world, actor);
+  const here = body && world.state.containers[body];
+  const named = (words: readonly string[]) => words.includes(phrase);
+  // ponytail: scans every detail and entity of the world per lookup; index by room when it shows.
+  const ids = [
+    ...Object.entries(world.details).filter(([, d]) => d.room === here && named(d.aliases)),
+    ...Object.entries(world.entities).filter(
+      ([id, e]) => [here, body].includes(world.state.containers[id]) && named(e.keywords),
+    ),
+  ]
     .map(([id]) => id as EntityId)
     .sort(cmp);
   if (ids.length === 0) return { kind: 'none' };

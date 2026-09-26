@@ -104,5 +104,28 @@
       "facts_typed"
     ],
     "implemented_in": "R5 S3 facts in state, fact_compare"
+  },
+  "containment": {
+    "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12",
+    "contracts": [
+      "ItemDefinition",
+      "NpcDefinition",
+      "ItemLocation",
+      "CommandPayload",
+      "EventPayload",
+      "Policy"
+    ],
+    "modules": [
+      "kernel/ts/src/policy.ts",
+      "kernel/ts/src/target.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_items_hash.json"
+    ],
+    "invariants": [
+      "one_container_per_item",
+      "containment_acyclic"
+    ],
+    "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs"
   }
 }

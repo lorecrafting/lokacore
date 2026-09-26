@@ -1,0 +1,25 @@
+{
+  "api_version": "loka/v3",
+  "id": "ashmere_items",
+  "version": "0.0.1",
+  "title": "Ashmere — Items",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.0",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "description_variant": 1,
+      "inspectable_detail": 1,
+      "containment": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "ferry_landing"
+}

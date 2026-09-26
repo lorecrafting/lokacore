@@ -84,7 +84,7 @@ defmodule Loka.ContentTest do
 
   # Break: wrong key mapping, key order, hash input or artifact framing.
   test "the hello subset source compiles to the Python known answer" do
-    assert Loka.Content.compile("cartridges/ashmere_hello") == {:ok, @hello_artifact}
+    assert Loka.Content.compile("cartridges/ashmere_hello") == {:ok, @hello_artifact, []}
   end
 
   describe "determinism (CAR-04)" do
@@ -98,12 +98,12 @@ defmodule Loka.ContentTest do
       manifest = @manifest |> Enum.reverse() |> Enum.map(fn {k, v} -> {k, JSON.encode!(v)} end)
 
       compile = fn dir, files ->
-        assert {:ok, bytes} = Loka.Content.compile(source(Path.join(tmp, dir), files))
+        assert {:ok, bytes, []} = Loka.Content.compile(source(Path.join(tmp, dir), files))
         bytes
       end
 
       a = compile.("a", %{"facts.json" => {:raw, facts.(names, @fact)}})
-      assert Loka.Content.compile(Path.join(tmp, "a")) == {:ok, a}
+      assert Loka.Content.compile(Path.join(tmp, "a")) == {:ok, a, []}
 
       b =
         compile.("b", %{
@@ -364,7 +364,7 @@ defmodule Loka.ContentTest do
           "cartridge.json" => %{m | "supported_profiles" => ["online_private"]}
         })
 
-      assert {:ok, _} = Loka.Content.compile(online, registry: registry)
+      assert {:ok, _, _} = Loka.Content.compile(online, registry: registry)
 
       offline = source(Path.join(tmp, "offline"), %{"cartridge.json" => m})
 
@@ -385,7 +385,7 @@ defmodule Loka.ContentTest do
 
       range = %{"at_least" => "1.9", "below" => "1.10"}
 
-      assert {:ok, _} =
+      assert {:ok, _, _} =
                Loka.Content.compile(
                  source(tmp, %{"cartridge.json" => manifest(["requires", "kernel_api"], range)})
                )
@@ -431,7 +431,7 @@ defmodule Loka.ContentTest do
       end
 
       ok = source(Path.join(tmp, "ok"), %{"policies/p.json" => policy(nots.(123))})
-      assert {:ok, bytes} = Loka.Content.compile(ok)
+      assert {:ok, bytes, []} = Loka.Content.compile(ok)
       assert {:ok, _} = Canonical.decode(bytes)
 
       assert errors(Path.join(tmp, "deep"), %{"policies/p.json" => policy(nots.(124))}) ==
@@ -442,7 +442,7 @@ defmodule Loka.ContentTest do
       size = byte_size(@hello_artifact)
 
       assert Loka.Content.compile("cartridges/ashmere_hello", max_bytes: size) ==
-               {:ok, @hello_artifact}
+               {:ok, @hello_artifact, []}
 
       assert Loka.Content.compile("cartridges/ashmere_hello", max_bytes: size - 1) ==
                {:error, [d("ARTIFACT_TOO_LARGE", "", %{"bytes" => size, "maximum" => size - 1})]}
@@ -451,7 +451,7 @@ defmodule Loka.ContentTest do
 
   # Break: the source directory's name read as a glob pattern.
   test "a directory name with glob characters", %{tmp_dir: tmp} do
-    assert {:ok, _} = Loka.Content.compile(source(Path.join(tmp, "c[1]{a,b}*?"), %{}))
+    assert {:ok, _, _} = Loka.Content.compile(source(Path.join(tmp, "c[1]{a,b}*?"), %{}))
   end
 
   # Break: the task writes other bytes than compile/2 returns, or writes on error.

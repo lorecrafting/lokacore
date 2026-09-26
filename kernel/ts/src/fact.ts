@@ -29,12 +29,17 @@ const typed = (v: FactValue, t: FactType): boolean =>
         (v as number) >= (t.minimum ?? -Infinity) &&
         (v as number) <= (t.maximum ?? Infinity);
 
+/** True when the cartridge declares `fact`, allows scope kind `scope` and `v` is of its type. */
+export function typedFact(world: World, fact: DefinitionRef, scope: string, v: FactValue): boolean {
+  const spec = world.cartridge.facts[refString(fact)];
+  return spec !== undefined && spec.scopes.includes(scope as never) && typed(v, spec.value_type);
+}
+
 /** Registered invariants of facts (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
   facts_typed: (world) =>
     Object.entries(world.state.facts ?? {}).every(([text, v]) => {
-      const { fact, scope } = decode(text) as { fact: DefinitionRef; scope: { kind: never } };
-      const spec = world.cartridge.facts[refString(fact)];
-      return spec !== undefined && spec.scopes.includes(scope.kind) && typed(v, spec.value_type);
+      const { fact, scope } = decode(text) as { fact: DefinitionRef; scope: { kind: string } };
+      return typedFact(world, fact, scope.kind, v);
     }),
 };

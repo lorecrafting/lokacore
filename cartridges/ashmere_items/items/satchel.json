@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "satchel",
+    "leather_satchel"
+  ],
+  "short": "item.satchel.short",
+  "room_line": "item.satchel.room",
+  "description": "item.satchel.description",
+  "location": {
+    "in": "room",
+    "room": "ferry_landing"
+  },
+  "capacity": 1
+}

@@ -27,7 +27,12 @@
     "residency": "portable_capability",
     "commands": [
       "take",
-      "drop"
+      "drop",
+      "give"
+    ],
+    "definitions": [
+      "item",
+      "npc"
     ],
     "events": [
       "item_acquired",

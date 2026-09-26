@@ -10,7 +10,8 @@ defmodule Loka.Content do
   definition, `policies/<key>.json` and `actions/<key>.json`, the frozen shape without `key`.
   R5 adds `rooms/<key>.json` (RoomDefinition without `key`), `text.json` (the TextCatalog)
   and an optional `entry` room in `cartridge.json`; a source with any of them compiles to
-  loka-cartridge-v2. A reference is a full DefinitionRef object naming this cartridge, or
+  loka-cartridge-v2. R5 S4 adds `items/<key>.json` and `npcs/<key>.json` (ItemDefinition and
+  NpcDefinition without `key`). A reference is a full DefinitionRef object naming this cartridge, or
   short: the key alone, of the kind its field takes (owner decision 2026-09-25,
   `Loka.Content.Checks.expand/2`). Other files are ignored, except that a `.json` file
   anywhere else is UNKNOWN_FIELD.
@@ -25,30 +26,40 @@ defmodule Loka.Content do
   @registry @registry_path |> File.read!() |> JSON.decode!()
 
   @doc """
-  Compiles the source directory into CartridgeArtifact bytes (one canonical JSON document),
-  or returns its diagnostics in the order Diagnostic defines. Options: `:max_bytes`
+  Compiles the source directory into CartridgeArtifact bytes (one canonical JSON document)
+  and its warnings (severity warning), or returns its diagnostics, each list in the order
+  Diagnostic defines. Options: `:max_bytes`
   (default ArtifactSize's maximum) and `:registry`, the decoded capability registry the
   cartridge is checked against (default protocol/capability_registry.json).
   """
-  @spec compile(Path.t(), keyword()) :: {:ok, binary()} | {:error, [map()]}
+  @spec compile(Path.t(), keyword()) :: {:ok, binary(), [map()]} | {:error, [map()]}
   def compile(dir, opts \\ []) do
     max_bytes = Keyword.get(opts, :max_bytes, Contracts.defs()["ArtifactSize"]["maximum"])
     {files, diags} = Source.load(dir)
 
-    with {:ok, cartridge} <- compiled(files, diags, Keyword.get(opts, :registry, @registry)) do
-      # Checked values encode: NESTING_TOO_DEEP guards the only limit they can reach.
-      {:ok, bytes} = Canonical.encode(cartridge)
-      hash = :crypto.hash(:sha256, bytes) |> Base.encode16(case: :lower)
-      {:ok, artifact} = Canonical.encode(%{"content_hash" => hash, "cartridge" => cartridge})
+    with {:ok, cartridge, warnings} <-
+           compiled(files, diags, Keyword.get(opts, :registry, @registry)) do
+      artifact = artifact(cartridge)
 
       if byte_size(artifact) <= max_bytes,
-        do: {:ok, artifact},
+        do: {:ok, artifact, warnings},
         else: too_large(byte_size(artifact), max_bytes)
     end
   end
 
+  # Checked values encode: NESTING_TOO_DEEP guards the only limit they can reach.
+  defp artifact(cartridge) do
+    {:ok, bytes} = Canonical.encode(cartridge)
+    hash = :crypto.hash(:sha256, bytes) |> Base.encode16(case: :lower)
+    {:ok, artifact} = Canonical.encode(%{"content_hash" => hash, "cartridge" => cartridge})
+    artifact
+  end
+
   defp compiled(files, diags, registry) do
-    with {:error, ds} <- Compiler.compile(files, diags, registry), do: {:error, sorted(ds)}
+    case Compiler.compile(files, diags, registry) do
+      {:ok, cartridge, warnings} -> {:ok, cartridge, sorted(warnings)}
+      {:error, ds} -> {:error, sorted(ds)}
+    end
   end
 
   defp too_large(bytes, max) do

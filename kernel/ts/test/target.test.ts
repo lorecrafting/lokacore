@@ -78,7 +78,7 @@ test('resolution is none, unique or ambiguous per the hand-written table', () =>
     [lane, 'post', { kind: 'none' }],
   ];
   for (const [w, text, expected] of rows) {
-    const resolution = resolve(w, text);
+    const resolution = resolve(w, w.character, text);
     assert.deepEqual(resolution, expected, text);
     assert.ok(check('target_candidates_ordered', { resolution }), text);
   }
