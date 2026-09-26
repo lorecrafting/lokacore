@@ -20,7 +20,10 @@ Before handing off:
    confirm a test fails; if none does, the tests are not done. Fix or record a
    disposition for each finding.
 3. Commit (attribution lines per the session), push the branch, open the PR citing the
-   spec sections and including the ponytail result. Do not merge.
+   spec sections and including the ponytail result. A slice that adds or changes a mechanic
+   includes the composes-with statement
+   ([emergence principles](../../docs/decisions/owner-decision-emergence-2026-09-25.md)).
+   Do not merge.
 4. Reply with: what changed, check output summary, self-review findings with dispositions,
    open questions. Keep it short.
 
