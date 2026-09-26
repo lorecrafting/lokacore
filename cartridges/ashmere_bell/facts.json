@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "chapel.bell_rung": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The chapel bell was rung; the fen floods (00a §6, §10)."
+    }
+  }
+}

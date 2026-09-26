@@ -127,5 +127,29 @@
       "containment_acyclic"
     ],
     "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs"
+  },
+  "action_recipe": {
+    "spec": "06 §19 ActionSet algebra, §20 ActionRecipe; 21 §7 ActionRecipe / ComposedAction; 05 §28; 04 §5.2; ADR-016",
+    "contracts": [
+      "ActionRecipe",
+      "RecipeStep",
+      "RecipeTarget",
+      "ActionContribution",
+      "CommandPayload",
+      "EventPayload"
+    ],
+    "modules": [
+      "kernel/ts/src/actions.ts",
+      "kernel/ts/src/fact.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_bell_hash.json"
+    ],
+    "invariants": [
+      "facts_typed",
+      "fault_discards_whole_proposal",
+      "unknown_types_fail_closed"
+    ],
+    "implemented_in": "R5 S5 ActionSet algebra, perform, fact.assign and event.emit steps"
   }
 }

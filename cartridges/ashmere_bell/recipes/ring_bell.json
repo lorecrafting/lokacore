@@ -1,0 +1,42 @@
+{
+  "label": "actions.ring_bell",
+  "aliases": [
+    "ring"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "belfry",
+    "detail": "bell"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "chapel_bell_rung",
+        "equals": true
+      }
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "chapel_bell_rung",
+          "value": true
+        },
+        {
+          "op": "event.emit",
+          "event": "bell_rung"
+        }
+      ],
+      "narration": {
+        "actor": "narration.ring_bell.actor",
+        "observers": "narration.ring_bell.observers"
+      }
+    }
+  }
+}
