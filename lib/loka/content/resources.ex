@@ -61,25 +61,23 @@ defmodule Loka.Content.Resources do
   end
 
   defp spec(rel, k, fields) do
-    steps = ["resources", k]
     value = @defaults |> Map.get(k, %{}) |> Map.merge(fields) |> Map.put("key", k)
 
-    authored =
-      if is_map_key(fields, "key"), do: [diag("UNKNOWN_FIELD", at(rel, steps ++ ["key"]))]
+    ordered = value["minimum"] <= value["start"] and value["start"] <= value["maximum"]
 
-    diags =
-      (authored || []) ++
-        validated(rel, steps, "Key", k) ++
-        Enum.reject(
-          validated(rel, steps, "ResourceSpec", value),
-          &(&1["path"] == at(rel, steps ++ ["key"]))
-        )
-
-    cond do
-      diags != [] -> {:error, diags}
-      value["minimum"] <= value["start"] and value["start"] <= value["maximum"] -> {:ok, value}
-      true -> {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, steps))]}
+    case diags(rel, ["resources", k], fields, value) do
+      [] when ordered -> {:ok, value}
+      [] -> {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k]))]}
+      diags -> {:error, diags}
     end
+  end
+
+  # An authored key is UNKNOWN_FIELD (the name is the key); the name must be a Key.
+  defp diags(rel, steps, fields, value) do
+    key = at(rel, steps ++ ["key"])
+    authored = if is_map_key(fields, "key"), do: [diag("UNKNOWN_FIELD", key)], else: []
+    spec = Enum.reject(validated(rel, steps, "ResourceSpec", value), &(&1["path"] == key))
+    authored ++ validated(rel, steps, "Key", value["key"]) ++ spec
   end
 
   defp validated(rel, steps, contract, value) do

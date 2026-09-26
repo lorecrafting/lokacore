@@ -97,10 +97,16 @@ defmodule Loka.Content.Compiler do
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
     {resources, d1} = Resources.load(of(files, :resources))
+    {defs, d2} = kinds(files)
+    {Map.merge(expanded(defs, m), %{"fact" => facts, "resource" => resources}), d0 ++ d1 ++ d2}
+  end
+
+  # The one-file-per-definition kinds (@kinds) and their diagnostics.
+  defp kinds(files) do
     loaded = for {kind, file, contract} <- @kinds, do: {kind, files(files, file, contract)}
-    defs = for {kind, {ds, _}} <- loaded, into: %{}, do: {kind, ds}
-    defs = expanded(defs, m) |> Map.put("fact", facts) |> Map.put("resource", resources)
-    {defs, d0 ++ d1 ++ for({_, {_, ds}} <- loaded, d <- ds, do: d)}
+
+    {Map.new(loaded, fn {kind, {ds, _}} -> {kind, ds} end),
+     for({_, {_, ds}} <- loaded, d <- ds, do: d)}
   end
 
   # Short references become full ones once a valid manifest names the cartridge; without one

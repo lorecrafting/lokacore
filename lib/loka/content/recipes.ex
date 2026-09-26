@@ -102,14 +102,16 @@ defmodule Loka.Content.Recipes do
   end
 
   defp refs(rel, r, %{m: m, defs: defs}) do
-    target(rel, r["target"], m, defs) ++
-      for(
-        {%{"op" => "fact.assign"} = s, steps} <- steps(r),
-        d <- reference(rel, steps, "fact", s, m, defs),
-        do: d
-      ) ++
-      for {n, steps} <- resourced(r), d <- reference(rel, steps, "resource", n, m, defs), do: d
+    facts =
+      for {%{"op" => "fact.assign"} = s, steps} <- steps(r),
+          d <- reference(rel, steps, "fact", s, m, defs),
+          do: d
+
+    target(rel, r["target"], m, defs) ++ facts ++ resources(rel, r, m, defs)
   end
+
+  defp resources(rel, r, m, defs),
+    do: for({n, steps} <- resourced(r), d <- reference(rel, steps, "resource", n, m, defs), do: d)
 
   # Each part of a recipe naming a resource: its costs, a threshold check and resource.adjust
   # steps, with its path.
