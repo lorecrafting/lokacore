@@ -49,3 +49,12 @@ bounded reaction depth, registry order). Principle 4's Realm authority fits Stat
 
 The check itself (`:52-55`) is followable: three lists, "none" is a valid answer, and it
 demands no new features.
+
+## Fix round 1 at `6d8507f`: APPROVE
+
+All four findings resolved. reviewer.md step 7 now covers capability code only, with the
+exception kept and cartridge content excluded. It matches the decision's check section,
+which now carries the same exclusion. Writes go only through the registered consequence
+vocabulary (21 §11). Principle 3 now says "registered typed consequences". The fire/door
+example now says "nobody wrote a rule about fire and doors". Group channels cite 21 §16.
+No new issues.
