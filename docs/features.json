@@ -214,5 +214,33 @@
       "rejection_consumes_nothing"
     ],
     "implemented_in": "R5 S6a wait (no jobs yet), time_window"
+  },
+  "barrier": {
+    "spec": "21 §5 Connection, Barrier; 05 §17, §25; 04 §5.3 Lifecycle transition, §7, §19; 00 §4.1",
+    "contracts": [
+      "BarrierDefinition",
+      "BarrierState",
+      "Connection",
+      "CommandPayload",
+      "EventPayload",
+      "DeltaOp",
+      "MutationTarget",
+      "Policy"
+    ],
+    "modules": [
+      "kernel/ts/src/rules/movement.ts",
+      "kernel/ts/src/policy.ts",
+      "kernel/ts/src/compose.ts",
+      "kernel/ts/src/target.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/composition.json",
+      "protocol/fixtures/cartridge_gate_hash.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "rejection_consumes_nothing"
+    ],
+    "implemented_in": "R5 S7 open, close, lock, unlock, barrier_state, closed and locked exits"
   }
 }
