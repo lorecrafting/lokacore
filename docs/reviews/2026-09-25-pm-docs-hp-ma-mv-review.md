@@ -95,3 +95,14 @@ Findings:
    costs 1, not 1.5). Say "floored" so R8 does not round differently.
 
 Verdict: **APPROVE WITH NOTES**.
+
+## Fix check (`7e48f6b`)
+
+- Finding 3: fixed. 00:320 now states Diku's position bonuses and the quarter rate when
+  hungry or thirsty, matching `limits.c` and the decision.
+- Finding 4: fixed. The record calls HP 20 a chosen value at the caster end of the 18-30
+  range; 00:283 now says "(from DikuMUD)" rather than "DikuMUD's starting maximums".
+- Finding 5: fixed. "rounded down" in both the record and the 00 Terrain row.
+- `elixir bin/check_docs.exs`: 0 broken links, 0 unreachable.
+
+Verdict: **APPROVE**.
