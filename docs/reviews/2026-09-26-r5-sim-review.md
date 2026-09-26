@@ -183,3 +183,47 @@ cross-vendor review (Sol 5.6; A1-A5, text in r5-sim-crossvendor.txt beside this 
 Re-run the full check line (bin/check_all.sh), mutation-check each new test (break, watch fail,
 restore), /ponytail-review and /code-review medium on the diff, push, reply per finding with
 fix commit or reason.
+
+## Fix check, round 1 (`babd068`)
+
+Scope (WORKFLOW step 6): each disposition as the PM ruled it, the code the fix touched and its
+direct callers. CI green on `babd068` (bundle, elixir, lint, typescript 2m12s); locally the sim,
+world, facts, recipes and containment suites pass (56 tests).
+
+**Verdict: APPROVE WITH NOTES** (one nit, N3; nothing open).
+
+| Item | Ruling | Result |
+|---|---|---|
+| B1 | two planted recipe views | Met: "every action available" and "unavailable with the other shown code" each caught as `gameview_agrees_with_admission` on a `perform` (`sim.test.ts` new red control). |
+| S1 | planted unregistered event | Met: caught as `unknown_types_fail_closed` in one command. |
+| N1 | REACHED a floor | Met: missing codes fail, extras allowed. |
+| N2, A4 | report wording, no format change | Met: the report leads with `reproduce (re-checks every invariant): node kernel/ts/test/sim.ts <seed>` (asserted in the containment red control), labels the transcript a playback that checks no invariant and ends at the first stray command, and a drained start says to use the reproduce command. |
+| A1 | `adopt_mismatch` | Met. `sim.ts` `adopted` composes the delta independently (`compose`, `base`, `row` reused, adopt not called), fails on a compose fault, and requires `after.state` to equal the state before plus the composed rows, the clock and the decision's rng, nothing else. That is exactly what `adopt` writes (`world.ts` 237-252): its other outputs (fact_changed events, budget and typed-fact faults) are not State or not accepted. Three red controls: clock off by one, rng not advanced, stale `time.advance` that composes to a fault. |
+| A2 | wording only | Met: the PR description states the value-chain-only scope and the Gate R5 deferral plainly. |
+| A3 | trigger types, coverage | Met: `sim_seeds.json` records each seed's trigger type and a test asserts the seed still issues it; the 10k run asserts every cartridge and every unregistered type turns up. The test keeps its own `UNKNOWN` copy, which is what makes Sol's narrowing scenario fail. |
+| A5 | own-key guards | Met: `ownerOf` (own keys) serves `step` and `admit`; `world.test.ts` asserts an event typed `constructor` faults `unowned_event`. `SHOWN` guarded in `invariants.ts:152`. |
+
+**Core changes.** `adopt` now takes its section and row from `row(target)`; for every target
+kind the result is identical to the old `SECTIONS[kind]` plus `entity_id`/`key` pair, and a
+kind without a section (the clock) still skips. Callers of `adopt` (`decideWith`, and the
+facts, recipes and containment tests) pass unchanged. `admit`: `ownerOf` returns `undefined`
+for an unknown type exactly where the old optional chain did, so only the prototype-key case
+changes (TypeError before, `unowned_event` now). `step` is unchanged apart from the helper.
+
+**Mutations (each restored):**
+
+| Mutant | Result |
+|---|---|
+| `adopted` returns true | adopt_mismatch red control fails |
+| want's rng taken from `after` | fails |
+| clock not compared | fails |
+| `ownerOf` without `Object.hasOwn` | world.test (`foreign event`) fails |
+| generator `UNKNOWN` narrowed to `dance` | coverage and seed-trigger tests fail |
+| `SHOWN` own-key guard removed | **all tests pass** (N3) |
+
+**N3 (nit): the `SHOWN` guard has no test.** `kernel/ts/src/invariants.ts:152`. No demo
+cartridge has an action keyed by a prototype name, so no simulated step reaches it. Failure
+scenario: the guard is dropped and a later cartridge keys an action `constructor`; the check
+then throws, and the simulator reports a false `threw` on a correct kernel. That is a loud
+false alarm, not a missed bug, hence a nit. Fix if wanted: a direct `check('gameview_agrees_with_admission', …)`
+call with a hand-made view action keyed `constructor`.
