@@ -121,7 +121,7 @@
               }
             },
             "definitions": {
-              "description": "The definition kinds this capability owns, by name (DefinitionRef kind; room is room.schema.json RoomDefinition); a cartridge with one requires the owner (UNDECLARED_CAPABILITY); absent means none.",
+              "description": "The definition kinds this capability owns, by name (a DefinitionRef kind, or a definition nested in one: room is room.schema.json RoomDefinition, detail a room's InspectableDetail, variant a room's or detail's DescriptionVariant); a cartridge with one requires the owner (UNDECLARED_CAPABILITY); absent means none.",
               "type": "array",
               "items": {
                 "$ref": "action.schema.json#/$defs/Key"

@@ -47,7 +47,10 @@
     "key": "inspectable_detail",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "detail"
+    ]
   },
   {
     "key": "description_variant",
@@ -56,6 +59,9 @@
     "residency": "portable_capability",
     "commands": [
       "look"
+    ],
+    "definitions": [
+      "variant"
     ]
   },
   {
