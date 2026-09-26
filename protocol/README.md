@@ -17,7 +17,7 @@ lists only what a file adds to that.
 | `text.schema.json` | localized text ids and bindings; the default-locale text catalog | 04 §15; 05 §18; 06 §43 | |
 | **Rules and state change** | | | |
 | `command.schema.json` | the portable Command registry | 04 §1, §3, §21; 14 §R3A | |
-| `action.schema.json` | action definitions, invocation, targets | 04 §1, §2, §18, §19; 06 §20; 21 §7 | |
+| `action.schema.json` | action definitions, invocation, targets; ActionSet contributions and action recipes | 04 §1, §2, §18, §19; 06 §19, §20; 21 §7; 05 §28 | `cartridge_bell_hash.json` |
 | `policy.schema.json` | the policy AST | 06 §21; 21 §3.2, §4; 14 §R3A | |
 | `fact.schema.json` | FactSpec, scoped facts | 03 §7, §13; 21 §3.9, §4 | |
 | `delta.schema.json` | StateDelta ops, targets, preconditions | 04 §1, §5.1, §5.3; 14 §R3A | `composition.json` |
