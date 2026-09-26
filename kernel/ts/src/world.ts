@@ -4,7 +4,7 @@
 // capability that owns it (capability_registry.json), composes the delta and commits it.
 import { encode } from './canonical.ts';
 import type { Installed } from './cartridge.ts';
-import { compose } from './compose.ts';
+import { compose, key } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
   LIMITS,
@@ -13,6 +13,7 @@ import {
   type DecisionResult,
   type EntityId,
   type ErrorCode,
+  type FactValue,
   type GameView,
   type Owned,
   type TextKey,
@@ -29,6 +30,7 @@ import {
   type Rule,
   type World,
 } from './decision.ts';
+import { invariants as factInvariants } from './fact.ts';
 import { id } from './id_source.ts';
 import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
@@ -42,10 +44,14 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   description_variant: description_variant.decide,
 };
 
-/** What this kernel implements, for the loader (05 §3, §6): each capability with a rule, at 1. */
+// Capabilities that own no command, so no rule: what the rules and the GameView call implements
+// them (fact.ts, policy.ts; details in target.ts and look). Each has feature map cells.
+const RULELESS = ['fact', 'policy', 'inspectable_detail'];
+
+/** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
   kernel_api: '1.0',
-  capabilities: Object.fromEntries(Object.keys(RULES).map((k) => [k, [1]])),
+  capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,
   client_features: [],
@@ -57,7 +63,7 @@ const NIL = '00000000-0000-0000-0000-000000000000';
  * A fresh world: IdSource ids under the nil CommandId (ordinal 0 the player's CharacterId, 1 its
  * body entity, then each room in DefinitionRefString order, then each room's details in the same
  * room order and detail-key order: numeric profile, Initial world ids), the body in the entry
- * room, time 0.
+ * room, time 0, each fact's default by its canonical DefinitionRef text and no fact set.
  */
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
@@ -71,6 +77,13 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
       cmp(a, b),
     ))
       details[mint()] = { ...d, room: roomIds[r], key };
+  const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
+  const factDefaults = Object.fromEntries(
+    Object.values(cartridge.facts).map((f) => [
+      key({ cartridge_id, cartridge_version, kind: 'fact', key: f.key }),
+      f.value_type.default,
+    ]),
+  );
   return {
     cartridge,
     context,
@@ -79,6 +92,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     rooms: Object.fromEntries(refs.map((r) => [roomIds[r], cartridge.rooms[r]])),
     roomIds,
     details,
+    factDefaults,
     state: { clock: 0, containers: { [body]: roomIds[refString(cartridge.entry)] }, rng: seed },
   };
 }
@@ -114,18 +128,26 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   return adopt(world, admit(owner, rule(world, command, allocator(world, command))));
 }
 
-/** Composes an admitted decision's delta and adopts the changes; only admit() makes one. */
-function adopt(world: World, decision: Admitted): Stepped {
+/**
+ * Composes an admitted decision's delta over the state and the fact defaults and adopts its
+ * containment and fact changes; only admit() makes an Admitted.
+ */
+export function adopt(world: World, decision: Admitted): Stepped {
   if (decision.kind !== 'accepted') return { decision, world };
-  const result = compose(world.state as unknown as Parameters<typeof compose>[0], decision.delta);
+  const base = { ...world.state, fact_defaults: world.factDefaults };
+  const result = compose(base as unknown as Parameters<typeof compose>[0], decision.delta);
   if ('fault' in result) return { decision: result.fault, world };
-  // ponytail: copies the containers map per move (O(entities)); a persistent map when big.
+  // ponytail: copies the containers and facts maps per step (O(rows)); persistent maps when big.
   const containers = { ...world.state.containers };
+  const facts: Record<string, FactValue> = { ...world.state.facts };
   for (const { target, value } of result.changes)
     if (target.kind === 'containment') containers[target.entity_id] = value as EntityId;
+    else if (target.kind === 'fact') facts[key(target)] = value as FactValue;
+  const state = { ...world.state, containers, rng: decision.rng };
+  // No facts key until one is set, so a world without facts keeps its pre-fact state hash.
   return {
     decision,
-    world: { ...world, state: { ...world.state, containers, rng: decision.rng } },
+    world: { ...world, state: Object.keys(facts).length ? { ...state, facts } : state },
   };
 }
 
@@ -151,7 +173,7 @@ declare const ADMITTED: unique symbol;
 /** A DecisionResult that passed admit(); adopt() takes only this, so step cannot skip admit. */
 export type Admitted = DecisionResult & { readonly [ADMITTED]: true };
 
-const INVARIANTS = { ...movement.invariants };
+const INVARIANTS = { ...movement.invariants, ...factInvariants };
 
 /** True when the registered invariant holds for the world; throws for an unknown id. */
 export function holds(id: string, world: World): boolean {
@@ -159,14 +181,18 @@ export function holds(id: string, world: World): boolean {
   return INVARIANTS[id](world);
 }
 
-/** The player's GameView of the current place (04 §14; 00 §4.10): exits in compass order. */
+/**
+ * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
+ * the player sees (description_variant.describe), exits in compass order.
+ */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
+  const description = text(description_variant.describe(world, world.character, room));
   return {
     actor_id: world.character,
-    place: { id: here, title: text(room.title), description: text(room.description) },
+    place: { id: here, title: text(room.title), description },
     exits: COMPASS.filter((d) => Object.hasOwn(room.exits, d)).map((direction) => ({
       available: true,
       direction,

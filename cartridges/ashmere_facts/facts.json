@@ -1,0 +1,42 @@
+{
+  "facts": {
+    "village.child_status": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "missing",
+          "rescued",
+          "lost"
+        ],
+        "default": "missing"
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Whether the missing child was found (00a §6)."
+    },
+    "chapel.bell_rung": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The chapel bell was rung; the fen floods (00a §6, §10)."
+    },
+    "fen.tracks_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player found the child's tracks at the reed bank (00a §6)."
+    }
+  }
+}

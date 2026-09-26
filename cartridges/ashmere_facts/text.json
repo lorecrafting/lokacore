@@ -1,0 +1,13 @@
+{
+  "room.ferry_landing.title": "Ferry Landing",
+  "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A mooring post leans into the current.",
+  "room.village_green.title": "Village Green",
+  "room.village_green.description": "An old elm shades a patch of trodden grass. The village goes about its day.",
+  "room.village_green.worried": "An old elm shades a patch of trodden grass. Neighbours talk in low voices about the missing child.",
+  "room.village_green.celebration": "Lanterns hang from the old elm. The child is home, and the bell still hums over the green.",
+  "room.reed_path.title": "Reed Path",
+  "room.reed_path.description": "A narrow path winds south through the reeds toward the fen.",
+  "room.reed_path.flooded": "Brown water has risen over the reed path since the bell rang.",
+  "detail.mud": "Soft black mud, churned by boots and birds.",
+  "detail.mud.tracks": "Among the boot prints, a small bare footprint points toward the fen."
+}

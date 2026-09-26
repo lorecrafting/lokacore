@@ -7,6 +7,7 @@ defmodule Loka.ContentRoomsTest do
   @moduletag :tmp_dir
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_rooms_hash.json"))
   @details_kat JSON.decode!(File.read!("protocol/fixtures/cartridge_details_hash.json"))
+  @facts_kat JSON.decode!(File.read!("protocol/fixtures/cartridge_facts_hash.json"))
 
   defp ref(key, kind \\ "room"),
     do: %{"cartridge_id" => "c", "cartridge_version" => "1.0.0", "kind" => kind, "key" => key}
@@ -20,7 +21,7 @@ defmodule Loka.ContentRoomsTest do
       "kernel_api" => %{"at_least" => "1.0", "below" => "2.0"},
       "content_schema" => 1,
       "rule_ir" => 1,
-      "capabilities" => %{"movement" => 1},
+      "capabilities" => %{"movement" => 1, "inspectable_detail" => 1},
       "client_features" => []
     },
     "supported_profiles" => ["offline_private"]
@@ -226,5 +227,104 @@ defmodule Loka.ContentRoomsTest do
 
     shared = Map.drop(details, ~w(bell gap lamp)) |> put_in(["notice", "description"], "r.d")
     assert {:ok, _} = compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", shared)})
+  end
+
+  # R5 S3. Breaks: variants dropped or reshaped, facts not keyed, or a short fact reference in a
+  # room's or detail's variant left short (owner decision 2026-09-25; the loader would reject it).
+  test "ashmere_facts compiles to its Python known answer" do
+    expected =
+      ~s({"cartridge":#{@facts_kat["canonical"]},"content_hash":"#{@facts_kat["sha256"]}"})
+
+    assert Loka.Content.compile("cartridges/ashmere_facts") == {:ok, expected}
+  end
+
+  defp variant(root, text \\ "r.d"),
+    do: %{"when" => %{"policy_version" => 1, "root" => root}, "description" => text}
+
+  defp bell(equals), do: %{"op" => "fact_compare", "fact" => "bell", "equals" => equals}
+
+  @bell %{
+    "facts" => %{
+      "bell" => %{
+        "version" => 1,
+        "value_type" => %{"type" => "bool", "default" => false},
+        "scopes" => ["instance"],
+        "meaning" => "m"
+      }
+    }
+  }
+
+  # Breaks: a variant's text key, a short fact reference in a room's or a detail's variant, or
+  # a compared value's type goes unchecked (the player reads a raw key, or the kernel reads no
+  # fact).
+  test "a variant's missing text or fact is UNRESOLVED_REFERENCE; a wrong value FACT_TYPE_MISMATCH",
+       %{tmp_dir: dir} do
+    m =
+      put_in(@manifest, ["requires", "capabilities"], %{
+        "movement" => 1,
+        "inspectable_detail" => 1,
+        "description_variant" => 1,
+        "fact" => 1
+      })
+
+    nope = %{"op" => "fact_compare", "fact" => "nope", "equals" => true}
+    lamp = %{"aliases" => ["lamp"], "description" => "r.d", "variants" => [variant(nope)]}
+
+    b =
+      room(%{})
+      |> Map.put("variants", [variant(bell(true), "d.gone"), variant(bell("yes"))])
+      |> Map.put("details", %{"lamp" => lamp})
+
+    files = %{
+      "cartridge.json" => Map.put(m, "entry", ref("a")),
+      "facts.json" => @bell,
+      "rooms/b.json" => b
+    }
+
+    assert compile(dir, files) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "rooms/b.details.lamp.variants[0].when.root.fact", %{
+                  "target" => "c@1.0.0:fact/nope"
+                }),
+                d("UNRESOLVED_REFERENCE", "rooms/b.variants[0].description", %{
+                  "target" => "d.gone"
+                }),
+                d("FACT_TYPE_MISMATCH", "rooms/b.variants[1].when.root.equals")
+              ]}
+  end
+
+  # Breaks: a detail or a variant (on a room or a detail) compiles without its owning
+  # capability required, or a variant condition's op without its owner (05 §6).
+  test "details, variants and their ops without their owners are UNDECLARED_CAPABILITY",
+       %{tmp_dir: dir} do
+    m = put_in(@manifest, ["requires", "capabilities"], %{"movement" => 1})
+    lamp = %{"aliases" => ["lamp"], "description" => "r.d", "variants" => [variant(bell(true))]}
+
+    b =
+      room(%{})
+      |> Map.put("variants", [variant(%{"op" => "not", "item" => bell(true)})])
+      |> Map.put("details", %{"lamp" => lamp})
+
+    files = %{
+      "cartridge.json" => Map.put(m, "entry", ref("a")),
+      "facts.json" => @bell,
+      "rooms/b.json" => b
+    }
+
+    undeclared = fn path, cap ->
+      d("UNDECLARED_CAPABILITY", path, %{"capability" => cap}, [cap <> "@1"])
+    end
+
+    assert compile(dir, files) ==
+             {:error,
+              [
+                undeclared.("rooms/b.details.lamp", "inspectable_detail"),
+                undeclared.("rooms/b.details.lamp.variants[0]", "description_variant"),
+                undeclared.("rooms/b.details.lamp.variants[0].when.root.op", "fact"),
+                undeclared.("rooms/b.variants[0]", "description_variant"),
+                undeclared.("rooms/b.variants[0].when.root.item.op", "fact"),
+                undeclared.("rooms/b.variants[0].when.root.op", "policy")
+              ]}
   end
 end

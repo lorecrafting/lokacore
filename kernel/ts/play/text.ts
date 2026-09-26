@@ -5,6 +5,7 @@ import type { Cartridge, World } from '../src/index.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { COMPASS } from '../src/decision.ts';
 import { gameView } from '../src/index.ts';
+import { describe } from '../src/rules/description_variant.ts';
 import { normalize } from '../src/target.ts';
 
 /**
@@ -61,9 +62,11 @@ export function room(cartridge: Cartridge, world: World): string {
   return `${text(view.place.title.key)}\n${text(view.place.description.key)}\nExits: ${exits}\n`;
 }
 
-/** A detail's description, in the cartridge's text. */
-export const detail = (cartridge: Cartridge, world: World, id: EntityId): string =>
-  `${cartridge.text[world.details[id].description] ?? world.details[id].description}\n`;
+/** A detail's description as the player sees it (its variants), in the cartridge's text. */
+export function detail(cartridge: Cartridge, world: World, id: EntityId): string {
+  const key = describe(world, world.character, world.details[id]);
+  return `${cartridge.text[key] ?? key}\n`;
+}
 
 /** "Which do you mean: the notice or the mooring post?": each candidate by its first alias. */
 export const which = (world: World, ids: readonly EntityId[]): string => {

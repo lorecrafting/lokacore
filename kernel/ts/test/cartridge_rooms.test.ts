@@ -12,7 +12,13 @@ import { read } from './read.ts';
 const kat = read('protocol/fixtures/cartridge_rooms_hash.json');
 const installed: Installed = {
   kernel_api: '1.0',
-  capabilities: { movement: [1], description_variant: [1], fact: [1], policy: [1] },
+  capabilities: {
+    movement: [1],
+    description_variant: [1],
+    fact: [1],
+    policy: [1],
+    inspectable_detail: [1],
+  },
   content_schema: 1,
   rule_ir: 1,
   client_features: [],

@@ -88,3 +88,22 @@ export function utf8(s: string): Uint8Array {
   }
   return out.subarray(0, n);
 }
+
+// UTF-8 → string, strict by round trip: a malformed, overlong, truncated or surrogate
+// encoding re-encodes to different bytes (a lone low surrogate re-encodes identically, and
+// the canonical decoder rejects it). Throws on a code point above U+10FFFF.
+// ponytail: one string per character; decode in chunks if 4 MiB artifacts load slowly on Hermes.
+export function fromUtf8(b: Uint8Array): string {
+  const parts: string[] = [];
+  for (let i = 0; i < b.length;) {
+    const lead = b[i++];
+    const n = lead < 0x80 ? 0 : lead < 0xe0 ? 1 : lead < 0xf0 ? 2 : 3;
+    let cp = n ? lead & (0x3f >> n) : lead;
+    for (let k = 0; k < n; k++) cp = (cp << 6) | (b[i++] & 0x3f);
+    parts.push(String.fromCodePoint(cp));
+  }
+  const s = parts.join('');
+  const again = utf8(s);
+  if (again.length !== b.length || again.some((x, i) => x !== b[i])) throw new RangeError();
+  return s;
+}
