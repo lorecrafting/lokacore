@@ -75,3 +75,15 @@ Brief mode matches 00 §4.10 Settings ("brief prose").
    while the R5 row stays at 7 + 1; a word on whether the estimate holds would help (question).
 6. **nit**, same record `:69`. "The link syntax name is `touch link`" reads oddly; "These are
    called touch links" is enough.
+
+## Fix round 1 at `bbf5c74`: APPROVE
+
+All six findings are resolved. F1: `fact_changed` is appended at each executed `fact.assign`'s
+causal position (04 §5.2 steps 4-6), and an unchanged value emits nothing (03 §7). F2: the
+markup lives in catalog strings, `Text` stays `{key, bindings}`, and the GameView side
+(targetable details, need #6) moves to R6P, where the roadmap already feeds the needs table
+into GameView v2. F3: an unresolved target is an error, and a missing link is a per-variant
+warning with hidden details exempt, so `ashmere_details` keeps compiling. N4: the `expand/2`
+claim is gone, and targets resolve against room details and cartridge items and entities.
+N5: the ROADMAP S4 entry and the index line now name touch links. N6: the sentence is removed.
+No new issues. Docs check and the pre-push checks pass.
