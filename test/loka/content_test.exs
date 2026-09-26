@@ -283,11 +283,12 @@ defmodule Loka.ContentTest do
         "items" => [
           %{"op" => "fact_compare", "fact" => "a_b", "equals" => 1},
           %{"op" => "not", "item" => %{"op" => "has_item", "item" => "a_b"}},
-          %{"op" => "fact_compare", "fact" => "missing", "equals" => true}
+          %{"op" => "fact_compare", "fact" => "missing", "equals" => true},
+          %{"op" => "quest_state", "quest" => "q", "state" => "active"}
         ]
       }
 
-      caps = Map.put(@manifest["requires"]["capabilities"], "containment", 1)
+      caps = Map.merge(@manifest["requires"]["capabilities"], %{"containment" => 1, "quest" => 1})
       bad = %{"op" => "fact_compare", "fact" => "A-b", "equals" => true}
 
       assert errors(tmp, %{
@@ -301,6 +302,9 @@ defmodule Loka.ContentTest do
                }),
                d("UNRESOLVED_REFERENCE", "policies/p.root.items[2].fact", %{
                  "target" => "c@1.0.0:fact/missing"
+               }),
+               d("UNRESOLVED_REFERENCE", "policies/p.root.items[3].quest", %{
+                 "target" => "c@1.0.0:quest/q"
                }),
                d("SCHEMA_VIOLATION", "policies/q.root.fact", %{"error" => "pattern_mismatch"})
              ]
