@@ -100,7 +100,11 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (command.world_context_id !== world.context) return reject('not_found');
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
-  const decision = admit(owner, rule(world, command, allocator(world, command)));
+  return adopt(world, admit(owner, rule(world, command, allocator(world, command))));
+}
+
+/** Composes an admitted decision's delta and adopts the changes; only admit() makes one. */
+function adopt(world: World, decision: Admitted): Stepped {
   if (decision.kind !== 'accepted') return { decision, world };
   const result = compose(world.state as unknown as Parameters<typeof compose>[0], decision.delta);
   if ('fault' in result) return { decision: result.fault, world };
@@ -119,17 +123,22 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
  * capability does not own faults unowned_event, and a result over output_bytes faults
  * budget_exceeded; both discard the whole proposal.
  */
-export function admit(owner: string, decision: DecisionResult): DecisionResult {
-  if (decision.kind !== 'accepted') return decision;
+export function admit(owner: string, decision: DecisionResult): Admitted {
+  const fault = (code: ErrorCode) => ({ kind: 'fault', code }) as Admitted;
+  if (decision.kind !== 'accepted') return decision as Admitted;
   const owners = CAPABILITY_OWNERS.event;
   if (decision.events.some((e) => owners[e.payload.type]?.split('@')[0] !== owner))
-    return { kind: 'fault', code: 'unowned_event' };
+    return fault('unowned_event');
   // ponytail: unreachable with look and move (fixed-size results); tested with the first rule
   // whose output size varies (S5, ActionRecipe).
   if (utf8(encode(decision as never)).length > LIMITS.output_bytes!)
-    return { kind: 'fault', code: 'budget_exceeded' };
-  return decision;
+    return fault('budget_exceeded');
+  return decision as Admitted;
 }
+
+declare const ADMITTED: unique symbol;
+/** A DecisionResult that passed admit(); adopt() takes only this, so step cannot skip admit. */
+export type Admitted = DecisionResult & { readonly [ADMITTED]: true };
 
 const INVARIANTS = { ...movement.invariants };
 

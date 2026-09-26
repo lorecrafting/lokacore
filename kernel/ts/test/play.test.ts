@@ -130,22 +130,12 @@ test('replaying the transcript twice reproduces its records and state hashes byt
     f(rec.data.command);
     return [lines[0], lines[1], encode(rec), ...lines.slice(3)].join('\n');
   };
-  const header = (f: (h: any) => void) => {
-    const rec = JSON.parse(lines[0]);
-    f(rec);
-    return [encode(rec), ...lines.slice(1)].join('\n');
-  };
   const variants: [string, string, RegExp][] = [
     ['another decision', original.replace('"direction":"north"', '"direction":"west"'), /./],
     ['a blank line', original.replace('\n', '\n\n'), /not an ObservationRecord line/],
     ['no final newline', original.slice(0, -1), /replay differs/],
     ['another world', second((c) => (c.world_context_id = OTHER_WORLD)), /can't go that way/],
     ['the nil CommandId', second((c) => (c.id = NIL)), /permission_denied/],
-    [
-      'a header in another world (R1-3)',
-      header((h) => (h.data.world_context_id = OTHER_WORLD)),
-      /can't go that way/,
-    ],
   ];
   for (const [name, text, why] of variants) {
     const path = join(dir, 'tampered.jsonl');
@@ -154,6 +144,24 @@ test('replaying the transcript twice reproduces its records and state hashes byt
     assert.equal(r.status, 1, name);
     assert.match(r.out + r.err, why, name);
   }
+});
+
+// R1-3, R2-2: replay builds the world from the header, not from the first command. The
+// expected initial state hash is Python's: body (ordinal 1) in ferry_landing (ordinal 3, the
+// second room ref) of OTHER_WORLD, seed [1, 0, 0, 0] (numeric profile, Initial world ids).
+test('a header in another world replays from that world', () => {
+  const lines = readFileSync(ROOT + transcript, 'utf8').split('\n');
+  const head = JSON.parse(lines[0]);
+  head.data.world_context_id = OTHER_WORLD;
+  head.ids.seed = [1, 0, 0, 0];
+  const path = join(dir, 'other-world.jsonl');
+  writeFileSync(path, [encode(head), ...lines.slice(1)].join('\n'));
+  const r = play([artifact, '--replay', path]);
+  assert.equal(r.status, 1);
+  assert.equal(
+    hashes(r.out)[0],
+    '3e67bf938148221ad31d8bd31db992b17a7e1341061c64fcd051ce863ee27ad3',
+  );
 });
 
 // A4: the header alone reconstructs the initial world. Breaks: the world context re-minted.
