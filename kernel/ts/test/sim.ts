@@ -115,7 +115,8 @@ function begin(seed: number, g: Gen) {
   if (g.int(4)) return { loaded, start: world };
   const rows = Object.values(loaded.cartridge.resources ?? {}).map((spec) => {
     const resource = resourceRef(world, spec.key);
-    const value = g.pick([spec.minimum, spec.minimum + 1, Math.min(10, spec.maximum)]);
+    const pick = g.pick([spec.minimum, spec.minimum + 1, 10]);
+    const value = Math.max(spec.minimum, Math.min(pick, spec.maximum)); // within the bounds
     return [
       key({ kind: 'resource', resource, entity_id: world.body }),
       { value, at: 0 },
