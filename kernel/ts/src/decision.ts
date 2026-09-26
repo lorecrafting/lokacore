@@ -14,6 +14,7 @@ import {
   type EntityId,
   type ErrorCode,
   type EventPayload,
+  type InspectableDetail,
   type Key,
   type Owned,
   type RoomDefinition,
@@ -40,8 +41,12 @@ export type World = {
   readonly body: EntityId;
   readonly rooms: Readonly<Record<string, RoomDefinition>>; // by room EntityId
   readonly roomIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
+  readonly details: Readonly<Record<string, Detail>>; // by detail target id
   readonly state: State;
 };
+
+/** A room's InspectableDetail, with the room and key its target id stands for (21 §6). */
+export type Detail = InspectableDetail & { readonly room: EntityId; readonly key: string };
 
 type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 type Event<E> = Omit<DomainEvent, 'payload'> & {

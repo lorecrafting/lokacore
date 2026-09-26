@@ -3,7 +3,8 @@
 **Status: Accepted by the owner 2026-09-25 ([record](owner-decision-adr-075-2026-09-25.md));
 entered [document 16](../spec/16-decision-register.md) 2026-09-25.** Amended 2026-09-25 by R5 slice 1's
 review ([record](../reviews/2026-09-25-r5-s1-review.md), Astra A4, A5; Fable F1): the three
-*Amendment* notes in §4 and §6. Written by the developer agent
+*Amendment* notes in §4 and §6; amended again by R5 slice 2 ([owner decision](owner-decision-lab-failed-lookups-2026-09-25.md)):
+the `target.unresolved` diagnostics record and its §6 note. Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
 ([owner decision](owner-decisions-observability-astra-2026-09-25.md)).
 
@@ -34,7 +35,7 @@ A new envelope field or meaning takes a new format tag.
 | Store | What goes in | Producers through R6P | Where until a server exists | Retention | Upload by default |
 |---|---|---|---|---|---|
 | `game_trace` | one `trace.run` header per run, then one `trace.command` entry per command (§4) | `loka play`, simulator (R5); local authority (R6) | dev and CI: `tmp/obs/game_trace/<run_id>.jsonl` (git-ignored); phone: the app sandbox, placement decided by R6 | dev: until deleted; CI: kept as a workflow artifact when the run fails; phone: bounded, cap decided by R6; certification keeps reproducible traces longer (11 §15, R9) | never (11 §11) |
-| `diagnostics` | things to fix: `content.diagnostic` (08 §6), `simulation.invariant_failed` (09 §2) | the TypeScript loader via `loka play` (R5 S1); `mix loka.compile` from the slice that first stores its diagnostics; simulator | `tmp/obs/diagnostics/` | as game_trace in CI | no |
+| `diagnostics` | things to fix: `content.diagnostic` (08 §6), `simulation.invariant_failed` (09 §2), `target.unresolved` (R5 S2) | the TypeScript loader and failed lookups via `loka play` (R5 S1, S2); `mix loka.compile` from the slice that first stores its diagnostics; simulator | `tmp/obs/diagnostics/` | as game_trace in CI | no |
 | `operations` | host-dependent measures: `kernel.decision_latency` (11 §13) | `loka play`, simulator (Node); local authority (Hermes) | `tmp/obs/operations/`; phone: the app sandbox | dev: until deleted; R6P timing evidence is captured under the [evidence lessons](../lessons/evidence.md) | no |
 | `dev_evidence` | `agent.work`: model, tokens and pull-request disposition per agent per pull request | the PM, when a pull request merges or closes: one record per agent (role and instance), summing its rounds; a sum that includes an unknown round is `unknown` | committed, `docs/dev-evidence.jsonl`, appended by the PM ([owner decision](owner-decisions-adr-075-2026-09-25.md), item 2) | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
 
@@ -54,7 +55,7 @@ may appear at all:
 
 | Ids contract | Used by | Required | Optional |
 |---|---|---|---|
-| RunIds | `trace.run` | content_hash, kernel_version, seed, run_id | none |
+| RunIds | `trace.run`, `target.unresolved` | content_hash, kernel_version, seed, run_id | none |
 | ReplayIds | `trace.command`, `simulation.invariant_failed` | content_hash, kernel_version, seed, run_id, command_id, revision | none |
 | BuildIds | `content.diagnostic` | kernel_version, input_digest | content_hash (only once an artifact's hash exists) |
 | HostIds | `kernel.decision_latency` | kernel_version, host, run_id, command_id | none |
@@ -177,7 +178,13 @@ absolute home or worktree path in `Diagnostic.path` and a device serial in
 `Diagnostic.data`, which its redaction must strip or reject. *Amendment (A5):* free player text
 enters a Command only where its contract needs it, and then passes the producer's redaction or
 rejection before the Command is built; a word no command needs is a host parse message, never a
-Command or a record.
+Command or a record. *Amendment (R5 S2, [owner decision](owner-decision-lab-failed-lookups-2026-09-25.md)):* a failed lookup (target
+resolution none or ambiguous, 21 §7) builds no Command, and its producer writes one
+`target.unresolved` record to `diagnostics` (a content gap to fix; never `game_trace`, since it
+is neither a decision nor a replay input) under the run's `RunIds`. It is the one record that
+carries player words: each normalized word matches `[a-z0-9]{1,32}` or is recorded as
+`redacted` (a host identifier in any case, or anything else), decided before the record is
+built.
 
 ## 7. Adding a name, and validating producers
 

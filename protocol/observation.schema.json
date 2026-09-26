@@ -218,7 +218,7 @@
       ]
     },
     "RunIds": {
-      "description": "The correlation ids of a run header: the replay inputs a run shares (ReplayIds without command and revision).",
+      "description": "The correlation ids of a run header, and of a failed lookup in that run (target.unresolved): the replay inputs a run shares (ReplayIds without command and revision).",
       "type": "object",
       "properties": {
         "content_hash": {
@@ -838,6 +838,129 @@
         }
       ]
     },
+    "LookupWord": {
+      "description": "One word of a failed lookup as the producer recorded it: the normalized word (lowercase letters and digits, at most 32), or redacted when it held a host identifier (ADR-075 §6) or anything else a record may not carry. Redaction happens before the record is built; a redacted word is marked, never an empty string.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "word"
+            },
+            "word": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+$",
+              "maxLength": 32
+            }
+          },
+          "required": [
+            "kind",
+            "word"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "redacted"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "kind": "word",
+          "word": "post"
+        },
+        {
+          "kind": "redacted"
+        },
+        {
+          "kind": "word",
+          "word": "pppppppppppppppppppppppppppppppp"
+        }
+      ]
+    },
+    "TargetUnresolved": {
+      "description": "A player's lookup that resolved to no target or to several (21 §7 none | ambiguous; 04 §18), so no Command was built and nothing reached the game_trace (owner request, R5 S2: the Lab, bots and tests see what players try that the content lacks). room: the room it was tried in; outcome and candidates: the resolution and its candidate count (0 for none); words: the normalized words compared, after redaction, at most 16; after_ordinal: the ordinal of the run's last trace.command before it (0 before the first), joining it to the game_trace by run_id.",
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "outcome": {
+          "enum": [
+            "none",
+            "ambiguous"
+          ]
+        },
+        "candidates": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1024
+        },
+        "words": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LookupWord"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "after_ordinal": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "room",
+        "outcome",
+        "candidates",
+        "words",
+        "after_ordinal"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "room": {
+            "cartridge_id": "ashmere_details",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "outcome": "ambiguous",
+          "candidates": 2,
+          "words": [
+            {
+              "kind": "word",
+              "word": "post"
+            }
+          ],
+          "after_ordinal": 0
+        },
+        {
+          "room": {
+            "cartridge_id": "ashmere_details",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "well_lane"
+          },
+          "outcome": "none",
+          "candidates": 0,
+          "words": [
+            {
+              "kind": "redacted"
+            }
+          ],
+          "after_ordinal": 3
+        }
+      ]
+    },
     "AgentWork": {
       "description": "One agent's work on one pull request: its role, model (opus, fable, astra, ...), instance (1, 2, ... among that role's agents on the pull request, so (pull_request, role, instance) is unique), the tokens it used (a required Measure; unknown when not reported, never 0) and the pull request's disposition (merged or closed), which is not a judgment of the agent's work. Evidence for analysis, never an acceptance authority.",
       "type": "object",
@@ -999,6 +1122,36 @@
             },
             "data": {
               "$ref": "#/$defs/InvariantFailure"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "target.unresolved"
+            },
+            "store": {
+              "enum": [
+                "diagnostics"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/RunIds"
+            },
+            "data": {
+              "$ref": "#/$defs/TargetUnresolved"
             }
           },
           "required": [
@@ -1293,6 +1446,39 @@
               "state": "unknown"
             },
             "pr_disposition": "closed"
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "target.unresolved",
+          "store": "diagnostics",
+          "ids": {
+            "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "seed": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
+          },
+          "data": {
+            "room": {
+              "cartridge_id": "ashmere_details",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            },
+            "outcome": "ambiguous",
+            "candidates": 2,
+            "words": [
+              {
+                "kind": "word",
+                "word": "post"
+              }
+            ],
+            "after_ordinal": 0
           }
         }
       ]

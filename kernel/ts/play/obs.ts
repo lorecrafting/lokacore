@@ -2,10 +2,11 @@
 // JSON lines, the store files under tmp/obs/, and redaction of diagnostics (§6).
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, realpathSync, writeFileSync } from 'node:fs';
-import { homedir, hostname, tmpdir } from 'node:os';
+import { homedir, hostname, tmpdir, userInfo } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { encode, type Json } from '../src/canonical.ts';
 import { KERNEL_ID } from '../src/index.ts';
+import { normalize } from '../src/target.ts';
 import { validate } from '../src/validate.ts';
 
 export const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
@@ -46,6 +47,7 @@ const secrets = [
   tmpdir(),
   realpathSync(tmpdir()),
   hostname(),
+  userInfo().username,
   process.env.ANDROID_SERIAL ?? '',
 ]
   .filter((s) => s.length > 3)
@@ -62,4 +64,26 @@ export function redact<T extends Json>(value: T): T {
   if (value && typeof value === 'object')
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, redact(v)])) as T;
   return value;
+}
+
+/**
+ * A lookup's normalized words for a target.unresolved record, at most 16: each a word of
+ * lowercase letters and digits (at most 32), or redacted when it holds a host identifier (in
+ * any case) or anything else (ADR-075 §6, as amended in R5 S2). Redacted before the record is
+ * built, never recorded as an empty string.
+ */
+export function lookupWords(text: string) {
+  // Every letters-and-digits piece of a host identifier (user name, hostname labels, serial):
+  // a word can hold only those, and a path's pieces (`home`, `users`) are ordinary words.
+  const pieces = [hostname(), userInfo().username, process.env.ANDROID_SERIAL ?? '']
+    .flatMap((x) => x.toLowerCase().split(/[^a-z0-9]+/))
+    .filter((x) => x.length > 3);
+  const hidden = (w: string) => pieces.some((x) => w.includes(x));
+  return normalize(text)
+    .slice(0, 16)
+    .map((word) =>
+      /^[a-z0-9]{1,32}$/.test(word) && !hidden(word)
+        ? { kind: 'word', word }
+        : { kind: 'redacted' },
+    );
 }

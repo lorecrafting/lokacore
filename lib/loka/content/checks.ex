@@ -97,10 +97,42 @@ defmodule Loka.Content.Checks do
   end
 
   defp texts(defs, text) do
-    for {kind, fields} <- [{"room", ~w(title description)}, {"action", ~w(label accessibility)}],
-        {_, {rel, [], def}} <- defs[kind],
-        d <- text_keys({rel, def}, fields, text),
+    for(
+      {kind, fields} <- [{"room", ~w(title description)}, {"action", ~w(label accessibility)}],
+      {_, {rel, [], def}} <- defs[kind],
+      d <- text_keys({rel, def}, fields, text),
+      do: d
+    ) ++ details(defs, text)
+  end
+
+  # Each detail's description has a catalog entry, and its first alias is one no other detail
+  # of its room has, in the form a lookup produces (room.schema.json InspectableDetail).
+  defp details(defs, text) do
+    for {_, {rel, [], r}} <- defs["room"],
+        ds = Map.get(r, "details", %{}),
+        {key, detail} <- ds,
+        d <- detail_text(rel, key, detail, text) ++ reachable(rel, key, detail, ds),
         do: d
+  end
+
+  defp detail_text(_, _, _, :unknown), do: []
+
+  defp detail_text(rel, key, %{"description" => t}, text) do
+    if is_map_key(text, t),
+      do: [],
+      else: [
+        diag("UNRESOLVED_REFERENCE", at(rel, ["details", key, "description"]), %{"target" => t})
+      ]
+  end
+
+  defp reachable(rel, key, detail, ds) do
+    others = for {k, o} <- ds, k != key, a <- o["aliases"], into: MapSet.new(), do: a
+
+    [first | _] = words = String.split(hd(detail["aliases"]), "_")
+
+    if "" in words or first in ~w(at the a an) or hd(detail["aliases"]) in others,
+      do: [diag("UNREACHABLE_DETAIL", at(rel, ["details", key]))],
+      else: []
   end
 
   # Without a valid manifest the entry is unknown, not missing.

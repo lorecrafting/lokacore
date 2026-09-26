@@ -95,6 +95,10 @@ The table below describes the files as imported. Later amendments are in git his
   ids rule beside IdSource (additive; the nil CommandId reserved for world creation, one
   allocation counter per decision); 00a §12 notes the frozen room, text and entry shapes.
   No existing rule or fixture changed.
+- 2026-09-25, R5 S2 (target resolution; PM-approved design):
+  [conformance/numeric-profile.md](conformance/numeric-profile.md) gains the detail target
+  ids rule after the initial world ids (additive: details after the rooms, in room and key
+  order). No existing rule or fixture changed.
 
 ## Link rewrites (the only byte changes at import)
 

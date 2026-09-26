@@ -5,8 +5,8 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir, userInfo } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { encode } from '../src/canonical.ts';
@@ -130,22 +130,12 @@ test('replaying the transcript twice reproduces its records and state hashes byt
     f(rec.data.command);
     return [lines[0], lines[1], encode(rec), ...lines.slice(3)].join('\n');
   };
-  const header = (f: (h: any) => void) => {
-    const rec = JSON.parse(lines[0]);
-    f(rec);
-    return [encode(rec), ...lines.slice(1)].join('\n');
-  };
   const variants: [string, string, RegExp][] = [
     ['another decision', original.replace('"direction":"north"', '"direction":"west"'), /./],
     ['a blank line', original.replace('\n', '\n\n'), /not an ObservationRecord line/],
     ['no final newline', original.slice(0, -1), /replay differs/],
     ['another world', second((c) => (c.world_context_id = OTHER_WORLD)), /can't go that way/],
     ['the nil CommandId', second((c) => (c.id = NIL)), /permission_denied/],
-    [
-      'a header in another world (R1-3)',
-      header((h) => (h.data.world_context_id = OTHER_WORLD)),
-      /can't go that way/,
-    ],
   ];
   for (const [name, text, why] of variants) {
     const path = join(dir, 'tampered.jsonl');
@@ -154,6 +144,24 @@ test('replaying the transcript twice reproduces its records and state hashes byt
     assert.equal(r.status, 1, name);
     assert.match(r.out + r.err, why, name);
   }
+});
+
+// R1-3, R2-2: replay builds the world from the header, not from the first command. The
+// expected initial state hash is Python's: body (ordinal 1) in ferry_landing (ordinal 3, the
+// second room ref) of OTHER_WORLD, seed [1, 0, 0, 0] (numeric profile, Initial world ids).
+test('a header in another world replays from that world', () => {
+  const lines = readFileSync(ROOT + transcript, 'utf8').split('\n');
+  const head = JSON.parse(lines[0]);
+  head.data.world_context_id = OTHER_WORLD;
+  head.ids.seed = [1, 0, 0, 0];
+  const path = join(dir, 'other-world.jsonl');
+  writeFileSync(path, [encode(head), ...lines.slice(1)].join('\n'));
+  const r = play([artifact, '--replay', path]);
+  assert.equal(r.status, 1);
+  assert.equal(
+    hashes(r.out)[0],
+    '3e67bf938148221ad31d8bd31db992b17a7e1341061c64fcd051ce863ee27ad3',
+  );
 });
 
 // A4: the header alone reconstructs the initial world. Breaks: the world context re-minted.
@@ -223,6 +231,118 @@ test('go <serial> on a valid cartridge leaves the serial in no record', () => {
     assert.ok(!text.includes(serial), store);
   }
   assert.equal(records(rel).length, 2); // the header and look
+});
+
+// R5 S2 lookups on the details known answer (21 §6-§7; 04 §17-§18). Expected text is the
+// fixture's; a run's target ids depend on its random world, so they are checked against
+// Python's in target.test.ts, and here only where they appear.
+const details = read('protocol/fixtures/cartridge_details_hash.json');
+const detailsArtifact = join(dir, 'details.json');
+writeFileSync(
+  detailsArtifact,
+  `{"cartridge":${details.canonical},"content_hash":"${details.sha256}"}`,
+);
+const lookScript = join(dir, 'look.txt');
+writeFileSync(lookScript, 'look mooring post\nexamine post\nx bucket\nn\nx bucket\nx\n');
+
+// Breaks: unique, none and ambiguous confused, a lookup that fails becoming a Command, words
+// reaching a Command, a failed lookup not recorded (or recorded in the game_trace), or replay
+// of a look at a detail diverging.
+test('look <words> examines one detail, lists an ambiguity, and records failed lookups', () => {
+  const r = play([detailsArtifact, lookScript]);
+  assert.equal(r.status, 0, r.err);
+  assert.match(r.out, /> look mooring post\nRope has worn a groove into the post\./);
+  assert.match(
+    r.out,
+    /> examine post\nWhich do you mean: the (notice or the mooring post|mooring post or the notice)\?\n>/,
+  );
+  assert.match(r.out, /> x bucket\nYou don't see that here\.\n> n\n/);
+  assert.match(r.out, /> x bucket\nA wooden bucket on a rusted chain/);
+  assert.match(r.out, /> x\nExamine what\?\n/);
+  const rel = r.out.match(/transcript: (\S+)/)![1];
+  const commands = records(rel)
+    .slice(1)
+    .map((e) => e.data.command.payload);
+  assert.deepEqual(
+    commands.map(({ actor_id, ...p }) => (p.target_id ? { ...p, target_id: '*' } : p)),
+    [
+      { type: 'look', target_id: '*' },
+      { type: 'move', direction: 'north' },
+      { type: 'look', target_id: '*' },
+    ],
+  );
+  const failed = records(rel.replace('game_trace', 'diagnostics'));
+  for (const f of failed) assert.deepEqual(validate('ObservationRecord', f), []);
+  const room = {
+    cartridge_id: 'ashmere_details',
+    cartridge_version: '0.0.1',
+    kind: 'room',
+    key: 'ferry_landing',
+  };
+  assert.deepEqual(
+    failed.map((f) => [f.event, f.store, f.ids.run_id, f.data]),
+    [
+      [
+        'target.unresolved',
+        'diagnostics',
+        records(rel)[0].ids.run_id,
+        {
+          room,
+          outcome: 'ambiguous',
+          candidates: 2,
+          words: [{ kind: 'word', word: 'post' }],
+          after_ordinal: 1,
+        },
+      ],
+      [
+        'target.unresolved',
+        'diagnostics',
+        records(rel)[0].ids.run_id,
+        {
+          room,
+          outcome: 'none',
+          candidates: 0,
+          words: [{ kind: 'word', word: 'bucket' }],
+          after_ordinal: 1,
+        },
+      ],
+    ],
+  );
+  const again = play([detailsArtifact, '--replay', ROOT + rel]);
+  assert.equal(again.status, 0, again.err);
+  assert.match(again.out, /replay: 3 commands identical/);
+});
+
+// ADR-075 §6 (A5, R5 S2): a serial or the user name named in a lookup reaches no record, the failed-lookup
+// record included, where it is marked redacted; a path's pieces (home, users) stay words.
+// Breaks: words recorded unredacted, redaction that misses another case, redaction keyed on
+// path pieces, or the words entering a Command.
+test('look <serial> or <user name> leaves neither in any record', () => {
+  const serial = 'r58m12abcde';
+  const path = join(dir, 'look-serial.txt');
+  const user = userInfo().username;
+  writeFileSync(
+    path,
+    `look ${serial}\nx the ${serial.toUpperCase()} post\nlook ${user}\nlook home\nlook users\n`,
+  );
+  const r = play([detailsArtifact, path], { ANDROID_SERIAL: serial });
+  const rel = r.out.match(/transcript: (\S+)/)![1];
+  for (const store of ['game_trace', 'diagnostics']) {
+    const text = readFileSync(ROOT + rel.replace('game_trace', store), 'utf8');
+    assert.ok(!text.toLowerCase().includes(serial) && !text.includes(`"${user}"`), store);
+  }
+  assert.ok(!existsSync(ROOT + rel.replace('game_trace', 'operations'))); // no command ran
+  assert.deepEqual(
+    records(rel.replace('game_trace', 'diagnostics')).map((f) => f.data.words),
+    [
+      [{ kind: 'redacted' }],
+      [{ kind: 'redacted' }, { kind: 'word', word: 'post' }],
+      [{ kind: 'redacted' }],
+      [{ kind: 'word', word: 'home' }],
+      [{ kind: 'word', word: 'users' }],
+    ],
+  );
+  assert.equal(records(rel).length, 1); // the header only: no lookup became a Command
 });
 
 // ADR-075 §3: input_digest is SHA-256 of the artifact file's bytes. Breaks: another input

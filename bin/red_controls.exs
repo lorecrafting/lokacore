@@ -97,7 +97,13 @@ controls = [
    %{
      "protocol/red_control.schema.json" =>
        ~s({"$defs": {"RedControl": {"anyOf": [{"type": "string"}, {"type": "string"}]}}})
-   }, ~w(mix compile --warnings-as-errors --force), "RedControl/anyOf: invalid"}
+   }, ~w(mix compile --warnings-as-errors --force), "RedControl/anyOf: invalid"},
+  {"features: a capability implemented without its feature map cells",
+   %{"kernel/ts/src/rules/barrier.ts" => "export {};\n"}, ~w(elixir bin/features.exs --check),
+   "barrier@1: missing spec"},
+  {"features: a transcript added without regenerating the feature map",
+   %{"cartridges/ashmere_details/transcripts/barrier.jsonl" => ""},
+   ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"}
 ]
 
 failures =

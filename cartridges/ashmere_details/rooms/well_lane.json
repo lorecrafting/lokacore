@@ -1,0 +1,36 @@
+{
+  "title": "room.well_lane.title",
+  "description": "room.well_lane.description",
+  "exits": {
+    "south": {
+      "to": {
+        "cartridge_id": "ashmere_details",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "ferry_landing"
+      }
+    }
+  },
+  "details": {
+    "well": {
+      "aliases": [
+        "well"
+      ],
+      "description": "detail.well"
+    },
+    "bucket": {
+      "aliases": [
+        "bucket",
+        "well_bucket"
+      ],
+      "description": "detail.bucket"
+    },
+    "steps": {
+      "aliases": [
+        "worn_steps",
+        "steps"
+      ],
+      "description": "detail.steps"
+    }
+  }
+}

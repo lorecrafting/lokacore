@@ -69,7 +69,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Observe the current place.",
+          "description": "Observe the current place, or, with target_id, one thing in it: an id the authority's target resolution returned as unique (21 §7; 04 §17, §18), never the player's words.",
           "type": "object",
           "properties": {
             "type": {
@@ -77,6 +77,9 @@
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
@@ -263,6 +266,11 @@
         {
           "type": "look",
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+        },
+        {
+          "type": "look",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "target_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
         },
         {
           "type": "take",

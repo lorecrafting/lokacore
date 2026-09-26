@@ -24,6 +24,12 @@
     "description": "A registered invariant failed after a command; the ids are the deterministic repro (09 §2; roadmap verification harness). Producer: the deterministic simulator (R5), later fault simulation (R6)."
   },
   {
+    "name": "target.unresolved",
+    "store": "diagnostics",
+    "kind": "event",
+    "description": "A player's lookup that matched no target or several, so no Command was built (21 §7; 04 §18; owner request, R5 S2): diagnostics because it is a thing to fix in content, never game_trace (not a decision, not a replay input). Producer: loka play (R5 S2); the simulator and the Lab later."
+  },
+  {
     "name": "kernel.decision_latency",
     "store": "operations",
     "kind": "metric",

@@ -1,0 +1,161 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_details (R5 S2; 05 \u00a711; CartridgeArtifact.content_hash): the rooms known answer's construction with InspectableDetails on two rooms (room.schema.json): the compiled cartridge assembled by hand from the source files (manifest without entry, the lock, empty facts, policies and actions, each room keyed by its DefinitionRefString with key added, entry, text), its canonical bytes and SHA-256 of those bytes. canonical was produced by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_details",
+      "version": "0.0.1",
+      "title": "Ashmere \u2014 Details",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "description_variant": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "description_variant": 1
+      }
+    },
+    "facts": {},
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_details@0.0.1:room/boathouse": {
+        "title": "room.boathouse.title",
+        "description": "room.boathouse.description",
+        "exits": {
+          "east": {
+            "to": {
+              "cartridge_id": "ashmere_details",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        },
+        "key": "boathouse"
+      },
+      "ashmere_details@0.0.1:room/ferry_landing": {
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_details",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "well_lane"
+            }
+          },
+          "west": {
+            "to": {
+              "cartridge_id": "ashmere_details",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "boathouse"
+            }
+          }
+        },
+        "details": {
+          "mooring_post": {
+            "aliases": [
+              "mooring_post",
+              "post",
+              "mooring"
+            ],
+            "description": "detail.mooring_post"
+          },
+          "notice": {
+            "aliases": [
+              "notice",
+              "post"
+            ],
+            "description": "detail.notice"
+          },
+          "tide_marks": {
+            "aliases": [
+              "tide_marks",
+              "marks"
+            ],
+            "description": "detail.tide_marks"
+          }
+        },
+        "key": "ferry_landing"
+      },
+      "ashmere_details@0.0.1:room/well_lane": {
+        "title": "room.well_lane.title",
+        "description": "room.well_lane.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_details",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        },
+        "details": {
+          "well": {
+            "aliases": [
+              "well"
+            ],
+            "description": "detail.well"
+          },
+          "bucket": {
+            "aliases": [
+              "bucket",
+              "well_bucket"
+            ],
+            "description": "detail.bucket"
+          },
+          "steps": {
+            "aliases": [
+              "worn_steps",
+              "steps"
+            ],
+            "description": "detail.steps"
+          }
+        },
+        "key": "well_lane"
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_details",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "ferry_landing"
+    },
+    "text": {
+      "room.ferry_landing.title": "Ferry Landing",
+      "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A mooring post leans into the current.",
+      "room.boathouse.title": "Boathouse",
+      "room.boathouse.description": "Oars and nets hang from the rafters above Bram's ferry.",
+      "room.well_lane.title": "Well Lane",
+      "room.well_lane.description": "Worn steps lead to the village well. A bucket hangs from its chain.",
+      "detail.mooring_post": "Rope has worn a groove into the post. Someone has carved a fox into it.",
+      "detail.notice": "A notice nailed to the post: no ferry after dark.",
+      "detail.tide_marks": "Dark lines on the pilings show how high the river climbs.",
+      "detail.well": "Mossy stones ring a deep shaft. Cold air rises from below.",
+      "detail.bucket": "A wooden bucket on a rusted chain, still damp from the last draw.",
+      "detail.steps": "The steps are worn hollow by a century of feet."
+    }
+  },
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_details\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_details\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere \u2014 Details\",\"version\":\"0.0.1\"},\"policies\":{},\"rooms\":{\"ashmere_details@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_details\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_details@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"mooring_post\",\"post\",\"mooring\"],\"description\":\"detail.mooring_post\"},\"notice\":{\"aliases\":[\"notice\",\"post\"],\"description\":\"detail.notice\"},\"tide_marks\":{\"aliases\":[\"tide_marks\",\"marks\"],\"description\":\"detail.tide_marks\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_details\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_details\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_details@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"details\":{\"bucket\":{\"aliases\":[\"bucket\",\"well_bucket\"],\"description\":\"detail.bucket\"},\"steps\":{\"aliases\":[\"worn_steps\",\"steps\"],\"description\":\"detail.steps\"},\"well\":{\"aliases\":[\"well\"],\"description\":\"detail.well\"}},\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_details\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"detail.bucket\":\"A wooden bucket on a rusted chain, still damp from the last draw.\",\"detail.mooring_post\":\"Rope has worn a groove into the post. Someone has carved a fox into it.\",\"detail.notice\":\"A notice nailed to the post: no ferry after dark.\",\"detail.steps\":\"The steps are worn hollow by a century of feet.\",\"detail.tide_marks\":\"Dark lines on the pilings show how high the river climbs.\",\"detail.well\":\"Mossy stones ring a deep shaft. Cold air rises from below.\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"}}",
+  "sha256": "3c637393bfe6229b90fb732a501460894698d2fffeff6971d9a5f0ae989bfbbc"
+}
