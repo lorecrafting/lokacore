@@ -12,21 +12,14 @@ import {
   type CharacterId,
   type Command,
   type DecisionResult,
-  type DefinitionRef,
   type DeltaOp,
   type EntityId,
-  type EntityView,
   type ErrorCode,
-  type FactValue,
-  type GameView,
-  type Key,
   type Owned,
-  type TextKey,
   type WorldContextId,
 } from './contracts.gen.ts';
 import {
   allocator,
-  COMPASS,
   COMPOSES,
   event,
   refString,
@@ -42,7 +35,7 @@ import { factChanged, invariants as factInvariants, typedFact } from './fact.ts'
 import { id } from './id_source.ts';
 import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
-import { lists, refusal } from './actions.ts';
+import { refusal } from './actions.ts';
 import * as action_recipe from './rules/action_recipe.ts';
 import * as containment from './rules/containment.ts';
 import * as description_variant from './rules/description_variant.ts';
@@ -60,9 +53,9 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
-// them (fact.ts, policy.ts; details in target.ts and look; a recipe's check in
+// them (fact.ts, policy.ts, resource.ts; details in target.ts and look; a recipe's check in
 // rules/action_recipe.ts). Each has feature map cells.
-const RULELESS = ['fact', 'policy', 'inspectable_detail', 'check'];
+const RULELESS = ['fact', 'policy', 'inspectable_detail', 'check', 'resource'];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
@@ -116,9 +109,24 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entityIds,
     capacities,
     factDefaults,
+    resourceSpecs: specs(cartridge),
     state: { clock: 0, containers, rng: seed },
   };
 }
+
+// The cartridge's ResourceSpecs by canonical DefinitionRef text, as composition reads them.
+const specs = (c: Cartridge) =>
+  Object.fromEntries(
+    Object.values(c.resources ?? {}).map((s) => [
+      key({
+        cartridge_id: c.manifest.id,
+        cartridge_version: c.manifest.version,
+        kind: 'resource',
+        key: s.key,
+      }),
+      s,
+    ]),
+  );
 
 // Each NPC, then each item, in DefinitionRefString order, with its minted id, its container (an
 // NPC's room, an item's location) and its declared capacity.
@@ -208,28 +216,41 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
   const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
   if (bad)
     return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
-  const base = { ...world.state, fact_defaults: world.factDefaults, capacities: world.capacities };
+  const base = {
+    ...world.state,
+    fact_defaults: world.factDefaults,
+    capacities: world.capacities,
+    resource_specs: world.resourceSpecs,
+  };
   const result = compose(base as unknown as Parameters<typeof compose>[0], decision.delta);
   if ('fault' in result) return { decision: result.fault, world };
-  // ponytail: copies the containers and facts maps per step (O(rows)); persistent maps when big.
-  const containers = { ...world.state.containers };
-  const facts: Record<string, FactValue> = { ...world.state.facts };
+  // ponytail: copies each written section per step (O(rows)); persistent maps when big.
+  const written: Record<string, Record<string, unknown>> = {};
   let clock = world.state.clock;
-  for (const { target, value } of result.changes)
-    if (target.kind === 'containment') containers[target.entity_id] = value as EntityId;
-    else if (target.kind === 'fact') facts[key(target)] = value as FactValue;
-    else if (target.kind === 'clock') clock = value as number;
-  const state = { ...world.state, clock, containers, rng: decision.rng };
+  for (const { target, value } of result.changes) {
+    if (target.kind === 'clock') clock = value as number;
+    const name = SECTIONS[target.kind];
+    if (!name) continue;
+    written[name] ??= { ...world.state[name] };
+    written[name][target.kind === 'containment' ? target.entity_id : key(target)] = value;
+  }
   const events = factChanged(world, command, mint, assigns, decision.events);
   const out = events === decision.events ? decision : { ...decision, events };
   if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
     return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
-  // No facts key until one is set, so a world without facts keeps its pre-fact state hash.
-  return {
-    decision: out,
-    world: { ...world, state: Object.keys(facts).length ? { ...state, facts } : state },
-  };
+  // Only written sections join the state, so a world that never sets a fact, resource or
+  // cooldown keeps its earlier state hash.
+  const state = { ...world.state, ...written, clock, rng: decision.rng } as World['state'];
+  return { decision: out, world: { ...world, state } };
 }
+
+// The State section each written MutationTarget kind lives in (the clock is State.clock).
+const SECTIONS: Readonly<Record<string, 'containers' | 'facts' | 'resources' | 'cooldowns'>> = {
+  containment: 'containers',
+  fact: 'facts',
+  resource: 'resources',
+  cooldown: 'cooldowns',
+};
 
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 
@@ -260,41 +281,4 @@ export function holds(id: string, world: World): boolean {
   return INVARIANTS[id](world);
 }
 
-/**
- * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
- * the player sees (description_variant.describe), exits in compass order, the place's actions,
- * the NPCs and items in the room and the items the player's body holds (03 §23), each named by
- * its short description with its actions (actions.ts lists: an item here by the room_contents
- * scope, an NPC by room_occupants, a held item by inventory), NPCs first, then in
- * DefinitionRefString order.
- */
-export function gameView(world: World): GameView {
-  const here = world.state.containers[world.body];
-  const actions = lists(world, world.character);
-  const scope = { item: 'room_contents', npc: 'room_occupants' } as const;
-  const within = (holder: EntityId): EntityView[] =>
-    Object.entries(world.entities)
-      .filter(([id]) => world.state.containers[id] === holder)
-      .map(([id, e]) => ({
-        id: id as EntityId,
-        name: e.short,
-        kind: e.kind as Key,
-        actions: actions.of(holder === world.body ? 'inventory' : scope[e.kind]),
-      }));
-  const room = world.rooms[here];
-  const text = (key: TextKey) => ({ key });
-  const description = text(description_variant.describe(world, world.character, room));
-  return {
-    actor_id: world.character,
-    place: { id: here, title: text(room.title), description },
-    exits: COMPASS.filter((d) => Object.hasOwn(room.exits, d)).map((direction) => ({
-      available: true,
-      direction,
-    })),
-    actions: actions.place,
-    entities: within(here),
-    inventory: within(world.body),
-    journal: [],
-    time: world.state.clock,
-  };
-}
+export { gameView } from './view.ts';

@@ -219,13 +219,14 @@ test('time_window needs schedule@1 and a non-empty window', () => {
     (recipe(c).policy.root = { op: 'time_window', from, to });
   assert.ok(load('cartridge_bell_hash.json', and(window(18, 6))).ok);
   fails(and(window(18, 18)), 'EMPTY_TIME_WINDOW', `${AT}.policy.root`);
-  fails(
-    window(18, 6),
-    'UNDECLARED_CAPABILITY',
-    `${AT}.policy.root.op`,
-    { capability: 'schedule' },
-    ['schedule@1'],
-  );
+  const unscheduled = (c: any) => {
+    delete c.manifest.requires.capabilities.schedule; // the compiler adds it with the pools
+    delete c.lock.capabilities.schedule;
+    window(18, 6)(c);
+  };
+  fails(unscheduled, 'UNDECLARED_CAPABILITY', `${AT}.policy.root.op`, { capability: 'schedule' }, [
+    'schedule@1',
+  ]);
 });
 
 // Astra A1. Breaks: a fact.assign value (any outcome) or a fact_compare value not of the fact's
@@ -265,5 +266,60 @@ test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
     and((c) => (c.recipes[toll] = { ...structuredClone(recipe(c)), key: 'toll_bell' })),
     'DUPLICATE_DEFINITION',
     `${AT}.check`,
+  );
+});
+
+// R5 S6b resources, on the road known answer. Breaks: the kernel would read a resource that
+// does not exist, or regenerate outside a spec's bounds, because the loader let it in (each
+// matched by a compiler test in test/loka/content_road_test.exs).
+const ROAD = 'cartridge_road_hash.json';
+const HP = 'ashmere_road@0.0.1:resource/hp';
+const SHOVE = `.cartridge.recipes["ashmere_road@0.0.1:recipe/shove_cart"]`;
+const PRAY = `.cartridge.recipes["ashmere_road@0.0.1:recipe/pray"]`;
+const road = (c: any, key: string) => c.recipes[`ashmere_road@0.0.1:recipe/${key}`];
+const road_fails = (f: (c: any) => void, code: string, path: string, data = {}, s: string[] = []) =>
+  fails(f, code, path, data, s, ROAD);
+
+test('a resource spec whose bounds do not hold its start is RESOURCE_SPEC_INVALID', () => {
+  assert.ok(load(ROAD, () => {}).ok);
+  const at = `.cartridge.resources["${HP}"]`;
+  road_fails((c) => (c.resources[HP].start = 26), 'RESOURCE_SPEC_INVALID', at);
+  road_fails((c) => (c.resources[HP].start = -1), 'RESOURCE_SPEC_INVALID', at);
+  road_fails((c) => (c.resources[HP].minimum = 26), 'RESOURCE_SPEC_INVALID', at);
+  assert.ok(load(ROAD, (c) => (c.resources[HP].start = 25)).ok); // start at a bound
+});
+
+test("a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE", () => {
+  const target = { target: 'ashmere_road@0.0.1:resource/sp' };
+  road_fails(
+    (c) => (road(c, 'shove_cart').costs[0].resource.key = 'sp'),
+    'UNRESOLVED_REFERENCE',
+    `${SHOVE}.costs[0].resource`,
+    target,
+  );
+  road_fails(
+    (c) => (road(c, 'shove_cart').check.resource.key = 'sp'),
+    'UNRESOLVED_REFERENCE',
+    `${SHOVE}.check.resource`,
+    target,
+  );
+  road_fails(
+    (c) => (road(c, 'pray').outcomes.success.sequence[0].resource.key = 'sp'),
+    'UNRESOLVED_REFERENCE',
+    `${PRAY}.outcomes.success.sequence[0].resource`,
+    target,
+  );
+});
+
+test('resources without resource@1 in the lock are UNDECLARED_CAPABILITY', () => {
+  road_fails(
+    (c) => {
+      delete c.manifest.requires.capabilities.resource;
+      delete c.lock.capabilities.resource;
+    },
+    'UNDECLARED_CAPABILITY',
+    `.cartridge.resources["${HP}"]`,
+    { capability: 'resource' },
+    ['resource@1'],
   );
 });

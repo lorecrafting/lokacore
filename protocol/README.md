@@ -20,6 +20,7 @@ lists only what a file adds to that.
 | `action.schema.json` | action definitions, invocation, targets; ActionSet contributions and action recipes | 04 §1, §2, §18, §19; 06 §19, §20; 21 §7; 05 §28 | `cartridge_bell_hash.json` |
 | `policy.schema.json` | the policy AST | 06 §21; 21 §3.2, §4; 14 §R3A | |
 | `fact.schema.json` | FactSpec, scoped facts | 03 §7, §13; 21 §3.9, §4 | |
+| `resource.schema.json` | ResourceSpec: bounded integer resources, the default HP/MA/MV pools, hourly regeneration | 21 §4; 00 §4 | `composition.json`, `cartridge_road_hash.json` |
 | `delta.schema.json` | StateDelta ops, targets, preconditions | 04 §1, §5.1, §5.3; 14 §R3A | `composition.json` |
 | `decision.schema.json` | DecisionResult | 04 §5, §5.0, §5.2 | `composition.json` |
 | `event.schema.json` | DomainEvent, proposed versus committed | 04 §1, §5.1, §8, §11; 14 §R3A | `composition.json` |

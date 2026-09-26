@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { readdirSync } from 'node:fs';
 import { test } from 'node:test';
 import { hash } from '../src/canonical.ts';
+import { commandId } from '../src/id_source.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { accepted, allocator, event, rejected } from '../src/decision.ts';
@@ -77,6 +78,8 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
         target: none,
         input: ['direction'],
       },
+      // The compiler adds schedule@1 with the pools (review #49 A1).
+      { available: true, action_key: 'wait', label: 'action.wait', target: none, input: ['until'] },
     ],
     entities: [],
     inventory: [],
@@ -85,7 +88,33 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
   });
 });
 
+// Astra A1. Breaks: the default pools without a way to regenerate (no schedule@1, so no wait):
+// 82 moves leave the body at 0 mv for good.
+test('a body out of mv waits an hour and moves again', () => {
+  let w = fresh();
+  let n = 0;
+  const next = (payload: object) => {
+    const s = kernelStep(w, { ...cmd(payload), id: commandId(CMD, String(n++)) } as Command);
+    w = s.world;
+    return s.decision.kind === 'rejected' ? s.decision.error.code : s.decision.kind;
+  };
+  for (let i = 0; i < 41; i++) {
+    assert.equal(next({ type: 'move', direction: 'north' }), 'accepted');
+    assert.equal(next({ type: 'move', direction: 'south' }), 'accepted');
+  }
+  assert.equal(next({ type: 'move', direction: 'north' }), 'insufficient_resource');
+  assert.equal(next({ type: 'wait', until: 3600 }), 'accepted'); // 0 + 18
+  assert.equal(next({ type: 'move', direction: 'north' }), 'accepted');
+});
+
 // Breaks: a wrong destination, a missing or wrong delta, a missing event, or state not adopted.
+// The rooms cartridge has the default pools (R5 S6b), so the move pays 1 mv at time 0.
+const MV = {
+  cartridge_id: 'ashmere_rooms',
+  cartridge_version: '0.0.1',
+  kind: 'resource',
+  key: 'mv',
+};
 test('move north proposes one transfer and entity_entered_room, and commits it', () => {
   const { decision, world } = step(fresh(), move('north'));
   assert.deepEqual(decision, {
@@ -93,6 +122,7 @@ test('move north proposes one transfer and entity_entered_room, and commits it',
     outcome: 'moved',
     delta: {
       ops: [
+        { op: 'resource.adjust', writer_group: 0, resource: MV, entity_id: BODY, from: 82, to: 81 },
         {
           op: 'entity.transfer',
           writer_group: 0,
@@ -119,6 +149,7 @@ test('move north proposes one transfer and entity_entered_room, and commits it',
     rng: SEED,
   });
   assert.deepEqual(world.state.containers, { [BODY]: WELL });
+  assert.deepEqual(Object.values(world.state.resources!), [{ value: 81, at: 0 }]);
 });
 
 // Breaks: an exit followed in the wrong direction, or a room title from the wrong definition.

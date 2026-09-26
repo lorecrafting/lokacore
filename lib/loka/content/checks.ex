@@ -57,7 +57,8 @@ defmodule Loka.Content.Checks do
   @doc """
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
   node's reference (fact, item, quest), in any policy tree (a variant's condition included), a
-  recipe's fact.assign fact or its target's room, an exit's `to`, an item's location (its room,
+  recipe's fact.assign fact, its target's room or the resource of its cost, threshold check or
+  resource.adjust step, an exit's `to`, an item's location (its room,
   npc or item, as `in` selects) or an NPC's room goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
   """
@@ -81,6 +82,11 @@ defmodule Loka.Content.Checks do
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
+
+  # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
+  # map may have a detail keyed resource, whose value is a map).
+  def expand(%{"resource" => r} = n, m) when is_binary(r),
+    do: Map.put(n, "resource", ref(r, "resource", m))
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))

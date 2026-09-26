@@ -7,6 +7,7 @@ import {
   type DeltaOp,
   type ErrorCode,
   type MutationTarget,
+  type ResourceSpec,
   type StateDelta,
 } from './contracts.gen.ts';
 
@@ -60,7 +61,25 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'job', job_id: op.job_id };
     case 'time.advance':
       return { kind: 'clock' };
+    case 'resource.adjust':
+      return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
+    case 'cooldown.start':
+      return { kind: 'cooldown', actor_id: op.actor_id, action: op.action };
   }
+}
+
+/** A resource's stored row: its value and the time it was stored (delta.schema.json). */
+export type Stored = { readonly value: number; readonly at: number };
+
+/**
+ * A resource's current value at `now` (ResourceSpec regeneration): the stored value (start at
+ * time 0 when unset) plus gain for each hour boundary crossed since it was stored, stopping at
+ * maximum. A product past 2^53 is inexact but still above maximum, so the result is exact.
+ */
+export function current(row: Stored | undefined, spec: ResourceSpec, now: number): number {
+  const { value, at } = row ?? { value: spec.start, at: 0 };
+  const ticks = Math.floor(now / 3600) - Math.floor(at / 3600);
+  return Math.min(spec.maximum, value + spec.gain * ticks);
 }
 
 export function compose(state: State, delta: StateDelta): Result {
@@ -116,6 +135,42 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'quest.activate':
     case 'quest.transition':
       return quest(op, row, ctx);
+    case 'choice.open':
+    case 'choice.resolve':
+    case 'choice.close':
+      return choice(op, row);
+    case 'job.schedule':
+      if (row !== undefined) return { code: 'precondition_failed' };
+      if (op.due_time <= ctx.horizon) return { code: 'nonfuture_job' };
+      return { value: { job: op.job, due_time: op.due_time, status: 'pending' } as Json };
+    case 'job.complete': {
+      const ok =
+        get(row, 'status') === 'pending' && (get(row, 'due_time') as number) <= ctx.horizon;
+      return check(ok, put(row, { status: 'completed' }));
+    }
+    case 'time.advance':
+      return check(row === op.from && op.to > op.from, op.to);
+    case 'resource.adjust':
+      return adjusted(op, row as Stored | undefined, ctx);
+    case 'cooldown.start':
+      return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
+  }
+}
+
+// `from` is the resource's current (regenerated) value and `to` within its spec's bounds.
+function adjusted(op: DeltaOp & { op: 'resource.adjust' }, row: Stored | undefined, ctx: Ctx) {
+  const spec = get(section(ctx.state, 'resource_specs'), key(op.resource)) as
+    ResourceSpec | undefined;
+  const ok =
+    spec !== undefined &&
+    current(row, spec, ctx.state.clock) === op.from &&
+    op.to >= spec.minimum &&
+    op.to <= spec.maximum;
+  return check(ok, { value: op.to, at: ctx.state.clock });
+}
+
+function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined): Outcome {
+  switch (op.op) {
     case 'choice.open': {
       const { actor_id, source, beat, roles, choice_ids } = op;
       const opened = { actor_id, source, beat, roles, choice_ids, status: 'pending' };
@@ -128,19 +183,8 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       const ok = offered && get(row, 'opened_revision') === op.expected_revision;
       return check(ok, put(row, { status: 'resolved', choice_id: op.choice_id }));
     }
-    case 'choice.close':
+    default:
       return check(get(row, 'status') === 'pending', put(row, { status: 'closed' }));
-    case 'job.schedule':
-      if (row !== undefined) return { code: 'precondition_failed' };
-      if (op.due_time <= ctx.horizon) return { code: 'nonfuture_job' };
-      return { value: { job: op.job, due_time: op.due_time, status: 'pending' } as Json };
-    case 'job.complete': {
-      const ok =
-        get(row, 'status') === 'pending' && (get(row, 'due_time') as number) <= ctx.horizon;
-      return check(ok, put(row, { status: 'completed' }));
-    }
-    case 'time.advance':
-      return check(row === op.from && op.to > op.from, op.to);
   }
 }
 
@@ -205,6 +249,10 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'jobs'), t.job_id);
     case 'clock':
       return s.clock;
+    case 'resource':
+      return get(section(s, 'resources'), key(t));
+    case 'cooldown':
+      return get(section(s, 'cooldowns'), key(t));
   }
 }
 

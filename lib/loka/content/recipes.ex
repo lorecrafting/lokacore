@@ -19,7 +19,9 @@ defmodule Loka.Content.Recipes do
 
   @doc """
   For a v2 source with a valid manifest (else none): each recipe's owner (action_recipe), its
-  check's (check@1, by its events) and each step's of any outcome (by its event) is required; it
+  check's (check@1, by its events) and each step's of any outcome (by its event; a
+  resource.adjust has none, like a cost: resource@1 comes with the default pools) is required;
+  its costs, threshold check and resource.adjust steps name resources of this cartridge; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
   of this cartridge and a detail of that room, each fact.assign a fact with a value of its type,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
@@ -92,16 +94,31 @@ defmodule Loka.Content.Recipes do
 
     owned(at(rel, []), "recipe", {caps, owners(registry, ["definitions"])}) ++
       check ++
-      Enum.flat_map(steps(r), fn {s, steps} ->
-        owned(at(rel, steps ++ ["op"]), @step_event[s["op"]], events)
-      end)
+      for {s, steps} <- steps(r),
+          event = @step_event[s["op"]],
+          event != nil,
+          d <- owned(at(rel, steps ++ ["op"]), event, events),
+          do: d
   end
 
   defp refs(rel, r, %{m: m, defs: defs}) do
-    target(rel, r["target"], m, defs) ++
+    facts =
       for {%{"op" => "fact.assign"} = s, steps} <- steps(r),
           d <- reference(rel, steps, "fact", s, m, defs),
           do: d
+
+    target(rel, r["target"], m, defs) ++ facts ++ resources(rel, r, m, defs)
+  end
+
+  defp resources(rel, r, m, defs),
+    do: for({n, steps} <- resourced(r), d <- reference(rel, steps, "resource", n, m, defs), do: d)
+
+  # Each part of a recipe naming a resource: its costs, a threshold check and resource.adjust
+  # steps, with its path.
+  defp resourced(r) do
+    costs = for {c, i} <- Enum.with_index(Map.get(r, "costs", [])), do: {c, ["costs", i]}
+    check = for %{"kind" => "threshold"} = c <- [r["check"]], do: {c, ["check"]}
+    costs ++ check ++ for({%{"op" => "resource.adjust"} = s, steps} <- steps(r), do: {s, steps})
   end
 
   # The room resolves (reference/6), then the detail is one of its details.

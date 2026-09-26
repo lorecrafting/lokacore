@@ -20,26 +20,32 @@ import {
   type Key,
   type NpcDefinition,
   type Owned,
+  type ResourceSpec,
   type RoomDefinition,
   type StateDelta,
   type Text,
   type WorldContextId,
 } from './contracts.gen.ts';
+import type { Stored } from './compose.ts';
 import { id } from './id_source.ts';
 import type { RngState } from './rng.ts';
 
 export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
 
 /**
- * The mutable, hashed part of a world: logical time, containment (03 §23), the RNG and the facts
- * set so far, by canonical fact MutationTarget text (compose.ts); absent until one is set, as an
- * unset fact has its default and no record (fact.schema.json ScopedFact).
+ * The mutable, hashed part of a world: logical time, containment (03 §23), the RNG, and the
+ * facts, resources and cooldowns written so far, each by canonical MutationTarget text
+ * (compose.ts); each absent until one is written, as an unset fact has its default and an unset
+ * resource its start (fact.schema.json ScopedFact; resource.ts), so a world that never writes
+ * one keeps its state hash.
  */
 export type State = {
   readonly clock: number;
   readonly containers: Readonly<Record<string, EntityId>>;
   readonly rng: RngState;
   readonly facts?: Readonly<Record<string, FactValue>>;
+  readonly resources?: Readonly<Record<string, Stored>>;
+  readonly cooldowns?: Readonly<Record<string, number>>;
 };
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */
@@ -55,6 +61,7 @@ export type World = {
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly capacities: Readonly<Record<string, number>>; // by EntityId, where declared
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
+  readonly resourceSpecs: Readonly<Record<string, ResourceSpec>>; // by canonical DefinitionRef text
   readonly state: State;
 };
 

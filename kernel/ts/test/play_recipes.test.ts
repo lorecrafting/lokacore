@@ -23,11 +23,11 @@ function play(lines: string[], file = artifact) {
     encoding: 'utf8',
   });
   assert.equal(r.status, 0, r.stderr);
-  // Each prompt's reply, without the state lines.
+  // Each prompt's reply, without the state and status lines.
   return r.stdout
     .split(/^> /m)
     .slice(1)
-    .map((s) => s.replace(/^(\[state|transcript:) .*\n/gm, ''));
+    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''));
 }
 
 // Breaks: a recipe alias not recognized (alone or before target words), the words after it not
@@ -136,4 +136,32 @@ test('wait passes whole hours and the bell rings only between dusk and dawn', ()
       'wait 24\nTime passes. It is day 2, 18:01.\n',
     ],
   );
+});
+
+// R5 S6b, on the road known answer (hp 10/25, ma 100/100, mv 3/3). Breaks: the status line
+// missing or not following the pools, or exhaustion, an unaffordable cost or a cooldown shown
+// with the wrong words.
+test('the status line follows the pools; exhaustion, costs and cooldowns read as words', () => {
+  const road = read('protocol/fixtures/cartridge_road_hash.json');
+  const file = join(dir, 'road.json');
+  writeFileSync(file, `{"cartridge":${road.canonical},"content_hash":"${road.sha256}"}`);
+  const script = join(dir, 'road.txt');
+  writeFileSync(script, 'east\npray\npray\nwest\nshove cart\neast\nwait\n');
+  const r = spawnSync('node', [`${ROOT}kernel/ts/play/main.ts`, file, script], {
+    encoding: 'utf8',
+  });
+  assert.equal(r.status, 0, r.stderr);
+  const status = r.stdout.split('\n').filter((l) => l.startsWith('hp '));
+  assert.deepEqual(status, [
+    'hp 10/25  ma 100/100  mv 3/3  day 1, 00:00',
+    'hp 10/25  ma 100/100  mv 2/3  day 1, 00:00', // east
+    'hp 15/25  ma 90/100  mv 2/3  day 1, 00:00', // pray: 10 ma, +5 hp
+    'hp 15/25  ma 90/100  mv 2/3  day 1, 00:00', // cooling down
+    'hp 15/25  ma 90/100  mv 1/3  day 1, 00:00', // west
+    'hp 15/25  ma 90/100  mv 0/3  day 1, 00:00', // shove: hp 15 meets the threshold; pays 1 mv
+    'hp 15/25  ma 90/100  mv 0/3  day 1, 00:00', // too exhausted
+    'hp 20/25  ma 94/100  mv 3/3  day 1, 01:00', // an hour: +5, +4, +18 stopped at 3
+  ]);
+  assert.match(r.stdout, /> pray\nYou can't do that again yet\.\n/);
+  assert.match(r.stdout, /> east\nYou are too exhausted\.\n/);
 });

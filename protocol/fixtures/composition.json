@@ -1,8 +1,94 @@
 {
   "description": "Known answers for StateDelta composition (04 §5.1-§5.4), the commit boundary (04 §5.1, 03 §15) and the r3_pr5 invariant checks. Expected values are hand-written. States: facts and fact_defaults are row lists here; the test harness indexes them by canonical text (lib/loka/core/compose.ex). Three boundary cases are too long to list here; every host must build and run them (both kernels do: test/loka/core/compose_test.exs, kernel/ts/test/compose.test.ts). In them, id <pp>…<n> is \"<pp>000000-0000-4000-8000-\" followed by n zero-padded to 12 digits, every op has writer_group 0, and every job is lantern 0.1.0 schedule bram. (1) budget-before-first-op-fault: state base; job.schedule d1…0 due 30 (a job that already exists), then job.schedule f2…1 to f2…64 due 100; expected fault budget_exceeded, not precondition_failed. (2) pending-jobs-bound-is-the-final-queue: state clock 6 and jobs f0…1 to f0…1024, each pending with due_time 3; job.schedule f1…0 due 20, then job.complete f0…1; expected changes: job f0…1 completed with due_time 3, then job f1…0 pending with due_time 20. (3) changes-sorted-by-target-over-32-rows: state clock 0 and containers e0…1 to e0…40, all in 10000000-0000-4000-8000-000000000000; entity.transfer of each from there to 20000000-0000-4000-8000-000000000000, in the order e0…40 down to e0…1; expected 40 containment rows, e0…1 to e0…40 ascending, each with value 20000000-0000-4000-8000-000000000000.",
   "states": {
+    "pools": {
+      "clock": 7300,
+      "resource_specs": {
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"mv\",\"kind\":\"resource\"}": {
+          "key": "mv",
+          "minimum": 0,
+          "maximum": 82,
+          "start": 82,
+          "gain": 18
+        },
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+          "key": "hp",
+          "minimum": 0,
+          "maximum": 20,
+          "start": 20,
+          "gain": 5
+        },
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"ma\",\"kind\":\"resource\"}": {
+          "key": "ma",
+          "minimum": 0,
+          "maximum": 100,
+          "start": 50,
+          "gain": 4
+        },
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"coins\",\"kind\":\"resource\"}": {
+          "key": "coins",
+          "minimum": 0,
+          "maximum": 100,
+          "start": 5,
+          "gain": 0
+        }
+      },
+      "resources": {
+        "{\"entity_id\":\"e1000000-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"mv\",\"kind\":\"resource\"}}": {
+          "value": 10,
+          "at": 3500
+        },
+        "{\"entity_id\":\"e1000000-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+          "value": 18,
+          "at": 0
+        }
+      }
+    },
     "base": {
       "clock": 6,
+      "resource_specs": {
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"mv\",\"kind\":\"resource\"}": {
+          "key": "mv",
+          "minimum": 0,
+          "maximum": 82,
+          "start": 82,
+          "gain": 18
+        },
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+          "key": "hp",
+          "minimum": 0,
+          "maximum": 20,
+          "start": 20,
+          "gain": 5
+        },
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"ma\",\"kind\":\"resource\"}": {
+          "key": "ma",
+          "minimum": 0,
+          "maximum": 100,
+          "start": 50,
+          "gain": 4
+        },
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"coins\",\"kind\":\"resource\"}": {
+          "key": "coins",
+          "minimum": 0,
+          "maximum": 100,
+          "start": 5,
+          "gain": 0
+        }
+      },
+      "resources": {
+        "{\"entity_id\":\"e1000000-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"mv\",\"kind\":\"resource\"}}": {
+          "value": 10,
+          "at": 0
+        },
+        "{\"entity_id\":\"e1000000-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+          "value": 18,
+          "at": 0
+        }
+      },
+      "cooldowns": {
+        "{\"action\":\"pick_lock\",\"actor_id\":\"a0000000-0000-4000-8000-000000000000\",\"kind\":\"cooldown\"}": 3
+      },
       "facts": [
         {
           "target": {
@@ -258,6 +344,805 @@
     }
   },
   "cases": [
+    {
+      "id": "resource-adjust-stored-value",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 10,
+          "to": 9
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 9,
+              "at": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource-unset-is-start",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "coins"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 5,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "coins"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 0,
+              "at": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource-below-minimum-never-clamps",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "coins"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 5,
+          "to": -1
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "coins"
+            },
+            "entity_id": "e1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "resource-above-maximum-never-clamps",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e2000000-0000-4000-8000-000000000000",
+          "from": 82,
+          "to": 83
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "e2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "resource-without-spec",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "luck"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 0,
+          "to": 1
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "luck"
+            },
+            "entity_id": "e1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "resource-stale-from",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 82,
+          "to": 81
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "e1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "same-group-resource-sequence",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 10,
+          "to": 9
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 4
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 4,
+              "at": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-group-resource-stale-second",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 10,
+          "to": 9
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 10,
+          "to": 8
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "e1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-resource-two-groups",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 10,
+          "to": 9
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 1,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 8
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "e1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "resource-written-at-base-clock-inside-advance",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 7300
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 10,
+          "to": 9
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 9,
+              "at": 6
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 7300
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource-regen-counts-hour-boundaries",
+      "state": "pools",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 46,
+          "to": 45
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 45,
+              "at": 7300
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource-regen-not-whole-hours-since-write",
+      "state": "pools",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 28,
+          "to": 27
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "e1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "resource-regen-stored-value-is-stale",
+      "state": "pools",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 10,
+          "to": 9
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "e1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "resource-regen-stops-at-maximum",
+      "state": "pools",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 20,
+          "to": 19
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 19,
+              "at": 7300
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource-regen-from-unset-start",
+      "state": "pools",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "ma"
+          },
+          "entity_id": "e1000000-0000-4000-8000-000000000000",
+          "from": 58,
+          "to": 57
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "ma"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 57,
+              "at": 7300
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource-unset-at-maximum",
+      "state": "pools",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "entity_id": "e2000000-0000-4000-8000-000000000000",
+          "from": 82,
+          "to": 81
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e2000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 81,
+              "at": 7300
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cooldown-start-first",
+      "state": "base",
+      "ops": [
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "action": "ring_bell",
+          "at": 6
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "cooldown",
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "action": "ring_bell"
+            },
+            "value": 6
+          }
+        ]
+      }
+    },
+    {
+      "id": "cooldown-start-restart",
+      "state": "base",
+      "ops": [
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "action": "pick_lock",
+          "from": 3,
+          "at": 6
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "cooldown",
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "action": "pick_lock"
+            },
+            "value": 6
+          }
+        ]
+      }
+    },
+    {
+      "id": "cooldown-start-missing-from",
+      "state": "base",
+      "ops": [
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "action": "pick_lock",
+          "at": 6
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "cooldown",
+            "actor_id": "a0000000-0000-4000-8000-000000000000",
+            "action": "pick_lock"
+          }
+        }
+      }
+    },
+    {
+      "id": "cooldown-start-from-never-started",
+      "state": "base",
+      "ops": [
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "action": "ring_bell",
+          "from": 3,
+          "at": 6
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "cooldown",
+            "actor_id": "a0000000-0000-4000-8000-000000000000",
+            "action": "ring_bell"
+          }
+        }
+      }
+    },
+    {
+      "id": "cooldown-start-at-not-base-clock",
+      "state": "base",
+      "ops": [
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "action": "ring_bell",
+          "at": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "cooldown",
+            "actor_id": "a0000000-0000-4000-8000-000000000000",
+            "action": "ring_bell"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-cooldown-two-groups",
+      "state": "base",
+      "ops": [
+        {
+          "op": "cooldown.start",
+          "writer_group": 0,
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "action": "ring_bell",
+          "at": 6
+        },
+        {
+          "op": "cooldown.start",
+          "writer_group": 1,
+          "actor_id": "a0000000-0000-4000-8000-000000000000",
+          "action": "ring_bell",
+          "from": 6,
+          "at": 6
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "cooldown",
+            "actor_id": "a0000000-0000-4000-8000-000000000000",
+            "action": "ring_bell"
+          }
+        }
+      }
+    },
     {
       "id": "empty-delta",
       "state": "base",
@@ -2532,6 +3417,140 @@
     }
   ],
   "invariants": [
+    {
+      "id": "delta_preconditions_hold",
+      "holds": true,
+      "note": "resource adjusted from its regenerated value",
+      "observation": {
+        "state": "pools",
+        "delta": {
+          "ops": [
+            {
+              "op": "resource.adjust",
+              "writer_group": 0,
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000",
+              "from": 46,
+              "to": 45
+            },
+            {
+              "op": "resource.adjust",
+              "writer_group": 0,
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000",
+              "from": 45,
+              "to": 40
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "resource",
+                "resource": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "resource",
+                  "key": "mv"
+                },
+                "entity_id": "e1000000-0000-4000-8000-000000000000"
+              },
+              "value": {
+                "value": 40,
+                "at": 7300
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": false,
+      "note": "resource adjusted from its stale stored value",
+      "observation": {
+        "state": "pools",
+        "delta": {
+          "ops": [
+            {
+              "op": "resource.adjust",
+              "writer_group": 0,
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "e1000000-0000-4000-8000-000000000000",
+              "from": 10,
+              "to": 9
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "resource",
+                "resource": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "resource",
+                  "key": "mv"
+                },
+                "entity_id": "e1000000-0000-4000-8000-000000000000"
+              },
+              "value": {
+                "value": 9,
+                "at": 7300
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": false,
+      "note": "cooldown restarted without its last start",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "cooldown.start",
+              "writer_group": 0,
+              "actor_id": "a0000000-0000-4000-8000-000000000000",
+              "action": "pick_lock",
+              "at": 6
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "cooldown",
+                "actor_id": "a0000000-0000-4000-8000-000000000000",
+                "action": "pick_lock"
+              },
+              "value": 6
+            }
+          ]
+        }
+      }
+    },
     {
       "id": "one_container_per_item",
       "holds": true,

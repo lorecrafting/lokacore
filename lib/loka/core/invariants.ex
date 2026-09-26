@@ -47,7 +47,7 @@ defmodule Loka.Core.Invariants do
   end
 
   # Checks only the read -> write value chain per target (fact value, container, quest state,
-  # continuation or job status, clock), not capacity, revision, cycle or time bounds.
+  # continuation or job status, clock, current resource value, cooldown start), not capacity, revision, cycle or time bounds.
   def check("delta_preconditions_hold", %{"state" => s, "delta" => %{"ops" => ops}, "result" => r}) do
     Map.has_key?(r, "fault") or
       Enum.reduce_while(ops, %{}, fn op, seen ->
@@ -119,6 +119,8 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "job.schedule"}), do: {nil, "pending"}
   defp link(%{"op" => "job.complete"}), do: {"pending", "completed"}
   defp link(%{"op" => "time.advance"} = op), do: {op["from"], op["to"]}
+  defp link(%{"op" => "resource.adjust"} = op), do: {op["from"], op["to"]}
+  defp link(%{"op" => "cooldown.start"} = op), do: {op["from"], op["at"]}
 
   defp initial(%{"op" => "fact.assign"} = op, s) do
     with nil <- get_in(s, ["facts", Compose.key(Compose.target(op))]),
@@ -136,4 +138,13 @@ defmodule Loka.Core.Invariants do
 
   defp initial(%{"op" => "job." <> _, "job_id" => j}, s), do: get_in(s, ["jobs", j, "status"])
   defp initial(%{"op" => "time.advance"}, s), do: s["clock"]
+
+  defp initial(%{"op" => "resource.adjust"} = op, s) do
+    spec = get_in(s, ["resource_specs", Compose.key(op["resource"])])
+    row = get_in(s, ["resources", Compose.key(Compose.target(op))])
+    spec && Compose.current(row, spec, s["clock"])
+  end
+
+  defp initial(%{"op" => "cooldown.start"} = op, s),
+    do: get_in(s, ["cooldowns", Compose.key(Compose.target(op))])
 end

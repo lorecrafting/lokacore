@@ -253,12 +253,37 @@ defmodule Loka.Core.ComposeTest do
     assert over?(%{"jobs" => jobs(due + 1, 1)}, for(n <- 1..(due + 1), do: complete(job_id(n))))
   end
 
+  # Review #49 N1. Breaks: a stored resource row without `at` raising out of compose (the
+  # TypeScript twin faults precondition_failed on it).
+  test "a malformed resource row faults instead of raising" do
+    ref = %{
+      "cartridge_id" => "c",
+      "cartridge_version" => "1.0.0",
+      "kind" => "resource",
+      "key" => "hp"
+    }
+
+    t = %{"kind" => "resource", "resource" => ref, "entity_id" => "e"}
+    spec = %{"minimum" => 0, "maximum" => 9, "start" => 9, "gain" => 1}
+
+    state = %{
+      "clock" => 7300,
+      "resource_specs" => %{Compose.key(ref) => spec},
+      "resources" => %{Compose.key(t) => %{"value" => 3}}
+    }
+
+    op = %{"op" => "resource.adjust", "writer_group" => 0, "resource" => ref, "entity_id" => "e"}
+
+    assert Compose.compose(state, %{"ops" => [Map.merge(op, %{"from" => 3, "to" => 2})]}) ==
+             %{"fault" => %{"kind" => "fault", "code" => "precondition_failed", "target" => t}}
+  end
+
   # Seeded random deltas over a small id pool (so conflicts and failed preconditions are
   # common) through both kernels: canonical bytes and invariant results must match.
   @peer "kernel/ts/test/differential_peer.ts"
   test "differential: Elixir and TypeScript compose identically" do
     :rand.seed(:exsss, {5, 5, 5})
-    pool = for c <- cases(), c["state"] == "base", op <- c["ops"], do: op
+    pool = for c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op
     cases = for _ <- 1..1000, do: random_case(pool)
 
     ours =
@@ -291,7 +316,7 @@ defmodule Loka.Core.ComposeTest do
     state =
       index(%{
         @base
-        | "clock" => pick(0..10),
+        | "clock" => pick([pick(0..10), 3599, 3600, 7300]),
           "capacities" => Map.new(@base["capacities"], fn {e, _} -> {e, pick(0..1)} end),
           "facts" => Enum.take(@base["facts"], pick(0..1))
       })
@@ -316,5 +341,19 @@ defmodule Loka.Core.ComposeTest do
     do: %{op | "from" => pick([s["clock"], pick(0..10)]), "to" => pick(0..20)}
 
   defp vary(%{"op" => "job.schedule"} = op, _), do: %{op | "due_time" => pick(0..30)}
+
+  defp vary(%{"op" => "cooldown.start"} = op, s), do: %{op | "at" => pick([s["clock"], 6])}
+
+  # Often the current value, so adjustments pass and chain; `to` sometimes out of bounds.
+  defp vary(%{"op" => "resource.adjust"} = op, s) do
+    spec = s["resource_specs"][Compose.key(op["resource"])]
+
+    now =
+      spec && Compose.current(s["resources"][Compose.key(Compose.target(op))], spec, s["clock"])
+
+    from = pick([now || 0, now || 0, pick(0..90)])
+    %{op | "from" => from, "to" => from + pick(-12..3)}
+  end
+
   defp vary(op, _), do: op
 end

@@ -1,28 +1,32 @@
 // action_recipe@1 (capability_registry.json): perform one ActionRecipe of the cartridge as one
 // logical decision (06 §20; 21 §7; 04 §5.2). step admits only an action of the actor's
 // ActionSet whose policy holds (actions.ts refusal); here the key is re-resolved in that set: no
-// recipe by that key is not_found, a target_id other than the recipe's detail invalid_target, and
-// the detail outside the actor's room not_present. A rejection draws no RNG and changes nothing.
-// Accepted: a recipe's check (check@1) is resolved first, one luck draw from the world's RNG, and
-// emits check_passed or check_failed at position 1; its result selects the outcome, success or
-// failure (the decision's outcome; performed for a recipe without a check), and a failure commits
-// its draw, time and steps exactly like success (04 §5.0). Then that outcome's sequence in order,
-// each fact.assign a delta op whose expected value is the fact as the steps before it left it,
-// each event.emit a custom_event at its causal position; a fact.assign that changes its fact
-// leaves the next position free for the fact_changed the host puts there (world.ts adopt). Then,
-// unless the outcome is failure, action_completed, engine-owned; the actor reads the outcome's
-// narration. A duration adds
-// one time.advance after the steps; events keep the admission time. Costs, cooldowns and result
-// bands join in S6b and later.
+// recipe by that key is not_found, a target_id other than the recipe's detail invalid_target, the
+// detail outside the actor's room not_present, then actions.ts admission: a perform before the
+// actor's last admitted attempt plus the recipe's cooldown cooldown, and costs the actor's body
+// cannot pay insufficient_resource. A rejection draws no RNG and changes nothing (04 §5.0).
+// Accepted: the costs are paid first (resource.adjust ops); then a recipe's check (check@1) is
+// resolved, a luck draw from the world's RNG or a threshold on a resource's value at admission,
+// and emits check_passed or check_failed at position 1; its result selects the outcome, success
+// or failure (the decision's outcome; performed for a recipe without a check), and a failure
+// commits its costs, draw, cooldown, time and steps exactly like success (04 §5.0). Then that
+// outcome's sequence in order: each fact.assign a delta op whose expected value is the fact as the
+// steps before it left it, each resource.adjust one from the resource's value as the costs and
+// steps before it left it, adding by and stopping at the bounds (none when that changes nothing), each event.emit a custom_event at its causal position; a fact.assign
+// that changes its fact leaves the next position free for the fact_changed the host puts there
+// (world.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
+// reads the outcome's narration. A cooldown adds a cooldown.start at the admission time, and a
+// duration one time.advance after the steps; events keep the admission time. Result bands join
+// later.
 import type {
+  ActionRecipe,
   DeltaOp,
   EntityId,
   EventPayload,
   FactValue,
-  RecipeCheck,
   RecipeStep,
 } from '../contracts.gen.ts';
-import { detailOf, resolved } from '../actions.ts';
+import { admission, detailOf, resolved } from '../actions.ts';
 import { key, same } from '../compose.ts';
 import {
   accepted,
@@ -36,6 +40,7 @@ import {
 } from '../decision.ts';
 import { scopeOf, value } from '../fact.ts';
 import { add } from '../int.ts';
+import { adjust, level, type Levels } from '../resource.ts';
 import { uniform } from '../rng.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint) => {
@@ -47,15 +52,22 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   if (target_id !== undefined && target_id !== subject_id) return rejected('invalid_target');
   if (world.details[subject_id].room !== world.state.containers[body])
     return rejected('not_present');
+  const admitted = admission(world, recipe, actor_id, body);
+  if (typeof admitted === 'string') return rejected(admitted);
+  const { paid, last, from } = admitted;
   const { check, duration } = recipe;
-  const rolled = check && roll(world, command, mint, check, subject_id);
+  const rolled = check && resolve(world, command, mint, check, subject_id, body);
   const { sequence, narration } = recipe.outcomes[rolled?.outcome ?? 'success']!;
-  const start = rolled ? { ...START, events: [rolled.event], position: 1 } : START;
-  const { ops, events, position } = sequence.reduce(step(world, command, mint, subject_id), start);
+  const start = { ...START, ops: paid.ops, levels: paid.levels };
+  const begun = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
+  const run = sequence.reduce(step(world, command, mint, subject_id, body), begun);
   const done = { type: 'action_completed', action, subject_id } as const;
   const completed =
-    rolled?.outcome === 'failure' ? [] : [event(world, command, mint, position + 1, done)];
-  const from = world.state.clock;
+    rolled?.outcome === 'failure' ? [] : [event(world, command, mint, run.position + 1, done)];
+  const since = last === undefined ? {} : { from: last };
+  const cooldown: DeltaOp[] = recipe.cooldown
+    ? [{ op: 'cooldown.start', writer_group: 0, actor_id, action, ...since, at: from }]
+    : [];
   // ponytail: no jobs exist yet; once they do, this advance runs its due set like wait's
   // (04 §5.4: an action's time cost is an explicit advance that may not skip a due job).
   const time: DeltaOp[] = duration
@@ -64,8 +76,8 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   return accepted(
     world,
     rolled?.outcome ?? 'performed',
-    [...ops, ...time],
-    [...events, ...completed],
+    [...run.ops, ...cooldown, ...time],
+    [...run.events, ...completed],
     [{ key: narration.actor }],
     rolled?.rng,
   );
@@ -75,17 +87,24 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
 // rng_budget_exhausted (which throws and discards the decision) is practically unreachable.
 const DRAWS = 8;
 
-// The check's luck roll: one uniform draw in [0, 100), passing below chance (action.schema.json
-// RecipeCheck), its event at position 1 and the RNG after the draw.
-function roll(
+// The check's result, its event at position 1 and the RNG after it: luck draws one uniform
+// integer in [0, 100) and passes below chance; threshold draws nothing and passes when the
+// body's value of the resource at admission (before costs) is at least difficulty
+// (action.schema.json RecipeCheck).
+function resolve(
   world: World,
   command: Command,
   mint: Mint,
-  check: RecipeCheck,
+  check: NonNullable<ActionRecipe['check']>,
   subject_id: EntityId,
+  body: EntityId,
 ) {
-  const [n, rng] = uniform(world.state.rng, 100, DRAWS);
-  const passed = n < check.chance;
+  const [n, rng] =
+    check.kind === 'luck' ? uniform(world.state.rng, 100, DRAWS) : [0, world.state.rng];
+  const passed =
+    check.kind === 'luck'
+      ? n < check.chance
+      : level(world, body, check.resource)! >= check.difficulty;
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const payload: CheckEvent = {
     type: passed ? 'check_passed' : 'check_failed',
@@ -102,15 +121,20 @@ type Run = {
   readonly events: readonly ReturnType<typeof event<CustomEvent | CheckEvent>>[];
   readonly position: number;
   readonly facts: Readonly<Record<string, FactValue>>; // by MutationTarget text, as set so far
+  readonly levels: Levels; // resource values as the costs and steps so far left them
 };
 type CustomEvent = Extract<EventPayload, { type: 'custom_event' }>;
 type CheckEvent = Extract<EventPayload, { type: 'check_passed' | 'check_failed' }>;
-const START: Run = { ops: [], events: [], position: 0, facts: {} };
+const START: Run = { ops: [], events: [], position: 0, facts: {}, levels: {} };
 
 // One step of the sequence over the run so far.
 const step =
-  (world: World, command: Command, mint: Mint, subject_id: EntityId) =>
+  (world: World, command: Command, mint: Mint, subject_id: EntityId, body: EntityId) =>
   (r: Run, s: RecipeStep): Run => {
+    if (s.op === 'resource.adjust') {
+      const { op, levels } = adjust(world, body, s.resource, s.by, r.levels, true);
+      return op.from === op.to ? r : { ...r, ops: [...r.ops, op], levels };
+    }
     if (s.op === 'event.emit') {
       const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
       const payload: CustomEvent = {

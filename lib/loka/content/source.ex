@@ -12,6 +12,7 @@ defmodule Loka.Content.Source do
           :manifest
           | :facts
           | :text
+          | :resources
           | {:policy | :action | :room | :item | :npc | :recipe, String.t()}
 
   @doc """
@@ -77,6 +78,7 @@ defmodule Loka.Content.Source do
   defp classify("cartridge.json"), do: :manifest
   defp classify("facts.json"), do: :facts
   defp classify("text.json"), do: :text
+  defp classify("resources.json"), do: :resources
 
   defp classify(rel) do
     case Path.split(rel) do

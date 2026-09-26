@@ -1,0 +1,40 @@
+{
+  "label": "actions.pray",
+  "aliases": [
+    "pray"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "wayside",
+    "detail": "shrine"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "costs": [
+    {
+      "resource": "ma",
+      "amount": 10
+    }
+  ],
+  "cooldown": 3600,
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "resource.adjust",
+          "resource": "hp",
+          "by": 5
+        }
+      ],
+      "narration": {
+        "actor": "narration.pray.actor"
+      }
+    }
+  }
+}

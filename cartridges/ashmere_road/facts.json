@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "cart.moved": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The mired cart was shoved free of the ruts."
+    }
+  }
+}
