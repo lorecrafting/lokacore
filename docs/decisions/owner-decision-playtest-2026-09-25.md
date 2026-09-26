@@ -10,7 +10,7 @@ Owner's words:
 > have that playtest and tweak mechanics/ui period?
 
 The PM proposed (summary): terminal playtests with `loka play` from R5 S6b on; a
-playtest-and-tune stage after R6P, open-ended, ended by the owner; the owner's notes batched
+playtest-and-tune stage after R6P, open-ended, ended by the owner, who plays on the phone; the owner's notes batched
 by the PM into small PRs; game numbers kept as cartridge data so tuning is a content edit;
 lighter review for content-number and UI-styling PRs; the "format changes never break
 installed content" rule starting at the first release to real players, not at R6.
