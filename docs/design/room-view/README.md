@@ -48,7 +48,7 @@ Questions for the engine rather than needs:
 - Should rooms carry lit or dark, and obscured entities a perceived name ("something brass") with an opaque handle?
 - Are "is here" lines ("Bram the ferryman stands here…") cartridge content in GameView, or built by the UI from the name?
 - Should narration carry a semantic cue key (for example `quest_resolved`) for sound and haptics, or should the UI infer it?
-- Does moving cost `mv`, and if so is the cost per exit or per terrain?
+- Answered: moving costs 1 `mv` per room from R5 S6b; per-terrain costs come at R8 ([owner decision](../../decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
 
 ## Explorations
 
