@@ -57,3 +57,4 @@ text. This directory also holds the owner's decisions retained verbatim.
 - Owner decision: [review lever: Opus by default, Fable/Astra for foundational freezes](owner-decision-review-lever-2026-09-25.md).
 - Owner decision: [composability and emergence principles; composes-with check](owner-decision-emergence-2026-09-25.md).
 - Owner decisions: [S4 item text (four tiers), brief mode in S7, player text online; inline touch links; host-synthesized `fact_changed`](owner-decisions-r5-s4-2026-09-25.md).
+- Owner decision: [all reviews on Opus while Fable is near its limit](owner-decision-opus-reviews-2026-09-25.md).
