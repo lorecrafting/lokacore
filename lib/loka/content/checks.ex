@@ -137,17 +137,9 @@ defmodule Loka.Content.Checks do
   defp room({rel, r}, m, defs, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 
-    owned(at(rel, []), "room", required) ++
-      for(
-        {k, _} <- Map.get(r, "details", %{}),
-        d <- owned(at(rel, ["details", k]), "detail", required),
-        do: d
-      ) ++
-      for(
-        {steps, _} <- RoomParts.variants(r),
-        d <- owned(at(rel, steps), "variant", required),
-        do: d
-      ) ++
+    Enum.flat_map(RoomParts.parts(r), fn {steps, kind} ->
+      owned(at(rel, steps), kind, required)
+    end) ++
       for {dir, exit} <- r["exits"],
           d <- reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs),
           do: d
@@ -176,9 +168,7 @@ defmodule Loka.Content.Checks do
   defp trees(defs, actions) do
     for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
       for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
-      for {_, {rel, [], r}} <- defs["room"],
-          {steps, v} <- RoomParts.variants(r),
-          do: {rel, steps ++ ["when", "root"], v["when"]["root"]}
+      RoomParts.conditions(defs)
   end
 
   defp command(rel, name, required) do

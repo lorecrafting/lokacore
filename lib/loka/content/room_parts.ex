@@ -28,6 +28,24 @@ defmodule Loka.Content.RoomParts do
   end
 
   @doc """
+  The room `r`, each of its details and each description variant, as `{steps, kind}`, the
+  definition kinds of capability_registry.json.
+  """
+  @spec parts(map()) :: [{list(), String.t()}]
+  def parts(r) do
+    details = for {k, _} <- Map.get(r, "details", %{}), do: {["details", k], "detail"}
+    [{[], "room"} | details] ++ for {steps, _} <- variants(r), do: {steps, "variant"}
+  end
+
+  @doc "Each variant's condition in the schema-valid rooms, as `{rel, steps, root}`."
+  @spec conditions(map()) :: [{String.t(), list(), map()}]
+  def conditions(defs) do
+    for {_, {rel, [], r}} <- defs["room"],
+        {steps, v} <- variants(r),
+        do: {rel, steps ++ ["when", "root"], v["when"]["root"]}
+  end
+
+  @doc """
   Each detail's description has a catalog entry, and its first alias is one no other detail of
   its room has, in the form a lookup produces (room.schema.json InspectableDetail).
   """
