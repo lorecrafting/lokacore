@@ -46,3 +46,13 @@ figure replaces one when the owner confirms it in-game:
 
 Effect: R5 S6b (resources) builds the three default pools, the 1 MV move cost and
 regeneration; document 00's "HP, stamina, spirit" becomes HP/MA/MV (amended in 00 §4).
+
+Later the same day the owner asked:
+
+> wait can we have existing cartridges get the pools?
+
+PM ruling: yes. Nothing has shipped, so the development cartridges are not installed content.
+The compiler gives every v2 cartridge `resource@1` and the three pools by default; the
+affected known answers and transcripts are re-derived in S6b and listed in its PR. An artifact
+without `resource@1` still loads and has no pools. This replaces "existing cartridges keep
+their behaviour and transcripts" above.

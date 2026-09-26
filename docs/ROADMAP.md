@@ -51,6 +51,7 @@ filter on top. Adapted from Datadog's
 | R6 | 5 + 1 | the [14 §R6](spec/14-implementation-plan.md#r6--offline-authority-and-save-system) build list as R6P needs it (including the fake synchronization adapter); plus fault simulation |
 | Early R7/R8 | 5 | one quest, a dialogue choice, a schedule, reactions, narration (TypeScript) |
 | R6P | 4 | compiled Lantern cartridge, touch UI, device and human proof; the UI slices and GameView v2 take [the room view's GameView needs](design/room-view/README.md#gameview-needs) as input |
+| Playtest and tune | open | after R6P, ended by the owner ([owner decision](decisions/owner-decision-playtest-2026-09-25.md)): the owner plays on the phone; the PM batches the notes into small PRs: number tuning and UI styling (short review), changed or new mechanics and behaviour (normal slices, spec first). Terminal playtests with `loka play` run from R5 S6b on. The rule that a format change never breaks installed content starts at the first release to real players |
 
 27 slices after R3. Estimate ([ADR-074 §6](decisions/adr-074-ts-first-proposal.md#6-re-estimate-to-r6p-estimates-not-measurements),
 from R3's approximate counts): about 8.5 to 9.2 million subagent tokens to R6P for the 26 slices it counted, plus about 0.4 million for the observability slice; PM

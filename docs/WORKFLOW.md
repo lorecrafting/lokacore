@@ -112,8 +112,9 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 
 ## Review stance
 
-Review depth scales with risk: a docs-only or config-only slice gets a short review (no
-mutation testing), a contract freeze gets the full one.
+Review depth scales with risk: a docs-only or config-only slice, or one that only changes
+content numbers or UI styling ([playtest decision](decisions/owner-decision-playtest-2026-09-25.md)),
+gets a short review (no mutation testing), a contract freeze gets the full one.
 
 Adversarial in proportion: the reviewer tries to break the change, not to redesign it.
 Every finding states a concrete failure scenario (input or state, then the wrong result),
