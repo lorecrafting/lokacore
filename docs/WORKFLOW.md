@@ -10,14 +10,16 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Opus | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Opus; Fable for design judgment | independent review, review record |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Opus; Fable for design judgment (suspended, see below) | independent review, review record |
 
 **Fable reviews design judgment:** a slice that freezes semantics later work cannot cheaply
 change (a spec amendment, a canonical encoding, an identity or delta contract, a gate
 review), or an Opus reviewer and the developer disagreeing twice. The PM passes
 `model: "fable"` when spawning that reviewer (the file's default is Opus). Everything else
 stays on Opus, reviewed once with a narrow fix check; to R6P, Fable is planned for about six
-slices ([owner decision](decisions/owner-decision-review-lever-2026-09-25.md)).
+slices ([owner decision](decisions/owner-decision-review-lever-2026-09-25.md)). Suspended:
+all reviews run on Opus until the owner says Fable is available again
+([owner decision](decisions/owner-decision-opus-reviews-2026-09-25.md)).
 **Cross-vendor review (Astra)** runs beside the Fable review only where the PM judges a
 slice foundational: a freeze later work builds on (a spec amendment, a new encoding or
 hash domain, an identity, delta or other core contract, a gate review), not the
