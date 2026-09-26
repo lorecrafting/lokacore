@@ -128,9 +128,9 @@ function keyStage(c: Obj): Diagnostic[] {
 }
 
 // The lock equals requires.capabilities, every command is owned, and every command, policy op,
-// definition kind (room, detail, NPC, item, variant, recipe) and recipe step (by the event it
-// produces: fact_changed for fact.assign, custom_event for event.emit) the cartridge uses has
-// its owner in the lock.
+// definition kind (room, detail, NPC, item, variant, recipe), recipe check (by the events it
+// produces, check@1's) and recipe step of any outcome (by the event it produces: fact_changed for
+// fact.assign, custom_event for event.emit) the cartridge uses has its owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const required: Obj = c.manifest.requires.capabilities;
@@ -157,9 +157,11 @@ function lockStage(c: Obj): Diagnostic[] {
   for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
     const at = `.cartridge.recipes${step(ref)}`;
     use('definition', 'recipe', at);
-    r.outcomes.success.sequence.forEach((s: Obj, i: number) =>
-      use('event', STEP_EVENT[s.op], `${at}.outcomes.success.sequence[${i}].op`),
-    );
+    if (r.check) use('event', 'check_passed', `${at}.check`);
+    for (const [name, o] of Object.entries(r.outcomes as Obj))
+      o.sequence.forEach((s: Obj, i: number) =>
+        use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`),
+      );
   }
   return out;
 }

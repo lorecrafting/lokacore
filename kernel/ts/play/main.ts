@@ -15,7 +15,7 @@ import { validate } from '../src/validate.ts';
 import { resolve, normalize } from '../src/target.ts';
 import { detailOf, resolved, type Offered } from '../src/actions.ts';
 import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
-import { detail, inventory, parse, room, say, which } from './text.ts';
+import { clock, detail, inventory, parse, room, say, which } from './text.ts';
 import { decide, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
@@ -70,7 +70,10 @@ async function session(script: string | undefined) {
     else if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
     else if (parsed && 'perform' in parsed) perform(r, parsed);
     else if (parsed && 'lookup' in parsed) lookup(r, parsed);
-    else if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
+    else if (parsed && 'wait' in parsed) {
+      const payload = { type: 'wait', until: r.world.state.clock + parsed.wait * 3600 };
+      append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+    } else if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
     if (tty) input.prompt();
   }
   input.close();
@@ -119,6 +122,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
     taken: `You take ${name(p.item_id)}.\n`,
     dropped: `You drop ${name(p.item_id)}.\n`,
     given: `You give ${name(p.item_id)} to ${name((p as { recipient_id?: string }).recipient_id)}.\n`,
+    waited: `Time passes. It is ${clock(r.world.state.clock)}.\n`,
   };
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =

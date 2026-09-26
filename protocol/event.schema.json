@@ -354,7 +354,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A performed ActionRecipe completed (06 §20; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (action_recipe@1): the rule emits it after the recipe's sequence on every accepted perform, and no content step can emit it, so a quest objective on it never depends on a recipe's own steps.",
+          "description": "A performed ActionRecipe completed (06 §20; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (action_recipe@1): the rule emits it after the outcome's sequence on every accepted perform whose outcome is performed (no check) or success; a failed attempt emits its check_failed and no action_completed (R5 S6a), and no content step can emit it, so a quest objective on it never depends on a recipe's own steps.",
           "type": "object",
           "properties": {
             "type": {
@@ -370,6 +370,48 @@
           "required": [
             "type",
             "action",
+            "subject_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A Check passed (check@1; 21 §7 Check; 00a `event: {type: check_passed, check: checks/<key>}`): check is the DefinitionRef of kind check, the cartridge's id and version and the check's key; subject_id is the target the check was made against (a recipe's). Engine-owned: an ActionRecipe's rule emits check_passed or check_failed at position 1 of every accepted perform of a recipe with a check, before its outcome's steps, and no content step can emit it.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "check_passed"
+            },
+            "check": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "check",
+            "subject_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A Check failed (check@1; 21 §7 Check; 00a `event: {type: check_passed, check: checks/<key>}`): check is the DefinitionRef of kind check, the cartridge's id and version and the check's key; subject_id is the target the check was made against (a recipe's). Engine-owned: an ActionRecipe's rule emits check_passed or check_failed at position 1 of every accepted perform of a recipe with a check, before its outcome's steps, and no content step can emit it.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "check_failed"
+            },
+            "check": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "check",
             "subject_id"
           ],
           "additionalProperties": false

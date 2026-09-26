@@ -1,0 +1,49 @@
+{
+  "label": "actions.pick_lock",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "churchyard",
+    "detail": "gate"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "crypt_gate_open",
+        "equals": true
+      }
+    }
+  },
+  "check": {
+    "key": "pick_lock",
+    "kind": "luck",
+    "chance": 50
+  },
+  "duration": 600,
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "crypt_gate_open",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_lock.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_lock.failure"
+      }
+    }
+  }
+}

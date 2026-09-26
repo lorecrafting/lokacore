@@ -1,0 +1,12 @@
+{
+  "room.churchyard.title": "Churchyard",
+  "room.churchyard.description": "Leaning stones crowd the grass. A small [bell](bell) hangs in the lych gate, and an iron [gate](gate) bars the crypt steps.",
+  "detail.bell": "A little bronze bell. By custom it is rung only between dusk and dawn.",
+  "detail.gate": "An iron gate, its lock furred with rust.",
+  "detail.gate.open": "The iron gate hangs open on the crypt steps.",
+  "actions.ring_bell": "Ring the bell",
+  "actions.pick_lock": "Pick the lock",
+  "narration.ring_bell.actor": "You ring the lych bell. Its thin note carries over the graves.",
+  "narration.pick_lock.success": "The lock gives with a gritty click. The gate swings open.",
+  "narration.pick_lock.failure": "The pick slips in the rusted lock. It holds."
+}

@@ -1,5 +1,5 @@
-// The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item; 21 §3.2, §4
-// Policy; 06 §21): pure, over committed state, for one actor. Every other op belongs to a
+// The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
+// time_window; 21 §3.2, §4 Policy; 06 §21): pure, over committed state, for one actor. Every other op belongs to a
 // capability this kernel does not install, so the loader rejects a cartridge that uses one
 // (CAPABILITY_NOT_INSTALLED).
 import type { CharacterId, Policy } from './contracts.gen.ts';
@@ -19,6 +19,11 @@ export function holds(world: World, actor: CharacterId, p: Policy): boolean {
       return value(world, actor, p.fact) === p.equals;
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
+    case 'time_window': {
+      // One unit is one second and time 0 is midnight (command.schema.json LogicalTime).
+      const hour = Math.floor(world.state.clock / 3600) % 24;
+      return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
+    }
     default:
       throw new Error(`policy op ${p.op} is not installed`);
   }

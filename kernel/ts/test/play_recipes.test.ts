@@ -115,3 +115,25 @@ test('an alias shared by recipes picks the one whose target the words name', () 
       file,
     );
 });
+
+// R5 S6a, the dusk known answer (ring_bell from 18 to 6, a minute long). Breaks: wait not
+// adding whole hours to the clock, the clock shown with the wrong day or hour, a wait outside 1
+// to 24 hours building a Command, or the dusk gate not following the clock.
+test('wait passes whole hours and the bell rings only between dusk and dawn', () => {
+  const dusk = read('protocol/fixtures/cartridge_dusk_hash.json');
+  const file = join(dir, 'dusk.json');
+  writeFileSync(file, `{"cartridge":${dusk.canonical},"content_hash":"${dusk.sha256}"}`);
+  assert.deepEqual(
+    play(['wait 6', 'ring', 'wait', 'wait 0', 'wait 25', 'wait 11', 'ring', 'wait 24'], file),
+    [
+      'wait 6\nTime passes. It is day 1, 06:00.\n',
+      "ring\nYou can't do that now.\n",
+      'wait\nTime passes. It is day 1, 07:00.\n',
+      'wait 0\nWait how many hours?\n',
+      'wait 25\nWait how many hours?\n',
+      'wait 11\nTime passes. It is day 1, 18:00.\n',
+      'ring\nYou ring the lych bell. Its thin note carries over the graves.\n',
+      'wait 24\nTime passes. It is day 2, 18:01.\n',
+    ],
+  );
+});

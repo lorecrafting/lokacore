@@ -51,7 +51,8 @@
         "capacity_exceeded",
         "nonfuture_job",
         "budget_exceeded",
-        "unowned_event"
+        "unowned_event",
+        "evaluator_error"
       ],
       "examples": [
         "not_found",
