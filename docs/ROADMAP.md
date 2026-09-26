@@ -54,5 +54,12 @@ filter on top. Adapted from Datadog's
 27 slices after R3. Estimate ([ADR-074 §6](decisions/adr-074-ts-first-proposal.md#6-re-estimate-to-r6p-estimates-not-measurements),
 from R3's approximate counts): about 8.5 to 9.2 million subagent tokens to R6P for the 26 slices it counted, plus about 0.4 million for the observability slice; PM
 coordination is extra and unmeasured. Calendar time is bounded by owner approvals and
-device sessions. Re-estimate after the first two R5 slices, including the R5 set-up items (`loka play`, rule
-lint, feature map).
+device sessions.
+
+Re-estimate after R5 S2 ([owner decision](decisions/owner-decision-review-lever-2026-09-25.md)):
+observed harness tokens were 2.64M for S1 (#34, without Astra) and 1.08M for S2 (#35),
+against about 0.35M planned; the figures may count per-run context and overstate. For the
+about 21 slices left after S2b: about 14 to 18 million, with Fable and Astra kept for about
+six foundational slices at S2's to the S1-S2 average rate and the rest at S2b's 0.48M (#37);
+about 23 million with every slice at S2's rate. PM coordination stays
+extra and unmeasured.
