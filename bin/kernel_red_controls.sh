@@ -22,7 +22,7 @@ rm play/red_control.ts
 # Deleting admit() from step's path must not typecheck (Admitted brand, src/world.ts).
 cp src/world.ts src/world.ts.orig
 trap 'mv -f src/world.ts.orig src/world.ts' EXIT
-sed -i.bak 's/adopt(world, admit(owner, \(.*\)));$/adopt(world, \1);/' src/world.ts && rm src/world.ts.bak
+sed -i.bak 's/adopt(world, admit(owner, \(rule([^)]*)\)),/adopt(world, \1,/' src/world.ts && rm src/world.ts.bak
 if cmp -s src/world.ts src/world.ts.orig; then echo "admit plant did not apply"; exit 1; fi
 if npx tsc >/dev/null; then echo "tsc accepted step without admit()"; exit 1; fi
 echo "ok   step cannot skip admit()"

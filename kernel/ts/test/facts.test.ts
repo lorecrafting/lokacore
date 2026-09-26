@@ -12,7 +12,7 @@ import type { CharacterId, Command, Policy } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { holds as condition } from '../src/policy.ts';
 import { describe } from '../src/rules/description_variant.ts';
-import { accepted, allocator } from '../src/decision.ts';
+import { accepted, allocator, event } from '../src/decision.ts';
 import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
 import { read } from './read.ts';
 
@@ -234,6 +234,51 @@ test('a fact.assign its FactSpec does not allow faults precondition_failed', () 
     assert.deepEqual(r.decision, { kind: 'fault', code: 'precondition_failed', target });
     assert.equal(r.world, w);
   }
+});
+
+// R5 S4, owner decision Q2. Breaks: fact_changed not appended, appended for an assign that
+// keeps the value, once per fact instead of per assign, before the rule's events, with ids
+// that reuse the rule's ordinals, or in the actor's scope instead of the fact's.
+test('each fact.assign that changes its fact appends fact_changed after the rule events', () => {
+  const w = fresh();
+  const assign = (k: string, expected: unknown, value: unknown) => ({
+    op: 'fact.assign',
+    writer_group: 0,
+    fact: fact(k),
+    scope: instance,
+    expected,
+    value,
+  });
+  const ops = [
+    assign('chapel_bell_rung', false, true),
+    assign('village_child_status', 'missing', 'missing'),
+    assign('chapel_bell_rung', true, false),
+  ];
+  const mint = allocator(w, SET);
+  const own = event(w, SET, mint, 1, {
+    type: 'item_acquired',
+    item_id: MUD,
+    holder_id: BODY,
+  } as never);
+  const decision = admit('containment', accepted(w, 'x', ops as never, [own]) as never);
+  const { decision: d } = adopt(w, decision, SET, mint);
+  const changed = (id: string, position: number, old: boolean) => ({
+    id,
+    world_context_id: CONTEXT,
+    scope: instance,
+    actor_id: CHARACTER,
+    logical_time: 0,
+    position,
+    causation_id: 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b',
+    correlation_id: 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b',
+    payload: { type: 'fact_changed', fact: fact('chapel_bell_rung'), old, new: !old },
+  });
+  assert.ok(d.kind === 'accepted');
+  assert.deepEqual(d.events, [
+    own,
+    changed('2ed1ae6f-befe-8e6a-a5b1-bce1b3d1e5d9', 2, false), // ordinal 1, Python
+    changed('dc69e85d-a2c1-815e-a631-9c6b94c780d3', 3, true), // ordinal 2
+  ]);
 });
 
 // The loader on facts and variants (protocol/cartridge.schema.json DiagnosticCode). Mutants

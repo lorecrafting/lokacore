@@ -12,78 +12,83 @@ defmodule Loka.Content.Links do
 
   @link ~r/\[([^\[\]]+)\](?:\(([^()]*)\))?/
 
-  @doc "`{errors, warnings}` for the links of every room, detail, item and NPC text."
-  @spec check(map(), map() | :unknown) :: {[map()], [map()]}
-  def check(_, :unknown), do: {[], []}
+  @doc """
+  The link diagnostics of a v2 source's rooms, details, items and NPCs (`{entry, text}`; nil
+  for v1), warnings included (severity warning).
+  """
+  @spec check(map(), {term(), map() | :unknown} | nil) :: [map()]
+  def check(_, nil), do: []
+  def check(_, {_, :unknown}), do: []
 
-  def check(defs, text) do
-    entities = for {_, _, e} <- Entities.all(defs), into: MapSet.new(), do: e["key"]
+  def check(defs, {_, text}) do
+    entities = MapSet.new(for {_, _, e} <- Entities.all(defs), do: e["key"])
 
-    uses =
-      for({_, {rel, [], r}} <- defs["room"], use <- room_uses(rel, r, entities), do: use) ++
-        for {rel, key, steps, t} <- Entities.text_keys(defs),
-            do: {rel, steps, t, key, entities, if(room_line?(steps), do: [key], else: [])}
-
-    Enum.reduce(uses, {[], []}, fn use, {es, ws} ->
-      {e, w} = links(use, text)
-      {es ++ e, ws ++ w}
-    end)
+    for use <- room_uses(defs, entities) ++ entity_uses(defs, entities),
+        d <- links(use, text),
+        do: d
   end
 
-  # Each text of room `r` as {rel, steps, key, self, targets, must_link}: the room's title,
-  # description and variants (no self; descriptions must link every detail), then each detail's
-  # description and variants (self the detail).
-  defp room_uses(rel, r, entities) do
-    details = Map.get(r, "details", %{})
-    targets = MapSet.union(entities, MapSet.new(Map.keys(details)))
-    all = Map.keys(details)
-
-    [{rel, ["title"], r["title"], nil, targets, []}] ++
-      for {steps, key, self} <- descriptions(r) do
-        {rel, steps, key, self, targets, if(self, do: [], else: all)}
-      end
+  # Each use as {rel, steps, text key, self, targets, must link}: an item's or NPC's texts
+  # (self the item or NPC; its room lines must link it).
+  defp entity_uses(defs, entities) do
+    for {rel, key, steps, t} <- Entities.text_keys(defs),
+        do: {rel, steps, t, key, entities, if(room_line?(steps), do: [key], else: [])}
   end
 
-  defp descriptions(r) do
-    variants = Map.new(RoomParts.variants(r))
-
-    [{["description"], r["description"], nil}] ++
-      for({[_, _] = s, v} <- variants, do: {s ++ ["description"], v["description"], nil}) ++
-      for {k, d} <- Map.get(r, "details", %{}),
-          {s, t} <-
-            [{["details", k, "description"], d["description"]}] ++
-              for(
-                {["details", ^k | _] = s, v} <- variants,
-                do: {s ++ ["description"], v["description"]}
-              ),
-          do: {s, t, k}
+  # A room's texts (targets its details too): its descriptions must link every detail.
+  defp room_uses(defs, entities) do
+    for {_, {rel, [], r}} <- defs["room"],
+        details = Map.keys(Map.get(r, "details", %{})),
+        targets = MapSet.union(entities, MapSet.new(details)),
+        {steps, key} <- texts(r) do
+      self = detail_of(steps)
+      {rel, steps, key, self, targets, if(self || steps == ["title"], do: [], else: details)}
+    end
   end
+
+  # The title, description and variants of room `r`, then each detail's description and
+  # variants (RoomParts.variants), as {steps, text key}.
+  defp texts(r) do
+    details = for {k, d} <- Map.get(r, "details", %{}), do: {["details", k], d}
+
+    [
+      {["title"], r["title"]}
+      | for({s, d} <- [{[], r} | details], do: {s ++ ["description"], d["description"]})
+    ] ++
+      for {s, v} <- RoomParts.variants(r), do: {s ++ ["description"], v["description"]}
+  end
+
+  defp detail_of(["details", k | _]), do: k
+  defp detail_of(_), do: nil
 
   defp room_line?(["room_line"]), do: true
   defp room_line?(["room_line_variants", _, "description"]), do: true
   defp room_line?(_), do: false
 
   defp links({rel, steps, key, self, targets, must}, text) do
-    found = for [_ | rest] <- Regex.scan(@link, Map.get(text, key, "")), do: rest
     path = at(rel, steps)
-
-    named =
-      for [words | target] <- found do
-        case {target, self} do
-          {[t], _} -> {t, t}
-          {[], nil} -> {"[#{words}]", nil}
-          {[], s} -> {s, s}
-        end
-      end
-
-    errors =
-      for {as, t} <- named,
-          t == nil or (not MapSet.member?(targets, t) and t != self),
-          do: diag("UNRESOLVED_REFERENCE", path, %{"target" => as})
-
-    linked = for {_, t} <- named, do: t
-    {errors, for(t <- must, t not in linked, do: warning(path, t))}
+    named = for [_, w | t] <- Regex.scan(@link, Map.get(text, key, "")), do: target(w, t, self)
+    unresolved(named, self, targets, path) ++ missing(named, must, path)
   end
+
+  defp unresolved(named, self, targets, path) do
+    for {as, t} <- named,
+        not valid?(t, self, targets),
+        do: diag("UNRESOLVED_REFERENCE", path, %{"target" => as})
+  end
+
+  defp missing(named, must, path) do
+    linked = for {_, t} <- named, do: t
+    for t <- must, t not in linked, do: warning(path, t)
+  end
+
+  defp valid?(t, self, targets), do: t != nil and (t == self or MapSet.member?(targets, t))
+
+  # A link's {target as reported, target}: its key, else the text's own thing (none in a
+  # room's own text, reported as the link).
+  defp target(_, [t], _), do: {t, t}
+  defp target(words, [], nil), do: {"[#{words}]", nil}
+  defp target(_, [], self), do: {self, self}
 
   defp warning(path, t),
     do: Map.put(diag("TOUCH_LINK_MISSING", path, %{"target" => t}), "severity", "warning")

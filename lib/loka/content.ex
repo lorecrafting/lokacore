@@ -39,19 +39,27 @@ defmodule Loka.Content do
 
     with {:ok, cartridge, warnings} <-
            compiled(files, diags, Keyword.get(opts, :registry, @registry)) do
-      # Checked values encode: NESTING_TOO_DEEP guards the only limit they can reach.
-      {:ok, bytes} = Canonical.encode(cartridge)
-      hash = :crypto.hash(:sha256, bytes) |> Base.encode16(case: :lower)
-      {:ok, artifact} = Canonical.encode(%{"content_hash" => hash, "cartridge" => cartridge})
+      artifact = artifact(cartridge)
 
       if byte_size(artifact) <= max_bytes,
-        do: {:ok, artifact, sorted(warnings)},
+        do: {:ok, artifact, warnings},
         else: too_large(byte_size(artifact), max_bytes)
     end
   end
 
+  # Checked values encode: NESTING_TOO_DEEP guards the only limit they can reach.
+  defp artifact(cartridge) do
+    {:ok, bytes} = Canonical.encode(cartridge)
+    hash = :crypto.hash(:sha256, bytes) |> Base.encode16(case: :lower)
+    {:ok, artifact} = Canonical.encode(%{"content_hash" => hash, "cartridge" => cartridge})
+    artifact
+  end
+
   defp compiled(files, diags, registry) do
-    with {:error, ds} <- Compiler.compile(files, diags, registry), do: {:error, sorted(ds)}
+    case Compiler.compile(files, diags, registry) do
+      {:ok, cartridge, warnings} -> {:ok, cartridge, sorted(warnings)}
+      {:error, ds} -> {:error, sorted(ds)}
+    end
   end
 
   defp too_large(bytes, max) do

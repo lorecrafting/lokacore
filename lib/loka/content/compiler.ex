@@ -26,17 +26,19 @@ defmodule Loka.Content.Compiler do
     {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
     v2 = v2(defs, entry, text)
-    {links, warnings} = if v2, do: Links.check(defs, elem(v2, 1)), else: {[], []}
 
-    case loaded ++
-           d1 ++
-           d2 ++
-           d3 ++
-           Checks.check(manifest, defs, registry) ++
-           Checks.rooms(manifest, defs, v2, registry) ++ links do
-      [] -> {:ok, cartridge(manifest, defs, v2), warnings}
-      diags -> {:error, diags}
+    case split(Enum.concat([loaded, d1, d2, d3, checks(manifest, defs, v2, registry)])) do
+      {warnings, []} -> {:ok, cartridge(manifest, defs, v2), warnings}
+      {_, errors} -> {:error, errors}
     end
+  end
+
+  # {warnings, errors}
+  defp split(diags), do: Enum.split_with(diags, &(&1["severity"] == "warning"))
+
+  defp checks(manifest, defs, v2, registry) do
+    Checks.check(manifest, defs, registry) ++
+      Checks.rooms(manifest, defs, v2, registry) ++ Links.check(defs, v2)
   end
 
   # v2 exactly when the source has rooms, items, NPCs, an entry or a text catalog

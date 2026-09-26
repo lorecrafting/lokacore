@@ -102,14 +102,7 @@ export function refStage(c: Obj): Diagnostic[] {
     const at = `.cartridge.rooms${step(ref)}`;
     for (const [dir, exit] of Object.entries(r.exits as Obj))
       named(exit.to, 'room', `${at}.exits.${dir}.to`);
-    const details: Obj = r.details ?? {};
-    for (const [key, d] of Object.entries(details)) {
-      const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
-      const [first, ...words] = d.aliases[0].split('_');
-      const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
-      if (!typable || others.includes(d.aliases[0]))
-        out.push(diag('UNREACHABLE_DETAIL', `${at}.details.${key}`));
-    }
+    out.push(...unreachable(r.details ?? {}, at));
   }
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj))
     named(n.room, 'room', `.cartridge.npcs${step(ref)}.room`);
@@ -127,6 +120,19 @@ export function refStage(c: Obj): Diagnostic[] {
     if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
   }
   return [...out, ...holders(c)];
+}
+
+// UNREACHABLE_DETAIL for each detail of the room at `at` whose first alias another detail has
+// or no lookup produces.
+function unreachable(details: Obj, at: string): Diagnostic[] {
+  return Object.entries(details).flatMap(([key, d]) => {
+    const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
+    const [first, ...words] = d.aliases[0].split('_');
+    const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
+    return !typable || others.includes(d.aliases[0])
+      ? [diag('UNREACHABLE_DETAIL', `${at}.details.${key}`)]
+      : [];
+  });
 }
 
 // Items and NPCs start in containers that form no cycle (CONTAINMENT_CYCLE, at each item on

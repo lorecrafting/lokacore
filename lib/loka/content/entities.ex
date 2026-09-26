@@ -61,22 +61,22 @@ defmodule Loka.Content.Entities do
   @spec holders(map()) :: [map()]
   def holders(defs) do
     items = for {_, {rel, [], i}} <- defs["item"], into: %{}, do: {i["key"], {rel, i}}
+    in_cycle = for {key, {rel, _}} <- items, cycle?(key, items), do: rel
 
+    Enum.map(in_cycle, &diag("CONTAINMENT_CYCLE", at(&1, ["location", "item"]))) ++
+      over(defs, items)
+  end
+
+  defp over(defs, items) do
     held =
       Enum.frequencies(
         for {_, {_, %{"location" => l}}} <- items, do: {l["in"], l[l["in"]]["key"]}
       )
 
-    cycles =
-      for {key, {rel, _}} <- items,
-          cycle?(key, items),
-          do: diag("CONTAINMENT_CYCLE", at(rel, ["location", "item"]))
-
-    cycles ++
-      for {kind, rel, %{"capacity" => cap} = h} <- all(defs),
-          n = Map.get(held, {kind, h["key"]}, 0),
-          n > cap,
-          do: diag("CAPACITY_EXCEEDED", at(rel, ["capacity"]), %{"capacity" => cap, "held" => n})
+    for {kind, rel, %{"capacity" => cap} = h} <- all(defs),
+        n = Map.get(held, {kind, h["key"]}, 0),
+        n > cap,
+        do: diag("CAPACITY_EXCEEDED", at(rel, ["capacity"]), %{"capacity" => cap, "held" => n})
   end
 
   # Following items' locations from `key` returns to it within one step per item.
