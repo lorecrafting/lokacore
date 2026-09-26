@@ -78,7 +78,7 @@
       "heading": "### 5.3 Minimal operation and conflict matrix"
     },
     "statement": "An unregistered command, delta op, policy operator, event or effect type is invalid, never permissive.",
-    "implemented_in": "none"
+    "implemented_in": "typescript"
   },
   {
     "id": "command_id_ignores_placement",
@@ -96,7 +96,7 @@
       "heading": "### 5.0 Rejection is not a failed attempt"
     },
     "statement": "A rejected decision changes no gameplay state, RNG, logical time or cost.",
-    "implemented_in": "none"
+    "implemented_in": "typescript"
   },
   {
     "id": "retry_replays_receipt",
@@ -150,6 +150,15 @@
       "heading": "## 7. Typed world facts and narrative memory"
     },
     "statement": "Every stored fact is a fact the cartridge declares, in a scope kind it allows, with a value of its FactSpec type (bool, one of its enum values, or an int within its bounds).",
+    "implemented_in": "typescript"
+  },
+  {
+    "id": "gameview_agrees_with_admission",
+    "citation": {
+      "document": "04-command-event-effect-protocol.md",
+      "heading": "## 19. Action availability"
+    },
+    "statement": "An exit or action the GameView shows available is not refused for a reason the view shows (policy, cost, cooldown, door, MV); one shown unavailable is refused.",
     "implemented_in": "typescript"
   }
 ]

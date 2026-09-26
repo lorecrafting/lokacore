@@ -169,7 +169,11 @@ function place(
  * unsupported_capability when that capability is not in the lock or has no rule here.
  */
 export function step(world: World, command: Command): Stepped {
-  const [owner] = (CAPABILITY_OWNERS.command[command.payload.type] ?? '').split('@');
+  const type = command.payload.type;
+  // Own keys only: a type such as `constructor` names no command (unknown_types_fail_closed).
+  const [owner] = (
+    Object.hasOwn(CAPABILITY_OWNERS.command, type) ? CAPABILITY_OWNERS.command[type] : ''
+  ).split('@');
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
     return { decision: rejected('unsupported_capability'), world };
