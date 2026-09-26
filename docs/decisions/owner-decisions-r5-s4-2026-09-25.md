@@ -40,3 +40,31 @@ without emitting the event itself (admit() would fault `unowned_event` if take e
 Owner's answer:
 
 > Proceed as planned (Recommended)
+
+## Q3: the touch keyword (added by the owner after Q1)
+
+Owner's words:
+
+> Also the room keywords, or item keywords there should be for the touch based interface, a
+> keyword that is underlined, maybe a new field for that?  Like 'underlined_keyword' or
+> 'touchable_keyword' or something idk you figure a good name for it, or some mechanism that
+> allows the mobile client to know which word to underline so it can be targeted by a touch
+
+PM ruling (the owner delegated the choice): mark the tappable words inside the authored text
+itself, not in a separate field. A separate `touchable_keyword` field would make the client
+search the sentence for the word, which breaks on repeated words ("the lantern beside the
+lantern hook"), on inflections, and on translation, where the word moves or changes. An
+inline link keeps the word and its target together in every language:
+
+```text
+A [brass lantern] sits here.                  <- item text: the link targets that item
+Rope is looped over the [old post](mooring_post).  <- room text: targets a detail or entity
+```
+
+Short refs in the target expand through `Checks.expand/2`.
+
+The compiler rejects a link whose target does not resolve, and a visible item or inspectable
+detail that has no link anywhere in the text the player sees. GameView carries the linked
+spans with the target ids the client already has, so the client underlines exactly what the
+cartridge marked and never guesses. The link syntax name is `touch link`. S4 builds it for
+item text and S2 details.
