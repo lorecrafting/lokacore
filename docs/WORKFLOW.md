@@ -72,7 +72,7 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
-   PR link, verdict, notes. Owner decisions, anything open after fix round 2 and Astra
+   PR link, verdict, notes. Owner decisions, anything open after fix round 2 and cross-vendor
    relays still go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says.
 
