@@ -280,7 +280,7 @@ Room count: 25 + 22 + 13 + 17 + 32 = 109. By level: z+3: 1, z+2: 4, z+1: 14, z0:
 
 Everything the game uses, grouped the way a classic-MUD player recognizes it. Each row names where it appears and the v3 primitive it pulls. Phase is where the primitive must first exist. Rows marked **NEW** are not in document 21 yet; see §11.
 
-*Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), DikuMUD's starting maximums HP 20, MA 100, MV 82 and regeneration per game hour HP 5, MA 4, MV 18, unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); cartridges built before the pools existed keep their behaviour and transcripts; and the pools regenerate per game hour, derived from the clock.
+*Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), starting maximums HP 20, MA 100, MV 82 (from DikuMUD) and regeneration per game hour HP 5, MA 4, MV 18, unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); cartridges built before the pools existed keep their behaviour and transcripts; and the pools regenerate per game hour, derived from the clock.
 
 ### 4.1 World and movement
 
@@ -295,7 +295,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Dark rooms and dark-sight | fen at night, barrow, crypt, deep shaft; hill-folk see in dark | room tag + light resource + ancestry | R8 |
 | Water rooms: swim, boat, drowning | mire, pool, shallows, tide flats, flooded gallery; MV drain, drown at 0 | terrain + skill + Resource | R8 |
 | Tides | mire crossing and tide flats passable at low tide only, 6-hour cycle | **NEW** tide window (calendar-derived) | R8 |
-| Terrain movement cost | 1 MV per room from R5; from R8 the average of the two rooms' terrain costs (DikuMUD's table); mounted halves | travel cost | R5 (1 MV), R8 (terrain) |
+| Terrain movement cost | 1 MV per room from R5; from R8 the average of the two rooms' terrain costs, rounded down (DikuMUD's table); mounted halves | travel cost | R5 (1 MV), R8 (terrain) |
 | Indoor/outdoor, weather exposure | rain outdoors chills; fog lowers PER; cloak negates | room tag + status | R8 |
 | Traps: pit, dart, cave-in | barrow passage, deep shaft, mine event | Check + consequence | R8 |
 | Climbing and rope | descend into barrow mouth or deep shaft without rope = fall damage | item requirement + Check | R8 |
@@ -317,7 +317,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Moon phase | full moon: wights stronger, portal opens, wisp visible | derived from calendar | R8 |
 | Real-elapsed jobs | smithy, brewing, tanning, mining quota, inn rest | ADR-049 resume input | R6 |
 | Weather | clear/rain/fog/storm; storm closes the ferry | seeded weather capability | R8 |
-| Regeneration | HP/MA/MV per hour; doubled resting; halved hungry | derived resource | R5 |
+| Regeneration | HP/MA/MV per game hour; DikuMUD's position bonuses (HP and MV +1/2 sleeping, +1/4 resting, +1/8 sitting; MA +100%, +50%, +25%); a quarter when hungry or thirsty | derived resource | R5 |
 | Light burn-down | torch 2 h, lantern 8 h, refill oil at chandler | derived temporal state | R8 |
 | Shop and service hours | per NPC; bank closed Sundays; ferry no night crossing | schedule | R8 |
 | Timed world events | cave-in at the mine on day 6; storm on day 9; Lantern Night after the main story | WorldEventPlan | R8 |
