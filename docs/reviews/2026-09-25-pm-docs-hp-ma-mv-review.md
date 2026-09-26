@@ -47,3 +47,14 @@
    decision answers it (1 MV per room from R5, terrain in R8). The R6P UI slices take this
    README as input and would re-raise a settled question. Mark it answered with a link to
    the decision.
+
+## Fix round 1 (`2c560d1`)
+
+- Finding 1: fixed. The 00 amendment now says the move is refused at 0 MV and that
+  cartridges built before the pools existed keep their behaviour and transcripts, matching
+  the accepted option (decision record lines 15-16).
+- Finding 2: fixed. The room-view README marks the `mv` question answered (1 MV per room from
+  R5 S6b, terrain at R8) and links the decision; the link resolves.
+- `elixir bin/check_docs.exs`: 0 broken links, 0 unreachable.
+
+Verdict: **APPROVE**.
