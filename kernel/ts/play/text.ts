@@ -130,8 +130,14 @@ const BARRED: Record<string, string> = { exit_closed: ' (closed)', exit_locked: 
 
 /** The short description of the barrier on the current room's exit in `direction`, if any. */
 export function door(cartridge: Cartridge, world: World, direction: string): string {
+  const b = barrierAt(cartridge, world, direction);
+  return b ? say(cartridge, b.short) : 'it';
+}
+
+/** The barrier on the current room's exit in `direction`, if any. */
+export function barrierAt(cartridge: Cartridge, world: World, direction: string) {
   const barrier = exitOf(world.rooms[world.state.containers[world.body]], direction)?.barrier;
-  return barrier ? say(cartridge, cartridge.barriers![refString(barrier)].short) : 'it';
+  return barrier && cartridge.barriers![refString(barrier)];
 }
 
 /** What the player is carrying: each item's short description. */
@@ -214,6 +220,7 @@ export function reason(
     'close invalid_state': 'It is already closed.',
     'lock not_owned': "You don't have the key.",
     'unlock not_owned': "You don't have the key.",
+    'lockless not_owned': 'It has no lock.',
     ...Object.fromEntries(
       ['open', 'close', 'lock', 'unlock'].flatMap((v) => [
         [`${v} invalid_target`, `There is nothing to ${v} there.`],

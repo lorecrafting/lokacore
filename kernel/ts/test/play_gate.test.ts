@@ -62,6 +62,7 @@ test('doors are named by direction or keywords, and refusals read as words', () 
       'open gate',
       'open',
       'unlock e',
+      'lock north',
       'open oak door',
       'open north',
       'close west',
@@ -78,6 +79,7 @@ test('doors are named by direction or keywords, and refusals read as words', () 
       "open gate\nYou don't see that here.\n",
       'open\nOpen what?\n',
       "unlock e\nYou don't have the key.\n",
+      'lock north\nIt has no lock.\n', // review #50 N3: the oak door has no key_item
       'open oak door\nYou open the oak door.\n',
       'open north\nIt is already open.\n',
       'close west\nThere is no exit that way.\n',

@@ -15,7 +15,19 @@ import { validate } from '../src/validate.ts';
 import { doors, resolve, normalize } from '../src/target.ts';
 import { detailOf, resolved, type Offered } from '../src/actions.ts';
 import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
-import { clock, detail, door, inventory, parse, reason, room, say, status, which } from './text.ts';
+import {
+  barrierAt,
+  clock,
+  detail,
+  door,
+  inventory,
+  parse,
+  reason,
+  room,
+  say,
+  status,
+  which,
+} from './text.ts';
 import { decide, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
@@ -134,7 +146,11 @@ function turn(r: Run, cmd: Command, measured = true): string {
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
   const p = cmd.payload as { type: string; target_id?: EntityId; item_id?: EntityId };
   const name = (id?: string) => say(cartridge, r.world.entities[id!]?.short ?? '');
-  const it = door(cartridge, r.world, (p as { direction?: string }).direction ?? '');
+  const dir = (p as { direction?: string }).direction ?? '';
+  const it = door(cartridge, r.world, dir);
+  // A door without a key_item has no lock: lock and unlock say so, not that a key is missing.
+  const lockless =
+    ['lock', 'unlock'].includes(p.type) && !barrierAt(cartridge, r.world, dir)?.key_item;
   const done: Record<string, string> = {
     taken: `You take ${name(p.item_id)}.\n`,
     dropped: `You drop ${name(p.item_id)}.\n`,
@@ -148,7 +164,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
     decision.kind !== 'accepted'
-      ? `${reason(decision, p.type)}\n`
+      ? `${reason(decision, lockless ? 'lockless' : p.type)}\n`
       : narrated
         ? narrated.map((t) => `${say(cartridge, t.key)}\n`).join('')
         : (done[decision.outcome] ??
