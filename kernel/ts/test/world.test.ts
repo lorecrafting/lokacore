@@ -8,8 +8,26 @@ import { test } from 'node:test';
 import { hash } from '../src/canonical.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
+import { accepted, event, rejected } from '../src/decision.ts';
+import {
+  decideWith,
+  gameView,
+  holds,
+  INSTALLED,
+  newWorld,
+  step as kernelStep,
+} from '../src/world.ts';
 import { read } from './read.ts';
+
+// Every rule call sees a deep-frozen world, so a rule that mutates it throws here (ADR-072).
+const freeze = <T>(v: T): T => {
+  if (v && typeof v === 'object' && !Object.isFrozen(v)) {
+    Object.freeze(v);
+    for (const x of Object.values(v)) freeze(x);
+  }
+  return v;
+};
+const step = (w: World, c: Command) => kernelStep(freeze(w), c);
 
 const kat = read('protocol/fixtures/cartridge_rooms_hash.json');
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -81,7 +99,7 @@ test('move north proposes one transfer and entity_entered_room, and commits it',
     },
     events: [
       {
-        id: '2ed1ae6f-befe-8e6a-a5b1-bce1b3d1e5d9', // IdSource [context, command, 1], Python
+        id: 'e2870386-6797-8a1b-8e1a-b2c028c16c49', // IdSource [context, command, 0], Python
         world_context_id: CONTEXT,
         scope: { kind: 'player', character_id: CHARACTER },
         actor_id: CHARACTER,
@@ -136,7 +154,8 @@ test('look is accepted with an empty delta and leaves the state unchanged', () =
   assert.equal(hash(world.state as never), hash(w.state as never));
 });
 
-// Breaks: commands of an uninstalled or unlocked capability reach a rule, or another actor moves.
+// Breaks: a command of an uninstalled or unlocked capability, another actor, another world or
+// the reserved nil CommandId (numeric profile, initial world) reaches a rule.
 test('unknown capabilities and other actors are rejected before any rule', () => {
   const w = fresh();
   const take = cmd({ type: 'take', item_id: BODY });
@@ -152,6 +171,8 @@ test('unknown capabilities and other actors are rejected before any rule', () =>
     [w, take, 'unsupported_capability'],
     [unlocked, cmd({ type: 'look' }), 'unsupported_capability'],
     [w, stranger, 'not_found'],
+    [w, { ...move('north'), world_context_id: BODY }, 'not_found'],
+    [w, { ...move('north'), id: '00000000-0000-0000-0000-000000000000' }, 'permission_denied'],
   ] as [World, Command, string][])
     assert.deepEqual(step(world, command).decision, { kind: 'rejected', error: { code } });
 });
@@ -173,4 +194,27 @@ test('the movement invariants fail on a broken world', () => {
 test('the delta digest construction matches the Python known answer', () => {
   const { value, sha256 } = read('protocol/fixtures/delta_digest.json');
   assert.equal(hash(value), sha256);
+});
+
+// Planted rules through the admission boundary (Astra A2 counterexamples 1 and 3). Breaks: the
+// event-ownership check is removed, or the world a rule sees is writable.
+test('a rule emitting a foreign event is rejected, and one mutating the world throws', () => {
+  const w = freeze(fresh());
+  const foreign = (world: World, c: Command, mint: () => string) => {
+    const payload = JSON.parse(
+      `{"type":"item_acquired","item_id":"${BODY}","holder_id":"${BODY}"}`,
+    );
+    return accepted(world, 'moved', [], [event(world, c, mint, 1, payload)]);
+  };
+  assert.deepEqual(decideWith(w, move('north'), 'movement', foreign as never).decision, {
+    kind: 'rejected',
+    error: { code: 'unsupported_capability' },
+  });
+  const mutating = (world: World) => {
+    const { assign } = Object;
+    assign(world.state, { clock: 123 });
+    return rejected('invalid_target');
+  };
+  assert.throws(() => decideWith(w, move('north'), 'movement', mutating as never), TypeError);
+  assert.equal(w.state.clock, 0);
 });

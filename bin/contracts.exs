@@ -202,14 +202,15 @@ faults =
 
 limits = read.("docs/spec/conformance/composition-profile.json")["limits"]
 
-# Owning capability (key@version) of each command, policy op and definition kind, for the
-# loader's UNDECLARED_CAPABILITY re-check and command routing (cartridge.schema.json
-# DiagnosticCode). Events join when a frozen definition kind references one.
+# Owning capability (key@version) of each command, policy op, definition kind and event, for
+# the loader's UNDECLARED_CAPABILITY re-check, command routing and the event-ownership check
+# at admission (cartridge.schema.json DiagnosticCode; kernel/ts/src/world.ts).
 owners =
   for {kind, field} <- [
         {"command", "commands"},
         {"policy", "policies"},
-        {"definition", "definitions"}
+        {"definition", "definitions"},
+        {"event", "events"}
       ],
       into: %{} do
     {kind, for(e <- registry, name <- e[field] || [], into: %{}, do: {name, pin.(e)})}
@@ -239,7 +240,7 @@ targets = %{
         [
           "export const EVALUATION_FAULTS: readonly ErrorCode[] = #{Gen.lit(faults)};",
           "export const LIMITS: Readonly<Record<string, number>> = JSON.parse(#{Gen.lit(Gen.lit(limits))});",
-          "export const CAPABILITY_OWNERS: Readonly<Record<'command' | 'policy' | 'definition', Readonly<Record<string, string>>>> = JSON.parse(#{Gen.lit(Gen.lit(owners))});",
+          "export const CAPABILITY_OWNERS: Readonly<Record<'command' | 'policy' | 'definition' | 'event', Readonly<Record<string, string>>>> = JSON.parse(#{Gen.lit(Gen.lit(owners))});",
           "export type Owned = { #{Enum.join(owned, "; ")} };",
           "export const ARTIFACT_MAX_BYTES = #{Loka.Core.Contracts.defs()["ArtifactSize"]["maximum"]};",
           ""

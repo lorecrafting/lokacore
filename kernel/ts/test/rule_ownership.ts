@@ -6,13 +6,13 @@
 import { accepted, event, type Rule } from '../src/decision.ts';
 import * as movement from '../src/rules/movement.ts';
 
-export const emitsForeign: Rule<'movement'> = (w, c) =>
+export const emitsForeign: Rule<'movement'> = (w, c, mint) =>
   // @ts-expect-error movement's rule may not emit containment's item_acquired.
   accepted(
     w,
     'x',
     [],
-    [event(w, c, 1, { type: 'item_acquired', item_id: w.body, holder_id: w.body })],
+    [event(w, c, mint, 1, { type: 'item_acquired', item_id: w.body, holder_id: w.body })],
   );
 
 // @ts-expect-error movement's rule takes move, so it cannot serve description_variant's look.

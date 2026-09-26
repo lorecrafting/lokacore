@@ -51,12 +51,19 @@ type Event<E> = Omit<DomainEvent, 'payload'> & {
 export type Decision<E> =
   | Exclude<DecisionResult, { kind: 'accepted' }>
   | (Omit<Accepted, 'events'> & { readonly events: readonly Event<E>[] });
-/** A rule of capability C: only C's commands in, only C's events out (typecheck enforces). */
+/** The command's IdSource allocator: each call is the next ordinal, from 0 (numeric profile). */
+export type Mint = () => string;
+/**
+ * A rule of capability C: only C's commands in, only C's events out. Typecheck enforces it for
+ * typed code; step() re-checks event ownership at admission, and lint/rules/ts-rule-module-*.yml
+ * ban the untyped and mutating escapes.
+ */
 export type Rule<C extends keyof Owned> = (
   world: World,
   command: Omit<Command, 'payload'> & {
     readonly payload: Extract<CommandPayload, { type: Owned[C]['command'] }>;
   },
+  mint: Mint,
 ) => Decision<Owned[C]['event']>;
 
 /** The six compass directions, in RoomDefinition exits order (room.schema.json). */
@@ -70,15 +77,25 @@ export const refString = (r: DefinitionRef) =>
 
 export const rejected = (code: ErrorCode) => ({ kind: 'rejected', error: { code } }) as const;
 
-/** The DomainEvent at `position` of the command's decision (04 §8, §11). */
+/**
+ * The IdSource allocator of one command's decision: ordinals 0, 1, 2, ... each used once, shared
+ * by every id the decision creates (events now; entities and effects later).
+ */
+export function allocator(world: World, command: { readonly id: Command['id'] }): Mint {
+  let ordinal = 0;
+  return () => id(world.context, command.id, ordinal++);
+}
+
+/** The DomainEvent at one-based causal `position` (04 §5.2, §8, §11), its id from `mint`. */
 export function event<P extends EventPayload>(
   world: World,
   command: { readonly id: Command['id'] },
+  mint: Mint,
   position: number,
   payload: P,
 ): Omit<DomainEvent, 'payload'> & { payload: P } {
   return {
-    id: id(world.context, command.id, position) as DomainEvent['id'],
+    id: mint() as DomainEvent['id'],
     world_context_id: world.context,
     scope: { kind: 'player', character_id: world.character },
     actor_id: world.character,
@@ -108,3 +125,7 @@ export const accepted = <E>(
 /** The room a direction's exit leads to, if the room has that exit. */
 export const exitTo = (room: RoomDefinition, direction: string): DefinitionRef | undefined =>
   (room.exits as Readonly<Record<string, { to: DefinitionRef }>>)[direction]?.to;
+
+/** Own-key test and values for rule modules, which may not name Object (ts-rule-module-pure). */
+export const has = (o: object, key: string): boolean => Object.hasOwn(o, key);
+export const values = <T>(o: Readonly<Record<string, T>>): T[] => Object.values(o);

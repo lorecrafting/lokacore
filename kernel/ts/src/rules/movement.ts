@@ -6,13 +6,16 @@ import {
   COMPASS,
   event,
   exitTo,
+  has,
   refString,
   rejected,
   type Rule,
+  values,
   type World,
 } from '../decision.ts';
+import type { DefinitionRef } from '../contracts.gen.ts';
 
-export const decide: Rule<'movement'> = (world, command) => {
+export const decide: Rule<'movement'> = (world, command, mint) => {
   const { direction } = command.payload;
   if (!COMPASS.includes(direction)) return rejected('invalid_target');
   const here = world.state.containers[world.body];
@@ -27,14 +30,16 @@ export const decide: Rule<'movement'> = (world, command) => {
     destination_id: there,
   } as const;
   const entered = { type: 'entity_entered_room', entity_id: world.body, room_id: there } as const;
-  return accepted(world, 'moved', [transfer], [event(world, command, 1, entered)]);
+  return accepted(world, 'moved', [transfer], [event(world, command, mint, 1, entered)]);
 };
 
 /** Registered invariants of movement (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
-  player_in_one_room: (world) => Object.hasOwn(world.rooms, world.state.containers[world.body]),
+  player_in_one_room: (world) => has(world.rooms, world.state.containers[world.body]),
   exits_resolve: (world) =>
-    Object.values(world.rooms).every((room) =>
-      Object.values(room.exits).every((exit) => Object.hasOwn(world.roomIds, refString(exit.to))),
+    values(world.rooms).every((room) =>
+      values<{ to: DefinitionRef }>(room.exits).every((exit) =>
+        has(world.roomIds, refString(exit.to)),
+      ),
     ),
 };

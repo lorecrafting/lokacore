@@ -18,7 +18,16 @@ import {
   type TextKey,
   type WorldContextId,
 } from './contracts.gen.ts';
-import { COMPASS, refString, rejected, type Cartridge, type Rule, type World } from './decision.ts';
+import {
+  allocator,
+  COMPASS,
+  refString,
+  rejected,
+  type Cartridge,
+  type Mint,
+  type Rule,
+  type World,
+} from './decision.ts';
 import { id } from './id_source.ts';
 import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
@@ -64,20 +73,41 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
 }
 
 /**
- * Decides and, when accepted, composes and commits one command (04 §5). Rejected: the owning
- * capability is not in the lock or has no rule (unsupported_capability), or the actor is not
- * this world's player (not_found). A result over output_bytes or a failed precondition faults.
+ * Decides and, when accepted, composes and commits one command (04 §5): routes it to the rule
+ * of the capability that owns its type (capability_registry.json), rejecting it with
+ * unsupported_capability when that capability is not in the lock or has no rule here.
  */
-export function step(world: World, command: Command): { decision: DecisionResult; world: World } {
+export function step(world: World, command: Command): Stepped {
   const [owner] = (CAPABILITY_OWNERS.command[command.payload.type] ?? '').split('@');
-  const rule = RULES[owner as keyof Owned] as unknown as (w: World, c: Command) => DecisionResult;
-  const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
+  const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
-    return reject('unsupported_capability');
+    return { decision: rejected('unsupported_capability'), world };
+  return decideWith(world, command, owner, rule);
+}
+
+type Stepped = { decision: DecisionResult; world: World };
+type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
+
+/**
+ * The admission boundary around one rule call (step's only production use). Before the rule:
+ * the nil CommandId is reserved for world creation (permission_denied); a command for another
+ * world (not_found) or another actor (not_found) is rejected. After it: an event type another
+ * capability owns is rejected (unsupported_capability), a result over output_bytes faults
+ * budget_exceeded, and the delta composes or faults before the changes are adopted.
+ */
+export function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
+  const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
+  if (command.id === NIL) return reject('permission_denied');
+  if (command.world_context_id !== world.context) return reject('not_found');
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
-  const decision = rule(world, command);
+  const decision = rule(world, command, allocator(world, command));
   if (decision.kind !== 'accepted') return { decision, world };
+  const owners = CAPABILITY_OWNERS.event;
+  if (decision.events.some((e) => owners[e.payload.type]?.split('@')[0] !== owner))
+    return reject('unsupported_capability');
+  // ponytail: unreachable with look and move (fixed-size results); tested with the first rule
+  // whose output size varies (S5, ActionRecipe).
   if (utf8(encode(decision as never)).length > LIMITS.output_bytes!)
     return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
   const result = compose(world.state as unknown as Parameters<typeof compose>[0], decision.delta);
