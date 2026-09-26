@@ -327,4 +327,31 @@ defmodule Loka.ContentRoomsTest do
                 undeclared.("rooms/b.variants[0].when.root.op", "policy")
               ]}
   end
+
+  # Review F1. Breaks: expand/2 takes a details map with a detail keyed exits (and title) for a
+  # room and crashes, or skips expanding inside that detail's variant condition.
+  test "details keyed exits and title compile, their short references expanded", %{tmp_dir: dir} do
+    m =
+      put_in(@manifest, ["requires", "capabilities"], %{
+        "movement" => 1,
+        "inspectable_detail" => 1,
+        "description_variant" => 1,
+        "fact" => 1
+      })
+
+    exits = %{"aliases" => ["exits"], "description" => "r.d", "variants" => [variant(bell(true))]}
+    title = %{"aliases" => ["title"], "description" => "r.t"}
+    b = Map.put(room(%{}), "details", %{"exits" => exits, "title" => title})
+
+    files = %{
+      "cartridge.json" => Map.put(m, "entry", ref("a")),
+      "facts.json" => @bell,
+      "rooms/b.json" => b
+    }
+
+    assert {:ok, bytes} = compile(dir, files)
+    %{"cartridge" => c} = JSON.decode!(bytes)
+    [v] = c["rooms"]["c@1.0.0:room/b"]["details"]["exits"]["variants"]
+    assert v["when"]["root"]["fact"] == ref("bell", "fact")
+  end
 end

@@ -59,7 +59,8 @@ defmodule Loka.Content.Checks do
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
 
-  def expand(%{"exits" => exits} = room, m) when is_map(exits) do
+  # A room (its title a text key): a details map may also have a detail keyed exits or title.
+  def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
     to = fn {d, e} -> {d, Map.update!(e, "to", &ref(&1, "room", m))} end
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, to))
   end
