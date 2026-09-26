@@ -25,16 +25,18 @@ Emergence comes from systems that share the world's nouns, not from authored com
 They extend spec 21 §1 (closed semantics, open composition), §3.4 (ReactionRule) and the
 shared consequence vocabulary (21 §11).
 
-1. **Mechanics meet through shared vocabulary, never by name.** A capability reads and
-   writes facts, properties, relations, containment, perception and domain events that any
-   other capability can use; it never special-cases another mechanic or a single piece of
-   content ("if fire and this door"). Example: fire acts on anything `burnable`; a wooden
-   locked door is burnable; burning opens it, and nobody wrote that rule.
+1. **Mechanics meet through shared vocabulary, never by name.** A capability reads facts,
+   properties, relations, containment, perception and domain events that any other
+   capability can use, and changes them only through the registered consequence vocabulary
+   (21 §11; there is no generic set-field operation). Capability code never special-cases
+   another mechanic or a single piece of content ("if fire and this door"). Example: fire's
+   consequence acts on anything `burnable`; a wooden locked door is burnable; so fire opens
+   it, though nobody wrote a rule about fire and doors.
 2. **Player verbs act on general properties.** An action targets whatever satisfies its
    policy (material, container, lit, hidden, ...), not a listed set of entities, so players
    can find uses nobody enumerated.
-3. **Reactions chain, within bounds.** Events trigger ReactionRules that emit further typed
-   consequences (fire spreads, noise wakes a guard), bounded by the budgets and ordering
+3. **Reactions chain, within bounds.** Events trigger ReactionRules that emit further registered
+   typed consequences (fire spreads, noise wakes a guard), bounded by the budgets and ordering
    rules so a chain is deterministic and terminates.
 4. **The world remembers players.** Houses, signs, books, guild halls, stock, reputation
    and trails are persistent state under ownership and access policies (21 §27), in the
@@ -42,7 +44,7 @@ shared consequence vocabulary (21 §11).
 5. **Consequences are real.** Scarcity, decay, sinks, theft and loss exist where a cartridge
    or Realm enables them; the online economy never imports offline value (07 §21).
 6. **Social play is first-class.** Speech range, emotes, introductions and displayed
-   identity (21 §6 Recognition), player-written text, and group channels.
+   identity (21 §6 Recognition), player-written text, and group channels (21 §16).
 7. **Emergent must not mean exploitable.** Conservation and containment invariants, the
    seeded simulation over sequences that mix several capabilities, and multiplayer/economy
    certification (07 §3) keep undiscovered combinations from becoming duplication bugs.
@@ -51,5 +53,7 @@ shared consequence vocabulary (21 §11).
 
 Every slice that adds or changes a mechanic states, in its brief and PR: which shared
 vocabulary it reads and writes; which existing mechanics it now affects without extra
-code; and any place it names another mechanic or a specific piece of content (each such
-place is a finding unless the spec requires it). Reviewers check the statement.
+code; and any place its capability code names another mechanic or a specific piece of content
+(each such place is a finding unless the spec requires it). Cartridge content, such as a
+ReactionRule on one bell, names content by design and is not covered. Reviewers check the
+statement.

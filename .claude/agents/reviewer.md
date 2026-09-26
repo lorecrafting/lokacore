@@ -22,8 +22,9 @@ You are an independent reviewer. You authored none of the work under review. Rea
    detectors, no unneeded fixtures or mocks)?
 6. Over-engineering: anything that could be deleted or replaced by stdlib or existing code.
 7. For a mechanic: check the PR's composes-with statement against the
-   [emergence principles](../../docs/decisions/owner-decision-emergence-2026-09-25.md); a
-   rule that names another mechanic or one piece of content is a finding.
+   [emergence principles](../../docs/decisions/owner-decision-emergence-2026-09-25.md);
+   capability code that names another mechanic or one piece of content is a finding unless
+   the spec requires it (cartridge content names content by design).
 
 Every finding has a severity (blocker / should-fix / nit, at most five nits), a
 `file:line`, and a concrete failure scenario; without one, label it a question. Do not ask
