@@ -180,9 +180,13 @@ test('perform is rejected for another target, key or room, and once its policy f
 });
 
 // Breaks (brief item 7): a recipe commits a value its FactSpec does not allow, or part of the
-// sequence commits before the fault.
+// sequence commits before the fault. The loader rejects such an artifact (FACT_TYPE_MISMATCH,
+// #46 A1), so the value is changed in the loaded cartridge: adopt's check is the second line.
 test('a recipe assigning a wrongly typed value faults with nothing committed', () => {
-  const w = world((c) => (c.recipes[RECIPE].outcomes.success.sequence[0].value = 'yes'));
+  const ok = world();
+  const cartridge = structuredClone(ok.cartridge) as any;
+  cartridge.recipes[RECIPE].outcomes.success.sequence[0].value = 'yes';
+  const w = { ...ok, cartridge };
   const r = step(w, ring());
   assert.deepEqual(plain(r.decision), {
     kind: 'fault',
