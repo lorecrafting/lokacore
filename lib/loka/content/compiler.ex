@@ -6,7 +6,7 @@ defmodule Loka.Content.Compiler do
   """
   alias Loka.Content.Checks
   alias Loka.Core.Contracts
-  import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4]
+  import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
 
   @facts_file %{
     "type" => "object",
@@ -24,6 +24,7 @@ defmodule Loka.Content.Compiler do
   def compile(files, loaded, registry) do
     {manifest, entry, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files)
+    {entry, defs} = expanded(manifest, entry, defs)
     {text, d3} = text(of(files, :text))
     v2 = v2(defs, entry, text)
 
@@ -38,6 +39,22 @@ defmodule Loka.Content.Compiler do
     end
   end
 
+  # Short references become full ones once a valid manifest names the cartridge; without one
+  # the build fails anyway and reference checks are skipped.
+  defp expanded(nil, entry, defs), do: {entry, defs}
+
+  defp expanded(m, entry, defs) do
+    defs =
+      for {kind, ds} <- defs, into: %{} do
+        {kind, if(is_map(ds), do: Map.new(ds, fn {k, d} -> {k, expand(d, m)} end), else: ds)}
+      end
+
+    {ref(entry, "room", m), defs}
+  end
+
+  defp expand({rel, steps, v}, m), do: {rel, steps, Checks.expand(v, m)}
+  defp expand(:invalid, _), do: :invalid
+
   # v2 exactly when the source has rooms, an entry or a text catalog (CompiledCartridge).
   defp v2(defs, entry, text) do
     if defs["room"] != %{} or entry != nil or text != nil, do: {entry, text || %{}}
@@ -51,7 +68,7 @@ defmodule Loka.Content.Compiler do
   # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), which the
   # compiled v2 cartridge carries beside the manifest.
   defp manifest([{rel, m}], registry) do
-    defs = Contracts.defs()
+    defs = source_defs()
 
     file =
       put_in(defs["CartridgeManifest"], ["properties", "entry"], %{"$ref" => "DefinitionRef"})
@@ -180,12 +197,16 @@ defmodule Loka.Content.Compiler do
 
   defp authored_key(_, _, _), do: []
 
-  defp validated(rel, steps, contract, value, defs \\ Contracts.defs()) do
+  defp validated(rel, steps, contract, value, defs \\ source_defs()) do
     case Contracts.validate(contract, value, defs) do
       :ok -> []
       {:error, es} -> schema(rel, steps, value, es)
     end
   end
+
+  # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
+  defp source_defs,
+    do: Map.update!(Contracts.defs(), "DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
 
   defp cartridge(m, defs, nil) do
     %{

@@ -4,7 +4,7 @@ defmodule Loka.Content.Checks do
   06 §20–21). `registry` is a decoded capability registry (CapabilitySpec entries, like
   protocol/capability_registry.json); ownership comes from its commands and policies.
   """
-  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
   alias Loka.Core.Canonical
   alias Loka.Core.Contracts
 
@@ -47,6 +47,25 @@ defmodule Loka.Content.Checks do
       _ -> []
     end
   end
+
+  @doc """
+  `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
+  node's reference (fact, item, quest) or an exit's `to` goes becomes the DefinitionRef of
+  cartridge `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
+  """
+  @spec expand(term(), map()) :: term()
+  def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
+    do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
+
+  def expand(%{"exits" => exits} = room, m) when is_map(exits),
+    do: %{
+      room
+      | "exits" => Map.new(exits, fn {d, e} -> {d, Map.update!(e, "to", &ref(&1, "room", m))} end)
+    }
+
+  def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
+  def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
+  def expand(v, _), do: v
 
   @doc """
   Diagnostics across the schema-valid definitions (`kind => key => {rel, steps, value}`):

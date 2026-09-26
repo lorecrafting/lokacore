@@ -97,6 +97,18 @@ defmodule Loka.Content.Source do
     }
   end
 
+  @doc "A short reference `key` as the DefinitionRef of `m`'s `kind` definition; else unchanged."
+  @spec ref(term(), String.t(), map()) :: term()
+  def ref(key, kind, m) when is_binary(key),
+    do: %{
+      "cartridge_id" => m["id"],
+      "cartridge_version" => m["version"],
+      "kind" => kind,
+      "key" => key
+    }
+
+  def ref(r, _, _), do: r
+
   @doc "A diagnostic path: the source for `rel`, then `steps`."
   @spec at(String.t(), steps()) :: String.t()
   def at(rel, steps) do
