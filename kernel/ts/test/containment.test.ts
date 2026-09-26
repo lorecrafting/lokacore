@@ -43,9 +43,18 @@ const give = (item_id: string, recipient_id: string) =>
   cmd({ type: 'give', item_id, recipient_id });
 const move = (direction: string) => cmd({ type: 'move', direction });
 const run = (w: World, ...cs: Command[]) => cs.reduce((x, c) => step(x, c).world, w);
+// An engine verb as the GameView advertises it on an entity (actions.ts).
+const verb = (key: string, scope: string) => ({
+  available: true,
+  action_key: key,
+  label: `action.${key}`,
+  target: { kind: 'entity', scopes: [scope] },
+  input: [],
+});
 
 // Breaks: entity ids minted from other ordinals or in another order, an item placed at the
-// wrong container, a capacity lost, or the GameView listing what is elsewhere.
+// wrong container, a capacity lost, or the GameView listing what is elsewhere or a verb on the
+// wrong entity (take on the NPC, drop on an item in the room).
 test('a fresh world mints NPCs then items after the details and places each', () => {
   const w = fresh();
   assert.deepEqual(w.state.containers, {
@@ -59,7 +68,12 @@ test('a fresh world mints NPCs then items after the details and places each', ()
   const view = gameView(w);
   assert.deepEqual(view.entities, [
     { id: BRAM, name: 'npc.bram.short', kind: 'npc', actions: [] },
-    { id: SATCHEL, name: 'item.satchel.short', kind: 'item', actions: [] },
+    {
+      id: SATCHEL,
+      name: 'item.satchel.short',
+      kind: 'item',
+      actions: [verb('take', 'room_contents')],
+    },
   ]);
   assert.deepEqual(view.inventory, []);
 });
@@ -102,8 +116,9 @@ test('take proposes one transfer to the body and item_acquired, at the Python st
     hash(world.state as never),
     'fb828aedb07fd77bab6905d0707c214e7dc85f0d0f067e1f118cd6b237ccf06b',
   );
+  const held = ['drop', 'give'].map((v) => verb(v, 'inventory'));
   assert.deepEqual(gameView(world).inventory, [
-    { id: SATCHEL, name: 'item.satchel.short', kind: 'item', actions: [] },
+    { id: SATCHEL, name: 'item.satchel.short', kind: 'item', actions: held },
   ]);
 });
 

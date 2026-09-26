@@ -155,7 +155,7 @@
       ]
     },
     "EventPayload": {
-      "description": "The registered event types (04 §8) the R6P proof uses (pre-release-proof.md). Content-declared custom events are an R3B envelope.",
+      "description": "The registered event types (04 §8) the R6P proof uses (pre-release-proof.md). A cartridge's custom events are one type, custom_event, named by a DefinitionRef in the cartridge's namespace, so content never emits an engine-owned type (05 §28).",
       "oneOf": [
         {
           "description": "entity_id entered room_id.",
@@ -331,6 +331,48 @@
             "new"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "A cartridge's custom event (06 §20 custom DomainEvents; 04 §5.3 event emission), emitted by an ActionRecipe's event.emit step: event is the DefinitionRef of kind event, the cartridge's id and version and the step's key; subject_id is the recipe's target.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "custom_event"
+            },
+            "event": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "event",
+            "subject_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "A performed ActionRecipe completed (06 §20; 00a Q3 action_completed): action is its stable action key, subject_id its target. Engine-owned (action_recipe@1): the rule emits it after the recipe's sequence on every accepted perform, and no content step can emit it, so a quest objective on it never depends on a recipe's own steps.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "action_completed"
+            },
+            "action": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "action",
+            "subject_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -401,6 +443,21 @@
           "subject_id": "11111111-2222-4333-8444-555555555555",
           "old": "undecided",
           "new": "party_led"
+        },
+        {
+          "type": "custom_event",
+          "event": {
+            "cartridge_id": "ashmere_bell",
+            "cartridge_version": "0.0.1",
+            "kind": "event",
+            "key": "bell_rung"
+          },
+          "subject_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "type": "action_completed",
+          "action": "ring_bell",
+          "subject_id": "11111111-2222-4333-8444-555555555555"
         }
       ]
     }

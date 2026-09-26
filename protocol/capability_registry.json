@@ -190,7 +190,17 @@
     "key": "action_recipe",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "perform"
+    ],
+    "definitions": [
+      "recipe"
+    ],
+    "events": [
+      "custom_event",
+      "action_completed"
+    ]
   },
   {
     "key": "reaction",

@@ -4,7 +4,7 @@ defmodule Loka.Content.Compiler do
   Each stage runs on the parts the stages before it accepted, so one bad file does not hide
   the diagnostics of the others.
   """
-  alias Loka.Content.{Checks, Links}
+  alias Loka.Content.{Checks, Links, Recipes}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
 
@@ -38,13 +38,14 @@ defmodule Loka.Content.Compiler do
 
   defp checks(manifest, defs, v2, registry) do
     Checks.check(manifest, defs, registry) ++
-      Checks.rooms(manifest, defs, v2, registry) ++ Links.check(defs, v2)
+      Checks.rooms(manifest, defs, v2, registry) ++
+      Recipes.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
   end
 
-  # v2 exactly when the source has rooms, items, NPCs, an entry or a text catalog
+  # v2 exactly when the source has rooms, items, NPCs, recipes, an entry or a text catalog
   # (CompiledCartridge).
   defp v2(defs, entry, text) do
-    if Enum.any?(~w(room item npc), &(defs[&1] != %{})) or entry != nil or text != nil,
+    if Enum.any?(~w(room item npc recipe), &(defs[&1] != %{})) or entry != nil or text != nil,
       do: {entry, text || %{}}
   end
 
@@ -83,23 +84,20 @@ defmodule Loka.Content.Compiler do
     end
   end
 
+  @kinds [
+    {"policy", :policy, "VersionedPolicy"},
+    {"action", :action, "ActionDefinition"},
+    {"room", :room, "RoomDefinition"},
+    {"item", :item, "ItemDefinition"},
+    {"npc", :npc, "NpcDefinition"},
+    {"recipe", :recipe, "ActionRecipe"}
+  ]
+
   defp definitions(files, m) do
-    {facts, d1} = facts(of(files, :facts))
-    {policies, d2} = files(files, :policy, "VersionedPolicy")
-    {actions, d3} = files(files, :action, "ActionDefinition")
-    {rooms, d4} = files(files, :room, "RoomDefinition")
-    {items, d5} = files(files, :item, "ItemDefinition")
-    {npcs, d6} = files(files, :npc, "NpcDefinition")
-
-    defs = %{
-      "policy" => policies,
-      "action" => actions,
-      "room" => rooms,
-      "item" => items,
-      "npc" => npcs
-    }
-
-    {Map.put(expanded(defs, m), "fact", facts), d1 ++ d2 ++ d3 ++ d4 ++ d5 ++ d6}
+    {facts, d0} = facts(of(files, :facts))
+    loaded = for {kind, file, contract} <- @kinds, do: {kind, files(files, file, contract)}
+    defs = for {kind, {ds, _}} <- loaded, into: %{}, do: {kind, ds}
+    {Map.put(expanded(defs, m), "fact", facts), d0 ++ for({_, {_, ds}} <- loaded, d <- ds, do: d)}
   end
 
   # Short references become full ones once a valid manifest names the cartridge; without one
@@ -232,10 +230,10 @@ defmodule Loka.Content.Compiler do
     }
   end
 
-  # items and npcs are optional maps (CompiledCartridge): absent when empty.
+  # items, npcs and recipes are optional maps (CompiledCartridge): absent when empty.
   defp cartridge(m, defs, {entry, text}) do
     optional =
-      for {k, map} <- [{"item", "items"}, {"npc", "npcs"}],
+      for {k, map} <- [{"item", "items"}, {"npc", "npcs"}, {"recipe", "recipes"}],
           defs[k] != %{},
           into: %{},
           do: {map, keyed(m, k, defs)}

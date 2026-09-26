@@ -4,7 +4,7 @@
   "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need; slice 2: inspectable details; slice 3: description variants. Tags and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
   "$defs": {
     "Alias": {
-      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
+      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for an ActionRecipe, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9_]*$",
       "maxLength": 64,
@@ -123,7 +123,7 @@
       ]
     },
     "RoomDefinition": {
-      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, and its description variants (DescriptionVariant). Custom named connections (05 §17) join later as a separate optional field.",
+      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field.",
       "type": "object",
       "properties": {
         "key": {
@@ -173,6 +173,14 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/DescriptionVariant"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "action.schema.json#/$defs/ActionContribution"
           },
           "minItems": 1,
           "maxItems": 16
@@ -246,6 +254,20 @@
                 }
               },
               "description": "room.reed_path.flooded"
+            }
+          ]
+        },
+        {
+          "key": "belfry",
+          "title": "room.belfry.title",
+          "description": "room.belfry.description",
+          "exits": {},
+          "actions": [
+            {
+              "op": "subtract",
+              "actions": [
+                "drop"
+              ]
             }
           ]
         }

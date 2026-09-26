@@ -105,7 +105,7 @@ const schemaStage = (doc: Json) =>
 // The schema's propertyNames pattern already holds the key's shape and kind.
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const map of ['facts', 'policies', 'actions', 'rooms', 'npcs', 'items']) {
+  for (const map of ['facts', 'policies', 'actions', 'rooms', 'npcs', 'items', 'recipes']) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [
@@ -127,9 +127,10 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// The lock equals requires.capabilities, every command is owned, and every command, policy op
-// and definition kind (room, detail, NPC, item, variant) the cartridge uses has its owner in
-// the lock.
+// The lock equals requires.capabilities, every command is owned, and every command, policy op,
+// definition kind (room, detail, NPC, item, variant, recipe) and recipe step (by the event it
+// produces: fact_changed for fact.assign, custom_event for event.emit) the cartridge uses has
+// its owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const required: Obj = c.manifest.requires.capabilities;
@@ -141,7 +142,7 @@ function lockStage(c: Obj): Diagnostic[] {
     if (Object.hasOwn(locked, key)) data.locked = locked[key];
     out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
   }
-  const use = (kind: 'command' | 'policy' | 'definition', name: string, path: string) => {
+  const use = (kind: 'command' | 'policy' | 'definition' | 'event', name: string, path: string) => {
     const owners = CAPABILITY_OWNERS[kind];
     // The schema closes policy ops, so only a command can be unowned.
     if (!Object.hasOwn(owners, name)) return void out.push(diag('UNKNOWN_COMMAND', path));
@@ -153,8 +154,20 @@ function lockStage(c: Obj): Diagnostic[] {
     use('command', a.command, `.cartridge.actions${step(ref)}.command`);
   for (const [n, at] of nodes(c)) use('policy', n.op, `${at}.op`);
   for (const [kind, , at] of parts(c)) use('definition', kind, at);
+  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
+    const at = `.cartridge.recipes${step(ref)}`;
+    use('definition', 'recipe', at);
+    r.outcomes.success.sequence.forEach((s: Obj, i: number) =>
+      use('event', STEP_EVENT[s.op], `${at}.outcomes.success.sequence[${i}].op`),
+    );
+  }
   return out;
 }
+
+const STEP_EVENT: Readonly<Record<string, string>> = {
+  'fact.assign': 'fact_changed',
+  'event.emit': 'custom_event',
+};
 
 // MAJOR.MINOR as digit strings without leading zeros: longer is larger, then lexical.
 function apiCmp(a: string, b: string): number {

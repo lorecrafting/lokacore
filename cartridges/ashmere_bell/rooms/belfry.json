@@ -1,0 +1,50 @@
+{
+  "title": "room.belfry.title",
+  "description": "room.belfry.description",
+  "exits": {
+    "down": {
+      "to": "bell_tower"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "chapel_bell_rung",
+          "equals": true
+        }
+      },
+      "description": "room.belfry.rung"
+    }
+  ],
+  "details": {
+    "bell": {
+      "aliases": [
+        "bell",
+        "bronze_bell"
+      ],
+      "description": "detail.bell",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "chapel_bell_rung",
+              "equals": true
+            }
+          },
+          "description": "detail.bell.rung"
+        }
+      ]
+    },
+    "rope": {
+      "aliases": [
+        "rope"
+      ],
+      "description": "detail.rope"
+    }
+  }
+}

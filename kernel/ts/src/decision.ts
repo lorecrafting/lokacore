@@ -22,6 +22,7 @@ import {
   type Owned,
   type RoomDefinition,
   type StateDelta,
+  type Text,
   type WorldContextId,
 } from './contracts.gen.ts';
 import { id } from './id_source.ts';
@@ -139,12 +140,16 @@ export function event<P extends EventPayload>(
   };
 }
 
-/** An accepted decision with its typed outcome (04 §5): no effects, the RNG untouched. */
+/**
+ * An accepted decision with its typed outcome and, when it has any, its narration (04 §5; 06
+ * §43): no effects, the RNG untouched.
+ */
 export const accepted = <E>(
   world: World,
   outcome: string,
   ops: StateDelta['ops'],
   events: readonly Event<E>[],
+  narration?: readonly Text[],
 ): Decision<E> => ({
   kind: 'accepted',
   outcome: outcome as Key,
@@ -152,6 +157,7 @@ export const accepted = <E>(
   events,
   effects: [],
   rng: world.state.rng,
+  ...(narration && { narration }),
 });
 
 /** The room a direction's exit leads to, if the room has that exit. */

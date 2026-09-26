@@ -11,7 +11,7 @@ defmodule Loka.Content do
   R5 adds `rooms/<key>.json` (RoomDefinition without `key`), `text.json` (the TextCatalog)
   and an optional `entry` room in `cartridge.json`; a source with any of them compiles to
   loka-cartridge-v2. R5 S4 adds `items/<key>.json` and `npcs/<key>.json` (ItemDefinition and
-  NpcDefinition without `key`). A reference is a full DefinitionRef object naming this cartridge, or
+  NpcDefinition without `key`); R5 S5 `recipes/<key>.json` (ActionRecipe without `key`). A reference is a full DefinitionRef object naming this cartridge, or
   short: the key alone, of the kind its field takes (owner decision 2026-09-25,
   `Loka.Content.Checks.expand/2`). Other files are ignored, except that a `.json` file
   anywhere else is UNKNOWN_FIELD.

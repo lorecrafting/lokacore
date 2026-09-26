@@ -1,0 +1,14 @@
+{
+  "room.belfry.title": "Belfry",
+  "room.belfry.description": "The great [bronze bell](bell) hangs still from an oak beam. A frayed [rope](rope) drops from its wheel.",
+  "room.belfry.rung": "The great [bronze bell](bell) still sways on its beam, humming. The [rope](rope) twitches against the wheel.",
+  "room.bell_tower.title": "Bell Tower",
+  "room.bell_tower.description": "A narrow stair climbs through the dark. Pigeon feathers drift on the steps.",
+  "room.bell_tower.rung": "A narrow stair climbs through the dark. The walls still tremble with the bell's voice.",
+  "detail.bell": "Green bronze, cold to the touch. No one has rung it in years.",
+  "detail.bell.rung": "Green bronze, warm now, still humming under your hand.",
+  "detail.rope": "Hemp rope, frayed where hands have pulled it.",
+  "actions.ring_bell": "Ring the bell",
+  "narration.ring_bell.actor": "You haul on the rope. The bell swings, and its voice rolls out over the fen.",
+  "narration.ring_bell.observers": "The chapel bell rings out over the fen."
+}
