@@ -150,19 +150,23 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     }
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
-    case 'resource.adjust': {
-      const spec = get(section(ctx.state, 'resource_specs'), key(op.resource)) as
-        ResourceSpec | undefined;
-      const ok =
-        spec !== undefined &&
-        current(row as Stored | undefined, spec, ctx.state.clock) === op.from &&
-        op.to >= spec.minimum &&
-        op.to <= spec.maximum;
-      return check(ok, { value: op.to, at: ctx.state.clock });
-    }
+    case 'resource.adjust':
+      return adjusted(op, row as Stored | undefined, ctx);
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
   }
+}
+
+// `from` is the resource's current (regenerated) value and `to` within its spec's bounds.
+function adjusted(op: DeltaOp & { op: 'resource.adjust' }, row: Stored | undefined, ctx: Ctx) {
+  const spec = get(section(ctx.state, 'resource_specs'), key(op.resource)) as
+    ResourceSpec | undefined;
+  const ok =
+    spec !== undefined &&
+    current(row, spec, ctx.state.clock) === op.from &&
+    op.to >= spec.minimum &&
+    op.to <= spec.maximum;
+  return check(ok, { value: op.to, at: ctx.state.clock });
 }
 
 function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined): Outcome {

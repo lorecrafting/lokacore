@@ -83,8 +83,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
 
-  # A recipe's cost, threshold check or resource.adjust step: its resource.
-  def expand(%{"resource" => _} = n, m), do: Map.update!(n, "resource", &ref(&1, "resource", m))
+  # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
+  # map may have a detail keyed resource, whose value is a map).
+  def expand(%{"resource" => r} = n, m) when is_binary(r),
+    do: Map.put(n, "resource", ref(r, "resource", m))
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))

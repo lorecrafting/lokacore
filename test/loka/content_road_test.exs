@@ -75,6 +75,16 @@ defmodule Loka.ContentRoadTest do
     assert compile(dir, files) == {:ok, @expected, []}
   end
 
+  # Breaks: the resource expansion catching a details map with a detail keyed resource (its
+  # siblings' short references then stay short and the compiler crashes).
+  test "a detail keyed resource leaves its siblings' references expanded", %{tmp_dir: dir} do
+    heap = %{"aliases" => ["heap"], "description" => "detail.cart"}
+    files = edit("rooms/mill_yard.json", ["details", "resource"], heap)
+    {:ok, a, _touch_link_warning} = compile(dir, files)
+    cart = JSON.decode!(a)["cartridge"]["rooms"]["ashmere_road@0.0.1:room/mill_yard"]["details"]
+    assert cart["cart"]["variants"] |> hd() |> get_in(["when", "root", "fact", "kind"]) == "fact"
+  end
+
   # Breaks: the defaults missing without resources.json, or an authored resource not declared.
   test "the default pools come without resources.json; a new resource joins them",
        %{tmp_dir: dir} do
