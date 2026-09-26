@@ -41,6 +41,11 @@ Owner's answer:
 
 > Proceed as planned (Recommended)
 
+PM clarification after review (#41 finding 1): the host appends `fact_changed` at the causal
+position of each executed `fact.assign` (04 §5.2 steps 4-6), not after composition, so
+subscribers such as the chapter-one reactions run in the same decision. An assign that leaves
+the value unchanged emits no event.
+
 ## Q3: the touch keyword (added by the owner after Q1)
 
 Owner's words:
@@ -57,14 +62,17 @@ lantern hook"), on inflections, and on translation, where the word moves or chan
 inline link keeps the word and its target together in every language:
 
 ```text
-A [brass lantern] sits here.                  <- item text: the link targets that item
+A [brass lantern] sits here.                       <- item text: the link targets that item
 Rope is looped over the [old post](mooring_post).  <- room text: targets a detail or entity
 ```
 
-Short refs in the target expand through `Checks.expand/2`.
+The markup lives in the catalog strings (`Text` stays `{key, bindings}`), so each locale
+marks its own words. The compiler resolves a link target against the room's details and the
+cartridge's items and entities; a target that does not resolve is an error. A visible item or
+inspectable detail with no link in a given description variant or room-line variant is a
+warning, not an error: hidden details are exempt, and 00 §4.10 also lists entities and details
+as cards below the prose, so nothing becomes untappable.
 
-The compiler rejects a link whose target does not resolve, and a visible item or inspectable
-detail that has no link anywhere in the text the player sees. GameView carries the linked
-spans with the target ids the client already has, so the client underlines exactly what the
-cartridge marked and never guesses. The link syntax name is `touch link`. S4 builds it for
-item text and S2 details.
+S4 builds the markup and these checks for item text and S2 details, and updates the existing
+cartridges where that is cheap. Carrying the spans and targetable details in GameView (room-view
+need #6) is a GameView contract change and joins the GameView-for-touch work at R6P.
