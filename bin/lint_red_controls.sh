@@ -15,9 +15,11 @@ printf 'export const t = Date.now();\nexport const decide = () => 0;\n' > kernel
 printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.state.clock = 1; };\nconst { assign } = Object;\nFunction('x')();\nconst p = JSON.parse('{}');\n" > kernel/ts/src/rules/red_control.ts
 # Review F2: an inline rule registered in RULES.
 sed -i.bak 's/  movement: movement.decide,/  movement: (w) => w,/' kernel/ts/src/world.ts && rm kernel/ts/src/world.ts.bak
-echo "import { a } from '../../authority/local-story';" > mobile/packages/ui/red_control.tsx
+# The shared and realm plants are a template-literal require and a jest.mock only, so their
+# rules are reported only if module-specifier sees those forms.
+echo "const a = require(\`../../authority/local-story\`);" > mobile/packages/ui/red_control.tsx
 printf "const b = () => import('../realm');\nimport { k } from '../../../kernel/ts/src';\nexport const P = () => <>{k}</>;\n" > mobile/features/story/red_control.tsx
-echo "import { c } from '../story';" > mobile/features/realm/red_control.tsx
+echo "jest.mock('../story');" > mobile/features/realm/red_control.tsx
 out=$(ast-grep scan --error 2>&1)
 status=0
 for rule in $(ls lint/rules | sed 's/\.yml$//'); do

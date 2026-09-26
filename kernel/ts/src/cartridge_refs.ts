@@ -13,6 +13,7 @@ import {
 import { refString } from './decision.ts';
 import { typed } from './fact.ts';
 import { barriers } from './cartridge_barriers.ts';
+import { links } from './cartridge_links.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -122,9 +123,9 @@ function checkers(c: Obj, out: Diagnostic[]) {
 // this cartridge, an exit's barrier a barrier of it, which each exit of its destination back to
 // its room names too (BARRIER_MISMATCH), a barrier's key_item an item of it, every text key a
 // room, a detail, an NPC, an item, a barrier, a variant, an action or a recipe uses has a
-// catalog entry, every detail's first alias is its own and typable, items and
-// NPCs start where containment allows, recipes and rooms' action contributions name what exists
-// (recipes), and each resource's bounds hold its start (RESOURCE_SPEC_INVALID).
+// catalog entry, every touch link names what it may (cartridge_links.ts), every detail's first
+// alias is its own and typable, items and NPCs start where containment allows, recipes and
+// rooms' action contributions name what exists (recipes), and each resource's bounds hold its start (RESOURCE_SPEC_INVALID).
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -155,7 +156,8 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
-  out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named)); // checkers push to out too
+  // checkers push to out too
+  out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj))
     if (!(s.minimum <= s.start && s.start <= s.maximum))
       out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));

@@ -92,3 +92,16 @@ test('doors are named by direction or keywords, and refusals read as words', () 
     ],
   );
 });
+
+// Breaks: scan showing the room beyond a closed or locked door, missing an item beyond an open
+// one, or the empty room's line wrong (00 §4.1 scan).
+test('scan shows each door that bars the way, else the room beyond and what is in it', () => {
+  assert.deepEqual(play(['scan', 'open north', 'scan', 'n', 'take key', 'scan']).slice(1), [
+    'scan\neast: the cell door (locked).\nnorth: the oak door (closed).\n',
+    'open north\nYou open the oak door.\n',
+    'scan\neast: the cell door (locked).\nnorth (Courtyard): an iron key.\n',
+    `n\n${COURTYARD}`,
+    'take key\nYou take an iron key.\n',
+    'scan\nsouth (Gatehouse).\n',
+  ]);
+});

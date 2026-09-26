@@ -78,6 +78,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
         target: none,
         input: ['direction'],
       },
+      { available: true, action_key: 'scan', label: 'action.scan', target: none, input: [] },
       // The compiler adds schedule@1 with the pools (review #49 A1).
       { available: true, action_key: 'wait', label: 'action.wait', target: none, input: ['until'] },
     ],

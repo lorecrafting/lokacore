@@ -5,7 +5,8 @@
 // costs the body 1 mv, and one it cannot pay is insufficient_resource ("You are too exhausted.").
 // Accepted: that resource.adjust (none without the pool), one entity.transfer of the actor's
 // body and entity_entered_room; no resource event. ponytail: 1 mv per room; terrain costs (the
-// average of the two rooms' terrain, 00 §4.1) replace the 1 in R8.
+// average of the two rooms' terrain, 00 §4.1) replace the 1 in R8. scan (00 §4.1) is accepted
+// with nothing to change, no RNG and no event, like look; the host shows sight().
 import {
   accepted,
   barrierState,
@@ -15,6 +16,7 @@ import {
   exitOf,
   exitTo,
   has,
+  keys,
   refString,
   rejected,
   type Rule,
@@ -25,6 +27,7 @@ import type { DefinitionRef, EntityId, RoomDefinition } from '../contracts.gen.t
 import { level, pay, resourceRef } from '../resource.ts';
 
 export const decide: Rule<'movement'> = (world, command, mint) => {
+  if (command.payload.type === 'scan') return accepted(world, 'scanned', [], []);
   const { direction } = command.payload;
   if (!COMPASS.includes(direction)) return rejected('invalid_target');
   const body = bodyOf(world, command.payload.actor_id);
@@ -67,6 +70,24 @@ export function passage(world: World, room: RoomDefinition, direction: string) {
 export function fare(world: World, body: EntityId) {
   const mv = resourceRef(world, 'mv');
   return level(world, body, mv) === undefined ? { ops: [] } : pay(world, body, [MV(mv)]);
+}
+
+/**
+ * What `body` sees through each exit of its room, in compass order (00 §4.1 scan): the passage
+ * code of an exit whose barrier bars the way, else the destination room and the NPCs and
+ * items directly in it, NPCs first, then in DefinitionRefString order (as the GameView lists
+ * them). Read-only. ponytail: sight passes exactly where a move would (passage); perception
+ * policies, darkness and far scan from view rooms join with map discovery.
+ */
+export function sight(world: World, body: EntityId) {
+  const room = world.rooms[world.state.containers[body]];
+  return COMPASS.filter((d) => has(room.exits, d)).map((direction) => {
+    const barred = passage(world, room, direction);
+    if (barred) return { direction, code: barred };
+    const there = world.roomIds[refString(exitTo(room, direction)!)];
+    const at = (id: string): id is EntityId => world.state.containers[id] === there;
+    return { direction, room: there, entities: keys(world.entities).filter(at) };
+  });
 }
 
 const MV = (resource: DefinitionRef) => ({ resource, amount: 1 });

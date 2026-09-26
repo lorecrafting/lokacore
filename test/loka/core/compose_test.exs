@@ -7,7 +7,7 @@ defmodule Loka.Core.ComposeTest do
   @fixture JSON.decode!(File.read!("protocol/fixtures/composition.json"))
   @limits JSON.decode!(File.read!("docs/spec/conformance/composition-profile.json"))["limits"]
   @registered for i <- JSON.decode!(File.read!("protocol/invariants.json")),
-                  i["implemented_in"] == "r3_pr5",
+                  i["implemented_in"] == "elixir_and_typescript",
                   do: i["id"]
   @compose_invariants ~w(one_container_per_item containment_acyclic no_last_writer_wins
                          delta_preconditions_hold fault_discards_whole_proposal
@@ -186,7 +186,7 @@ defmodule Loka.Core.ComposeTest do
            ]
   end
 
-  test "invariant checks known answers, a holding and a violated case per r3_pr5 invariant" do
+  test "invariant checks known answers, a holding and a violated case per invariant checked in both kernels" do
     for c <- @fixture["invariants"] do
       obs = Map.update(c["observation"], "state", nil, &state/1)
       assert Invariants.check(c["id"], obs) == c["holds"], "#{c["id"]}: #{c["note"]}"

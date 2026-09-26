@@ -3,7 +3,7 @@ defmodule Loka.Core.RegistriesTest do
   # consistent with the contracts and files it names. Fixtures are decoded with the stdlib
   # JSON so they never pass through the code under test.
   use ExUnit.Case, async: true
-  alias Loka.Core.Contracts
+  alias Loka.Core.{Contracts, Invariants}
 
   @invalid JSON.decode!(File.read!("protocol/fixtures/invalid.json"))
   @registry JSON.decode!(File.read!("protocol/error_registry.json"))
@@ -173,7 +173,12 @@ defmodule Loka.Core.RegistriesTest do
       end
 
     assert Enum.sort(ownership_problems(planted)) ==
-             [{:two_owners, "take"}, {:unknown, "fly"}, {:unowned, "move"}]
+             [
+               {:two_owners, "take"},
+               {:unknown, "fly"},
+               {:unowned, "move"},
+               {:unowned, "scan"}
+             ]
   end
 
   # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
@@ -222,6 +227,63 @@ defmodule Loka.Core.RegistriesTest do
                {:no_document, "no_document"},
                {:no_heading, "no_heading"}
              ])
+  end
+
+  # Where a check by each id runs today (invariant.schema.json implemented_in): in Elixir when
+  # Loka.Core.Invariants.check/2 answers an observation carrying every field any check reads,
+  # in TypeScript when kernel/ts/test/invariant_peer.ts reports a check that knows the id.
+  @observation %{
+    "state" => %{},
+    "delta" => %{"ops" => []},
+    "result" => %{"changes" => []},
+    "resolution" => %{"kind" => "none"},
+    "decision" => %{"kind" => "rejected"},
+    "commit" => "failed",
+    "published" => []
+  }
+
+  defp placement_problems(entries) do
+    ids = Enum.map(entries, & &1["id"])
+    {out, 0} = System.cmd("node", ["kernel/ts/test/invariant_peer.ts", JSON.encode!(ids)])
+    typescript = JSON.decode!(out)
+
+    for e <- entries,
+        where = placement(e["id"] in typescript, elixir?(e["id"])),
+        e["implemented_in"] != where,
+        do: {e["id"], where}
+  end
+
+  defp elixir?(id) do
+    is_boolean(Invariants.check(id, @observation))
+  rescue
+    FunctionClauseError -> false
+  end
+
+  defp placement(true, true), do: "elixir_and_typescript"
+  defp placement(true, false), do: "typescript"
+  defp placement(false, false), do: "none"
+  defp placement(false, true), do: "elixir"
+
+  test "each invariant's implemented_in names where a check by its id runs" do
+    assert placement_problems(@invariants) == []
+  end
+
+  # Breaks: a value naming a check that does not exist (a planned invariant marked checked, a
+  # TypeScript-only one marked in both kernels) or hiding one that does.
+  test "the placement check catches a value naming no check, or the wrong kernels" do
+    set = fn id, v -> %{Enum.find(@invariants, &(&1["id"] == id)) | "implemented_in" => v} end
+
+    planted = [
+      set.("retry_replays_receipt", "typescript"),
+      set.("exits_resolve", "elixir_and_typescript"),
+      set.("no_last_writer_wins", "none")
+    ]
+
+    assert Enum.sort(placement_problems(planted)) == [
+             {"exits_resolve", "typescript"},
+             {"no_last_writer_wins", "elixir_and_typescript"},
+             {"retry_replays_receipt", "none"}
+           ]
   end
 
   test "the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable" do

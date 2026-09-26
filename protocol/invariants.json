@@ -6,7 +6,7 @@
       "heading": "## 23. Inventory/location invariant"
     },
     "statement": "Every item has exactly one authoritative container; inventory is derived from it, never stored twice.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "no_proposed_event_escapes",
@@ -15,7 +15,7 @@
       "heading": "### 5.1 Proposal-state semantics and StateDelta composition"
     },
     "statement": "No proposed DomainEvent, Effect or projection hint is published when the decision is rejected, faults or its commit fails.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "no_last_writer_wins",
@@ -24,7 +24,7 @@
       "heading": "### 5.1 Proposal-state semantics and StateDelta composition"
     },
     "statement": "Two writer groups writing one mutation target without a registered composition rule fault with conflicting_write.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "delta_preconditions_hold",
@@ -33,7 +33,7 @@
       "heading": "### 5.1 Proposal-state semantics and StateDelta composition"
     },
     "statement": "Every delta op's precondition holds against the overlay of the ops before it, or the decision faults.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "containment_acyclic",
@@ -42,7 +42,7 @@
       "heading": "### 5.3 Minimal operation and conflict matrix"
     },
     "statement": "No entity contains itself directly or transitively, and no container exceeds its capacity.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "fault_discards_whole_proposal",
@@ -51,7 +51,7 @@
       "heading": "### 5.2 Initial immediate-composition profile"
     },
     "statement": "A budget, conflict or evaluator fault commits nothing: no state, receipt, RNG or time advance.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "fault_codes_are_evaluation_faults",
@@ -60,7 +60,7 @@
       "heading": "### 5.2 Initial immediate-composition profile"
     },
     "statement": "A fault DecisionResult carries only an evaluation_fault code from protocol/error_registry.json, never a gameplay rejection code.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "target_candidates_ordered",
@@ -69,7 +69,7 @@
       "heading": "### TargetSpec / TargetResolution"
     },
     "statement": "Ambiguous candidate_ids are distinct and in the order the TargetResolution contract (protocol/action.schema.json) states.",
-    "implemented_in": "r3_pr5"
+    "implemented_in": "elixir_and_typescript"
   },
   {
     "id": "unknown_types_fail_closed",
@@ -78,7 +78,7 @@
       "heading": "### 5.3 Minimal operation and conflict matrix"
     },
     "statement": "An unregistered command, delta op, policy operator, event or effect type is invalid, never permissive.",
-    "implemented_in": "r3_pr3"
+    "implemented_in": "none"
   },
   {
     "id": "command_id_ignores_placement",
@@ -87,7 +87,7 @@
       "heading": "## 3. Canonical command representation"
     },
     "statement": "CommandId depends only on the idempotency scope and InvocationId, never on routing or authority placement.",
-    "implemented_in": "r3_pr3"
+    "implemented_in": "none"
   },
   {
     "id": "rejection_consumes_nothing",
@@ -96,7 +96,7 @@
       "heading": "### 5.0 Rejection is not a failed attempt"
     },
     "statement": "A rejected decision changes no gameplay state, RNG, logical time or cost.",
-    "implemented_in": "r5"
+    "implemented_in": "none"
   },
   {
     "id": "retry_replays_receipt",
@@ -105,7 +105,7 @@
       "heading": "## 14. Command receipts and retry admission"
     },
     "statement": "A retry with matching intent replays the original receipted outcome and never rerolls RNG or reruns effects.",
-    "implemented_in": "r6"
+    "implemented_in": "none"
   },
   {
     "id": "idempotency_payload_conflict",
@@ -114,7 +114,7 @@
       "heading": "### A9. Idempotency at retryable boundaries"
     },
     "statement": "Reusing an idempotency identity with a different semantic payload fails as an integrity conflict, with no mutation.",
-    "implemented_in": "r6"
+    "implemented_in": "none"
   },
   {
     "id": "job_complete_owned_by_run",
@@ -123,7 +123,7 @@
       "heading": "### 5.4 Bounded causality and durable waiting"
     },
     "statement": "job.complete is proposed only by that job's own run_job at its visited due time (protocol/delta.schema.json job.complete).",
-    "implemented_in": "r5"
+    "implemented_in": "none"
   },
   {
     "id": "player_in_one_room",
@@ -132,7 +132,7 @@
       "heading": "### Containment"
     },
     "statement": "The player's body has exactly one container, and it is a room of the world.",
-    "implemented_in": "r5"
+    "implemented_in": "typescript"
   },
   {
     "id": "exits_resolve",
@@ -141,7 +141,7 @@
       "heading": "## 17. World topology"
     },
     "statement": "Every exit of every room names a room of the world.",
-    "implemented_in": "r5"
+    "implemented_in": "typescript"
   },
   {
     "id": "facts_typed",
@@ -150,6 +150,6 @@
       "heading": "## 7. Typed world facts and narrative memory"
     },
     "statement": "Every stored fact is a fact the cartridge declares, in a scope kind it allows, with a value of its FactSpec type (bool, one of its enum values, or an int within its bounds).",
-    "implemented_in": "r5"
+    "implemented_in": "typescript"
   }
 ]
