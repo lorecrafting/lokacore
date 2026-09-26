@@ -23,10 +23,10 @@ all reviews run on Opus until the owner says Fable is available again
 cross-vendor review covers the remaining Fable slots (the simulation slice, R6 authority/save, GameView for
 touch).
 **Cross-vendor review** (Astra, or another vendor's model the owner has credits for, such as
-Sol 5.6 on #50) runs beside the design-judgment review only where the PM judges a
+Sol 5.6 on [#50](reviews/2026-09-26-r5-s7-review.md)) runs beside the design-judgment review only where the PM judges a
 slice foundational: a freeze later work builds on (a spec amendment, a new encoding or
 hash domain, an identity, delta or other core contract, a gate review), not the
-implementation of a contract Astra already reviewed. The owner delegated this judgment to
+implementation of a contract a cross-vendor review already covered. The owner delegated this judgment to
 the PM ([record](decisions/owner-decisions-observability-astra-2026-09-25.md)). Once CI is
 green, the PM gives the owner a paste-ready prompt (PR, head SHA, spec sections,
 focus, and the output format: verdict, then findings with id, severity, `path:line` at that
