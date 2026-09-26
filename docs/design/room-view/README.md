@@ -42,6 +42,7 @@ Compared against [protocol/gameview.schema.json](../../../protocol/gameview.sche
 | 9 | text aliases per action and target | text drawer suggestions and echoes | ActionDefinition notes they arrive with the parser |
 | 10 | the accessibility text key on each advertised action | screen readers | ActionDefinition.accessibility (not projected) |
 | 11 | the destination name of an exit the player already knows | screen-reader labels; the Map page | none |
+| 12 | the door on an exit and its state even when passable, with its open/close/lock/unlock actions (R5 S7 review Q2) | closing an open door by touch | ExitView reason only when blocked |
 
 Questions for the engine rather than needs:
 
