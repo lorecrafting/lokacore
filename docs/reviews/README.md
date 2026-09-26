@@ -60,4 +60,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [R5 S2b: short references in cartridge source](2026-09-25-r5-s2b-review.md): PR #37 at `7c18373`, CHANGES REQUIRED (one blocker, a missing quest_state test); fixes `8aef59f`, APPROVE.
 - [Review-lever owner decision, R5 re-estimate, #36/#37 ledger](2026-09-25-review-lever-docs-review.md): PR #38 at `ee90fa1`, APPROVE WITH NOTES (one nit on the estimate basis); fixes `4085939`, APPROVE.
 - [Emergence owner decision; composes-with check](2026-09-25-emergence-docs-review.md): PR #39 at `48cac4d`, APPROVE WITH NOTES (one should-fix: reviewer step 7 drops the spec-required exception); fixes `6d8507f`, APPROVE.
-- [R5 S3: typed facts, conditions, state-dependent descriptions](2026-09-25-r5-s3-review.md): PR #40 at `5bcf81a`, APPROVE WITH NOTES (Fable; one should-fix: `expand/2` crashes on a detail keyed `exits`).; fixes `7bbdbec`, APPROVE.
+- [R5 S3: typed facts, conditions, state-dependent descriptions](2026-09-25-r5-s3-review.md): PR #40 at `5bcf81a`, APPROVE WITH NOTES (Fable; one should-fix: `expand/2` crashes on a detail keyed `exits`); fixes `7bbdbec`, APPROVE.

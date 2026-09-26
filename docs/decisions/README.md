@@ -56,3 +56,4 @@ text. This directory also holds the owner's decisions retained verbatim.
 - Owner decision: [short references in cartridge source (S2b)](owner-decision-short-refs-2026-09-25.md).
 - Owner decision: [review lever: Opus by default, Fable/Astra for foundational freezes](owner-decision-review-lever-2026-09-25.md).
 - Owner decision: [composability and emergence principles; composes-with check](owner-decision-emergence-2026-09-25.md).
+- Owner decisions: [S4 item text (four tiers), brief mode in S7, player text online; host-synthesized `fact_changed`](owner-decisions-r5-s4-2026-09-25.md).

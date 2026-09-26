@@ -21,3 +21,10 @@
 {"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"pm","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":37},"store":"dev_evidence"}
 {"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"developer","tokens":{"state":"observed","value":287180}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":37},"store":"dev_evidence"}
 {"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":190107}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":37},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"pm","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":38},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":112532}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":38},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"pm","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":39},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":128942}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":39},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"pm","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":40},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"developer","tokens":{"state":"observed","value":684814}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":40},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"fable","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":410353}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":40},"store":"dev_evidence"}
