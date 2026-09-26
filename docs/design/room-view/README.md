@@ -11,7 +11,7 @@ Open [room-view.html](room-view.html) in a browser to play the Lantern loop on t
 - **The page.** A pinned room title, then the description (only small details such as the mooring post are tappable inline), then MUD-style lines for people and things ("**Bram** the ferryman stands here, one boot on the ferry."), then that room's event log.
 - **The footer.** A tiny endpaper minimap sits between two long hairline rules. You are the solid dot, places are open rings reaching two steps out, and paths meet each ring at its edge. Unexplored ways are dotted, and a barred way ends in a small red tick.
   - **The map is the joystick.** Press it and it zooms about 2.6×. Drag toward a path to light it, then release to walk; drag back to the middle to cancel. For up and down, drag out to stair nodes that appear beside it. A tap opens the Map page. A tip bubble teaches the gesture once, and hidden "Go north" buttons serve screen readers.
-  - **One status line:** `06:00 · standing · hp 300/300  ma 120/120  mv 200/200`. Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
+  - **One status line:** `06:00 · standing · hp 20/20  ma 100/100  mv 82/82` (the pools and defaults: [owner decision](../../decisions/owner-decision-hp-ma-mv-2026-09-25.md)). Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
   - Swiping up on the footer (away from the map), or tapping the small handle, opens the text drawer. Every tap shows up there as its command.
 
 ## Departures from 00 §4.10

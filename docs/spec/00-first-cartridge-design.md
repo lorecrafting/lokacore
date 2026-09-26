@@ -280,7 +280,7 @@ Room count: 25 + 22 + 13 + 17 + 32 = 109. By level: z+3: 1, z+2: 4, z+1: 14, z0:
 
 Everything the game uses, grouped the way a classic-MUD player recognizes it. Each row names where it appears and the v3 primitive it pulls. Phase is where the primitive must first exist. Rows marked **NEW** are not in document 21 yet; see §11.
 
-*Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), maximums 300/120/200 unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); cartridges built before the pools existed keep their behaviour and transcripts; and the pools regenerate per game hour, derived from the clock.
+*Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), DikuMUD's starting maximums HP 20, MA 100, MV 82 and regeneration per game hour HP 5, MA 4, MV 18, unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); cartridges built before the pools existed keep their behaviour and transcripts; and the pools regenerate per game hour, derived from the clock.
 
 ### 4.1 World and movement
 
@@ -295,7 +295,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Dark rooms and dark-sight | fen at night, barrow, crypt, deep shaft; hill-folk see in dark | room tag + light resource + ancestry | R8 |
 | Water rooms: swim, boat, drowning | mire, pool, shallows, tide flats, flooded gallery; MV drain, drown at 0 | terrain + skill + Resource | R8 |
 | Tides | mire crossing and tide flats passable at low tide only, 6-hour cycle | **NEW** tide window (calendar-derived) | R8 |
-| Terrain movement cost | 1 MV per room from R5; fen 2 MV, road 1, mine 2, mounted halves | travel cost | R5 (1 MV), R8 (terrain) |
+| Terrain movement cost | 1 MV per room from R5; from R8 the average of the two rooms' terrain costs (DikuMUD's table); mounted halves | travel cost | R5 (1 MV), R8 (terrain) |
 | Indoor/outdoor, weather exposure | rain outdoors chills; fog lowers PER; cloak negates | room tag + status | R8 |
 | Traps: pit, dart, cave-in | barrow passage, deep shaft, mine event | Check + consequence | R8 |
 | Climbing and rope | descend into barrow mouth or deep shaft without rope = fall damage | item requirement + Check | R8 |
@@ -329,7 +329,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 |---|---|---|---|
 | Ancestry and guild | four ancestries, five guilds, secondary guild at level 5 | creation facts + policy | R7 |
 | Six stats, trainable | STR, DEX, CON, INT, SPI, PER; train at guildhall for pennies and level | attributes + trainer | R7 |
-| Resources | HP, MA (mana), MV (movement), LegendMUD-style, default 300/120/200; hunger, thirst | Resource | R5 |
+| Resources | HP, MA (mana), MV (movement), LegendMUD/DikuMUD-style, default 20/100/82; hunger, thirst | Resource | R5 |
 | Levels 1–15, XP from kills, quests, exploration, first-crafts | level titles per guild | progression | R7 |
 | Skills as percentages, learn by use and by training | 22 skills: swords, daggers, clubs, bows, thrown, dodge, parry, bash, kick, disarm, backstab, sneak, hide, pick lock, steal, bandage, swim, climb, haggle, herbalism, brewing, cooking, smithing, tanning, mining, fishing, ride, track, appraise | skills + practice + **NEW** learn-by-doing | R7 |
 | Spell words | light, mend, ward, calm, reveal, chill, bind; two words combine (`ward + light` = sanctuary) | skills + Check + **NEW** word combination | R7 |
