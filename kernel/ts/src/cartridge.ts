@@ -105,7 +105,16 @@ const schemaStage = (doc: Json) =>
 // The schema's propertyNames pattern already holds the key's shape and kind.
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  for (const map of ['facts', 'policies', 'actions', 'rooms', 'npcs', 'items', 'recipes']) {
+  for (const map of [
+    'facts',
+    'policies',
+    'actions',
+    'rooms',
+    'npcs',
+    'items',
+    'recipes',
+    'resources',
+  ]) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [
@@ -128,9 +137,10 @@ function keyStage(c: Obj): Diagnostic[] {
 }
 
 // The lock equals requires.capabilities, every command is owned, and every command, policy op,
-// definition kind (room, detail, NPC, item, variant, recipe), recipe check (by the events it
-// produces, check@1's) and recipe step of any outcome (by the event it produces: fact_changed for
-// fact.assign, custom_event for event.emit) the cartridge uses has its owner in the lock.
+// definition kind (room, detail, NPC, item, variant, recipe, resource), recipe check (by the
+// events it produces, check@1's) and recipe step of any outcome (by the event it produces:
+// fact_changed for fact.assign, custom_event for event.emit; a resource.adjust, like a cost,
+// through the resource it names) the cartridge uses has its owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const required: Obj = c.manifest.requires.capabilities;
@@ -159,10 +169,13 @@ function lockStage(c: Obj): Diagnostic[] {
     use('definition', 'recipe', at);
     if (r.check) use('event', 'check_passed', `${at}.check`);
     for (const [name, o] of Object.entries(r.outcomes as Obj))
-      o.sequence.forEach((s: Obj, i: number) =>
-        use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`),
-      );
+      o.sequence.forEach((s: Obj, i: number) => {
+        if (s.op !== 'resource.adjust')
+          use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`);
+      });
   }
+  for (const ref of Object.keys((c.resources ?? {}) as Obj))
+    use('definition', 'resource', `.cartridge.resources${step(ref)}`);
   return out;
 }
 

@@ -140,20 +140,10 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'quest.activate':
     case 'quest.transition':
       return quest(op, row, ctx);
-    case 'choice.open': {
-      const { actor_id, source, beat, roles, choice_ids } = op;
-      const opened = { actor_id, source, beat, roles, choice_ids, status: 'pending' };
-      return check(row === undefined, opened as unknown as Json);
-    }
-    case 'choice.resolve': {
-      const offered =
-        get(row, 'status') === 'pending' &&
-        (get(row, 'choice_ids') as string[]).includes(op.choice_id);
-      const ok = offered && get(row, 'opened_revision') === op.expected_revision;
-      return check(ok, put(row, { status: 'resolved', choice_id: op.choice_id }));
-    }
+    case 'choice.open':
+    case 'choice.resolve':
     case 'choice.close':
-      return check(get(row, 'status') === 'pending', put(row, { status: 'closed' }));
+      return choice(op, row);
     case 'job.schedule':
       if (row !== undefined) return { code: 'precondition_failed' };
       if (op.due_time <= ctx.horizon) return { code: 'nonfuture_job' };
@@ -167,16 +157,34 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       return check(row === op.from && op.to > op.from, op.to);
     case 'resource.adjust': {
       const spec = get(section(ctx.state, 'resource_specs'), key(op.resource)) as Spec | undefined;
-      const now = ctx.state.clock;
       const ok =
         spec !== undefined &&
-        current(row as Stored | undefined, spec, now) === op.from &&
+        current(row as Stored | undefined, spec, ctx.state.clock) === op.from &&
         op.to >= spec.minimum &&
         op.to <= spec.maximum;
-      return check(ok, { value: op.to, at: now });
+      return check(ok, { value: op.to, at: ctx.state.clock });
     }
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
+  }
+}
+
+function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined): Outcome {
+  switch (op.op) {
+    case 'choice.open': {
+      const { actor_id, source, beat, roles, choice_ids } = op;
+      const opened = { actor_id, source, beat, roles, choice_ids, status: 'pending' };
+      return check(row === undefined, opened as unknown as Json);
+    }
+    case 'choice.resolve': {
+      const offered =
+        get(row, 'status') === 'pending' &&
+        (get(row, 'choice_ids') as string[]).includes(op.choice_id);
+      const ok = offered && get(row, 'opened_revision') === op.expected_revision;
+      return check(ok, put(row, { status: 'resolved', choice_id: op.choice_id }));
+    }
+    default:
+      return check(get(row, 'status') === 'pending', put(row, { status: 'closed' }));
   }
 }
 

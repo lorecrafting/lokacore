@@ -18,6 +18,7 @@ const installed: Installed = {
     fact: [1],
     policy: [1],
     inspectable_detail: [1],
+    resource: [1],
   },
   content_schema: 1,
   rule_ir: 1,

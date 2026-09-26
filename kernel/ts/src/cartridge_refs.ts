@@ -117,8 +117,8 @@ function checkers(c: Obj, out: Diagnostic[]) {
 // and no time_window is empty (EMPTY_TIME_WINDOW). v2: the entry and every exit name a room of
 // this cartridge, every text key a room, a detail, an NPC, an item, a variant, an action or a
 // recipe uses has a catalog entry, every detail's first alias is its own and typable, items and
-// NPCs start where containment allows, and recipes and rooms' action contributions name what
-// exists (recipes).
+// NPCs start where containment allows, recipes and rooms' action contributions name what exists
+// (recipes), and each resource's bounds hold its start (RESOURCE_SPEC_INVALID).
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -149,14 +149,18 @@ export function refStage(c: Obj): Diagnostic[] {
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
   out.push(...recipes(c, check), ...holders(c)); // recipes' checkers push to out too
+  for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj))
+    if (!(s.minimum <= s.start && s.start <= s.maximum))
+      out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));
   return out;
 }
 
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
 // one ActionSet identity) and its check's key no other recipe's check's (one check DefinitionRef),
 // its target names a room of this cartridge and a detail of that room,
-// it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), each outcome's
-// fact.assign names a fact of it, and its label and narrations have catalog entries; each key of
+// it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), its threshold check,
+// costs and resource.adjust steps name resources of it, each outcome's fact.assign names a fact
+// of it, and its label and narrations have catalog entries; each key of
 // a room's action contribution names an engine verb (a registered command), an action or a
 // recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
 function recipes(c: Obj, { named, typedValue, text }: ReturnType<typeof checkers>): Diagnostic[] {
@@ -177,9 +181,15 @@ function recipes(c: Obj, { named, typedValue, text }: ReturnType<typeof checkers
     else if (!Object.hasOwn(there.details ?? {}, detail))
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.target.detail`, { target: detail }));
     if (!r.check !== !r.outcomes.failure) out.push(diag('OUTCOME_MISMATCH', `${at}.outcomes`));
+    if (r.check?.kind === 'threshold') named(r.check.resource, 'resource', `${at}.check.resource`);
+    (r.costs ?? []).forEach((k: Obj, i: number) =>
+      named(k.resource, 'resource', `${at}.costs[${i}].resource`),
+    );
     for (const [name, o] of Object.entries(r.outcomes as Obj)) {
       const path = `${at}.outcomes.${name}`;
       o.sequence.forEach((s: Obj, i: number) => {
+        if (s.op === 'resource.adjust')
+          named(s.resource, 'resource', `${path}.sequence[${i}].resource`);
         if (s.op !== 'fact.assign') return;
         named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
         typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);

@@ -686,7 +686,56 @@
           "additionalProperties": false
         },
         "check": {
-          "$ref": "#/$defs/RecipeCheck"
+          "oneOf": [
+            {
+              "description": "A luck roll (RecipeCheck).",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "$ref": "#/$defs/Key"
+                },
+                "kind": {
+                  "const": "luck"
+                },
+                "chance": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 99
+                }
+              },
+              "required": [
+                "key",
+                "kind",
+                "chance"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the recipe's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of RecipeCheck apply.",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "$ref": "#/$defs/Key"
+                },
+                "kind": {
+                  "const": "threshold"
+                },
+                "resource": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "difficulty": {
+                  "$ref": "resource.schema.json#/$defs/ResourceInt"
+                }
+              },
+              "required": [
+                "key",
+                "kind",
+                "resource",
+                "difficulty"
+              ],
+              "additionalProperties": false
+            }
+          ]
         },
         "duration": {
           "type": "integer",
@@ -962,57 +1011,27 @@
       ]
     },
     "RecipeCheck": {
-      "description": "An ActionRecipe's Check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two recipes' checks may not share one (DUPLICATE_DEFINITION). threshold (R5 S6b) passes when the actor's body holds at least difficulty of a resource of the cartridge, read at admission before the recipe's costs; it draws nothing and emits the same events. Modifiers, opposed checks and result bands join as further kinds and fields (result bands as more outcomes keys).",
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "key": {
-              "$ref": "#/$defs/Key"
-            },
-            "kind": {
-              "const": "luck"
-            },
-            "chance": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99
-            }
-          },
-          "required": [
-            "key",
-            "kind",
-            "chance"
-          ],
-          "additionalProperties": false,
-          "description": "A luck roll."
+      "description": "An ActionRecipe's Check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two recipes' checks may not share one (DUPLICATE_DEFINITION). ActionRecipe.check is this luck shape or a threshold (R5 S6b; see ActionRecipe). Modifiers, opposed checks and result bands join as further kinds and fields (result bands as more outcomes keys).",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/Key"
         },
-        {
-          "description": "A deterministic threshold: passes when the actor's body's current resource value (derived, at admission, before the recipe's costs) is at least difficulty. Draws no RNG.",
-          "type": "object",
-          "properties": {
-            "key": {
-              "$ref": "#/$defs/Key"
-            },
-            "kind": {
-              "const": "threshold"
-            },
-            "resource": {
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "difficulty": {
-              "$ref": "resource.schema.json#/$defs/ResourceInt"
-            }
-          },
-          "required": [
-            "key",
-            "kind",
-            "resource",
-            "difficulty"
-          ],
-          "additionalProperties": false
+        "kind": {
+          "const": "luck"
+        },
+        "chance": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99
         }
+      },
+      "required": [
+        "key",
+        "kind",
+        "chance"
       ],
+      "additionalProperties": false,
       "examples": [
         {
           "key": "pry_lid",
@@ -1028,17 +1047,6 @@
           "key": "k",
           "kind": "luck",
           "chance": 99
-        },
-        {
-          "key": "shove_door",
-          "kind": "threshold",
-          "resource": {
-            "cartridge_id": "ashmere_dusk",
-            "cartridge_version": "0.0.1",
-            "kind": "resource",
-            "key": "hp"
-          },
-          "difficulty": 10
         }
       ]
     },

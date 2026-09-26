@@ -3,10 +3,12 @@
 // definitions carry no aliases yet (action.schema.json), so the aliases live here.
 import type { Cartridge, World } from '../src/index.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
+import { key } from '../src/compose.ts';
 import { COMPASS } from '../src/decision.ts';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/rules/description_variant.ts';
 import { normalize } from '../src/target.ts';
+import { level, resourceRef } from '../src/resource.ts';
 
 /**
  * A Command's payload without its actor, a lookup (the player's words after the verb, which
@@ -141,3 +143,17 @@ export const clock = (t: number): string => {
   ];
   return `day ${day}, ${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
 };
+
+/**
+ * The DikuMUD-style status line, `hp 20/20  ma 100/100  mv 82/82  day 1, 00:00`: each default
+ * pool the cartridge declares (current/maximum, resource.ts), then the time; empty for a
+ * cartridge without the pools.
+ */
+export function status(world: World): string {
+  const pools = ['hp', 'ma', 'mv'].flatMap((k) => {
+    const r = resourceRef(world, k);
+    const now = level(world, world.body, r);
+    return now === undefined ? [] : [`${k} ${now}/${world.resourceSpecs[key(r)].maximum}`];
+  });
+  return pools.length ? `${[...pools, clock(world.state.clock)].join('  ')}\n` : '';
+}

@@ -15,7 +15,7 @@ import { validate } from '../src/validate.ts';
 import { resolve, normalize } from '../src/target.ts';
 import { detailOf, resolved, type Offered } from '../src/actions.ts';
 import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
-import { clock, detail, inventory, parse, room, say, which } from './text.ts';
+import { clock, detail, inventory, parse, room, say, status, which } from './text.ts';
 import { decide, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
@@ -100,9 +100,11 @@ const header = (r: Run) =>
     },
   });
 
-// The room on arrival and the initial state hash.
+// The room on arrival, the status line and the initial state hash.
 const shown = (r: Run) =>
-  process.stdout.write(`${room(cartridge, r.world)}[state ${hash(r.world.state as never)}]\n`);
+  process.stdout.write(
+    `${room(cartridge, r.world)}${status(r.world)}[state ${hash(r.world.state as never)}]\n`,
+  );
 
 const command = (r: Run, parsed: { type: string }): Command =>
   ({
@@ -133,7 +135,8 @@ function turn(r: Run, cmd: Command, measured = true): string {
         : (done[decision.outcome] ??
           (p.target_id ? detail(cartridge, r.world, p.target_id) : room(cartridge, r.world)));
   const micros = latency.data.value;
-  process.stdout.write(`${shown}[state ${hash(r.world.state as never)}  step ${micros} µs]\n`);
+  const state = hash(r.world.state as never);
+  process.stdout.write(`${shown}${status(r.world)}[state ${state}  step ${micros} µs]\n`);
   return line(trace);
 }
 
@@ -227,6 +230,9 @@ function reason(
     'give not_found': "You can't give things to that.",
     'give invalid_target': "You can't give things to that.",
     'give invalid_state': "They can't carry any more.",
+    'move insufficient_resource': 'You are too exhausted.',
+    insufficient_resource: "You don't have the strength for that.",
+    cooldown: "You can't do that again yet.",
     'perform invalid_target': "You can't do that to that.",
     invalid_state: "You can't do that now.",
     not_present: "You don't see that here.",

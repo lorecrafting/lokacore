@@ -4,7 +4,7 @@ defmodule Loka.Content.Compiler do
   Each stage runs on the parts the stages before it accepted, so one bad file does not hide
   the diagnostics of the others.
   """
-  alias Loka.Content.{Checks, Links, Recipes}
+  alias Loka.Content.{Checks, Links, Recipes, Resources}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
 
@@ -25,7 +25,7 @@ defmodule Loka.Content.Compiler do
     {manifest, entry, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
-    v2 = v2(defs, entry, text)
+    v2 = v2(defs, entry, text, of(files, :resources))
 
     case split(Enum.concat([loaded, d1, d2, d3, checks(manifest, defs, v2, registry)])) do
       {warnings, []} -> {:ok, cartridge(manifest, defs, v2), warnings}
@@ -42,11 +42,12 @@ defmodule Loka.Content.Compiler do
       Recipes.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
   end
 
-  # v2 exactly when the source has rooms, items, NPCs, recipes, an entry or a text catalog
-  # (CompiledCartridge).
-  defp v2(defs, entry, text) do
-    if Enum.any?(~w(room item npc recipe), &(defs[&1] != %{})) or entry != nil or text != nil,
-      do: {entry, text || %{}}
+  # v2 exactly when the source has rooms, items, NPCs, recipes, an entry, a text catalog or
+  # resources.json (CompiledCartridge).
+  defp v2(defs, entry, text, resources) do
+    if Enum.any?(~w(room item npc recipe), &(defs[&1] != %{})) or entry != nil or text != nil or
+         resources != [],
+       do: {entry, text || %{}}
   end
 
   defp of(files, kind), do: for({rel, ^kind, v} <- files, do: {rel, v})
@@ -95,9 +96,11 @@ defmodule Loka.Content.Compiler do
 
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
+    {resources, d1} = Resources.load(of(files, :resources))
     loaded = for {kind, file, contract} <- @kinds, do: {kind, files(files, file, contract)}
     defs = for {kind, {ds, _}} <- loaded, into: %{}, do: {kind, ds}
-    {Map.put(expanded(defs, m), "fact", facts), d0 ++ for({_, {_, ds}} <- loaded, d <- ds, do: d)}
+    defs = expanded(defs, m) |> Map.put("fact", facts) |> Map.put("resource", resources)
+    {defs, d0 ++ d1 ++ for({_, {_, ds}} <- loaded, d <- ds, do: d)}
   end
 
   # Short references become full ones once a valid manifest names the cartridge; without one
@@ -230,8 +233,11 @@ defmodule Loka.Content.Compiler do
     }
   end
 
-  # items, npcs and recipes are optional maps (CompiledCartridge): absent when empty.
+  # items, npcs and recipes are optional maps (CompiledCartridge): absent when empty. The
+  # default pools are always there, with resource@1 (Resources).
   defp cartridge(m, defs, {entry, text}) do
+    m = Resources.requires(m)
+
     optional =
       for {k, map} <- [{"item", "items"}, {"npc", "npcs"}, {"recipe", "recipes"}],
           defs[k] != %{},
@@ -240,7 +246,7 @@ defmodule Loka.Content.Compiler do
 
     cartridge(m, defs, nil)
     |> Map.merge(%{"format" => "loka-cartridge-v2", "rooms" => keyed(m, "room", defs)})
-    |> Map.merge(%{"entry" => entry, "text" => text})
+    |> Map.merge(%{"entry" => entry, "text" => text, "resources" => keyed(m, "resource", defs)})
     |> Map.merge(optional)
   end
 

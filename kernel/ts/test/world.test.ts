@@ -86,6 +86,13 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
 });
 
 // Breaks: a wrong destination, a missing or wrong delta, a missing event, or state not adopted.
+// The rooms cartridge has the default pools (R5 S6b), so the move pays 1 mv at time 0.
+const MV = {
+  cartridge_id: 'ashmere_rooms',
+  cartridge_version: '0.0.1',
+  kind: 'resource',
+  key: 'mv',
+};
 test('move north proposes one transfer and entity_entered_room, and commits it', () => {
   const { decision, world } = step(fresh(), move('north'));
   assert.deepEqual(decision, {
@@ -93,6 +100,7 @@ test('move north proposes one transfer and entity_entered_room, and commits it',
     outcome: 'moved',
     delta: {
       ops: [
+        { op: 'resource.adjust', writer_group: 0, resource: MV, entity_id: BODY, from: 82, to: 81 },
         {
           op: 'entity.transfer',
           writer_group: 0,
@@ -119,6 +127,7 @@ test('move north proposes one transfer and entity_entered_room, and commits it',
     rng: SEED,
   });
   assert.deepEqual(world.state.containers, { [BODY]: WELL });
+  assert.deepEqual(Object.values(world.state.resources!), [{ value: 81, at: 0 }]);
 });
 
 // Breaks: an exit followed in the wrong direction, or a room title from the wrong definition.
