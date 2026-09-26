@@ -4,13 +4,18 @@ defmodule Loka.Content.Checks do
   06 §20–21). `registry` is a decoded capability registry (CapabilitySpec entries, like
   protocol/capability_registry.json); ownership comes from its commands and policies.
   """
-  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
-  alias Loka.Content.{Entities, RoomParts}
+  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
+  import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
+  alias Loka.Content.{Entities, Recipes, RoomParts}
   alias Loka.Core.Canonical
-  alias Loka.Core.Contracts
 
   @supported_pin 1
-  @ref_fields %{"fact_compare" => "fact", "has_item" => "item", "quest_state" => "quest"}
+  @ref_fields %{
+    "fact_compare" => "fact",
+    "has_item" => "item",
+    "quest_state" => "quest",
+    "fact.assign" => "fact"
+  }
   # A definition sits inside the artifact, the cartridge and its kind's map.
   @enclosing 3
 
@@ -51,10 +56,10 @@ defmodule Loka.Content.Checks do
 
   @doc """
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
-  node's reference (fact, item, quest), in any policy tree (a variant's condition included), an
-  exit's `to`, an item's location (its room, npc or item, as `in` selects) or an NPC's room goes
-  becomes the DefinitionRef of cartridge `m`'s definition of that key, of the kind the field
-  takes (`Source.ref/3`).
+  node's reference (fact, item, quest), in any policy tree (a variant's condition included), a
+  recipe's fact.assign fact or its target's room, an exit's `to`, an item's location (its room,
+  npc or item, as `in` selects) or an NPC's room goes becomes the DefinitionRef of cartridge
+  `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
   """
   @spec expand(term(), map()) :: term()
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
@@ -72,6 +77,10 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"room" => _, "room_line" => t} = npc, m) when is_binary(t),
     do: Map.update!(npc, "room", &ref(&1, "room", m))
+
+  # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
+  def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
+    do: Map.update!(target, "room", &ref(&1, "room", m))
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
@@ -101,19 +110,13 @@ defmodule Loka.Content.Checks do
   defp nesting(v) when is_list(v), do: 1 + Enum.reduce(v, 0, &max(nesting(&1), &2))
   defp nesting(_), do: 0
 
-  defp owners(registry, fields \\ ["commands", "policies"]) do
-    for c <- registry,
-        name <- Enum.flat_map(fields, &Map.get(c, &1, [])),
-        into: %{},
-        do: {name, {c["key"], "#{c["key"]}@#{c["version"]}"}}
-  end
-
   @doc """
   Diagnostics for a v2 source (`{entry, text}`; nil for v1): the entry is present, each room's,
   item's and NPC's owning capability is required, exits and the entry name rooms of this
   cartridge, items' locations and NPCs' rooms name definitions of their kind, items and NPCs
-  start without a containment cycle or over capacity, and each room's, item's, NPC's and
-  action's text keys have a catalog entry (unless the catalog was rejected, `:unknown`).
+  start without a containment cycle or over capacity, each room's, item's, NPC's and action's
+  text keys have a catalog entry (unless the catalog was rejected, `:unknown`). Recipes and
+  rooms' action contributions are `Loka.Content.Recipes.check/4`.
   """
   @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown} | nil, [map()]) :: [map()]
   def rooms(_, _, nil, _), do: []
@@ -201,7 +204,7 @@ defmodule Loka.Content.Checks do
   defp trees(defs, actions) do
     for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
       for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
-      RoomParts.conditions(defs) ++ Entities.conditions(defs)
+      RoomParts.conditions(defs) ++ Entities.conditions(defs) ++ Recipes.conditions(defs)
   end
 
   defp command(rel, name, required) do
@@ -209,10 +212,6 @@ defmodule Loka.Content.Checks do
       do: owned(at(rel, ["command"]), name, required),
       else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end
-
-  defp commands,
-    do:
-      for(b <- Contracts.defs()["CommandPayload"]["oneOf"], do: b["properties"]["type"]["const"])
 
   defp nodes(%{"op" => op, "items" => items} = n, steps) when op in ~w(all any) do
     children =
@@ -235,60 +234,4 @@ defmodule Loka.Content.Checks do
         field -> reference(rel, steps, field, n, m, defs)
       end
   end
-
-  defp owned(path, name, {required, owners}) do
-    {key, pin} = owners[name]
-
-    if is_map_key(required, key),
-      do: [],
-      else: [diag("UNDECLARED_CAPABILITY", path, %{"capability" => key}, [pin])]
-  end
-
-  defp reference(rel, steps, field, n, m, defs) when is_binary(field),
-    do: reference(rel, steps, {field, field}, n, m, defs)
-
-  defp reference(rel, steps, {field, kind}, n, m, defs) do
-    ref = n[field]
-
-    case resolve(ref, kind, m, defs) do
-      :unresolved ->
-        s = "#{ref["cartridge_id"]}@#{ref["cartridge_version"]}:#{ref["kind"]}/#{ref["key"]}"
-        [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]
-
-      {_, _, %{"value_type" => t}} ->
-        if typed?(n["equals"], t),
-          do: [],
-          else: [diag("FACT_TYPE_MISMATCH", at(rel, steps ++ ["equals"]))]
-
-      _ ->
-        []
-    end
-  end
-
-  # A ref names this cartridge and the kind its field is named after (fact, item, quest).
-  # An :invalid definition or an :unknown namespace (rejected facts.json) counts as
-  # resolved: the real error is already reported there.
-  defp resolve(
-         %{"cartridge_id" => id, "cartridge_version" => v, "kind" => k, "key" => key},
-         k,
-         %{
-           "id" => id,
-           "version" => v
-         },
-         defs
-       ) do
-    case defs[k] do
-      %{^key => target} -> target
-      :unknown -> :unknown
-      _ -> :unresolved
-    end
-  end
-
-  defp resolve(_, _, _, _), do: :unresolved
-
-  defp typed?(v, %{"type" => "bool"}), do: is_boolean(v)
-  defp typed?(v, %{"type" => "enum", "values" => vs}), do: v in vs
-
-  defp typed?(v, %{"type" => "int"} = t),
-    do: is_integer(v) and v >= Map.get(t, "minimum", v) and v <= Map.get(t, "maximum", v)
 end
