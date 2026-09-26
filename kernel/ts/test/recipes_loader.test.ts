@@ -219,13 +219,14 @@ test('time_window needs schedule@1 and a non-empty window', () => {
     (recipe(c).policy.root = { op: 'time_window', from, to });
   assert.ok(load('cartridge_bell_hash.json', and(window(18, 6))).ok);
   fails(and(window(18, 18)), 'EMPTY_TIME_WINDOW', `${AT}.policy.root`);
-  fails(
-    window(18, 6),
-    'UNDECLARED_CAPABILITY',
-    `${AT}.policy.root.op`,
-    { capability: 'schedule' },
-    ['schedule@1'],
-  );
+  const unscheduled = (c: any) => {
+    delete c.manifest.requires.capabilities.schedule; // the compiler adds it with the pools
+    delete c.lock.capabilities.schedule;
+    window(18, 6)(c);
+  };
+  fails(unscheduled, 'UNDECLARED_CAPABILITY', `${AT}.policy.root.op`, { capability: 'schedule' }, [
+    'schedule@1',
+  ]);
 });
 
 // Astra A1. Breaks: a fact.assign value (any outcome) or a fact_compare value not of the fact's

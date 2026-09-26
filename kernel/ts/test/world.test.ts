@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { readdirSync } from 'node:fs';
 import { test } from 'node:test';
 import { hash } from '../src/canonical.ts';
+import { commandId } from '../src/id_source.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { accepted, allocator, event, rejected } from '../src/decision.ts';
@@ -77,12 +78,33 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
         target: none,
         input: ['direction'],
       },
+      // The compiler adds schedule@1 with the pools (review #49 A1).
+      { available: true, action_key: 'wait', label: 'action.wait', target: none, input: ['until'] },
     ],
     entities: [],
     inventory: [],
     journal: [],
     time: 0,
   });
+});
+
+// Astra A1. Breaks: the default pools without a way to regenerate (no schedule@1, so no wait):
+// 82 moves leave the body at 0 mv for good.
+test('a body out of mv waits an hour and moves again', () => {
+  let w = fresh();
+  let n = 0;
+  const next = (payload: object) => {
+    const s = kernelStep(w, { ...cmd(payload), id: commandId(CMD, String(n++)) } as Command);
+    w = s.world;
+    return s.decision.kind === 'rejected' ? s.decision.error.code : s.decision.kind;
+  };
+  for (let i = 0; i < 41; i++) {
+    assert.equal(next({ type: 'move', direction: 'north' }), 'accepted');
+    assert.equal(next({ type: 'move', direction: 'south' }), 'accepted');
+  }
+  assert.equal(next({ type: 'move', direction: 'north' }), 'insufficient_resource');
+  assert.equal(next({ type: 'wait', until: 3600 }), 'accepted'); // 0 + 18
+  assert.equal(next({ type: 'move', direction: 'north' }), 'accepted');
 });
 
 // Breaks: a wrong destination, a missing or wrong delta, a missing event, or state not adopted.

@@ -494,7 +494,7 @@
       ]
     },
     "RecipeStep": {
-      "description": "One registered operation of a recipe outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it; a result outside the resource's bounds faults the whole decision (precondition_failed), never a rejection or a clamp.",
+      "description": "One registered operation of a recipe outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (RecipeCost).",
       "oneOf": [
         {
           "description": "Assign a fact.",
@@ -535,7 +535,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Adjust a resource of the actor's body.",
+          "description": "Adjust a resource of the actor's body by `by`, stopping at its bounds.",
           "type": "object",
           "properties": {
             "op": {

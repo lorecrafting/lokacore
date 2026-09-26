@@ -1,5 +1,31 @@
 [
   {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "resource.adjust",
+      "writer_group": 0,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "entity_id": "11111111-2222-4333-8444-555555555555",
+      "from": 2147483648,
+      "to": -2147483649
+    },
+    "errors": [
+      {
+        "path": "/from",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/to",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
     "contract": "ResourceInt",
     "value": 2147483648,
     "errors": [

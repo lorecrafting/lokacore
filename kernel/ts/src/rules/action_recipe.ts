@@ -2,9 +2,9 @@
 // logical decision (06 §20; 21 §7; 04 §5.2). step admits only an action of the actor's
 // ActionSet whose policy holds (actions.ts refusal); here the key is re-resolved in that set: no
 // recipe by that key is not_found, a target_id other than the recipe's detail invalid_target, the
-// detail outside the actor's room not_present, a perform before the actor's last admitted attempt
-// plus the recipe's cooldown cooldown, and costs the actor's body cannot pay (resource.ts pay)
-// insufficient_resource. A rejection draws no RNG and changes nothing (04 §5.0).
+// detail outside the actor's room not_present, then actions.ts admission: a perform before the
+// actor's last admitted attempt plus the recipe's cooldown cooldown, and costs the actor's body
+// cannot pay insufficient_resource. A rejection draws no RNG and changes nothing (04 §5.0).
 // Accepted: the costs are paid first (resource.adjust ops); then a recipe's check (check@1) is
 // resolved, a luck draw from the world's RNG or a threshold on a resource's value at admission,
 // and emits check_passed or check_failed at position 1; its result selects the outcome, success
@@ -12,7 +12,7 @@
 // commits its costs, draw, cooldown, time and steps exactly like success (04 §5.0). Then that
 // outcome's sequence in order: each fact.assign a delta op whose expected value is the fact as the
 // steps before it left it, each resource.adjust one from the resource's value as the costs and
-// steps before it left it, each event.emit a custom_event at its causal position; a fact.assign
+// steps before it left it, adding by and stopping at the bounds (none when that changes nothing), each event.emit a custom_event at its causal position; a fact.assign
 // that changes its fact leaves the next position free for the fact_changed the host puts there
 // (world.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
 // reads the outcome's narration. A cooldown adds a cooldown.start at the admission time, and a
@@ -20,15 +20,13 @@
 // later.
 import type {
   ActionRecipe,
-  CharacterId,
   DeltaOp,
-  Key,
   EntityId,
   EventPayload,
   FactValue,
   RecipeStep,
 } from '../contracts.gen.ts';
-import { detailOf, resolved } from '../actions.ts';
+import { admission, detailOf, resolved } from '../actions.ts';
 import { key, same } from '../compose.ts';
 import {
   accepted,
@@ -42,7 +40,7 @@ import {
 } from '../decision.ts';
 import { scopeOf, value } from '../fact.ts';
 import { add } from '../int.ts';
-import { adjust, level, pay, type Levels } from '../resource.ts';
+import { adjust, level, type Levels } from '../resource.ts';
 import { uniform } from '../rng.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint) => {
@@ -54,7 +52,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   if (target_id !== undefined && target_id !== subject_id) return rejected('invalid_target');
   if (world.details[subject_id].room !== world.state.containers[body])
     return rejected('not_present');
-  const admitted = admit(world, recipe, actor_id, action, body);
+  const admitted = admission(world, recipe, actor_id, body);
   if (typeof admitted === 'string') return rejected(admitted);
   const { paid, last, from } = admitted;
   const { check, duration } = recipe;
@@ -84,23 +82,6 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
     rolled?.rng,
   );
 };
-
-// The perform's cooldown (from the actor's last admitted attempt: cooldown until last plus the
-// recipe's cooldown) and costs (resource.ts pay: insufficient_resource), before any draw.
-function admit(
-  world: World,
-  recipe: ActionRecipe,
-  actor_id: CharacterId,
-  action: Key,
-  body: EntityId,
-) {
-  const from = world.state.clock;
-  const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action })];
-  if (recipe.cooldown && last !== undefined && from < add(last, recipe.cooldown))
-    return 'cooldown' as const;
-  const paid = pay(world, body, recipe.costs ?? []);
-  return paid ? { paid, last, from } : ('insufficient_resource' as const);
-}
 
 // ponytail: at most 8 draws; at bound 100 one is rejected with probability 96 / 2^32, so
 // rng_budget_exhausted (which throws and discards the decision) is practically unreachable.
@@ -151,8 +132,8 @@ const step =
   (world: World, command: Command, mint: Mint, subject_id: EntityId, body: EntityId) =>
   (r: Run, s: RecipeStep): Run => {
     if (s.op === 'resource.adjust') {
-      const { op, levels } = adjust(world, body, s.resource, s.by, r.levels);
-      return { ...r, ops: [...r.ops, op], levels };
+      const { op, levels } = adjust(world, body, s.resource, s.by, r.levels, true);
+      return op.from === op.to ? r : { ...r, ops: [...r.ops, op], levels };
     }
     if (s.op === 'event.emit') {
       const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;

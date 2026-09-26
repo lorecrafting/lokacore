@@ -92,13 +92,17 @@ defmodule Loka.Core.Compose do
   @doc """
   A resource's current value at `now` (ResourceSpec regeneration): the stored value (`start` at
   time 0 when unset) plus `gain` for each hour boundary crossed since it was stored, stopping at
-  `maximum`.
+  `maximum`; nil for a malformed row, which no `from` equals (TypeScript's is NaN).
   """
-  @spec current(map() | nil, map(), integer()) :: integer()
-  def current(row, spec, now) do
-    %{"value" => v, "at" => at} = row || %{"value" => spec["start"], "at" => 0}
-    min(spec["maximum"], v + spec["gain"] * (div(now, 3600) - div(at, 3600)))
+  @spec current(map() | nil, map(), integer()) :: integer() | nil
+  def current(nil, spec, now), do: current(%{"value" => spec["start"], "at" => 0}, spec, now)
+
+  def current(%{"value" => v, "at" => at}, spec, now) when is_integer(v) and is_integer(at) do
+    ticks = Integer.floor_div(now, 3600) - Integer.floor_div(at, 3600)
+    min(spec["maximum"], v + spec["gain"] * ticks)
   end
+
+  def current(_, _, _), do: nil
 
   @doc "Canonical text of a JSON value: the identity of a target or DefinitionRef."
   @spec key(term()) :: binary()

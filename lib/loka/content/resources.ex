@@ -4,7 +4,7 @@ defmodule Loka.Content.Resources do
   amendment, owner decision HP/MA/MV). The file is `{"resources": {key: fields}}`: a default
   pool's key (hp, ma, mv) overrides any of its fields, another key declares a whole
   ResourceSpec without `key`. Every loka-cartridge-v2 cartridge gets the three pools and
-  resource@1 (`requires/1`), with or without the file.
+  resource@1 and schedule@1 (`requires/1`), with or without the file.
   """
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4]
   alias Loka.Core.Contracts
@@ -45,9 +45,18 @@ defmodule Loka.Content.Resources do
 
   def load(_), do: specs(@rel, %{})
 
-  @doc "The manifest with resource@1 required, which the default pools need."
+  @doc """
+  The manifest with resource@1 required, which the default pools need, and schedule@1, whose
+  `wait` lets a body out of mv regenerate (review #49 A1: no dead end).
+  """
   @spec requires(map()) :: map()
-  def requires(m), do: update_in(m, ["requires", "capabilities"], &Map.put_new(&1, "resource", 1))
+  def requires(m),
+    do:
+      update_in(
+        m,
+        ["requires", "capabilities"],
+        &Map.merge(%{"resource" => 1, "schedule" => 1}, &1)
+      )
 
   defp specs(rel, authored) do
     results =

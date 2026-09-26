@@ -145,7 +145,7 @@
               }
             },
             "resources": {
-              "description": "The cartridge's resources (resource.schema.json ResourceSpec), keyed by DefinitionRefString of kind resource; absent when it has none (R5 S6b, an optional map: the tag stays). The compiler adds the default pools hp, ma and mv and resource@1 to every v2 cartridge; an artifact without them (older or hand-built) has no pools, and its moves cost nothing.",
+              "description": "The cartridge's resources (resource.schema.json ResourceSpec), keyed by DefinitionRefString of kind resource; absent when it has none (R5 S6b, an optional map: the tag stays). The compiler adds the default pools hp, ma and mv, resource@1 and schedule@1 (wait, so an exhausted body can regenerate) to every v2 cartridge; an artifact without them (older or hand-built) has no pools, and its moves cost nothing.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):resource/[a-z][a-z0-9_]{0,63}$"

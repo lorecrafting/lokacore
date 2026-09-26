@@ -21,7 +21,10 @@ import {
   type TextKey,
   type VersionedPolicy,
 } from './contracts.gen.ts';
+import { key } from './compose.ts';
 import { bodyOf, refString, type World } from './decision.ts';
+import { sub } from './int.ts';
+import { pay } from './resource.ts';
 import { holds } from './policy.ts';
 import { cmp } from './validate.ts';
 
@@ -191,9 +194,30 @@ function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandP
 }
 
 /**
+ * A recipe's admission for `actor_id` acting through `body`, after its policy and target, shared
+ * by the rule and the GameView: cooldown while the time since the actor's last admitted attempt
+ * is below the recipe's cooldown (never overflows: 0 <= last <= now), then insufficient_resource
+ * when the body cannot pay the costs (resource.ts pay); else the paid ops and levels, the last
+ * attempt's time and now. Read-only, before any draw.
+ */
+export function admission(
+  world: World,
+  recipe: ActionRecipe,
+  actor_id: CharacterId,
+  body: EntityId,
+) {
+  const from = world.state.clock;
+  const last = world.state.cooldowns?.[key({ kind: 'cooldown', actor_id, action: recipe.key })];
+  if (recipe.cooldown && last !== undefined && sub(from, last) < recipe.cooldown)
+    return 'cooldown' as const;
+  const paid = pay(world, body, recipe.costs ?? []);
+  return paid ? { paid, last, from } : ('insufficient_resource' as const);
+}
+
+/**
  * The GameView lists of `actor`'s set: `listed(fits)` is each action that `fits` in presentation
- * order (highest priority first, then key), available when its policy holds, else shown with
- * invalid_state (00 §4.10). A recipe is listed with the place while its detail is in the actor's
+ * order (highest priority first, then key), available when its policy holds and, for a recipe,
+ * its admission passes, else shown with invalid_state or admission's code (00 §4.10). A recipe is listed with the place while its detail is in the actor's
  * room.
  */
 export function lists(world: World, actor: CharacterId) {
@@ -204,9 +228,13 @@ export function lists(world: World, actor: CharacterId) {
     world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!];
   const advertise = (a: Offered): AdvertisedAction => {
     const shown = { action_key: a.key, label: a.label, target: a.target, input: a.input };
-    return holds(world, actor, a.policy.root)
-      ? { available: true, ...shown }
-      : { available: false, ...shown, reason: { code: 'invalid_state' } };
+    const admitted = a.recipe && admission(world, a.recipe, actor, body!);
+    const code = !holds(world, actor, a.policy.root)
+      ? 'invalid_state'
+      : typeof admitted === 'string'
+        ? admitted
+        : undefined;
+    return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   };
   const listed = (fits: (t: TargetSpec) => boolean) =>
     Object.values(set)

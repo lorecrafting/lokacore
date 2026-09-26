@@ -253,6 +253,31 @@ defmodule Loka.Core.ComposeTest do
     assert over?(%{"jobs" => jobs(due + 1, 1)}, for(n <- 1..(due + 1), do: complete(job_id(n))))
   end
 
+  # Review #49 N1. Breaks: a stored resource row without `at` raising out of compose (the
+  # TypeScript twin faults precondition_failed on it).
+  test "a malformed resource row faults instead of raising" do
+    ref = %{
+      "cartridge_id" => "c",
+      "cartridge_version" => "1.0.0",
+      "kind" => "resource",
+      "key" => "hp"
+    }
+
+    t = %{"kind" => "resource", "resource" => ref, "entity_id" => "e"}
+    spec = %{"minimum" => 0, "maximum" => 9, "start" => 9, "gain" => 1}
+
+    state = %{
+      "clock" => 7300,
+      "resource_specs" => %{Compose.key(ref) => spec},
+      "resources" => %{Compose.key(t) => %{"value" => 3}}
+    }
+
+    op = %{"op" => "resource.adjust", "writer_group" => 0, "resource" => ref, "entity_id" => "e"}
+
+    assert Compose.compose(state, %{"ops" => [Map.merge(op, %{"from" => 3, "to" => 2})]}) ==
+             %{"fault" => %{"kind" => "fault", "code" => "precondition_failed", "target" => t}}
+  end
+
   # Seeded random deltas over a small id pool (so conflicts and failed preconditions are
   # common) through both kernels: canonical bytes and invariant results must match.
   @peer "kernel/ts/test/differential_peer.ts"

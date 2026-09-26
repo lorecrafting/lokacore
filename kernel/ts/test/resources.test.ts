@@ -10,7 +10,7 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { INSTALLED, newWorld, step } from '../src/world.ts';
+import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -170,17 +170,28 @@ test('regeneration adds gain per hour boundary crossed, stopping at the maximum'
   ]);
 });
 
-// Breaks: a resource.adjust step clamped at the maximum instead of faulting.
-test('a resource.adjust step past the maximum faults and changes nothing', () => {
-  // pray at 0 (hp 15), at 3600 (hp 15 + 5 regen + 5 = 25), then at 7200 hp is 25 already.
+// Breaks: a resource.adjust step not stopping at the resource's bounds (RecipeStep: add by,
+// stopping at the bounds), or emitting a no-op adjust at full value.
+test('a resource.adjust step stops at the maximum; at full value it changes nothing', () => {
+  // pray at 0 (hp 15), at 3600 (hp 15 + 5 regen = 20, + 5 = 25), then at 7200 hp is 25 already.
   const full = run(world(), move('east'), perform('pray'), wait(3600), perform('pray'), wait(7200));
-  const s = step(full, perform('pray'));
-  assert.deepEqual(JSON.parse(JSON.stringify(s.decision)), {
-    kind: 'fault',
-    code: 'precondition_failed',
-    target: { kind: 'resource', resource: ref('hp'), entity_id: BODY },
-  });
-  assert.equal(s.world, full);
+  const at = step(full, perform('pray')).decision;
+  assert.equal(at.kind === 'accepted' && at.outcome, 'performed');
+  assert.deepEqual(
+    ops(full, perform('pray')).map((o: { op: string }) => o.op),
+    ['resource.adjust', 'cooldown.start'], // the ma cost only
+  );
+  assert.deepEqual(ops(full, perform('pray'))[0], adjust('ma', 88, 78)); // 90 - 10 + 4 at 3600 is 84, + 4 at 7200
+  // hp 23 + 5 stops at 25.
+  const hurt = world((c) => (c.resources['ashmere_road@0.0.1:resource/hp'].start = 23));
+  assert.deepEqual(ops(run(hurt, move('east')), perform('pray'))[1], adjust('hp', 23, 25));
+});
+
+// Breaks: the cooldown end computed as last + cooldown, which overflows for a huge cooldown
+// (an evaluator_error fault instead of the cooldown refusal).
+test('a cooldown of 2^53 - 1 refuses with cooldown, not a fault', () => {
+  const once = world((c) => (c.recipes[PRAY].cooldown = Number.MAX_SAFE_INTEGER));
+  rejects(run(once, move('east'), wait(3600), perform('pray')), perform('pray'), 'cooldown');
 });
 
 // Breaks: < and <= swapped at the cooldown boundary, or no cooldown.start.
@@ -205,4 +216,32 @@ test('a failed attempt starts the cooldown too', () => {
   const failed = step(w, perform('shove_cart'));
   assert.equal(failed.decision.kind === 'accepted' && failed.decision.outcome, 'failure');
   rejects(failed.world, perform('shove_cart'), 'cooldown');
+});
+
+// Astra A2. Breaks: the GameView advertising a recipe under cooldown or with unaffordable costs,
+// or an exit the body cannot pay for, as available (the same world rejects them).
+test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavailable', () => {
+  const pray = (w: World) => gameView(w).actions.find((a) => a.action_key === 'pray');
+  const prayed = run(world(), move('east'), perform('pray'));
+  assert.deepEqual(pray(prayed), {
+    available: false,
+    action_key: 'pray',
+    label: 'actions.pray',
+    target: { kind: 'none' },
+    input: [],
+    reason: { code: 'cooldown' },
+  });
+  assert.equal(pray(run(prayed, wait(3600)))!.available, true);
+  const poor = world((c) => (c.recipes[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]));
+  assert.deepEqual(pray(run(poor, move('east')))!, {
+    ...pray(prayed)!,
+    reason: { code: 'insufficient_resource' },
+  });
+  const tired = run(world(), move('east'), move('west'), move('east'));
+  assert.deepEqual(gameView(tired).exits, [
+    { available: false, direction: 'west', reason: { code: 'insufficient_resource' } },
+  ]);
+  assert.deepEqual(gameView(run(tired, wait(3600))).exits, [
+    { available: true, direction: 'west' },
+  ]);
 });

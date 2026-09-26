@@ -18,7 +18,7 @@ import {
   values,
   type World,
 } from '../decision.ts';
-import type { DefinitionRef } from '../contracts.gen.ts';
+import type { DefinitionRef, EntityId } from '../contracts.gen.ts';
 import { level, pay, resourceRef } from '../resource.ts';
 
 export const decide: Rule<'movement'> = (world, command, mint) => {
@@ -30,8 +30,7 @@ export const decide: Rule<'movement'> = (world, command, mint) => {
   const to = exitTo(world.rooms[here], direction);
   const there = to && world.roomIds[refString(to)];
   if (!there) return rejected('not_found');
-  const mv = resourceRef(world, 'mv');
-  const paid = level(world, body, mv) === undefined ? { ops: [] } : pay(world, body, [MV(mv)]);
+  const paid = fare(world, body);
   if (!paid) return rejected('insufficient_resource');
   const transfer = {
     op: 'entity.transfer',
@@ -44,6 +43,15 @@ export const decide: Rule<'movement'> = (world, command, mint) => {
   const ops = [...paid.ops, transfer];
   return accepted(world, 'moved', ops, [event(world, command, mint, 1, entered)]);
 };
+
+/**
+ * What a move costs `body`: 1 mv where the cartridge declares the pool, else nothing; undefined
+ * when the body cannot pay. Read-only, shared with the GameView's exits (view.ts).
+ */
+export function fare(world: World, body: EntityId) {
+  const mv = resourceRef(world, 'mv');
+  return level(world, body, mv) === undefined ? { ops: [] } : pay(world, body, [MV(mv)]);
+}
 
 const MV = (resource: DefinitionRef) => ({ resource, amount: 1 });
 

@@ -31,8 +31,10 @@ export function level(world: World, entity: EntityId, resource: DefinitionRef): 
 
 /**
  * The resource.adjust of `resource` by `by` (checked arithmetic), from its value as `levels`
- * left it in this decision (else its current value), and the levels after it. A result out of
- * bounds is left for composition to fault (never clamped).
+ * left it in this decision (else its current value), and the levels after it. `saturate` (a
+ * recipe step, RecipeStep: add by, stopping at the bounds) stops the result at the resource's
+ * bounds; otherwise a result out of bounds is left for composition to fault. The op itself is
+ * always exact.
  */
 export function adjust(
   world: World,
@@ -40,10 +42,13 @@ export function adjust(
   resource: DefinitionRef,
   by: number,
   levels: Levels,
+  saturate = false,
 ): { op: Adjust; levels: Levels } {
   const at = key({ kind: 'resource', resource, entity_id: entity });
   const from = levels[at] ?? level(world, entity, resource)!;
-  const to = add(from, by);
+  const { minimum, maximum } = world.resourceSpecs[key(resource)];
+  const exact = add(from, by);
+  const to = saturate ? Math.min(maximum, Math.max(minimum, exact)) : exact;
   const op: Adjust = {
     op: 'resource.adjust',
     writer_group: 0,

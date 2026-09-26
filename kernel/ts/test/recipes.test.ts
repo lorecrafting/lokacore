@@ -201,7 +201,7 @@ const shown = (key: string, label: string, available = true) => ({
   action_key: key,
   label,
   target: { kind: 'none' },
-  input: key === 'move' ? ['direction'] : [],
+  input: key === 'move' ? ['direction'] : key === 'wait' ? ['until'] : [],
   ...(available ? {} : { reason: { code: 'invalid_state' } }),
 });
 const places = (w: World) => gameView(w).actions.map((a) => a.action_key);
@@ -211,7 +211,8 @@ const places = (w: World) => gameView(w).actions.map((a) => a.action_key);
 test("the place's actions: the recipe first while its detail is here, then the verbs", () => {
   const w = world();
   const ringBell = shown('ring_bell', 'actions.ring_bell');
-  const verbs = [shown('look', 'action.look'), shown('move', 'action.move')];
+  // wait: the compiler adds schedule@1 with the pools (review #49 A1).
+  const verbs = ['look', 'move', 'wait'].map((v) => shown(v, `action.${v}`));
   assert.deepEqual(plain(gameView(w).actions), [ringBell, ...verbs]);
   const rung = step(w, ring()).world;
   const greyed = shown('ring_bell', 'actions.ring_bell', false);
@@ -219,6 +220,7 @@ test("the place's actions: the recipe first while its detail is here, then the v
   assert.deepEqual(places(step(w, cmd({ type: 'move', direction: 'down' })).world), [
     'look',
     'move',
+    'wait',
   ]);
 });
 
@@ -228,7 +230,7 @@ test("a room's contributions shape its actions, and step admits only what they o
   const with_ = (...actions: object[]) => world((c) => (c.rooms[ROOM].actions = actions));
   const look = cmd({ type: 'look' });
   const rows: [object[], string[]][] = [
-    [[{ op: 'subtract', actions: ['look'] }], ['ring_bell', 'move']],
+    [[{ op: 'subtract', actions: ['look'] }], ['ring_bell', 'move', 'wait']],
     [[{ op: 'intersect', actions: ['ring_bell', 'take'] }], ['ring_bell']],
     [[{ op: 'replace', actions: ['move'] }], ['move']],
     [
@@ -243,7 +245,7 @@ test("a room's contributions shape its actions, and step admits only what they o
         { op: 'subtract', actions: ['look'] },
         { op: 'override', actions: ['look'] },
       ],
-      ['ring_bell', 'look', 'move'],
+      ['ring_bell', 'look', 'move', 'wait'],
     ],
   ];
   for (const [actions, expected] of rows) {

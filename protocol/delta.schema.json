@@ -449,10 +449,10 @@
               "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "from": {
-              "type": "integer"
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
             },
             "to": {
-              "type": "integer"
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
             }
           },
           "required": [
