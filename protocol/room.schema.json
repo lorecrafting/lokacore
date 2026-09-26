@@ -15,7 +15,7 @@
       ]
     },
     "Connection": {
-      "description": "One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction. barrier, optional (barrier@1), names the Barrier whose one shared state the exit passes through (21 §5 Barrier; 05 §25 coherent connections): move through it is refused while it is closed (exit_closed) or locked (exit_locked); an exit without one means what it always meant. A reciprocal exit is authored in the destination room (00a §2); the two faces of one door name the same barrier: an exit and each exit of its destination back to its room name the same barrier or none (BARRIER_MISMATCH).",
+      "description": "One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction. barrier, optional (barrier@1), names the Barrier whose one shared state the exit passes through (21 §5 Barrier; 05 §25 coherent connections): move through it is refused while it is closed (exit_closed) or locked (exit_locked); an exit without one means what it always meant. A reciprocal exit is authored in the destination room (00a §2); faces pair by opposite direction: an exit's reciprocal face is its destination's exit in the opposite compass direction when that exit leads back to its room, and an exit with a barrier needs a reciprocal face naming the same barrier (BARRIER_MISMATCH at each face otherwise). One-way and bent barrier passages (no reciprocal face, or an opposite-direction exit that leads elsewhere) are rejected for now and may be allowed later; an exit without a barrier is BARRIER_MISMATCH only when its reciprocal face names one.",
       "type": "object",
       "properties": {
         "to": {

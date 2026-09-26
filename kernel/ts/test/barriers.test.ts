@@ -355,3 +355,26 @@ test('a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY', ()
     CELL,
   );
 });
+
+// Review #50 re-review S2 (twin: test/loka/content_gate_test.exs). Breaks: a face paired without
+// the "leads back" condition, so a door on A.north to B and B.south to C is taken for one door.
+test('a door on a bent passage is BARRIER_MISMATCH', () => {
+  const bent = (c: any) =>
+    (room(c, 'courtyard').exits.south = {
+      to: { ...OAK, kind: 'room', key: 'cell' },
+      barrier: OAK,
+    });
+  fails(bent, 'BARRIER_MISMATCH', `${ROOM('courtyard')}.exits.south`);
+  // With cell.north back to the courtyard, only the gatehouse's face is bent.
+  fails(
+    (c) => {
+      bent(c);
+      room(c, 'cell').exits.north = {
+        to: { ...OAK, kind: 'room', key: 'courtyard' },
+        barrier: OAK,
+      };
+    },
+    'BARRIER_MISMATCH',
+    `${ROOM('gatehouse')}.exits.north`,
+  );
+});

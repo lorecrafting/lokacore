@@ -235,4 +235,33 @@ defmodule Loka.ContentGateTest do
                 d("BARRIER_UNREACHABLE_KEY", "barriers/oak_door")
               ]}
   end
+
+  # Review #50 re-review B1. Breaks: a key inside a container item not counted as in reach.
+  test "a key inside a container in a reachable room is in reach", %{tmp_dir: dir} do
+    satchel =
+      src("items/iron_key.json")
+      |> Map.put("keywords", ["satchel"])
+      |> Map.put("capacity", 1)
+
+    files = %{
+      "items/satchel.json" => satchel,
+      "items/iron_key.json" =>
+        put_in(src("items/iron_key.json"), ["location"], %{"in" => "item", "item" => "satchel"})
+    }
+
+    assert {:ok, _, _} = compile(dir, files)
+  end
+
+  # Review #50 re-review S2. Breaks: a face paired without the "leads back" condition, so a door
+  # on A.north to B and B.south to C (a bent passage) is taken for one door.
+  test "a door on a bent passage is BARRIER_MISMATCH", %{tmp_dir: dir} do
+    bent = %{"to" => "cell", "barrier" => "oak_door"}
+
+    assert compile(dir, edit("rooms/courtyard.json", ["exits", "south"], bent)) ==
+             {:error,
+              [
+                d("BARRIER_MISMATCH", "rooms/courtyard.exits.south"),
+                d("BARRIER_MISMATCH", "rooms/gatehouse.exits.north")
+              ]}
+  end
 end
