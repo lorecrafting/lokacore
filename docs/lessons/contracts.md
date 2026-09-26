@@ -19,8 +19,8 @@ file covers: [the protocol map](../../protocol/README.md).
   only the admission boundary and hosts should name the player. An actor's body comes from
   `bodyOf(world, actor)` in `kernel/ts/src/decision.ts`, the one place that still assumes one
   body per world; `event()` takes the actor from the command. Before admission accepts a
-  second actor, `bodyOf` must change (and the invariant `player_in_one_room`, which checks the
-  one body). A rule that assumes "the actor is the player" blocks puppeting and NPC-issued
+  second actor, `bodyOf` must change, as must `give` accepting only an NPC as recipient
+  (`rules/containment.ts`) and the invariant `player_in_one_room`, which checks the one body. A rule that assumes "the actor is the player" blocks puppeting and NPC-issued
   commands
   ([owner decision](../decisions/owner-decision-puppeting-2026-09-25.md)).
 - Cartridge source accepts a short reference (a Key) at every DefinitionRef, but only the

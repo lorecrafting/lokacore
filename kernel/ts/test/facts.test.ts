@@ -237,8 +237,8 @@ test('a fact.assign its FactSpec does not allow faults precondition_failed', () 
 });
 
 // R5 S4, owner decision Q2. Breaks: fact_changed not appended, appended for an assign that
-// keeps the value, once per fact instead of per assign, before the rule's events, with ids
-// that reuse the rule's ordinals, or in the actor's scope instead of the fact's.
+// keeps the value, once per fact instead of per assign, with ids that reuse the rule's
+// ordinals, or in the actor's scope instead of the fact's.
 test('each fact.assign that changes its fact appends fact_changed after the rule events', () => {
   const w = fresh();
   const assign = (k: string, expected: unknown, value: unknown) => ({

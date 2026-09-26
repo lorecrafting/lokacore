@@ -395,7 +395,7 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
   - `any`: At least one item holds.
   - `not`: The item does not hold.
   - `target_present`: The resolved target is present to the actor.
-  - `has_item`: The actor holds an item of this definition.
+  - `has_item`: The actor holds an item of this definition, directly or inside containers it holds, transitively.
   - `quest_state`: The actor's instance of the quest is in this lifecycle state.
   - `fact_compare`: The fact, in the actor's scope, equals this value.
 - **QuestState**: Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.

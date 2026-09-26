@@ -209,6 +209,9 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
       old: o.expected,
       new: o.value,
     };
+    // ponytail: appended after the rule's events, because a rule result keeps its changes and
+    // events in separate lists; S5 ActionRecipe must interleave them at each assign's causal
+    // position (04 §5.2 steps 4-5).
     const position = decision.events.length + i + 1;
     return { ...event(world, command, mint, position, payload as never), scope: o.scope };
   });
@@ -233,7 +236,8 @@ export function admit(owner: string, decision: DecisionResult): Admitted {
   if (decision.events.some((e) => owners[e.payload.type]?.split('@')[0] !== owner))
     return fault('unowned_event');
   // ponytail: unreachable with look and move (fixed-size results); tested with the first rule
-  // whose output size varies (S5, ActionRecipe).
+  // whose output size varies (S5, ActionRecipe). The fact_changed events adopt() appends later
+  // are not counted here; count them once a rule sets facts (S5).
   if (utf8(encode(decision as never)).length > LIMITS.output_bytes!)
     return fault('budget_exceeded');
   return decision as Admitted;

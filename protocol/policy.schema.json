@@ -117,7 +117,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor holds an item of this definition.",
+          "description": "The actor holds an item of this definition, directly or inside containers it holds, transitively.",
           "type": "object",
           "properties": {
             "op": {
