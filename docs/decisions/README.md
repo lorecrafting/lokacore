@@ -59,3 +59,4 @@ text. This directory also holds the owner's decisions retained verbatim.
 - Owner decisions: [S4 item text (four tiers), brief mode in S7, player text online; inline touch links; host-synthesized `fact_changed`](owner-decisions-r5-s4-2026-09-25.md).
 - Owner decision: [all reviews on Opus while Fable is near its limit](owner-decision-opus-reviews-2026-09-25.md).
 - Owner decision: [default HP, MA and MV pools, 1 MV per move, regeneration (S6b)](owner-decision-hp-ma-mv-2026-09-25.md).
+- Owner decision: [a playtest-and-tune stage after R6P: numbers, UI, changed and new mechanics](owner-decision-playtest-2026-09-25.md).

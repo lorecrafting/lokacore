@@ -280,7 +280,7 @@ Room count: 25 + 22 + 13 + 17 + 32 = 109. By level: z+3: 1, z+2: 4, z+1: 14, z0:
 
 Everything the game uses, grouped the way a classic-MUD player recognizes it. Each row names where it appears and the v3 primitive it pulls. Phase is where the primitive must first exist. Rows marked **NEW** are not in document 21 yet; see §11.
 
-*Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), starting maximums HP 20, MA 100, MV 82 (from DikuMUD) and regeneration per game hour HP 5, MA 4, MV 18, unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); cartridges built before the pools existed keep their behaviour and transcripts; and the pools regenerate per game hour, derived from the clock.
+*Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), starting maximums HP 20, MA 100, MV 82 (from DikuMUD) and regeneration per game hour HP 5, MA 4, MV 18, unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); the compiler gives every cartridge the pools unless it overrides them, and an artifact that does not lock `resource@1` has none; and the pools regenerate per game hour, derived from the clock.
 
 ### 4.1 World and movement
 
