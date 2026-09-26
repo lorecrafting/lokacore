@@ -1,14 +1,20 @@
-# A string that is a module specifier: import/export ... from '<here>', import('<here>'),
-# require('<here>'). The mobile import-boundary rules match only inside one.
+# A string or template literal that is a module specifier: import/export ... from '<here>',
+# import('<here>'), require('<here>'), require.resolve('<here>'), and jest's module paths
+# (jest.mock, doMock, unmock, requireActual, requireMock). The mobile import-boundary rules
+# match only inside one. ponytail: a specifier built at run time (require(name)) is not
+# seen; the bundler's graph would be the next check if one appears.
 id: module-specifier
 language: tsx
 rule:
-  kind: string
-  any:
-    - inside: { kind: import_statement, field: source }
-    - inside: { kind: export_statement, field: source }
-    - inside:
-        kind: arguments
-        inside:
-          kind: call_expression
-          has: { field: function, regex: '^(import|require)$' }
+  all:
+    - any: [{ kind: string }, { kind: template_string }]
+    - any:
+        - inside: { kind: import_statement, field: source }
+        - inside: { kind: export_statement, field: source }
+        - inside:
+            kind: arguments
+            inside:
+              kind: call_expression
+              has:
+                field: function
+                regex: '^(import|require|require\.resolve|jest\.(mock|doMock|unmock|requireActual|requireMock))$'
