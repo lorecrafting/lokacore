@@ -19,13 +19,14 @@ review), or an Opus reviewer and the developer disagreeing twice. The PM passes
 stays on Opus, reviewed once with a narrow fix check; to R6P, Fable is planned for about six
 slices ([owner decision](decisions/owner-decision-review-lever-2026-09-25.md)). Suspended:
 all reviews run on Opus until the owner says Fable is available again
-([owner decision](decisions/owner-decision-opus-reviews-2026-09-25.md)); meanwhile Astra
-reviews the remaining Fable slots (the simulation slice, R6 authority/save, GameView for
+([owner decision](decisions/owner-decision-opus-reviews-2026-09-25.md)); meanwhile a
+cross-vendor review covers the remaining Fable slots (the simulation slice, R6 authority/save, GameView for
 touch).
-**Cross-vendor review (Astra)** runs beside the design-judgment review only where the PM judges a
+**Cross-vendor review** (Astra, or another vendor's model the owner has credits for, such as
+Sol 5.6 on [#50](reviews/2026-09-26-r5-s7-review.md)) runs beside the design-judgment review only where the PM judges a
 slice foundational: a freeze later work builds on (a spec amendment, a new encoding or
 hash domain, an identity, delta or other core contract, a gate review), not the
-implementation of a contract Astra already reviewed. The owner delegated this judgment to
+implementation of a contract a cross-vendor review already covered. The owner delegated this judgment to
 the PM ([record](decisions/owner-decisions-observability-astra-2026-09-25.md)). Once CI is
 green, the PM gives the owner a paste-ready prompt (PR, head SHA, spec sections,
 focus, and the output format: verdict, then findings with id, severity, `path:line` at that
@@ -71,7 +72,7 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
-   PR link, verdict, notes. Owner decisions, anything open after fix round 2 and Astra
+   PR link, verdict, notes. Owner decisions, anything open after fix round 2 and cross-vendor
    relays still go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says.
 
