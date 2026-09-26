@@ -106,6 +106,32 @@ test('a location, NPC room or has_item item naming no definition is UNRESOLVED_R
   );
 });
 
+// Owner decision Q3 (the compiler's twin in test/loka/content_items_test.exs). Breaks: a link
+// target that names nothing, a bare link in a room's own text, or a detail linked from an
+// item's text loads; or a link to an item, an NPC or the text's own thing is refused.
+test('a touch link naming no detail, item or NPC it may name is UNRESOLVED_REFERENCE', () => {
+  const room = `.cartridge.rooms["${ID}:room/ferry_landing"]`;
+  const linking = (key: string, s: string) => (c: any) => (c.text[key] = s);
+  const ok = linking('detail.mooring_post', 'The [post] and a [lantern](lantern) by [Bram](bram).');
+  assert.ok(load(ok).ok);
+  const fail = (key: string, s: string, path: string, target: string) =>
+    fails(linking(key, s), 'UNRESOLVED_REFERENCE', path, { target });
+  fail('room.ferry_landing.description', 'A [crate](crate).', `${room}.description`, 'crate');
+  fail('room.ferry_landing.description', 'The [water].', `${room}.description`, '[water]');
+  fail(
+    'item.satchel.room',
+    'By the [post](mooring_post).',
+    `${item('satchel')}.room_line`,
+    'mooring_post',
+  );
+  fail(
+    'item.lantern.room_oil',
+    'A [lantern](lamp).',
+    `${item('lantern')}.room_line_variants[0].description`,
+    'lamp',
+  );
+});
+
 // Breaks: a cyclic or overfull start loads, so newWorld builds a world whose containers never
 // reach a room or hold more than their capacity.
 test('items that start in a cycle or over a capacity are rejected', () => {
