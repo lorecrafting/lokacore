@@ -98,6 +98,12 @@ test('a location, NPC room or has_item item naming no definition is UNRESOLVED_R
     `${item('lantern')}.short`,
     { target: 'item.nothing' },
   );
+  fails(
+    (c) => (c.npcs[`${ID}:npc/bram`].room_line = 'npc.nothing'),
+    'UNRESOLVED_REFERENCE',
+    `.cartridge.npcs["${ID}:npc/bram"].room_line`,
+    { target: 'npc.nothing' },
+  );
 });
 
 // Breaks: a cyclic or overfull start loads, so newWorld builds a world whose containers never

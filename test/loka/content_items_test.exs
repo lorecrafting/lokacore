@@ -178,13 +178,14 @@ defmodule Loka.ContentItemsTest do
            ]
   end
 
-  # Breaks: items in a source without rooms compiled to v1 and silently dropped.
+  # Breaks: items in a source without rooms or text compiled to v1 and silently dropped.
   test "items without rooms still compile as v2 and need an entry", %{tmp_dir: dir} do
     assert {:error, diags} =
              compile(dir, %{
                "cartridge.json" => Map.delete(src("cartridge.json"), "entry"),
                "rooms/ferry_landing.json" => nil,
-               "rooms/village_green.json" => nil
+               "rooms/village_green.json" => nil,
+               "text.json" => nil
              })
 
     assert d("SCHEMA_VIOLATION", "cartridge.entry", %{"error" => "missing_property"}) in diags
