@@ -3,7 +3,7 @@
 - PR: #36 (`pm-puppeting-35`), commit reviewed `8eb47f7`.
 - Reviewer: a fresh Claude Code agent (Opus) that authored none of the work. Docs-only
   slice: no mutation testing.
-- Verdict: **APPROVE WITH NOTES**.
+- Verdict: **APPROVE WITH NOTES**; fixes `a4824d2`, **APPROVE**.
 
 ## What must be true
 
@@ -54,3 +54,20 @@
 ## Not checked
 
 - The owner quote "yes please": relayed, not verifiable.
+
+## Fix round 1: `a4824d2` — APPROVE
+
+PM ruling: finding 1 accepted in docs, no code change now.
+
+- Decision record (`owner-decision-puppeting-2026-09-25.md:10-13`): the summary now names
+  the `event()` helper and the rules' use of `world.body`, marked as corrected after
+  review. Resolved.
+- Lesson (`docs/lessons/contracts.md:18-23`): the four named sites match the code
+  (`decision.ts:105-106`; `movement.ts:21,28,32,38`; `description_variant.ts:11`;
+  `target.ts:28`), and it gates them on admission accepting a second actor. Keeping
+  `world.body` as today's one body is right: no actor-to-body lookup exists. Resolved.
+- `check_docs.exs` 112 docs, 0 broken, 0 unreachable; Prettier clean.
+- nit, `docs/lessons/contracts.md:19`: "only the admission boundary and hosts name the
+  player" is still false for `event()` (`decision.ts:105-106`), which the next sentence
+  lists as a site to change. A reader may take the first clause as current fact. Optional
+  fix: "should name".
