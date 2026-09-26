@@ -66,3 +66,18 @@ chat, a decision line would let the S8 reviewer check the brief against it.
 
 **Q2 (question): the early R7/R8 count stays at 5 with three carries added.** Do the carries
 fit inside the five slices, or should the count grow?
+
+## Fix check: `6f31746`, `e7811c8`
+
+- **N1: fixed.** `WORKFLOW.md:29` now reads "a contract a cross-vendor review already
+  covered", and `:75` reads "cross-vendor relays". The Sol example links the #50 review
+  record.
+- **N2: fixed.** The early R7/R8 row says Gate R5 reports the carried items as deferred, not
+  missing, and names 00 §4.4 for locked containers. That is correct: row 365 sits under
+  §4.4, not §4.1 as my note said.
+- **Q1: answered.** 00 §4.1 row 290, "Cardinal + up/down exits, `scan` adjacent rooms", is
+  tagged R5. S8 now cites it.
+- **Q2: answered.** The count stays at 5 and is re-planned when R7 is sliced. Nothing is owed.
+- `elixir bin/check_docs.exs`: 0 broken links.
+
+Verdict: **APPROVE**.
