@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -231,6 +231,107 @@ test('go <serial> on a valid cartridge leaves the serial in no record', () => {
     assert.ok(!text.includes(serial), store);
   }
   assert.equal(records(rel).length, 2); // the header and look
+});
+
+// R5 S2 lookups on the details known answer (21 §6-§7; 04 §17-§18). Expected text is the
+// fixture's; a run's target ids depend on its random world, so they are checked against
+// Python's in target.test.ts, and here only where they appear.
+const details = read('protocol/fixtures/cartridge_details_hash.json');
+const detailsArtifact = join(dir, 'details.json');
+writeFileSync(
+  detailsArtifact,
+  `{"cartridge":${details.canonical},"content_hash":"${details.sha256}"}`,
+);
+const lookScript = join(dir, 'look.txt');
+writeFileSync(lookScript, 'look mooring post\nexamine post\nx bucket\nn\nx bucket\nx\n');
+
+// Breaks: unique, none and ambiguous confused, a lookup that fails becoming a Command, words
+// reaching a Command, a failed lookup not recorded (or recorded in the game_trace), or replay
+// of a look at a detail diverging.
+test('look <words> examines one detail, lists an ambiguity, and records failed lookups', () => {
+  const r = play([detailsArtifact, lookScript]);
+  assert.equal(r.status, 0, r.err);
+  assert.match(r.out, /> look mooring post\nRope has worn a groove into the post\./);
+  assert.match(
+    r.out,
+    /> examine post\nWhich do you mean: the (notice or the mooring post|mooring post or the notice)\?\n>/,
+  );
+  assert.match(r.out, /> x bucket\nYou don't see that here\.\n> n\n/);
+  assert.match(r.out, /> x bucket\nA wooden bucket on a rusted chain/);
+  assert.match(r.out, /> x\nExamine what\?\n/);
+  const rel = r.out.match(/transcript: (\S+)/)![1];
+  const commands = records(rel)
+    .slice(1)
+    .map((e) => e.data.command.payload);
+  assert.deepEqual(
+    commands.map(({ actor_id, ...p }) => (p.target_id ? { ...p, target_id: '*' } : p)),
+    [
+      { type: 'look', target_id: '*' },
+      { type: 'move', direction: 'north' },
+      { type: 'look', target_id: '*' },
+    ],
+  );
+  const failed = records(rel.replace('game_trace', 'diagnostics'));
+  for (const f of failed) assert.deepEqual(validate('ObservationRecord', f), []);
+  const room = {
+    cartridge_id: 'ashmere_details',
+    cartridge_version: '0.0.1',
+    kind: 'room',
+    key: 'ferry_landing',
+  };
+  assert.deepEqual(
+    failed.map((f) => [f.event, f.store, f.ids.run_id, f.data]),
+    [
+      [
+        'target.unresolved',
+        'diagnostics',
+        records(rel)[0].ids.run_id,
+        {
+          room,
+          outcome: 'ambiguous',
+          candidates: 2,
+          words: [{ kind: 'word', word: 'post' }],
+          after_ordinal: 1,
+        },
+      ],
+      [
+        'target.unresolved',
+        'diagnostics',
+        records(rel)[0].ids.run_id,
+        {
+          room,
+          outcome: 'none',
+          candidates: 0,
+          words: [{ kind: 'word', word: 'bucket' }],
+          after_ordinal: 1,
+        },
+      ],
+    ],
+  );
+  const again = play([detailsArtifact, '--replay', ROOT + rel]);
+  assert.equal(again.status, 0, again.err);
+  assert.match(again.out, /replay: 3 commands identical/);
+});
+
+// ADR-075 §6 (A5, R5 S2): a serial named in a lookup reaches no record, the failed-lookup
+// record included, where it is marked redacted. Breaks: words recorded unredacted, redaction
+// that misses another case, or the words entering a Command.
+test('look <serial> leaves the serial in no record', () => {
+  const serial = 'r58m12abcde';
+  const path = join(dir, 'look-serial.txt');
+  writeFileSync(path, `look ${serial}\nx the ${serial.toUpperCase()} post\n`);
+  const r = play([detailsArtifact, path], { ANDROID_SERIAL: serial });
+  const rel = r.out.match(/transcript: (\S+)/)![1];
+  for (const store of ['game_trace', 'diagnostics']) {
+    const text = readFileSync(ROOT + rel.replace('game_trace', store), 'utf8');
+    assert.ok(!text.toLowerCase().includes(serial), store);
+  }
+  assert.ok(!existsSync(ROOT + rel.replace('game_trace', 'operations'))); // no command ran
+  assert.deepEqual(
+    records(rel.replace('game_trace', 'diagnostics')).map((f) => f.data.words),
+    [[{ kind: 'redacted' }], [{ kind: 'redacted' }, { kind: 'word', word: 'post' }]],
+  );
+  assert.equal(records(rel).length, 1); // the header only: no lookup became a Command
 });
 
 // ADR-075 §3: input_digest is SHA-256 of the artifact file's bytes. Breaks: another input

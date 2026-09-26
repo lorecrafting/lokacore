@@ -12,8 +12,9 @@ import { commandId } from '../src/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { sha256Hex } from '../src/sha256.ts';
 import { validate } from '../src/validate.ts';
-import { append, kernelVersion, line, redact } from './obs.ts';
-import { parse, room, type Parsed } from './text.ts';
+import { resolve } from '../src/target.ts';
+import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
+import { detail, parse, room, which, type Parsed } from './text.ts';
 import { decide, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
@@ -64,6 +65,7 @@ async function session(script: string | undefined) {
     const parsed = parse(text);
     if (parsed === 'quit') break;
     if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
+    else if (parsed && 'lookup' in parsed) lookup(r, parsed.lookup);
     else if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
     if (tty) input.prompt();
   }
@@ -95,7 +97,7 @@ const header = (r: Run) =>
 const shown = (r: Run) =>
   process.stdout.write(`${room(cartridge, r.world)}[state ${hash(r.world.state as never)}]\n`);
 
-const command = (r: Run, parsed: Exclude<Parsed, string | null>): Command =>
+const command = (r: Run, parsed: object): Command =>
   ({
     id: commandId(r.ids.run_id, randomUUID()),
     world_context_id: r.world.context,
@@ -107,10 +109,40 @@ const command = (r: Run, parsed: Exclude<Parsed, string | null>): Command =>
 function turn(r: Run, cmd: Command, measured = true): string {
   const { trace, latency, decision } = decide(r, cmd);
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
-  const shown = decision.kind === 'accepted' ? room(cartridge, r.world) : `${reason(decision)}\n`;
+  const target = 'target_id' in cmd.payload ? cmd.payload.target_id : undefined;
+  const shown =
+    decision.kind !== 'accepted'
+      ? `${reason(decision)}\n`
+      : target
+        ? detail(cartridge, r.world, target)
+        : room(cartridge, r.world);
   const micros = latency.data.value;
   process.stdout.write(`${shown}[state ${hash(r.world.state as never)}  step ${micros} µs]\n`);
   return line(trace);
+}
+
+// Resolves the player's words in the current room (target.ts; 04 §17): unique becomes a look
+// Command at the resolved id; none and ambiguous build no Command and write one
+// target.unresolved record to diagnostics (owner request, R5 S2) with the words redacted.
+function lookup(r: Run, words: string) {
+  const res = resolve(r.world, words);
+  if (res.kind === 'unique') {
+    const cmd = command(r, { type: 'look', target_id: res.target_id });
+    return void append('game_trace', r.ids.run_id, turn(r, cmd));
+  }
+  const none = res.kind === 'none';
+  process.stdout.write(none ? "You don't see that here.\n" : which(r.world, res.candidate_ids));
+  const { key } = r.world.rooms[r.world.state.containers[r.world.body]];
+  const { id, version } = cartridge.manifest;
+  const data = {
+    room: { cartridge_id: id, cartridge_version: version, kind: 'room', key },
+    outcome: res.kind,
+    candidates: none ? 0 : res.candidate_ids.length,
+    words: lookupWords(words),
+    after_ordinal: r.ordinal,
+  };
+  const record = { format: 'loka-obs-v1', event: 'target.unresolved', store: 'diagnostics' };
+  append('diagnostics', r.ids.run_id, line({ ...record, ids: r.ids, data }));
 }
 
 function reason(d: { kind: string; error?: { code: string }; code?: string }): string {
