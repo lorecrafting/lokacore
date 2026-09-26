@@ -47,7 +47,7 @@ defmodule Loka.Core.Invariants do
   end
 
   # Checks only the read -> write value chain per target (fact value, container, quest state,
-  # continuation or job status, clock, current resource value, cooldown start), not capacity, revision, cycle or time bounds.
+  # continuation or job status, clock, current resource value, cooldown start, barrier state), not capacity, revision, cycle or time bounds.
   def check("delta_preconditions_hold", %{"state" => s, "delta" => %{"ops" => ops}, "result" => r}) do
     Map.has_key?(r, "fault") or
       Enum.reduce_while(ops, %{}, fn op, seen ->
@@ -121,6 +121,7 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "time.advance"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "resource.adjust"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "cooldown.start"} = op), do: {op["from"], op["at"]}
+  defp link(%{"op" => "barrier.transition"} = op), do: {op["from"], op["to"]}
 
   defp initial(%{"op" => "fact.assign"} = op, s) do
     with nil <- get_in(s, ["facts", Compose.key(Compose.target(op))]),
@@ -147,4 +148,9 @@ defmodule Loka.Core.Invariants do
 
   defp initial(%{"op" => "cooldown.start"} = op, s),
     do: get_in(s, ["cooldowns", Compose.key(Compose.target(op))])
+
+  defp initial(%{"op" => "barrier.transition"} = op, s) do
+    with nil <- get_in(s, ["barriers", Compose.key(Compose.target(op))]),
+         do: get_in(s, ["barrier_initial", Compose.key(op["barrier"])])
+  end
 end

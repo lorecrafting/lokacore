@@ -16,6 +16,7 @@
         "stale_revision",
         "insufficient_resource",
         "exit_locked",
+        "exit_closed",
         "quest_requirement",
         "cooldown",
         "rate_limited",

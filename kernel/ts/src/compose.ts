@@ -28,6 +28,12 @@ const LEGAL: Record<string, string[]> = {
   abandoned: ['active'],
 };
 const OPEN = ['active', 'objectives_complete'];
+// A barrier's legal transitions (room.schema.json BarrierState): open, close, lock, unlock.
+const DOOR: Record<string, string[]> = {
+  closed: ['open', 'locked'],
+  open: ['closed'],
+  locked: ['closed'],
+};
 
 export const key = (value: unknown): string => encode(value as Json);
 export const same = (a: unknown, b: unknown): boolean => key(a ?? null) === key(b ?? null);
@@ -65,6 +71,8 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
     case 'cooldown.start':
       return { kind: 'cooldown', actor_id: op.actor_id, action: op.action };
+    case 'barrier.transition':
+      return { kind: 'barrier', barrier: op.barrier };
   }
 }
 
@@ -154,6 +162,10 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       return adjusted(op, row as Stored | undefined, ctx);
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
+    case 'barrier.transition': {
+      const now = row ?? get(section(ctx.state, 'barrier_initial'), key(op.barrier));
+      return check(now === op.from && (DOOR[op.from] ?? []).includes(op.to), op.to);
+    }
   }
 }
 
@@ -253,6 +265,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'resources'), key(t));
     case 'cooldown':
       return get(section(s, 'cooldowns'), key(t));
+    case 'barrier':
+      return get(section(s, 'barriers'), key(t));
   }
 }
 

@@ -213,6 +213,15 @@
           "due_time": 3,
           "status": "completed"
         }
+      },
+      "barrier_initial": {
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"cell_door\",\"kind\":\"barrier\"}": "locked",
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"gate\",\"kind\":\"barrier\"}": "open",
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hatch\",\"kind\":\"barrier\"}": "closed",
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"arch\",\"kind\":\"barrier\"}": "open"
+      },
+      "barriers": {
+        "{\"barrier\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"gate\",\"kind\":\"barrier\"},\"kind\":\"barrier\"}": "closed"
       }
     },
     "no_clock": {
@@ -1139,6 +1148,477 @@
             "kind": "cooldown",
             "actor_id": "a0000000-0000-4000-8000-000000000000",
             "action": "ring_bell"
+          }
+        }
+      }
+    },
+    {
+      "id": "barrier-unlock-from-initial",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "cell_door"
+          },
+          "from": "locked",
+          "to": "closed"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "barrier",
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "cell_door"
+              }
+            },
+            "value": "closed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "barrier-open-from-initial",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "hatch"
+          },
+          "from": "closed",
+          "to": "open"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "barrier",
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "hatch"
+              }
+            },
+            "value": "open"
+          }
+        ]
+      }
+    },
+    {
+      "id": "barrier-close-from-initial",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "arch"
+          },
+          "from": "open",
+          "to": "closed"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "barrier",
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "arch"
+              }
+            },
+            "value": "closed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "barrier-lock-from-initial",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "hatch"
+          },
+          "from": "closed",
+          "to": "locked"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "barrier",
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "hatch"
+              }
+            },
+            "value": "locked"
+          }
+        ]
+      }
+    },
+    {
+      "id": "barrier-stored-state-over-initial",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "gate"
+          },
+          "from": "closed",
+          "to": "open"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "barrier",
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "gate"
+              }
+            },
+            "value": "open"
+          }
+        ]
+      }
+    },
+    {
+      "id": "barrier-initial-ignored-when-stored",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "gate"
+          },
+          "from": "open",
+          "to": "closed"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "barrier",
+            "barrier": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "barrier",
+              "key": "gate"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "barrier-open-while-locked",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "cell_door"
+          },
+          "from": "locked",
+          "to": "open"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "barrier",
+            "barrier": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "barrier",
+              "key": "cell_door"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "barrier-lock-while-open",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "arch"
+          },
+          "from": "open",
+          "to": "locked"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "barrier",
+            "barrier": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "barrier",
+              "key": "arch"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "barrier-same-state",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "hatch"
+          },
+          "from": "closed",
+          "to": "closed"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "barrier",
+            "barrier": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "barrier",
+              "key": "hatch"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "barrier-without-initial",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "portcullis"
+          },
+          "from": "closed",
+          "to": "open"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "barrier",
+            "barrier": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "barrier",
+              "key": "portcullis"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "same-group-unlock-then-open",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "cell_door"
+          },
+          "from": "locked",
+          "to": "closed"
+        },
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "cell_door"
+          },
+          "from": "closed",
+          "to": "open"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "barrier",
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "cell_door"
+              }
+            },
+            "value": "open"
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-group-barrier-stale-second",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "hatch"
+          },
+          "from": "closed",
+          "to": "open"
+        },
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "hatch"
+          },
+          "from": "closed",
+          "to": "locked"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "barrier",
+            "barrier": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "barrier",
+              "key": "hatch"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-barrier-two-groups",
+      "state": "base",
+      "ops": [
+        {
+          "op": "barrier.transition",
+          "writer_group": 0,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "hatch"
+          },
+          "from": "closed",
+          "to": "open"
+        },
+        {
+          "op": "barrier.transition",
+          "writer_group": 1,
+          "barrier": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "barrier",
+            "key": "hatch"
+          },
+          "from": "open",
+          "to": "closed"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "barrier",
+            "barrier": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "barrier",
+              "key": "hatch"
+            }
           }
         }
       }
@@ -4026,6 +4506,98 @@
                 },
                 "state": "active"
               }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": true,
+      "note": "barrier unlocked from its initial state, then opened",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "barrier.transition",
+              "writer_group": 0,
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "cell_door"
+              },
+              "from": "locked",
+              "to": "closed"
+            },
+            {
+              "op": "barrier.transition",
+              "writer_group": 0,
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "cell_door"
+              },
+              "from": "closed",
+              "to": "open"
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "barrier",
+                "barrier": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "barrier",
+                  "key": "cell_door"
+                }
+              },
+              "value": "open"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "holds": false,
+      "note": "barrier opened from its initial state over a stored one",
+      "observation": {
+        "state": "base",
+        "delta": {
+          "ops": [
+            {
+              "op": "barrier.transition",
+              "writer_group": 0,
+              "barrier": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "barrier",
+                "key": "gate"
+              },
+              "from": "open",
+              "to": "closed"
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "barrier",
+                "barrier": {
+                  "cartridge_id": "lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "barrier",
+                  "key": "gate"
+                }
+              },
+              "value": "closed"
             }
           ]
         }

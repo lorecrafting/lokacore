@@ -50,6 +50,11 @@
     "description": "The exit is locked (04 §7)."
   },
   {
+    "code": "exit_closed",
+    "category": "gameplay_rejection",
+    "description": "The exit's barrier is closed, not locked: opening it would let the actor through (04 §7; 21 §5 Barrier)."
+  },
+  {
     "code": "quest_requirement",
     "category": "gameplay_rejection",
     "description": "A quest requirement is not met (04 §7)."

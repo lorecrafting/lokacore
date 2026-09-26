@@ -23,7 +23,9 @@ defmodule Loka.Core.Compose do
   - `"resource_specs"`: canonical DefinitionRef text => ResourceSpec (`minimum`, `maximum`,
     `start`, `gain`); `"resources"`: canonical resource MutationTarget text => `value`, `at`
     (the time it was stored); a resource's current value is `current/3`;
-  - `"cooldowns"`: canonical cooldown MutationTarget text => the LogicalTime it last started.
+  - `"cooldowns"`: canonical cooldown MutationTarget text => the LogicalTime it last started;
+  - `"barrier_initial"`: canonical DefinitionRef text => BarrierState for unset barriers;
+    `"barriers"`: canonical barrier MutationTarget text => BarrierState.
 
   Result: `%{"changes" => rows}`, one `%{"target", "value"}` per written MutationTarget,
   sorted by canonical target text (the rows the host commits, ADR-072; a new continuation
@@ -48,6 +50,9 @@ defmodule Loka.Core.Compose do
     "failed" => ["active"],
     "abandoned" => ["active"]
   }
+
+  # A barrier's legal transitions (room.schema.json BarrierState): open, close, lock, unlock.
+  @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
 
   @spec compose(map(), map()) :: %{String.t() => term()}
   def compose(state, %{"ops" => ops}) do
@@ -88,6 +93,9 @@ defmodule Loka.Core.Compose do
 
   def target(%{"op" => "cooldown.start"} = op),
     do: Map.put(Map.take(op, ~w(actor_id action)), "kind", "cooldown")
+
+  def target(%{"op" => "barrier.transition", "barrier" => b}),
+    do: %{"kind" => "barrier", "barrier" => b}
 
   @doc """
   A resource's current value at `now` (ResourceSpec regeneration): the stored value (`start` at
@@ -240,6 +248,13 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "cooldown.start", "at" => at} = op, t, {state, _, _} = ctx),
     do: check(read(t, ctx) == op["from"] and at == state["clock"], at)
 
+  defp apply_op(%{"op" => "barrier.transition", "from" => from, "to" => to} = op, t, ctx) do
+    now =
+      with nil <- read(t, ctx), do: section(elem(ctx, 0), "barrier_initial")[key(op["barrier"])]
+
+    check(now == from and to in Map.get(@door, from, []), to)
+  end
+
   defp check(true, value), do: {:ok, value}
   defp check(false, _), do: {:error, "precondition_failed"}
 
@@ -259,6 +274,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "clock"}, s), do: s["clock"]
   defp base(%{"kind" => "resource"} = t, s), do: section(s, "resources")[key(t)]
   defp base(%{"kind" => "cooldown"} = t, s), do: section(s, "cooldowns")[key(t)]
+  defp base(%{"kind" => "barrier"} = t, s), do: section(s, "barriers")[key(t)]
 
   # d is e or inside it. A walk longer than the containment rows means a cyclic base: fail closed.
   defp inside?(nil, _, _, _), do: false

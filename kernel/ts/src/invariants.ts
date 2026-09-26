@@ -47,6 +47,8 @@ function initial(op: Any, s: Any): Json | undefined {
   if (family === 'choice') return s.choices?.[op.continuation_id]?.status;
   if (family === 'job') return s.jobs?.[op.job_id]?.status;
   if (family === 'cooldown') return s.cooldowns?.[key(target(op))];
+  if (family === 'barrier')
+    return s.barriers?.[key(target(op))] ?? s.barrier_initial?.[key(op.barrier)];
   if (family === 'resource') {
     const spec = s.resource_specs?.[key(op.resource)];
     return spec && current(s.resources?.[key(target(op))], spec, s.clock);

@@ -69,6 +69,90 @@
           "additionalProperties": false
         },
         {
+          "description": "Open the closed, unlocked barrier on the exit in `direction` (barrier@1).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "open"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Close the open barrier on the exit in `direction` (barrier@1).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "close"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Lock the closed barrier on the exit in `direction` with its key_item, which the actor holds (barrier@1).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "lock"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Unlock the locked barrier on the exit in `direction` with its key_item, which the actor holds (barrier@1).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "unlock"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "direction": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "direction"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Observe the current place, or, with target_id, one thing in it: an id the authority's target resolution returned as unique (21 §7; 04 §17, §18), never the player's words.",
           "type": "object",
           "properties": {

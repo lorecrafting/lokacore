@@ -9077,7 +9077,7 @@
         "kind": 1,
         "key": "b"
       },
-      "barrier": {
+      "gate": {
         "cartridge_id": "c",
         "cartridge_version": "1.0.0",
         "kind": "room",
@@ -9086,7 +9086,7 @@
     },
     "errors": [
       {
-        "path": "/barrier",
+        "path": "/gate",
         "code": "unknown_property"
       },
       {
