@@ -111,7 +111,7 @@
                     "cartridge_id": "ashmere_facts",
                     "cartridge_version": "0.0.1",
                     "kind": "fact",
-                    "key": "bell_rung"
+                    "key": "chapel_bell_rung"
                   },
                   "equals": true
                 }
@@ -239,7 +239,7 @@
                       "cartridge_id": "ashmere_facts",
                       "cartridge_version": "0.0.1",
                       "kind": "fact",
-                      "key": "bell_rung"
+                      "key": "chapel_bell_rung"
                     },
                     "equals": false
                   }
@@ -277,7 +277,7 @@
                 "cartridge_id": "ashmere_facts",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
-                "key": "bell_rung"
+                "key": "chapel_bell_rung"
               },
               "equals": true
             }
