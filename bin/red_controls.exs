@@ -104,10 +104,8 @@ controls = [
   {"features: a ruleless capability implemented without its feature map cells",
    %{
      "tmp/red-features.json" =>
-       File.read!(Path.join(root, "docs/features.json"))
-       |> JSON.decode!()
-       |> Map.put("barrier", %{"implemented_in" => "planted"})
-       |> JSON.encode!()
+       ~s({"barrier": {"implemented_in": "planted"}, ) <>
+         String.trim_leading(File.read!(Path.join(root, "docs/features.json")), "{")
    }, ~w(elixir bin/features.exs --check tmp/red-features.json), "barrier@1: missing spec"},
   {"features: a transcript added without regenerating the feature map",
    %{"cartridges/ashmere_details/transcripts/barrier.jsonl" => ""},
