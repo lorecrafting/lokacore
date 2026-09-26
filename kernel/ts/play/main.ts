@@ -14,7 +14,7 @@ import { sha256Hex } from '../src/sha256.ts';
 import { validate } from '../src/validate.ts';
 import { resolve } from '../src/target.ts';
 import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
-import { detail, parse, room, which, type Parsed } from './text.ts';
+import { detail, inventory, parse, room, say, which } from './text.ts';
 import { decide, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
@@ -64,8 +64,9 @@ async function session(script: string | undefined) {
     if (!tty) process.stdout.write(`> ${text}\n`);
     const parsed = parse(text);
     if (parsed === 'quit') break;
-    if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
-    else if (parsed && 'lookup' in parsed) lookup(r, parsed.lookup);
+    if (parsed === 'inventory') process.stdout.write(inventory(cartridge, r.world));
+    else if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
+    else if (parsed && 'lookup' in parsed) lookup(r, parsed);
     else if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
     if (tty) input.prompt();
   }
@@ -97,11 +98,7 @@ const header = (r: Run) =>
 const shown = (r: Run) =>
   process.stdout.write(`${room(cartridge, r.world)}[state ${hash(r.world.state as never)}]\n`);
 
-const command = (
-  r: Run,
-  parsed:
-    Exclude<Parsed, string | null | { lookup: string }> | { type: 'look'; target_id: EntityId },
-): Command =>
+const command = (r: Run, parsed: { type: string }): Command =>
   ({
     id: commandId(r.ids.run_id, randomUUID()),
     world_context_id: r.world.context,
@@ -113,29 +110,47 @@ const command = (
 function turn(r: Run, cmd: Command, measured = true): string {
   const { trace, latency, decision } = decide(r, cmd);
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
-  const target = 'target_id' in cmd.payload ? cmd.payload.target_id : undefined;
+  const p = cmd.payload as { type: string; target_id?: EntityId; item_id?: EntityId };
+  const name = (id?: string) => say(cartridge, r.world.entities[id!]?.short ?? '');
+  const done: Record<string, string> = {
+    taken: `You take ${name(p.item_id)}.\n`,
+    dropped: `You drop ${name(p.item_id)}.\n`,
+    given: `You give ${name(p.item_id)} to ${name((p as { recipient_id?: string }).recipient_id)}.\n`,
+  };
   const shown =
     decision.kind !== 'accepted'
-      ? `${reason(decision)}\n`
-      : target
-        ? detail(cartridge, r.world, target)
-        : room(cartridge, r.world);
+      ? `${reason(decision, p.type)}\n`
+      : (done[decision.outcome] ??
+        (p.target_id ? detail(cartridge, r.world, p.target_id) : room(cartridge, r.world)));
   const micros = latency.data.value;
   process.stdout.write(`${shown}[state ${hash(r.world.state as never)}  step ${micros} µs]\n`);
   return line(trace);
 }
 
-// Resolves the player's words in the current room (target.ts; 04 §17): unique becomes a look
-// Command at the resolved id; none and ambiguous build no Command and write one
+// Resolves the player's words (target.ts; 04 §17), and for give the recipient's: each unique
+// id goes into a look, take, drop or give Command; none and ambiguous build no Command.
+function lookup(r: Run, p: { lookup: string; verb?: 'take' | 'drop' | 'give'; to?: string }) {
+  const id = found(r, p.lookup);
+  const to = p.verb === 'give' && id ? found(r, p.to!) : undefined;
+  if (!id || (p.verb === 'give' && !to)) return;
+  const payload =
+    p.verb === 'give'
+      ? { type: 'give', item_id: id, recipient_id: to }
+      : p.verb
+        ? { type: p.verb, item_id: id }
+        : { type: 'look', target_id: id };
+  append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+}
+
+// The words' unique id, else undefined after telling the player and writing one
 // target.unresolved record to diagnostics (owner request, R5 S2) with the words redacted.
-function lookup(r: Run, words: string) {
+function found(r: Run, words: string): EntityId | undefined {
   const res = resolve(r.world, r.world.character, words);
-  if (res.kind === 'unique') {
-    const cmd = command(r, { type: 'look', target_id: res.target_id });
-    return void append('game_trace', r.ids.run_id, turn(r, cmd));
-  }
+  if (res.kind === 'unique') return res.target_id;
   const none = res.kind === 'none';
-  process.stdout.write(none ? "You don't see that here.\n" : which(r.world, res.candidate_ids));
+  process.stdout.write(
+    none ? "You don't see that here.\n" : which(cartridge, r.world, res.candidate_ids),
+  );
   const { key } = r.world.rooms[r.world.state.containers[r.world.body]];
   const { id, version } = cartridge.manifest;
   const data = {
@@ -149,14 +164,28 @@ function lookup(r: Run, words: string) {
   append('diagnostics', r.ids.run_id, line({ ...record, ids: r.ids, data }));
 }
 
-function reason(d: { kind: string; error?: { code: string }; code?: string }): string {
+// The player's words for a rejection of a command of `type`, else the kind and code.
+function reason(
+  d: { kind: string; error?: { code: string }; code?: string },
+  type: string,
+): string {
   const code = d.error?.code ?? d.code;
   const words: Record<string, string> = {
-    not_found: "You can't go that way.",
-    invalid_target: "That isn't a direction.",
+    'move not_found': "You can't go that way.",
+    'move invalid_target': "That isn't a direction.",
+    'take invalid_state': 'You already have that.',
+    'take not_found': "You can't take that.",
+    'take invalid_target': "You can't take that.",
+    'drop not_found': "You aren't carrying that.",
+    'drop invalid_target': "You aren't carrying that.",
+    'give not_found': "You can't give things to that.",
+    'give invalid_target': "You can't give things to that.",
+    'give invalid_state': "They can't carry any more.",
+    not_present: "You don't see that here.",
+    not_owned: "You aren't carrying that.",
     unsupported_capability: "You can't do that here.",
   };
-  return words[code!] ?? `(${d.kind}: ${code})`;
+  return words[`${type} ${code}`] ?? words[code!] ?? `(${d.kind}: ${code})`;
 }
 
 // Re-decides the transcript's Commands from its header (run, seed, world, and the recorded

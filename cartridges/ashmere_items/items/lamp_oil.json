@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "flask",
+    "oil",
+    "lamp_oil"
+  ],
+  "short": "item.lamp_oil.short",
+  "room_line": "item.lamp_oil.room",
+  "description": "item.lamp_oil.description",
+  "location": {
+    "in": "item",
+    "item": "satchel"
+  }
+}

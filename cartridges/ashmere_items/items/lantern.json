@@ -1,0 +1,25 @@
+{
+  "keywords": [
+    "lantern",
+    "brass_lantern"
+  ],
+  "short": "item.lantern.short",
+  "room_line": "item.lantern.room",
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "has_item",
+          "item": "lamp_oil"
+        }
+      },
+      "description": "item.lantern.room_oil"
+    }
+  ],
+  "description": "item.lantern.description",
+  "location": {
+    "in": "room",
+    "room": "village_green"
+  }
+}

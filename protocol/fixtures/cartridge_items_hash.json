@@ -1,0 +1,209 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_items (R5 S4; 05 §11; CartridgeArtifact.content_hash): two rooms (one detail), one NPC with a capacity, and three items (entity.schema.json ItemDefinition, NpcDefinition): one in a room with a room-line variant whose condition is has_item, one container item with a capacity in a room, and one inside it; text with touch links. Assembled by hand from the source files (manifest without entry, the lock, empty facts, policies and actions, each room, NPC and item with key added and short references expanded, entry, text), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (no numbers beyond small integers, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_items",
+      "version": "0.0.1",
+      "title": "Ashmere — Items",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "description_variant": 1,
+          "inspectable_detail": 1,
+          "containment": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "description_variant": 1,
+        "inspectable_detail": 1,
+        "containment": 1
+      }
+    },
+    "facts": {},
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_items@0.0.1:room/ferry_landing": {
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_items",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "village_green"
+            }
+          }
+        },
+        "details": {
+          "mooring_post": {
+            "aliases": [
+              "mooring_post",
+              "post",
+              "mooring"
+            ],
+            "description": "detail.mooring_post"
+          }
+        },
+        "key": "ferry_landing"
+      },
+      "ashmere_items@0.0.1:room/village_green": {
+        "title": "room.village_green.title",
+        "description": "room.village_green.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_items",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        },
+        "key": "village_green"
+      }
+    },
+    "npcs": {
+      "ashmere_items@0.0.1:npc/bram": {
+        "keywords": [
+          "bram",
+          "ferryman"
+        ],
+        "short": "npc.bram.short",
+        "room_line": "npc.bram.room",
+        "description": "npc.bram.description",
+        "room": {
+          "cartridge_id": "ashmere_items",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "ferry_landing"
+        },
+        "capacity": 1,
+        "key": "bram"
+      }
+    },
+    "items": {
+      "ashmere_items@0.0.1:item/lamp_oil": {
+        "keywords": [
+          "flask",
+          "oil",
+          "lamp_oil"
+        ],
+        "short": "item.lamp_oil.short",
+        "room_line": "item.lamp_oil.room",
+        "description": "item.lamp_oil.description",
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_items",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "satchel"
+          }
+        },
+        "key": "lamp_oil"
+      },
+      "ashmere_items@0.0.1:item/lantern": {
+        "keywords": [
+          "lantern",
+          "brass_lantern"
+        ],
+        "short": "item.lantern.short",
+        "room_line": "item.lantern.room",
+        "room_line_variants": [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "has_item",
+                "item": {
+                  "cartridge_id": "ashmere_items",
+                  "cartridge_version": "0.0.1",
+                  "kind": "item",
+                  "key": "lamp_oil"
+                }
+              }
+            },
+            "description": "item.lantern.room_oil"
+          }
+        ],
+        "description": "item.lantern.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_items",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "village_green"
+          }
+        },
+        "key": "lantern"
+      },
+      "ashmere_items@0.0.1:item/satchel": {
+        "keywords": [
+          "satchel",
+          "leather_satchel"
+        ],
+        "short": "item.satchel.short",
+        "room_line": "item.satchel.room",
+        "description": "item.satchel.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_items",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          }
+        },
+        "capacity": 1,
+        "key": "satchel"
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_items",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "ferry_landing"
+    },
+    "text": {
+      "room.ferry_landing.title": "Ferry Landing",
+      "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.",
+      "room.village_green.title": "Village Green",
+      "room.village_green.description": "An old elm shades a patch of trodden grass.",
+      "detail.mooring_post": "Rope has worn a groove into the [post]. Someone has carved a fox into it.",
+      "npc.bram.short": "Bram the ferryman",
+      "npc.bram.room": "[Bram] the ferryman stands here, one boot on the ferry.",
+      "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry.",
+      "item.lantern.short": "a brass lantern",
+      "item.lantern.room": "A [brass lantern] lies in the weeds.",
+      "item.lantern.room_oil": "A [brass lantern] lies in the weeds, dry. The oil you carry would fill it.",
+      "item.lantern.description": "Dented brass, its reservoir dry. It would light a fen path.",
+      "item.satchel.short": "a leather satchel",
+      "item.satchel.room": "A leather [satchel] leans against a crate.",
+      "item.satchel.description": "Scuffed leather, buckled shut over something that sloshes.",
+      "item.lamp_oil.short": "a flask of lamp oil",
+      "item.lamp_oil.room": "A [flask of lamp oil] stands here.",
+      "item.lamp_oil.description": "Thick yellow oil, enough for one lantern."
+    }
+  },
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_items@0.0.1:item/lamp_oil\":{\"description\":\"item.lamp_oil.description\",\"key\":\"lamp_oil\",\"keywords\":[\"flask\",\"oil\",\"lamp_oil\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"satchel\",\"kind\":\"item\"}},\"room_line\":\"item.lamp_oil.room\",\"short\":\"item.lamp_oil.short\"},\"ashmere_items@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"room_line_variants\":[{\"description\":\"item.lantern.room_oil\",\"when\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"lamp_oil\",\"kind\":\"item\"},\"op\":\"has_item\"}}}],\"short\":\"item.lantern.short\"},\"ashmere_items@0.0.1:item/satchel\":{\"capacity\":1,\"description\":\"item.satchel.description\",\"key\":\"satchel\",\"keywords\":[\"satchel\",\"leather_satchel\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.satchel.room\",\"short\":\"item.satchel.short\"}},\"lock\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"inspectable_detail\":1,\"movement\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_items\",\"requires\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"inspectable_detail\":1,\"movement\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Items\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_items@0.0.1:npc/bram\":{\"capacity\":1,\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"rooms\":{\"ashmere_items@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"mooring_post\",\"post\",\"mooring\"],\"description\":\"detail.mooring_post\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_items@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_items\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"text\":{\"detail.mooring_post\":\"Rope has worn a groove into the [post]. Someone has carved a fox into it.\",\"item.lamp_oil.description\":\"Thick yellow oil, enough for one lantern.\",\"item.lamp_oil.room\":\"A [flask of lamp oil] stands here.\",\"item.lamp_oil.short\":\"a flask of lamp oil\",\"item.lantern.description\":\"Dented brass, its reservoir dry. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] lies in the weeds.\",\"item.lantern.room_oil\":\"A [brass lantern] lies in the weeds, dry. The oil you carry would fill it.\",\"item.lantern.short\":\"a brass lantern\",\"item.satchel.description\":\"Scuffed leather, buckled shut over something that sloshes.\",\"item.satchel.room\":\"A leather [satchel] leans against a crate.\",\"item.satchel.short\":\"a leather satchel\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry.\",\"npc.bram.room\":\"[Bram] the ferryman stands here, one boot on the ferry.\",\"npc.bram.short\":\"Bram the ferryman\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}}",
+  "sha256": "8f951f15a1a55a328c500e51ea83b27c6b3255e517766c16d6853c12f15e6c61"
+}

@@ -1,8 +1,9 @@
 defmodule Mix.Tasks.Loka.Compile do
   @shortdoc "Compiles a cartridge source directory into an artifact file"
   @moduledoc """
-  `mix loka.compile <source dir> <artifact path>`: writes the CartridgeArtifact, or prints
-  each diagnostic as one JSON line on stderr and exits 1 without writing.
+  `mix loka.compile <source dir> <artifact path>`: writes the CartridgeArtifact and prints
+  each warning as one JSON line on stderr, or prints each diagnostic so and exits 1 without
+  writing.
   """
   use Mix.Task
   use Boundary, top_level?: true, deps: [Loka.Content, Mix]
@@ -12,7 +13,8 @@ defmodule Mix.Tasks.Loka.Compile do
     if !File.dir?(dir), do: Mix.raise("mix loka.compile: #{dir} is not a directory")
 
     case Loka.Content.compile(dir) do
-      {:ok, bytes} ->
+      {:ok, bytes, warnings} ->
+        for w <- warnings, do: IO.puts(:stderr, JSON.encode!(w))
         File.write!(out, bytes)
 
       {:error, diags} ->

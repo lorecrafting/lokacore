@@ -9,7 +9,7 @@ defmodule Loka.Content.Source do
 
   @type steps :: [String.t() | non_neg_integer()]
   @type file ::
-          :manifest | :facts | :text | {:policy | :action | :room, String.t()}
+          :manifest | :facts | :text | {:policy | :action | :room | :item | :npc, String.t()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
@@ -80,6 +80,8 @@ defmodule Loka.Content.Source do
       ["policies", file] -> {:policy, Path.rootname(file)}
       ["actions", file] -> {:action, Path.rootname(file)}
       ["rooms", file] -> {:room, Path.rootname(file)}
+      ["items", file] -> {:item, Path.rootname(file)}
+      ["npcs", file] -> {:npc, Path.rootname(file)}
       _ -> :unknown
     end
   end

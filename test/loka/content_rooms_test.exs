@@ -27,6 +27,17 @@ defmodule Loka.ContentRoomsTest do
     "supported_profiles" => ["offline_private"]
   }
 
+  defp warn(path, target) do
+    %{
+      "severity" => "warning",
+      "code" => "TOUCH_LINK_MISSING",
+      "path" => path,
+      "message_key" => "diagnostics.touch_link_missing",
+      "data" => %{"target" => target},
+      "suggested_capabilities" => []
+    }
+  end
+
   defp room(exits), do: %{"title" => "r.t", "description" => "r.d", "exits" => exits}
 
   # A two-room source (a north to b), with `files` merged over it; nil removes a file.
@@ -60,11 +71,11 @@ defmodule Loka.ContentRoomsTest do
   # Breaks if the v2 payload drops or renames a field, or keys rooms wrongly.
   test "ashmere_rooms compiles to the Python known answer" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-    assert Loka.Content.compile("cartridges/ashmere_rooms") == {:ok, expected}
+    assert Loka.Content.compile("cartridges/ashmere_rooms") == {:ok, expected, []}
   end
 
   test "a two-room source compiles to v2 with its entry and text", %{tmp_dir: dir} do
-    assert {:ok, bytes} = compile(dir, %{})
+    assert {:ok, bytes, []} = compile(dir, %{})
     %{"cartridge" => c} = JSON.decode!(bytes)
     assert c["format"] == "loka-cartridge-v2"
     assert Map.keys(c["rooms"]) == ["c@1.0.0:room/a", "c@1.0.0:room/b"]
@@ -196,7 +207,17 @@ defmodule Loka.ContentRoomsTest do
     expected =
       ~s({"cartridge":#{@details_kat["canonical"]},"content_hash":"#{@details_kat["sha256"]}"})
 
-    assert Loka.Content.compile("cartridges/ashmere_details") == {:ok, expected}
+    # R5 S4: its room descriptions carry no touch links yet, so each detail is a warning.
+    warnings = [
+      warn("rooms/ferry_landing.description", "mooring_post"),
+      warn("rooms/ferry_landing.description", "notice"),
+      warn("rooms/ferry_landing.description", "tide_marks"),
+      warn("rooms/well_lane.description", "bucket"),
+      warn("rooms/well_lane.description", "steps"),
+      warn("rooms/well_lane.description", "well")
+    ]
+
+    assert Loka.Content.compile("cartridges/ashmere_details") == {:ok, expected, warnings}
   end
 
   defp detail(aliases, text \\ "r.d"), do: %{"aliases" => aliases, "description" => text}
@@ -226,7 +247,7 @@ defmodule Loka.ContentRoomsTest do
               ]}
 
     shared = Map.drop(details, ~w(bell gap lamp)) |> put_in(["notice", "description"], "r.d")
-    assert {:ok, _} = compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", shared)})
+    assert {:ok, _, _} = compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", shared)})
   end
 
   # R5 S3. Breaks: variants dropped or reshaped, facts not keyed, or a short fact reference in a
@@ -235,7 +256,12 @@ defmodule Loka.ContentRoomsTest do
     expected =
       ~s({"cartridge":#{@facts_kat["canonical"]},"content_hash":"#{@facts_kat["sha256"]}"})
 
-    assert Loka.Content.compile("cartridges/ashmere_facts") == {:ok, expected}
+    warnings = [
+      warn("rooms/reed_path.description", "mud"),
+      warn("rooms/reed_path.variants[0].description", "mud")
+    ]
+
+    assert Loka.Content.compile("cartridges/ashmere_facts") == {:ok, expected, warnings}
   end
 
   defp variant(root, text \\ "r.d"),
@@ -349,7 +375,7 @@ defmodule Loka.ContentRoomsTest do
       "rooms/b.json" => b
     }
 
-    assert {:ok, bytes} = compile(dir, files)
+    assert {:ok, bytes, _} = compile(dir, files)
     %{"cartridge" => c} = JSON.decode!(bytes)
     [v] = c["rooms"]["c@1.0.0:room/b"]["details"]["exits"]["variants"]
     assert v["when"]["root"]["fact"] == ref("bell", "fact")

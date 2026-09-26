@@ -1,0 +1,20 @@
+{
+  "room.ferry_landing.title": "Ferry Landing",
+  "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.",
+  "room.village_green.title": "Village Green",
+  "room.village_green.description": "An old elm shades a patch of trodden grass.",
+  "detail.mooring_post": "Rope has worn a groove into the [post]. Someone has carved a fox into it.",
+  "npc.bram.short": "Bram the ferryman",
+  "npc.bram.room": "[Bram] the ferryman stands here, one boot on the ferry.",
+  "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry.",
+  "item.lantern.short": "a brass lantern",
+  "item.lantern.room": "A [brass lantern] lies in the weeds.",
+  "item.lantern.room_oil": "A [brass lantern] lies in the weeds, dry. The oil you carry would fill it.",
+  "item.lantern.description": "Dented brass, its reservoir dry. It would light a fen path.",
+  "item.satchel.short": "a leather satchel",
+  "item.satchel.room": "A leather [satchel] leans against a crate.",
+  "item.satchel.description": "Scuffed leather, buckled shut over something that sloshes.",
+  "item.lamp_oil.short": "a flask of lamp oil",
+  "item.lamp_oil.room": "A [flask of lamp oil] stands here.",
+  "item.lamp_oil.description": "Thick yellow oil, enough for one lantern."
+}

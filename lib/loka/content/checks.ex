@@ -5,7 +5,7 @@ defmodule Loka.Content.Checks do
   protocol/capability_registry.json); ownership comes from its commands and policies.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
-  alias Loka.Content.RoomParts
+  alias Loka.Content.{Entities, RoomParts}
   alias Loka.Core.Canonical
   alias Loka.Core.Contracts
 
@@ -51,9 +51,10 @@ defmodule Loka.Content.Checks do
 
   @doc """
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
-  node's reference (fact, item, quest), in any policy tree (a variant's condition included), or
-  an exit's `to` goes becomes the DefinitionRef of cartridge `m`'s definition of that key, of
-  the kind the field takes (`Source.ref/3`).
+  node's reference (fact, item, quest), in any policy tree (a variant's condition included), an
+  exit's `to`, an item's location (its room, npc or item, as `in` selects) or an NPC's room goes
+  becomes the DefinitionRef of cartridge `m`'s definition of that key, of the kind the field
+  takes (`Source.ref/3`).
   """
   @spec expand(term(), map()) :: term()
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
@@ -64,6 +65,13 @@ defmodule Loka.Content.Checks do
     to = fn {d, e} -> {d, Map.update!(e, "to", &ref(&1, "room", m))} end
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, to))
   end
+
+  # An ItemLocation (`in` a kind, and that kind's field) or an NPC (its room_line a text key).
+  def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
+    do: Map.update!(loc, k, &ref(&1, k, m))
+
+  def expand(%{"room" => _, "room_line" => t} = npc, m) when is_binary(t),
+    do: Map.update!(npc, "room", &ref(&1, "room", m))
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
@@ -101,10 +109,11 @@ defmodule Loka.Content.Checks do
   end
 
   @doc """
-  Diagnostics for a v2 source (`{entry, text}`; nil for v1): the entry is present, each room's
-  owning capability is required, exits and the entry name rooms of this cartridge, and each
-  room's and action's text keys have a catalog entry (unless the catalog was rejected,
-  `:unknown`).
+  Diagnostics for a v2 source (`{entry, text}`; nil for v1): the entry is present, each room's,
+  item's and NPC's owning capability is required, exits and the entry name rooms of this
+  cartridge, items' locations and NPCs' rooms name definitions of their kind, items and NPCs
+  start without a containment cycle or over capacity, and each room's, item's, NPC's and
+  action's text keys have a catalog entry (unless the catalog was rejected, `:unknown`).
   """
   @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown} | nil, [map()]) :: [map()]
   def rooms(_, _, nil, _), do: []
@@ -114,8 +123,29 @@ defmodule Loka.Content.Checks do
 
     entry(m, entry, defs) ++
       texts(defs, text) ++
-      if(m, do: Enum.flat_map(rooms, &room(&1, m, defs, registry)), else: [])
+      if(m,
+        do:
+          Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++
+            entities(m, defs, registry) ++
+            Enum.flat_map(Entities.all(defs), fn {_, rel, e} -> located(rel, e, m, defs) end),
+        else: []
+      )
   end
+
+  defp entities(m, defs, registry) do
+    required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
+
+    Entities.holders(defs) ++
+      for {kind, rel, e} <- Entities.all(defs),
+          {steps, k} <- Entities.parts(e, kind),
+          d <- owned(at(rel, steps), k, required),
+          do: d
+  end
+
+  defp located(rel, %{"location" => %{"in" => k} = loc}, m, defs),
+    do: reference(rel, ["location"], {k, k}, loc, m, defs)
+
+  defp located(rel, npc, m, defs), do: reference(rel, [], {"room", "room"}, npc, m, defs)
 
   defp texts(defs, text) do
     for(
@@ -123,7 +153,9 @@ defmodule Loka.Content.Checks do
       {_, {rel, [], def}} <- defs[kind],
       d <- text_keys({rel, def}, fields, text),
       do: d
-    ) ++ RoomParts.details(defs, text) ++ RoomParts.variant_texts(defs, text)
+    ) ++
+      RoomParts.details(defs, text) ++
+      RoomParts.variant_texts(defs, text) ++ Entities.texts(defs, text)
   end
 
   # Without a valid manifest the entry is unknown, not missing.
@@ -169,7 +201,7 @@ defmodule Loka.Content.Checks do
   defp trees(defs, actions) do
     for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
       for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
-      RoomParts.conditions(defs)
+      RoomParts.conditions(defs) ++ Entities.conditions(defs)
   end
 
   defp command(rel, name, required) do

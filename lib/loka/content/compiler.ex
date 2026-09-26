@@ -4,7 +4,7 @@ defmodule Loka.Content.Compiler do
   Each stage runs on the parts the stages before it accepted, so one bad file does not hide
   the diagnostics of the others.
   """
-  alias Loka.Content.Checks
+  alias Loka.Content.{Checks, Links}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
 
@@ -16,31 +16,34 @@ defmodule Loka.Content.Compiler do
   }
 
   @doc """
-  The CompiledCartridge for the loaded files, or all diagnostics (unsorted), `loaded` (the
-  load diagnostics) included.
+  The CompiledCartridge and its warnings, or all diagnostics (unsorted), `loaded` (the load
+  diagnostics) included.
   """
   @spec compile([{String.t(), term(), term()}], [map()], [map()]) ::
-          {:ok, map()} | {:error, [map()]}
+          {:ok, map(), [map()]} | {:error, [map()]}
   def compile(files, loaded, registry) do
     {manifest, entry, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
     v2 = v2(defs, entry, text)
+    {links, warnings} = if v2, do: Links.check(defs, elem(v2, 1)), else: {[], []}
 
     case loaded ++
            d1 ++
            d2 ++
            d3 ++
            Checks.check(manifest, defs, registry) ++
-           Checks.rooms(manifest, defs, v2, registry) do
-      [] -> {:ok, cartridge(manifest, defs, v2)}
+           Checks.rooms(manifest, defs, v2, registry) ++ links do
+      [] -> {:ok, cartridge(manifest, defs, v2), warnings}
       diags -> {:error, diags}
     end
   end
 
-  # v2 exactly when the source has rooms, an entry or a text catalog (CompiledCartridge).
+  # v2 exactly when the source has rooms, items, NPCs, an entry or a text catalog
+  # (CompiledCartridge).
   defp v2(defs, entry, text) do
-    if defs["room"] != %{} or entry != nil or text != nil, do: {entry, text || %{}}
+    if Enum.any?(~w(room item npc), &(defs[&1] != %{})) or entry != nil or text != nil,
+      do: {entry, text || %{}}
   end
 
   defp of(files, kind), do: for({rel, ^kind, v} <- files, do: {rel, v})
@@ -83,9 +86,18 @@ defmodule Loka.Content.Compiler do
     {policies, d2} = files(files, :policy, "VersionedPolicy")
     {actions, d3} = files(files, :action, "ActionDefinition")
     {rooms, d4} = files(files, :room, "RoomDefinition")
-    defs = %{"policy" => policies, "action" => actions, "room" => rooms}
+    {items, d5} = files(files, :item, "ItemDefinition")
+    {npcs, d6} = files(files, :npc, "NpcDefinition")
 
-    {Map.put(expanded(defs, m), "fact", facts), d1 ++ d2 ++ d3 ++ d4}
+    defs = %{
+      "policy" => policies,
+      "action" => actions,
+      "room" => rooms,
+      "item" => items,
+      "npc" => npcs
+    }
+
+    {Map.put(expanded(defs, m), "fact", facts), d1 ++ d2 ++ d3 ++ d4 ++ d5 ++ d6}
   end
 
   # Short references become full ones once a valid manifest names the cartridge; without one
@@ -218,10 +230,18 @@ defmodule Loka.Content.Compiler do
     }
   end
 
+  # items and npcs are optional maps (CompiledCartridge): absent when empty.
   defp cartridge(m, defs, {entry, text}) do
+    optional =
+      for {k, map} <- [{"item", "items"}, {"npc", "npcs"}],
+          defs[k] != %{},
+          into: %{},
+          do: {map, keyed(m, k, defs)}
+
     cartridge(m, defs, nil)
     |> Map.merge(%{"format" => "loka-cartridge-v2", "rooms" => keyed(m, "room", defs)})
     |> Map.merge(%{"entry" => entry, "text" => text})
+    |> Map.merge(optional)
   end
 
   defp keyed(m, kind, defs),
