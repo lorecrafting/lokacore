@@ -54,4 +54,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 ## R5
 
-- [R5 S1: rooms and exits, first world, look/move, `loka play`, rule lint lockdown](2026-09-25-r5-s1-review.md): PR #34 at `b76025e`, APPROVE WITH NOTES (Fable; Astra relay pending).
+- [R5 S1: rooms and exits, first world, look/move, `loka play`, rule lint lockdown](2026-09-25-r5-s1-review.md): PR #34 at `b76025e`, APPROVE WITH NOTES (Fable); Astra relay; fixes `740349c`, APPROVE WITH NOTES.
