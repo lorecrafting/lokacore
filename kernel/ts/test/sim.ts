@@ -148,7 +148,7 @@ export function simulate(seed: number, kernel = KERNEL): Outcome {
 }
 
 /** The first failure of `commands` from `start`, if any. */
-export function replay(start: World, commands: readonly Command[], kernel = KERNEL) {
+function replay(start: World, commands: readonly Command[], kernel = KERNEL) {
   let world = start;
   for (const [at, c] of commands.entries()) {
     const r = checked(kernel, world, c);
