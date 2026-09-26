@@ -7,7 +7,7 @@ import { randomUUID, getRandomValues } from 'node:crypto';
 import { createReadStream, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { decode, encode, hash, type Json } from '../src/canonical.ts';
-import type { Command, CommandPayload } from '../src/contracts.gen.ts';
+import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts';
 import { commandId } from '../src/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { sha256Hex } from '../src/sha256.ts';
@@ -97,7 +97,11 @@ const header = (r: Run) =>
 const shown = (r: Run) =>
   process.stdout.write(`${room(cartridge, r.world)}[state ${hash(r.world.state as never)}]\n`);
 
-const command = (r: Run, parsed: object): Command =>
+const command = (
+  r: Run,
+  parsed:
+    Exclude<Parsed, string | null | { lookup: string }> | { type: 'look'; target_id: EntityId },
+): Command =>
   ({
     id: commandId(r.ids.run_id, randomUUID()),
     world_context_id: r.world.context,
