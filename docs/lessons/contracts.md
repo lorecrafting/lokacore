@@ -16,7 +16,7 @@ file covers: [the protocol map](../../protocol/README.md).
   ids with the `Loka.Core.Contracts` constructors at the boundary and match the tag
   explicitly (`{:character_id, id}`) in every domain function head.
 - Rules take the actor from the command (`payload.actor_id`), never from `world.character`;
-  only the admission boundary and hosts name the player. The actor's body is `world.body`
+  only the admission boundary and hosts should name the player. The actor's body is `world.body`
   today (one body, no actor-to-body lookup yet). Before admission accepts a second actor,
   these sites must take the body and actor from the command: `event()` in
   `kernel/ts/src/decision.ts`, `rules/movement.ts`, `rules/description_variant.ts` and
