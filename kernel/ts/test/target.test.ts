@@ -38,9 +38,15 @@ const cmd = (payload: object): Command =>
   }) as Command;
 const north = (w: World) => step(w, cmd({ type: 'move', direction: 'north' })).world;
 
-// Breaks: detail ids minted in another order or from other ordinals, or tied to the wrong room.
+// Breaks: detail ids minted in another order (such as the object's key order) or from other
+// ordinals, or tied to the wrong room.
 test('a fresh world gives each detail a target id after the rooms', () => {
   const w = fresh();
+  const shuffled = structuredClone(loaded.cartridge) as any;
+  const room = shuffled.rooms['ashmere_details@0.0.1:room/ferry_landing'];
+  room.details = Object.fromEntries(Object.entries(room.details).reverse());
+  const again = newWorld(shuffled, CONTEXT as World['context'], [1, 0, 0, 0]);
+  assert.deepEqual(again.details, w.details);
   const by = Object.entries(w.details).map(([id, d]) => [id, d.room, d.key]);
   assert.deepEqual(by.sort(), [
     [TIDE, FERRY, 'tide_marks'],
