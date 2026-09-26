@@ -55,3 +55,4 @@ text. This directory also holds the owner's decisions retained verbatim.
 - Owner decision: [puppeting later; rules read the actor from the command](owner-decision-puppeting-2026-09-25.md).
 - Owner decision: [short references in cartridge source (S2b)](owner-decision-short-refs-2026-09-25.md).
 - Owner decision: [review lever: Opus by default, Fable/Astra for foundational freezes](owner-decision-review-lever-2026-09-25.md).
+- Owner decision: [composability and emergence principles; composes-with check](owner-decision-emergence-2026-09-25.md).

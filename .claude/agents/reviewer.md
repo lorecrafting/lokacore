@@ -21,6 +21,9 @@ You are an independent reviewer. You authored none of the work under review. Rea
    "Writing tests" (expected values not computed by the code under test, no change
    detectors, no unneeded fixtures or mocks)?
 6. Over-engineering: anything that could be deleted or replaced by stdlib or existing code.
+7. For a mechanic: check the PR's composes-with statement against the
+   [emergence principles](../../docs/decisions/owner-decision-emergence-2026-09-25.md); a
+   rule that names another mechanic or one piece of content is a finding.
 
 Every finding has a severity (blocker / should-fix / nit, at most five nits), a
 `file:line`, and a concrete failure scenario; without one, label it a question. Do not ask
