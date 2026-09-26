@@ -24,6 +24,7 @@ import {
   refString,
   rejected,
   type Cartridge,
+  type Detail,
   type Mint,
   type Rule,
   type World,
@@ -54,20 +55,30 @@ const NIL = '00000000-0000-0000-0000-000000000000';
 
 /**
  * A fresh world: IdSource ids under the nil CommandId (ordinal 0 the player's CharacterId, 1 its
- * body entity, then each room in DefinitionRefString order), the body in the entry room, time 0.
+ * body entity, then each room in DefinitionRefString order, then each room's details in the same
+ * room order and detail-key order: numeric profile, Initial world ids), the body in the entry
+ * room, time 0.
  */
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
-  const mint = (n: number) => id(context, NIL, n);
+  let ordinal = 0;
+  const mint = () => id(context, NIL, ordinal++) as EntityId;
+  const [character, body] = [mint() as string as CharacterId, mint()];
   const refs = Object.keys(cartridge.rooms).sort(cmp);
-  const roomIds = Object.fromEntries(refs.map((r, i) => [r, mint(i + 2) as EntityId]));
-  const body = mint(1) as EntityId;
+  const roomIds = Object.fromEntries(refs.map((r) => [r, mint()]));
+  const details: Record<string, Detail> = {};
+  for (const r of refs)
+    for (const [key, d] of Object.entries(cartridge.rooms[r].details ?? {}).sort(([a], [b]) =>
+      cmp(a, b),
+    ))
+      details[mint()] = { ...d, room: roomIds[r], key };
   return {
     cartridge,
     context,
-    character: mint(0) as CharacterId,
+    character,
     body,
     rooms: Object.fromEntries(refs.map((r) => [roomIds[r], cartridge.rooms[r]])),
     roomIds,
+    details,
     state: { clock: 0, containers: { [body]: roomIds[refString(cartridge.entry)] }, rng: seed },
   };
 }
