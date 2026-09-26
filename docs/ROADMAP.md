@@ -32,6 +32,10 @@ filter on top. Adapted from Datadog's
 - **Owner attention goes to invariant lists and harness changes**, not line-by-line code.
 - Later (R14, optional): a networked telnet/SSH terminal adapter for `loka play` once the
   online server exists (SSH or a browser terminal; plain telnet is unencrypted).
+- Later (with NPC behaviors or the online server): puppeting, a player controlling an NPC's
+  body. Needs a control-permission policy at the authority, body-versus-player state scope,
+  pausing the NPC's behaviors (21 §10 arbitration), a GameView from the body's perception
+  and displayed identity online ([owner decision](decisions/owner-decision-puppeting-2026-09-25.md)).
 - Not now: TLA+ (revisit for Realm handoff and cross-authority effects, R14/R20) and
   production telemetry loops (no production yet; phone timing at R6P is the stand-in).
 
