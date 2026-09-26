@@ -40,12 +40,17 @@ defmodule Loka.Content.Recipes do
     taken = r["key"] in ctx.actions or r["key"] in commands()
     duplicate = if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
 
-    mismatch =
-      if is_map_key(r, "check") == is_map_key(r["outcomes"], "failure"),
-        do: [],
-        else: [diag("OUTCOME_MISMATCH", at(rel, ["outcomes"]))]
+    owners(rel, r, ctx) ++
+      refs(rel, r, ctx) ++
+      texts(rel, r, ctx.text) ++
+      duplicate ++
+      mismatch(rel, r)
+  end
 
-    owners(rel, r, ctx) ++ refs(rel, r, ctx) ++ texts(rel, r, ctx.text) ++ duplicate ++ mismatch
+  defp mismatch(rel, r) do
+    if is_map_key(r, "check") == is_map_key(r["outcomes"], "failure"),
+      do: [],
+      else: [diag("OUTCOME_MISMATCH", at(rel, ["outcomes"]))]
   end
 
   # Each step of each outcome, with its path.
