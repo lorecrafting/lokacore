@@ -114,6 +114,7 @@ function keyStage(c: Obj): Diagnostic[] {
     'items',
     'recipes',
     'resources',
+    'barriers',
   ]) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
@@ -137,7 +138,7 @@ function keyStage(c: Obj): Diagnostic[] {
 }
 
 // The lock equals requires.capabilities, every command is owned, and every command, policy op,
-// definition kind (room, detail, NPC, item, variant, recipe, resource), recipe check (by the
+// definition kind (room, detail, NPC, item, variant, recipe, resource, barrier), recipe check (by the
 // events it produces, check@1's) and recipe step of any outcome (by the event it produces:
 // fact_changed for fact.assign, custom_event for event.emit; a resource.adjust, like a cost,
 // through the resource it names) the cartridge uses has its owner in the lock.

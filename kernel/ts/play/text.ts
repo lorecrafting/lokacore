@@ -4,7 +4,7 @@
 import type { Cartridge, World } from '../src/index.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { key } from '../src/compose.ts';
-import { COMPASS } from '../src/decision.ts';
+import { COMPASS, exitOf, refString } from '../src/decision.ts';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/rules/description_variant.ts';
 import { normalize } from '../src/target.ts';
@@ -20,8 +20,10 @@ export type Parsed =
   | { type: 'look' }
   | { type: 'move'; direction: string }
   | { lookup: string; verb?: 'take' | 'drop' | 'give'; to?: string }
+  | { door: (typeof DOORS)[number]; direction?: string; words?: string }
   | { wait: number }
   | 'inventory'
+  | 'brief'
   | 'quit'
   | string
   | null;
@@ -34,10 +36,12 @@ const WORDS: Record<string, Parsed> = {
   q: 'quit',
   inventory: 'inventory',
   i: 'inventory',
+  brief: 'brief',
 };
 for (const d of COMPASS) WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d };
 
 const LOOK = ['look', 'l', 'examine', 'x'];
+const DOORS = ['open', 'close', 'lock', 'unlock'] as const;
 const VERBS: Record<string, 'take' | 'drop' | 'give'> = {
   get: 'take',
   take: 'take',
@@ -48,8 +52,9 @@ const VERBS: Record<string, 'take' | 'drop' | 'give'> = {
 /**
  * `look`/`l`, `look`/`l`/`examine`/`x` <words> (a lookup; `look at the post` and `look post`
  * alike, target.ts normalize), `get`/`take` <words>, `drop` <words>, `give` <words> `to`
- * <words>, `inventory`/`i`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24;
- * one when omitted], `quit`/`q`. Only the
+ * <words>, `open`/`close`/`lock`/`unlock` <a direction, its initial, or words naming a door>,
+ * `inventory`/`i`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
+ * omitted], `brief` (brief mode on or off), `quit`/`q`. Only the
  * six compass words become a move: any other word after `go` is a message, never a Command, so
  * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand
  * that."
@@ -62,9 +67,16 @@ export function parse(text: string): Parsed {
   if (Object.hasOwn(VERBS, words[0])) {
     const verb = VERBS[words[0]];
     const [what, to] = verb === 'give' ? rest.split(/\s+to\s+/i) : [rest];
-    if (!normalize(what).length) return `${words[0][0].toUpperCase()}${words[0].slice(1)} what?`;
+    if (!normalize(what).length) return `${capital(words[0])} what?`;
     if (verb !== 'give') return { lookup: what, verb };
     return to && normalize(to).length ? { lookup: what, verb, to } : 'Give it to whom?';
+  }
+  if ((DOORS as readonly string[]).includes(words[0])) {
+    const door = words[0] as (typeof DOORS)[number];
+    const known = words.length === 2 && word(words[1]);
+    if (known && typeof known === 'object' && 'direction' in known)
+      return { door, direction: known.direction };
+    return normalize(rest).length ? { door, words: rest } : `${capital(door)} what?`;
   }
   if (LOOK.includes(words[0])) {
     if (normalize(rest).length) return { lookup: rest };
@@ -83,6 +95,8 @@ export function parse(text: string): Parsed {
   return (words.length === 1 && word(words[0])) || "I don't understand that.";
 }
 
+const capital = (w: string) => `${w[0].toUpperCase()}${w.slice(1)}`;
+
 /** A catalog string as plain words: each touch link's words, without brackets or target. */
 export const plain = (s: string): string => s.replace(/\[([^[\]]+)\](?:\([^()]*\))?/g, '$1');
 
@@ -90,10 +104,11 @@ export const plain = (s: string): string => s.replace(/\[([^[\]]+)\](?:\([^()]*\
 export const say = (cartridge: Cartridge, key: string): string => plain(cartridge.text[key] ?? key);
 
 /**
- * The current room's title, description, the room line of each NPC and item in it (an item's
- * room-line variants), and exits, in the cartridge's text.
+ * The current room's title, description (none when `brief`), the room line of each NPC and item
+ * in it (an item's room-line variants), and exits, each marked closed or locked while its barrier
+ * bars the way, in the cartridge's text.
  */
-export function room(cartridge: Cartridge, world: World): string {
+export function room(cartridge: Cartridge, world: World, brief = false): string {
   const view = gameView(world);
   const text = (key: string) => say(cartridge, key);
   const lines = view.entities.map((e) => {
@@ -104,9 +119,25 @@ export function room(cartridge: Cartridge, world: World): string {
     };
     return `${text(describe(world, world.character, of))}\n`;
   });
-  const exits = view.exits.map((e) => e.direction).join(', ') || 'none';
-  const head = `${text(view.place.title.key)}\n${text(view.place.description.key)}\n`;
+  const mark = (e: (typeof view.exits)[number]) => ('reason' in e && BARRED[e.reason.code]) || '';
+  const exits = view.exits.map((e) => `${e.direction}${mark(e)}`).join(', ') || 'none';
+  const long = brief ? '' : `${text(view.place.description.key)}\n`;
+  const head = `${text(view.place.title.key)}\n${long}`;
   return `${head}${lines.join('')}Exits: ${exits}\n`;
+}
+
+const BARRED: Record<string, string> = { exit_closed: ' (closed)', exit_locked: ' (locked)' };
+
+/** The short description of the barrier on the current room's exit in `direction`, if any. */
+export function door(cartridge: Cartridge, world: World, direction: string): string {
+  const b = barrierAt(cartridge, world, direction);
+  return b ? say(cartridge, b.short) : 'it';
+}
+
+/** The barrier on the current room's exit in `direction`, if any. */
+export function barrierAt(cartridge: Cartridge, world: World, direction: string) {
+  const barrier = exitOf(world.rooms[world.state.containers[world.body]], direction)?.barrier;
+  return barrier && cartridge.barriers![refString(barrier)];
 }
 
 /** What the player is carrying: each item's short description. */
@@ -156,4 +187,46 @@ export function status(world: World): string {
     return now === undefined ? [] : [`${k} ${now}/${world.resourceSpecs[key(r)].maximum}`];
   });
   return pools.length ? `${[...pools, clock(world.state.clock)].join('  ')}\n` : '';
+}
+
+// The player's words for a rejection of a command of `type`, else the kind and code.
+export function reason(
+  d: { kind: string; error?: { code: string }; code?: string },
+  type: string,
+): string {
+  const code = d.error?.code ?? d.code;
+  const words: Record<string, string> = {
+    'move not_found': "You can't go that way.",
+    'move invalid_target': "That isn't a direction.",
+    'take invalid_state': 'You already have that.',
+    'take not_found': "You can't take that.",
+    'take invalid_target': "You can't take that.",
+    'drop not_found': "You aren't carrying that.",
+    'drop invalid_target': "You aren't carrying that.",
+    'give not_found': "You can't give things to that.",
+    'give invalid_target': "You can't give things to that.",
+    'give invalid_state': "They can't carry any more.",
+    'move insufficient_resource': 'You are too exhausted.',
+    insufficient_resource: "You don't have the strength for that.",
+    cooldown: "You can't do that again yet.",
+    'perform invalid_target': "You can't do that to that.",
+    invalid_state: "You can't do that now.",
+    not_present: "You don't see that here.",
+    not_owned: "You aren't carrying that.",
+    unsupported_capability: "You can't do that here.",
+    exit_closed: 'The way is closed.',
+    exit_locked: 'It is locked.',
+    'open invalid_state': 'It is already open.',
+    'close invalid_state': 'It is already closed.',
+    'lock not_owned': "You don't have the key.",
+    'unlock not_owned': "You don't have the key.",
+    'lockless not_owned': 'It has no lock.',
+    ...Object.fromEntries(
+      ['open', 'close', 'lock', 'unlock'].flatMap((v) => [
+        [`${v} invalid_target`, `There is nothing to ${v} there.`],
+        [`${v} not_found`, 'There is no exit that way.'],
+      ]),
+    ),
+  };
+  return words[`${type} ${code}`] ?? words[code!] ?? `(${d.kind}: ${code})`;
 }

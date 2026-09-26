@@ -199,6 +199,27 @@
             "to"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "The barrier's current state equals `equals` (room.schema.json BarrierState; closed means closed and unlocked). Owned by barrier@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "barrier_state"
+            },
+            "barrier": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "equals": {
+              "$ref": "room.schema.json#/$defs/BarrierState"
+            }
+          },
+          "required": [
+            "op",
+            "barrier",
+            "equals"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -256,6 +277,16 @@
           "op": "time_window",
           "from": 0,
           "to": 23
+        },
+        {
+          "op": "barrier_state",
+          "barrier": {
+            "cartridge_id": "ashmere_gate",
+            "cartridge_version": "0.0.1",
+            "kind": "barrier",
+            "key": "cell_door"
+          },
+          "equals": "open"
         }
       ]
     }

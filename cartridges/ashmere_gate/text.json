@@ -1,0 +1,17 @@
+{
+  "room.gatehouse.title": "Gatehouse",
+  "room.gatehouse.description": "Arrow slits light a draughty stone gatehouse. An [oak door](oak_door) leads north to the courtyard; a squat iron-bound door stands to the east.",
+  "detail.oak_door": "A heavy oak door, banded with iron and shut fast.",
+  "detail.oak_door.open": "The heavy oak door stands open to the courtyard.",
+  "room.courtyard.title": "Courtyard",
+  "room.courtyard.description": "Weeds push up between the flagstones of a small walled courtyard.",
+  "room.cell.title": "Cell",
+  "room.cell.description": "A cramped cell. Old straw rots in one corner, and a chain hangs from the wall.",
+  "item.iron_key.short": "an iron key",
+  "item.iron_key.room": "An [iron key] lies among the weeds.",
+  "item.iron_key.description": "A heavy iron key, its bow shaped like a ring.",
+  "barrier.oak_door.short": "the oak door",
+  "barrier.cell_door.short": "the cell door",
+  "actions.knock": "Knock on the oak door",
+  "narration.knock.actor": "You rap on the oak door. The knocks echo in the courtyard beyond; no one answers."
+}

@@ -278,6 +278,36 @@ defmodule Loka.Core.ComposeTest do
              %{"fault" => %{"kind" => "fault", "code" => "precondition_failed", "target" => t}}
   end
 
+  # Review #50 A3/N1: the twin kernels agree on malformed barrier states (kernel/ts/test/
+  # compose.test.ts has the same cases). Breaks: a stored false read as unset (the initial state
+  # then used), or a from-state outside the legal table accepted.
+  test "a malformed barrier state faults precondition_failed" do
+    barrier = %{
+      "cartridge_id" => "c",
+      "cartridge_version" => "1.0.0",
+      "kind" => "barrier",
+      "key" => "d"
+    }
+
+    t = %{"kind" => "barrier", "barrier" => barrier}
+    fault = %{"fault" => %{"kind" => "fault", "code" => "precondition_failed", "target" => t}}
+
+    op =
+      &%{
+        "op" => "barrier.transition",
+        "writer_group" => 0,
+        "barrier" => barrier,
+        "from" => &1,
+        "to" => "open"
+      }
+
+    at = &%{"clock" => 0, "barrier_initial" => %{Compose.key(barrier) => &1}}
+
+    stored = Map.put(at.("closed"), "barriers", %{Compose.key(t) => false})
+    assert Compose.compose(stored, %{"ops" => [op.("closed")]}) == fault
+    assert Compose.compose(at.("toString"), %{"ops" => [op.("toString")]}) == fault
+  end
+
   # Seeded random deltas over a small id pool (so conflicts and failed preconditions are
   # common) through both kernels: canonical bytes and invariant results must match.
   @peer "kernel/ts/test/differential_peer.ts"
@@ -318,7 +348,8 @@ defmodule Loka.Core.ComposeTest do
         @base
         | "clock" => pick([pick(0..10), 3599, 3600, 7300]),
           "capacities" => Map.new(@base["capacities"], fn {e, _} -> {e, pick(0..1)} end),
-          "facts" => Enum.take(@base["facts"], pick(0..1))
+          "facts" => Enum.take(@base["facts"], pick(0..1)),
+          "barriers" => Enum.take(@base["barriers"], pick(0..1)) |> Map.new()
       })
 
     %{
@@ -343,6 +374,10 @@ defmodule Loka.Core.ComposeTest do
   defp vary(%{"op" => "job.schedule"} = op, _), do: %{op | "due_time" => pick(0..30)}
 
   defp vary(%{"op" => "cooldown.start"} = op, s), do: %{op | "at" => pick([s["clock"], 6])}
+
+  @doors ~w(open closed locked)
+  defp vary(%{"op" => "barrier.transition"} = op, _),
+    do: %{op | "from" => pick(@doors), "to" => pick(@doors)}
 
   # Often the current value, so adjustments pass and chain; `to` sometimes out of bounds.
   defp vary(%{"op" => "resource.adjust"} = op, s) do

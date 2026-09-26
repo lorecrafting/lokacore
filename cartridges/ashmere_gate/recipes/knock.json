@@ -1,0 +1,33 @@
+{
+  "label": "actions.knock",
+  "aliases": [
+    "knock"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "gatehouse",
+    "detail": "oak_door"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "knocked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.knock.actor"
+      }
+    }
+  }
+}

@@ -108,7 +108,7 @@ test('an alias shared by recipes picks the one whose target the words name', () 
       [
         'd\nBell Tower\nA narrow stair climbs through the dark. Pigeon feathers drift on the steps.\nExits: up\n',
         'ring gong\nYou haul on the rope. The bell swings, and its voice rolls out over the fen.\n',
-        'u\nBelfry\nThe great bronze bell hangs still from an oak beam. A frayed rope drops from its wheel.\nExits: down\n',
+        'u\nBelfry\nExits: down\n', // brief mode (R5 S7): the entry room, visited
         'ring bell\nWhich do you mean: Ring the bell or Toll the bell?\n',
         "ring rope\nYou can't do that to that.\n",
       ],

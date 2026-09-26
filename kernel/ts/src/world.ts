@@ -37,6 +37,7 @@ import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
 import { refusal } from './actions.ts';
 import * as action_recipe from './rules/action_recipe.ts';
+import * as barrier from './rules/barrier.ts';
 import * as containment from './rules/containment.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
@@ -50,6 +51,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   containment: containment.decide,
   action_recipe: action_recipe.decide,
   schedule: schedule.decide,
+  barrier: barrier.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
@@ -109,23 +111,25 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entityIds,
     capacities,
     factDefaults,
-    resourceSpecs: specs(cartridge),
+    resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
+    barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
     state: { clock: 0, containers, rng: seed },
   };
 }
 
-// The cartridge's ResourceSpecs by canonical DefinitionRef text, as composition reads them.
-const specs = (c: Cartridge) =>
+// A definition map's values by canonical DefinitionRef text, as composition reads them (the
+// ResourceSpecs, each barrier's initial state).
+const byRef = <D extends { key: string }, V>(
+  c: Cartridge,
+  kind: string,
+  defs: Readonly<Record<string, D>> = {},
+  value: (d: D) => V,
+) =>
   Object.fromEntries(
-    Object.values(c.resources ?? {}).map((s) => [
-      key({
-        cartridge_id: c.manifest.id,
-        cartridge_version: c.manifest.version,
-        kind: 'resource',
-        key: s.key,
-      }),
-      s,
-    ]),
+    Object.values(defs).map((d) => {
+      const { id: cartridge_id, version: cartridge_version } = c.manifest;
+      return [key({ cartridge_id, cartridge_version, kind, key: d.key }), value(d)];
+    }),
   );
 
 // Each NPC, then each item, in DefinitionRefString order, with its minted id, its container (an
@@ -221,6 +225,7 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
     fact_defaults: world.factDefaults,
     capacities: world.capacities,
     resource_specs: world.resourceSpecs,
+    barrier_initial: world.barrierInitial,
   };
   const result = compose(base as unknown as Parameters<typeof compose>[0], decision.delta);
   if ('fault' in result) return { decision: result.fault, world };
@@ -238,18 +243,21 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
   const out = events === decision.events ? decision : { ...decision, events };
   if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
     return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
-  // Only written sections join the state, so a world that never sets a fact, resource or
-  // cooldown keeps its earlier state hash.
+  // Only written sections join the state, so a world that never sets a fact, resource,
+  // cooldown or barrier keeps its earlier state hash.
   const state = { ...world.state, ...written, clock, rng: decision.rng } as World['state'];
   return { decision: out, world: { ...world, state } };
 }
 
 // The State section each written MutationTarget kind lives in (the clock is State.clock).
-const SECTIONS: Readonly<Record<string, 'containers' | 'facts' | 'resources' | 'cooldowns'>> = {
+const SECTIONS: Readonly<
+  Record<string, 'containers' | 'facts' | 'resources' | 'cooldowns' | 'barriers'>
+> = {
   containment: 'containers',
   fact: 'facts',
   resource: 'resources',
   cooldown: 'cooldowns',
+  barrier: 'barriers',
 };
 
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;

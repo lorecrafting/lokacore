@@ -415,6 +415,31 @@
             "subject_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "A barrier changed state from `from` to `to` (barrier@1; 21 §5 Barrier): opened (closed to open), closed (open to closed), locked (closed to locked) or unlocked (locked to closed). Engine-owned: barrier@1 emits it at position 1 of every accepted open, close, lock and unlock.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "barrier_changed"
+            },
+            "barrier": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "from": {
+              "$ref": "room.schema.json#/$defs/BarrierState"
+            },
+            "to": {
+              "$ref": "room.schema.json#/$defs/BarrierState"
+            }
+          },
+          "required": [
+            "type",
+            "barrier",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

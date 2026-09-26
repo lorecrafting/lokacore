@@ -9077,7 +9077,7 @@
         "kind": 1,
         "key": "b"
       },
-      "barrier": {
+      "gate": {
         "cartridge_id": "c",
         "cartridge_version": "1.0.0",
         "kind": "room",
@@ -9086,7 +9086,7 @@
     },
     "errors": [
       {
-        "path": "/barrier",
+        "path": "/gate",
         "code": "unknown_property"
       },
       {
@@ -11504,6 +11504,376 @@
       {
         "path": "/to",
         "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "BarrierDefinition",
+    "value": {
+      "keywords": [],
+      "initial": "ajar",
+      "key_item": "iron_key",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/initial",
+        "code": "not_in_enum"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key_item",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/keywords",
+        "code": "too_few_items"
+      },
+      {
+        "path": "/short",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "BarrierDefinition",
+    "value": {
+      "key": "d",
+      "keywords": [
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d",
+        "d"
+      ],
+      "short": "s",
+      "initial": "open"
+    },
+    "errors": [
+      {
+        "path": "/keywords",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "BarrierDefinition",
+    "value": {
+      "key": "d",
+      "short": "s"
+    },
+    "errors": [
+      {
+        "path": "/initial",
+        "code": "missing_property"
+      },
+      {
+        "path": "/keywords",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Connection",
+    "value": {
+      "to": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "b"
+      },
+      "barrier": "oak_door"
+    },
+    "errors": [
+      {
+        "path": "/barrier",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "barriers": {
+        "c@1.0.0:room/x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/barriers/c@1.0.0:room~1x",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/barriers/c@1.0.0:room~1x",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policies",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "barrier.transition"
+    },
+    "errors": [
+      {
+        "path": "/barrier",
+        "code": "missing_property"
+      },
+      {
+        "path": "/from",
+        "code": "missing_property"
+      },
+      {
+        "path": "/to",
+        "code": "missing_property"
+      },
+      {
+        "path": "/writer_group",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "barrier.transition",
+      "writer_group": 0,
+      "barrier": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "barrier",
+        "key": "oak_door"
+      },
+      "from": "ajar",
+      "to": "open",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/from",
+        "code": "not_in_enum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "barrier",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/barrier",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "barrier_state"
+    },
+    "errors": [
+      {
+        "path": "/barrier",
+        "code": "missing_property"
+      },
+      {
+        "path": "/equals",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "barrier_state",
+      "barrier": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "barrier",
+        "key": "oak_door"
+      },
+      "equals": "shut",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/equals",
+        "code": "not_in_enum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "barrier_changed",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/barrier",
+        "code": "missing_property"
+      },
+      {
+        "path": "/from",
+        "code": "missing_property"
+      },
+      {
+        "path": "/to",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "open",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "close",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "lock",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "unlock",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
       }
     ]
   }

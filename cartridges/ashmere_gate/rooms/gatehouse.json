@@ -1,0 +1,36 @@
+{
+  "title": "room.gatehouse.title",
+  "description": "room.gatehouse.description",
+  "exits": {
+    "north": {
+      "to": "courtyard",
+      "barrier": "oak_door"
+    },
+    "east": {
+      "to": "cell",
+      "barrier": "cell_door"
+    }
+  },
+  "details": {
+    "oak_door": {
+      "aliases": [
+        "oak_door",
+        "door"
+      ],
+      "description": "detail.oak_door",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "barrier_state",
+              "barrier": "oak_door",
+              "equals": "open"
+            }
+          },
+          "description": "detail.oak_door.open"
+        }
+      ]
+    }
+  }
+}

@@ -18,7 +18,22 @@
     "key": "barrier",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "open",
+      "close",
+      "lock",
+      "unlock"
+    ],
+    "definitions": [
+      "barrier"
+    ],
+    "events": [
+      "barrier_changed"
+    ],
+    "policies": [
+      "barrier_state"
+    ]
   },
   {
     "key": "containment",
