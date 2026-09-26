@@ -218,7 +218,7 @@
       ]
     },
     "RunIds": {
-      "description": "The correlation ids of a run header: the replay inputs a run shares (ReplayIds without command and revision).",
+      "description": "The correlation ids of a run header, and of a failed lookup in that run (target.unresolved): the replay inputs a run shares (ReplayIds without command and revision).",
       "type": "object",
       "properties": {
         "content_hash": {
