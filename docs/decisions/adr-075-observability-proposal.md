@@ -3,7 +3,7 @@
 **Status: Accepted by the owner 2026-09-25 ([record](owner-decision-adr-075-2026-09-25.md));
 entered [document 16](../spec/16-decision-register.md) 2026-09-25.** Amended 2026-09-25 by R5 slice 1's
 review ([record](../reviews/2026-09-25-r5-s1-review.md), Astra A4, A5; Fable F1): the three
-*Amendment* notes in §4 and §6; amended again by R5 slice 2 (owner request relayed by the PM):
+*Amendment* notes in §4 and §6; amended again by R5 slice 2 ([owner decision](owner-decision-lab-failed-lookups-2026-09-25.md)):
 the `target.unresolved` diagnostics record and its §6 note. Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
 ([owner decision](owner-decisions-observability-astra-2026-09-25.md)).
@@ -178,7 +178,7 @@ absolute home or worktree path in `Diagnostic.path` and a device serial in
 `Diagnostic.data`, which its redaction must strip or reject. *Amendment (A5):* free player text
 enters a Command only where its contract needs it, and then passes the producer's redaction or
 rejection before the Command is built; a word no command needs is a host parse message, never a
-Command or a record. *Amendment (R5 S2, owner request):* a failed lookup (target
+Command or a record. *Amendment (R5 S2, [owner decision](owner-decision-lab-failed-lookups-2026-09-25.md)):* a failed lookup (target
 resolution none or ambiguous, 21 §7) builds no Command, and its producer writes one
 `target.unresolved` record to `diagnostics` (a content gap to fix; never `game_trace`, since it
 is neither a decision nor a replay input) under the run's `RunIds`. It is the one record that
