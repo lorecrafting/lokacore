@@ -4,10 +4,12 @@
 // commit and GameView are in world.ts.
 import {
   DEFS,
+  type BarrierState,
   type CharacterId,
   type Command,
   type CommandPayload,
   type CompiledCartridge,
+  type Connection,
   type DecisionResult,
   type DefinitionRef,
   type DomainEvent,
@@ -26,7 +28,7 @@ import {
   type Text,
   type WorldContextId,
 } from './contracts.gen.ts';
-import type { Stored } from './compose.ts';
+import { key, type Stored } from './compose.ts';
 import { id } from './id_source.ts';
 import type { RngState } from './rng.ts';
 
@@ -34,10 +36,10 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
 
 /**
  * The mutable, hashed part of a world: logical time, containment (03 §23), the RNG, and the
- * facts, resources and cooldowns written so far, each by canonical MutationTarget text
- * (compose.ts); each absent until one is written, as an unset fact has its default and an unset
- * resource its start (fact.schema.json ScopedFact; resource.ts), so a world that never writes
- * one keeps its state hash.
+ * facts, resources, cooldowns and barrier states written so far, each by canonical
+ * MutationTarget text (compose.ts); each absent until one is written, as an unset fact has its
+ * default, an unset resource its start (fact.schema.json ScopedFact; resource.ts) and an unset
+ * barrier its initial state, so a world that never writes one keeps its state hash.
  */
 export type State = {
   readonly clock: number;
@@ -46,6 +48,7 @@ export type State = {
   readonly facts?: Readonly<Record<string, FactValue>>;
   readonly resources?: Readonly<Record<string, Stored>>;
   readonly cooldowns?: Readonly<Record<string, number>>;
+  readonly barriers?: Readonly<Record<string, BarrierState>>;
 };
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */
@@ -62,6 +65,7 @@ export type World = {
   readonly capacities: Readonly<Record<string, number>>; // by EntityId, where declared
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
   readonly resourceSpecs: Readonly<Record<string, ResourceSpec>>; // by canonical DefinitionRef text
+  readonly barrierInitial: Readonly<Record<string, BarrierState>>; // by canonical DefinitionRef text
   readonly state: State;
 };
 
@@ -177,9 +181,17 @@ export const accepted = <E>(
   ...(narration && { narration }),
 });
 
+/** The room's exit in a direction, if it has one. */
+export const exitOf = (room: RoomDefinition, direction: string): Connection | undefined =>
+  (room.exits as Readonly<Record<string, Connection>>)[direction];
+
 /** The room a direction's exit leads to, if the room has that exit. */
 export const exitTo = (room: RoomDefinition, direction: string): DefinitionRef | undefined =>
-  (room.exits as Readonly<Record<string, { to: DefinitionRef }>>)[direction]?.to;
+  exitOf(room, direction)?.to;
+
+/** A barrier's current state (barrier@1): its stored state, else its initial one. */
+export const barrierState = (world: World, barrier: DefinitionRef): BarrierState =>
+  world.state.barriers?.[key({ kind: 'barrier', barrier })] ?? world.barrierInitial[key(barrier)];
 
 /** Own-key test and values for rule modules, which may not name Object (ts-rule-module-pure). */
 export const has = (o: object, key: string): boolean => Object.hasOwn(o, key);

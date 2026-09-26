@@ -1,8 +1,8 @@
 // Target resolution (21 §7 TargetSpec / TargetResolution; 04 §17-§18; 14 §R5): the authority's
 // Search over what a player names, run before any Command is built, so a Command carries only
 // the resolved id and never the player's words.
-import type { CharacterId, EntityId, TargetResolution } from './contracts.gen.ts';
-import { bodyOf, type World } from './decision.ts';
+import type { CharacterId, EntityId, Key, TargetResolution } from './contracts.gen.ts';
+import { bodyOf, COMPASS, exitOf, refString, type World } from './decision.ts';
 import { cmp } from './validate.ts';
 
 /**
@@ -44,4 +44,22 @@ export function resolve(world: World, actor: CharacterId, text: string): TargetR
   if (ids.length === 0) return { kind: 'none' };
   if (ids.length === 1) return { kind: 'unique', target_id: ids[0] };
   return { kind: 'ambiguous', candidate_ids: ids };
+}
+
+/**
+ * The directions of the exits of `actor`'s room whose barrier (barrier@1) has a keyword equal to
+ * the normalized words joined by `_`, as resolve matches, in compass order: none, one, or several
+ * (the player must say which). A direction itself names its exit; the text adapter maps it.
+ */
+export function doors(world: World, actor: CharacterId, text: string): Key[] {
+  const phrase = normalize(text).join('_');
+  const body = bodyOf(world, actor);
+  if (!body) return [];
+  const room = world.rooms[world.state.containers[body]];
+  return COMPASS.filter((d) => {
+    const barrier = exitOf(room, d)?.barrier;
+    return (
+      barrier && world.cartridge.barriers![refString(barrier)].keywords.includes(phrase as never)
+    );
+  });
 }

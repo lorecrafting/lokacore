@@ -71,7 +71,8 @@ const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
 });
 // ponytail: every engine verb has priority 0, so they list in key order; give them priorities
 // when a host's presentation needs one first. ponytail: this table names other capabilities'
-// verbs (schedule's wait joined in R5 S6, per the brief); each verb's target and input move onto
+// verbs (schedule's wait joined in R5 S6, barrier's open, close, lock and unlock in S7, per the
+// briefs); each verb's target and input move onto
 // its command's registry entry when dialogue's talk lands, and that slice decides how choose and
 // close_choice (answers to a pending choice, not ActionSet actions) pass admission.
 const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
@@ -81,6 +82,10 @@ const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   drop: [entity('inventory'), []],
   give: [entity('inventory'), []],
   wait: [{ kind: 'none' }, ['until']],
+  open: [{ kind: 'none' }, ['direction']],
+  close: [{ kind: 'none' }, ['direction']],
+  lock: [{ kind: 'none' }, ['direction']],
+  unlock: [{ kind: 'none' }, ['direction']],
 };
 
 // The engine verbs whose owning capability the cartridge locks, labelled action.<verb>.
