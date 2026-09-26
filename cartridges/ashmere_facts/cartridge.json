@@ -1,8 +1,8 @@
 {
   "api_version": "loka/v3",
-  "id": "ashmere_details",
+  "id": "ashmere_facts",
   "version": "0.0.1",
-  "title": "Ashmere — Details",
+  "title": "Ashmere — Facts",
   "requires": {
     "kernel_api": {
       "at_least": "1.0",
@@ -13,7 +13,9 @@
     "capabilities": {
       "movement": 1,
       "description_variant": 1,
-      "inspectable_detail": 1
+      "inspectable_detail": 1,
+      "fact": 1,
+      "policy": 1
     },
     "client_features": []
   },

@@ -386,3 +386,36 @@ function sortKeys(v: any): any {
     );
   return v;
 }
+
+// R5 S3 (21 §6 DescriptionVariant). Breaks: the terminal prints a room's or a detail's base
+// text instead of the variant its facts select, or a variant whose condition fails. Expected
+// text is the facts fixture's catalog (child missing, bell not rung). The mud's variant is
+// planted to hold at the defaults (tracks_found equals false), re-hashed with node:crypto over
+// sorted-key JSON.stringify (canonical for these values), never by the kernel.
+test('the terminal shows the description variant the fresh facts select', () => {
+  const facts = read('protocol/fixtures/cartridge_facts_hash.json');
+  const c = facts.value;
+  c.rooms['ashmere_facts@0.0.1:room/reed_path'].details.mud.variants[0].when.root.items[0].equals =
+    false;
+  const sorted = (v: any): any =>
+    Array.isArray(v)
+      ? v.map(sorted)
+      : v && typeof v === 'object'
+        ? Object.fromEntries(
+            Object.keys(v)
+              .sort()
+              .map((k) => [k, sorted(v[k])]),
+          )
+        : v;
+  const canonical = JSON.stringify(sorted(c));
+  const sha = createHash('sha256').update(canonical).digest('hex');
+  const file = join(dir, 'facts.json');
+  writeFileSync(file, `{"cartridge":${canonical},"content_hash":"${sha}"}`);
+  const walk = join(dir, 'facts.txt');
+  writeFileSync(walk, 'n\ns\ns\nlook mud\n');
+  const r = play([file, walk]);
+  assert.equal(r.status, 0, r.err);
+  assert.match(r.out, new RegExp(`> n\nVillage Green\n${c.text['room.village_green.worried']}\n`));
+  assert.match(r.out, new RegExp(`> s\nReed Path\n${c.text['room.reed_path.description']}\n`));
+  assert.match(r.out, new RegExp(`> look mud\n${c.text['detail.mud.tracks']}\n`));
+});

@@ -14,6 +14,7 @@ import {
   type EntityId,
   type ErrorCode,
   type EventPayload,
+  type FactValue,
   type InspectableDetail,
   type Key,
   type Owned,
@@ -26,11 +27,16 @@ import type { RngState } from './rng.ts';
 
 export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
 
-/** The mutable, hashed part of a world: logical time, containment (03 §23) and the RNG. */
+/**
+ * The mutable, hashed part of a world: logical time, containment (03 §23), the RNG and the facts
+ * set so far, by canonical fact MutationTarget text (compose.ts); absent until one is set, as an
+ * unset fact has its default and no record (fact.schema.json ScopedFact).
+ */
 export type State = {
   readonly clock: number;
   readonly containers: Readonly<Record<string, EntityId>>;
   readonly rng: RngState;
+  readonly facts?: Readonly<Record<string, FactValue>>;
 };
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */
@@ -42,6 +48,7 @@ export type World = {
   readonly rooms: Readonly<Record<string, RoomDefinition>>; // by room EntityId
   readonly roomIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly details: Readonly<Record<string, Detail>>; // by detail target id
+  readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
   readonly state: State;
 };
 

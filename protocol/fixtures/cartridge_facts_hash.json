@@ -1,0 +1,264 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_facts (R5 S3; 05 \u00a711; CartridgeArtifact.content_hash): typed facts (fact.schema.json FactSpec: an instance enum, an instance bool, a player bool, keyed by DefinitionRefString with each . of the authored name made _) and description variants on two rooms and one detail (room.schema.json DescriptionVariant) whose conditions use all, any, not and fact_compare with short fact references expanded to full DefinitionRefs. Assembled by hand from the source files (manifest without entry, the lock, empty policies and actions, each room with key added and short references expanded, entry, text), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (integers only, no control characters, two non-ASCII characters) Python's output is the loka-numeric-v1 encoding.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_facts",
+      "version": "0.0.1",
+      "title": "Ashmere \u2014 Facts",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "description_variant": 1,
+          "inspectable_detail": 1,
+          "fact": 1,
+          "policy": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "description_variant": 1,
+        "inspectable_detail": 1,
+        "fact": 1,
+        "policy": 1
+      }
+    },
+    "facts": {
+      "ashmere_facts@0.0.1:fact/village_child_status": {
+        "version": 1,
+        "value_type": {
+          "type": "enum",
+          "values": [
+            "missing",
+            "rescued",
+            "lost"
+          ],
+          "default": "missing"
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "Whether the missing child was found (00a \u00a76).",
+        "key": "village_child_status"
+      },
+      "ashmere_facts@0.0.1:fact/chapel_bell_rung": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "The chapel bell was rung; the fen floods (00a \u00a76, \u00a710).",
+        "key": "chapel_bell_rung"
+      },
+      "ashmere_facts@0.0.1:fact/fen_tracks_found": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "The player found the child's tracks at the reed bank (00a \u00a76).",
+        "key": "fen_tracks_found"
+      }
+    },
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_facts@0.0.1:room/ferry_landing": {
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_facts",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "village_green"
+            }
+          },
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_facts",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "reed_path"
+            }
+          }
+        },
+        "key": "ferry_landing"
+      },
+      "ashmere_facts@0.0.1:room/reed_path": {
+        "title": "room.reed_path.title",
+        "description": "room.reed_path.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_facts",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        },
+        "variants": [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "ashmere_facts",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "chapel_bell_rung"
+                },
+                "equals": true
+              }
+            },
+            "description": "room.reed_path.flooded"
+          }
+        ],
+        "details": {
+          "mud": {
+            "aliases": [
+              "mud",
+              "tracks"
+            ],
+            "description": "detail.mud",
+            "variants": [
+              {
+                "when": {
+                  "policy_version": 1,
+                  "root": {
+                    "op": "any",
+                    "items": [
+                      {
+                        "op": "fact_compare",
+                        "fact": {
+                          "cartridge_id": "ashmere_facts",
+                          "cartridge_version": "0.0.1",
+                          "kind": "fact",
+                          "key": "fen_tracks_found"
+                        },
+                        "equals": true
+                      }
+                    ]
+                  }
+                },
+                "description": "detail.mud.tracks"
+              }
+            ]
+          }
+        },
+        "key": "reed_path"
+      },
+      "ashmere_facts@0.0.1:room/village_green": {
+        "title": "room.village_green.title",
+        "description": "room.village_green.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_facts",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        },
+        "variants": [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "all",
+                "items": [
+                  {
+                    "op": "fact_compare",
+                    "fact": {
+                      "cartridge_id": "ashmere_facts",
+                      "cartridge_version": "0.0.1",
+                      "kind": "fact",
+                      "key": "village_child_status"
+                    },
+                    "equals": "rescued"
+                  },
+                  {
+                    "op": "fact_compare",
+                    "fact": {
+                      "cartridge_id": "ashmere_facts",
+                      "cartridge_version": "0.0.1",
+                      "kind": "fact",
+                      "key": "chapel_bell_rung"
+                    },
+                    "equals": true
+                  }
+                ]
+              }
+            },
+            "description": "room.village_green.celebration"
+          },
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "not",
+                "item": {
+                  "op": "fact_compare",
+                  "fact": {
+                    "cartridge_id": "ashmere_facts",
+                    "cartridge_version": "0.0.1",
+                    "kind": "fact",
+                    "key": "village_child_status"
+                  },
+                  "equals": "rescued"
+                }
+              }
+            },
+            "description": "room.village_green.worried"
+          }
+        ],
+        "key": "village_green"
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_facts",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "ferry_landing"
+    },
+    "text": {
+      "room.ferry_landing.title": "Ferry Landing",
+      "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A mooring post leans into the current.",
+      "room.village_green.title": "Village Green",
+      "room.village_green.description": "An old elm shades a patch of trodden grass. The village goes about its day.",
+      "room.village_green.worried": "An old elm shades a patch of trodden grass. Neighbours talk in low voices about the missing child.",
+      "room.village_green.celebration": "Lanterns hang from the old elm. The child is home, and the bell still hums over the green.",
+      "room.reed_path.title": "Reed Path",
+      "room.reed_path.description": "A narrow path winds south through the reeds toward the fen.",
+      "room.reed_path.flooded": "Brown water has risen over the reed path since the bell rang.",
+      "detail.mud": "Soft black mud, churned by boots and birds.",
+      "detail.mud.tracks": "Among the boot prints, a small bare footprint points toward the fen."
+    }
+  },
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_facts@0.0.1:fact/chapel_bell_rung\":{\"key\":\"chapel_bell_rung\",\"meaning\":\"The chapel bell was rung; the fen floods (00a \u00a76, \u00a710).\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"ashmere_facts@0.0.1:fact/fen_tracks_found\":{\"key\":\"fen_tracks_found\",\"meaning\":\"The player found the child's tracks at the reed bank (00a \u00a76).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"ashmere_facts@0.0.1:fact/village_child_status\":{\"key\":\"village_child_status\",\"meaning\":\"Whether the missing child was found (00a \u00a76).\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":\"missing\",\"type\":\"enum\",\"values\":[\"missing\",\"rescued\",\"lost\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_facts\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere \u2014 Facts\",\"version\":\"0.0.1\"},\"policies\":{},\"rooms\":{\"ashmere_facts@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"reed_path\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_facts@0.0.1:room/reed_path\":{\"description\":\"room.reed_path.description\",\"details\":{\"mud\":{\"aliases\":[\"mud\",\"tracks\"],\"description\":\"detail.mud\",\"variants\":[{\"description\":\"detail.mud.tracks\",\"when\":{\"policy_version\":1,\"root\":{\"items\":[{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"fen_tracks_found\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}],\"op\":\"any\"}}}]}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"reed_path\",\"title\":\"room.reed_path.title\",\"variants\":[{\"description\":\"room.reed_path.flooded\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"chapel_bell_rung\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}]},\"ashmere_facts@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\",\"variants\":[{\"description\":\"room.village_green.celebration\",\"when\":{\"policy_version\":1,\"root\":{\"items\":[{\"equals\":\"rescued\",\"fact\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_child_status\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"chapel_bell_rung\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}],\"op\":\"all\"}}},{\"description\":\"room.village_green.worried\",\"when\":{\"policy_version\":1,\"root\":{\"item\":{\"equals\":\"rescued\",\"fact\":{\"cartridge_id\":\"ashmere_facts\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_child_status\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}}}]}},\"text\":{\"detail.mud\":\"Soft black mud, churned by boots and birds.\",\"detail.mud.tracks\":\"Among the boot prints, a small bare footprint points toward the fen.\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.reed_path.description\":\"A narrow path winds south through the reeds toward the fen.\",\"room.reed_path.flooded\":\"Brown water has risen over the reed path since the bell rang.\",\"room.reed_path.title\":\"Reed Path\",\"room.village_green.celebration\":\"Lanterns hang from the old elm. The child is home, and the bell still hums over the green.\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass. The village goes about its day.\",\"room.village_green.title\":\"Village Green\",\"room.village_green.worried\":\"An old elm shades a patch of trodden grass. Neighbours talk in low voices about the missing child.\"}}",
+  "sha256": "6eddafbab2944d27e4fd4fde9a8256542241e94efcd5b71e355031573db1d95d"
+}

@@ -5,6 +5,7 @@ defmodule Loka.Content.Checks do
   protocol/capability_registry.json); ownership comes from its commands and policies.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
+  alias Loka.Content.RoomParts
   alias Loka.Core.Canonical
   alias Loka.Core.Contracts
 
@@ -50,18 +51,19 @@ defmodule Loka.Content.Checks do
 
   @doc """
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
-  node's reference (fact, item, quest) or an exit's `to` goes becomes the DefinitionRef of
-  cartridge `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
+  node's reference (fact, item, quest), in any policy tree (a variant's condition included), or
+  an exit's `to` goes becomes the DefinitionRef of cartridge `m`'s definition of that key, of
+  the kind the field takes (`Source.ref/3`).
   """
   @spec expand(term(), map()) :: term()
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
 
-  def expand(%{"exits" => exits} = room, m) when is_map(exits),
-    do: %{
-      room
-      | "exits" => Map.new(exits, fn {d, e} -> {d, Map.update!(e, "to", &ref(&1, "room", m))} end)
-    }
+  # A room (its title a text key): a details map may also have a detail keyed exits or title.
+  def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
+    to = fn {d, e} -> {d, Map.update!(e, "to", &ref(&1, "room", m))} end
+    room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, to))
+  end
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
@@ -121,37 +123,7 @@ defmodule Loka.Content.Checks do
       {_, {rel, [], def}} <- defs[kind],
       d <- text_keys({rel, def}, fields, text),
       do: d
-    ) ++ details(defs, text)
-  end
-
-  # Each detail's description has a catalog entry, and its first alias is one no other detail
-  # of its room has, in the form a lookup produces (room.schema.json InspectableDetail).
-  defp details(defs, text) do
-    for {_, {rel, [], r}} <- defs["room"],
-        ds = Map.get(r, "details", %{}),
-        {key, detail} <- ds,
-        d <- detail_text(rel, key, detail, text) ++ reachable(rel, key, detail, ds),
-        do: d
-  end
-
-  defp detail_text(_, _, _, :unknown), do: []
-
-  defp detail_text(rel, key, %{"description" => t}, text) do
-    if is_map_key(text, t),
-      do: [],
-      else: [
-        diag("UNRESOLVED_REFERENCE", at(rel, ["details", key, "description"]), %{"target" => t})
-      ]
-  end
-
-  defp reachable(rel, key, detail, ds) do
-    others = for {k, o} <- ds, k != key, a <- o["aliases"], into: MapSet.new(), do: a
-
-    [first | _] = words = String.split(hd(detail["aliases"]), "_")
-
-    if "" in words or first in ~w(at the a an) or hd(detail["aliases"]) in others,
-      do: [diag("UNREACHABLE_DETAIL", at(rel, ["details", key]))],
-      else: []
+    ) ++ RoomParts.details(defs, text) ++ RoomParts.variant_texts(defs, text)
   end
 
   # Without a valid manifest the entry is unknown, not missing.
@@ -166,7 +138,9 @@ defmodule Loka.Content.Checks do
   defp room({rel, r}, m, defs, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 
-    owned(at(rel, []), "room", required) ++
+    Enum.flat_map(RoomParts.parts(r), fn {steps, kind} ->
+      owned(at(rel, steps), kind, required)
+    end) ++
       for {dir, exit} <- r["exits"],
           d <- reference(rel, ["exits", dir], {"to", "room"}, exit, m, defs),
           do: d
@@ -191,10 +165,11 @@ defmodule Loka.Content.Checks do
   defp tree({rel, steps, root}, ctx),
     do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
-  # Every policy tree: a named policy's root and each action's inline one.
+  # Every policy tree: a named policy's root, each action's inline one and each variant's.
   defp trees(defs, actions) do
     for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
-      for {rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}
+      for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
+      RoomParts.conditions(defs)
   end
 
   defp command(rel, name, required) do

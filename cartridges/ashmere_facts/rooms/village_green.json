@@ -1,0 +1,46 @@
+{
+  "title": "room.village_green.title",
+  "description": "room.village_green.description",
+  "exits": {
+    "south": {
+      "to": "ferry_landing"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
+              "equals": "rescued"
+            },
+            {
+              "op": "fact_compare",
+              "fact": "chapel_bell_rung",
+              "equals": true
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.celebration"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "village_child_status",
+            "equals": "rescued"
+          }
+        }
+      },
+      "description": "room.village_green.worried"
+    }
+  ]
+}

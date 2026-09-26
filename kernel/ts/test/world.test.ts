@@ -4,6 +4,7 @@
 // ["loka-id-v1", context, nil command id, ordinal] (numeric-profile.md), and room titles
 // are the fixture's text keys.
 import assert from 'node:assert/strict';
+import { readdirSync } from 'node:fs';
 import { test } from 'node:test';
 import { hash } from '../src/canonical.ts';
 import type { Command } from '../src/contracts.gen.ts';
@@ -217,4 +218,19 @@ test("a decision's allocator mints ordinals 0, 1, ... under its command", () => 
     [mint(), mint()],
     ['e2870386-6797-8a1b-8e1a-b2c028c16c49', '2ed1ae6f-befe-8e6a-a5b1-bce1b3d1e5d9'],
   );
+});
+
+// R5 S3. Breaks: a capability a cartridge can lock with no feature map cells, or one the map
+// calls implemented that the loader rejects (CAPABILITY_NOT_INSTALLED). Expected: the rule
+// module files, plus each capability owning no command that docs/features.json marks
+// implemented (bin/features.exs), read from the files, not from world.ts.
+test('INSTALLED is each rule module and each implemented ruleless capability', () => {
+  const rows = read('docs/features.json');
+  const ruleless = read('protocol/capability_registry.json')
+    .filter((c: { key: string; commands?: string[] }) => !c.commands?.length)
+    .map((c: { key: string }) => c.key)
+    .filter((k: string) => rows[k]?.implemented_in);
+  const rules = readdirSync(new URL('../src/rules/', import.meta.url)).map((f) => f.slice(0, -3));
+  const expected = [...rules, ...ruleless].sort().map((k) => [k, [1]]);
+  assert.deepEqual(Object.entries(INSTALLED.capabilities).sort(), expected);
 });

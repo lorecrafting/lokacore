@@ -1,0 +1,49 @@
+{
+  "title": "room.reed_path.title",
+  "description": "room.reed_path.description",
+  "exits": {
+    "north": {
+      "to": "ferry_landing"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "chapel_bell_rung",
+          "equals": true
+        }
+      },
+      "description": "room.reed_path.flooded"
+    }
+  ],
+  "details": {
+    "mud": {
+      "aliases": [
+        "mud",
+        "tracks"
+      ],
+      "description": "detail.mud",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "any",
+              "items": [
+                {
+                  "op": "fact_compare",
+                  "fact": "fen_tracks_found",
+                  "equals": true
+                }
+              ]
+            }
+          },
+          "description": "detail.mud.tracks"
+        }
+      ]
+    }
+  }
+}

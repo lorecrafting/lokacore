@@ -142,5 +142,14 @@
     },
     "statement": "Every exit of every room names a room of the world.",
     "implemented_in": "r5"
+  },
+  {
+    "id": "facts_typed",
+    "citation": {
+      "document": "03-domain-state-persistence.md",
+      "heading": "## 7. Typed world facts and narrative memory"
+    },
+    "statement": "Every stored fact is a fact the cartridge declares, in a scope kind it allows, with a value of its FactSpec type (bool, one of its enum values, or an int within its bounds).",
+    "implemented_in": "r5"
   }
 ]

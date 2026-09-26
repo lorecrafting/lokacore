@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Room and connection contracts",
-  "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need; slice 2: inspectable details. Tags, description variants and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
+  "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need; slice 2: inspectable details; slice 3: description variants. Tags and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
   "$defs": {
     "Alias": {
       "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
@@ -38,7 +38,7 @@
       ]
     },
     "InspectableDetail": {
-      "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but the first alias must be the detail's own and in the form a lookup produces (no empty word, not starting with at, the, a or an), or the player could not pick it by name (UNREACHABLE_DETAIL). Condition variants, perception, reveal facts and contextual actions join as optional fields.",
+      "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but the first alias must be the detail's own and in the form a lookup produces (no empty word, not starting with at, the, a or an), or the player could not pick it by name (UNREACHABLE_DETAIL). Its variants (DescriptionVariant) select other prose by condition. Owned by inspectable_detail (a cartridge with details requires it). R5 freezes this v1 shape (14 §R5): perception, reveal facts and contextual actions join as optional fields.",
       "type": "object",
       "properties": {
         "aliases": {
@@ -51,6 +51,14 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DescriptionVariant"
+          },
+          "minItems": 1,
+          "maxItems": 16
         }
       },
       "required": [
@@ -87,11 +95,35 @@
             "p"
           ],
           "description": "d"
+        },
+        {
+          "aliases": [
+            "bell"
+          ],
+          "description": "detail.bell",
+          "variants": [
+            {
+              "when": {
+                "policy_version": 1,
+                "root": {
+                  "op": "fact_compare",
+                  "fact": {
+                    "cartridge_id": "ashmere_facts",
+                    "cartridge_version": "0.0.1",
+                    "kind": "fact",
+                    "key": "chapel_bell_rung"
+                  },
+                  "equals": true
+                }
+              },
+              "description": "detail.bell.rung"
+            }
+          ]
         }
       ]
     },
     "RoomDefinition": {
-      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), and optionally its inspectable details by key, at most 64. Custom named connections (05 §17) join later as a separate optional field.",
+      "description": "A navigable place (21 §5 Place/Room): its key, its title and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, and its description variants (DescriptionVariant). Custom named connections (05 §17) join later as a separate optional field.",
       "type": "object",
       "properties": {
         "key": {
@@ -136,6 +168,14 @@
             "$ref": "#/$defs/InspectableDetail"
           },
           "maxProperties": 64
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DescriptionVariant"
+          },
+          "minItems": 1,
+          "maxItems": 16
         }
       },
       "required": [
@@ -181,6 +221,68 @@
               "description": "detail.bucket"
             }
           }
+        },
+        {
+          "key": "reed_path",
+          "title": "room.reed_path.title",
+          "description": "room.reed_path.description",
+          "exits": {},
+          "variants": [
+            {
+              "when": {
+                "policy_version": 1,
+                "root": {
+                  "op": "not",
+                  "item": {
+                    "op": "fact_compare",
+                    "fact": {
+                      "cartridge_id": "ashmere_facts",
+                      "cartridge_version": "0.0.1",
+                      "kind": "fact",
+                      "key": "chapel_bell_rung"
+                    },
+                    "equals": false
+                  }
+                }
+              },
+              "description": "room.reed_path.flooded"
+            }
+          ]
+        }
+      ]
+    },
+    "DescriptionVariant": {
+      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json VersionedPolicy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
+      "type": "object",
+      "properties": {
+        "when": {
+          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "when",
+        "description"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "ashmere_facts",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "equals": true
+            }
+          },
+          "description": "room.reed_path.flooded"
         }
       ]
     }

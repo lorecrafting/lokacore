@@ -12,7 +12,7 @@ import {
   type TextKey,
 } from './contracts.gen.ts';
 import { refString } from './decision.ts';
-import { utf8 } from './sha256.ts';
+import { fromUtf8 } from './sha256.ts';
 import { cmp, validate } from './validate.ts';
 
 /** What the installed kernel and app implement (05 §3, §6); the host supplies it. */
@@ -98,25 +98,6 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
 
 const fail = (ds: Diagnostic[]): LoadResult => ({ ok: false, diagnostic: first(ds) });
 
-// UTF-8 → string, strict by round trip: a malformed, overlong, truncated or surrogate
-// encoding re-encodes to different bytes (a lone low surrogate re-encodes identically, and
-// the canonical decoder rejects it). Throws on a code point above U+10FFFF.
-// ponytail: one string per character; decode in chunks if 4 MiB artifacts load slowly on Hermes.
-function fromUtf8(b: Uint8Array): string {
-  const parts: string[] = [];
-  for (let i = 0; i < b.length;) {
-    const lead = b[i++];
-    const n = lead < 0x80 ? 0 : lead < 0xe0 ? 1 : lead < 0xf0 ? 2 : 3;
-    let cp = n ? lead & (0x3f >> n) : lead;
-    for (let k = 0; k < n; k++) cp = (cp << 6) | (b[i++] & 0x3f);
-    parts.push(String.fromCodePoint(cp));
-  }
-  const s = parts.join('');
-  const again = utf8(s);
-  if (again.length !== b.length || again.some((x, i) => x !== b[i])) throw new RangeError();
-  return s;
-}
-
 // JSON-pointer path from the validator → loader path, walking `doc` to tell index from name.
 function loaderPath(doc: Json, pointer: string): string {
   let v: any = doc;
@@ -162,8 +143,45 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// The lock equals requires.capabilities, every command is owned, and every command and policy
-// op a definition uses has its owning capability's key in the lock.
+// Each room, detail and description variant (v2), with its kind (registry definitions) and path.
+function parts(c: Obj): [string, Obj, string][] {
+  const out: [string, Obj, string][] = [];
+  const add = (kind: string, d: Obj, at: string) => {
+    out.push([kind, d, at]);
+    (d.variants ?? []).forEach((v: Obj, i: number) =>
+      out.push(['variant', v, `${at}.variants[${i}]`]),
+    );
+  };
+  for (const [ref, r] of Object.entries((c.rooms ?? {}) as Obj)) {
+    add('room', r, `.cartridge.rooms${step(ref)}`);
+    for (const [key, d] of Object.entries((r.details ?? {}) as Obj))
+      add('detail', d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
+  }
+  return out;
+}
+
+// Each node, with its path, of every action's, named policy's and variant's condition.
+function nodes(c: Obj): [Obj, string][] {
+  const walk = (p: Obj, at: string): [Obj, string][] => [
+    [p, at],
+    ...(p.op === 'not' ? walk(p.item, `${at}.item`) : []),
+    ...(p.items ?? []).flatMap((x: Obj, i: number) => walk(x, `${at}.items[${i}]`)),
+  ];
+  return [
+    ...Object.entries(c.actions as Obj).flatMap(([ref, a]) =>
+      walk(a.policy.root, `.cartridge.actions${step(ref)}.policy.root`),
+    ),
+    ...Object.entries(c.policies as Obj).flatMap(([ref, p]) =>
+      walk(p.root, `.cartridge.policies${step(ref)}.root`),
+    ),
+    ...parts(c).flatMap(([k, v, at]) =>
+      k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
+    ),
+  ];
+}
+
+// The lock equals requires.capabilities, every command is owned, and every command, policy op
+// and definition kind (room, detail, variant) the cartridge uses has its owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const required: Obj = c.manifest.requires.capabilities;
@@ -183,25 +201,16 @@ function lockStage(c: Obj): Diagnostic[] {
     if (!Object.hasOwn(locked, owner))
       out.push(diag('UNDECLARED_CAPABILITY', path, { capability: owner }, [owners[name]]));
   };
-  const walk = (p: Obj, path: string) => {
-    use('policy', p.op, `${path}.op`);
-    if (p.op === 'not') walk(p.item, `${path}.item`); // has_item.item is a DefinitionRef
-    (p.items ?? []).forEach((x: Obj, i: number) => walk(x, `${path}.items[${i}]`));
-  };
-  for (const [ref, a] of Object.entries(c.actions as Obj)) {
-    const path = `.cartridge.actions${step(ref)}`;
-    use('command', a.command, `${path}.command`);
-    walk(a.policy.root, `${path}.policy.root`);
-  }
-  for (const [ref, p] of Object.entries(c.policies as Obj))
-    walk(p.root, `.cartridge.policies${step(ref)}.root`);
-  for (const ref of Object.keys(c.rooms ?? {}))
-    use('definition', 'room', `.cartridge.rooms${step(ref)}`);
+  for (const [ref, a] of Object.entries(c.actions as Obj))
+    use('command', a.command, `.cartridge.actions${step(ref)}.command`);
+  for (const [n, at] of nodes(c)) use('policy', n.op, `${at}.op`);
+  for (const [kind, , at] of parts(c)) use('definition', kind, at);
   return out;
 }
 
-// v2: the entry and every exit name a room of this cartridge, every text key a room, a detail
-// or an action uses has a catalog entry, and every detail's first alias is its own and typable.
+// v2: the entry and every exit name a room of this cartridge, every text key a room, a detail,
+// a variant or an action uses has a catalog entry, every fact_compare names a fact of this
+// cartridge (the kernel reads it), and every detail's first alias is its own and typable.
 function refStage(c: Obj): Diagnostic[] {
   if (c.format !== 'loka-cartridge-v2') return [];
   const { id, version } = c.manifest;
@@ -220,12 +229,10 @@ function refStage(c: Obj): Diagnostic[] {
   room(c.entry, '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;
-    text(r, ['title', 'description'], at);
     for (const [dir, exit] of Object.entries(r.exits as Obj))
       room(exit.to, `${at}.exits.${dir}.to`);
     const details: Obj = r.details ?? {};
     for (const [key, d] of Object.entries(details)) {
-      text(d, ['description'], `${at}.details.${key}`);
       const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
       const [first, ...words] = d.aliases[0].split('_');
       const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
@@ -235,6 +242,11 @@ function refStage(c: Obj): Diagnostic[] {
   }
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
+  for (const [kind, d, at] of parts(c))
+    text(d, kind === 'room' ? ['title', 'description'] : ['description'], at);
+  for (const [n, at] of nodes(c))
+    if (n.op === 'fact_compare' && !Object.hasOwn(c.facts, refString(n.fact)))
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}.fact`, { target: refString(n.fact) }));
   return out;
 }
 
@@ -258,6 +270,10 @@ function installedStage(c: Obj, installed: Installed): Diagnostic[] {
           capability: `${key}@${v}`,
         }),
       );
+  // One private world: a fact is read at its one scope, player or instance (fact.ts).
+  for (const [ref, f] of Object.entries(c.facts as Obj))
+    if (new Set(f.scopes).size !== 1 || !['player', 'instance'].includes(f.scopes[0]))
+      out.push(diag('FACT_SCOPE_UNSUPPORTED', `.cartridge.facts${step(ref)}.scopes`));
   const api = installed.kernel_api;
   if (apiCmp(api, req.kernel_api.at_least) < 0 || apiCmp(api, req.kernel_api.below) >= 0)
     out.push(

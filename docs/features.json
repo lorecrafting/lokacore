@@ -1,6 +1,6 @@
 {
   "movement": {
-    "spec": "21 \u00a75 Place/Room, Connection; 05 \u00a717; 04 \u00a75; 00 \u00a74.10",
+    "spec": "21 §5 Place/Room, Connection; 05 §17; 04 §5; 00 §4.10",
     "contracts": [
       "RoomDefinition",
       "Connection",
@@ -17,14 +17,34 @@
     "implemented_in": "R5 S1 (#34)"
   },
   "description_variant": {
-    "spec": "21 \u00a76 InspectableDetail, DescriptionVariant; 21 \u00a77 TargetResolution; 04 \u00a714, \u00a717-\u00a718",
+    "spec": "21 §6 InspectableDetail, DescriptionVariant; 21 §7 TargetResolution; 04 §14, §17-§18; 00a §12",
     "contracts": [
       "CommandPayload",
       "InspectableDetail",
+      "DescriptionVariant",
       "TargetResolution",
       "TargetUnresolved"
     ],
     "modules": [
+      "kernel/ts/src/target.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_details_hash.json",
+      "protocol/fixtures/cartridge_facts_hash.json"
+    ],
+    "invariants": [
+      "target_candidates_ordered"
+    ],
+    "implemented_in": "R5 S1 (#34) look; R5 S2 look at a detail; R5 S3 description variants"
+  },
+  "inspectable_detail": {
+    "spec": "21 §6 InspectableDetail; 14 §R5",
+    "contracts": [
+      "InspectableDetail",
+      "Alias"
+    ],
+    "modules": [
+      "kernel/ts/src/world.ts",
       "kernel/ts/src/target.ts"
     ],
     "fixtures": [
@@ -33,20 +53,10 @@
     "invariants": [
       "target_candidates_ordered"
     ],
-    "implemented_in": "R5 S1 (#34) look; R5 S2 look at a detail"
-  },
-  "inspectable_detail": {
-    "spec": "21 \u00a76 InspectableDetail",
-    "contracts": [
-      "InspectableDetail",
-      "Alias"
-    ],
-    "fixtures": [
-      "protocol/fixtures/cartridge_details_hash.json"
-    ]
+    "implemented_in": "R5 S2 details; R5 S3 lock requirement"
   },
   "target_resolution": {
-    "spec": "21 \u00a77 TargetSpec / TargetResolution; 04 \u00a717-\u00a718",
+    "spec": "21 §7 TargetSpec / TargetResolution; 04 §17-§18",
     "contracts": [
       "TargetSpec",
       "TargetResolution"
@@ -57,5 +67,42 @@
     "invariants": [
       "target_candidates_ordered"
     ]
+  },
+  "policy": {
+    "spec": "21 §3.2, §4 Policy; 06 §21",
+    "contracts": [
+      "VersionedPolicy",
+      "Policy"
+    ],
+    "modules": [
+      "kernel/ts/src/policy.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_facts_hash.json"
+    ],
+    "invariants": [
+      "unknown_types_fail_closed"
+    ],
+    "implemented_in": "R5 S3 all, any, not"
+  },
+  "fact": {
+    "spec": "03 §7, §13; 21 §3.9, §4 Fact",
+    "contracts": [
+      "FactSpec",
+      "FactType",
+      "FactValue",
+      "ScopedFact"
+    ],
+    "modules": [
+      "kernel/ts/src/fact.ts",
+      "kernel/ts/src/policy.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_facts_hash.json"
+    ],
+    "invariants": [
+      "facts_typed"
+    ],
+    "implemented_in": "R5 S3 facts in state, fact_compare"
   }
 }
