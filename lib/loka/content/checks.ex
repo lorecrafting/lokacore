@@ -91,12 +91,16 @@ defmodule Loka.Content.Checks do
   def rooms(m, defs, {entry, text}, registry) do
     rooms = for {_, {rel, [], r}} <- defs["room"], do: {rel, r}
 
-    actions = for {_, {rel, [], a}} <- defs["action"], do: {rel, a}
-
     entry(m, entry, defs) ++
-      Enum.flat_map(rooms, &text_keys(&1, ~w(title description), text)) ++
-      Enum.flat_map(actions, &text_keys(&1, ~w(label accessibility), text)) ++
+      texts(defs, text) ++
       if(m, do: Enum.flat_map(rooms, &room(&1, m, defs, registry)), else: [])
+  end
+
+  defp texts(defs, text) do
+    for {kind, fields} <- [{"room", ~w(title description)}, {"action", ~w(label accessibility)}],
+        {_, {rel, [], def}} <- defs[kind],
+        d <- text_keys({rel, def}, fields, text),
+        do: d
   end
 
   # Without a valid manifest the entry is unknown, not missing.
