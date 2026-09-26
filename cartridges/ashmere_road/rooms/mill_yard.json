@@ -1,0 +1,31 @@
+{
+  "title": "room.mill_yard.title",
+  "description": "room.mill_yard.description",
+  "exits": {
+    "east": {
+      "to": "wayside"
+    }
+  },
+  "details": {
+    "cart": {
+      "aliases": [
+        "cart",
+        "handcart"
+      ],
+      "description": "detail.cart",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "cart_moved",
+              "equals": true
+            }
+          },
+          "description": "detail.cart.moved"
+        }
+      ]
+    }
+  }
+}

@@ -267,3 +267,58 @@ test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
     `${AT}.check`,
   );
 });
+
+// R5 S6b resources, on the road known answer. Breaks: the kernel would read a resource that
+// does not exist, or regenerate outside a spec's bounds, because the loader let it in (each
+// matched by a compiler test in test/loka/content_road_test.exs).
+const ROAD = 'cartridge_road_hash.json';
+const HP = 'ashmere_road@0.0.1:resource/hp';
+const SHOVE = `.cartridge.recipes["ashmere_road@0.0.1:recipe/shove_cart"]`;
+const PRAY = `.cartridge.recipes["ashmere_road@0.0.1:recipe/pray"]`;
+const road = (c: any, key: string) => c.recipes[`ashmere_road@0.0.1:recipe/${key}`];
+const road_fails = (f: (c: any) => void, code: string, path: string, data = {}, s: string[] = []) =>
+  fails(f, code, path, data, s, ROAD);
+
+test('a resource spec whose bounds do not hold its start is RESOURCE_SPEC_INVALID', () => {
+  assert.ok(load(ROAD, () => {}).ok);
+  const at = `.cartridge.resources["${HP}"]`;
+  road_fails((c) => (c.resources[HP].start = 26), 'RESOURCE_SPEC_INVALID', at);
+  road_fails((c) => (c.resources[HP].start = -1), 'RESOURCE_SPEC_INVALID', at);
+  road_fails((c) => (c.resources[HP].minimum = 26), 'RESOURCE_SPEC_INVALID', at);
+  assert.ok(load(ROAD, (c) => (c.resources[HP].start = 25)).ok); // start at a bound
+});
+
+test("a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE", () => {
+  const target = { target: 'ashmere_road@0.0.1:resource/sp' };
+  road_fails(
+    (c) => (road(c, 'shove_cart').costs[0].resource.key = 'sp'),
+    'UNRESOLVED_REFERENCE',
+    `${SHOVE}.costs[0].resource`,
+    target,
+  );
+  road_fails(
+    (c) => (road(c, 'shove_cart').check.resource.key = 'sp'),
+    'UNRESOLVED_REFERENCE',
+    `${SHOVE}.check.resource`,
+    target,
+  );
+  road_fails(
+    (c) => (road(c, 'pray').outcomes.success.sequence[0].resource.key = 'sp'),
+    'UNRESOLVED_REFERENCE',
+    `${PRAY}.outcomes.success.sequence[0].resource`,
+    target,
+  );
+});
+
+test('resources without resource@1 in the lock are UNDECLARED_CAPABILITY', () => {
+  road_fails(
+    (c) => {
+      delete c.manifest.requires.capabilities.resource;
+      delete c.lock.capabilities.resource;
+    },
+    'UNDECLARED_CAPABILITY',
+    `.cartridge.resources["${HP}"]`,
+    { capability: 'resource' },
+    ['resource@1'],
+  );
+});

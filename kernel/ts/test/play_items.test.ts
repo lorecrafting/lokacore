@@ -22,11 +22,11 @@ function play(lines: string[]) {
     encoding: 'utf8',
   });
   assert.equal(r.status, 0, r.stderr);
-  // Each prompt's reply, without the state lines.
+  // Each prompt's reply, without the state and status lines.
   return r.stdout
     .split(/^> /m)
     .slice(1)
-    .map((s) => s.replace(/^(\[state|transcript:) .*\n/gm, ''));
+    .map((s) => s.replace(/^(\[state|transcript:|hp \d+\/\d+) .*\n/gm, ''));
 }
 
 // Breaks: a verb mapped to the wrong command or words, room lines or plain words missing,

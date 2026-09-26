@@ -1,0 +1,18 @@
+{
+  "title": "room.wayside.title",
+  "description": "room.wayside.description",
+  "exits": {
+    "west": {
+      "to": "mill_yard"
+    }
+  },
+  "details": {
+    "shrine": {
+      "aliases": [
+        "shrine",
+        "wayside_shrine"
+      ],
+      "description": "detail.shrine"
+    }
+  }
+}

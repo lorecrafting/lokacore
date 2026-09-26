@@ -1,5 +1,861 @@
 [
   {
+    "contract": "ResourceInt",
+    "value": 2147483648,
+    "errors": [
+      {
+        "path": "",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceInt",
+    "value": -2147483649,
+    "errors": [
+      {
+        "path": "",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceSpec",
+    "value": {},
+    "errors": [
+      {
+        "path": "/gain",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/maximum",
+        "code": "missing_property"
+      },
+      {
+        "path": "/minimum",
+        "code": "missing_property"
+      },
+      {
+        "path": "/start",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceSpec",
+    "value": {
+      "key": "hp",
+      "minimum": 0,
+      "maximum": 20,
+      "start": 20,
+      "gain": -1
+    },
+    "errors": [
+      {
+        "path": "/gain",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceSpec",
+    "value": {
+      "key": "hp",
+      "minimum": 0,
+      "maximum": 20,
+      "start": 20,
+      "gain": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/gain",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceSpec",
+    "value": {
+      "key": "hp",
+      "minimum": -2147483649,
+      "maximum": 20,
+      "start": 20,
+      "gain": 5,
+      "label": "x"
+    },
+    "errors": [
+      {
+        "path": "/label",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/minimum",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCost",
+    "value": {},
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCost",
+    "value": {
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "amount": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCost",
+    "value": {
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "amount": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "ring_bell",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        }
+      },
+      "costs": []
+    },
+    "errors": [
+      {
+        "path": "/costs",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "ring_bell",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        }
+      },
+      "costs": [
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        },
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/costs",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "ring_bell",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        }
+      },
+      "cooldown": 0
+    },
+    "errors": [
+      {
+        "path": "/cooldown",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "ring_bell",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        }
+      },
+      "check": {
+        "kind": "threshold"
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/difficulty",
+        "code": "missing_property"
+      },
+      {
+        "path": "/check/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/check/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "ring_bell",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        }
+      },
+      "check": {
+        "key": "k",
+        "kind": "threshold",
+        "resource": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "resource",
+          "key": "hp"
+        },
+        "difficulty": 2147483648,
+        "chance": 5
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/chance",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/check/difficulty",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "resource.adjust"
+    },
+    "errors": [
+      {
+        "path": "/by",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "resource.adjust",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "by": 2147483648,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/by",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "resource.adjust"
+    },
+    "errors": [
+      {
+        "path": "/entity_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/from",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      },
+      {
+        "path": "/to",
+        "code": "missing_property"
+      },
+      {
+        "path": "/writer_group",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "resource.adjust",
+      "writer_group": 0,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "entity_id": "11111111-2222-4333-8444-555555555555",
+      "from": 1,
+      "to": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "cooldown.start"
+    },
+    "errors": [
+      {
+        "path": "/action",
+        "code": "missing_property"
+      },
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/at",
+        "code": "missing_property"
+      },
+      {
+        "path": "/writer_group",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "cooldown.start",
+      "writer_group": 0,
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "action": "pray",
+      "at": 6,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "resource"
+    },
+    "errors": [
+      {
+        "path": "/entity_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "resource",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "entity_id": "11111111-2222-4333-8444-555555555555",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "cooldown"
+    },
+    "errors": [
+      {
+        "path": "/action",
+        "code": "missing_property"
+      },
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "MutationTarget",
+    "value": {
+      "kind": "cooldown",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "action": "pray",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "resources": {
+        "c@1.0.0:recipe/x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policies",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resources/c@1.0.0:recipe~1x",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/resources/c@1.0.0:recipe~1x",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
     "contract": "StateScope",
     "value": {
       "kind": "realm"

@@ -1,0 +1,14 @@
+{
+  "room.mill_yard.title": "Mill Yard",
+  "room.mill_yard.description": "Flour dust greys the cobbles. A [handcart](cart) sits mired to its axles in the ruts.",
+  "room.wayside.title": "Wayside",
+  "room.wayside.description": "The road bends past a moss-grown [shrine](shrine) where travellers leave their prayers.",
+  "detail.cart": "A handcart sunk deep in the mud. It would take a hale body to shift it.",
+  "detail.cart.moved": "The handcart stands free of the ruts now, its wheels caked in mud.",
+  "detail.shrine": "A little stone shrine, its niche worn smooth by hands.",
+  "actions.shove_cart": "Shove the cart",
+  "actions.pray": "Pray at the shrine",
+  "narration.shove_cart.success": "You set your shoulder to the cart and heave. It lurches free of the ruts.",
+  "narration.shove_cart.failure": "You heave at the cart, but you are too weak to shift it.",
+  "narration.pray.actor": "You bow your head at the shrine. Warmth steadies your limbs."
+}

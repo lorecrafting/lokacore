@@ -118,7 +118,8 @@
       "kernel/ts/src/compose.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/composition.json"
+      "protocol/fixtures/composition.json",
+      "protocol/fixtures/cartridge_road_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",

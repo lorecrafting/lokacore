@@ -1,0 +1,29 @@
+{
+  "api_version": "loka/v3",
+  "id": "ashmere_road",
+  "version": "0.0.1",
+  "title": "Ashmere — Road",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.0",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "inspectable_detail": 1,
+      "description_variant": 1,
+      "fact": 1,
+      "policy": 1,
+      "action_recipe": 1,
+      "check": 1,
+      "schedule": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "mill_yard"
+}

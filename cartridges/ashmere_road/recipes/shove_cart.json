@@ -1,0 +1,55 @@
+{
+  "label": "actions.shove_cart",
+  "aliases": [
+    "shove"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "mill_yard",
+    "detail": "cart"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "cart_moved",
+        "equals": true
+      }
+    }
+  },
+  "costs": [
+    {
+      "resource": "mv",
+      "amount": 1
+    }
+  ],
+  "check": {
+    "key": "shove_cart",
+    "kind": "threshold",
+    "resource": "hp",
+    "difficulty": 15
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "cart_moved",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.shove_cart.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.shove_cart.failure"
+      }
+    }
+  }
+}

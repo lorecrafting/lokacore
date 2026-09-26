@@ -1,0 +1,317 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_road (R5 S6b; 05 §11; CartridgeArtifact.content_hash): the default pools with resources.json overrides (hp 0..25 start 10, mv 0..3 start 3; resource.schema.json ResourceSpec) and resource@1 added by the compiler; shove_cart with a cost (1 mv, RecipeCost) and a threshold check (hp at least 15), success and failure outcomes; pray with a cost (10 ma), a cooldown of 3600 and a resource.adjust step (hp +5); one instance bool fact, two rooms with a detail each, one with a description variant; text with touch links. Assembled by hand from the source files (manifest without entry plus resource@1, the lock, empty policies and actions, facts, rooms and recipes with key added and short references expanded, the pools, entry, text), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_road",
+      "version": "0.0.1",
+      "title": "Ashmere — Road",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "inspectable_detail": 1,
+          "description_variant": 1,
+          "fact": 1,
+          "policy": 1,
+          "action_recipe": 1,
+          "check": 1,
+          "schedule": 1,
+          "resource": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "inspectable_detail": 1,
+        "description_variant": 1,
+        "fact": 1,
+        "policy": 1,
+        "action_recipe": 1,
+        "check": 1,
+        "schedule": 1,
+        "resource": 1
+      }
+    },
+    "facts": {
+      "ashmere_road@0.0.1:fact/cart_moved": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "The mired cart was shoved free of the ruts.",
+        "key": "cart_moved"
+      }
+    },
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_road@0.0.1:room/mill_yard": {
+        "title": "room.mill_yard.title",
+        "description": "room.mill_yard.description",
+        "exits": {
+          "east": {
+            "to": {
+              "cartridge_id": "ashmere_road",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "wayside"
+            }
+          }
+        },
+        "details": {
+          "cart": {
+            "aliases": [
+              "cart",
+              "handcart"
+            ],
+            "description": "detail.cart",
+            "variants": [
+              {
+                "when": {
+                  "policy_version": 1,
+                  "root": {
+                    "op": "fact_compare",
+                    "fact": {
+                      "cartridge_id": "ashmere_road",
+                      "cartridge_version": "0.0.1",
+                      "kind": "fact",
+                      "key": "cart_moved"
+                    },
+                    "equals": true
+                  }
+                },
+                "description": "detail.cart.moved"
+              }
+            ]
+          }
+        },
+        "key": "mill_yard"
+      },
+      "ashmere_road@0.0.1:room/wayside": {
+        "title": "room.wayside.title",
+        "description": "room.wayside.description",
+        "exits": {
+          "west": {
+            "to": {
+              "cartridge_id": "ashmere_road",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "mill_yard"
+            }
+          }
+        },
+        "details": {
+          "shrine": {
+            "aliases": [
+              "shrine",
+              "wayside_shrine"
+            ],
+            "description": "detail.shrine"
+          }
+        },
+        "key": "wayside"
+      }
+    },
+    "recipes": {
+      "ashmere_road@0.0.1:recipe/pray": {
+        "label": "actions.pray",
+        "aliases": [
+          "pray"
+        ],
+        "target": {
+          "kind": "detail",
+          "room": {
+            "cartridge_id": "ashmere_road",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "wayside"
+          },
+          "detail": "shrine"
+        },
+        "priority": 5,
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "costs": [
+          {
+            "resource": {
+              "cartridge_id": "ashmere_road",
+              "cartridge_version": "0.0.1",
+              "kind": "resource",
+              "key": "ma"
+            },
+            "amount": 10
+          }
+        ],
+        "cooldown": 3600,
+        "outcomes": {
+          "success": {
+            "sequence": [
+              {
+                "op": "resource.adjust",
+                "resource": {
+                  "cartridge_id": "ashmere_road",
+                  "cartridge_version": "0.0.1",
+                  "kind": "resource",
+                  "key": "hp"
+                },
+                "by": 5
+              }
+            ],
+            "narration": {
+              "actor": "narration.pray.actor"
+            }
+          }
+        },
+        "key": "pray"
+      },
+      "ashmere_road@0.0.1:recipe/shove_cart": {
+        "label": "actions.shove_cart",
+        "aliases": [
+          "shove"
+        ],
+        "target": {
+          "kind": "detail",
+          "room": {
+            "cartridge_id": "ashmere_road",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "mill_yard"
+          },
+          "detail": "cart"
+        },
+        "priority": 5,
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "not",
+            "item": {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "ashmere_road",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "cart_moved"
+              },
+              "equals": true
+            }
+          }
+        },
+        "costs": [
+          {
+            "resource": {
+              "cartridge_id": "ashmere_road",
+              "cartridge_version": "0.0.1",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "amount": 1
+          }
+        ],
+        "check": {
+          "key": "shove_cart",
+          "kind": "threshold",
+          "resource": {
+            "cartridge_id": "ashmere_road",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "difficulty": 15
+        },
+        "outcomes": {
+          "success": {
+            "sequence": [
+              {
+                "op": "fact.assign",
+                "fact": {
+                  "cartridge_id": "ashmere_road",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "cart_moved"
+                },
+                "value": true
+              }
+            ],
+            "narration": {
+              "actor": "narration.shove_cart.success"
+            }
+          },
+          "failure": {
+            "sequence": [],
+            "narration": {
+              "actor": "narration.shove_cart.failure"
+            }
+          }
+        },
+        "key": "shove_cart"
+      }
+    },
+    "resources": {
+      "ashmere_road@0.0.1:resource/hp": {
+        "key": "hp",
+        "minimum": 0,
+        "maximum": 25,
+        "start": 10,
+        "gain": 5
+      },
+      "ashmere_road@0.0.1:resource/ma": {
+        "key": "ma",
+        "minimum": 0,
+        "maximum": 100,
+        "start": 100,
+        "gain": 4
+      },
+      "ashmere_road@0.0.1:resource/mv": {
+        "key": "mv",
+        "minimum": 0,
+        "maximum": 3,
+        "start": 3,
+        "gain": 18
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_road",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "mill_yard"
+    },
+    "text": {
+      "room.mill_yard.title": "Mill Yard",
+      "room.mill_yard.description": "Flour dust greys the cobbles. A [handcart](cart) sits mired to its axles in the ruts.",
+      "room.wayside.title": "Wayside",
+      "room.wayside.description": "The road bends past a moss-grown [shrine](shrine) where travellers leave their prayers.",
+      "detail.cart": "A handcart sunk deep in the mud. It would take a hale body to shift it.",
+      "detail.cart.moved": "The handcart stands free of the ruts now, its wheels caked in mud.",
+      "detail.shrine": "A little stone shrine, its niche worn smooth by hands.",
+      "actions.shove_cart": "Shove the cart",
+      "actions.pray": "Pray at the shrine",
+      "narration.shove_cart.success": "You set your shoulder to the cart and heave. It lurches free of the ruts.",
+      "narration.shove_cart.failure": "You heave at the cart, but you are too weak to shift it.",
+      "narration.pray.actor": "You bow your head at the shrine. Warmth steadies your limbs."
+    }
+  },
+  "canonical": "{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"},\"facts\":{\"ashmere_road@0.0.1:fact/cart_moved\":{\"key\":\"cart_moved\",\"meaning\":\"The mired cart was shoved free of the ruts.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_road\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"check\":1,\"description_variant\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Road\",\"version\":\"0.0.1\"},\"policies\":{},\"recipes\":{\"ashmere_road@0.0.1:recipe/pray\":{\"aliases\":[\"pray\"],\"cooldown\":3600,\"costs\":[{\"amount\":10,\"resource\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"ma\",\"kind\":\"resource\"}}],\"key\":\"pray\",\"label\":\"actions.pray\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.pray.actor\"},\"sequence\":[{\"by\":5,\"op\":\"resource.adjust\",\"resource\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}}]}},\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":5,\"target\":{\"detail\":\"shrine\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"ashmere_road@0.0.1:recipe/shove_cart\":{\"aliases\":[\"shove\"],\"check\":{\"difficulty\":15,\"key\":\"shove_cart\",\"kind\":\"threshold\",\"resource\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}},\"costs\":[{\"amount\":1,\"resource\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}],\"key\":\"shove_cart\",\"label\":\"actions.shove_cart\",\"outcomes\":{\"failure\":{\"narration\":{\"actor\":\"narration.shove_cart.failure\"},\"sequence\":[]},\"success\":{\"narration\":{\"actor\":\"narration.shove_cart.success\"},\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"},\"op\":\"not\"}},\"priority\":5,\"target\":{\"detail\":\"cart\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}}},\"resources\":{\"ashmere_road@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":25,\"minimum\":0,\"start\":10},\"ashmere_road@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_road@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":3,\"minimum\":0,\"start\":3}},\"rooms\":{\"ashmere_road@0.0.1:room/mill_yard\":{\"description\":\"room.mill_yard.description\",\"details\":{\"cart\":{\"aliases\":[\"cart\",\"handcart\"],\"description\":\"detail.cart\",\"variants\":[{\"description\":\"detail.cart.moved\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"cart_moved\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}]}},\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"wayside\",\"kind\":\"room\"}}},\"key\":\"mill_yard\",\"title\":\"room.mill_yard.title\"},\"ashmere_road@0.0.1:room/wayside\":{\"description\":\"room.wayside.description\",\"details\":{\"shrine\":{\"aliases\":[\"shrine\",\"wayside_shrine\"],\"description\":\"detail.shrine\"}},\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"ashmere_road\",\"cartridge_version\":\"0.0.1\",\"key\":\"mill_yard\",\"kind\":\"room\"}}},\"key\":\"wayside\",\"title\":\"room.wayside.title\"}},\"text\":{\"actions.pray\":\"Pray at the shrine\",\"actions.shove_cart\":\"Shove the cart\",\"detail.cart\":\"A handcart sunk deep in the mud. It would take a hale body to shift it.\",\"detail.cart.moved\":\"The handcart stands free of the ruts now, its wheels caked in mud.\",\"detail.shrine\":\"A little stone shrine, its niche worn smooth by hands.\",\"narration.pray.actor\":\"You bow your head at the shrine. Warmth steadies your limbs.\",\"narration.shove_cart.failure\":\"You heave at the cart, but you are too weak to shift it.\",\"narration.shove_cart.success\":\"You set your shoulder to the cart and heave. It lurches free of the ruts.\",\"room.mill_yard.description\":\"Flour dust greys the cobbles. A [handcart](cart) sits mired to its axles in the ruts.\",\"room.mill_yard.title\":\"Mill Yard\",\"room.wayside.description\":\"The road bends past a moss-grown [shrine](shrine) where travellers leave their prayers.\",\"room.wayside.title\":\"Wayside\"}}",
+  "sha256": "151b7089597318e00c0eb7ad23746190c0ea93330f708b5a97250a951a74868e"
+}
