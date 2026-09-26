@@ -20,6 +20,7 @@
   {"contract": "GameError", "value": {"code": "exit_locked", "reason": "x", "a/b~c": 1}, "errors": [{"path": "/a~1b~0c", "code": "unknown_property"}, {"path": "/reason", "code": "unknown_property"}]},
   {"contract": "GameError", "value": {}, "errors": [{"path": "/code", "code": "missing_property"}]},
   {"contract": "ErrorRegistryEntry", "value": {"code": "not_found", "category": "other", "description": ""}, "errors": [{"path": "/category", "code": "not_in_enum"}, {"path": "/description", "code": "too_short"}]},
+  {"contract": "ErrorRegistryEntry", "value": {}, "errors": [{"path": "/category", "code": "missing_property"}, {"path": "/code", "code": "missing_property"}, {"path": "/description", "code": "missing_property"}]},
   {"contract": "NoSuchContract", "value": {}, "errors": [{"path": "", "code": "unknown_contract"}]},
   {"contract": "SubsetProbe", "value": {"n": true}, "errors": [{"path": "/n", "code": "invalid_type"}]},
   {"contract": "SubsetProbe", "value": {"n": 0.5}, "errors": [{"path": "/n", "code": "invalid_type"}]},
