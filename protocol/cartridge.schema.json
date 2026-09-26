@@ -134,6 +134,16 @@
                 "$ref": "entity.schema.json#/$defs/NpcDefinition"
               }
             },
+            "recipes": {
+              "description": "The cartridge's action recipes (action.schema.json ActionRecipe), keyed by DefinitionRefString of kind recipe; absent when it has none (R5 S5, an optional map: the tag stays).",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):recipe/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "action.schema.json#/$defs/ActionRecipe"
+              }
+            },
             "entry": {
               "description": "The room a new run's player starts in (00a §12 manifest entry); a room of this cartridge.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
