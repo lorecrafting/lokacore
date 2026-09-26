@@ -58,3 +58,40 @@
 - `elixir bin/check_docs.exs`: 0 broken links, 0 unreachable.
 
 Verdict: **APPROVE**.
+
+## Owner follow-up, DikuMUD figures (`4ddec9d`)
+
+Checked against `sneezymud/dikumud` (fetched with `gh api .../contents/<file>`):
+
+- Quote: appended verbatim with its context line; the record's unverifiability note covers it.
+- Reading: "make it closer to DikuMUD, and if we can find out, LEgendMUD" asks for Diku as
+  the base with LegendMUD figures where known. Taking Diku's starting numbers over the
+  mockup's 300/120/200 is a fair reading, the record says it supersedes that answer, and
+  it keeps a path for LegendMUD figures the owner confirms.
+- Figures (`graf` in `limits.c`, starting age 17 from `age()` in `utility.c`):
+  `mana_limit` 100; `move_limit` graf(17; 70,160) = 70 + 2*90/15 = 82; `hit_gain`
+  5 + 2*5/15 = 5; `mana_gain` 4 + 2*2/15 = 4; `move_gain` 18 + 2*4/15 = 18. HP: `do_start`
+  sets base 10, `advance_level` adds `con_app` hitp plus a class roll (mage 3-8 ... warrior
+  10-15), `hit_limit` adds graf(17; 4,17) = 5. `movement_loss` inside 1, city 2, field 2,
+  forest 3, hills 4, mountains 6, swimming 4; `do_simple_move` charges the average of the
+  two rooms' costs and refuses with "You are too exhausted." when MV is short. All match.
+- 00 §4 amendment, Terrain and Resources rows, and the room-view status line all read
+  20/100/82; no Markdown doc still gives 300/120/200 as the default.
+- `elixir bin/check_docs.exs`: 0 broken links, 0 unreachable.
+
+Findings:
+
+3. **should-fix** `docs/spec/00-first-cartridge-design.md:320`: the Regeneration row still
+   says "doubled resting; halved hungry", while the decision now says sleeping, resting and
+   sitting add Diku's position bonuses (`limits.c`: HP/MV +1/2 sleeping, +1/4 resting, +1/8
+   sitting; MA +100%/+50%/+25%; hungry or thirsty cuts gain to a quarter). An R7 positions
+   developer following 00 builds a doubling the decision replaced. Align the row with the
+   decision, or say which one governs.
+4. **nit** `docs/decisions/owner-decision-hp-ma-mv-2026-09-25.md:38`: HP 20 is not a Diku
+   constant but a pick inside Diku's level-1 range (about 18-30 before the constitution
+   bonus; 20 is the mage/cleric end), and 00:283 calls it "DikuMUD's starting maximums". Say
+   it is a chosen representative value.
+5. **nit** same file, line 43: Diku's average is C integer division (floored: inside to city
+   costs 1, not 1.5). Say "floored" so R8 does not round differently.
+
+Verdict: **APPROVE WITH NOTES**.
