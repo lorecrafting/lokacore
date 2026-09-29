@@ -16,3 +16,7 @@ Document 04 §§5.4–5.5 requires a whole-decision `budget_exceeded` fault and 
 - Compared the limit list and tie order with `docs/spec/conformance/composition-profile.json`: all eleven keys match in profile order. The closed `DecisionResult` fault remains unchanged; the diagnostic is separate and non-authoritative, with unavailable causal values `null` rather than invented.
 - Checked the deferral against document 00 §11 and document 14 §R10: both mechanics belong to chapter one; open/close remains R5. The owner record identifies the decision as a PM relay rather than fabricating a verbatim quote.
 - No implementation, schema, fixture, or test changed. The first-producer rule is consistent with document 11 §12 and ADR-075 §7. Mutation testing does not apply to this documentation slice. No unnecessary mechanism in the diff.
+
+## Re-review — `90e18668f5edf96773eca172234bd1ff2f7f9dfc`
+
+**APPROVE.** The should-fix is resolved. Document 04 §5.4 now requires a stored observation only for a replayable decision with genuine `ReplayIds`; a preview without them reports the limit in its local diagnostic and neither invents IDs nor emits an `ObservationRecord`. This matches ADR-075 §3's required IDs and the isolated, unpublished preview in documents 04 §5.5 and 08 §30. The closed fault, exact limit key, first-producer registration, and non-authoritative store remain intact. I reviewed the one-line fix and those direct spec cross-references; no new findings. Documentation-only change; no mutation test.
