@@ -41,3 +41,11 @@ Scoped re-review of the changes after `95061a9`; the five original findings were
 `mise exec -- elixir bin/check_docs.exs`: 141 docs, 0 broken links, 0 unreachable. `git diff --check 95061a9..e3cf692`: clean. PR body matches the revised sequence. All three CI jobs at `e3cf692` passed (Elixir, lint, TypeScript).
 
 **Verdict at `e3cf692`: CHANGES REQUIRED** (one should-fix remains).
+
+## Fix round 2 — `460b47d`
+
+Scoped to the remaining P1 acceptance finding. `docs/ROADMAP.md:64` now requires the **actual adapter** on Node, Android Hermes and iOS Hermes to match exact frozen fixture results, with per-step canonical state/result bytes for mismatches. This satisfies [R6P P1](../spec/pre-release-proof.md#implementation-tickets-and-dependency-graph), its candidate-adapter evidence rule, and [ADR-074 §3](../decisions/adr-074-ts-first-proposal.md#3-the-proposal). P6 retains the full physical-device proof. The PR body agrees; no new finding.
+
+`git diff --check c2f384f..460b47d`: clean. `mise exec -- elixir bin/check_docs.exs`: 141 docs, 0 broken links, 0 unreachable. CI for `460b47d` was pending at review time; the PM must confirm it finishes green before merge.
+
+**Verdict at `460b47d`: APPROVE.**

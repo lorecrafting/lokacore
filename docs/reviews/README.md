@@ -81,4 +81,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 ## R6
 
-- [R6 offline authority slice plan](2026-09-28-r6-plan-review.md): PR #58 at `05af857`, CHANGES REQUIRED (one blocker, three should-fix, one nit); fixes `e3cf692`, CHANGES REQUIRED (one P1 acceptance gap).
+- [R6 offline authority slice plan](2026-09-28-r6-plan-review.md): PR #58 at `05af857`, CHANGES REQUIRED; fixes `e3cf692`, CHANGES REQUIRED; final `460b47d`, APPROVE.
