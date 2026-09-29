@@ -21,14 +21,20 @@ const moved = (r: Result): [string, Json][] =>
     .filter((c) => c.target.kind === 'containment')
     .map((c) => [(c.target as Any).entity_id, c.value]);
 
-// Walking up from e's container reaches e, or runs longer than there are rows (a cycle).
-function loops(c: Json | undefined, e: string, final: Map<string, Json>): boolean {
-  for (let n = final.size; n > 0; n--) {
-    if (c === undefined) return false;
-    if (c === e) return true;
-    c = final.get(c as string);
+// Each ancestor path is marked once, so a long acyclic chain stays linear.
+function acyclic(final: Map<string, Json>): boolean {
+  const done = new Set<string>();
+  for (const root of final.keys()) {
+    const path = new Set<string>();
+    let at: Json | undefined = root;
+    while (typeof at === 'string' && final.has(at) && !done.has(at)) {
+      if (path.has(at)) return false;
+      path.add(at);
+      at = final.get(at);
+    }
+    for (const e of path) done.add(e);
   }
-  return c !== undefined;
+  return true;
 }
 
 // Each op reads one value of its target and leaves another (the Elixir twin's link/1).
@@ -65,6 +71,87 @@ function initial(op: Any, s: Any): Json | undefined {
   return s.clock;
 }
 
+const LEGAL: Record<string, string[]> = {
+  active: ['objectives_complete', 'failed', 'abandoned'],
+  objectives_complete: ['resolved', 'failed', 'abandoned'],
+  failed: ['active'],
+  abandoned: ['active'],
+};
+const DOOR: Record<string, string[]> = {
+  closed: ['open', 'locked'],
+  open: ['closed'],
+  locked: ['closed'],
+};
+
+function transferValid(op: Any, containers: Map<string, string>, capacities: Any): boolean {
+  const path = new Set<string>();
+  for (let at = op.destination_id; at !== undefined; at = containers.get(at)) {
+    if (at === op.entity_id || path.has(at)) return false;
+    path.add(at);
+  }
+  const cap = capacities?.[op.destination_id];
+  if (cap === undefined) return true;
+  let held = 0;
+  for (const [e, c] of containers) if (e !== op.entity_id && c === op.destination_id) held++;
+  return held < cap;
+}
+
+function questValid(op: Any, quests: Map<string, Any>): boolean {
+  if (op.op === 'quest.activate')
+    return ![...quests.values()].some(
+      (q) =>
+        same(q.quest, op.quest) &&
+        same(q.scope, op.scope) &&
+        ['active', 'objectives_complete'].includes(q.state),
+    );
+  return (
+    (LEGAL[op.from] ?? []).includes(op.to) &&
+    (op.to === 'resolved'
+      ? op.outcome !== undefined
+      : op.to === 'failed' || op.outcome === undefined)
+  );
+}
+
+function extra(
+  op: Any,
+  s: Any,
+  horizon: number,
+  containers: Map<string, string>,
+  quests: Map<string, Any>,
+): boolean {
+  switch (op.op) {
+    case 'entity.transfer':
+      return transferValid(op, containers, s.capacities);
+    case 'quest.activate':
+    case 'quest.transition':
+      return questValid(op, quests);
+    case 'choice.resolve': {
+      const row = s.choices?.[op.continuation_id];
+      return (
+        Array.isArray(row?.choice_ids) &&
+        row.choice_ids.includes(op.choice_id) &&
+        row.opened_revision === op.expected_revision
+      );
+    }
+    case 'job.schedule':
+      return op.due_time > horizon;
+    case 'job.complete':
+      return s.jobs?.[op.job_id]?.due_time <= horizon;
+    case 'time.advance':
+      return op.to > op.from;
+    case 'resource.adjust': {
+      const spec = s.resource_specs?.[key(op.resource)];
+      return spec !== undefined && op.to >= spec.minimum && op.to <= spec.maximum;
+    }
+    case 'cooldown.start':
+      return op.at === s.clock;
+    case 'barrier.transition':
+      return Object.hasOwn(DOOR, op.from) && DOOR[op.from]!.includes(op.to);
+    default:
+      return true;
+  }
+}
+
 const CHECKS: Record<string, (o: Any) => boolean> = {
   one_container_per_item: ({ state, result }) => {
     const m = moved(result);
@@ -83,7 +170,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     const counts = new Map<Json, number>();
     for (const c of final.values()) counts.set(c, (counts.get(c) ?? 0) + 1);
     return (
-      [...final].every(([e, c]) => !loops(c, e, final)) &&
+      acyclic(final) &&
       Object.entries<number>(state.capacities ?? {}).every(
         ([c, cap]) => (counts.get(c) ?? 0) <= cap,
       )
@@ -97,16 +184,30 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     }
     return 'fault' in result || [...groups.values()].every((g) => g.size === 1);
   },
-  // Checks only the read -> write value chain per target (a resource's current value, derived),
-  // not capacity, revision, cycle, resource or time bounds.
+  // Replay the contract preconditions on independent overlays; never use compose's result to
+  // compute the expected answer. A fault vacuously holds this success-only invariant.
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
+    if (!Number.isInteger(state.clock)) return false;
     const seen = new Map<string, Json | undefined>();
+    const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
+    const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));
+    let horizon = state.clock;
+    for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
       const k = key(target(op));
       const [need, give] = link(op);
-      if (!same(seen.has(k) ? seen.get(k) : initial(op, state), need)) return false;
+      if (
+        !same(seen.has(k) ? seen.get(k) : initial(op, state), need) ||
+        !extra(op, state, horizon, containers, quests)
+      )
+        return false;
       seen.set(k, give);
+      if (op.op === 'entity.transfer') containers.set(op.entity_id, op.destination_id);
+      if (op.op === 'quest.activate')
+        quests.set(op.instance_id, { quest: op.quest, scope: op.scope, state: 'active' });
+      if (op.op === 'quest.transition')
+        quests.set(op.instance_id, { ...quests.get(op.instance_id), state: op.to });
     }
     return true;
   },

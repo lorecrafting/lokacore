@@ -78,3 +78,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Gate R5 Astra baseline review](2026-09-27-r5-gate-astra-baseline.md): `main` at `63f22db`, NOT READY TO PASS (four known carries; one scope question). Advisory input to the later gate review.
 - [Astra Gate R5 baseline record](2026-09-28-r5-astra-baseline-record-review.md): PR #55 at `1201758`, APPROVE WITH NOTES (independent factual check; Gate R5 remains open).
 - [Gate R5 budget diagnostic contract and deferred mechanics](2026-09-28-r5-budget-contract-review.md): PR #56 at `7bec84f`, APPROVE WITH NOTES (one should-fix: preview correlation IDs).
+- [Gate R5 carries: independent preconditions, linear containment, GameView own-key guard](2026-09-28-r5-gate-carries-review.md): PR #57 at `e95e0c7`, APPROVE.
