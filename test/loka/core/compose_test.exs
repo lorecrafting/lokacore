@@ -196,6 +196,46 @@ defmodule Loka.Core.ComposeTest do
     for id <- @registered, holds <- [true, false], do: assert({id, holds} in covered, id)
   end
 
+  # Breaks: delta_preconditions_hold accepts an invalid success when it checks only from-values.
+  test "invalid successful deltas fail their independent precondition check" do
+    refute Invariants.check("delta_preconditions_hold", %{
+             "state" => %{},
+             "delta" => %{"ops" => []},
+             "result" => %{"changes" => []}
+           })
+
+    ids = ~w(choice-resolve-not-offered choice-resolve-wrong-revision
+             quest-transition-skips-objectives-complete quest-activate-while-open-in-scope
+             capacity-all-or-nothing transfer-into-descendant
+             resource-below-minimum-never-clamps time-advance-not-later
+             job-schedule-at-current-time job-complete-not-due
+             barrier-lock-while-open cooldown-start-at-not-base-clock)
+
+    for id <- ids do
+      c = Enum.find(@fixture["cases"], &(&1["id"] == id))
+      assert c, id
+
+      assert Invariants.check("delta_preconditions_hold", %{
+               "state" => state(c["state"]),
+               "delta" => %{"ops" => c["ops"]},
+               "result" => %{"changes" => []}
+             }) == false,
+             id
+    end
+  end
+
+  # Breaks: an optimized cycle walk checks only moved rows, or skips capacity.
+  test "containment checks deep chains, untouched cycles and untouched capacity" do
+    chain = Map.new(1..5000, &{"n#{&1}", "n#{&1 + 1}"})
+
+    holds =
+      &Invariants.check("containment_acyclic", %{"state" => &1, "result" => %{"changes" => []}})
+
+    assert holds.(%{"containers" => chain})
+    refute holds.(%{"containers" => Map.put(chain, "n5001", "n4999")})
+    refute holds.(%{"containers" => %{"a" => "box", "b" => "box"}, "capacities" => %{"box" => 1}})
+  end
+
   defp jobs(n, due),
     do: Map.new(1..n//1, &{job_id(&1), %{"due_time" => due, "status" => "pending"}})
 
