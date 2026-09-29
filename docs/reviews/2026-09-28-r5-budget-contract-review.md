@@ -20,3 +20,7 @@ Document 04 §§5.4–5.5 requires a whole-decision `budget_exceeded` fault and 
 ## Re-review — `90e18668f5edf96773eca172234bd1ff2f7f9dfc`
 
 **APPROVE.** The should-fix is resolved. Document 04 §5.4 now requires a stored observation only for a replayable decision with genuine `ReplayIds`; a preview without them reports the limit in its local diagnostic and neither invents IDs nor emits an `ObservationRecord`. This matches ADR-075 §3's required IDs and the isolated, unpublished preview in documents 04 §5.5 and 08 §30. The closed fault, exact limit key, first-producer registration, and non-authoritative store remain intact. I reviewed the one-line fix and those direct spec cross-references; no new findings. Documentation-only change; no mutation test.
+
+## Merge-head verification — `67b508d6900fc688d47f5bf00043bf10e1b67ec4`
+
+**APPROVE.** The reviewed spec and owner-decision files are unchanged from `8d9c470`. The `docs/reviews/README.md` conflict resolution retains both PR #56's final approval and PR #57's approval. No new finding in this scoped head check.
