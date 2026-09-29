@@ -25,3 +25,19 @@ Reviewed head: `05af857` (`r6-plan`). Independent Codex review; reviewer authore
 - No mutation test (docs-only). `mise exec -- elixir bin/check_docs.exs`: 141 docs, 0 broken links, 0 unreachable. `gh pr checks 58`: Elixir, lint and TypeScript all passed at `05af857`. `git diff --check origin/main...HEAD`: clean.
 
 **Verdict: CHANGES REQUIRED.**
+
+## Fix round 1 — `e3cf692`
+
+Scoped re-review of the changes after `95061a9`; the five original findings were checked against their direct roadmap lines and the governing spec. No implementation or mutation test (docs-only).
+
+| Finding | Disposition |
+|---|---|
+| B1 | **Partially fixed.** `docs/ROADMAP.md:53,55,64` puts P1 before S1, assigns a distinct slice, and corrects the P2/P3–P6 sequence. Its acceptance still says only “controlled known answers.” [P1](../spec/pre-release-proof.md#implementation-tickets-and-dependency-graph) requires **exact fixture results on selected host paths**, and the proof's evidence section requires running the corpus against the actual candidate adapters. A pure digest/helper test could pass while the adapter's Node or Hermes path produces different identity or outcome bytes. Name the selected P1 host paths and require exact frozen fixture results from the actual adapter there; P6 retains full device proof. This is a remaining **should-fix** acceptance gap, not an unscheduled-prerequisite blocker. |
+| S1 | Fixed. `docs/ROADMAP.md:67` now makes installed-release retention cover saves, bookmarks, recovery copies, pending validated restores, active references/downloads and completed migration, and requires an old-release deletion control. |
+| S2 | Fixed. `docs/ROADMAP.md:65` now requires replay of a consumed choice from a stale view and integrity conflict for changed intent under the same ID. |
+| S3 | Fixed. `docs/ROADMAP.md:54` assigns the proof's calendar with the NPC schedule/behavior slice. |
+| N1 | Fixed. `docs/ROADMAP.md:72` totals 31 slices and labels the older estimates historical. |
+
+`mise exec -- elixir bin/check_docs.exs`: 141 docs, 0 broken links, 0 unreachable. `git diff --check 95061a9..e3cf692`: clean. PR body matches the revised sequence. All three CI jobs at `e3cf692` passed (Elixir, lint, TypeScript).
+
+**Verdict at `e3cf692`: CHANGES REQUIRED** (one should-fix remains).
