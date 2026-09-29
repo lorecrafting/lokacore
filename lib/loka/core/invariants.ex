@@ -22,6 +22,13 @@ defmodule Loka.Core.Invariants do
   @evaluation_faults for e <- JSON.decode!(@registry),
                          e["category"] == "evaluation_fault",
                          do: e["code"]
+  @legal %{
+    "active" => ~w(objectives_complete failed abandoned),
+    "objectives_complete" => ~w(resolved failed abandoned),
+    "failed" => ["active"],
+    "abandoned" => ["active"]
+  }
+  @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
 
   @spec check(String.t(), map()) :: boolean()
   def check("one_container_per_item", %{"state" => s, "result" => r}) do
@@ -37,7 +44,7 @@ defmodule Loka.Core.Invariants do
     final = Map.merge(Map.get(s, "containers", %{}), Map.new(moved(r)))
     counts = Enum.frequencies(Map.values(final))
 
-    Enum.all?(final, fn {e, c} -> not loops?(c, e, final, map_size(final)) end) and
+    acyclic?(final) and
       Enum.all?(Map.get(s, "capacities", %{}), fn {c, cap} -> Map.get(counts, c, 0) <= cap end)
   end
 
@@ -46,16 +53,10 @@ defmodule Loka.Core.Invariants do
     Map.has_key?(r, "fault") or Enum.all?(groups, fn {_, gs} -> length(Enum.uniq(gs)) == 1 end)
   end
 
-  # Checks only the read -> write value chain per target (fact value, container, quest state,
-  # continuation or job status, clock, current resource value, cooldown start, barrier state), not capacity, revision, cycle or time bounds.
+  # Replay success preconditions independently of Compose.compose/2, including cross-target
+  # overlays for containment and quest scope. A fault vacuously holds this success-only check.
   def check("delta_preconditions_hold", %{"state" => s, "delta" => %{"ops" => ops}, "result" => r}) do
-    Map.has_key?(r, "fault") or
-      Enum.reduce_while(ops, %{}, fn op, seen ->
-        k = Compose.key(Compose.target(op))
-        {need, give} = link(op)
-        before = Map.get_lazy(seen, k, fn -> initial(op, s) end)
-        if before == need, do: {:cont, Map.put(seen, k, give)}, else: {:halt, false}
-      end) != false
+    Map.has_key?(r, "fault") or preconditions_hold?(s, ops)
   end
 
   def check("fault_discards_whole_proposal", %{"result" => r}) do
@@ -101,11 +102,125 @@ defmodule Loka.Core.Invariants do
         do: {e, c}
   end
 
-  # Walking up from e's container reaches e, or runs longer than there are rows (a cycle).
-  defp loops?(nil, _, _, _), do: false
-  defp loops?(e, e, _, _), do: true
-  defp loops?(_, _, _, 0), do: true
-  defp loops?(c, e, final, n), do: loops?(final[c], e, final, n - 1)
+  defp preconditions_hold?(s, ops) do
+    if not is_integer(s["clock"]), do: false, else: replay_preconditions(s, ops)
+  end
+
+  defp replay_preconditions(s, ops) do
+    horizon =
+      Enum.reduce(ops, s["clock"], fn op, t ->
+        if op["op"] == "time.advance", do: op["to"], else: t
+      end)
+
+    containers = Map.get(s, "containers", %{})
+    quests = Map.get(s, "quests", %{})
+
+    Enum.reduce_while(ops, {%{}, containers, quests}, fn op, {seen, containers, quests} ->
+      k = Compose.key(Compose.target(op))
+      {need, give} = link(op)
+      before = Map.get_lazy(seen, k, fn -> initial(op, s) end)
+
+      if before == need and extra?(op, s, horizon, containers, quests) do
+        {:cont,
+         {Map.put(seen, k, give), moved_container(op, containers), moved_quest(op, quests)}}
+      else
+        {:halt, false}
+      end
+    end) != false
+  end
+
+  # Mark each path once; a deep chain is linear in the number of rows.
+  defp acyclic?(final) do
+    Enum.reduce_while(final, MapSet.new(), fn {e, _}, done ->
+      case walk(e, final, done, MapSet.new()) do
+        :cycle -> {:halt, false}
+        path -> {:cont, MapSet.union(done, path)}
+      end
+    end) != false
+  end
+
+  defp walk(e, final, done, path) do
+    cond do
+      not Map.has_key?(final, e) or MapSet.member?(done, e) -> path
+      MapSet.member?(path, e) -> :cycle
+      true -> walk(final[e], final, done, MapSet.put(path, e))
+    end
+  end
+
+  defp extra?(%{"op" => "entity.transfer"} = op, s, _, containers, _) do
+    d = op["destination_id"]
+    e = op["entity_id"]
+    cap = get_in(s, ["capacities", d])
+    held = Enum.count(containers, fn {x, c} -> x != e and c == d end)
+    not inside?(d, e, containers, MapSet.new()) and (cap == nil or held < cap)
+  end
+
+  defp extra?(%{"op" => "quest.activate"} = op, _, _, _, quests) do
+    Enum.all?(quests, fn {_, q} ->
+      q["quest"] != op["quest"] or q["scope"] != op["scope"] or
+        q["state"] not in ~w(active objectives_complete)
+    end)
+  end
+
+  defp extra?(%{"op" => "quest.transition"} = op, _, _, _, _) do
+    to = op["to"]
+    outcome = op["outcome"]
+
+    to in Map.get(@legal, op["from"], []) and
+      if(to == "resolved", do: outcome != nil, else: to == "failed" or outcome == nil)
+  end
+
+  defp extra?(%{"op" => "choice.resolve"} = op, s, _, _, _) do
+    row = get_in(s, ["choices", op["continuation_id"]]) || %{}
+
+    op["choice_id"] in Map.get(row, "choice_ids", []) and
+      row["opened_revision"] == op["expected_revision"]
+  end
+
+  defp extra?(%{"op" => "job.schedule"} = op, _, horizon, _, _),
+    do: op["due_time"] > horizon
+
+  defp extra?(%{"op" => "job.complete"} = op, s, horizon, _, _),
+    do: get_in(s, ["jobs", op["job_id"], "due_time"]) <= horizon
+
+  defp extra?(%{"op" => "time.advance"} = op, _, _, _, _), do: op["to"] > op["from"]
+
+  defp extra?(%{"op" => "resource.adjust"} = op, s, _, _, _) do
+    spec = get_in(s, ["resource_specs", Compose.key(op["resource"])])
+    spec != nil and op["to"] >= spec["minimum"] and op["to"] <= spec["maximum"]
+  end
+
+  defp extra?(%{"op" => "cooldown.start"} = op, s, _, _, _), do: op["at"] == s["clock"]
+
+  defp extra?(%{"op" => "barrier.transition"} = op, _, _, _, _),
+    do: op["to"] in Map.get(@door, op["from"], [])
+
+  defp extra?(_, _, _, _, _), do: true
+
+  defp inside?(nil, _, _, _), do: false
+
+  defp inside?(at, e, containers, path) do
+    at == e or MapSet.member?(path, at) or
+      inside?(containers[at], e, containers, MapSet.put(path, at))
+  end
+
+  defp moved_container(%{"op" => "entity.transfer"} = op, containers),
+    do: Map.put(containers, op["entity_id"], op["destination_id"])
+
+  defp moved_container(_, containers), do: containers
+
+  defp moved_quest(%{"op" => "quest.activate"} = op, quests),
+    do:
+      Map.put(
+        quests,
+        op["instance_id"],
+        Map.take(op, ~w(quest scope)) |> Map.put("state", "active")
+      )
+
+  defp moved_quest(%{"op" => "quest.transition"} = op, quests),
+    do: Map.update!(quests, op["instance_id"], &Map.put(&1, "state", op["to"]))
+
+  defp moved_quest(_, quests), do: quests
 
   # Each op reads one value of its target and leaves another: the fact value, the container,
   # the quest state, the continuation or job status, the clock.

@@ -8,6 +8,7 @@ import { test } from 'node:test';
 import type { AdvertisedAction, Command, DecisionResult } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
 import { gameView, step } from '../src/world.ts';
+import { check } from '../src/invariants.ts';
 import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
 
@@ -38,6 +39,19 @@ const PICKED = ['bell', 'details', 'dusk', 'facts', 'gate', 'items', 'road', 'ro
   (c) => `ashmere_${c}`,
 );
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
+
+// Breaks: SHOWN's inherited constructor is treated as a list of view refusal codes.
+test('an unknown constructor action is safe to compare with admission', () => {
+  const view = {
+    exits: [],
+    entities: [],
+    inventory: [],
+    actions: [{ action_key: 'constructor', available: true }],
+  };
+  const command = { payload: { type: 'constructor' } };
+  const decision = { kind: 'rejected', error: { code: 'invalid_state' } };
+  assert.equal(check('gameview_agrees_with_admission', { view, command, decision }), true);
+});
 
 // Breaks: an invariant registered with no per-step check and no stated reason.
 test('every registered invariant is checked per step, or says why not', () => {

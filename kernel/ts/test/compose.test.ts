@@ -117,6 +117,52 @@ test('invariant checks known answers, a holding and a violated case per invarian
     for (const h of [true, false]) assert.ok(covered.has(`${id}:${h}`), id);
 });
 
+// Breaks: delta_preconditions_hold accepts an invalid success because it checks only each
+// target's from-value, missing independent membership, lifecycle and bound rules.
+test('invalid successful deltas fail their independent precondition check', () => {
+  assert.equal(
+    check('delta_preconditions_hold', { state: {}, delta: { ops: [] }, result: { changes: [] } }),
+    false,
+    'missing clock',
+  );
+  const ids = [
+    'choice-resolve-not-offered',
+    'choice-resolve-wrong-revision',
+    'quest-transition-skips-objectives-complete',
+    'quest-activate-while-open-in-scope',
+    'capacity-all-or-nothing',
+    'transfer-into-descendant',
+    'resource-below-minimum-never-clamps',
+    'time-advance-not-later',
+    'job-schedule-at-current-time',
+    'job-complete-not-due',
+    'barrier-lock-while-open',
+    'cooldown-start-at-not-base-clock',
+  ];
+  for (const id of ids) {
+    const c = fixture.cases.find((x: { id: string }) => x.id === id);
+    assert.ok(c, id);
+    assert.equal(
+      check('delta_preconditions_hold', {
+        state: state(c.state),
+        delta: { ops: c.ops },
+        result: { changes: [] },
+      }),
+      false,
+      id,
+    );
+  }
+});
+
+// Breaks: a fast cycle check ignores untouched rows, or drops capacity validation.
+test('containment checks deep chains, untouched cycles and untouched capacity', () => {
+  const chain = Object.fromEntries(range(5000).map((n) => [`n${n}`, `n${n + 1}`]));
+  const holds = (s: object) => check('containment_acyclic', { state: s, result: { changes: [] } });
+  assert.equal(holds({ containers: chain }), true);
+  assert.equal(holds({ containers: { ...chain, n5001: 'n4999' } }), false);
+  assert.equal(holds({ containers: { a: 'box', b: 'box' }, capacities: { box: 1 } }), false);
+});
+
 test('published events pass no_proposed_event_escapes', () => {
   for (const { id, decision, commit, published } of fixture.publication)
     assert.ok(check('no_proposed_event_escapes', { decision, commit, published }), id);
