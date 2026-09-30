@@ -34,7 +34,7 @@
     "QUEST": "Activation/credit, branching, resolution, scope and reward-once.",
     "SCENE": "Durable choices/consequences and coherent presentation recovery.",
     "TRANSACTION": "Applicable immediate item/payment/resource ownership conservation.",
-    "DEVICE": "Actual iOS/Android build, input responsiveness, offline and save evidence.",
+    "DEVICE": "Actual iOS/Android build, input responsiveness, offline and save evidence (iOS only before the first free product gate; Android deferred to it, owner decision 2026-09-30).",
     "HUMAN": "Readability, discoverability, consequence comprehension and authoring feedback.",
     "INSTANCE": "Spatial instancing closure, entry/export/teardown/recovery before feature use.",
     "ESCROW": "Queued ServiceJob custody, capacity, retry/fault and reconciliation before use.",

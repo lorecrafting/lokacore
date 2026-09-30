@@ -68,7 +68,7 @@ the portable rules layer returns a canonically identical result across repeated 
 
 Run the same fixture through every host implementation/adapter required by the R1-selected portable-execution strategy.
 
-For a shared native kernel this includes direct/native, BEAM, iOS, and Android host paths. For the dual implementation, tested first (ADR-068), compare the accepted Elixir and mobile implementations instead. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), rules compare the TypeScript hosts (Node, Android Hermes, iOS Hermes) now and the server host at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
+For a shared native kernel this includes direct/native, BEAM, iOS, and Android host paths. For the dual implementation, tested first (ADR-068), compare the accepted Elixir and mobile implementations instead. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md), rules compare the TypeScript hosts (Node and iOS Hermes; Android Hermes from the first free product gate, [envelope §4](r1-acceptance-envelope.md#4-physical-devices-and-reproducible-setup), [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)) now and the server host at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
 
 Domain-result hash MUST match.
 

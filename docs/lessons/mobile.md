@@ -28,7 +28,9 @@ Hard-won lessons for `mobile/` and physical-device runs.
   `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
 
 **Physical-device runs**
-- The owner can connect only one phone at a time. Batch all work per phone; ask for a
+- Until the first free product gate the only phone is the iPhone 11
+  ([owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)). After
+  that the owner can connect only one phone at a time: batch all work per phone; ask for a
   swap only when needed.
 - A locked screen stops the app's JS. Check the lock state before a run; keep the app in
   the foreground; treat a lock or backgrounding as an invalid run.

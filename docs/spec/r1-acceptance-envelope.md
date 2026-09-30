@@ -60,7 +60,7 @@ Retained runner/native state is only a revision-tagged, reconstructible cache of
 
 **Randomized differential testing (MUST for C; applies to every pair of hosts that must agree).** A seeded generator produces action sequences over the admitted fixture definitions, including rejected and failed attempts, RNG draws, boundary values and restore points. Every implementation runs each sequence from the same initial state, and the per-step canonical outcome, StateDelta, event/effect, RNG and state bytes must be identical. The first divergence fails the run; retain its seed, then minimize it and admit it as a new fixture only through the ordinary expected-answer review. Approved target: every fast semantic CI run, within its 30-minute budget (§10), executes a fixed regression seed set plus at least 10,000 fresh sequences of 1 to 64 steps, recording generator version, seeds, sequence count and length distribution. Agreement between implementations is not correctness, because both can agree on a wrong answer: the reviewed known-answer fixtures stay authoritative.
 
-**Applicability under [ADR-074](../decisions/adr-074-ts-first-proposal.md) (2026-09-24).** For `portable_capability` rules the Elixir-versus-TypeScript pair is deferred to the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal); the portable semantic foundation keeps it. The TypeScript host pairs are retained: Node, Android Hermes and iOS Hermes are distinct hosts, and per-step canonical bytes recorded on Node are replayed on each device. The regression seeds and 10,000 fresh sequences run on Node every fast CI run; a device sample runs at R6P. Running the fresh sequences on Node rather than on devices is an owner-approved assurance reduction. Results already recorded under this section stand.
+**Applicability under [ADR-074](../decisions/adr-074-ts-first-proposal.md) (2026-09-24).** For `portable_capability` rules the Elixir-versus-TypeScript pair is deferred to the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal); the portable semantic foundation keeps it. The TypeScript host pairs are retained: Node, Android Hermes and iOS Hermes are distinct hosts, and per-step canonical bytes recorded on Node are replayed on each device (Android Hermes from the first free product gate, §4). The regression seeds and 10,000 fresh sequences run on Node every fast CI run; a device sample runs at R6P. Running the fresh sequences on Node rather than on devices is an owner-approved assurance reduction. Deferring Android Hermes (§4) adds to it: an Android-only failure, such as the expo-sqlite double-open fault in the [mobile lessons](../lessons/mobile.md), can pass R6P unseen until that gate, and the owner accepts this. Results already recorded under this section stand.
 
 Before candidate implementation, freeze the RNG/numeric/encoding profile and known-answer vectors (see `conformance/numeric-profile.md`). Every accepted host must test negative division/remainder, overflow, invalid JSON/numbers, post-draw RNG state, rejected attempts, failed attempts, and restore.
 
@@ -98,6 +98,12 @@ class remains; determine the Pixel SKU/SoC/RAM/OS before considering substitutio
 Palma 2 is an optional e-paper usability device, not a replacement phone or new
 mandatory platform. Simulators/emulators are development/compatibility tools,
 not physical latency or memory qualification. Numerical gates below are unchanged.
+
+**Android deferred (2026-09-30, [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)).**
+Until the first free product gate ([14 Shipping rule](14-implementation-plan.md#shipping-rule)),
+including R6 and R6P, the only required physical device is the iPhone 11 and the TypeScript hosts
+are Node and iOS Hermes. The Android rows here and in §4.1, and the Android Hermes host
+pair (§3), are required at that gate, not before.
 
 ### 4.1 Support policy and recorded setup
 
