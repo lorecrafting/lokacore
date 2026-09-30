@@ -1,0 +1,16 @@
+P1RUN p1-1790806547575 begin
+P1RUN p1-1790806547575 hermes {"Bytecode Version":98,"Static Hermes":true,"Builtins Frozen":false,"VM Experiments":0,"Build":"Release","GC":"hades (concurrent)","OSS Release Version":"250829098.0.17","Debugger Enabled":false,"CommonJS Modules":"None"}
+P1RUN p1-1790806547575 items take then give in target order PASS
+P1RUN p1-1790806547575 items the take retried without its view token: the same identity and intent PASS
+P1RUN p1-1790806547575 items envelopes, authorization and resolution rejections PASS
+P1RUN p1-1790806547575 dusk a failed luck check is an accepted attempt, not a rejection PASS
+P1RUN p1-1790806547575 digests take with a view token PASS
+P1RUN p1-1790806547575 digests the same take under another invocation id, without the token PASS
+P1RUN p1-1790806547575 digests give, targets in one order PASS
+P1RUN p1-1790806547575 digests give, targets in the other order PASS
+P1RUN p1-1790806547575 digests move without input PASS
+P1RUN p1-1790806547575 digests move north PASS
+P1RUN p1-1790806547575 digests a choice under one continuation PASS
+P1RUN p1-1790806547575 digests the same choice under another continuation PASS
+P1RUN p1-1790806547575 digests rows=8 mismatches=0
+P1RUN p1-1790806547575 done mismatches=0
