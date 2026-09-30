@@ -24,7 +24,7 @@ Before handing off:
    includes the composes-with statement
    ([emergence principles](../../docs/decisions/owner-decision-emergence-2026-09-25.md)).
    Do not merge.
-4. Reply with: what changed, branch and head SHA, the commands you actually ran, self-review
+4. Reply with: what changed, branch and head SHA, the commands you actually ran (with output), self-review
    findings with dispositions, deviations from the brief, open questions. If the brief gave
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
@@ -33,5 +33,6 @@ Never use `--no-verify` or force-push (including `--force-with-lease`) without t
 
 When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
 checks, push, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
-If the same issue survives two fix attempts, stop: write down the assumption both attempts
-shared and test that before a third try, or escalate to the PM.
+If the same issue survives two fix attempts within a round, stop: write down the assumption
+both attempts shared and test that, or escalate to the PM. A finding still open after fix
+round 2 goes to the owner, not a third round.

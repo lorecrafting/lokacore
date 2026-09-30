@@ -51,7 +51,7 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 5. **Fix (same developer).** PM forwards the findings with `SendMessage` to the developer,
    whose context is intact (after a PM session restart: a fresh developer gets the brief
    plus the findings). Every fix message restates the whole open finding list, not just the
-   new ones (a resumed agent drops earlier directives). It runs `git pull --rebase` first (the review record is on the
+   new ones (a resumed agent drops earlier directives). The developer runs `git pull --rebase` first (the review record is on the
    branch), never force-pushes, fixes or disputes each finding with a reason, reruns the
    checks and pushes.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
@@ -100,7 +100,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 - A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
   first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`.
 - CI failure: rerun the job once. An identical second failure is not a flake. A failure in code
-  the diff does not touch means check for a stale base (rebase) before anything else.
+  the diff does not touch means check for a stale base (update the branch from `main` with a merge, never a rebase
+  or force-push) before anything else.
 - Git hooks are set once per clone ([AGENTS.md, Working rules](../AGENTS.md#working-rules));
   worktrees share that setting.
 - Agent types in `.claude/agents/` register only when a session starts. If one is missing,
