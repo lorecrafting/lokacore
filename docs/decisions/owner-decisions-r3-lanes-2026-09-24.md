@@ -34,3 +34,5 @@ checker can verify these quotes against the chat.
    NOTES with nothing open and every CI job is green on the head. Owner decisions,
    anything open after fix round 2, and Astra relays still go to the owner.
    [Workflow](../WORKFLOW.md) step 7 updated.
+   Amended 2026-09-30: what stays open after fix round 2 goes up the escalation ladder before
+   the owner, and the Astra relays are gone ([autonomy decision](owner-decision-autonomy-2026-09-30.md)).
