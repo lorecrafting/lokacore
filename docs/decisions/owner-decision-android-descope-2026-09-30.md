@@ -17,3 +17,7 @@ Effect ([spec amendment](../spec/IMPORT.md#amendments-since-import), home of the
 - Android evidence is deferred, not dropped: the Android Hermes host pair, the Android
   qualification device and the Android release smoke are required at the first free product
   gate.
+- This is an assurance reduction added to the one in
+  [ADR-074 §3](adr-074-ts-first-proposal.md#3-the-proposal): an Android-only failure (for
+  example the expo-sqlite double-open fault in the [mobile lessons](../lessons/mobile.md))
+  can pass R6P unseen until that gate. The owner accepts it.
