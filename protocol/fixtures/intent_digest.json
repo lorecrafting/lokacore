@@ -1,0 +1,112 @@
+{
+  "description": "Known answers for the invocation-intent digest, intent_digest_version \"loka-intent-v1\" (03 §14; kernel/ts/src/invocation.ts INTENT_DIGEST_VERSION). The digest is the lowercase hex SHA-256 of the canonical encoding of the array [\"loka-intent-v1\", action_key, actor_id, target_ids, input]: target_ids in their given order, never sorted; invocation_id (the receipt key) and view_freshness_token (admission metadata, 04 §16) never enter it; semantic input such as continuation_id does. Computed outside the kernels with Python: hashlib.sha256(json.dumps(['loka-intent-v1', i['action_key'], i['actor_id'], i['target_ids'], i['input']], sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode()).hexdigest(); the first row also checked with shasum -a 256. A changed answer is a new intent_digest_version, never an edit: stored receipts keep the version they were written under.",
+  "cases": [
+    {
+      "name": "take with a view token",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000001",
+        "action_key": "take",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [
+          "d530207e-b845-8be5-9d53-b44b2cf5d8a1"
+        ],
+        "input": {},
+        "view_freshness_token": "view-1"
+      },
+      "intent_digest": "38b7d24e08b6afdc4cf815efc148dd79cd7ec9f04661b99693c664592c47715d"
+    },
+    {
+      "name": "the same take under another invocation id, without the token",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000002",
+        "action_key": "take",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [
+          "d530207e-b845-8be5-9d53-b44b2cf5d8a1"
+        ],
+        "input": {}
+      },
+      "intent_digest": "38b7d24e08b6afdc4cf815efc148dd79cd7ec9f04661b99693c664592c47715d"
+    },
+    {
+      "name": "give, targets in one order",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000003",
+        "action_key": "give",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [
+          "ff864ad5-cd56-80c8-9392-dc88bdc28fd2",
+          "d530207e-b845-8be5-9d53-b44b2cf5d8a1"
+        ],
+        "input": {}
+      },
+      "intent_digest": "d1724acb625f2eb403ad9e5b51b92862b1da18b818eb5784cf4e117c456b6663"
+    },
+    {
+      "name": "give, targets in the other order",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000004",
+        "action_key": "give",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [
+          "d530207e-b845-8be5-9d53-b44b2cf5d8a1",
+          "ff864ad5-cd56-80c8-9392-dc88bdc28fd2"
+        ],
+        "input": {}
+      },
+      "intent_digest": "e575ac2db3f9102a4e96f72863d2c4ff18f1fcbdda44892553394410a99cd07a"
+    },
+    {
+      "name": "move without input",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000005",
+        "action_key": "move",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [],
+        "input": {}
+      },
+      "intent_digest": "ca127198f628ae63f2a57a28d0e91dc346d045cfcca4b785496458c11dd86e1e"
+    },
+    {
+      "name": "move north",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000006",
+        "action_key": "move",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [],
+        "input": {
+          "direction": "north"
+        }
+      },
+      "intent_digest": "87fac7e4ef3f470ff41f5b347b11c44e7956f8e1eee9b909db7b2c84ede79f18"
+    },
+    {
+      "name": "a choice under one continuation",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000007",
+        "action_key": "choose",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [],
+        "input": {
+          "choice_id": "carry",
+          "continuation_id": "44444444-5555-8666-8777-888888888888"
+        }
+      },
+      "intent_digest": "b9da23c30df210e123ecf6ab79c06eecbfd369e1e2a70b6320abba36a1e1f4c3"
+    },
+    {
+      "name": "the same choice under another continuation",
+      "invocation": {
+        "invocation_id": "00000000-0000-4000-8000-000000000008",
+        "action_key": "choose",
+        "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+        "target_ids": [],
+        "input": {
+          "choice_id": "carry",
+          "continuation_id": "44444444-5555-8666-8777-888888888889"
+        }
+      },
+      "intent_digest": "d6440e03373faad9da3cb4b646899f203ae9f9c8213fa8ec3dab852d9d4b12ee"
+    }
+  ]
+}

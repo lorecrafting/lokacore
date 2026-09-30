@@ -46,8 +46,8 @@ export function identify(
  * action key, actor, target ids in their given order and the validated input. The invocation id
  * is the receipt's key, not intent; view_freshness_token is admission metadata (04 §16).
  */
-// The receipt's intent_digest_version (03 §14). ponytail: its bytes are pinned only by
-// test/invocation_cases.json; S1 pins them in a spec clause or protocol fixture (ROADMAP S1).
+// The receipt's intent_digest_version (03 §14); its bytes and known answers are pinned by
+// protocol/fixtures/intent_digest.json. A change of bytes is a new version, never an edit.
 export const INTENT_DIGEST_VERSION = 'loka-intent-v1';
 
 const intentDigest = (i: ActionInvocation): string =>

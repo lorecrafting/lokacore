@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "main": "index.ts",
+  "scripts": {
+    "test": "node --test \"../authority/**/*.test.ts\""
+  },
   "engines": {
     "node": "24.21.0"
   },

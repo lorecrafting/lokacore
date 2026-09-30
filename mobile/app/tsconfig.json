@@ -1,5 +1,6 @@
 {
   "extends": "expo/tsconfig.base.json",
   "compilerOptions": { "strict": true, "noEmit": true, "allowImportingTsExtensions": true },
-  "include": ["**/*.ts", "**/*.tsx", "../features", "../authority", "../packages"]
+  "include": ["**/*.ts", "**/*.tsx", "../features", "../authority", "../packages"],
+  "exclude": ["../authority/**/*.test.ts"]
 }

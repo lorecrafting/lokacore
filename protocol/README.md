@@ -11,7 +11,7 @@ lists only what a file adds to that.
 | File | Covers | Spec | Fixtures |
 |---|---|---|---|
 | **Identity and scope** | | | |
-| `identity.schema.json` | definition and runtime ids, each its own type; CommandId | 03 §2, §3, §6; 05 §4 | `command_id.json` |
+| `identity.schema.json` | definition and runtime ids, each its own type; CommandId; the invocation-intent digest (TypeScript only) | 03 §2, §3, §6, §14; 05 §4 | `command_id.json`, `intent_digest.json` |
 | `scope.schema.json` | StateScope, AudiencePolicy | 03 §6 | |
 | `relation.schema.json` | typed relations, entity provenance | 21 §4; 03 §3, §11; 05 §25 | |
 | `text.schema.json` | localized text ids and bindings; the default-locale text catalog | 04 §15; 05 §18; 06 §43 | |

@@ -30,4 +30,4 @@ m bin/kernel_red_controls.sh
 m node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh
 git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' | xargs -0 mise exec -- node_modules/.bin/prettier --check
-cd mobile/app && m npx tsc --noEmit
+cd mobile/app && m npx tsc --noEmit && m npm test

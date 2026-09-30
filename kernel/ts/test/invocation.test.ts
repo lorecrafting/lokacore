@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { RngState, WorldContextId } from '../src/contracts.gen.ts';
 import { loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
-import { attempt, run } from '../src/known_answers.ts';
+import { attempt, digests, run } from '../src/known_answers.ts';
 import { INSTALLED } from '../src/world.ts';
 import { read } from './read.ts';
 
@@ -25,13 +25,22 @@ const dusk = world('cartridge_dusk_hash.json', [
   27274249, 25704967, 31982592, 12605441,
 ] as RngState);
 
-// Breaks: the command id taken from anything but the trusted scope and invocation id, targets
-// sorted or the freshness token in the intent digest, give's targets filled in another order,
+// Breaks: the command id taken from anything but the trusted scope and invocation id, give's
+// targets filled in another order,
 // authorization before validation, an unknown field accepted, or a NEW intent resolved to the
 // wrong Command, an unoffered action admitted, or a failed check reported as a rejection.
 test('the adapter matches the invocation known answers', () => {
   assert.deepEqual(run(items, cases), []);
   assert.deepEqual(run(dusk, dusk_cases), []);
+});
+
+// Breaks (03 §14): targets sorted, the freshness token or invocation id in the intent digest,
+// semantic input (continuation_id) left out, or any other change to the pinned bytes
+// (protocol/fixtures/intent_digest.json, computed outside the kernels), or a check that cannot fail.
+test('the intent digest matches its pinned known answers', () => {
+  const { cases: rows } = read('protocol/fixtures/intent_digest.json');
+  assert.deepEqual(digests(rows), []);
+  assert.equal(digests([{ ...rows[0], intent_digest: rows[2].intent_digest }]).length, 1);
 });
 
 // Breaks: a runner that cannot fail, or reports only hashes (pre-release-proof.md, Evidence
