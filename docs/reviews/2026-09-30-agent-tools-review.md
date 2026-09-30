@@ -25,3 +25,14 @@
 - **nit** `docs/WORKFLOW.md:111`: "the PM either does that step" for a blocked reviewer step (e.g. running a check the reviewer must see fail) puts review work on the PM, weakening independence. Scope it: for the reviewer, spawn a fresh `general-purpose` with the definition file.
 - **question** `.claude/agents/developer.md:4`: if `/code-review medium` fans out subagents it needs `Agent`, not listed. Non-blocking: developer.md step 2 already allows the same questions by hand.
 - **question** `ToolSearch` only loads deferred tools that are also in the allowlist; it matters only if `ReportFindings` arrives deferred. Harmless.
+
+## Fix check: `2bcb5c2`
+
+Scope: that commit only (`docs/WORKFLOW.md:109-114`).
+
+- nit 1 (duplicated tool list): fixed; the bullet points to `tools:` in the definition files, no list.
+- nit 2 (PM doing a blocked reviewer step): fixed; a blocked reviewer step goes to a fresh `general-purpose` with the definition file, never the PM. Consistent with the registration bullet at `docs/WORKFLOW.md:107-108`.
+- questions 3 and 4: dispositions accepted (step 2 allows the review by hand; ToolSearch harmless).
+- `bin/check_docs.exs` passes.
+
+Verdict: **APPROVE**.

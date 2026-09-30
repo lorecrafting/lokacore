@@ -82,7 +82,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Gate R5: the R5 milestone, review-flow decisions, ROADMAP carries, docs tidy pass](2026-09-30-r5-gate-review.md): PR #59 at `267c8e7` (R5 code at `f1a041d`), CHANGES REQUIRED (four should-fix: `target_resolution@1`, `equipment@1`/`attributes@1`/provenance unrecorded, ROADMAP R5 row and budget diagnostic, supersession pointers; two nits; one question; codex R5-01..04); fixes `1b5fb4f`, CHANGES REQUIRED (`loka play` crashed on a lookup over 1,024 matches); fixes `d9d13f3`, APPROVE. Gate R5 passes with the deferrals recorded in ROADMAP.
 - [Docs trim: Sonnet developers, CHECKS.md, ROADMAP archive, token hygiene](2026-09-30-docs-trim-review.md): PR #60 at `21dc3ca`, APPROVE WITH NOTES (one should-fix: 250 vs 300 word caps; two nits).
 - [Five pstack rules: handback fields, timebox, fix restatement, two-strike, CI flake, lesson filter](2026-09-30-pstack-rules-review.md): PR #61 at `42acddb`, APPROVE WITH NOTES (two should-fix: stale-base "rebase" needs a force-push, two-strike "third try" vs two fix rounds; three nits); fixes `fbb0f26`, APPROVE.
-- [Agent tools allowlist for developer and reviewer](2026-09-30-agent-tools-review.md): PR #62 at `edd03ac`, APPROVE WITH NOTES (two nits: duplicated tool list, PM doing a blocked reviewer step; two questions).
+- [Agent tools allowlist for developer and reviewer](2026-09-30-agent-tools-review.md): PR #62 at `edd03ac`, APPROVE WITH NOTES (two nits: duplicated tool list, PM doing a blocked reviewer step; two questions); fixes `2bcb5c2`, APPROVE.
 
 ## R6
 
