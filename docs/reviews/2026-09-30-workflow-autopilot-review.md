@@ -88,3 +88,17 @@ Verdict: **CHANGES REQUIRED** (two should-fix: S1, S2; one nit).
   still sends round-2 leftovers straight to the owner.
 
 Verdict: **APPROVE WITH NOTES** (one nit, N4).
+
+## Round 3: `2fd8744`, `84b50fe`
+
+- **Paraphrase (`2fd8744`): holds.** Marked "(paraphrased)"; every condition of the earlier
+  verbatim quotes is kept (no asking for normal steps; run to the end of the PR or slice; ask
+  only when critical; `advisor`, then a higher model by hand, then a human; maximum autonomy).
+  Nothing added or dropped.
+- **N4: fixed** (`84b50fe`), pointer under §3.
+- **N5 (nit)** `docs/decisions/owner-decisions-r3-lanes-2026-09-24.md:38`: the pointer credits
+  the removal of Astra relays to the autonomy decision; it was the
+  [review-flow decision](../decisions/owner-decisions-review-flow-2026-09-30.md) ("no owner
+  relay"). Scenario: a reader follows the link and finds no word about relays.
+
+Verdict: **APPROVE WITH NOTES** (one nit, N5).
