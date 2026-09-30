@@ -19,8 +19,11 @@ Facts, by source:
   `passcodeRequired: false`, `unlockedSinceBoot: true`; the launch put the app in the foreground and the
   run completed.
 - **Not checked:** no red control was run on the device (no deliberately wrong digest row); the per-row
-  PASS/FAIL label matches a mismatch by expected digest, so rows 1 and 2, which share a digest, would
-  both print FAIL; the `mismatches=` count is authoritative. Only the 8 frozen rows were run.
+  PASS/FAIL label in the wiring tests `x.includes(c.intent_digest)` on each mismatch message, which
+  holds both the expected and the ACTUAL digest. So a failure can make a different row print FAIL too
+  (a target-order bug making row 3 return row 4's digest would print FAIL on row 4 as well), and rows 1
+  and 2, which share a digest, would both print FAIL; the `mismatches=` count from `digests()` is
+  authoritative. Only the 8 frozen rows were run.
 
 Steps (same as the earlier run; wiring temporary and not committed, kept here as
 [dev-metro.config.diff](dev-metro.config.diff), identical to the earlier one, and
