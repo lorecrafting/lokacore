@@ -27,11 +27,10 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 ## Loop
 
 **Keep going.** Once the owner has approved the slice plan, the PM runs steps 2 to 7 to the
-merge without asking for permission at each step: spawn the reviewer when CI is green,
-forward findings, fix, re-review, merge. It stops only for what the loop already reserves to
-the owner: an owner decision, a spec conflict, anything still open after fix round 2, or an
-action outside this workflow (destructive, or outward-facing beyond the PR and its merge).
-Report at the end of the slice, not at every step.
+merge without asking permission at each step: spawn the reviewer when CI is green, forward
+findings, fix, re-review, merge. It stops only for what steps 1, 6 and 7 and
+[AGENTS.md](../AGENTS.md) reserve to the owner (for example a `--no-verify` push), or for an
+action outside this workflow. Report at the end of the slice, not at every step.
 
 1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its spec sections;
    keep [the roadmap](ROADMAP.md) current.
