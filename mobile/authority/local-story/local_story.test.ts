@@ -1,15 +1,19 @@
-// The local Story authority on Node with real SQLite (node:sqlite), one connection per simulated
-// process; a restart closes it and opens a new one on the same file (03 §§14-15; 07 §§8-9).
+// The local Story authority on Node with real SQLite (node:sqlite) in WAL mode, as expo-sqlite
+// opens it, one connection per simulated process; a restart closes it and opens a new one on the
+// same file, and a kill is a real child process (03 §§14-15; 07 §§8-9; ADR-075 §4).
 // Expected values are literals from the fixtures named beside them, never from the code under test.
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
 import { encode } from '../../../kernel/ts/src/canonical.ts';
 import type { RngState, WorldContextId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
+import { validate } from '../../../kernel/ts/src/validate.ts';
 import { INSTALLED } from '../../../kernel/ts/src/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Reply, type Saved } from './authority.ts';
@@ -27,25 +31,35 @@ const world = (fixture: string, seed: readonly number[]) => {
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   assert.ok(loaded.ok);
   const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId;
-  return newWorld(loaded.cartridge as Cartridge, context, seed as RngState);
+  const fresh = newWorld(loaded.cartridge as Cartridge, context, seed as RngState);
+  const kernel_version = `loka-kernel@${'0123456789'.repeat(4)}`;
+  const run_id = '6f6f6f6f-1111-4222-8333-444444444444';
+  return { fresh, ids: { content_hash: kat.sha256, kernel_version, seed, run_id } };
 };
 const items = world('cartridge_items_hash.json', [1, 2, 3, 4]);
 // numeric-vectors.json rng_steps[3].state; its next draw fails pick_lock (invocation_cases.json).
 const dusk = world('cartridge_dusk_hash.json', [27274249, 25704967, 31982592, 12605441]);
 
-/** A process: one connection to the save at `path`, adapted to expo-sqlite's sync names. */
-function processOn(path: string, fresh = items, pageSize = 0) {
+type Tap = (statement: string, run: () => unknown) => unknown;
+/**
+ * A process: one connection to the save at `path`, adapted to expo-sqlite's sync names. `tap`
+ * wraps each execSync and runSync, the one place a test simulates a fault.
+ */
+function processOn(path: string, story = items, pageSize = 0, tap: Tap = (_, run) => run()) {
   const sql = new DatabaseSync(path);
-  if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`);
+  if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`); // before WAL fixes it
+  sql.exec('PRAGMA journal_mode = WAL');
   const db = {
-    execSync: (s: string) => sql.exec(s),
-    runSync: (s: string, ...p: (string | number | null)[]) => sql.prepare(s).run(...p),
+    execSync: (s: string) => void tap(s, () => sql.exec(s)),
+    runSync: (s: string, ...p: (string | number | null)[]) =>
+      tap(s, () => sql.prepare(s).run(...p)),
     getFirstSync: <T>(s: string, ...p: (string | number | null)[]) =>
       (sql.prepare(s).get(...p) ?? null) as T | null,
     getAllSync: <T>(s: string, ...p: (string | number | null)[]) => sql.prepare(s).all(...p) as T[],
+    isInTransactionSync: () => sql.isTransaction,
   };
   const one = (q: string) => Object.values(sql.prepare(q).get()!)[0];
-  return { sql, story: openStory(db, fresh, SCOPE), one };
+  return { sql, story: openStory(db, story.fresh, SCOPE, story.ids), one };
 }
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-s1-')), 'save.db');
 const invocation = (n: number, action_key: string, target_ids: string[], token?: string) => ({
@@ -58,8 +72,47 @@ const invocation = (n: number, action_key: string, target_ids: string[], token?:
 });
 const take = invocation(1, 'take', [SATCHEL], 'view-1');
 const outcome = (r: Reply) => (r as Saved).decision as { outcome: string };
+const saved = (r: Reply) => [(r as Saved).replay, (r as Saved).revision];
+// dusk's pick_lock; its draw leaves numeric-vectors.json rng_steps[4].state.
+const pick = invocation(2, 'pick_lock', []);
+const after = [15224335, 29364750, 272377353, 1125134346];
+
+/**
+ * The save's game trace, every record valid against the ObservationRecord contract, a trace.run
+ * header first; per entry: ordinal, the revision decided against, commit state and revision.
+ */
+function traced(p: { sql: DatabaseSync }) {
+  const rows = p.sql.prepare('SELECT record FROM trace ORDER BY rowid').all();
+  const [head, ...entries] = rows.map((r) => JSON.parse(r.record as string));
+  for (const r of [head, ...entries]) assert.deepEqual(validate('ObservationRecord', r), []);
+  assert.equal(head.event, 'trace.run');
+  return entries.map((e) => [
+    e.data.ordinal,
+    e.ids.revision,
+    e.data.commit.state,
+    e.data.commit.revision ?? null,
+  ]);
+}
 const state = (p: { story: { world: () => { state: unknown } } }) =>
   encode(p.story.world().state as never);
+
+// The child of the kill test: `kill <save> commit|trace` opens the save, then takes the satchel and
+// SIGKILLs itself right after the real COMMIT (before memory adopts it) or as the first trace row
+// is written (memory adopted, no reply yet).
+if (process.argv[2] === 'kill') {
+  const [path, at] = process.argv.slice(3) as [string, string];
+  let armed = false;
+  const die = () => process.kill(process.pid, 'SIGKILL');
+  const p = processOn(path, items, 0, (s, run) => {
+    if (armed && at === 'trace' && s.startsWith('INSERT INTO trace')) die();
+    const out = run();
+    if (armed && at === 'commit' && s === 'COMMIT') die();
+    return out;
+  });
+  armed = true;
+  p.story.invoke(take);
+  process.exit(1); // not killed: the parent sees no SIGKILL
+}
 
 // Breaks: load returning the fresh world, changed rows, clock or RNG not written, or the revision
 // not persisted.
@@ -100,13 +153,11 @@ test('a retried consumed take replays its receipt; altered intent is a conflict'
   assert.equal(b.one('SELECT revision FROM head'), 2);
 });
 
-// Breaks (04 §5.0; 03 §14): a failed attempt not committing its draw, a rejection advancing the
-// revision or getting no receipt, a replay drawing again, or the receipt without its intent
-// digest version, or the clock not saved. The draw leaves numeric-vectors.json rng_steps[4].state.
+// Breaks (04 §5.0; 03 §14; ADR-075 §4): a failed attempt not committing its draw, a rejection
+// advancing the revision or getting no receipt, a replay drawing again, or the receipt without its
+// intent digest version, or the clock not saved; a replay or restart tracing a command again.
 test('a failed attempt and a rejection persist; their retries draw nothing', () => {
   const path = save();
-  const after = [15224335, 29364750, 272377353, 1125134346];
-  const pick = invocation(2, 'pick_lock', []);
   const dance = invocation(3, 'dance', []);
   const a = processOn(path, dusk);
   const failed = a.story.invoke(pick);
@@ -123,12 +174,13 @@ test('a failed attempt and a rejection persist; their retries draw nothing', () 
   const b = processOn(path, dusk);
   assert.equal(state(b), before);
   assert.deepEqual(b.story.world().state.rng, after);
-  assert.equal(b.story.world().state.clock, dusk.state.clock + 600); // pick_lock's duration
+  assert.equal(b.story.world().state.clock, dusk.fresh.state.clock + 600); // pick_lock's duration
   assert.deepEqual(b.story.invoke(pick), { ...failed, replay: true });
   assert.deepEqual(b.story.invoke(dance), { ...rejected, replay: true });
   assert.deepEqual(b.story.world().state.rng, after);
   assert.equal(b.one('SELECT rng FROM head'), JSON.stringify(after));
   assert.equal(b.one('SELECT DISTINCT intent_digest_version FROM receipt'), 'loka-intent-v1');
+  assert.deepEqual(traced(b), [[1, 0, 'committed', 1]]); // dance, rejected before a Command: none
 });
 
 // Breaks (03 §15; ADR-072): memory adopted before COMMIT, a partial write surviving the failed
@@ -158,13 +210,134 @@ test('a definite write failure leaves memory and storage at the prior revision',
 // (invocation.test.ts), which faults precondition_failed.
 test('a fault changes nothing and gets no receipt', () => {
   const ok = world('cartridge_bell_hash.json', [1, 2, 3, 4]);
-  const cartridge = structuredClone(ok.cartridge) as any;
+  const cartridge = structuredClone(ok.fresh.cartridge) as any;
   cartridge.recipes['ashmere_bell@0.0.1:recipe/ring_bell'].outcomes.success.sequence[0].value =
     'yes';
-  const p = processOn(save(), { ...ok, cartridge });
+  const p = processOn(save(), { ...ok, fresh: { ...ok.fresh, cartridge } });
   const before = p.story.world();
   const ring = invocation(4, 'ring_bell', []);
   assert.deepEqual(p.story.invoke(ring), { kind: 'fault', code: 'precondition_failed' });
   assert.equal(p.story.world(), before);
   assert.equal(p.one('SELECT count(*) FROM receipt'), 0);
+  assert.deepEqual(traced(p), [[1, 0, 'unavailable', null]]);
+});
+
+// Breaks (03 §15): an unknown first save presumed done, a COMMIT error presumed rolled back so
+// memory stays at revision 0 (the retry decides and draws again, the next attempt decides at
+// revision 1), or no unknown entry and follow-up at one ordinal. Simulated fault: the real
+// COMMIT runs, then its acknowledgement is lost.
+test('a lost COMMIT acknowledgement reconciles to the committed receipt', () => {
+  let lose = true;
+  const tap: Tap = (s, run) => {
+    const out = run();
+    if (!lose || s !== 'COMMIT') return out;
+    lose = false;
+    throw new Error('COMMIT acknowledgement lost');
+  };
+  const path = save();
+  assert.throws(() => processOn(path, dusk, 0, tap), /first save unknown/);
+  const p = processOn(path, dusk, 0, tap);
+  lose = true;
+  const first = p.story.invoke(pick);
+  assert.deepEqual([...saved(first), outcome(first).outcome], [false, 1, 'failure']);
+  assert.deepEqual(p.story.world().state.rng, after);
+  assert.deepEqual(p.story.invoke(pick), { ...first, replay: true });
+  assert.deepEqual(p.story.world().state.rng, after);
+  assert.deepEqual(saved(p.story.invoke(invocation(3, 'pick_lock', []))), [false, 2]);
+  assert.deepEqual(traced(p), [
+    [1, 0, 'unknown', null],
+    [1, 0, 'committed', 1],
+    [2, 1, 'committed', 2],
+  ]);
+});
+
+// Breaks (03 §15; storage lessons): reconcile reading the attempt's own uncommitted receipt inside
+// the still-open transaction (a false save), a failed COMMIT reported as saved or adopted, or the
+// retry refused. A deferred foreign-key violation fails the real COMMIT and leaves it open; the
+// first ROLLBACK after it is made to fail (simulated), so the outcome stays unknown once.
+test('a genuinely failed COMMIT reconciles to not committed; the retry is a fresh attempt', () => {
+  let jam = false;
+  const p = processOn(save(), items, 0, (s, run) => {
+    if (!jam || s !== 'ROLLBACK') return run();
+    jam = false;
+    throw new Error('ROLLBACK failed');
+  });
+  p.sql.exec(`PRAGMA foreign_keys = ON; CREATE TABLE parent (id INTEGER PRIMARY KEY);
+    CREATE TABLE orphan (id INTEGER REFERENCES parent DEFERRABLE INITIALLY DEFERRED);
+    CREATE TRIGGER orphaned AFTER INSERT ON receipt BEGIN INSERT INTO orphan VALUES (1); END;`);
+  const before = p.story.world();
+  jam = true;
+  assert.deepEqual(p.story.invoke(take), { kind: 'pending' });
+  assert.throws(() => p.story.invoke(take), /nothing was saved/); // settles, then fails anew
+  assert.equal(p.story.world(), before);
+  assert.deepEqual(
+    [p.one('SELECT count(*) FROM receipt'), p.one('SELECT revision FROM head')],
+    [0, 0],
+  );
+  p.sql.exec('DROP TRIGGER orphaned');
+  assert.deepEqual(saved(p.story.invoke(take)), [false, 1]);
+  assert.deepEqual(traced(p), [
+    [1, 0, 'unknown', null],
+    [1, 0, 'failed', null],
+    [2, 0, 'unknown', null],
+    [2, 0, 'failed', null],
+    [3, 0, 'committed', 1],
+  ]);
+});
+
+// Breaks (03 §15): a call decided or answered while the COMMIT outcome is unknown, memory adopting
+// the unconfirmed attempt, or a restart that does not load the commit or recover its trace entry.
+// Simulated fault: the connection breaks right after the real COMMIT.
+test('while the COMMIT outcome is unknown every call is fenced; a restart settles it', () => {
+  const path = save();
+  let arm = false;
+  const a = processOn(path, items, 0, (s, run) => {
+    const out = run();
+    if (!arm || s !== 'COMMIT') return out;
+    arm = false;
+    a.sql.close();
+    throw new Error('connection lost');
+  });
+  const before = a.story.world();
+  arm = true;
+  assert.deepEqual(a.story.invoke(take), { kind: 'pending' });
+  assert.deepEqual(a.story.invoke(invocation(2, 'give', [SATCHEL, NPC])), { kind: 'pending' });
+  assert.equal(a.story.world(), before);
+  const b = processOn(path);
+  assert.deepEqual(saved(b.story.invoke(take)), [true, 1]);
+  assert.deepEqual(traced(b), [[1, 0, 'committed', 1]]);
+});
+
+// Breaks (OFF-03-05; ADR-075 §4): the trace written before or inside the commit, a restart not
+// loading the commit or not recovering its missing entry, or recovery writing it twice.
+test('a process killed after COMMIT restarts with the take once and its trace entry once', () => {
+  for (const at of ['commit', 'trace']) {
+    const path = save();
+    const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url), 'kill', path, at]);
+    assert.equal(child.signal, 'SIGKILL', `${at}: ${child.stderr}`);
+    const b = processOn(path);
+    const retry = b.story.invoke(take);
+    assert.deepEqual([...saved(retry), outcome(retry).outcome], [true, 1, 'taken']);
+    b.sql.close();
+    assert.deepEqual(traced(processOn(path)), [[1, 0, 'committed', 1]]);
+  }
+});
+
+// Breaks (ADR-075 §4): no entry for a definite failure or one traced as unknown, the trace written
+// inside the gameplay transaction, or a trace failure reaching the player or never recovered.
+test('a definite failure is traced once; a failed trace write changes nothing', () => {
+  const path = save();
+  const a = processOn(path);
+  const raise = (table: string) =>
+    `CREATE TRIGGER t BEFORE INSERT ON ${table} BEGIN SELECT RAISE(ABORT, 'no space'); END`;
+  a.sql.exec(raise('receipt'));
+  assert.throws(() => a.story.invoke(take), /no space/);
+  a.sql.exec(`DROP TRIGGER t; ${raise('trace')}`);
+  assert.deepEqual(saved(a.story.invoke(take)), [false, 1]);
+  a.sql.exec('DROP TRIGGER t');
+  a.sql.close();
+  assert.deepEqual(traced(processOn(path)), [
+    [1, 0, 'failed', null],
+    [2, 0, 'committed', 1],
+  ]);
 });
