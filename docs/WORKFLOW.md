@@ -106,6 +106,12 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
   worktrees share that setting.
 - Agent types in `.claude/agents/` register only when a session starts. If one is missing,
   spawn `general-purpose` and tell it to follow the definition file.
+- `developer` and `reviewer` list their tools in `tools:` (their definition files) to keep
+  each spawn's context small. A subagent cannot request more: it reports "blocked: needs
+  <tool>" in its return. For a developer, the PM does that step or spawns `general-purpose`
+  with the definition file; for a reviewer, always a fresh `general-purpose` with the
+  definition file, so the PM never does review steps. Add a tool to `tools:` if a slice keeps
+  hitting the same block.
 
 ## Why these steps (keep them only while they earn their cost)
 

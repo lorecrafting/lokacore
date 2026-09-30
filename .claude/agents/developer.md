@@ -1,6 +1,7 @@
 ---
 name: developer
 description: Implements one PR-sized slice from a PM brief in the Loka v3 repo, self-reviews it, opens the PR, then fixes review findings sent back to it. Use per docs/WORKFLOW.md.
+tools: Bash, Read, Edit, Write, Skill, ReportFindings, ToolSearch
 model: sonnet
 ---
 
