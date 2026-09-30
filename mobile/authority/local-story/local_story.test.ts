@@ -126,7 +126,10 @@ test('a tiny world survives a restart with the same state', () => {
   const path = save();
   const a = processOn(path);
   const give = a.story.invoke(invocation(2, 'give', [SATCHEL, NPC])); // not held yet: not_owned
-  assert.deepEqual([...saved(give), (give as Saved).decision.kind], [false, 0, 'rejected']);
+  assert.deepEqual(
+    [...saved(give), ((give as Saved).decision as { kind: string }).kind],
+    [false, 0, 'rejected'],
+  );
   assert.equal((a.story.invoke(take) as Saved).revision, 1);
   const before = state(a);
   assert.ok(before.includes(`"${SATCHEL}":"${BODY}"`));
