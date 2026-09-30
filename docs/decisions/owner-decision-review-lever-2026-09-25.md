@@ -1,5 +1,8 @@
 # Owner decision: review lever after the R5 re-estimate — 2026-09-25
 
+Superseded in part (Fable slots; Astra only for foundational freezes) by the
+[2026-09-30 review-flow decisions](owner-decisions-review-flow-2026-09-30.md).
+
 Relayed verbatim by the coordinating assistant (Claude Code) from the owner's chat. No
 checker can verify these quotes against the chat.
 

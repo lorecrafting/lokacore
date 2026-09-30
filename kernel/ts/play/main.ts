@@ -12,9 +12,9 @@ import { commandId } from '../src/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { sha256Hex } from '../src/sha256.ts';
 import { validate } from '../src/validate.ts';
-import { doors, resolve, normalize } from '../src/target.ts';
+import { doors, normalize } from '../src/target.ts';
 import { detailOf, resolved, type Offered } from '../src/actions.ts';
-import { append, kernelVersion, line, lookupWords, redact } from './obs.ts';
+import { append, kernelVersion, line, redact } from './obs.ts';
 import {
   barrierAt,
   clock,
@@ -27,9 +27,8 @@ import {
   say,
   scan,
   status,
-  which,
 } from './text.ts';
-import { decide, type Run } from './run.ts';
+import { decide, found, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
 if (!artifact) fail('usage: loka play <artifact> [script | --replay <transcript>]');
@@ -242,28 +241,6 @@ function perform(r: Run, p: { perform: Offered[]; rest: string }) {
   }
   const payload = { type: 'perform', action: fits[0].key, ...(id && { target_id: id }) };
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
-}
-
-// The words' unique id, else undefined after telling the player and writing one
-// target.unresolved record to diagnostics (owner request, R5 S2) with the words redacted.
-function found(r: Run, words: string): EntityId | undefined {
-  const res = resolve(r.world, r.world.character, words);
-  if (res.kind === 'unique') return res.target_id;
-  const none = res.kind === 'none';
-  process.stdout.write(
-    none ? "You don't see that here.\n" : which(cartridge, r.world, res.candidate_ids),
-  );
-  const { key } = r.world.rooms[r.world.state.containers[r.world.body]];
-  const { id, version } = cartridge.manifest;
-  const data = {
-    room: { cartridge_id: id, cartridge_version: version, kind: 'room', key },
-    outcome: res.kind,
-    candidates: none ? 0 : res.candidate_ids.length,
-    words: lookupWords(words),
-    after_ordinal: r.ordinal,
-  };
-  const record = { format: 'loka-obs-v1', event: 'target.unresolved', store: 'diagnostics' };
-  append('diagnostics', r.ids.run_id, line({ ...record, ids: r.ids, data }));
 }
 
 // Re-decides the transcript's Commands from its header (run, seed, world, and the recorded
