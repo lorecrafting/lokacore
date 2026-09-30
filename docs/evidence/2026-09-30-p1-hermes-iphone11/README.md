@@ -1,7 +1,7 @@
 # R6 P1 adapter known answers on iOS Hermes (iPhone 11), 2026-09-30
 
-Result: **pass, 0 mismatches** on `run(items world, cases)` (3 cases, 11 steps) and
-`run(dusk world, dusk_cases)` (1 case, 1 step). Raw device output: [p1run.txt](p1run.txt).
+Result: **pass, 0 mismatches** on `run(items world, cases)` (3 cases; 11 steps from the fixture) and
+`run(dusk world, dusk_cases)` (1 case; 1 step from the fixture). Raw device output: [p1run.txt](p1run.txt).
 Spec: [pre-release-proof.md](../../spec/pre-release-proof.md) P1, ADR-074 §3; decision
 [owner-decision-p1-hermes-batching-2026-09-30](../../decisions/owner-decision-p1-hermes-batching-2026-09-30.md).
 
@@ -11,9 +11,10 @@ Facts, by source:
 - **Inspected:** `main.jsbundle` in the built app starts with the Hermes bytecode magic
   (`c6 1f bc 03 c1 03 19 1f`) and contains `loka-kernel`; source was `origin/main` 7d56480 plus the
   temporary wiring below. iOS 26.6.2 (23G90), iPhone 11; Xcode 27.0; Node 24.21.0.
-- **Not checked:** lock state was read with `devicectl device info lockState` before the run
-  (`passcodeRequired: false`, `unlockedSinceBoot: true`); the launch put the app in the foreground
-  and the JS run completed, so the run was not interrupted. No red control was run on the device.
+- **Inspected (run conditions):** lock state was read with `devicectl device info lockState` before
+  the run (`passcodeRequired: false`, `unlockedSinceBoot: true`); the launch put the app in the
+  foreground and the JS run completed, so it was not interrupted.
+- **Not checked:** no red control was run on the device.
 
 Steps (temporary wiring, not committed; the two files are kept here as [dev-metro.config.diff](dev-metro.config.diff)
 and [dev-App.tsx.txt](dev-App.tsx.txt)):
