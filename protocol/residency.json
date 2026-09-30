@@ -69,7 +69,7 @@
   {
     "key": "receipts",
     "residency": "authority_host_coordination",
-    "fixtures": []
+    "fixtures": ["protocol/fixtures/intent_digest.json"]
   },
   {
     "key": "transactions",

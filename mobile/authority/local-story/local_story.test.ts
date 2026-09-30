@@ -77,7 +77,8 @@ test('a tiny world survives a restart with the same state', () => {
 
 // Breaks (03 §14): the receipt looked up after resolving against the current world (the satchel
 // was given away), a replay that decides again or reports the current revision, the view token in
-// the match, or altered intent replayed or applied instead of refused.
+// the match, altered intent replayed or applied instead of refused, or a receipt of another
+// intent_digest_version compared as if it were this one.
 test('a retried consumed take replays its receipt; altered intent is a conflict', () => {
   const path = save();
   const a = processOn(path);
@@ -92,6 +93,8 @@ test('a retried consumed take replays its receipt; altered intent is a conflict'
   assert.deepEqual(retry, { ...first, replay: true });
   const altered = { ...invocation(1, 'give', [SATCHEL, NPC]) };
   assert.deepEqual(b.story.invoke(altered), { kind: 'conflict' });
+  b.sql.exec("UPDATE receipt SET intent_digest_version = 'loka-intent-v0'");
+  assert.deepEqual(b.story.invoke(take), { kind: 'conflict' });
   assert.equal(b.story.world(), before);
   assert.equal(b.one('SELECT count(*) FROM receipt'), 2);
   assert.equal(b.one('SELECT revision FROM head'), 2);

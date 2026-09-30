@@ -35,8 +35,10 @@ export function openStory(db: Db, fresh: World, scope: string) {
       if (id.kind !== 'identified') return id;
       const { invocation: i, command_id, intent_digest } = id;
       const old = receipt(db, scope, i.invocation_id);
+      // ponytail: one digest version; a receipt of another fails closed until a second exists.
+      const same = old?.intent_digest_version === INTENT_DIGEST_VERSION;
       if (old) {
-        if (old.intent_digest !== intent_digest) return { kind: 'conflict' };
+        if (!same || old.intent_digest !== intent_digest) return { kind: 'conflict' };
         return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
       }
       const command = resolve(world, id);

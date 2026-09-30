@@ -64,7 +64,7 @@ responsibilities, which are never capabilities (05 §6). No fixtures: none bound
 | state_delta_composition | portable_semantic_foundation | protocol/fixtures/composition.json |
 | invariant_checks | portable_semantic_foundation | protocol/fixtures/composition.json |
 | serialization | authority_host_coordination |  |
-| receipts | authority_host_coordination |  |
+| receipts | authority_host_coordination | protocol/fixtures/intent_digest.json |
 | transactions | authority_host_coordination |  |
 | persistence | authority_host_coordination |  |
 | scheduling_orchestration | authority_host_coordination |  |

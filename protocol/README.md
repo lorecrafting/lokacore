@@ -11,7 +11,7 @@ lists only what a file adds to that.
 | File | Covers | Spec | Fixtures |
 |---|---|---|---|
 | **Identity and scope** | | | |
-| `identity.schema.json` | definition and runtime ids, each its own type; CommandId; the invocation-intent digest (TypeScript only) | 03 §2, §3, §6, §14; 05 §4 | `command_id.json`, `intent_digest.json` |
+| `identity.schema.json` | definition and runtime ids, each its own type; CommandId | 03 §2, §3, §6; 05 §4 | `command_id.json` |
 | `scope.schema.json` | StateScope, AudiencePolicy | 03 §6 | |
 | `relation.schema.json` | typed relations, entity provenance | 21 §4; 03 §3, §11; 05 §25 | |
 | `text.schema.json` | localized text ids and bindings; the default-locale text catalog | 04 §15; 05 §18; 06 §43 | |
@@ -38,6 +38,7 @@ lists only what a file adds to that.
 | **Host, platform, verification** | | | |
 | `account.schema.json` | account/run binding, milestone reports, admission | 23 §2-§7, §11; 03 §25-§27 | |
 | `observation.schema.json`, `event_registry.json` | the observation record envelope, stores, correlation ids, game-trace entry, and the registered event names | 11 §11-§15; 08 §6; 09 §2, §7; [ADR-075](../docs/decisions/adr-075-observability-proposal.md) | `delta_digest.json`, `input_digest.json` |
+| (no schema) | the invocation-intent digest a receipt stores (`residency.json` receipts; TypeScript only) | 03 §14 | `intent_digest.json` |
 | `invariant.schema.json`, `invariants.json` | registered invariants, checked by id | [roadmap](../docs/ROADMAP.md) | `composition.json` |
 
 `fixtures/subset.schema.json` is a test-only probe for subset keywords no contract uses yet.
