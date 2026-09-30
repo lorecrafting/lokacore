@@ -30,10 +30,12 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 merge without asking permission at each step, and settles judgment calls itself. When a
 decision is hard, escalate in order: the `advisor` tool; then a higher model by hand (a
 Fable subagent, or codex Astra for a hard review); only if both fail to settle it, or it is
-critical, stop for the owner. Critical means what [AGENTS.md](../AGENTS.md) and the owner
-decisions reserve to the owner: a product or scope decision, a spec conflict, spending money,
-a `--no-verify` or force-push, anything destructive or outward-facing beyond the PR and its
-merge. Report at the end of the slice, not at every step.
+critical, stop for the owner ([owner decision](decisions/owner-decision-autonomy-2026-09-30.md)).
+A ladder answer is advice to the PM: it never changes a reviewer's finding or verdict and is
+never the owner's OK. Critical means what [AGENTS.md](../AGENTS.md) and the owner decisions
+reserve to the owner: a product or scope decision, a spec conflict, spending money, a
+`--no-verify` push, anything destructive or outward-facing beyond the PR and its merge.
+Report at the end of the slice, not at every step.
 
 1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its spec sections;
    keep [the roadmap](ROADMAP.md) current.
@@ -73,8 +75,8 @@ merge. Report at the end of the slice, not at every step.
    NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
-   PR link, verdict, notes. Owner decisions and anything open after fix round 2 still go to
-   the owner. If the slice taught a lesson, record it as
+   PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
+   escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
    future decision and survives code drift; if a check could enforce it, write the check instead.
 
