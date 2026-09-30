@@ -254,19 +254,19 @@ test('a lost COMMIT acknowledgement reconciles to the committed receipt', () => 
 // Breaks (03 §15; storage lessons): reconcile reading the attempt's own uncommitted receipt inside
 // the still-open transaction (a false save), a failed COMMIT reported as saved or adopted, or the
 // retry refused. A deferred foreign-key violation fails the real COMMIT and leaves it open; the
-// first ROLLBACK after it is made to fail (simulated), so the outcome stays unknown once.
+// two ROLLBACKs after it are made to fail (simulated), so the outcome stays unknown once.
 test('a genuinely failed COMMIT reconciles to not committed; the retry is a fresh attempt', () => {
-  let jam = false;
+  let jams = 0;
   const p = processOn(save(), items, 0, (s, run) => {
-    if (!jam || s !== 'ROLLBACK') return run();
-    jam = false;
+    if (!jams || s !== 'ROLLBACK') return run();
+    jams -= 1;
     throw new Error('ROLLBACK failed');
   });
   p.sql.exec(`PRAGMA foreign_keys = ON; CREATE TABLE parent (id INTEGER PRIMARY KEY);
     CREATE TABLE orphan (id INTEGER REFERENCES parent DEFERRABLE INITIALLY DEFERRED);
     CREATE TRIGGER orphaned AFTER INSERT ON receipt BEGIN INSERT INTO orphan VALUES (1); END;`);
   const before = p.story.world();
-  jam = true;
+  jams = 2;
   assert.deepEqual(p.story.invoke(take), { kind: 'pending' });
   assert.throws(() => p.story.invoke(take), /nothing was saved/); // settles, then fails anew
   assert.equal(p.story.world(), before);
@@ -324,7 +324,8 @@ test('a process killed after COMMIT restarts with the take once and its trace en
 });
 
 // Breaks (ADR-075 §4): no entry for a definite failure or one traced as unknown, the trace written
-// inside the gameplay transaction, or a trace failure reaching the player or never recovered.
+// inside the gameplay transaction, a trace failure reaching the player, or its missed entry
+// recovered after a later command's (replay by ordinal would then run give before take).
 test('a definite failure is traced once; a failed trace write changes nothing', () => {
   const path = save();
   const a = processOn(path);
@@ -335,9 +336,11 @@ test('a definite failure is traced once; a failed trace write changes nothing', 
   a.sql.exec(`DROP TRIGGER t; ${raise('trace')}`);
   assert.deepEqual(saved(a.story.invoke(take)), [false, 1]);
   a.sql.exec('DROP TRIGGER t');
+  assert.deepEqual(saved(a.story.invoke(invocation(2, 'give', [SATCHEL, NPC]))), [false, 2]);
   a.sql.close();
   assert.deepEqual(traced(processOn(path)), [
     [1, 0, 'failed', null],
     [2, 0, 'committed', 1],
+    [3, 1, 'committed', 2],
   ]);
 });

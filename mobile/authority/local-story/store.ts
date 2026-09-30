@@ -135,7 +135,8 @@ export function reconcile(db: Db, scope: string, invocation_id: string): Receipt
 
 /**
  * Runs `writes` and COMMIT in one transaction: true once committed; throws, rolled back, when a
- * write fails; false when COMMIT itself fails, since that is not proof of rollback (03 §15).
+ * write fails; false when COMMIT itself fails, since that is not proof of rollback (03 §15), after
+ * trying ROLLBACK so no transaction stays open.
  */
 export function transaction(db: Db, writes: () => void): boolean {
   db.execSync('BEGIN IMMEDIATE');
@@ -152,6 +153,9 @@ export function transaction(db: Db, writes: () => void): boolean {
     db.execSync('COMMIT');
     return true;
   } catch {
+    try {
+      db.execSync('ROLLBACK'); // a COMMIT that failed with the transaction open leaves it open
+    } catch {}
     return false;
   }
 }

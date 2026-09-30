@@ -16,10 +16,9 @@ export type CommitState = 'committed' | 'failed' | 'unknown' | 'unavailable';
 
 // ponytail: the trace grows with the save; the phone cap ADR-075 leaves to R6 is not set yet.
 /**
- * Appends the entry of `command`, decided as `d` and stored (or meant to be) at revision `at`,
- * with its commit outcome, at `ordinal` (default the next; the follow-up of an unknown commit
- * repeats it). Returns the ordinal, or undefined when the write failed: that is swallowed, and
- * `recover` rewrites a committed entry it missed.
+ * Appends the entries of `command`, decided as `d` and stored (or meant to be) at revision `at`,
+ * one per commit outcome in `states` (an unknown commit and its settled follow-up share one
+ * ordinal, ADR-075 §4), in one transaction. False when the write failed, which is swallowed.
  */
 export function traceCommand(
   db: Db,
@@ -27,13 +26,12 @@ export function traceCommand(
   command: Command,
   d: DecisionResult,
   at: number,
-  state: CommitState,
-  ordinal?: number,
-): number | undefined {
+  states: readonly CommitState[],
+): boolean {
   const record = (event: string, ids: object, data: object) =>
     encode({ format: 'loka-obs-v1', event, store: 'game_trace', ids, data } as never);
   try {
-    const written = transaction(db, () => {
+    return transaction(db, () => {
       // The last row holds the highest ordinal (a follow-up repeats it); rowid keeps this O(1).
       const last = db.getFirstSync<{ n: number }>(
         'SELECT ordinal AS n FROM trace ORDER BY rowid DESC LIMIT 1',
@@ -46,27 +44,32 @@ export function traceCommand(
         };
         db.runSync(TRACE, 0, null, null, record('trace.run', ids, header));
       }
-      ordinal ??= (last ?? 0) + 1;
+      const ordinal = (last ?? 0) + 1;
       const revision = d.kind === 'accepted' ? at - 1 : at; // the one it was decided against
-      const data = { ordinal, command, decision: traced(d), commit: outcome(d, at, state) };
-      const entry = record('trace.command', { ...ids, command_id: command.id, revision }, data);
-      db.runSync(TRACE, ordinal, command.id, state, entry);
+      for (const state of states) {
+        const data = { ordinal, command, decision: traced(d), commit: outcome(d, at, state) };
+        const entry = record('trace.command', { ...ids, command_id: command.id, revision }, data);
+        db.runSync(TRACE, ordinal, command.id, state, entry);
+      }
     });
-    if (written) return ordinal;
-    db.execSync('ROLLBACK'); // its COMMIT failed: leave no transaction open
-  } catch {}
-  return undefined;
+  } catch {
+    return false;
+  }
 }
 
-/** Appends the committed entry of every receipted Command that has none, in commit order. */
-export function recover(db: Db, ids: RunIds): void {
+/**
+ * Appends the committed entry of every receipted Command that has none, in commit order; false
+ * unless all were written.
+ */
+export function recover(db: Db, ids: RunIds): boolean {
   type Row = { command: string; response: string; revision: number };
   const missing = db.getAllSync<Row>(
     `SELECT command, response, revision FROM receipt WHERE command != 'null' AND command_id NOT IN
       (SELECT command_id FROM trace WHERE commit_state = 'committed') ORDER BY rowid`,
   );
-  for (const r of missing)
-    traceCommand(db, ids, JSON.parse(r.command), JSON.parse(r.response), r.revision, 'committed');
+  return missing.every((r) =>
+    traceCommand(db, ids, JSON.parse(r.command), JSON.parse(r.response), r.revision, ['committed']),
+  );
 }
 
 const TRACE = 'INSERT INTO trace VALUES (?, ?, ?, ?)';

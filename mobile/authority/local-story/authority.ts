@@ -2,7 +2,7 @@
 // save, and 03 §14's admission order. invoke is synchronous on one connection, so commands run
 // one at a time, as WorldInstance serializes them online (07 §8).
 import type { Json } from '../../../kernel/ts/src/canonical.ts';
-import type { DecisionResult, ErrorCode } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { Command, DecisionResult, ErrorCode } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
@@ -30,12 +30,12 @@ export type Reply =
  * until the store settles it (03 §15). Each command's game-trace entry follows its commit.
  */
 export function openStory(db: Db, fresh: World, scope: string, ids: RunIds) {
-  const s: Story = { db, fresh, scope, ids, ...load(db, fresh) };
-  recover(db, ids);
+  const s: Story = { db, fresh, scope, ids, ...load(db, fresh), behind: false };
+  s.behind = !recover(db, ids);
   return { world: () => s.world, invoke: (value: unknown) => invoke(s, value) };
 }
 
-type Trace = (at: number, state: CommitState, ordinal?: number) => number | undefined;
+type Trace = (at: number, ...states: CommitState[]) => void;
 type Story = {
   readonly db: Db;
   readonly fresh: World;
@@ -43,6 +43,7 @@ type Story = {
   readonly ids: RunIds;
   world: World;
   revision: number;
+  behind: boolean; // a committed entry's trace write failed; recover before the next entry
   // The attempt whose COMMIT outcome is unknown: no decision runs until it is settled.
   fence?: { invocation_id: string; trace: Trace; at: number } | undefined;
 };
@@ -68,8 +69,9 @@ function invoke(s: Story, value: unknown): Reply {
   const next = 'kind' in command ? { world: s.world, decision: command } : step(s.world, command);
   const d = next.decision;
   // A rejection before a Command existed has no trace entry: TraceEntry needs the Command.
-  const trace: Trace = (at, state, ordinal) =>
-    'kind' in command ? undefined : traceCommand(s.db, s.ids, command, d, at, state, ordinal);
+  const trace: Trace = (at, ...states) => {
+    if (!('kind' in command)) traceAfter(s, command, d, at, states);
+  };
   if (d.kind === 'fault') {
     trace(s.revision, 'unavailable');
     return { kind: 'fault', code: d.code };
@@ -124,7 +126,26 @@ function settle(s: Story): Receipt | undefined {
   const r = reconcile(s.db, s.scope, f.invocation_id); // throws while still unknown
   if (r) Object.assign(s, load(s.db, s.fresh));
   s.fence = undefined;
-  // Written once settled, so the unknown entry is never lost to a transaction left open.
-  f.trace(f.at, r ? 'committed' : 'failed', f.trace(f.at, 'unknown'));
+  // Traced once settled, with its follow-up; a process that dies while fenced traces neither.
+  f.trace(f.at, 'unknown', r ? 'committed' : 'failed');
   return r;
+}
+
+/**
+ * Traces a command after its commit; committed entries a failed write missed are recovered first,
+ * in commit order, so ordinals follow the commits (ADR-075 §4: the Commands by ordinal replay).
+ */
+function traceAfter(
+  s: Story,
+  command: Command,
+  d: DecisionResult,
+  at: number,
+  states: CommitState[],
+) {
+  const committed = states.at(-1) === 'committed';
+  if (s.behind) {
+    s.behind = !recover(s.db, s.ids);
+    if (committed) return; // recover wrote this one too, or a later one will
+  }
+  if (!traceCommand(s.db, s.ids, command, d, at, states) && committed) s.behind = true;
 }
