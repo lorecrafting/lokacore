@@ -7,6 +7,7 @@ import { openSmoke } from '../authority/local-story/smoke';
 import items from '../../protocol/fixtures/cartridge_items_hash.json';
 
 // Opened once per process (mobile lessons: a second handle on the same file crashes).
+// ponytail: a Fast Refresh edit of this file opens a second handle; reload the app in development.
 const smoke = openSmoke(openDatabaseSync('loka-smoke.db'), items);
 
 export default function App() {

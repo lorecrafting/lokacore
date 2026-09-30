@@ -62,8 +62,12 @@ export function openSmoke(db: Db, bundled: Bundled) {
   if (!loaded.ok) throw new Error(`cartridge did not load: ${JSON.stringify(loaded)}`);
   const cartridge = loaded.cartridge as Cartridge;
   const story = openStory(db, newWorld(cartridge, CONTEXT as never, SEED as never), SCOPE);
-  // Invocation ids count up from the receipts saved, so they stay unique across restarts.
-  let sent = db.getFirstSync<{ n: number }>('SELECT count(*) AS n FROM receipt')!.n;
+  // Ids continue from the highest receipt saved (replies without a receipt leave no trace).
+  const last = db.getFirstSync<{ id: string | null }>(
+    'SELECT max(invocation_id) AS id FROM receipt WHERE scope = ?',
+    SCOPE,
+  )!.id;
+  let sent = last ? parseInt(last.slice(-12), 16) : 0;
   const log: string[] = [];
   const text: Say = (key) => cartridge.text[key as Key] ?? key;
   // ponytail: the cartridge has no text for action labels yet, so show the key's last word.

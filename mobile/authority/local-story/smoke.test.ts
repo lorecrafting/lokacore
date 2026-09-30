@@ -34,7 +34,7 @@ const processOn = (path: string) => {
   };
   const press = (label: string) =>
     smoke.press(smoke.screen().buttons.find((b) => b.label === label)!);
-  return { sql, now, press };
+  return { sql, smoke, now, press };
 };
 
 // Breaks: a button that sends the wrong invocation (target, direction or actor), a world that is
@@ -61,4 +61,19 @@ test('a scripted session survives a restart and plays on', () => {
   b.press('Go south');
   assert.deepEqual(b.now().log, ['> Go south', 'moved']);
   assert.equal(b.now().place, 'Ferry Landing');
+});
+
+// Breaks: the next invocation id taken from the count of receipts. A malformed press saves no
+// receipt but used id 1, so the take got id 2; after a restart the count (1) gave id 2 again, which
+// the take's receipt answered "(conflict)" instead of moving.
+test('an invalid press before a save does not make the next id collide after a restart', () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
+  const a = processOn(path);
+  a.smoke.press({ label: 'bad', action_key: 'NOT A KEY', target_ids: [], input: {} });
+  assert.deepEqual(a.now().log, ['> bad', '(invalid)']);
+  a.press('take a leather satchel');
+  a.sql.close();
+  const b = processOn(path);
+  b.press('Go north');
+  assert.deepEqual(b.now().log, ['> Go north', 'moved']);
 });
