@@ -1,0 +1,7 @@
+P1RUN p1-1790804037351 begin
+P1RUN p1-1790804037351 hermes {"Bytecode Version":98,"Static Hermes":true,"Builtins Frozen":false,"VM Experiments":0,"Build":"Release","GC":"hades (concurrent)","OSS Release Version":"250829098.0.17","Debugger Enabled":false,"CommonJS Modules":"None"}
+P1RUN p1-1790804037351 items take then give in target order PASS
+P1RUN p1-1790804037351 items the take retried without its view token: the same identity and intent PASS
+P1RUN p1-1790804037351 items envelopes, authorization and resolution rejections PASS
+P1RUN p1-1790804037351 dusk a failed luck check is an accepted attempt, not a rejection PASS
+P1RUN p1-1790804037351 done mismatches=0

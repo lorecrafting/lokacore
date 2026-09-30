@@ -1,2 +1,3 @@
 # Imported with recorded source hashes (docs/spec/IMPORT.md): never let git "fix" whitespace.
 docs/spec/** -whitespace
+docs/evidence/** -whitespace
