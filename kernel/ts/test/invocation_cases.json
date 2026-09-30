@@ -1,8 +1,8 @@
 {
-  "description": "Known answers for the P1 identity/outcome adapter (kernel/ts/src/invocation.ts) on the ashmere_items world (protocol/fixtures/cartridge_items_hash.json, context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f, seed [1,2,3,4]). command_id and intent_digest were computed by Python hashlib over hand-built canonical JSON (commandId: ['loka-command-v1', scope, invocation_id], UUID version 8; intent: ['loka-intent-v1', action_key, actor_id, target_ids, input]), never by the kernels; the first command_id is protocol/fixtures/command_id.json row 1. Payloads and decisions are hand-written from the rule headers; invalid errors from protocol/fixtures/invalid.json and the ActionInvocation schema. Step 1 retries step 0 with another view token: the same identity (its receipt replay is S1's, so step decides it again).",
+  "description": "Known answers for the P1 identity/outcome adapter (kernel/ts/src/invocation.ts) on the ashmere_items world (protocol/fixtures/cartridge_items_hash.json, context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f, seed [1,2,3,4]). command_id and intent_digest were computed by Python hashlib over hand-built canonical JSON (commandId: ['loka-command-v1', scope, invocation_id], UUID version 8; intent: ['loka-intent-v1', action_key, actor_id, target_ids, input]), never by the kernels; the first command_id is protocol/fixtures/command_id.json row 1. Payloads and decisions are hand-written from the rule headers; invalid errors from protocol/fixtures/invalid.json and the ActionInvocation schema. The second case delivers the first take again from a fresh world without its view token: same command_id, intent_digest and outcome (receipt replay is S1's).",
   "cases": [
     {
-      "name": "take, retry, give in target order",
+      "name": "take then give in target order",
       "scope": "story/lineage-1/character-1",
       "steps": [
         {
@@ -22,27 +22,10 @@
               "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
               "item_id": "d530207e-b845-8be5-9d53-b44b2cf5d8a1"
             },
-            "decision": { "kind": "accepted", "outcome": "taken" }
-          }
-        },
-        {
-          "invocation": {
-            "invocation_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
-            "action_key": "take",
-            "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
-            "target_ids": ["d530207e-b845-8be5-9d53-b44b2cf5d8a1"],
-            "input": {},
-            "view_freshness_token": "view-2"
-          },
-          "result": {
-            "command_id": "3ee00071-4a05-8a6d-9ba7-fbf2e6211039",
-            "intent_digest": "38b7d24e08b6afdc4cf815efc148dd79cd7ec9f04661b99693c664592c47715d",
-            "payload": {
-              "type": "take",
-              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
-              "item_id": "d530207e-b845-8be5-9d53-b44b2cf5d8a1"
-            },
-            "decision": { "kind": "rejected", "code": "invalid_state" }
+            "decision": {
+              "kind": "accepted",
+              "outcome": "taken"
+            }
           }
         },
         {
@@ -65,7 +48,10 @@
               "item_id": "ff864ad5-cd56-80c8-9392-dc88bdc28fd2",
               "recipient_id": "d530207e-b845-8be5-9d53-b44b2cf5d8a1"
             },
-            "decision": { "kind": "rejected", "code": "invalid_target" }
+            "decision": {
+              "kind": "rejected",
+              "code": "invalid_target"
+            }
           }
         },
         {
@@ -88,7 +74,38 @@
               "item_id": "d530207e-b845-8be5-9d53-b44b2cf5d8a1",
               "recipient_id": "ff864ad5-cd56-80c8-9392-dc88bdc28fd2"
             },
-            "decision": { "kind": "accepted", "outcome": "given" }
+            "decision": {
+              "kind": "accepted",
+              "outcome": "given"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "the take retried without its view token: the same identity and intent",
+      "scope": "story/lineage-1/character-1",
+      "steps": [
+        {
+          "invocation": {
+            "invocation_id": "f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c",
+            "action_key": "take",
+            "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+            "target_ids": ["d530207e-b845-8be5-9d53-b44b2cf5d8a1"],
+            "input": {}
+          },
+          "result": {
+            "command_id": "3ee00071-4a05-8a6d-9ba7-fbf2e6211039",
+            "intent_digest": "38b7d24e08b6afdc4cf815efc148dd79cd7ec9f04661b99693c664592c47715d",
+            "payload": {
+              "type": "take",
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "item_id": "d530207e-b845-8be5-9d53-b44b2cf5d8a1"
+            },
+            "decision": {
+              "kind": "accepted",
+              "outcome": "taken"
+            }
           }
         }
       ]
@@ -102,11 +119,26 @@
           "result": {
             "kind": "invalid",
             "errors": [
-              { "path": "/action_key", "code": "missing_property" },
-              { "path": "/actor_id", "code": "missing_property" },
-              { "path": "/input", "code": "missing_property" },
-              { "path": "/invocation_id", "code": "missing_property" },
-              { "path": "/target_ids", "code": "missing_property" }
+              {
+                "path": "/action_key",
+                "code": "missing_property"
+              },
+              {
+                "path": "/actor_id",
+                "code": "missing_property"
+              },
+              {
+                "path": "/input",
+                "code": "missing_property"
+              },
+              {
+                "path": "/invocation_id",
+                "code": "missing_property"
+              },
+              {
+                "path": "/target_ids",
+                "code": "missing_property"
+              }
             ]
           }
         },
@@ -121,7 +153,12 @@
           },
           "result": {
             "kind": "invalid",
-            "errors": [{ "path": "/session_id", "code": "unknown_property" }]
+            "errors": [
+              {
+                "path": "/session_id",
+                "code": "unknown_property"
+              }
+            ]
           }
         },
         {
@@ -132,7 +169,9 @@
             "target_ids": [],
             "input": {}
           },
-          "result": { "kind": "unauthorized" }
+          "result": {
+            "kind": "unauthorized"
+          }
         },
         {
           "invocation": {
@@ -145,7 +184,10 @@
           "result": {
             "command_id": "f04c33e9-c71e-8034-8203-ba17af7244fa",
             "intent_digest": "88508481db881251f3e7357719a647c7a8f47b8beaaf2ae607ecaaf49b9e97c5",
-            "decision": { "kind": "rejected", "code": "unsupported_capability" }
+            "decision": {
+              "kind": "rejected",
+              "code": "unsupported_capability"
+            }
           }
         },
         {
@@ -162,7 +204,10 @@
           "result": {
             "command_id": "00ad7aad-9211-8521-b2cf-a7d3daa459ba",
             "intent_digest": "dbfade45bfcd66f37e156dfde6614ec93fc02e9b20a66d71c31dacaad2d19d51",
-            "decision": { "kind": "rejected", "code": "unsupported_capability" }
+            "decision": {
+              "kind": "rejected",
+              "code": "unsupported_capability"
+            }
           }
         },
         {
@@ -176,7 +221,10 @@
           "result": {
             "command_id": "57264818-ec7e-812b-9c36-e5320e1ae260",
             "intent_digest": "ca127198f628ae63f2a57a28d0e91dc346d045cfcca4b785496458c11dd86e1e",
-            "decision": { "kind": "rejected", "code": "unsupported_capability" }
+            "decision": {
+              "kind": "rejected",
+              "code": "unsupported_capability"
+            }
           }
         },
         {
@@ -185,7 +233,9 @@
             "action_key": "move",
             "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
             "target_ids": [],
-            "input": { "direction": "north" }
+            "input": {
+              "direction": "north"
+            }
           },
           "result": {
             "command_id": "8f151d72-de05-8276-b910-562edd37a8d5",
@@ -195,7 +245,10 @@
               "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
               "direction": "north"
             },
-            "decision": { "kind": "accepted", "outcome": "moved" }
+            "decision": {
+              "kind": "accepted",
+              "outcome": "moved"
+            }
           }
         }
       ]

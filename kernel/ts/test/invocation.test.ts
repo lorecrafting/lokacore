@@ -38,7 +38,7 @@ test('a mismatch reports the step, both results and the state as canonical bytes
   assert.deepEqual(rest, []);
   assert.match(
     report,
-    /^take, retry, give in target order step 0\nexpected \{"kind":"unauthorized"\}\n/,
+    /^take then give in target order step 0\nexpected \{"kind":"unauthorized"\}\n/,
   );
   assert.match(report, /\nactual {3}\{"command_id":"3ee00071-4a05-8a6d-9ba7-fbf2e6211039",/);
   // The satchel in the body after the take (ids: containment.test.ts, ordinals 8 and 1).
@@ -48,30 +48,43 @@ test('a mismatch reports the step, both results and the state as canonical bytes
   assert.ok(after.includes(held));
 });
 
-// Breaks (04 §5.0): a fault reported as a rejection or the reverse, or either one changing the
-// world. The bell recipe assigns a value its FactSpec does not allow, which adopt faults
-// precondition_failed (recipes.test.ts); the loader rejects such an artifact, so the loaded
-// cartridge is changed.
-test('a fault stays a fault and a rejection a rejection, neither changing the world', () => {
+// Breaks (04 §5.0): a fault or a failed attempt reported as a rejection or the reverse, a
+// rejection or fault changing the world, or a failed attempt not committing its draw. The bell's
+// ring_bell is changed in the loaded cartridge (the loader would reject both artifacts): assigning
+// a value its FactSpec does not allow, which adopt faults precondition_failed (recipes.test.ts),
+// or given a luck check of chance 20, which the seed's first roll of 20 fails, leaving the RNG at
+// [7, 0, 1026, 12288] (checks.test.ts, from numeric-vectors.json).
+test('fault, rejection and failed attempt stay distinct; only the attempt changes the world', () => {
   const ok = world('cartridge_bell_hash.json');
-  const cartridge = structuredClone(ok.cartridge) as any;
-  cartridge.recipes['ashmere_bell@0.0.1:recipe/ring_bell'].outcomes.success.sequence[0].value =
-    'yes';
-  const bad: World = { ...ok, cartridge };
-  const invoke = (action_key: string) =>
-    attempt(bad, 'story/lineage-1/character-1', {
+  const bell = (change: (recipe: any) => void): World => {
+    const cartridge = structuredClone(ok.cartridge) as any;
+    change(cartridge.recipes['ashmere_bell@0.0.1:recipe/ring_bell']);
+    return { ...ok, cartridge };
+  };
+  const bad = bell((r) => (r.outcomes.success.sequence[0].value = 'yes'));
+  const luck = bell((r) => {
+    r.check = { key: 'ring_true', kind: 'luck', chance: 20 };
+    r.outcomes.failure = { sequence: [], narration: { actor: 'narration.ring_bell.actor' } };
+  });
+  const invoke = (w: World, action_key: string) =>
+    attempt(w, 'story/lineage-1/character-1', {
       invocation_id: 'f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c',
       action_key,
       actor_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
       target_ids: [],
       input: {},
     });
-  const [fault, rejection] = [invoke('ring_bell'), invoke('take')];
-  assert.deepEqual((fault.result as any).decision, { kind: 'fault', code: 'precondition_failed' });
-  assert.deepEqual((rejection.result as any).decision, {
-    kind: 'rejected',
-    code: 'unsupported_capability', // the bell cartridge locks no containment
-  });
+  const [fault, rejection, failed] = [
+    invoke(bad, 'ring_bell'),
+    invoke(bad, 'take'),
+    invoke(luck, 'ring_bell'),
+  ];
+  const decision = (r: { result: unknown }) => (r.result as any).decision;
+  assert.deepEqual(decision(fault), { kind: 'fault', code: 'precondition_failed' });
+  // The bell cartridge locks no containment.
+  assert.deepEqual(decision(rejection), { kind: 'rejected', code: 'unsupported_capability' });
+  assert.deepEqual(decision(failed), { kind: 'accepted', outcome: 'failure' });
   assert.equal(fault.world, bad);
   assert.equal(rejection.world, bad);
+  assert.deepEqual(failed.world.state.rng, [7, 0, 1026, 12288]);
 });
