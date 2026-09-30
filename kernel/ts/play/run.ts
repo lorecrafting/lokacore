@@ -1,9 +1,18 @@
 // One command through the kernel, as the trace.command entry and the decision-latency
-// metric it produces (ADR-075 §3, §4; 11 §13, §15).
+// metric it produces (ADR-075 §3, §4; 11 §13, §15), and one lookup (found).
 import { performance } from 'node:perf_hooks';
 import { hash } from '../src/canonical.ts';
-import type { Command, DecisionResult } from '../src/contracts.gen.ts';
+import {
+  LIMITS,
+  type Command,
+  type DecisionResult,
+  type EntityId,
+  type TargetResolution,
+} from '../src/contracts.gen.ts';
 import { step, type World } from '../src/index.ts';
+import { resolve } from '../src/target.ts';
+import { append, line, lookupWords } from './obs.ts';
+import { which } from './text.ts';
 
 /** A run in progress: its ids, current world, last ordinal and authority revision. */
 export type Run = {
@@ -61,4 +70,36 @@ function outcome(d: DecisionResult, r: Run): [unknown, unknown] {
   };
   const events = d.events.map((event) => ({ committed_revision: r.revision, event }));
   return [traced, { state: 'committed', revision: r.revision, events, effect_ids: [] }];
+}
+
+// The words' unique id, else undefined after telling the player and writing one
+// target.unresolved record to diagnostics (owner request, R5 S2) with the words redacted. Past
+// selector_cardinality candidates resolve throws; that gets a refusal and no record, whose
+// candidates count could not hold it.
+export function found(r: Run, words: string): EntityId | undefined {
+  let res: TargetResolution;
+  try {
+    res = resolve(r.world, r.world.character, words);
+  } catch (e) {
+    if (!String(e).includes('exceed selector_cardinality')) throw e;
+    return void process.stdout.write(
+      `Over ${LIMITS.selector_cardinality} things here answer to that.\n`,
+    );
+  }
+  if (res.kind === 'unique') return res.target_id;
+  const ids = res.kind === 'ambiguous' ? res.candidate_ids : [];
+  process.stdout.write(
+    ids.length ? which(r.world.cartridge, r.world, ids) : "You don't see that here.\n",
+  );
+  const { key } = r.world.rooms[r.world.state.containers[r.world.body]];
+  const { id, version } = r.world.cartridge.manifest;
+  const data = {
+    room: { cartridge_id: id, cartridge_version: version, kind: 'room', key },
+    outcome: res.kind,
+    candidates: ids.length,
+    words: lookupWords(words),
+    after_ordinal: r.ordinal,
+  };
+  const record = { format: 'loka-obs-v1', event: 'target.unresolved', store: 'diagnostics' };
+  append('diagnostics', r.ids.run_id, line({ ...record, ids: r.ids, data }));
 }

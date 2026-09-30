@@ -67,3 +67,5 @@
 {"data":{"instance":2,"model":"opus","pr_disposition":"merged","role":"developer","tokens":{"state":"observed","value":153553}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":53},"store":"dev_evidence"}
 {"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":156907}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":53},"store":"dev_evidence"}
 {"data":{"instance":2,"model":"sol","pr_disposition":"merged","role":"reviewer","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":53},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"pm","tokens":{"state":"unknown"}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":54},"store":"dev_evidence"}
+{"data":{"instance":1,"model":"opus","pr_disposition":"merged","role":"reviewer","tokens":{"state":"observed","value":59461}},"event":"agent.work","format":"loka-obs-v1","ids":{"pull_request":54},"store":"dev_evidence"}

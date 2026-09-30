@@ -3,10 +3,12 @@
 // words) and the terminal's words for each outcome.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { encode } from '../src/canonical.ts';
 import { ROOT } from '../play/obs.ts';
 import { read } from './read.ts';
 
@@ -15,10 +17,10 @@ const kat = read('protocol/fixtures/cartridge_items_hash.json');
 const artifact = join(dir, 'items.json');
 writeFileSync(artifact, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);
 
-function play(lines: string[]) {
+function play(lines: string[], art = artifact) {
   const script = join(dir, 'script.txt');
   writeFileSync(script, `${lines.join('\n')}\n`);
-  const r = spawnSync('node', [`${ROOT}kernel/ts/play/main.ts`, artifact, script], {
+  const r = spawnSync('node', [`${ROOT}kernel/ts/play/main.ts`, art, script], {
     encoding: 'utf8',
   });
   assert.equal(r.status, 0, r.stderr);
@@ -69,5 +71,30 @@ test('take, drop, give, inventory and examine read as a player expects', () => {
     "drop lantern\nYou don't see that here.\n", // Bram holds it: out of reach
     "give satchel to nobody\nYou don't see that here.\n",
     'take\nTake what?\n',
+  ]);
+});
+
+// Breaks: a lookup over selector_cardinality (1024) candidates, where resolve throws (04 §5.3),
+// ends the session with a stack trace instead of a refusal. The artifact is encoded by the
+// kernel's canonical encoder: input only, the expected lines are hand-written.
+test('a lookup matching 1,025 items is refused and the session goes on', () => {
+  const c = structuredClone(kat.value);
+  const room = { cartridge_id: 'ashmere_items', cartridge_version: '0.0.1', kind: 'room' };
+  const coin = {
+    keywords: ['coin'],
+    short: 'item.lantern.short',
+    room_line: 'item.lantern.room',
+    description: 'item.lantern.description',
+    location: { in: 'room', room: { ...room, key: 'ferry_landing' } },
+  };
+  for (let i = 0; i < 1025; i++)
+    c.items[`ashmere_items@0.0.1:item/coin${i}`] = { ...coin, key: `coin${i}` };
+  const text = encode(c);
+  const coins = join(dir, 'coins.json');
+  const sha = createHash('sha256').update(text).digest('hex');
+  writeFileSync(coins, `{"cartridge":${text},"content_hash":"${sha}"}`);
+  assert.deepEqual(play(['look coin', 'i'], coins), [
+    'look coin\nOver 1024 things here answer to that.\n',
+    'i\nYou are carrying nothing.\n',
   ]);
 });

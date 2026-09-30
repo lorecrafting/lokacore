@@ -10,28 +10,18 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Opus | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Opus; Fable for design judgment (suspended, see below) | independent review, review record |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable rarely (see below) | independent review, review record |
 
-**Fable reviews design judgment:** a slice that freezes semantics later work cannot cheaply
-change (a spec amendment, a canonical encoding, an identity or delta contract, a gate
-review), or an Opus reviewer and the developer disagreeing twice. The PM passes
-`model: "fable"` when spawning that reviewer (the file's default is Opus). Everything else
-stays on Opus, reviewed once with a narrow fix check; to R6P, Fable is planned for about six
-slices ([owner decision](decisions/owner-decision-review-lever-2026-09-25.md)). Suspended:
-all reviews run on Opus until the owner says Fable is available again
-([owner decision](decisions/owner-decision-opus-reviews-2026-09-25.md)); meanwhile a
-cross-vendor review covers the remaining Fable slots (the simulation slice, R6 authority/save, GameView for
-touch).
-**Cross-vendor review** (Astra, or another vendor's model the owner has credits for, such as
-Sol 5.6 on [#50](reviews/2026-09-26-r5-s7-review.md)) runs beside the design-judgment review only where the PM judges a
-slice foundational: a freeze later work builds on (a spec amendment, a new encoding or
-hash domain, an identity, delta or other core contract, a gate review), not the
-implementation of a contract a cross-vendor review already covered. The owner delegated this judgment to
-the PM ([record](decisions/owner-decisions-observability-astra-2026-09-25.md)). Once CI is
-green, the PM gives the owner a paste-ready prompt (PR, head SHA, spec sections,
-focus, and the output format: verdict, then findings with id, severity, `path:line` at that
-SHA and a failure scenario, in one fenced block). The owner runs it and pastes the answer
-back; the reviewer appends it verbatim to its record, and its findings join the fix list.
+**Models** ([owner decision](decisions/owner-decisions-review-flow-2026-09-30.md)): a slice is
+reviewed once, with a narrow fix check, by a reviewer on the highest Opus; the PM passes
+`model: "fable"` only as a rare backstop for very complex work (it spends Claude Code tokens).
+**Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
+our own independent review, never instead of it: the PM may add it to any slice beyond
+docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only, `-m` Sol by
+default, Astra for hard reviews (escalate freely)) with the
+PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
+severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
+answer verbatim to the review record, and adds its findings to the fix list.
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
 ## Loop
@@ -72,8 +62,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
-   PR link, verdict, notes. Owner decisions, anything open after fix round 2 and cross-vendor
-   relays still go to the owner. If the slice taught a lesson, record it as
+   PR link, verdict, notes. Owner decisions and anything open after fix round 2 still go to
+   the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says.
 
 ## Milestone gate: docs tidy pass
@@ -105,7 +95,7 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 - The brief is the biggest quality lever: a vague brief yields confident wrong work.
   Acceptance is written as checkable items before any code.
 - Same-model reviewers share blind spots with the developer. Deriving requirements from
-  the spec first, breaking the code to test the tests, and Fable on semantic freezes are
+  the spec first, breaking the code to test the tests, and a cross-vendor review are
   the counterweights; a longer checklist is not.
 - The developer keeps its context across fixes, so fixes are cheap and consistent; the
   reviewer stays fresh so its judgment is independent.

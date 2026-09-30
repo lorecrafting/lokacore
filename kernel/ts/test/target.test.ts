@@ -93,3 +93,28 @@ test('look with a target_id examines a detail of this room, else not_found or no
   assert.deepEqual(look(FERRY), { kind: 'rejected', error: { code: 'not_found' } });
   assert.equal((step(w, cmd({ type: 'look' })).decision as { outcome?: string }).outcome, 'looked');
 });
+
+// Breaks: a resolution over the contract's 1024 candidates returned (out of contract, as a
+// loadable cartridge with 1025 same-named items in one room once did) or silently truncated
+// (04 §5.3), or the bound off by one.
+test('a lookup over 1024 candidates fails explicitly; 1024 are all returned', () => {
+  const coins = (n: number) => {
+    const w = fresh();
+    const ids = Array.from({ length: n }, (_, i) => `c${String(i).padStart(4, '0')}`);
+    const entities = Object.fromEntries(
+      ids.map((id) => [id, { kind: 'item', keywords: ['coin'] }]),
+    );
+    const containers = {
+      ...w.state.containers,
+      ...Object.fromEntries(ids.map((id) => [id, FERRY])),
+    };
+    return [
+      { ...w, entities, state: { ...w.state, containers } } as unknown as World,
+      ids,
+    ] as const;
+  };
+  const [w, ids] = coins(1024);
+  assert.deepEqual(resolve(w, w.character, 'coin'), { kind: 'ambiguous', candidate_ids: ids });
+  const [over] = coins(1025);
+  assert.throws(() => resolve(over, over.character, 'coin'), /1025 candidates exceed/);
+});

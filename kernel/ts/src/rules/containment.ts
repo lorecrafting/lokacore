@@ -19,6 +19,7 @@ import {
   values,
   type World,
 } from '../decision.ts';
+import { check } from '../invariants.ts';
 
 export const decide: Rule<'containment'> = (world, command, mint) => {
   const p = command.payload;
@@ -60,14 +61,6 @@ export const decide: Rule<'containment'> = (world, command, mint) => {
 const held = (world: World, holder: string) =>
   values(world.state.containers).filter((c) => c === holder).length;
 
-// Where `id`'s containers lead after one step per container: a room, unless they cycle.
-const climb = (world: World, id: string): string =>
-  keys(world.state.containers).reduce(
-    (at) =>
-      has(world.rooms, at) || !has(world.state.containers, at) ? at : world.state.containers[at],
-    id,
-  );
-
 /** Registered invariants of containment (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
   // Every item and NPC has a container, and each container is a room or a contained entity.
@@ -76,9 +69,14 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
       const c = world.state.containers[id];
       return has(world.rooms, c) || has(world.state.containers, c);
     }),
-  // From every contained entity, containers lead to a room within one step per container (so
-  // never around a cycle), and no declared capacity is exceeded.
+  // Every container is a room or a contained entity, so with no cycle (the linear observation
+  // check, which also holds each declared capacity) every chain of containers ends at a room.
   containment_acyclic: (world) =>
-    keys(world.state.containers).every((id) => has(world.rooms, climb(world, id))) &&
-    keys(world.capacities).every((id) => held(world, id) <= world.capacities[id]),
+    values(world.state.containers).every(
+      (c) => has(world.rooms, c) || has(world.state.containers, c),
+    ) &&
+    check('containment_acyclic', {
+      state: { containers: world.state.containers, capacities: world.capacities },
+      result: { changes: [] },
+    }),
 };
