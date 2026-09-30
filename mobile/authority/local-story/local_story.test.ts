@@ -440,7 +440,7 @@ test('an updated kernel starts a new segment after recovering the old one', () =
     [1, 1, 'committed', 2],
   ]);
   const heads = b.sql.prepare('SELECT record FROM trace WHERE ordinal = 0 ORDER BY rowid').all();
-  const run = (h: { record: unknown }) => JSON.parse(h.record as string);
+  const run = (h: Record<string, unknown>) => JSON.parse(h.record as string);
   assert.deepEqual(
     heads.map(run).map((h) => [h.ids.run_id, h.ids.kernel_version, h.data.initial_state]),
     [
