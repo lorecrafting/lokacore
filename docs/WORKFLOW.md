@@ -33,14 +33,15 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    worktree). Spawn `developer` (pass `model: "opus"` for a kernel or contract-freeze slice) with a self-contained brief: goal,
    spec sections (the clause for each behavior), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
-   decided.
+   decided, and a timebox: at the limit the developer stops and returns partial findings.
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium`), both in the developer's worktree or on the PR number, never
    the main checkout; fix what they find. A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md). Commit, push, open
    the PR (description cites spec sections and includes the ponytail result). Hand back a short note: what changed,
-   check output, self-review findings and dispositions, open questions.
+   branch and head SHA, the commands actually run with output, self-review findings and
+   dispositions, deviations from the brief, open questions.
 4. **Verify and review.** PM does not relay claims: it confirms CI is green on the pushed
    commit (or reruns the check line) before review. Then it spawns a *fresh* `reviewer`
    with the PR number, the brief and the spec sections. The reviewer derives the
@@ -49,7 +50,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    [the index](reviews/README.md), and returns the findings.
 5. **Fix (same developer).** PM forwards the findings with `SendMessage` to the developer,
    whose context is intact (after a PM session restart: a fresh developer gets the brief
-   plus the findings). It runs `git pull --rebase` first (the review record is on the
+   plus the findings). Every fix message restates the whole open finding list, not just the
+   new ones (a resumed agent drops earlier directives). It runs `git pull --rebase` first (the review record is on the
    branch), never force-pushes, fixes or disputes each finding with a reason, reruns the
    checks and pushes.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
@@ -64,7 +66,8 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    [which jobs run](decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
    PR link, verdict, notes. Owner decisions and anything open after fix round 2 still go to
    the owner. If the slice taught a lesson, record it as
-   [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says.
+   [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
+   future decision and survives code drift; if a check could enforce it, write the check instead.
 
 ## Token hygiene
 
@@ -96,6 +99,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
   pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
 - A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
   first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`.
+- CI failure: rerun the job once. An identical second failure is not a flake. A failure in code
+  the diff does not touch means check for a stale base (rebase) before anything else.
 - Git hooks are set once per clone ([AGENTS.md, Working rules](../AGENTS.md#working-rules));
   worktrees share that setting.
 - Agent types in `.claude/agents/` register only when a session starts. If one is missing,
