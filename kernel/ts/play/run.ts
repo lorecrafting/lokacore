@@ -80,7 +80,8 @@ export function found(r: Run, words: string): EntityId | undefined {
   let res: TargetResolution;
   try {
     res = resolve(r.world, r.world.character, words);
-  } catch {
+  } catch (e) {
+    if (!String(e).includes('exceed selector_cardinality')) throw e;
     return void process.stdout.write(
       `Over ${LIMITS.selector_cardinality} things here answer to that.\n`,
     );
