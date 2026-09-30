@@ -46,7 +46,7 @@ export function identify(
  * action key, actor, target ids in their given order and the validated input. The invocation id
  * is the receipt's key, not intent; view_freshness_token is admission metadata (04 §16).
  */
-export const intentDigest = (i: ActionInvocation): string =>
+const intentDigest = (i: ActionInvocation): string =>
   hash(['loka-intent-v1', i.action_key, i.actor_id, i.target_ids, i.input] as never);
 
 // The Command fields an invocation's ordered target_ids fill, by Command type.
