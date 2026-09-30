@@ -380,3 +380,31 @@ that."), and return `undefined` without writing a `target.unresolved` record. It
 covers it. Alternatively, if the PM prefers, record it as a `ponytail:` limit of `loka play`
 next to the one in `target.ts`, since no loadable content in the proof or chapter one comes
 near 1,024 same-named things.
+
+## Fix check — round 2 `3c6d132`, `d9d13f3`
+
+**APPROVE.** R1 is resolved, and the gate passes: nothing is open, and every deferral has
+its landing row.
+
+- `mise exec -- bin/check_all.sh` at `d9d13f3`, in a throwaway detached worktree: exit 0.
+  Elixir 207 passed; TypeScript 211 passed. The simulator ran 10,002 sequences (326,017
+  steps).
+- `found()` moved to `kernel/ts/play/run.ts` with the same behaviour, apart from the new
+  overflow branch. It still returns the unique id, prints the candidates or "You don't see
+  that here.", and writes one `target.unresolved` record (`candidates` 0 for none). Its
+  three callers (`play/main.ts:185`, `:186`, `:227`) build no Command when it returns
+  `undefined`. So on an overflow the player sees "Over 1024 things here answer to that.", no
+  record is written, and the session goes on. The new script test (1,025 coins, then `i`)
+  ends with status 0, so the session reaches its end, where it prints the `transcript:`
+  line.
+- Planted breaks, each reverted:
+  - Removing the try/catch fails the new test (stack trace instead of the refusal).
+  - Catching everything leaves the suite green. `resolve` throws nothing but the overflow
+    today, so swallowing other errors is not observable without a mock. A test for it would
+    be for coverage alone (AGENTS.md "Nothing extra"). This is noted, not a finding.
+  - With an injected non-overflow throw from `resolve`, both the catch-all and the rethrow
+    variant fail the existing items script test.
+- The `String(e).includes('exceed selector_cardinality')` match is tied to the message
+  `target.ts` throws. Both live in this repository, and a changed message fails the new test.
+- ROADMAP R6P carries graceful overflow handling as DEFERRED, with its two options named,
+  and `target.ts`'s `ponytail:` comment points to that row.
