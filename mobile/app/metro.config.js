@@ -6,5 +6,6 @@ const config = getDefaultConfig(__dirname);
 config.watchFolders = [
   path.resolve(__dirname, '..'),
   path.resolve(__dirname, '../../kernel/ts/src'),
+  path.resolve(__dirname, '../../protocol/fixtures'),
 ];
 module.exports = config;
