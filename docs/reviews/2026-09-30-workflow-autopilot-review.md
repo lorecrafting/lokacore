@@ -74,3 +74,17 @@ Checked: the "Critical" list keeps a spec conflict (AGENTS.md:17) and a `--no-ve
   and leave force-push forbidden.
 
 Verdict: **CHANGES REQUIRED** (two should-fix: S1, S2; one nit).
+
+## Fix round for round 2: `769ee0d`
+
+- **S1: fixed.** `docs/decisions/owner-decision-autonomy-2026-09-30.md` quotes the owner
+  (marked relayed verbatim, unverifiable) and amends R3 lanes §3; step 7
+  (`docs/WORKFLOW.md:78-79`) now matches step 6; indexed in `docs/decisions/README.md`.
+- **S2: fixed.** `docs/WORKFLOW.md:34-35`: a ladder answer is advice, never changes a reviewer
+  finding or verdict, never the owner's OK; the merge gate is untouched.
+- **N3: fixed.** Force-push dropped from the critical list (`:37`).
+- **N4 (nit)** `docs/decisions/owner-decisions-r3-lanes-2026-09-24.md` §3 has no "Amended by"
+  pointer, unlike the other amended records (PR #59 gate convention). Scenario: a reader of §3
+  still sends round-2 leftovers straight to the owner.
+
+Verdict: **APPROVE WITH NOTES** (one nit, N4).
