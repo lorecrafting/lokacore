@@ -3,7 +3,9 @@
 Relayed verbatim by the PM (Claude Code) from the owner's chat. No checker can verify these
 quotes against the chat.
 
-Supersedes the [all-reviews-on-Opus decision](owner-decision-opus-reviews-2026-09-25.md).
+Supersedes the [all-reviews-on-Opus decision](owner-decision-opus-reviews-2026-09-25.md), the
+Fable and Astra parts of the [review lever](owner-decision-review-lever-2026-09-25.md), and §2
+of the [observability/Astra decisions](owner-decisions-observability-astra-2026-09-25.md).
 
 Owner's words:
 
@@ -20,13 +22,13 @@ Owner's words:
 Effect:
 
 - Claude Code (the PM and its Opus subagents) remains the principal developer; codex is used
-  for reviews only, at its strongest available model (Sol or Astra), without rationing on
-  cost (the subscription is prepaid).
+  for reviews only, Sol by default and Astra for hard reviews (escalate freely), without
+  rationing on cost (the subscription is prepaid).
 - Codex is a normal, everyday cross-vendor reviewer: the PM may add it to any slice beyond
-  docs-only or trivial ones, and hard reviews escalate to it freely. There is no
-  foundational-freezes-only limit any more. Our own independent Opus review stays required;
-  codex is a second opinion, never a substitute.
-- The PM runs it itself with `codex exec` (read-only, `-m` the strongest model), giving it
+  docs-only or trivial ones. There is no foundational-freezes-only limit any more. Our own
+  independent Opus review stays required ([workflow](../WORKFLOW.md#loop) loop step 4: a fresh
+  `reviewer` for every slice); codex is a second opinion, never a substitute.
+- The PM runs it itself with `codex exec` (read-only, `-m` Sol, or Astra for a hard review), giving it
   the PR, head SHA, spec sections, focus and the output format: verdict, then findings with
   id, severity, `path:line` and a failure scenario, in one fenced block. The PM appends the
   answer verbatim to the review record. No paste-ready prompts, no owner relay.

@@ -17,8 +17,8 @@ reviewed once, with a narrow fix check, by a reviewer on the highest Opus; the P
 `model: "fable"` only as a rare backstop for very complex work (it spends Claude Code tokens).
 **Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
 our own independent review, never instead of it: the PM may add it to any slice beyond
-docs-only or trivial ones and escalates hard reviews to it freely. Once CI is green the PM
-runs `codex exec` (read-only, `-m` the strongest available model, Sol or Astra) with the
+docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only, `-m` Sol by
+default, Astra for hard reviews (escalate freely)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
 answer verbatim to the review record, and adds its findings to the fix list.

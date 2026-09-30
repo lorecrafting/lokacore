@@ -1,7 +1,13 @@
 // Target resolution (21 §7 TargetSpec / TargetResolution; 04 §17-§18; 14 §R5): the authority's
 // Search over what a player names, run before any Command is built, so a Command carries only
 // the resolved id and never the player's words.
-import type { CharacterId, EntityId, Key, TargetResolution } from './contracts.gen.ts';
+import {
+  LIMITS,
+  type CharacterId,
+  type EntityId,
+  type Key,
+  type TargetResolution,
+} from './contracts.gen.ts';
 import { bodyOf, COMPASS, exitOf, refString, type World } from './decision.ts';
 import { cmp } from './validate.ts';
 
@@ -22,10 +28,10 @@ export function normalize(text: string): string[] {
  * inventory): the details of its room, and the items and NPCs in its room or held by its body,
  * with an alias or keyword equal to the normalized words joined by `_` (exact match, never a
  * prefix): none, unique, or ambiguous with the candidate ids in ascending code-point order
- * (invariant target_candidates_ordered). ponytail: at most 64 details per room
- * (room.schema.json) plus one entity per item or NPC definition in reach, so over the contract's
- * 1024 candidates only if a cartridge puts that many same-named definitions in one room; add
- * an overflow outcome when stacking or spawning can.
+ * (invariant target_candidates_ordered). Over the contract's selector_cardinality candidates
+ * it throws, never truncating (04 §5.3). ponytail: a loadable cartridge can reach that only
+ * with over 1024 same-named items, NPCs and details in reach; the contract has no overflow
+ * outcome to report it gracefully.
  */
 export function resolve(world: World, actor: CharacterId, text: string): TargetResolution {
   const phrase = normalize(text).join('_');
@@ -43,6 +49,8 @@ export function resolve(world: World, actor: CharacterId, text: string): TargetR
     .sort(cmp);
   if (ids.length === 0) return { kind: 'none' };
   if (ids.length === 1) return { kind: 'unique', target_id: ids[0] };
+  if (ids.length > LIMITS.selector_cardinality)
+    throw new Error(`${ids.length} candidates exceed selector_cardinality`);
   return { kind: 'ambiguous', candidate_ids: ids };
 }
 

@@ -38,6 +38,8 @@ The owner answered:
 
 ## 2. Astra cross-vendor reviews only for foundational pieces
 
+Superseded by the [2026-09-30 review-flow decisions](owner-decisions-review-flow-2026-09-30.md).
+
 > also only use astra reviews for important PRs or important work,  no need for things that we are generally sure an opus or fable review can handle, maybe astra extra reviews for foundational super critical pieces that other things down line depend on, or something.  I leave it up to you
 
 Applied in [the workflow](../WORKFLOW.md): the PM sends Astra only foundational freezes

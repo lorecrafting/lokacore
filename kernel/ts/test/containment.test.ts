@@ -182,6 +182,19 @@ test('the containment invariants fail on a broken world', () => {
   assert.equal(holds('containment_acyclic', at({ ...c, [SATCHEL]: OIL })), false); // a cycle
   assert.equal(holds('containment_acyclic', at({ ...c, [LANTERN]: SATCHEL })), false); // 2 > 1
   assert.ok(holds('containment_acyclic', at({ ...c, [LANTERN]: BRAM })));
+  assert.equal(holds('containment_acyclic', at({ ...c, [BODY]: CMD })), false); // no room
+});
+
+// Breaks: a per-entity walk over every container, which the simulator runs every step
+// (quadratic: 4,000 items in one room took about a second, 20,000 about half a minute).
+// Linear takes tens of ms here; the bound leaves room for a slow CI machine.
+test('containment_acyclic is linear in the items of one room', () => {
+  const w = fresh();
+  const many = Array.from({ length: 20_000 }, (_, i) => [`coin${i}`, FERRY]);
+  const containers = { ...w.state.containers, ...Object.fromEntries(many) };
+  const t = performance.now();
+  assert.ok(holds('containment_acyclic', { ...w, state: { ...w.state, containers } } as World));
+  assert.ok(performance.now() - t < 2000);
 });
 
 // Breaks: the declared capacities or the containment cycle check missing from the proposal
