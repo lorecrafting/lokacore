@@ -79,13 +79,19 @@ const after = [15224335, 29364750, 272377353, 1125134346];
 
 /**
  * The save's game trace, every record valid against the ObservationRecord contract, a trace.run
- * header first; per entry: ordinal, the revision decided against, commit state and revision.
+ * header first whose ids and world every entry shares (ADR-075 §4, the relationships a schema
+ * cannot state); per entry: ordinal, the revision decided against, commit state and revision.
  */
 function traced(p: { sql: DatabaseSync }) {
   const rows = p.sql.prepare('SELECT record FROM trace ORDER BY rowid').all();
   const [head, ...entries] = rows.map((r) => JSON.parse(r.record as string));
   for (const r of [head, ...entries]) assert.deepEqual(validate('ObservationRecord', r), []);
   assert.equal(head.event, 'trace.run');
+  for (const e of entries) {
+    const { command_id, revision, ...shared } = e.ids;
+    assert.deepEqual([shared, e.data.command.id], [head.ids, command_id]);
+    assert.equal(e.data.command.world_context_id, head.data.world_context_id);
+  }
   return entries.map((e) => [
     e.data.ordinal,
     e.ids.revision,
@@ -115,10 +121,12 @@ if (process.argv[2] === 'kill') {
 }
 
 // Breaks: load returning the fresh world, changed rows, clock or RNG not written, or the revision
-// not persisted.
+// not persisted; a receipted rejection traced as advancing the revision (ADR-075 §4 matrix).
 test('a tiny world survives a restart with the same state', () => {
   const path = save();
   const a = processOn(path);
+  const give = a.story.invoke(invocation(2, 'give', [SATCHEL, NPC])); // not held yet: not_owned
+  assert.deepEqual([...saved(give), (give as Saved).decision.kind], [false, 0, 'rejected']);
   assert.equal((a.story.invoke(take) as Saved).revision, 1);
   const before = state(a);
   assert.ok(before.includes(`"${SATCHEL}":"${BODY}"`));
@@ -126,6 +134,10 @@ test('a tiny world survives a restart with the same state', () => {
   const b = processOn(path);
   assert.equal(state(b), before);
   assert.equal(b.one('SELECT revision FROM head'), 1);
+  assert.deepEqual(traced(b), [
+    [1, 0, 'committed', 0],
+    [2, 0, 'committed', 1],
+  ]);
 });
 
 // Breaks (03 §14): the receipt looked up after resolving against the current world (the satchel
