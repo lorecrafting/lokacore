@@ -1,5 +1,7 @@
 # Owner decision: all reviews on Opus while Fable is near its limit — 2026-09-25
 
+Superseded by [the 2026-09-30 review-flow decisions](owner-decisions-review-flow-2026-09-30.md).
+
 Relayed verbatim by the coordinating assistant (Claude Code) from the owner's chat. No
 checker can verify these quotes against the chat.
 
