@@ -44,7 +44,9 @@ Report at the end of the slice, not at every step.
    worktree). Spawn `developer` (pass `model: "opus"` for a kernel or contract-freeze slice) with a self-contained brief: goal,
    spec sections (the clause for each behavior), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
-   decided, and a timebox: at the limit the developer stops and returns partial findings.
+   decided, and a scope trigger (what makes the developer stop and ask, for example a frozen
+   fixture or protocol file that would need to change). Add a timebox only for open-ended work:
+   at the limit the developer stops and returns partial findings.
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium`), both in the developer's worktree or on the PR number, never
