@@ -17,7 +17,7 @@ export type Case = {
 export function attempt(world: World, scope: string, value: unknown) {
   const id = identify(scope, world.character, value);
   if (id.kind !== 'identified') return { world, result: id as Json };
-  const { command_id, intent_digest } = id;
+  const { command_id } = id;
   const command = resolve(world, id);
   const s = 'kind' in command ? { world, decision: command } : step(world, command);
   const d = s.decision;
@@ -28,7 +28,7 @@ export function attempt(world: World, scope: string, value: unknown) {
   const payload = 'kind' in command ? {} : { payload: command.payload };
   return {
     world: s.world,
-    result: { command_id, intent_digest, ...payload, decision } as never as Json,
+    result: { command_id, ...payload, decision } as never as Json,
   };
 }
 
@@ -48,5 +48,21 @@ export function run(world: World, cases: readonly Case[]): string[] {
           `state before ${state(before)}\nstate after  ${state(w)}`,
       ];
     });
+  });
+}
+
+/**
+ * Every row of protocol/fixtures/intent_digest.json whose invocation, identified for its own
+ * actor, does not give the pinned intent digest; empty when all match.
+ */
+export function digests(
+  rows: readonly { invocation: { actor_id: string }; intent_digest: string }[],
+) {
+  return rows.flatMap((r) => {
+    const id = identify('', r.invocation.actor_id as never, r.invocation);
+    const got = id.kind === 'identified' ? id.intent_digest : encode(id as never);
+    return got === r.intent_digest
+      ? []
+      : [`${encode(r.invocation as never)}\nexpected ${r.intent_digest}\nactual   ${got}`];
   });
 }
