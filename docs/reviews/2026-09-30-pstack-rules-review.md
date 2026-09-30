@@ -53,3 +53,17 @@
 ## Open items
 
 Findings 1 and 2 for the developer; nits at the developer's discretion.
+
+## Fix round 1: `fbb0f26`
+
+Scoped to the fix commit and the lines it touched.
+
+1. Fixed. `docs/WORKFLOW.md:103-104` now says merge from `main`, never rebase or force-push;
+   consistent with `docs/WORKFLOW.md:55` and `.claude/agents/developer.md:32,34`.
+2. Fixed. `.claude/agents/developer.md:36-38` scopes the two-strike rule to one round and sends a
+   finding open after round 2 to the owner, matching `docs/WORKFLOW.md:61-62`.
+3. Dispute accepted: one sentence per audience, no contradiction.
+4. Fixed. Both lists now say the commands were run with output.
+5. Fixed. "The developer runs" (`docs/WORKFLOW.md:54`).
+
+Verdict after fixes: **APPROVE**. Nothing open.
