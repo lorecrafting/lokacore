@@ -289,3 +289,94 @@ Gate accounting: the known carries are mentioned, but none has the requested exp
 R5-04 | nit | docs/ROADMAP.md:51 at SHA 267c8e7
 A reader checking the observability decision sees ADR-075 described as “proposed,” although its authoritative record says accepted on 2026-09-25. Remove the stale status restatement and retain the link.
 ```
+
+## Re-review — fix round 1 `1b5fb4f` (and the codex append `da0808f`)
+
+**CHANGES REQUIRED** (one should-fix, R1 below). Everything else in the round is resolved.
+
+Scope: the fix commit, the code it touched and its direct callers. The review was broader
+than a narrow fix check, because the fixes rewrote `containment_acyclic` and this PR closes a
+gate. `mise exec -- bin/check_all.sh` at `1b5fb4f` in a throwaway detached worktree: exit 0.
+Elixir 207 passed; TypeScript 210 passed. The simulator ran 10,002 sequences (324,876
+steps).
+
+### Dispositions of this record's findings
+
+- **S1 resolved.** The R6P row carries `target_resolution@1` with its `target_present`
+  leaf, landing before the compiled Lantern. It names both edits (the `RULELESS` entry and
+  the `holds()` case) and why one alone crashes. This matches the code: `world.ts:61` still
+  lacks the entry and `policy.ts` still has no case.
+- **S2 resolved.** The Early R7/R8 row lists `equipment@1`, `attributes@1` and
+  `EntityOrigin`. All three are still absent from the code.
+- **S3 resolved.** The R5 row now ends "Done; Gate R5 passed", with the #57 history and the
+  10,000-sequence sentence removed. The R6 row carries the budget diagnostic producer,
+  including the ReplayIds fact, which I checked against `play/run.ts:25`. ADR-075's stale
+  "proposed" is gone (codex R5-04).
+- **S4 resolved.** The new record supersedes all three records, and both older records carry
+  their pointer, the observability one under §2.
+- **N1 resolved.** WORKFLOW and the Effect bullets say Sol by default and Astra for hard
+  reviews.
+- **N2 resolved.** The keyless-door carry now reads as a loosening.
+- **Q1 resolved.** "Never a substitute" now cites WORKFLOW loop step 4.
+- **DEFERRED marks.** Every item in this record's DEFERRED tables now carries `DEFERRED` in
+  its landing row (R6, early R7/R8, R6P, R10). Each one matches the code at `1b5fb4f`
+  (codex R5-03).
+
+### Codex R5-02 (`kernel/ts/src/rules/containment.ts`): correct, and my G2 evidence was partial
+
+The developer is right. My 80,000-row probe measured the observation check in
+`invariants.ts`, not the world-level `containment_acyclic` in `rules/containment.ts`. The old
+world-level check ran `climb` over every key for every entity, which is quadratic, and the
+simulator runs it every step. The new version checks three things:
+
+- every container is a room or a contained entity (linear);
+- no cycle, using the #57 linear check;
+- each declared capacity, which it passes to that check.
+
+Every shape the old check rejected is still rejected: a cycle, over capacity, a non-room
+root, and an unknown container (the last two are the same clause). Mutants, each reverted:
+
+| Mutant | Result |
+|---|---|
+| drop the room-or-contained clause | the "broken world" test fails (the new `[BODY]: CMD` case) |
+| stop passing `capacities` | the "broken world" test fails (the 2 > 1 case) |
+| accept only rooms as containers (too strict) | 8 fail, including the simulator's 10k run, byte identity and the containment rejections |
+| put the old quadratic `climb` back | the new linearity test fails (33 s against its 2 s bound) |
+
+The linearity test uses a wall-clock bound, which is inherently timing-dependent. The margin
+is large (tens of ms against 2 s), so I accept it. The rule module now imports
+`../invariants.ts`, a kernel module, and the rule lint passes.
+
+### Codex R5-01 (`kernel/ts/src/target.ts`): the throw is right for the kernel, but `loka play` still crashes
+
+A throw in `resolve` is what the spec asks for. 04 §5.3 says "A selector that promises all
+matches fails explicitly on cardinality overflow". `TargetResolution` has no overflow variant,
+and truncation is forbidden. The new test pins the boundary: 1,024 candidates are all
+returned in order, and 1,025 throw.
+
+Direct callers of `resolve` (the Search, which runs before any Command exists):
+
+- **`kernel/ts/play/main.ts:250`** (`found`, used by look and perform lookups). There is no
+  try/catch between the throw and the top-level `await session(flag)`, so the uncaught
+  `Error` ends the process.
+- **`kernel/ts/test/sim.ts:240`**. The simulator's cartridges are far below 1,024 same-named
+  things, so this path is unreachable there.
+- The loader and `step` never call it. The `resolve` in `rules/action_recipe.ts:59` is a
+  different, local function.
+
+**R1 — should-fix, `kernel/ts/play/main.ts:250`.** Failure scenario: a loader-accepted
+artifact with 1,025 items named "coin" in the entry room. The player types `look coin`, and
+`loka play` exits with a stack trace. The typed decision or player message that 04 §5.3's
+"fails explicitly" calls for never appears, and the session's `transcript:` line is never
+printed.
+
+This is not a regression. Codex reproduced a crash at `f1a041d` too, where
+`target.unresolved` record validation threw. The fix only moved the throw earlier. But the
+PM's check asked that a host get a refusal, not an unhandled exception.
+
+Minimal fix: in `found`, catch the overflow, print a refusal ("Too many things answer to
+that."), and return `undefined` without writing a `target.unresolved` record. Its
+`candidates` field cannot hold the count. One `loka play` script test with 1,025 coins
+covers it. Alternatively, if the PM prefers, record it as a `ponytail:` limit of `loka play`
+next to the one in `target.ts`, since no loadable content in the proof or chapter one comes
+near 1,024 same-named things.
