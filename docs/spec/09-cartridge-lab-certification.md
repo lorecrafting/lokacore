@@ -162,7 +162,7 @@ Exercises Phoenix channel contract and generated fixtures.
 
 ### Cross-host conformance
 
-Runs the same golden scenario through every host implementation/adapter selected by the accepted portable-execution ADR and compares canonical trace hashes. If R1 selects one shared native kernel, this includes its direct host plus BEAM/iOS/Android bindings; if R1 selects the dual implementation, it compares the accepted Elixir/mobile implementations instead. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md) that is the TypeScript hosts (Node, Android Hermes, iOS Hermes) for rules, plus both kernels for the portable semantic foundation; Elixir rules join at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
+Runs the same golden scenario through every host implementation/adapter selected by the accepted portable-execution ADR and compares canonical trace hashes. If R1 selects one shared native kernel, this includes its direct host plus BEAM/iOS/Android bindings; if R1 selects the dual implementation, it compares the accepted Elixir/mobile implementations instead. Under [ADR-074](../decisions/adr-074-ts-first-proposal.md) that is the TypeScript hosts (Node and iOS Hermes; Android Hermes from the first free product gate, [envelope §4](r1-acceptance-envelope.md#4-physical-devices-and-reproducible-setup), [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)) for rules, plus both kernels for the portable semantic foundation; Elixir rules join at the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal).
 
 Certification uses all modes relevant to the deployment profile.
 

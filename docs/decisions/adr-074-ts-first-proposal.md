@@ -86,6 +86,8 @@ regression seeds run on Node every fast CI run; a device sample runs at R6P. Tha
 fresh sequences run on Node, not on devices, is an assurance reduction the owner
 approves by accepting this. ADR-071's on-device mismatch and mutant checks, real
 local-storage fault recovery and actual adapter evidence stay at R6P.
+(Note 2026-09-30: Android Hermes is deferred to the first free product gate,
+[owner decision](owner-decision-android-descope-2026-09-30.md).)
 
 **Trigger:** the first planned server consumer of any `portable_capability` semantics:
 Story content on a server host, a Realm-native cartridge using a portable capability, or

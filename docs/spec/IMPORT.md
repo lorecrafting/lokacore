@@ -99,6 +99,17 @@ The table below describes the files as imported. Later amendments are in git his
   [conformance/numeric-profile.md](conformance/numeric-profile.md) gains the detail target
   ids rule after the initial world ids (additive: details after the rooms, in room and key
   order). No existing rule or fixture changed.
+- 2026-09-30, [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)
+  (paraphrased): one phone, the iPhone 11, until the first free product gate (14 Shipping
+  rule); Android evidence is deferred to that gate, not dropped. The rule lives in envelope §4.
+  - Envelope §3 applicability note and §4 (new paragraph); 14 R9 runner and Shipping rule;
+    15 DET-02; 09 §5 cross-host conformance; 07 §13; pre-release-proof.md P6 and R6P
+    device evidence; release-scope DEVICE gate meaning (json and md edited identically:
+    the generator lives only in the legacy repository).
+  - Note only, text unchanged: 16 ADR-074 entry. Retained unchanged: the envelope §4 table
+    and §4.1 (governed by the new paragraph), the R1 history (07 §14, 09 §42, 14 R1/R2,
+    16 ADR-070 and the sequencing entry) and the release-time Android requirements
+    (09 §19, 10 §23, 11 §22, 14 R13).
 
 ## Link rewrites (the only byte changes at import)
 

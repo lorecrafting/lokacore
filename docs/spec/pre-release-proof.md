@@ -62,7 +62,7 @@ Both paths: accept → travel to shelter → take → return → talk → choose
 
 Adverse paths: acquire before acceptance (state credit); drop after opening choice (custody rejection); wait until Bram moves (presence rejection with close/return path); retry consumed choice after a stale view (receipt replay); alter choice under same ID (integrity conflict); conflict/budget fault (no partial proposal); rollback/unknown COMMIT/after-commit display interruption (durable reconciliation). Local account/report binding is tested with the fake adapter, never with invented authentication evidence.
 
-P4 must integrate the shared operation/reaction evaluator: the deliberately small Python Lantern model is only a specification example and cannot be copied as a special FerrymanEngine. P6 compares actual adapter bytes (the TypeScript host adapters on Node, Android Hermes and iOS Hermes, [ADR-074](../decisions/adr-074-ts-first-proposal.md)), narrative continuity and human comprehension against the frozen examples.
+P4 must integrate the shared operation/reaction evaluator: the deliberately small Python Lantern model is only a specification example and cannot be copied as a special FerrymanEngine. P6 compares actual adapter bytes (the TypeScript host adapters on Node and iOS Hermes, [ADR-074](../decisions/adr-074-ts-first-proposal.md); Android Hermes waits for the first free product gate, [envelope §4](r1-acceptance-envelope.md#4-physical-devices-and-reproducible-setup), [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)), narrative continuity and human comprehension against the frozen examples.
 
 ## Implementation tickets and dependency graph
 
@@ -83,7 +83,7 @@ P1/P2 do not authorize the legacy repository to grow a production engine. The de
 
 A non-developer can complete each choice path using touch, explain its consequence, quit at a choice, and resume in airplane mode without developer instructions. Record confusing interactions and authoring effort; do not equate an LLM playthrough with human readability.
 
-On each supported physical device, record exact build/cartridge hash, OS, device and conformance profile, both path transcripts, save/restore results, and latency/input-responsiveness measurements. Inject failures before and after commit and at narrative presentation boundaries. Lost-response retries must replay the original outcome even when the old target/choice no longer exists. RNG/check failures must not reroll on duplicate delivery.
+On each supported physical device (for R6P the iPhone 11, [envelope §4](r1-acceptance-envelope.md#4-physical-devices-and-reproducible-setup), [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)), record exact build/cartridge hash, OS, device and conformance profile, both path transcripts, save/restore results, and latency/input-responsiveness measurements. Inject failures before and after commit and at narrative presentation boundaries. Lost-response retries must replay the original outcome even when the old target/choice no longer exists. RNG/check failures must not reroll on duplicate delivery.
 
 Run the small implementation-independent known-answer corpus against the actual candidate adapters, not just the Python specification model. A pass in `checks/` only validates the packet/model tests. Per-step mismatch diagnostics must include canonical state/result bytes, not just differing final hashes.
 

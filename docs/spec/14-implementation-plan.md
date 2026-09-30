@@ -561,7 +561,7 @@ Document 09 §1a and the generated release matrix select the first-release gates
 - autonomous simulation;
 - adversarial scenario import/generation interface;
 - fault injection for local authority;
-- cross-host differential/conformance runner over the hosts that run the rules (before the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal), the TypeScript hosts: Node plus the Android and iOS Hermes replays; the Lab's headless Node run is authoring, not server hosting);
+- cross-host differential/conformance runner over the hosts that run the rules (before the [ADR-074 trigger](../decisions/adr-074-ts-first-proposal.md#3-the-proposal), the TypeScript hosts: Node plus the iOS Hermes replay, and the Android Hermes replay from the first free product gate ([envelope §4](r1-acceptance-envelope.md#4-physical-devices-and-reproducible-setup), [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)); the Lab's headless Node run is authoring, not server hosting);
 - semantic-review evidence bundle support;
 - content-addressed CertificationEvidenceBundle + repro export.
 
@@ -1020,7 +1020,7 @@ Realm development is not sized here and may run alongside later chapters. R16 is
 
 Prove a small playable experience at R6P, then ship the full chapter rather than build every future catalog feature first.
 
-The first free product gate spans **R10 + R12 (including R12A accounts/progress) plus applicable installation, signing, compatibility, store and human gates**. The first paid cartridge additionally requires R13 purchase/restore/entitlement evidence. Free experience validation and paid-product validation are different, explicit milestones.
+The first free product gate spans **R10 + R12 (including R12A accounts/progress) plus applicable installation, signing, compatibility, store and human gates**, and the Android evidence deferred to it ([envelope §4](r1-acceptance-envelope.md#4-physical-devices-and-reproducible-setup), [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)). The first paid cartridge additionally requires R13 purchase/restore/entitlement evidence. Free experience validation and paid-product validation are different, explicit milestones.
 
 The MMORPG path exists in the architecture so that work compounds, not so it blocks shipping.
 
