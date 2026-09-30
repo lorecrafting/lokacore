@@ -87,4 +87,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 ## R6
 
 - [R6 offline authority slice plan](2026-09-28-r6-plan-review.md): PR #58 at `05af857`, CHANGES REQUIRED; fixes `e3cf692`, CHANGES REQUIRED; final `460b47d`, APPROVE.
-- [Workflow "Keep going": the PM runs steps 2 to 7 without asking at each step](2026-09-30-workflow-autopilot-review.md): PR #63 at `f3b48a6`, APPROVE WITH NOTES (two nits: the owner stop list stated a third time; `--no-verify` not clearly a stop).
+- [Workflow "Keep going": the PM runs steps 2 to 7 without asking at each step](2026-09-30-workflow-autopilot-review.md): PR #63 at `f3b48a6`, APPROVE WITH NOTES (two nits: the owner stop list stated a third time; `--no-verify` not clearly a stop); fix `29d55c4`, APPROVE.

@@ -40,3 +40,11 @@
   inside the workflow (it is neither destructive nor outward-facing) and does not stop,
   though AGENTS.md:134 needs the owner's OK. The "owner decision" item arguably covers it;
   naming AGENTS.md owner-OK rules removes the doubt (N1's wording does both).
+
+## Fix round 1: `29d55c4`
+
+- **N1: fixed.** `docs/WORKFLOW.md:31-33` now points to steps 1, 6, 7 and AGENTS.md instead
+  of restating the list; the spec-conflict stop is kept via AGENTS.md:17 ("stop and ask").
+- **N2: fixed.** The `--no-verify` push is named as an AGENTS.md owner-reserved example; the
+  exhaustive-looking parenthetical is gone and "an action outside this workflow" stays.
+- Nothing else touched. Verdict: **APPROVE**.
