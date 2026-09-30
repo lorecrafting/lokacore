@@ -27,10 +27,13 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 ## Loop
 
 **Keep going.** Once the owner has approved the slice plan, the PM runs steps 2 to 7 to the
-merge without asking permission at each step: spawn the reviewer when CI is green, forward
-findings, fix, re-review, merge. It stops only for what steps 1, 6 and 7 and
-[AGENTS.md](../AGENTS.md) reserve to the owner (for example a `--no-verify` push), or for an
-action outside this workflow. Report at the end of the slice, not at every step.
+merge without asking permission at each step, and settles judgment calls itself. When a
+decision is hard, escalate in order: the `advisor` tool; then a higher model by hand (a
+Fable subagent, or codex Astra for a hard review); only if both fail to settle it, or it is
+critical, stop for the owner. Critical means what [AGENTS.md](../AGENTS.md) and the owner
+decisions reserve to the owner: a product or scope decision, a spec conflict, spending money,
+a `--no-verify` or force-push, anything destructive or outward-facing beyond the PR and its
+merge. Report at the end of the slice, not at every step.
 
 1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its spec sections;
    keep [the roadmap](ROADMAP.md) current.
@@ -65,7 +68,7 @@ action outside this workflow. Report at the end of the slice, not at every step.
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
    result to its record. A broad re-review of the whole PR happens only when the fixes
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
-   rounds; anything still open goes to the owner.
+   rounds; anything still open goes up the escalation ladder above, then to the owner.
 7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
    NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md),
