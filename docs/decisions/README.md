@@ -60,3 +60,4 @@ text. This directory also holds the owner's decisions retained verbatim.
 - Owner decision: [all reviews on Opus while Fable is near its limit](owner-decision-opus-reviews-2026-09-25.md).
 - Owner decision: [default HP, MA and MV pools, 1 MV per move, regeneration (S6b)](owner-decision-hp-ma-mv-2026-09-25.md).
 - Owner decision: [a playtest-and-tune stage after R6P: numbers, UI, changed and new mechanics](owner-decision-playtest-2026-09-25.md).
+- Owner decision: [defer `knock` and map discovery/`where` from R5 to chapter one](owner-decision-r5-deferred-mechanics-2026-09-28.md).

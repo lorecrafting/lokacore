@@ -282,13 +282,16 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 
 *Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), starting maximums HP 20, MA 100, MV 82 (from DikuMUD) and regeneration per game hour HP 5, MA 4, MV 18, unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); the compiler gives every cartridge the pools unless it overrides them, and an artifact that does not lock `resource@1` has none; and the pools regenerate per game hour, derived from the clock.
 
+*Amendment 2026-09-28 ([owner decision](../decisions/owner-decision-r5-deferred-mechanics-2026-09-28.md)):* `knock` and map discovery/`where` move from R5 to chapter-one work at R10. Open/close doors remain R5.
+
 ### 4.1 World and movement
 
 | Mechanic | In this game | Primitive | Phase |
 |---|---|---|---|
 | Rooms with long/short descriptions, brief mode | all 76 | Place | R5 |
 | Cardinal + up/down exits, `scan` adjacent rooms | all | Connection + perception | R5 |
-| Doors: open/close/knock | inn rooms, prior study, watch cell, jail, barrow mouth, vault | Barrier | R5 |
+| Doors: open/close | inn rooms, prior study, watch cell, jail, barrow mouth, vault | Barrier | R5 |
+| Knock on doors | chapter-one doors | ActionRecipe + Barrier | R10 (chapter one) |
 | Locks, keys, keys that break | six locked things; the cellar key snaps on a failed force | Barrier + has_item + Check | R5 |
 | Lockpicking and forcing | lockpick skill or STR force | Check + skill | R7 |
 | Hidden exits and secret doors | hidden treasury, fence alley | Connection + PerceptionPolicy | R8 |
@@ -301,7 +304,7 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Climbing and rope | descend into barrow mouth or deep shaft without rope = fall damage | item requirement + Check | R8 |
 | Transport: ferry, cart, moon portal | boathouse ↔ isle; stables ↔ Ashmere green; shrine ↔ standing stones at full moon | Service + transition | R8 |
 | Mounts | buy or rent a horse; ride on roads; not in fen or mine; horse has HP and hunger | **NEW** mount relation + follow | R8 |
-| Map discovery and `where` | minimap fills on visit; `where` lists known NPCs in the area | map discovery | R5 |
+| Map discovery and `where` | minimap fills on visit; `where` lists known NPCs in the area | map discovery | R10 (chapter one) |
 | Inspectable details | ~90: fresco, runes, well, notice boards, tide marks, mine seams | InspectableDetail | R5 |
 | Description variants | night, weather, tide, season, flood, festival, fact-driven | DescriptionVariant | R8 |
 | Sound and smell propagation | bell audible in Ashmere; shout carries one room; smoke from the mill | **NEW** SenseCue propagation | R8 |
