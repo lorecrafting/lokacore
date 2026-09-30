@@ -46,8 +46,12 @@ export function identify(
  * action key, actor, target ids in their given order and the validated input. The invocation id
  * is the receipt's key, not intent; view_freshness_token is admission metadata (04 §16).
  */
+// The receipt's intent_digest_version (03 §14). ponytail: its bytes are pinned only by
+// test/invocation_cases.json; S1 pins them in a spec clause or protocol fixture (ROADMAP S1).
+export const INTENT_DIGEST_VERSION = 'loka-intent-v1';
+
 const intentDigest = (i: ActionInvocation): string =>
-  hash(['loka-intent-v1', i.action_key, i.actor_id, i.target_ids, i.input] as never);
+  hash([INTENT_DIGEST_VERSION, i.action_key, i.actor_id, i.target_ids, i.input] as never);
 
 // The Command fields an invocation's ordered target_ids fill, by Command type.
 const TARGETS: Readonly<Record<string, readonly string[]>> = {

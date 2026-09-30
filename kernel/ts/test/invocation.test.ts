@@ -11,22 +11,27 @@ import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId;
 const SEED = [1, 2, 3, 4] as RngState;
-const world = (fixture: string) => {
+const world = (fixture: string, seed = SEED) => {
   const kat = read(`protocol/fixtures/${fixture}`);
   const artifact = `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`;
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  return newWorld(loaded.cartridge as Cartridge, CONTEXT, SEED);
+  return newWorld(loaded.cartridge as Cartridge, CONTEXT, seed);
 };
 const items = world('cartridge_items_hash.json');
-const { cases } = read('kernel/ts/test/invocation_cases.json');
+const { cases, dusk_cases } = read('kernel/ts/test/invocation_cases.json');
+// numeric-vectors.json rng_steps[3].state (see invocation_cases.json).
+const dusk = world('cartridge_dusk_hash.json', [
+  27274249, 25704967, 31982592, 12605441,
+] as RngState);
 
 // Breaks: the command id taken from anything but the trusted scope and invocation id, targets
 // sorted or the freshness token in the intent digest, give's targets filled in another order,
 // authorization before validation, an unknown field accepted, or a NEW intent resolved to the
-// wrong Command or an unoffered action admitted.
+// wrong Command, an unoffered action admitted, or a failed check reported as a rejection.
 test('the adapter matches the invocation known answers', () => {
   assert.deepEqual(run(items, cases), []);
+  assert.deepEqual(run(dusk, dusk_cases), []);
 });
 
 // Breaks: a runner that cannot fail, or reports only hashes (pre-release-proof.md, Evidence

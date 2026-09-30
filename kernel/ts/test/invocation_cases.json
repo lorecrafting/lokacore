@@ -1,5 +1,5 @@
 {
-  "description": "Known answers for the P1 identity/outcome adapter (kernel/ts/src/invocation.ts) on the ashmere_items world (protocol/fixtures/cartridge_items_hash.json, context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f, seed [1,2,3,4]). command_id and intent_digest were computed by Python hashlib over hand-built canonical JSON (commandId: ['loka-command-v1', scope, invocation_id], UUID version 8; intent: ['loka-intent-v1', action_key, actor_id, target_ids, input]), never by the kernels; the first command_id is protocol/fixtures/command_id.json row 1. Payloads and decisions are hand-written from the rule headers; invalid errors from protocol/fixtures/invalid.json and the ActionInvocation schema. The second case delivers the first take again from a fresh world without its view token: same command_id, intent_digest and outcome (receipt replay is S1's).",
+  "description": "Known answers for the P1 identity/outcome adapter (kernel/ts/src/invocation.ts) on the ashmere_items world (protocol/fixtures/cartridge_items_hash.json, context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f, seed [1,2,3,4]). command_id and intent_digest were computed by Python hashlib over hand-built canonical JSON (commandId: ['loka-command-v1', scope, invocation_id], UUID version 8; intent: ['loka-intent-v1', action_key, actor_id, target_ids, input]), never by the kernels; the first command_id is protocol/fixtures/command_id.json row 1. Payloads and decisions are hand-written from the rule headers; invalid errors from protocol/fixtures/invalid.json and the ActionInvocation schema. The second case delivers the first take again from a fresh world without its view token: same command_id, intent_digest and outcome (receipt replay is S1's). dusk_cases run on the ashmere_dusk world (protocol/fixtures/cartridge_dusk_hash.json, same context) seeded with numeric-vectors.json rng_steps[3].state [27274249, 25704967, 31982592, 12605441]: its next raw draw, 2031721883 (rng_steps[4]), is below 4294967200, so the roll is 83, which fails pick_lock's luck check of chance 50 (04 §5.0: accepted, outcome failure). No frozen cartridge can fault, so the fault case stays in the Node-only test.",
   "cases": [
     {
       "name": "take then give in target order",
@@ -248,6 +248,36 @@
             "decision": {
               "kind": "accepted",
               "outcome": "moved"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "dusk_cases": [
+    {
+      "name": "a failed luck check is an accepted attempt, not a rejection",
+      "scope": "story/lineage-1/character-1",
+      "steps": [
+        {
+          "invocation": {
+            "invocation_id": "00000000-0000-4000-8000-000000000007",
+            "action_key": "pick_lock",
+            "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+            "target_ids": [],
+            "input": {}
+          },
+          "result": {
+            "command_id": "3cbb4756-1741-87ed-869d-aa62c6d698a9",
+            "intent_digest": "77290ccc5ec53e278ff72cbdfc66662d5bb55c555f01f7728d045c5bf244404f",
+            "payload": {
+              "type": "perform",
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "action": "pick_lock"
+            },
+            "decision": {
+              "kind": "accepted",
+              "outcome": "failure"
             }
           }
         }
