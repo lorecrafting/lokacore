@@ -72,3 +72,17 @@
   and is consistent with 14:51 ("full first release remains chapter one"). The PM should
   confirm the owner did not mean R13 (the paid release). If the owner did mean R13, only
   the gate name in the envelope §4 paragraph and the record changes.
+
+## Fix commit `1c11c7b`
+
+Reviewed only that commit and the three files it touched.
+
+- S1 fixed. `r1-acceptance-envelope.md:63` and the Effect list in the decision record now
+  name the deferral as an assurance reduction that adds to ADR-074 §3. Both give the
+  Android-only failure scenario and say the owner accepts it. The `../lessons/mobile.md`
+  links resolve from both files.
+- N1 fixed. `r1-acceptance-envelope.md:104` now reads "the only required physical device".
+- N2 fixed. `docs/lessons/mobile.md` again says "ask for a swap only when needed".
+- Q1 settled by the PM: the first-free-product-gate reading is kept.
+
+Verdict on `1c11c7b`: **APPROVE**. No open items.
