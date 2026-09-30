@@ -72,7 +72,7 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
   the scratchpad and read the tail. Batch independent tool calls.
 - Delegate mechanical work; clear the session after each merge and resume from the PM state
   file. No plugin or CLAUDE.md changes mid-session (they bust the prompt cache).
-- Subagent returns are rules-shaped, under 250 words: paths with `file:line`, decisions with
+- Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
   a reason, open items, no narrative.
 - PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.

@@ -2,7 +2,7 @@
 
 Accepted ADRs live in [document 16](../spec/16-decision-register.md); ADR-070 to ADR-074
 entered it on 2026-09-24 and ADR-075 on 2026-09-25, and their files here hold the full
-text. This directory also holds the owner's decisions retained verbatim.
+text. This directory also holds the owner's decisions retained verbatim, or marked paraphrased.
 
 ## R0/R1
 
