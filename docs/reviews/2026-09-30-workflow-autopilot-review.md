@@ -48,3 +48,29 @@
 - **N2: fixed.** The `--no-verify` push is named as an AGENTS.md owner-reserved example; the
   exhaustive-looking parenthetical is gone and "an action outside this workflow" stays.
 - Nothing else touched. Verdict: **APPROVE**.
+
+## Round 2: `0b5b10c` (escalation ladder, "Critical" definition)
+
+Checked: the "Critical" list keeps a spec conflict (AGENTS.md:17) and a `--no-verify` push
+(AGENTS.md:134) with the owner; the step 7 merge gate (`docs/WORKFLOW.md:72-73`) is untouched.
+
+- **S1 (should-fix)** `docs/WORKFLOW.md:71` vs `docs/WORKFLOW.md:76-77` and
+  [auto-merge decision](../decisions/owner-decisions-r3-lanes-2026-09-24.md) §3: step 6 now
+  sends anything open after fix round 2 up the ladder first, and the ladder (`:31-33`) lets a
+  model "settle" it; step 7 and the owner decision still send it to the owner. Scenario: a
+  reviewer blocker is still disputed after round 2; a Fable subagent calls it invalid; the PM
+  treats it as settled and never tells the owner, against §3. The owner's "maximum autonomy"
+  words are not recorded anywhere: add an owner-decision record amending §3 (verbatim or
+  marked paraphrased) and make step 7 match step 6, or keep round-2 leftovers going to the owner.
+- **S2 (should-fix)** `docs/WORKFLOW.md:30-33`: nothing says a ladder answer is advice to the
+  PM only. Scenario: the PM asks codex Astra whether a reviewer finding holds, Astra says no,
+  the PM records the finding closed and merges on APPROVE WITH NOTES "with nothing open". A
+  model's answer then stands in for the fresh reviewer's verdict (step 6) and, for critical
+  matters, reads like approval. One sentence fixes both: "A ladder answer advises the PM; it
+  never changes a reviewer's finding or verdict and never counts as the owner's OK; critical
+  matters go to the owner directly."
+- **N3 (nit)** `docs/WORKFLOW.md:35`: "a `--no-verify` or force-push" lists force-push as
+  owner-approvable; Git hygiene and step 5 say never force-push. Say "a `--no-verify` push"
+  and leave force-push forbidden.
+
+Verdict: **CHANGES REQUIRED** (two should-fix: S1, S2; one nit).
