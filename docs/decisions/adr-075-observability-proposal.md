@@ -4,7 +4,9 @@
 entered [document 16](../spec/16-decision-register.md) 2026-09-25.** Amended 2026-09-25 by R5 slice 1's
 review ([record](../reviews/2026-09-25-r5-s1-review.md), Astra A4, A5; Fable F1): the three
 *Amendment* notes in §4 and §6; amended again by R5 slice 2 ([owner decision](owner-decision-lab-failed-lookups-2026-09-25.md)):
-the `target.unresolved` diagnostics record and its §6 note. Written by the developer agent
+the `target.unresolved` diagnostics record and its §6 note; amended again by R6 slice 2's review
+([record](../reviews/2026-09-30-r6-s2-review.md)): the phone placement in §2 and the trace
+segments in §§3-4. Written by the developer agent
 (Claude Code, Claude Opus) for the observability design slice
 ([owner decision](owner-decisions-observability-astra-2026-09-25.md)).
 
@@ -46,7 +48,7 @@ builders, not the game. They join by ids, not by sharing a bucket.
 ## 3. Correlation ids
 
 One vocabulary, each id defined once: `content_hash` (ContentHash), `kernel_version`
-(KernelVersion), `seed` (the run's initial RngState), `run_id` (StoryRunId: a save lineage;
+(KernelVersion), `seed` (the run's initial RngState), `run_id` (StoryRunId: a save lineage, which an app or content update keeps (*amendment, R6 S2*);
 for the simulator one sequence; part of the replay input, not re-minted on replay), `command_id` (CommandId), `revision` (the authority
 revision the command was decided against), `host` (HostKind: node, hermes_android,
 hermes_ios; a kind, never a device) and `pull_request`. Each store's ids are a closed
@@ -114,11 +116,14 @@ Header plus the Commands by ordinal are the complete replay input. *Amendment (A
 `RunHeader` carries the run's `world_context_id`, so a run with no commands still reconstructs
 its initial world. *Amendment (F1):* replay regenerates under the recorded `kernel_version` and
 reports the running one beside it; the kernel version is reported, never compared, so the same
-inputs can be replayed before and after a fix. *Amendment (R6 S2):* on the phone a save's
-trace is a sequence of runs: a process whose RunIds differ from the last header's (an app or
-content update) first recovers the missing committed entries under that header's ids, then
-writes a new `trace.run` header whose `initial_state` is unavailable (`not_collected`: it starts
-from the saved state); its ordinals start again at 1.
+inputs can be replayed before and after a fix. *Amendment (R6 S2):* each `trace.run` header opens
+a **segment**, and the rules above (one header, entries sharing its ids, ordinals unique with
+the one follow-up exception) hold per segment. A `run_id` identifies the save's run and survives
+updates, so on the phone one `run_id` may have several segments. A process whose RunIds differ
+from the last header's (an app or content update, even `kernel_version` alone) first recovers
+the missing committed entries under that header's ids, then writes a new header whose
+`initial_state` is unavailable (`not_collected`: it starts from the saved state); its ordinals
+start again at 1. A reader keys a segment by its header, not by `run_id` alone.
 
 | Decision | Possible commit outcomes |
 |---|---|

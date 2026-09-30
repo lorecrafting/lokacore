@@ -66,6 +66,8 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
       'SELECT record FROM trace WHERE ordinal = 0 ORDER BY rowid DESC LIMIT 1',
     );
     if (!last && !header({ state: 'fresh' })) return false;
+    // ponytail: receipts do not record the deciding ids, so if an updated process never wrote its
+    // header, its missed entries land in the previous segment; rare, R6 S6 owns it (ROADMAP).
     const prior: RunIds = last ? JSON.parse(last.record).ids : ids;
     type Row = { command: string; response: string; revision: number };
     const missing = db.getAllSync<Row>(

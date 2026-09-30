@@ -94,7 +94,7 @@ export function receipt(db: Db, scope: string, invocation_id: string): Receipt |
 /**
  * Commits one decision in one transaction (03 §15): for an accepted one the rows its delta
  * wrote, the revision, clock and RNG of `next`; always the receipt. Throws, with nothing written,
- * on a definite failure; false when COMMIT itself failed, whose outcome is unknown (reconcile).
+ * on a definite failure; false when the outcome is unknown (`transaction`; then `reconcile`).
  * The caller adopts `next` only after this returns true.
  */
 export function commit(db: Db, next: World, decision: DecisionResult, r: Receipt): boolean {
@@ -128,36 +128,44 @@ export function commit(db: Db, next: World, decision: DecisionResult, r: Receipt
  * read would see the attempt's own uncommitted receipt.
  */
 export function reconcile(db: Db, scope: string, invocation_id: string): Receipt | undefined {
-  try {
-    db.execSync('ROLLBACK');
-  } catch {} // none open: SQLite ended it, committed or not
-  if (db.isInTransactionSync()) throw new Error('transaction still open; outcome unknown');
+  if (!rollback(db)) throw new Error('transaction still open; outcome unknown');
   return receipt(db, scope, invocation_id);
 }
 
 /**
  * Runs `writes` and COMMIT in one transaction: true once committed; throws, rolled back, when a
- * write fails; false when COMMIT itself fails, since that is not proof of rollback (03 §15), after
- * trying ROLLBACK so no transaction stays open.
+ * write fails; false, after trying ROLLBACK, when COMMIT itself fails (not proof of rollback,
+ * 03 §15) or when a failed write's ROLLBACK leaves the transaction open (its uncommitted rows
+ * would read as saved). Either false is settled by `reconcile` before the next decision.
  */
 export function transaction(db: Db, writes: () => void): boolean {
+  // Only a failed trace write can leave one open here (reconcile settles gameplay's first).
+  if (db.isInTransactionSync()) db.execSync('ROLLBACK');
   db.execSync('BEGIN IMMEDIATE');
   try {
     writes();
   } catch (e) {
     // SQLite may already have rolled back (SQLITE_FULL); the original error is the one to raise.
-    try {
-      db.execSync('ROLLBACK');
-    } catch {}
-    throw e;
+    if (rollback(db)) throw e;
+    return false;
   }
   try {
     db.execSync('COMMIT');
     return true;
   } catch {
-    try {
-      db.execSync('ROLLBACK'); // a COMMIT that failed with the transaction open leaves it open
-    } catch {}
+    rollback(db); // a COMMIT that failed with the transaction open leaves it open
     return false;
+  }
+}
+
+/** Tries ROLLBACK; true only when the connection answers that no transaction is open after it. */
+function rollback(db: Db): boolean {
+  try {
+    db.execSync('ROLLBACK');
+  } catch {}
+  try {
+    return !db.isInTransactionSync();
+  } catch {
+    return false; // a broken connection: unknown
   }
 }

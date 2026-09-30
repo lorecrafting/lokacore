@@ -416,9 +416,11 @@ test('an unreadable trace never stops play or the save opening', () => {
   ]);
 });
 
-// Breaks (ADR-075 §4): entries decided under one kernel_version or run recorded under another's
-// header, or the missed entry of the old process recovered under the new ids.
-test('a process with new run ids starts a new run header after recovering the old one', () => {
+// Breaks (ADR-075 §4, segments): entries decided under one kernel_version recorded under another's
+// header, the old process's missed entry recovered under the new ids, or a catch-up that failed at
+// open ignored (the give written first). The update changes kernel_version alone; the trace is
+// unreadable while the updated process opens (simulated).
+test('an updated kernel starts a new segment after recovering the old one', () => {
   const path = save();
   const a = processOn(path);
   a.sql.exec(`CREATE TRIGGER t BEFORE INSERT ON trace BEGIN SELECT RAISE(ABORT, 'lost'); END`);
@@ -426,23 +428,51 @@ test('a process with new run ids starts a new run header after recovering the ol
   a.sql.exec('DROP TRIGGER t');
   a.sql.close();
   const kernel_version = `loka-kernel@${'f'.repeat(40)}`;
-  const run_id = '7f7f7f7f-1111-4222-8333-444444444444';
-  const b = processOn(path, { ...items, ids: { ...items.ids, kernel_version, run_id } });
+  let opening = true;
+  const b = processOn(path, { ...items, ids: { ...items.ids, kernel_version } }, 0, (s, run) => {
+    if (opening && s.includes('FROM trace')) throw new Error('trace unreadable');
+    return run();
+  });
+  opening = false;
   assert.deepEqual(saved(b.story.invoke(invocation(2, 'give', [SATCHEL, NPC]))), [false, 2]);
   assert.deepEqual(traced(b), [
     [1, 0, 'committed', 1],
     [1, 1, 'committed', 2],
   ]);
   const heads = b.sql.prepare('SELECT record FROM trace WHERE ordinal = 0 ORDER BY rowid').all();
+  const run = (h: { record: unknown }) => JSON.parse(h.record as string);
   assert.deepEqual(
-    heads
-      .map((h) => JSON.parse(h.record as string))
-      .map((h) => [h.ids.run_id, h.data.initial_state]),
+    heads.map(run).map((h) => [h.ids.run_id, h.ids.kernel_version, h.data.initial_state]),
     [
-      ['6f6f6f6f-1111-4222-8333-444444444444', { state: 'fresh' }],
-      [run_id, { state: 'unavailable', reason: 'not_collected' }],
+      [items.ids.run_id, items.ids.kernel_version, { state: 'fresh' }],
+      [items.ids.run_id, kernel_version, { state: 'unavailable', reason: 'not_collected' }],
     ],
   );
+});
+
+// Breaks (03 §15; ADR-075 §4): a failed write whose ROLLBACK also fails taken as definite, so the
+// retry reads the open transaction's own receipt as a replayed save while nothing is durable; or a
+// trace transaction left open the same way making every later BEGIN fail. Real faults (a trigger's
+// RAISE(FAIL) keeps the receipt row; a deferred foreign key fails the trace COMMIT); the ROLLBACK
+// after each fails once (simulated).
+test('a transaction a failed ROLLBACK leaves open is never read as saved nor blocks play', () => {
+  let jam = false;
+  const p = processOn(save(), items, 0, (s, run) => {
+    if (!jam || s !== 'ROLLBACK') return run();
+    jam = false;
+    throw new Error('ROLLBACK failed');
+  });
+  p.sql.exec(`CREATE TRIGGER f AFTER INSERT ON receipt BEGIN SELECT RAISE(FAIL, 'no space'); END`);
+  jam = true;
+  assert.throws(() => p.story.invoke(take), /nothing was saved/);
+  p.sql
+    .exec(`DROP TRIGGER f; PRAGMA foreign_keys = ON; CREATE TABLE parent (id INTEGER PRIMARY KEY);
+    CREATE TABLE orphan (id INTEGER REFERENCES parent DEFERRABLE INITIALLY DEFERRED);
+    CREATE TRIGGER orphaned AFTER INSERT ON trace BEGIN INSERT INTO orphan VALUES (1); END;`);
+  jam = true;
+  assert.deepEqual(saved(p.story.invoke(take)), [false, 1]);
+  assert.deepEqual(saved(p.story.invoke(invocation(2, 'give', [SATCHEL, NPC]))), [false, 2]);
+  assert.equal(p.one('SELECT revision FROM head'), 2);
 });
 
 // Breaks (03 §15): a save opened on a handle whose first-save transaction is still open, reading
