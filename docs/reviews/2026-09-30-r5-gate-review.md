@@ -269,3 +269,23 @@ the sentence as the PM's reading, so the record contains nothing invented.
   catch-all is the ROADMAP R5 row (S3).
 - Simplicity: the PR is net shorter (−26/+55, mostly the verbatim record). There is nothing
   to delete.
+
+## Cross-vendor review (codex, gpt-6-astra, read-only; appended verbatim by the PM)
+
+Run with `codex exec` on PR #59 head 267c8e7 with the whole-milestone Gate R5 brief; it ran in parallel and did not see the Opus record.
+
+VERDICT: CHANGES REQUIRED
+
+```text
+R5-01 | blocker | kernel/ts/src/target.ts:46 at main f1a041d
+Input: a loader-accepted artifact containing 1,025 items named “coin” in the entry room. resolve("coin") returns 1,025 candidates, violating TargetResolution’s 1,024 limit. Reproduced: validation returns too_many_items. In loka play, the resulting target.unresolved observation also exceeds its candidate limit and throws during record validation. Enforce bounded resolution; silently truncating would violate §5.3.
+
+R5-02 | should-fix | kernel/ts/src/rules/containment.ts:64 at main f1a041d
+State: thousands of valid items directly inside one room. The world-level containment_acyclic check traverses the entire container list for every entity, even after reaching a room. The simulator calls this every step, so #57’s linear foundation checker leaves quadratic validation on the active path. Measured median checks: 1,000 items ≈29 ms; 2,000 ≈214 ms; 4,000 ≈1,045 ms. Reuse linear traversal while preserving room and capacity checks.
+
+R5-03 | should-fix | docs/ROADMAP.md:52 at SHA 267c8e7
+Gate accounting: the known carries are mentioned, but none has the requested explicit DEFERRED status. The budget diagnostic producer is merely “still to be built” inside the R5 row; the mechanics appear as prose carries at line 54. Mark these explicitly DEFERRED so closing R5 does not leave their disposition ambiguous.
+
+R5-04 | nit | docs/ROADMAP.md:51 at SHA 267c8e7
+A reader checking the observability decision sees ADR-075 described as “proposed,” although its authoritative record says accepted on 2026-09-25. Remove the stale status restatement and retain the link.
+```
