@@ -66,3 +66,4 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [autonomous PM with an escalation ladder](owner-decision-autonomy-2026-09-30.md).
 - Owner decision: [R6 slice plan approved](owner-decision-r6-plan-2026-09-30.md).
 - Owner decision: [one phone (iPhone 11) until release; Android evidence deferred to the first free product gate](owner-decision-android-descope-2026-09-30.md).
+- Owner decision: [P1 merges on its Node proof; the iPhone 11 Hermes run is batched before S3](owner-decision-p1-hermes-batching-2026-09-30.md).
