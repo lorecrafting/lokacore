@@ -2,7 +2,7 @@
 
 Accepted ADRs live in [document 16](../spec/16-decision-register.md); ADR-070 to ADR-074
 entered it on 2026-09-24 and ADR-075 on 2026-09-25, and their files here hold the full
-text. This directory also holds the owner's decisions retained verbatim.
+text. This directory also holds the owner's decisions retained verbatim, or marked paraphrased.
 
 ## R0/R1
 
@@ -62,3 +62,4 @@ text. This directory also holds the owner's decisions retained verbatim.
 - Owner decision: [a playtest-and-tune stage after R6P: numbers, UI, changed and new mechanics](owner-decision-playtest-2026-09-25.md).
 - Owner decision: [defer `knock` and map discovery/`where` from R5 to chapter one](owner-decision-r5-deferred-mechanics-2026-09-28.md).
 - Owner decisions: [codex runs cross-vendor reviews; Fable back for rare, very complex work](owner-decisions-review-flow-2026-09-30.md).
+- Owner decision: [developers default to Sonnet, Opus for kernel and contract slices](owner-decision-sonnet-developers-2026-09-30.md).

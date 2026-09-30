@@ -53,7 +53,7 @@ roots = Enum.filter(["README.md", "AGENTS.md", "CLAUDE.md"], &Map.has_key?(links
 seen = reach.(reach, MapSet.new(roots), roots)
 orphans = for f <- docs, f not in seen, do: "unreachable #{f}"
 
-agents_budget = 2500
+agents_budget = 1400
 # Optional argument: the file to budget (the red control passes a padded copy).
 budget_file = List.first(System.argv(), Path.join(root, "AGENTS.md"))
 agents_words = budget_file |> File.read!() |> String.split() |> length()
