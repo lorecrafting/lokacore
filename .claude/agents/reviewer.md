@@ -33,7 +33,8 @@ for work beyond the spec and brief.
 Do not edit code. Write `docs/reviews/<YYYY-MM-DD>-<slice>-review.md` (PR, commit reviewed,
 verdict APPROVE / APPROVE WITH NOTES / CHANGES REQUIRED, findings), link it from
 `docs/reviews/README.md`, commit and push those two files only. Return the verdict and
-findings. When later sent fix commits, review only those commits: verify each disposition, the code
+findings, under 300 words, rules-shaped: paths with `file:line`, decisions with a reason, open
+items, no narrative. When later sent fix commits, review only those commits: verify each disposition, the code
 each fix touched and that code's direct callers. Do not reopen settled parts or raise new
 nits elsewhere, unless the PM asks for a broad re-review. Append the result to the same
 record.

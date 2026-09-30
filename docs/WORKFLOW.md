@@ -9,7 +9,7 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 | Role | Who | Model | Owns |
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
-| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Opus | code, checks, self-review, opening the PR, fixes |
+| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](decisions/owner-decision-sonnet-developers-2026-09-30.md)) | code, checks, self-review, opening the PR, fixes |
 | Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable rarely (see below) | independent review, review record |
 
 **Models** ([owner decision](decisions/owner-decisions-review-flow-2026-09-30.md)): a slice is
@@ -30,9 +30,9 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    keep [the roadmap](ROADMAP.md) current.
    Get the owner's OK on the plan and on any decision that is theirs.
 2. **Brief (PM).** Name the branch; do not check it out (the developer does, in its own
-   worktree). Spawn `developer` with a self-contained brief: goal,
-   spec sections, files in and out of scope, acceptance (which checks and fixtures must
-   pass, which red controls to add), the relevant `docs/lessons/` file, and anything the owner
+   worktree). Spawn `developer` (pass `model: "opus"` for a kernel or contract-freeze slice) with a self-contained brief: goal,
+   spec sections (the clause for each behavior), files in and out of scope, acceptance (which checks and fixtures must
+   pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
    decided.
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
@@ -65,6 +65,17 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    PR link, verdict, notes. Owner decisions and anything open after fix round 2 still go to
    the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says.
+
+## Token hygiene
+
+- Big outputs (logs, diffs, check runs) stay out of the main context: delegate, or write to
+  the scratchpad and read the tail. Batch independent tool calls.
+- Delegate mechanical work; clear the session after each merge and resume from the PM state
+  file. No plugin or CLAUDE.md changes mid-session (they bust the prompt cache).
+- Subagent returns are rules-shaped, under 250 words: paths with `file:line`, decisions with
+  a reason, open items, no narrative.
+- PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
+  or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
 
 ## Milestone gate: docs tidy pass
 
