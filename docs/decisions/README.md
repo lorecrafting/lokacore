@@ -63,4 +63,5 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [defer `knock` and map discovery/`where` from R5 to chapter one](owner-decision-r5-deferred-mechanics-2026-09-28.md).
 - Owner decisions: [codex runs cross-vendor reviews; Fable back for rare, very complex work](owner-decisions-review-flow-2026-09-30.md).
 - Owner decision: [developers default to Sonnet, Opus for kernel and contract slices](owner-decision-sonnet-developers-2026-09-30.md).
+- Owner decision: [autonomous PM with an escalation ladder](owner-decision-autonomy-2026-09-30.md).
 - Owner decision: [R6 slice plan approved](owner-decision-r6-plan-2026-09-30.md).

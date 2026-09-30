@@ -26,6 +26,17 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
 ## Loop
 
+**Keep going.** Once the owner has approved the slice plan, the PM runs steps 2 to 7 to the
+merge without asking permission at each step, and settles judgment calls itself. When a
+decision is hard, escalate in order: the `advisor` tool; then a higher model by hand (a
+Fable subagent, or codex Astra for a hard review); only if both fail to settle it, or it is
+critical, stop for the owner ([owner decision](decisions/owner-decision-autonomy-2026-09-30.md)).
+A ladder answer is advice to the PM: it never changes a reviewer's finding or verdict and is
+never the owner's OK. Critical means what [AGENTS.md](../AGENTS.md) and the owner decisions
+reserve to the owner: a product or scope decision, a spec conflict, spending money, a
+`--no-verify` push, anything destructive or outward-facing beyond the PR and its merge.
+Report at the end of the slice, not at every step.
+
 1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its spec sections;
    keep [the roadmap](ROADMAP.md) current.
    Get the owner's OK on the plan and on any decision that is theirs.
@@ -59,13 +70,13 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
    result to its record. A broad re-review of the whole PR happens only when the fixes
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
-   rounds; anything still open goes to the owner.
+   rounds; anything still open goes up the escalation ladder above, then to the owner.
 7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
    NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
-   PR link, verdict, notes. Owner decisions and anything open after fix round 2 still go to
-   the owner. If the slice taught a lesson, record it as
+   PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
+   escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
    future decision and survives code drift; if a check could enforce it, write the check instead.
 
