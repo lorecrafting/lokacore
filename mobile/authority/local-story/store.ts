@@ -49,6 +49,8 @@ const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
 
 /** The saved world and revision, or `fresh` saved whole at revision 0 when there is none. */
 export function load(db: Db, fresh: World): { world: World; revision: number } {
+  // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
+  if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
   db.execSync(SCHEMA);
   type Head = { revision: number; clock: number; rng: string };
   const head = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head');

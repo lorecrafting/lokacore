@@ -7,7 +7,7 @@ import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
 import { commit, load, receipt, reconcile, type Db, type Receipt } from './store.ts';
-import { recover, traceCommand, type CommitState, type RunIds } from './trace.ts';
+import { catchUp, traceCommand, type CommitState, type RunIds } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -31,7 +31,8 @@ export type Reply =
  */
 export function openStory(db: Db, fresh: World, scope: string, ids: RunIds) {
   const s: Story = { db, fresh, scope, ids, ...load(db, fresh), behind: false };
-  s.behind = !recover(db, ids);
+  s.behind = !catchUp(db, ids, fresh.context);
+  // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
   return { world: () => s.world, invoke: (value: unknown) => invoke(s, value) };
 }
 
@@ -43,7 +44,7 @@ type Story = {
   readonly ids: RunIds;
   world: World;
   revision: number;
-  behind: boolean; // a committed entry's trace write failed; recover before the next entry
+  behind: boolean; // the trace misses a committed entry or its header; catch up before the next
   // The attempt whose COMMIT outcome is unknown: no decision runs until it is settled.
   fence?: { invocation_id: string; trace: Trace; at: number } | undefined;
 };
@@ -132,8 +133,9 @@ function settle(s: Story): Receipt | undefined {
 }
 
 /**
- * Traces a command after its commit; committed entries a failed write missed are recovered first,
- * in commit order, so ordinals follow the commits (ADR-075 §4: the Commands by ordinal replay).
+ * Traces a command after its commit. A trace that is behind catches up first (all but this
+ * command), or this entry is skipped, so ordinals follow the commits (ADR-075 §4: the Commands by
+ * ordinal replay); a skipped committed entry is caught up later from its receipt.
  */
 function traceAfter(
   s: Story,
@@ -142,10 +144,7 @@ function traceAfter(
   at: number,
   states: CommitState[],
 ) {
-  const committed = states.at(-1) === 'committed';
-  if (s.behind) {
-    s.behind = !recover(s.db, s.ids);
-    if (committed) return; // recover wrote this one too, or a later one will
-  }
-  if (!traceCommand(s.db, s.ids, command, d, at, states) && committed) s.behind = true;
+  if (s.behind && (s.behind = !catchUp(s.db, s.ids, s.fresh.context, command.id))) return;
+  const written = traceCommand(s.db, s.ids, command, d, at, states);
+  if (!written && states.includes('committed')) s.behind = true;
 }

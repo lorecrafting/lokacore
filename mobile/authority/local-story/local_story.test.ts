@@ -41,25 +41,23 @@ const items = world('cartridge_items_hash.json', [1, 2, 3, 4]);
 const dusk = world('cartridge_dusk_hash.json', [27274249, 25704967, 31982592, 12605441]);
 
 type Tap = (statement: string, run: () => unknown) => unknown;
-/**
- * A process: one connection to the save at `path`, adapted to expo-sqlite's sync names. `tap`
- * wraps each execSync and runSync, the one place a test simulates a fault.
- */
-function processOn(path: string, story = items, pageSize = 0, tap: Tap = (_, run) => run()) {
+/** A connection adapted to expo-sqlite's sync names; `tap` wraps each statement to fault it. */
+const adapt = (sql: DatabaseSync, tap: Tap = (_, run) => run()) => ({
+  execSync: (s: string) => void tap(s, () => sql.exec(s)),
+  runSync: (s: string, ...p: (string | number | null)[]) => tap(s, () => sql.prepare(s).run(...p)),
+  getFirstSync: <T>(s: string, ...p: (string | number | null)[]) =>
+    tap(s, () => sql.prepare(s).get(...p) ?? null) as T | null,
+  getAllSync: <T>(s: string, ...p: (string | number | null)[]) =>
+    tap(s, () => sql.prepare(s).all(...p)) as T[],
+  isInTransactionSync: () => sql.isTransaction,
+});
+/** A process: one connection to the save at `path`, the one place a test's `tap` faults. */
+function processOn(path: string, story = items, pageSize = 0, tap?: Tap) {
   const sql = new DatabaseSync(path);
   if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`); // before WAL fixes it
   sql.exec('PRAGMA journal_mode = WAL');
-  const db = {
-    execSync: (s: string) => void tap(s, () => sql.exec(s)),
-    runSync: (s: string, ...p: (string | number | null)[]) =>
-      tap(s, () => sql.prepare(s).run(...p)),
-    getFirstSync: <T>(s: string, ...p: (string | number | null)[]) =>
-      (sql.prepare(s).get(...p) ?? null) as T | null,
-    getAllSync: <T>(s: string, ...p: (string | number | null)[]) => sql.prepare(s).all(...p) as T[],
-    isInTransactionSync: () => sql.isTransaction,
-  };
   const one = (q: string) => Object.values(sql.prepare(q).get()!)[0];
-  return { sql, story: openStory(db, story.fresh, SCOPE, story.ids), one };
+  return { sql, story: openStory(adapt(sql, tap), story.fresh, SCOPE, story.ids), one };
 }
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-s1-')), 'save.db');
 const invocation = (n: number, action_key: string, target_ids: string[], token?: string) => ({
@@ -79,19 +77,25 @@ const after = [15224335, 29364750, 272377353, 1125134346];
 
 /**
  * The save's game trace, every record valid against the ObservationRecord contract, a trace.run
- * header first whose ids and world every entry shares (ADR-075 §4, the relationships a schema
- * cannot state); per entry: ordinal, the revision decided against, commit state and revision.
+ * header first; each entry shares the ids and world of the header before it (ADR-075 §4, the
+ * relationships a schema cannot state). Per entry: ordinal, the revision decided against, commit
+ * state and revision.
  */
 function traced(p: { sql: DatabaseSync }) {
   const rows = p.sql.prepare('SELECT record FROM trace ORDER BY rowid').all();
-  const [head, ...entries] = rows.map((r) => JSON.parse(r.record as string));
-  for (const r of [head, ...entries]) assert.deepEqual(validate('ObservationRecord', r), []);
-  assert.equal(head.event, 'trace.run');
-  for (const e of entries) {
-    const { command_id, revision, ...shared } = e.ids;
-    assert.deepEqual([shared, e.data.command.id], [head.ids, command_id]);
-    assert.equal(e.data.command.world_context_id, head.data.world_context_id);
+  const records = rows.map((r) => JSON.parse(r.record as string));
+  assert.equal(records[0].event, 'trace.run');
+  let head = records[0];
+  for (const r of records) {
+    assert.deepEqual(validate('ObservationRecord', r), []);
+    if (r.event === 'trace.run') head = r;
+    else {
+      const { command_id, revision, ...shared } = r.ids;
+      assert.deepEqual([shared, r.data.command.id], [head.ids, command_id]);
+      assert.equal(r.data.command.world_context_id, head.data.world_context_id);
+    }
   }
+  const entries = records.filter((r) => r.event === 'trace.command');
   return entries.map((e) => [
     e.data.ordinal,
     e.ids.revision,
@@ -103,8 +107,8 @@ const state = (p: { story: { world: () => { state: unknown } } }) =>
   encode(p.story.world().state as never);
 
 // The child of the kill test: `kill <save> commit|trace` opens the save, then takes the satchel and
-// SIGKILLs itself right after the real COMMIT (before memory adopts it) or as the first trace row
-// is written (memory adopted, no reply yet).
+// SIGKILLs itself right after the real COMMIT (before memory adopts it) or as its trace entry is
+// written (memory adopted, no reply yet).
 if (process.argv[2] === 'kill') {
   const [path, at] = process.argv.slice(3) as [string, string];
   let armed = false;
@@ -195,7 +199,12 @@ test('a failed attempt and a rejection persist; their retries draw nothing', () 
   assert.deepEqual(b.story.world().state.rng, after);
   assert.equal(b.one('SELECT rng FROM head'), JSON.stringify(after));
   assert.equal(b.one('SELECT DISTINCT intent_digest_version FROM receipt'), 'loka-intent-v1');
-  assert.deepEqual(traced(b), [[1, 0, 'committed', 1]]); // dance, rejected before a Command: none
+  // dance, rejected before a Command, has no entry, and its receipt never blocks the next one.
+  assert.deepEqual(saved(b.story.invoke(invocation(4, 'pick_lock', []))), [false, 2]);
+  assert.deepEqual(traced(b), [
+    [1, 0, 'committed', 1],
+    [2, 1, 'committed', 2],
+  ]);
 });
 
 // Breaks (03 §15; ADR-072): memory adopted before COMMIT, a partial write surviving the failed
@@ -339,11 +348,18 @@ test('a process killed after COMMIT restarts with the take once and its trace en
 });
 
 // Breaks (ADR-075 §4): no entry for a definite failure or one traced as unknown, the trace written
-// inside the gameplay transaction, a trace failure reaching the player, or its missed entry
-// recovered after a later command's (replay by ordinal would then run give before take).
+// inside the gameplay transaction, a trace failure reaching the player, its missed entry recovered
+// after a later command's (replay by ordinal would then run give before take), or catching up
+// writing give's committed entry apart from its unknown one. The give's acknowledgement is lost.
 test('a definite failure is traced once; a failed trace write changes nothing', () => {
   const path = save();
-  const a = processOn(path);
+  let lose = false;
+  const a = processOn(path, items, 0, (s, run) => {
+    const out = run();
+    if (!lose || s !== 'COMMIT') return out;
+    lose = false;
+    throw new Error('COMMIT acknowledgement lost');
+  });
   const raise = (table: string) =>
     `CREATE TRIGGER t BEFORE INSERT ON ${table} BEGIN SELECT RAISE(ABORT, 'no space'); END`;
   a.sql.exec(raise('receipt'));
@@ -351,11 +367,93 @@ test('a definite failure is traced once; a failed trace write changes nothing', 
   a.sql.exec(`DROP TRIGGER t; ${raise('trace')}`);
   assert.deepEqual(saved(a.story.invoke(take)), [false, 1]);
   a.sql.exec('DROP TRIGGER t');
+  lose = true;
   assert.deepEqual(saved(a.story.invoke(invocation(2, 'give', [SATCHEL, NPC]))), [false, 2]);
   a.sql.close();
   assert.deepEqual(traced(processOn(path)), [
     [1, 0, 'failed', null],
     [2, 0, 'committed', 1],
+    [3, 1, 'unknown', null],
     [3, 1, 'committed', 2],
   ]);
+});
+
+// Breaks (ADR-075 §4): while committed entries cannot be written, a later entry written ahead of
+// them (replay by ordinal would decide it against the wrong world). The failure's entry is lost.
+test('while the trace is behind no later entry overtakes a missed one', () => {
+  const path = save();
+  const a = processOn(path);
+  a.sql.exec(`CREATE TRIGGER t BEFORE INSERT ON trace WHEN NEW.commit_state = 'committed'
+    BEGIN SELECT RAISE(ABORT, 'no space'); END`);
+  assert.deepEqual(saved(a.story.invoke(take)), [false, 1]);
+  a.sql.exec(
+    `CREATE TRIGGER r BEFORE INSERT ON receipt BEGIN SELECT RAISE(ABORT, 'no space'); END`,
+  );
+  assert.throws(() => a.story.invoke(invocation(2, 'give', [SATCHEL, NPC])), /no space/);
+  a.sql.exec('DROP TRIGGER t; DROP TRIGGER r');
+  a.sql.close();
+  assert.deepEqual(traced(processOn(path)), [[1, 0, 'committed', 1]]);
+});
+
+// Breaks (ADR-075 §4, derived, never authority): a trace read error reaching the player after a
+// commit, or stopping the save from opening. Simulated fault: every trace read and write fails.
+test('an unreadable trace never stops play or the save opening', () => {
+  const path = save();
+  let broken = true;
+  const tap: Tap = (s, run) => {
+    if (broken && /(FROM|INTO) trace/.test(s)) throw new Error('trace unreadable');
+    return run();
+  };
+  const a = processOn(path, items, 0, tap);
+  assert.deepEqual(saved(a.story.invoke(take)), [false, 1]);
+  assert.deepEqual(saved(a.story.invoke(invocation(2, 'give', [SATCHEL, NPC]))), [false, 2]);
+  a.sql.close();
+  processOn(path, items, 0, tap).sql.close();
+  broken = false;
+  assert.deepEqual(traced(processOn(path)), [
+    [1, 0, 'committed', 1],
+    [2, 1, 'committed', 2],
+  ]);
+});
+
+// Breaks (ADR-075 §4): entries decided under one kernel_version or run recorded under another's
+// header, or the missed entry of the old process recovered under the new ids.
+test('a process with new run ids starts a new run header after recovering the old one', () => {
+  const path = save();
+  const a = processOn(path);
+  a.sql.exec(`CREATE TRIGGER t BEFORE INSERT ON trace BEGIN SELECT RAISE(ABORT, 'lost'); END`);
+  assert.deepEqual(saved(a.story.invoke(take)), [false, 1]);
+  a.sql.exec('DROP TRIGGER t');
+  a.sql.close();
+  const kernel_version = `loka-kernel@${'f'.repeat(40)}`;
+  const run_id = '7f7f7f7f-1111-4222-8333-444444444444';
+  const b = processOn(path, { ...items, ids: { ...items.ids, kernel_version, run_id } });
+  assert.deepEqual(saved(b.story.invoke(invocation(2, 'give', [SATCHEL, NPC]))), [false, 2]);
+  assert.deepEqual(traced(b), [
+    [1, 0, 'committed', 1],
+    [1, 1, 'committed', 2],
+  ]);
+  const heads = b.sql.prepare('SELECT record FROM trace WHERE ordinal = 0 ORDER BY rowid').all();
+  assert.deepEqual(
+    heads
+      .map((h) => JSON.parse(h.record as string))
+      .map((h) => [h.ids.run_id, h.data.initial_state]),
+    [
+      ['6f6f6f6f-1111-4222-8333-444444444444', { state: 'fresh' }],
+      [run_id, { state: 'unavailable', reason: 'not_collected' }],
+    ],
+  );
+});
+
+// Breaks (03 §15): a save opened on a handle whose first-save transaction is still open, reading
+// its own uncommitted head as saved. Simulated: that COMMIT and the ROLLBACK after it fail.
+test('a save does not open inside a transaction left open', () => {
+  let jam = true;
+  const db = adapt(new DatabaseSync(save()), (s, run) => {
+    if (jam && (s === 'COMMIT' || s === 'ROLLBACK')) throw new Error(`${s} failed`);
+    return run();
+  });
+  assert.throws(() => openStory(db, items.fresh, SCOPE, items.ids), /first save unknown/);
+  jam = false;
+  assert.throws(() => openStory(db, items.fresh, SCOPE, items.ids), /transaction is open/);
 });

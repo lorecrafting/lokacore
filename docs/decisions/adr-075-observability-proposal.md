@@ -34,7 +34,7 @@ A new envelope field or meaning takes a new format tag.
 
 | Store | What goes in | Producers through R6P | Where until a server exists | Retention | Upload by default |
 |---|---|---|---|---|---|
-| `game_trace` | one `trace.run` header per run, then one `trace.command` entry per command (§4) | `loka play`, simulator (R5); local authority (R6) | dev and CI: `tmp/obs/game_trace/<run_id>.jsonl` (git-ignored); phone: the app sandbox, placement decided by R6 | dev: until deleted; CI: kept as a workflow artifact when the run fails; phone: bounded, cap decided by R6; certification keeps reproducible traces longer (11 §15, R9) | never (11 §11) |
+| `game_trace` | one `trace.run` header per run, then one `trace.command` entry per command (§4) | `loka play`, simulator (R5); local authority (R6) | dev and CI: `tmp/obs/game_trace/<run_id>.jsonl` (git-ignored); phone: the `trace` table of the save's SQLite database, on its one connection (*amendment, R6 S2:* the only store Hermes reaches without a new dependency; the trace shares the save's lifetime and backup) | dev: until deleted; CI: kept as a workflow artifact when the run fails; phone: bounded, cap set by R6 S6; certification keeps reproducible traces longer (11 §15, R9) | never (11 §11) |
 | `diagnostics` | things to fix: `content.diagnostic` (08 §6), `simulation.invariant_failed` (09 §2), `target.unresolved` (R5 S2) | the TypeScript loader and failed lookups via `loka play` (R5 S1, S2); `mix loka.compile` from the slice that first stores its diagnostics; simulator | `tmp/obs/diagnostics/` | as game_trace in CI | no |
 | `operations` | host-dependent measures: `kernel.decision_latency` (11 §13) | `loka play`, simulator (Node); local authority (Hermes) | `tmp/obs/operations/`; phone: the app sandbox | dev: until deleted; R6P timing evidence is captured under the [evidence lessons](../lessons/evidence.md) | no |
 | `dev_evidence` | `agent.work`: model, tokens and pull-request disposition per agent per pull request | the PM, when a pull request merges or closes: one record per agent (role and instance), summing its rounds; a sum that includes an unknown round is `unknown` | committed, `docs/dev-evidence.jsonl`, appended by the PM ([owner decision](owner-decisions-adr-075-2026-09-25.md), item 2) | kept (it feeds the roadmap re-estimates) | not applicable (in the repository) |
@@ -114,7 +114,11 @@ Header plus the Commands by ordinal are the complete replay input. *Amendment (A
 `RunHeader` carries the run's `world_context_id`, so a run with no commands still reconstructs
 its initial world. *Amendment (F1):* replay regenerates under the recorded `kernel_version` and
 reports the running one beside it; the kernel version is reported, never compared, so the same
-inputs can be replayed before and after a fix.
+inputs can be replayed before and after a fix. *Amendment (R6 S2):* on the phone a save's
+trace is a sequence of runs: a process whose RunIds differ from the last header's (an app or
+content update) first recovers the missing committed entries under that header's ids, then
+writes a new `trace.run` header whose `initial_state` is unavailable (`not_collected`: it starts
+from the saved state); its ordinals start again at 1.
 
 | Decision | Possible commit outcomes |
 |---|---|
