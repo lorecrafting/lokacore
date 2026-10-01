@@ -25,7 +25,7 @@ Before handing off:
    includes the composes-with statement
    ([emergence principles](../../docs/decisions/owner-decision-emergence-2026-09-25.md)).
    Do not merge.
-4. Reply with: what changed, branch and head SHA, the commands you actually ran (with output), self-review
+4. Reply with: what changed, branch and head SHA, the commands you actually ran (exit status, failing lines), self-review
    findings with dispositions, deviations from the brief, open questions. If the brief gave
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
