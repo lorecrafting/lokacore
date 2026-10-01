@@ -320,8 +320,8 @@ test('an app update reopens a save on its pinned release; new games pin the newe
 
 // Breaks (OFF-07): a head that does not parse replaced by the fresh world or opened at all; a
 // corrupt save under a release not installed reported corrupt, not missing; a save missing its
-// head (or head and identity) taken for an empty one and overwritten; a head RNG of the wrong
-// shape opened; the player's new game not making a playable save
+// head (or head and identity) taken for an empty one and overwritten; a head RNG or run seed
+// of the wrong shape opened; the player's new game not making a playable save
 // with new ids or its trace segment not starting fresh.
 test('a save that does not parse is save_corrupt until the player starts a new game', () => {
   const path = save();
@@ -340,6 +340,7 @@ test('a save that does not parse is save_corrupt until the player starts a new g
   for (const damage of [
     'DELETE FROM head; DELETE FROM save', // rows and receipts survive: not an empty database
     "UPDATE head SET rng = '[1,2]'", // parses, but is no RngState
+    "UPDATE save SET seed = '[1,2]'", // the run's seed, in every trace entry's ids
   ]) {
     const other = processOn(save(), { newId: ids() });
     other.story.invoke(pick(1));
