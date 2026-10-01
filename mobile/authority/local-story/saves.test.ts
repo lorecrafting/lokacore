@@ -393,3 +393,18 @@ test("a new run's entries missed by the trace follow its own header", () => {
     [id(4), 1, 'committed'],
   ]);
 });
+
+// Breaks (03 §15): a retry recognised by a stale run id rather than by its own fence: after the
+// pending new game settled through play, a later new game (behind another unknown COMMIT) answered
+// replaced without replacing anything.
+test('a new game after a settled one replaces the save again', () => {
+  const { tap, arm } = lostAck();
+  const p = processOn(save(), { newId: ids(), tap });
+  arm();
+  assert.deepEqual(p.story.newGame(), { kind: 'pending' });
+  assert.deepEqual(saved(p.story.invoke(pick(1))), [false, 1]);
+  arm();
+  assert.deepEqual(p.story.invoke(pick(2)), { kind: 'pending' });
+  assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
+  assert.deepEqual(p.all(IDENTITY), [identity(5)]);
+});

@@ -79,7 +79,8 @@ type Story = {
   world: World;
   revision: number;
   meta: Meta; // undefined only on a corrupt save, until its new game is adopted
-  game?: string | undefined; // the run of a new game whose COMMIT outcome is unknown
+  // The fence of a new game whose COMMIT outcome is unknown, and its run.
+  game?: { fence: () => undefined; run_id: string } | undefined;
   behind: boolean; // the trace misses a committed entry or its header; catch up before the next
   // Settles the attempt whose COMMIT outcome is unknown, throwing while it still is; no decision
   // runs until it has.
@@ -235,9 +236,8 @@ function traceAfter(
  * and the new run's trace opens with its header. An unknown COMMIT fences like an invocation's.
  */
 function newGame(s: Story) {
-  const retried = s.fence && s.game; // a retry of the new game still fenced
+  const retried = s.fence && s.fence === s.game?.fence ? s.game.run_id : undefined;
   if (fenced(s)) return { kind: 'pending' } as const;
-  s.game = undefined;
   if (retried && s.meta?.run_id === retried) return { kind: 'replaced' } as const; // not twice
   // Best effort before its receipts go (the trace is derived and never blocks the player): the
   // old run's missed entries can be recovered only from them.
@@ -246,7 +246,7 @@ function newGame(s: Story) {
   const replaced = replace(s.db, s.fresh, next); // throws on a definite failure, nothing written
   // Settled like an unknown COMMIT even when committed, so memory never serves the old run after
   // the new one is saved: a failed read while adopting it fences every call until it is adopted.
-  s.fence = () => {
+  const fence = () => {
     const run = () => s.db.getFirstSync<{ run_id: string }>('SELECT run_id FROM save')?.run_id;
     if (replaced || reconcile(s.db, run) === next.run_id) {
       adopt(s);
@@ -254,9 +254,8 @@ function newGame(s: Story) {
     }
     return undefined;
   };
-  s.game = next.run_id;
+  [s.fence, s.game] = [fence, { fence, run_id: next.run_id }];
   if (fenced(s)) return { kind: 'pending' } as const;
-  s.game = undefined;
   if (s.meta?.run_id !== next.run_id) throw new Error('COMMIT failed; nothing was replaced');
   return { kind: 'replaced' } as const;
 }
