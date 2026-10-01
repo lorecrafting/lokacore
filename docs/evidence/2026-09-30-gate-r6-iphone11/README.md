@@ -20,7 +20,7 @@ DEVICE=<the phone>; BUNDLE_ID=<the app's bundle id>; OUT=<an empty scratch direc
 redact() { sed "s#$HOME#<home>#g; s#$PWD#<repo>#g; s#$DEVICE#<device>#g"; }
 ```
 
-1. Release (Hermes) build of the head of `main` that includes this runbook, installed with
+1. Release (Hermes) build of the `r6-s6b-gate` commit that includes this runbook (run: `c963af1`), installed with
    `xcrun devicectl device install app` (as the smoke run did). Free personal team; no EAS.
 2. The owner deletes the app first (fresh install: no save), then the PM installs it. The phone
    stays unlocked and the app in the foreground (a lock stops the JS; a lock or backgrounding
@@ -49,8 +49,8 @@ is Ferry Landing with buttons `look`, `scan`, `Go north`, `take a leather satche
 | 7 | Go south | **End state:** Ferry Landing, Carrying: nothing, buttons `look`, `scan`, `Go north` | 7 |
 
 Declared end state: revision 7, 7 receipts, at Ferry Landing, nothing carried (the satchel is left
-at the Village Green). The kills fall between taps: a kill during a COMMIT is the S6a corpus's job,
-not this run's. The headless reference (`smoke.test.ts`, "the gate tap script ends at its declared
+at the Village Green). The kills fall between taps: a kill during a COMMIT is the S6a corpus's job (run in the phone's
+rollback journal), not this run's. The headless reference (`smoke.test.ts`, "the gate tap script ends at its declared
 state") plays the same taps, closing and reopening after taps 2, 5 and 6, with these values as
 hand-checked literals and checks the end state does not depend on the kills.
 
@@ -126,8 +126,11 @@ Run date 2026-09-30; build commit `c963af1` (Release, Hermes, free personal team
   carrying nothing.
 - **Inspected (save copied after each PM kill):** revision 0 and 0 receipts at first launch; 2 and 2
   after KILL 1; 5 and 5 after KILL 2; 6 and 6 after KILL 3; 7 and 7 at the end; the folder held only
-  `loka-save.db` each time. Compare test: `✔ the save copied from the phone equals the reference`,
+  `loka-save.db` each time (no `-wal` or `-journal`). Compare test: `✔ the save copied from the phone equals the reference`,
   pass 11, fail 0, skipped 0.
+
+- **Inspected (PM, on the copied saves of runs 1 and 2):** `pragma journal_mode` is `delete` and
+  `page_size` 4096: expo-sqlite on iOS opens the save in SQLite's default rollback journal, not WAL.
 
 ### Corrupt check (step 3)
 
@@ -139,13 +142,13 @@ Run date 2026-09-30; build commit `c963af1` (Release, Hermes, free personal team
   make out "...could not..." and "..._corrupt". A raw expo-sqlite error ("file is not a database")
   contains no "_corrupt", so expo-sqlite's error text did match `corrupt()` and the typed
   `save_corrupt` reached the screen.
-- **Note for SM2:** the failure line ignores the safe area (it renders under the notch).
-- **Not checked:** the exact full on-screen line (partly hidden); a kill during a COMMIT on the device
-  (S6a's headless corpus covers it); where run 1's two extra commands came from.
+- **Note for SM2:** the failure line ignores the safe area (it renders under the notch); carried to the SM2 row.
+- **Not checked:** SQLITE_CORRUPT (`malformed`, a damaged page in a valid database) on the device,
+  only NOTADB; from source, expo-sqlite passes SQLite's own message through and its vendored
+  `sqlite3.c` holds both texts; carried to R6P's device proof (P6).
+- **Not checked:** the exact full on-screen line (partly hidden); a kill during a COMMIT on the
+  device (S6a's headless corpus covers it); where run 1's two extra commands came from.
 
 ## Deferred, not passed (Gate R6)
 
-`real_elapsed` reconciliation; [OFF-08, OFF-09, OFF-13](../../spec/15-acceptance-scenarios.md#b-offline-lifecycle)
-(S4); OFF-12 (S3b, a release-process obligation); S3b's carries (GC, migration staging, the
-pre-migration copy, downloads); S6a's carries (a file-replace repair for NOTADB or corrupt pages,
-to SM2/R12; a corrupt deep page or receipt-index page throws untyped).
+Listed once, in the [ROADMAP R6 row](../../ROADMAP.md#slices).
