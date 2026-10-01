@@ -2,4 +2,5 @@
 // imports the kernel.
 export { KERNEL_ID } from '../../../kernel/ts/src/index.ts';
 export { openStory, type Host, type Reply } from './authority.ts';
+export { deliver, type Submit } from './progress.ts';
 export type { Db } from './store.ts';
