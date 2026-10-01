@@ -3,28 +3,40 @@
 import { useState } from 'react';
 import { Button, SafeAreaView, ScrollView, Text } from 'react-native';
 import { randomUUID } from 'expo-crypto';
-import { openDatabaseSync } from 'expo-sqlite';
-import { openSmoke } from '../authority/local-story/smoke';
+import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
+import { playSmoke } from '../authority/local-story/smoke';
 import items from '../../protocol/fixtures/cartridge_items_hash.json';
+import { confirmStartOver, SaveError } from './SaveError';
 
 // Opened once per process, kept on globalThis so a Fast Refresh does not open a second handle
 // (mobile lessons: a second handle on the same file crashes). A new file name: a save from before
-// R6 S3a has no identity row, so it would open as corrupt.
-const g = globalThis as { loka_smoke?: ReturnType<typeof openSmoke> };
-// A save that does not open (save_corrupt, OFF-07) is shown as one line, not thrown at load.
-// ponytail: any open error is shown, typed or not; the new-game recovery screen is SM2's.
-let smoke: ReturnType<typeof openSmoke> | undefined;
-let failed = '';
-try {
-  smoke = g.loka_smoke ??= openSmoke(openDatabaseSync('loka-save.db'), items, randomUUID);
-} catch (e) {
-  failed = `Save could not be opened: ${(e as Error).message}`;
-}
+// R6 S3a has no identity row, so it would open as corrupt. Start over closes the handle before it
+// deletes the file (expo refuses to delete an open database).
+// ponytail: deleteDatabaseSync removes the main file only; a hot -journal left by a crash would be
+// rolled into the fresh file. Delete it too (expo-file-system) if that is ever seen.
+const NAME = 'loka-save.db';
+let db: SQLiteDatabase | undefined;
+const g = globalThis as { loka_smoke?: ReturnType<typeof playSmoke> };
+const smoke = (g.loka_smoke ??= playSmoke(
+  () => (db = openDatabaseSync(NAME)),
+  () => {
+    db?.closeSync();
+    db = undefined;
+    deleteDatabaseSync(NAME);
+  },
+  items,
+  randomUUID,
+));
 
 export default function App() {
   const [, redraw] = useState(0);
-  if (!smoke) return <Text>{failed}</Text>;
-  const { view, text, buttons, log, pending } = smoke.screen();
+  const startOver = () => {
+    smoke.startOver();
+    redraw((n) => n + 1);
+  };
+  const game = smoke.game();
+  if (!game) return <SaveError failed={smoke.failed()!} startOver={startOver} />;
+  const { view, text, buttons, log, pending, fault } = game.screen();
   const here = [text(view.place.title.key), text(view.place.description.key)];
   const names = (es: typeof view.entities) => es.map((e) => text(e.name)).join(', ') || 'nothing';
   return (
@@ -43,11 +55,12 @@ export default function App() {
             key={i}
             title={b.label}
             onPress={() => {
-              smoke.press(b);
+              game.press(b);
               redraw((n) => n + 1);
             }}
           />
         ))}
+        {fault && <Button title="Start over" onPress={() => confirmStartOver(startOver)} />}
       </ScrollView>
     </SafeAreaView>
   );

@@ -73,3 +73,4 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [Gate R6 "finish": a fixed tap script to a declared end state, the save equal to a headless run; a real story is R6P's gate](owner-decision-gate-r6-finish-2026-09-30.md).
 - Owner decision: [Gate R6 carries to R6P: device mid-commit kill evidence, the `evaluation.budget_exceeded` producer, the Hermes `kernel.decision_latency` producer](owner-decision-gate-r6-carries-2026-09-30.md).
 - Owner decision: [S3b scope: bundled releases reopen saves on their pin, typed refusals; GC, migration staging and downloads carried](owner-decision-s3b-scope-2026-09-30.md).
+- Owner decision: [SM2 scope: the book-style UI over the smoke controller in three slices, real GameView data only, fonts and a simple page turn](owner-decision-sm2-scope-2026-10-01.md).

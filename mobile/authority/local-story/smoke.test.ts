@@ -4,49 +4,53 @@
 // a leather satchel with an exit north to the Village Green.
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openSmoke } from './smoke.ts';
+import { openSmoke, playSmoke } from './smoke.ts';
+import type { Db } from './store.ts';
 
 const PENDING = '(pending: not confirmed saved; press any button to retry it)';
 type P = (string | number | null)[];
+const ITEMS = read('protocol/fixtures/cartridge_items_hash.json') as never;
+const adapt = (
+  sql: DatabaseSync,
+  tap: (s: string, run: () => unknown) => unknown = (_, r) => r(),
+): Db => ({
+  execSync: (s) => void tap(s, () => sql.exec(s)),
+  isInTransactionSync: () => sql.isTransaction,
+  runSync: (s, ...p: P) => tap(s, () => sql.prepare(s).run(...p)),
+  getFirstSync: <T>(s: string, ...p: P) =>
+    tap(s, () => sql.prepare(s).get(...p) ?? null) as T | null,
+  getAllSync: <T>(s: string, ...p: P) => tap(s, () => sql.prepare(s).all(...p)) as T[],
+});
 const processOn = (
   path: string,
-  tap: (s: string, run: () => unknown) => unknown = (_, r) => r(),
+  tap?: (s: string, run: () => unknown) => unknown,
   pageSize = 0,
 ) => {
   const sql = new DatabaseSync(path);
   if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`);
-  const smoke = openSmoke(
-    {
-      execSync: (s) => void tap(s, () => sql.exec(s)),
-      isInTransactionSync: () => sql.isTransaction,
-      runSync: (s, ...p: P) => tap(s, () => sql.prepare(s).run(...p)),
-      getFirstSync: <T>(s: string, ...p: P) =>
-        tap(s, () => sql.prepare(s).get(...p) ?? null) as T | null,
-      getAllSync: <T>(s: string, ...p: P) => tap(s, () => sql.prepare(s).all(...p)) as T[],
-    },
-    read('protocol/fixtures/cartridge_items_hash.json') as never,
-    randomUUID,
-  );
-  const now = () => {
-    const { view, text, buttons, log, pending } = smoke.screen();
+  const smoke = openSmoke(adapt(sql, tap), ITEMS, randomUUID);
+  return { sql, smoke, ...screenOf(smoke) };
+};
+const screenOf = (smoke: ReturnType<typeof openSmoke>) => ({
+  now: () => {
+    const { view, text, buttons, log, pending, fault } = smoke.screen();
     return {
       place: text(view.place.title.key),
       carrying: view.inventory.map((e) => text(e.name)),
       buttons: buttons.map((b) => b.label),
       log: [...log],
       pending,
+      fault,
     };
-  };
-  const press = (label: string) =>
-    smoke.press(smoke.screen().buttons.find((b) => b.label === label)!);
-  return { sql, smoke, now, press };
-};
+  },
+  press: (label: string) => smoke.press(smoke.screen().buttons.find((b) => b.label === label)!),
+});
 
 // Breaks: a button that sends the wrong invocation (target, direction or actor), a world that is
 // not committed through the authority, a restart that loads the fresh world instead of the save,
@@ -183,6 +187,7 @@ test('a failed write is not claimed unsaved; the next press retries it', () => {
   p.sql.exec(`PRAGMA max_page_count = ${one('PRAGMA page_count')}`);
   p.press('Go north');
   assert.equal(p.now().pending, true);
+  assert.match(p.now().fault!, /full/i);
   assert.equal(p.now().log[0], '> Go north');
   assert.match(p.now().log[1], /^\(not confirmed: .*full.*retries Go north\)$/i);
   assert.equal(one('SELECT revision FROM head'), 0);
@@ -191,6 +196,7 @@ test('a failed write is not claimed unsaved; the next press retries it', () => {
   assert.deepEqual(p.now().log.slice(2), ['> Go north', 'moved']);
   assert.equal(p.now().place, 'Village Green');
   assert.equal(p.now().pending, false);
+  assert.equal(p.now().fault, undefined); // a stale fault would keep offering start over
 });
 
 // Breaks: after "scan" committed with its ack lost, a retry whose receipt lookup fails clears the
@@ -232,6 +238,112 @@ test('a confirmed reply that fails to format propagates and still ends the attem
   assert.equal(p.now().pending, false);
   p.press('Go north');
   assert.deepEqual(p.now().log.slice(-2), ['> Go north', 'moved']);
+});
+
+// The app's save file under playSmoke, as App.tsx wires it: `remove` closes the handle and deletes
+// the file, as expo's closeSync and deleteDatabaseSync do (the main file only).
+const app = (path: string) => {
+  let sql: DatabaseSync | undefined;
+  const c = playSmoke(
+    () => adapt((sql = new DatabaseSync(path))),
+    () => {
+      sql!.close();
+      rmSync(path);
+    },
+    ITEMS,
+    randomUUID,
+  );
+  const screen = () => screenOf(c.game()!);
+  return { c, sql: () => sql!, now: () => screen().now(), press: (l: string) => screen().press(l) };
+};
+const SQLITE_HEADER = 'SQLite format 3\0';
+
+/** A save at revision 1 (the satchel taken) whose index `name` has its b-tree page type byte broken. */
+const damaged = (name: string) => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
+  const a = processOn(path);
+  a.press('take a leather satchel');
+  const at = (q: string) => Number(Object.values(a.sql.prepare(q).get()!)[0]);
+  const root = at(`SELECT rootpage FROM sqlite_master WHERE name = '${name}'`);
+  const offset = (root - 1) * at('PRAGMA page_size');
+  a.sql.close();
+  const file = readFileSync(path);
+  file[offset] = 0xff;
+  writeFileSync(path, file);
+  return path;
+};
+
+// Breaks: start over that keeps the file: a NOTADB file cannot be repaired on its handle (its new
+// game throws), so reopening the same bytes fails again; or a start over that throws. A corrupt
+// receipt id index fails the open untyped (the smoke's next-id read uses it): no new game, same
+// file replace.
+test('start over replaces a file that does not open with a fresh game', () => {
+  const notadb = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
+  writeFileSync(notadb, Buffer.alloc(4096, 'x'));
+  const index = damaged('sqlite_autoindex_receipt_1');
+  for (const [path, kind] of [
+    [notadb, 'save_corrupt'],
+    [index, undefined],
+  ]) {
+    const a = app(path!);
+    assert.equal(a.c.failed()?.kind, kind, path);
+    a.c.startOver();
+    assert.equal(a.c.failed(), undefined, path);
+    assert.equal(a.now().place, 'Ferry Landing');
+    a.press('Go north');
+    assert.deepEqual(a.now().log, ['> Go north', 'moved']);
+    assert.equal(readFileSync(path!).subarray(0, 16).toString('latin1'), SQLITE_HEADER);
+  }
+});
+
+// Breaks: start over that always deletes the file, even where the authority's new game repairs it
+// in place: the old run's trace (and any pending report) is lost, so only the new run is traced.
+// A damaged identity (its format name rewritten) is save_corrupt with a new game (saves.test.ts).
+test('start over of a damaged identity keeps the file and its old run', () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
+  const a = processOn(path);
+  a.press('take a leather satchel');
+  a.sql.exec("UPDATE save SET format = 'loka-save-x'");
+  a.sql.close();
+  const b = app(path);
+  assert.equal(b.c.failed()?.kind, 'save_corrupt');
+  b.c.startOver();
+  assert.deepEqual(b.now().carrying, []);
+  const runs = b.sql().prepare("SELECT count(DISTINCT record ->> '$.ids.run_id') AS n FROM trace");
+  assert.equal(runs.get()!.n, 2);
+});
+
+// Breaks: a malformed page found during play (the receipt command-id index, written by the
+// commit; the open does not read it) thrown out of press (a crash on the phone), or swallowed so
+// no start over is offered; or a start over that cannot get past it.
+test('corruption found during play is shown with start over, which gives a fresh game', () => {
+  const b = app(damaged('sqlite_autoindex_receipt_2'));
+  assert.deepEqual(b.now().carrying, ['a leather satchel']); // it opens
+  b.press('Go north');
+  assert.match(b.now().fault!, /malformed/);
+  assert.equal(b.now().pending, true); // the retry stays possible (03 §14)
+  b.c.startOver();
+  assert.equal(b.now().place, 'Ferry Landing');
+  assert.deepEqual(b.now().carrying, []);
+  b.press('Go north');
+  assert.deepEqual(b.now().log, ['> Go north', 'moved']);
+});
+
+// Breaks (10 §32; saves.test.ts): start over of a newer app's save, destroying it instead of
+// asking for an app update. Its format is a higher loka-save-vN.
+test("a newer app's save is never started over", () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
+  const a = processOn(path);
+  a.press('take a leather satchel');
+  a.sql.exec("UPDATE save SET format = 'loka-save-v2'");
+  a.sql.close();
+  const before = readFileSync(path);
+  const b = app(path);
+  assert.equal(b.c.failed()?.kind, 'unsupported_save_format');
+  b.c.startOver();
+  assert.equal(b.c.failed()?.kind, 'unsupported_save_format');
+  b.sql().close();
+  assert.deepEqual(readFileSync(path), before);
 });
 
 // Gate R6 (docs/evidence/2026-09-30-gate-r6-iphone11/README.md): the tap script the owner plays on
