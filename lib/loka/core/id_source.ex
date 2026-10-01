@@ -7,8 +7,9 @@ defmodule Loka.Core.IdSource do
   `command_id/2` derives the stable CommandId (04 §3, 03 §14) the same way from
   `["loka-command-v1", idempotency_scope_id, invocation_id]`; authority placement never enters
   it (owner decision `docs/decisions/owner-decisions-r3-lanes-2026-09-24.md`; rule in
-  `docs/spec/conformance/numeric-profile.md`). It is for invocation-derived commands only: an
-  authority-internal command such as `run_job` uses a different tag over its own identity.
+  `docs/spec/conformance/numeric-profile.md`). It is for invocation-derived commands only:
+  `job_command_id/2` derives an authority-internal `run_job`'s from
+  `["loka-job-command-v1", job_id, occurrence]`, the occurrence being the job's due time.
   """
   import Bitwise
   import Loka.Core.Canonical, only: [is_safe_integer: 1]
@@ -35,6 +36,20 @@ defmodule Loka.Core.IdSource do
     do: uuid(Canonical.encode(["loka-command-v1", scope_id, invocation_id]))
 
   def command_id(_, _), do: {:error, :invalid_id}
+
+  @doc """
+  `:invalid_id` unless the job id is a binary, `:invalid_ordinal` unless the occurrence is an
+  integer in `0..2^53-1`, `:invalid_canonical` if the job id is not valid UTF-8.
+  """
+  @spec job_command_id(term(), term()) ::
+          {:ok, String.t()} | {:error, :invalid_id | :invalid_ordinal | :invalid_canonical}
+  def job_command_id(job_id, occurrence) do
+    cond do
+      not is_binary(job_id) -> {:error, :invalid_id}
+      not (is_safe_integer(occurrence) and occurrence >= 0) -> {:error, :invalid_ordinal}
+      true -> uuid(Canonical.encode(["loka-job-command-v1", job_id, occurrence]))
+    end
+  end
 
   defp uuid({:error, _} = error), do: error
 

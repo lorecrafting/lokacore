@@ -68,8 +68,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const cooldown: DeltaOp[] = recipe.cooldown
     ? [{ op: 'cooldown.start', writer_group: 0, actor_id, action, ...since, at: from }]
     : [];
-  // ponytail: no jobs exist yet; once they do, this advance runs its due set like wait's
-  // (04 §5.4: an action's time cost is an explicit advance that may not skip a due job).
+  // An explicit advance: the host runs its due jobs in this proposal (world.ts drain; 04 §5.4).
   const time: DeltaOp[] = duration
     ? [{ op: 'time.advance', writer_group: 0, from, to: add(from, duration) }]
     : [];

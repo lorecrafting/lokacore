@@ -40,8 +40,8 @@ export const diag = (
 export const step = (name: string) =>
   /^[a-z0-9_]+$/.test(name) ? `.${name}` : `[${encode(name)}]`;
 
-// Each room, detail, NPC, item, barrier and description variant (v2; an item's room-line
-// variants), with its kind (registry definitions) and path.
+// Each room, detail, NPC, NPC daily schedule, item, barrier, description variant (v2; an item's
+// room-line variants) and the calendar, with its kind (registry definitions) and path.
 export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (kind: string, d: Obj, at: string, field = 'variants') => {
@@ -55,12 +55,16 @@ export function parts(c: Obj): [string, Obj, string][] {
     for (const [key, d] of Object.entries((r.details ?? {}) as Obj))
       add('detail', d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
   }
-  for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj))
+  for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
     add('npc', n, `.cartridge.npcs${step(ref)}`);
+    if (n.daily_schedule)
+      out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
+  }
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj))
     add('item', i, `.cartridge.items${step(ref)}`, 'room_line_variants');
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
+  if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
   return out;
 }
 
@@ -127,14 +131,15 @@ function checkers(c: Obj, out: Diagnostic[]) {
 
 // Every fact_compare names a fact of this cartridge with a value of its type, every has_item
 // an item of it, every barrier_state a barrier of it, every quest_state a quest of it (the kernel reads them; any format, since v1 action policies are evaluated too),
-// and no time_window is empty (EMPTY_TIME_WINDOW). v2: the entry and every exit name a room of
-// this cartridge, an exit's barrier a barrier of it, which each exit of its destination back to
-// its room names too (BARRIER_MISMATCH), a barrier's key_item an item of it, every text key a
-// room, a detail, an NPC, an item, a barrier, a variant, an action or a recipe uses has a
-// catalog entry, every touch link names what it may (cartridge_links.ts), every detail's first
-// alias is its own and typable, items and NPCs start where containment allows, recipes and
-// rooms' action contributions name what exists (recipes), quests are coherent (cartridge_quests.ts),
-// and each resource's bounds hold its start (RESOURCE_SPEC_INVALID).
+// and no time_window is empty (EMPTY_TIME_WINDOW). v2: the entry, every exit and every room an
+// NPC starts in or names in its daily schedule name a room of this cartridge, an exit's barrier
+// a barrier of it, which each exit of its destination back to its room names too
+// (BARRIER_MISMATCH), a barrier's key_item an item of it, every text key a room, a detail, an
+// NPC, an item, a barrier, a variant, an action or a recipe uses has a catalog entry, every
+// touch link names what it may (cartridge_links.ts), every detail's first alias is its own and
+// typable, items and NPCs start where containment allows, recipes and rooms' action
+// contributions name what exists (recipes), quests are coherent (cartridge_quests.ts), and each
+// resource's bounds hold its start (RESOURCE_SPEC_INVALID).
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -157,8 +162,7 @@ export function refStage(c: Obj): Diagnostic[] {
       named(exit.to, 'room', `${at}.exits.${dir}.to`);
     out.push(...unreachable(r.details ?? {}, at));
   }
-  for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj))
-    named(n.room, 'room', `.cartridge.npcs${step(ref)}.room`);
+  for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
     const { in: k } = i.location;
     named(i.location[k], k, `.cartridge.items${step(ref)}.location.${k}`);
@@ -174,6 +178,16 @@ export function refStage(c: Obj): Diagnostic[] {
       out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));
   return out;
 }
+
+// Each room an NPC names, with its path: where it starts and each room of its daily schedule.
+const npcRooms = (c: Obj): [Obj, string][] =>
+  Object.entries((c.npcs ?? {}) as Obj).flatMap(([ref, n]) => [
+    [n.room, `.cartridge.npcs${step(ref)}.room`],
+    ...Object.entries((n.daily_schedule ?? {}) as Obj).map(([h, r]): [Obj, string] => [
+      r,
+      `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
+    ]),
+  ]);
 
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
 // one ActionSet identity) and its check's key no other recipe's check's (one check DefinitionRef),

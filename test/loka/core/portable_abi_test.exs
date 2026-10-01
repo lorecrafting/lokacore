@@ -234,4 +234,21 @@ defmodule Loka.Core.PortableAbiTest do
     assert IdSource.command_id("s", 1) == {:error, :invalid_id}
     assert IdSource.command_id(<<0xFF>>, "i") == {:error, :invalid_canonical}
   end
+
+  # Catches the job tag sharing the client tag ("loka-command-v1"), the occurrence left out of
+  # the hash, or the arguments swapped. protocol/fixtures/job_command_id.json was computed with
+  # Python hashlib over the canonical array (tag "loka-job-command-v1"); TypeScript reads it too.
+  test "job CommandId known answers" do
+    for c <- JSON.decode!(File.read!("protocol/fixtures/job_command_id.json")) do
+      assert IdSource.job_command_id(c["job_id"], c["occurrence"]) == {:ok, c["command_id"]},
+             inspect(c)
+    end
+  end
+
+  # Catches a non-string job id or an unsafe occurrence hashing instead of TypeScript's typed error.
+  test "job CommandId rejects bad input" do
+    assert IdSource.job_command_id(nil, 0) == {:error, :invalid_id}
+    assert IdSource.job_command_id("j", -1) == {:error, :invalid_ordinal}
+    assert IdSource.job_command_id("j", 1.5) == {:error, :invalid_ordinal}
+  end
 end

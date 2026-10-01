@@ -63,7 +63,7 @@ defmodule Loka.Content.Checks do
   included), a recipe's fact.assign fact, its target's room or the resource of its cost,
   threshold check or resource.adjust step, an exit's `to` and `barrier`, a barrier's
   `key_item`, a quest objective's `item_acquired`, an item's location (its room,
-  npc or item, as `in` selects) or an NPC's room goes becomes the DefinitionRef of cartridge
+  npc or item, as `in` selects), an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
   """
   @spec expand(term(), map()) :: term()
@@ -89,8 +89,13 @@ defmodule Loka.Content.Checks do
   def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
     do: Map.update!(loc, k, &ref(&1, k, m))
 
-  def expand(%{"room" => _, "room_line" => t} = npc, m) when is_binary(t),
-    do: Map.update!(npc, "room", &ref(&1, "room", m))
+  def expand(%{"room" => _, "room_line" => t} = npc, m) when is_binary(t) do
+    schedule = Map.get(npc, "daily_schedule", %{})
+
+    npc
+    |> Map.update!("room", &ref(&1, "room", m))
+    |> Map.merge(if schedule == %{}, do: %{}, else: %{"daily_schedule" => scheduled(schedule, m)})
+  end
 
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
@@ -104,6 +109,8 @@ defmodule Loka.Content.Checks do
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v
+
+  defp scheduled(schedule, m), do: Map.new(schedule, fn {h, r} -> {h, ref(r, "room", m)} end)
 
   @doc """
   Diagnostics across the schema-valid definitions (`kind => key => {rel, steps, value}`):
@@ -170,7 +177,14 @@ defmodule Loka.Content.Checks do
   defp located(rel, %{"location" => %{"in" => k} = loc}, m, defs),
     do: reference(rel, ["location"], {k, k}, loc, m, defs)
 
-  defp located(rel, npc, m, defs), do: reference(rel, [], {"room", "room"}, npc, m, defs)
+  defp located(rel, npc, m, defs) do
+    schedule = Map.get(npc, "daily_schedule", %{})
+
+    reference(rel, [], {"room", "room"}, npc, m, defs) ++
+      for {h, _} <- schedule,
+          d <- reference(rel, ["daily_schedule"], {h, "room"}, schedule, m, defs),
+          do: d
+  end
 
   defp texts(defs, text) do
     for(
@@ -235,8 +249,9 @@ defmodule Loka.Content.Checks do
       Entities.conditions(defs) ++ Recipes.conditions(defs) ++ Quests.conditions(defs)
   end
 
+  # run_job is authority-internal (04 §1): no action builds it.
   defp command(rel, name, required) do
-    if name in commands(),
+    if name in commands() and name != "run_job",
       do: owned(at(rel, ["command"]), name, required),
       else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end

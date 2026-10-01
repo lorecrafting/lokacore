@@ -4,8 +4,9 @@
 // commandId derives the stable CommandId (04 §3, 03 §14) the same way from
 // ["loka-command-v1", idempotencyScopeId, invocationId]; authority placement never enters it
 // (owner decision docs/decisions/owner-decisions-r3-lanes-2026-09-24.md; rule in
-// docs/spec/conformance/numeric-profile.md). It is for invocation-derived commands only: an
-// authority-internal command such as run_job uses a different tag over its own identity.
+// docs/spec/conformance/numeric-profile.md). It is for invocation-derived commands only:
+// jobCommandId derives an authority-internal run_job's from ["loka-job-command-v1", jobId,
+// occurrence], the occurrence being the job's due time (numeric-profile.md, job CommandId).
 import { encode } from './canonical.ts';
 import { KernelError } from './error.ts';
 import { sha256, utf8 } from './sha256.ts';
@@ -21,6 +22,12 @@ export function commandId(idempotencyScopeId: string, invocationId: string): str
   if (typeof idempotencyScopeId !== 'string' || typeof invocationId !== 'string')
     throw new KernelError('invalid_id');
   return uuid(encode(['loka-command-v1', idempotencyScopeId, invocationId]));
+}
+
+export function jobCommandId(jobId: string, occurrence: number): string {
+  if (typeof jobId !== 'string') throw new KernelError('invalid_id');
+  if (!Number.isSafeInteger(occurrence) || occurrence < 0) throw new KernelError('invalid_ordinal');
+  return uuid(encode(['loka-job-command-v1', jobId, occurrence]));
 }
 
 function uuid(json: string): string {

@@ -12,9 +12,17 @@ defmodule Loka.Content.Entities do
   @spec all(map()) :: [{String.t(), String.t(), map()}]
   def all(defs), do: for(k <- ~w(npc item), {_, {rel, [], e}} <- defs[k], do: {k, rel, e})
 
-  @doc "An entity and each of its room-line variants, as `{steps, kind}` (registry definitions)."
+  @doc """
+  An entity, each of its room-line variants and an NPC's daily schedule, as `{steps, kind}`
+  (registry definitions).
+  """
   @spec parts(map(), String.t()) :: [{list(), String.t()}]
-  def parts(e, kind), do: [{[], kind} | for({steps, _} <- variants(e), do: {steps, "variant"})]
+  def parts(e, kind) do
+    schedule =
+      if is_map_key(e, "daily_schedule"), do: [{["daily_schedule"], "schedule"}], else: []
+
+    [{[], kind} | for({steps, _} <- variants(e), do: {steps, "variant"})] ++ schedule
+  end
 
   defp variants(e) do
     for {v, i} <- Enum.with_index(Map.get(e, "room_line_variants", [])),

@@ -1,0 +1,12 @@
+{
+  "room.ferry_landing.title": "Ferry Landing",
+  "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.",
+  "room.village_green.title": "Village Green",
+  "room.village_green.description": "An old elm shades a patch of trodden grass.",
+  "detail.mooring_post": "Rope has worn a groove into the post. Someone has carved a fox into it.",
+  "npc.bram.short": "Bram the ferryman",
+  "npc.bram.room": "[Bram] the ferryman is here.",
+  "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.",
+  "actions.coil_rope": "Coil the mooring rope",
+  "narration.coil_rope.actor": "You coil the wet rope around the post, slowly, the way Bram does it."
+}

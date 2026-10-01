@@ -99,6 +99,10 @@ The table below describes the files as imported. Later amendments are in git his
   [conformance/numeric-profile.md](conformance/numeric-profile.md) gains the detail target
   ids rule after the initial world ids (additive: details after the rooms, in room and key
   order). No existing rule or fixture changed.
+- 2026-10-01, Early R7/R8 slice S (PM decision): [conformance/numeric-profile.md](conformance/numeric-profile.md)
+  gains the job CommandId rule beside CommandId (additive: the `run_job` tag the CommandId
+  rule reserved "where it first executes"), and records the initial ids after the details (NPCs,
+  items, then each scheduled NPC's first job). No existing rule or fixture changed.
 - 2026-09-30, [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)
   (paraphrased): one phone, the iPhone 11, until the first free product gate (14 Shipping
   rule); Android evidence is deferred to that gate, not dropped. The rule lives in envelope §4.

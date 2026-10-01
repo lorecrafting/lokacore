@@ -123,7 +123,7 @@
       "heading": "### 5.4 Bounded causality and durable waiting"
     },
     "statement": "job.complete is proposed only by that job's own run_job at its visited due time (protocol/delta.schema.json job.complete).",
-    "implemented_in": "none"
+    "implemented_in": "typescript"
   },
   {
     "id": "player_in_one_room",

@@ -235,7 +235,10 @@
     "key": "behavior",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "schedule"
+    ]
   },
   {
     "key": "schedule",
@@ -272,7 +275,10 @@
     "key": "calendar",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "calendar"
+    ]
   },
   {
     "key": "tide",

@@ -185,7 +185,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Dialogue, schedules and behavior join with their capabilities as optional fields.",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field.",
       "type": "object",
       "properties": {
         "key": {
@@ -215,6 +215,16 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 1024
+        },
+        "daily_schedule": {
+          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is an hour of the day, 0 to 23 without a leading zero; from that hour until the next listed one (wrapping at midnight) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(1?[0-9]|2[0-3])$"
+          },
+          "additionalProperties": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
         }
       },
       "required": [

@@ -1,3 +1,4 @@
+// size: allow 560, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs) shares this harness
 // The local Story authority on Node with real SQLite (node:sqlite) in its default rollback journal
 // (no WAL), as expo-sqlite opens the save on iOS, one connection per simulated process; a restart
 // closes it and opens a new one on the same file, and a kill is a real child process (03 §§14-15;
@@ -42,6 +43,7 @@ const installed = (s: ReturnType<typeof world>) =>
 const items = world('cartridge_items_hash.json', [1, 2, 3, 4]);
 // numeric-vectors.json rng_steps[3].state; its next draw fails pick_lock (invocation_cases.json).
 const dusk = world('cartridge_dusk_hash.json', [27274249, 25704967, 31982592, 12605441]);
+const ferry = world('cartridge_ferry_hash.json', [1, 2, 3, 4]);
 
 type Tap = (statement: string, run: () => unknown) => unknown;
 /** A connection adapted to expo-sqlite's sync names; `tap` wraps each statement to fault it. */
@@ -494,4 +496,52 @@ test('a save does not open inside a transaction left open', () => {
   assert.throws(() => openStory(db, installed(items), items.host), /first save unknown/);
   jam = false;
   assert.throws(() => openStory(db, installed(items), items.host), /transaction is open/);
+});
+
+// ashmere_ferry ids (kernel/ts/test/schedule.test.ts): Bram, the green, his first job (19:00) and
+// the one its run_job schedules (06:00 the next day).
+const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
+const GREEN = '91fde0fc-dd14-846f-826e-245e45d16ec7';
+const J0 = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
+const J1 = '5786a91b-185a-8097-aff4-19944692e75c';
+const waitUntil = (n: number, until: number) => ({
+  ...invocation(n, 'wait', []),
+  input: { until },
+});
+
+// Breaks (00a: save/restore preserves jobs): job rows not written or not loaded (the store keeps
+// sections by row(target)), so after a restart the 19:00 job is lost and Bram never moves, or the
+// restored world differs from one that never restarted.
+test('jobs survive a restart: waiting to 19:00 after it moves Bram as without it', () => {
+  const [path, other] = [save(), save()];
+  const a = processOn(path, ferry);
+  assert.equal((a.story.invoke(waitUntil(1, 18 * 3600)) as Saved).revision, 1);
+  a.sql.close();
+  const b = processOn(path, ferry);
+  assert.equal(
+    b.one(`SELECT value FROM state_row WHERE section = 'jobs' AND key = '${J0}'`),
+    '{"due_time":68400,"job":{"cartridge_id":"ashmere_ferry","cartridge_version":"0.0.1","key":"bram","kind":"npc"},"status":"pending"}',
+  );
+  b.story.invoke(waitUntil(2, 19 * 3600));
+  const c = processOn(other, ferry);
+  c.story.invoke(waitUntil(1, 18 * 3600));
+  c.story.invoke(waitUntil(2, 19 * 3600));
+  assert.equal(state(b), state(c));
+  const after = b.story.world().state as { containers: Record<string, string>; jobs: object };
+  assert.equal(after.containers[BRAM], GREEN);
+  assert.deepEqual(Object.keys(after.jobs).sort(), [J1, J0]);
+});
+
+// Breaks (04 §5.4; 03 §14): a recipe's time cost not running the job due inside it, or its retry
+// deciding again (running the job twice) instead of replaying the receipt.
+test('a recipe whose time cost runs a job replays its receipt on retry', () => {
+  const a = processOn(save(), ferry);
+  a.story.invoke(waitUntil(1, 18 * 3600 + 1800));
+  const coil = invocation(2, 'coil_rope', []);
+  const first = a.story.invoke(coil);
+  assert.equal(outcome(first).outcome, 'performed');
+  const after = a.story.world();
+  assert.equal((after.state as { containers: Record<string, string> }).containers[BRAM], GREEN);
+  assert.deepEqual(a.story.invoke(coil), { ...first, replay: true });
+  assert.equal(a.story.world(), after);
 });

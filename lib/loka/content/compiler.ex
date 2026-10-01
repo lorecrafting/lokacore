@@ -7,6 +7,7 @@ defmodule Loka.Content.Compiler do
   alias Loka.Content.{Checks, Links, Quests, Recipes, Resources}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
+  import Loka.Content.Refs, only: [owners: 2, owned: 3]
 
   @facts_file %{
     "type" => "object",
@@ -22,13 +23,13 @@ defmodule Loka.Content.Compiler do
   @spec compile([{String.t(), term(), term()}], [map()], [map()]) ::
           {:ok, map(), [map()]} | {:error, [map()]}
   def compile(files, loaded, registry) do
-    {manifest, entry, d1} = manifest(of(files, :manifest), registry)
+    {manifest, located, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
-    v2 = v2(defs, entry, text, of(files, :resources))
+    v2 = v2(defs, located, text, of(files, :resources))
 
     case split(Enum.concat([loaded, d1, d2, d3, checks(manifest, defs, v2, registry)])) do
-      {warnings, []} -> {:ok, cartridge(manifest, defs, v2), warnings}
+      {warnings, []} -> {:ok, cartridge(manifest, defs, v2, located), warnings}
       {_, errors} -> {:error, errors}
     end
   end
@@ -43,35 +44,46 @@ defmodule Loka.Content.Compiler do
       Quests.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
   end
 
-  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, an entry, a text
-  # catalog or resources.json (CompiledCartridge).
-  defp v2(defs, entry, text, resources) do
+  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, an entry, a
+  # calendar, a text catalog or resources.json (CompiledCartridge).
+  defp v2(defs, {entry, calendar}, text, resources) do
     if Enum.any?(~w(room item npc recipe barrier quest), &(defs[&1] != %{})) or entry != nil or
-         text != nil or
-         resources != [],
+         calendar != nil or text != nil or resources != [],
        do: {entry, text || %{}}
   end
 
+  # cartridge.json's calendar (cartridge.schema.json Calendar) needs calendar@1, its owner.
+  defp calendar(m, cal, registry) when cal != nil do
+    required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
+    owned(at("cartridge.json", ["calendar"]), "calendar", required)
+  end
+
+  defp calendar(_, _, _), do: []
+
   defp of(files, kind), do: for({rel, ^kind, v} <- files, do: {rel, v})
 
-  defp manifest([], _), do: {nil, nil, [diag("MISSING_MANIFEST", "cartridge")]}
-  defp manifest([{_, :invalid}], _), do: {nil, nil, []}
+  defp manifest([], _), do: {nil, {nil, nil}, [diag("MISSING_MANIFEST", "cartridge")]}
+  defp manifest([{_, :invalid}], _), do: {nil, {nil, nil}, []}
 
-  # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), which the
-  # compiled v2 cartridge carries beside the manifest.
+  # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12) and calendar,
+  # which the compiled v2 cartridge carries beside the manifest.
   defp manifest([{rel, m}], registry) do
     defs = source_defs()
 
     file =
-      put_in(defs["CartridgeManifest"], ["properties", "entry"], %{"$ref" => "DefinitionRef"})
+      defs["CartridgeManifest"]
+      |> put_in(["properties", "entry"], %{"$ref" => "DefinitionRef"})
+      |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
 
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
-        {entry, manifest} = Map.pop(m, "entry")
-        {manifest, ref(entry, "room", m), Checks.requirements(rel, manifest, registry)}
+        {extra, manifest} = Map.split(m, ["entry", "calendar"])
+        located = {ref(extra["entry"], "room", m), extra["calendar"]}
+        diags = Checks.requirements(rel, manifest, registry)
+        {manifest, located, diags ++ calendar(manifest, extra["calendar"], registry)}
 
       diags ->
-        {nil, nil, diags}
+        {nil, {nil, nil}, diags}
     end
   end
 
@@ -228,6 +240,10 @@ defmodule Loka.Content.Compiler do
   # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
   defp source_defs,
     do: Map.update!(Contracts.defs(), "DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+
+  # The v2 cartridge with cartridge.json's calendar, when it has one.
+  defp cartridge(m, defs, v2, {_, nil}), do: cartridge(m, defs, v2)
+  defp cartridge(m, defs, v2, {_, cal}), do: Map.put(cartridge(m, defs, v2), "calendar", cal)
 
   defp cartridge(m, defs, nil) do
     %{
