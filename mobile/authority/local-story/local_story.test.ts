@@ -33,8 +33,11 @@ const world = (fixture: string, seed: readonly number[]) => {
   const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId;
   const fresh = newWorld(loaded.cartridge as Cartridge, context, seed as RngState);
   const kernel_version = `loka-kernel@${'0123456789'.repeat(4)}`;
-  return { fresh, host: { content_hash: kat.sha256, kernel_version, newId: randomUUID } };
+  return { fresh, hash: kat.sha256, host: { kernel_version, newId: randomUUID } };
 };
+/** The one installed release of a test story. */
+const installed = (s: ReturnType<typeof world>) =>
+  [{ content_hash: s.hash, fresh: s.fresh }] as const;
 const items = world('cartridge_items_hash.json', [1, 2, 3, 4]);
 // numeric-vectors.json rng_steps[3].state; its next draw fails pick_lock (invocation_cases.json).
 const dusk = world('cartridge_dusk_hash.json', [27274249, 25704967, 31982592, 12605441]);
@@ -56,7 +59,7 @@ function processOn(path: string, story = items, pageSize = 0, tap?: Tap) {
   if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`); // before WAL fixes it
   sql.exec('PRAGMA journal_mode = WAL');
   const one = (q: string) => Object.values(sql.prepare(q).get()!)[0];
-  return { sql, story: opened(openStory(adapt(sql, tap), story.fresh, story.host)), one };
+  return { sql, story: opened(openStory(adapt(sql, tap), installed(story), story.host)), one };
 }
 /** An opened story; anything else fails the test. */
 function opened(o: ReturnType<typeof openStory>) {
@@ -488,7 +491,7 @@ test('a save does not open inside a transaction left open', () => {
     if (jam && (s === 'COMMIT' || s === 'ROLLBACK')) throw new Error(`${s} failed`);
     return run();
   });
-  assert.throws(() => openStory(db, items.fresh, items.host), /first save unknown/);
+  assert.throws(() => openStory(db, installed(items), items.host), /first save unknown/);
   jam = false;
-  assert.throws(() => openStory(db, items.fresh, items.host), /transaction is open/);
+  assert.throws(() => openStory(db, installed(items), items.host), /transaction is open/);
 });

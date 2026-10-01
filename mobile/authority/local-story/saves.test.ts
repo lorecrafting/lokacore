@@ -3,7 +3,8 @@
 // process, as local_story.test.ts. Expected values are literals from the fixtures named beside
 // them, never from the code under test.
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -36,14 +37,22 @@ const JOBS = {
     status: 'pending',
   },
 };
-const fresh = (() => {
-  const artifact = `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`;
+/** An installed release: the fixture's cartridge, fresh from `seed`, plus `extra` sections. */
+const release = (fixture: { canonical: string; sha256: string }, seed: number[], extra = {}) => {
+  const artifact = `{"cartridge":${fixture.canonical},"content_hash":"${fixture.sha256}"}`;
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   assert.ok(loaded.ok);
   const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId;
-  const w = newWorld(loaded.cartridge as Cartridge, context, SEED as unknown as RngState);
-  return { ...w, state: { ...w.state, jobs: JOBS } as typeof w.state };
-})();
+  const w = newWorld(loaded.cartridge as Cartridge, context, seed as unknown as RngState);
+  const fresh = { ...w, state: { ...w.state, ...extra } as typeof w.state };
+  return { content_hash: fixture.sha256, fresh };
+};
+const dusk = release(kat, SEED, { jobs: JOBS });
+// Two other real releases, for an app update (protocol/fixtures): neither has pick_lock.
+const bell = release(read('protocol/fixtures/cartridge_bell_hash.json'), [1, 2, 3, 4]);
+const BELL = bell.content_hash;
+const items = release(read('protocol/fixtures/cartridge_items_hash.json'), [1, 2, 3, 4]);
+type Releases = Parameters<typeof openStory>[1];
 const KERNEL = `loka-kernel@${'0123456789'.repeat(4)}`;
 /** The n-th id a test's allocator hands out. */
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -57,7 +66,7 @@ type Tap = (statement: string, run: () => unknown) => unknown;
 /** A process on the save at `path`: one connection, expo-sqlite's sync names, `tap` faults. */
 function processOn(
   path: string,
-  { newId = none, tap = ((_, run) => run()) as Tap, hash = kat.sha256 } = {},
+  { newId = none, tap = ((_, run) => run()) as Tap, releases = [dusk] as Releases } = {},
 ) {
   const sql = new DatabaseSync(path);
   sql.exec('PRAGMA journal_mode = WAL');
@@ -69,7 +78,7 @@ function processOn(
     getAllSync: <T>(s: string, ...p: P) => tap(s, () => sql.prepare(s).all(...p)) as T[],
     isInTransactionSync: () => sql.isTransaction,
   };
-  const opened = openStory(db, fresh, { content_hash: hash, kernel_version: KERNEL, newId });
+  const opened = openStory(db, releases, { kernel_version: KERNEL, newId });
   const one = (q: string) => Object.values(sql.prepare(q).get() ?? {})[0];
   const all = (q: string) =>
     sql
@@ -80,6 +89,24 @@ function processOn(
   return { sql, opened, story, one, all };
 }
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-s3a-')), 'save.db');
+/** The save file's bytes, by hash; read with no connection open (WAL checkpointed). */
+const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
+/** The content hash the save is pinned to. */
+const pinned = (p: ReturnType<typeof processOn>) =>
+  JSON.parse(p.one('SELECT pin FROM save') as string).content_hash;
+/** A result without its newGame function. */
+const typed = ({ newGame: _, ...rest }: { newGame?: unknown }) => rest;
+// After an app update dropping dusk: bell newest, then items.
+const LATER: Releases = [bell, items];
+/** The player's new game from a save that did not open; reopened, it plays the newest release. */
+function startOver(path: string) {
+  const c = processOn(path, { newId: ids(), releases: LATER });
+  assert.deepEqual((c.opened as { newGame: () => unknown }).newGame(), { kind: 'replaced' });
+  c.sql.close();
+  const d = processOn(path, { releases: LATER });
+  const cartridge = d.story.world().cartridge.manifest.id;
+  assert.deepEqual([d.opened.kind, pinned(d), cartridge], ['open', BELL, 'ashmere_bell']);
+}
 const pick = (n: number) => ({
   invocation_id: `00000000-0000-4000-8000-00000000000${n}`,
   action_key: 'pick_lock',
@@ -166,22 +193,69 @@ test('a new save allocates and pins its identity; a restart and a replay reuse i
   assert.equal(b.one('SELECT DISTINCT scope FROM receipt'), `story/${id(1)}/${ACTOR}`);
 });
 
-// Breaks (10 §32; pin 2): a save opened under a cartridge that is not its pinned release, or that
-// open writing anything (a trace segment, a new head).
-test('a save opened with another content hash is refused and left untouched', () => {
+// Breaks (10 §32 "Missing required package"; OFF-11): a save opened under a release that is not
+// its pin (the newest), or that open writing anything (a trace segment, a new head); the player's
+// new game from it missing, or not pinning the newest release.
+test('a save whose pinned release is missing is refused untouched; a new game moves on', () => {
   const path = save();
   const a = processOn(path, { newId: ids() });
   a.story.invoke(pick(1));
-  const before = [...stored(a), a.all('SELECT * FROM trace')];
   a.sql.close();
-  const b = processOn(path, { hash: 'f'.repeat(64) });
-  const pinned = JSON.parse(PIN);
-  assert.deepEqual(b.opened, { kind: 'pinned_release_missing', pinned, offered: 'f'.repeat(64) });
-  assert.deepEqual([...stored(b), b.all('SELECT * FROM trace')], before);
+  const before = bytes(path);
+  const b = processOn(path, { releases: LATER });
+  const missing = {
+    kind: 'pinned_release_missing',
+    pinned: JSON.parse(PIN),
+    installed: [BELL, items.content_hash],
+  };
+  assert.deepEqual(typed(b.opened as never), missing);
+  b.sql.close();
+  assert.equal(bytes(path), before);
+  startOver(path);
+});
+
+// Breaks (07 §9 save format version; 10 §32): a save of another format read or opened (as corrupt,
+// or by its pin), or a table created for it, before its format is checked; no new game from it.
+test('a save of an unknown format is refused with nothing written; a new game moves on', () => {
+  const path = save();
+  const a = processOn(path, { newId: ids() });
+  a.story.invoke(pick(1));
+  // A newer app's save: another format, without a table this one creates, pinned to dusk.
+  a.sql.exec("UPDATE save SET format = 'loka-save-v2'; DROP TABLE trace");
+  a.sql.close();
+  const before = bytes(path);
+  const b = processOn(path, { releases: LATER });
+  const unsupported = {
+    kind: 'unsupported_save_format',
+    format: 'loka-save-v2',
+    supported: ['loka-save-v1'],
+  };
+  assert.deepEqual(typed(b.opened as never), unsupported);
+  b.sql.close();
+  assert.equal(bytes(path), before);
+  startOver(path);
+});
+
+// Breaks (10 §32; OFF-11): after an app update adds a newer release, a save reopened on the newest
+// (bell has no pick_lock: the pick is rejected) or re-pinned, its trace entry under the newest
+// release's hash; a new game, or a new save, pinning the old release or keeping its world.
+test('an app update reopens a save on its pinned release; new games pin the newest', () => {
+  const path = save();
+  processOn(path, { newId: ids() }).sql.close();
+  const b = processOn(path, { newId: ids(), releases: [bell, dusk] });
+  assert.deepEqual(saved(b.story.invoke(pick(1))), [false, 1]);
+  assert.equal(state(b), PICKED);
+  assert.deepEqual(b.all(IDENTITY), [identity(1)]);
+  const entry = JSON.parse(b.one('SELECT record FROM trace ORDER BY rowid DESC LIMIT 1') as string);
+  assert.equal(entry.ids.content_hash, kat.sha256);
+  assert.deepEqual(b.story.newGame(), { kind: 'replaced' });
+  assert.deepEqual([pinned(b), b.story.world().cartridge.manifest.id], [BELL, 'ashmere_bell']);
+  const c = processOn(save(), { newId: ids(), releases: [bell, dusk] });
+  assert.deepEqual([pinned(c), c.story.world().cartridge.manifest.id], [BELL, 'ashmere_bell']);
 });
 
 // Breaks (OFF-07): a head that does not parse replaced by the fresh world or opened at all; a
-// corrupt save under another release offered a new game (re-pinned unawares); a save missing its
+// corrupt save under a release not installed reported corrupt, not missing; a save missing its
 // head (or head and identity) taken for an empty one and overwritten; a head RNG of the wrong
 // shape opened; the player's new game not making a playable save
 // with new ids or its trace segment not starting fresh.
@@ -192,7 +266,7 @@ test('a save that does not parse is save_corrupt until the player starts a new g
   a.sql.exec(`UPDATE state_row SET value = '{' WHERE section = 'jobs'`);
   const before = stored(a);
   a.sql.close();
-  assert.equal(processOn(path, { hash: 'f'.repeat(64) }).opened.kind, 'pinned_release_missing');
+  assert.equal(processOn(path, { releases: [bell] }).opened.kind, 'pinned_release_missing');
   const b = processOn(path, { newId: () => id(9) });
   assert.equal(b.opened.kind, 'save_corrupt');
   assert.deepEqual(stored(b), before);

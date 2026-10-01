@@ -7,7 +7,7 @@ import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
-import { commit, load, pinOf, receipt, reconcile, replace } from './store.ts';
+import { commit, identityOf, load, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta, Receipt } from './store.ts';
 import { catchUp, traceCommand, type CommitState, type RunIds } from './trace.ts';
 
@@ -21,15 +21,17 @@ export type Reply =
   | { kind: 'pending' } // COMMIT outcome unknown: retry the same invocation later (03 §§14-15)
   | Saved;
 
+/** An installed release (10 §16); the app bundles them newest first and downloads none (PREP-03). */
+export type Release = { content_hash: string; fresh: World };
+
 /**
- * What the host supplies: the bundled cartridge's content hash, the build's kernel version
- * (ADR-075 RunIds) and a fresh random UUID per call, for each new save's lineage and run ids and
- * each milestone report's id. `milestones` maps a `custom_event` key to the milestone and outcome
- * its commit reaches (none by default); `binding` is the signed-in account/profile, read once when
- * a run starts, which binds it (23 §§4-5, §11; null, the default: a guest).
+ * What the host supplies besides the releases: the build's kernel version (ADR-075 RunIds) and a
+ * fresh random UUID per call, for each new save's lineage and run ids and each milestone report's
+ * id. `milestones` maps a `custom_event` key to the milestone and outcome its commit reaches (none
+ * by default); `binding` is the signed-in account/profile, read once when a run starts, which
+ * binds it (23 §§4-5, §11; null, the default: a guest).
  */
 export type Host = {
-  content_hash: string;
   kernel_version: string;
   newId: () => string;
   // ponytail: stands in for the cartridge's own milestone declaration and the typed
@@ -40,40 +42,40 @@ export type Host = {
 const SAVE_FORMAT = 'loka-save-v1';
 
 /**
- * The story saved in `db`, or `fresh` saved at revision 0 as a new save that pins `fresh`'s
- * release. Its idempotency scope is the save's lineage and the world's character; its actor is
- * the character. A save whose pinned content hash is not the host's is not opened
- * (`pinned_release_missing`), nor is one that does not parse (`save_corrupt`, OFF-07), and the
- * head is left as it was. `invoke` takes one ActionInvocation: malformed or another actor's gets
- * no receipt; a known invocation replays its receipt (altered intent is a conflict) before
- * anything is resolved against the current world; a NEW one is resolved, decided once and
- * committed before it is adopted. A fault discards its proposal and gets no receipt (ADR-075 §4;
- * 04 §5.2 step 7). A failed commit throws, with memory and storage unchanged. A COMMIT whose
- * outcome is unknown fences every call, answered `pending`, until the store settles it (03 §15).
- * Each command's game-trace entry follows its commit. `newGame`: below.
+ * The story saved in `db`, on the installed release its pin names (10 §32, OFF-11), or the newest
+ * release's fresh world saved at revision 0 as a new save pinning it. Its idempotency scope is
+ * the save's lineage and the world's character; its actor is the character. Not opened, nothing
+ * written, only the player's new game offered (settled as any; reopen once `replaced`): a save of
+ * another format (`unsupported_save_format`, checked first), an uninstalled pin
+ * (`pinned_release_missing`, 10 §32) or a save that does not parse (`save_corrupt`, OFF-07).
+ * `invoke` takes one ActionInvocation: malformed or another actor's gets no receipt; a known
+ * invocation replays its receipt (altered intent is a conflict) before anything is resolved
+ * against the current world; a NEW one is resolved, decided once and committed before it is
+ * adopted. A fault discards its proposal and gets no receipt (ADR-075 §4; 04 §5.2 step 7). A
+ * failed commit throws, with memory and storage unchanged. A COMMIT whose outcome is unknown
+ * fences every call, answered `pending`, until the store settles it (03 §15). Each command's
+ * game-trace entry follows its commit. `newGame`: below.
  */
-export function openStory(db: Db, fresh: World, host: Host) {
-  const loaded = load(db, fresh, () => first(fresh, host));
-  // Checked first, so a corrupt save under another release is never replaced unawares.
-  const pin = loaded ? loaded.meta.pin : pinOf(db);
-  if (pin && pin.content_hash !== host.content_hash)
-    return { kind: 'pinned_release_missing' as const, pinned: pin, offered: host.content_hash };
-  // OFF-07: nothing to recover from until S3b; only the player's explicit new game moves on,
-  // settled as any (reopen once it is `replaced`).
-  if (!loaded) {
-    const s: Story = {
-      db,
-      fresh,
-      host,
-      world: fresh,
-      revision: 0,
-      meta: undefined!,
-      behind: false,
-    };
-    return { kind: 'save_corrupt' as const, newGame: () => newGame(s) };
-  }
-  const s: Story = { db, fresh, host, ...loaded, behind: false };
-  s.behind = !catchUp(db, ids(s), fresh.context);
+export function openStory(db: Db, releases: readonly [Release, ...Release[]], host: Host) {
+  const saved = identityOf(db);
+  const { fresh } = releases[0]; // meta stays undefined until a save is loaded or replaced
+  const s = { db, releases, fresh, host, world: fresh, revision: 0, behind: false } as Story;
+  // ponytail: no migration or recovery copy yet (owner-decision-s3b-scope-2026-09-30.md).
+  const refuse = <T>(r: T) => ({ ...r, newGame: () => newGame(s) });
+  const format = saved?.format;
+  if (saved && format !== SAVE_FORMAT)
+    return refuse({ kind: 'unsupported_save_format' as const, format, supported: [SAVE_FORMAT] });
+  if (saved && !saved.pin) return refuse({ kind: 'save_corrupt' as const });
+  const release = saved
+    ? releases.find((r) => r.content_hash === saved.pin!.content_hash)
+    : releases[0]; // no save row: a new save, or half a save that load reports corrupt
+  const installed = releases.map((r) => r.content_hash);
+  if (!release)
+    return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
+  const loaded = load(db, release.fresh, () => first(release, host));
+  if (!loaded) return refuse({ kind: 'save_corrupt' as const });
+  Object.assign(s, { fresh: release.fresh, ...loaded });
+  s.behind = !catchUp(db, ids(s), s.fresh.context);
   // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
   return {
     kind: 'open' as const,
@@ -86,7 +88,8 @@ export function openStory(db: Db, fresh: World, host: Host) {
 type Trace = (at: number, ...states: CommitState[]) => void;
 type Story = {
   readonly db: Db;
-  readonly fresh: World;
+  readonly releases: readonly [Release, ...Release[]];
+  fresh: World; // the open save's release
   readonly host: Host;
   world: World;
   revision: number;
@@ -101,19 +104,19 @@ type Story = {
 
 const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
 const ids = (s: Story): RunIds => ({
-  content_hash: s.host.content_hash,
+  content_hash: s.meta.pin.content_hash,
   kernel_version: s.host.kernel_version,
   seed: s.meta.seed as number[],
   run_id: s.meta.run_id,
 });
 
 /** A new save's identity: no parent, its initial RNG, the release it pins (10 §32), its binding. */
-function first(fresh: World, host: Host): Meta {
+function first({ content_hash, fresh }: Release, host: Host): Meta {
   const { id, version, requires } = fresh.cartridge.manifest;
   const pin = {
     cartridge_id: id,
     cartridge_version: version,
-    content_hash: host.content_hash,
+    content_hash,
     capability_lock: fresh.cartridge.lock,
     rule_ir: requires.rule_ir,
     numeric_profile: null, // ponytail: neither kernel exports a profile version yet
@@ -265,8 +268,8 @@ function traceAfter(
 /**
  * Replaces the save with a new game (10 §31, one save per story; the host has the player confirm
  * first): after settling any fenced attempt, in one transaction, the fresh world at revision 0, a
- * new lineage and run with no parent pinned to the bundled release, and no receipts (the old
- * lineage's would otherwise answer its invocation ids). Memory adopts it only after the commit,
+ * new lineage and run with no parent pinned to the newest release (10 §32), and no receipts (the
+ * old lineage's would otherwise answer its invocation ids). Memory adopts it only after the commit,
  * and the new run's trace opens with its header. An unknown COMMIT fences like an invocation's.
  */
 function newGame(s: Story) {
@@ -276,13 +279,15 @@ function newGame(s: Story) {
   // Best effort before its receipts go (the trace is derived and never blocks the player): the
   // old run's missed entries can be recovered only from them.
   if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
-  const next = first(s.fresh, s.host);
-  const replaced = replace(s.db, s.fresh, next); // throws on a definite failure, nothing written
+  const newest = s.releases[0];
+  const next = first(newest, s.host);
+  const replaced = replace(s.db, newest.fresh, next); // throws on a definite failure: none written
   // Settled like an unknown COMMIT even when committed, so memory never serves the old run after
   // the new one is saved: a failed read while adopting it fences every call until it is adopted.
   const fence = () => {
     const run = () => s.db.getFirstSync<{ run_id: string }>('SELECT run_id FROM save')?.run_id;
     if (replaced || reconcile(s.db, run) === next.run_id) {
+      s.fresh = newest.fresh;
       adopt(s);
       s.behind = !catchUp(s.db, ids(s), s.fresh.context);
     }

@@ -136,13 +136,19 @@ export function replace(db: Db, fresh: World, meta: Meta): boolean {
   });
 }
 
-/** The pinned release of a save that does not load, if its identity row still parses. */
-export function pinOf(db: Db): Meta['pin'] | undefined {
+/**
+ * The save row's format and pin, read before anything else (no table is created): none with no
+ * save row; pin undefined when it does not parse.
+ */
+export function identityOf(db: Db) {
+  if (!db.getFirstSync("SELECT 1 FROM sqlite_master WHERE name = 'save'")) return undefined;
+  const m = db.getFirstSync<{ format: string; pin: string }>('SELECT format, pin FROM save');
+  if (!m) return undefined;
+  let pin: Meta['pin'] | undefined;
   try {
-    return JSON.parse(db.getFirstSync<{ pin: string }>('SELECT pin FROM save')!.pin);
-  } catch {
-    return undefined;
-  }
+    pin = JSON.parse(m.pin);
+  } catch {}
+  return { format: m.format, pin };
 }
 
 /** The receipt of `invocation_id` in `scope`, if one was committed. */
