@@ -1,7 +1,7 @@
 # Gate R6 on the iPhone 11: airplane-mode runbook and result, 2026-09-30
 
-Status: **prepared, not yet run.** The Result sections are empty; the PM fills them after the run,
-each fact labeled by source: owner-reported (paraphrased) / inspected / not checked, as in the
+Status: **run** (2026-09-30; run 2 passed, run 1 kept as not passing). Facts are labeled by source:
+owner-reported (paraphrased) / inspected / not checked, as in the
 [smoke run](../2026-09-30-sm-iphone11/README.md). Never write a device name, UDID, team or
 container identifier or a home path here; pipe every captured line through `redact` (step 0).
 
@@ -98,16 +98,50 @@ expo-sqlite's error text matched `corrupt()` in `mobile/authority/local-story/st
 expo-sqlite error (`file is not a database` or another text) shown instead means it did not, which
 fails the S6b acceptance. If neither the screen nor the console shows it, record "not checked".
 
-## Result (PM fills after the run)
+## Result
 
-Run date, build commit, phone OS: _
+Run date 2026-09-30; build commit `c963af1` (Release, Hermes, free personal team, installed with
+`devicectl`); phone iOS 26.6.2.
 
-- **Owner-reported (paraphrased), tap script and kills:** _
-- **Owner-reported (paraphrased), airplane mode and lock state:** _
-- **Inspected, copied save:** files in the folder _; `head.revision` _; receipt count _; compare test _
-- **Inspected, corrupt check:** console message (backup) _; whether it matches `corrupt()` _
-- **Owner-reported (paraphrased), corrupt check screen:** _
-- **Not checked:** _
+### Run 1 (kept, not passing)
+
+- **Owner-reported (paraphrased):** fresh install, airplane mode on, phone unlocked throughout;
+  played taps 1 to 7 with KILL 1 to 3 by the PM (`devicectl` terminate `--kill`); after each relaunch
+  the screen matched the table (Village Green and satchel; Village Green and satchel; Village Green,
+  nothing carried); ended on Ferry Landing carrying nothing.
+- **Inspected:** the copied save had `head.revision` 9 and 9 receipts. Receipts 1 to 7 match the
+  script in order (take, north, south, scan, north, drop, south); receipts 8 (move north) and 9 (move
+  south) follow, each with a new invocation id (`...008`, `...009`) and a fresh decision (resource 78
+  then 77), not a replay or duplicate. The compare test failed (end state differs), as it should. The
+  trace holds one run header and 9 committed entries; it has no wall times (by design), so timing
+  cannot place 8 and 9.
+- **Owner-reported (paraphrased):** unsure whether they tapped north and south once more after tap 7.
+- **Disposition:** treated as two unrecorded extra taps, not passing; rerun with a revision check
+  after every step.
+
+### Run 2 (passing)
+
+- **Owner-reported (paraphrased):** app deleted again, airplane mode still on, fresh install of the
+  same build; each tap once; screens matched the table after each relaunch; ended on Ferry Landing
+  carrying nothing.
+- **Inspected (save copied after each PM kill):** revision 0 and 0 receipts at first launch; 2 and 2
+  after KILL 1; 5 and 5 after KILL 2; 6 and 6 after KILL 3; 7 and 7 at the end; the folder held only
+  `loka-save.db` each time. Compare test: `✔ the save copied from the phone equals the reference`,
+  pass 11, fail 0, skipped 0.
+
+### Corrupt check (step 3)
+
+- **Inspected:** the PM replaced the `SQLite` folder with one 4096-byte garbage `loka-save.db` and
+  launched with `--console`; the console showed only native startup lines (Release JS logs do not
+  reach the `devicectl` console) and the app was still running when the 60 s console timeout ended; a
+  second launch was still running 8 s later (no crash).
+- **Owner-reported (paraphrased):** the text sits at the top under the notch, partly hidden; they could
+  make out "...could not..." and "..._corrupt". A raw expo-sqlite error ("file is not a database")
+  contains no "_corrupt", so expo-sqlite's error text did match `corrupt()` and the typed
+  `save_corrupt` reached the screen.
+- **Note for SM2:** the failure line ignores the safe area (it renders under the notch).
+- **Not checked:** the exact full on-screen line (partly hidden); a kill during a COMMIT on the device
+  (S6a's headless corpus covers it); where run 1's two extra commands came from.
 
 ## Deferred, not passed (Gate R6)
 
