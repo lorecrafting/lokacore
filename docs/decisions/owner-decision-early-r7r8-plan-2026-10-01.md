@@ -14,7 +14,7 @@ The PM proposed the plan and three questions; the owner chose the recommended an
   `attributes@1`, `EntityOrigin`) move to R7/R8 for chapter one, after R6P and before R10. The
   Lantern proof needs none of them.
 - **GameView core slice.** Schedule only room-view GameView need 1 (resources as current/max with a
-  band), as slice G after D. Position (a new `positions@1`) and map places (map discovery stays at
+  band), as slice G after D. Position (`position@1`, an R5 deferral now on the chapter-one row) and map places (map discovery stays at
   R10, [record](owner-decision-r5-deferred-mechanics-2026-09-28.md)) are not pulled forward.
 
 Effect: [ROADMAP, Early R7/R8 slices](../ROADMAP.md#early-r7r8-slices).
