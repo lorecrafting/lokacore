@@ -193,7 +193,7 @@ function reached(s: Story, d: DecisionResult, observed_revision: number): Captur
   return d.events.flatMap(({ payload: p }) => {
     const m = p.type === 'custom_event' ? s.host.milestones?.get(p.event.key) : undefined;
     if (!m) return [];
-    const { lineage_id, run_id, binding = null } = s.meta;
+    const { lineage_id, run_id, binding } = s.meta;
     const report = { report_id: s.host.newId(), run_id, release, observed_revision, ...m };
     if (validate('MilestoneReport', report).length) throw new Error('not a MilestoneReport');
     return [{ lineage_id, binding, report: report as never }];
