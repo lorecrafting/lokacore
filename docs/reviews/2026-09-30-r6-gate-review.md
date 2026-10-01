@@ -473,3 +473,14 @@ New nit:
   Node) are lowercase, so this is not live. A one-line `validate('StoryRunId', …)` throw in
   `first()` would make such a host fail at once. Optional; SM2 can take it if it changes the id
   source.
+
+## Cross-vendor review (codex Astra), fix round 2
+
+Appended verbatim by the reviewer at the PM's request (codex, gpt-6-astra, read-only, on `dfad99b`):
+
+APPROVE
+
+```text
+H1 | fixed | Both IDs now require the lowercase StoryRunId UUID contract; no malformed-value bypass found. Healthy reopen, receipt replay, and newGame pass; expo-crypto 57.0.3 produces compatible casing. Removing binding's default preserves behavior: first() supplies null and load() rejects undefined. Added assertions fail when either UUID check reverts to typeof, or validation accepts arbitrary nonempty strings. Verified using real in-memory SQLite; file-backed suite not rerun in this read-only checkout.
+```
+PM ruling: N6 (nit, validate ids at write in first()) carried as an optional R6P note; not blocking.
