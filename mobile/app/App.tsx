@@ -31,9 +31,14 @@ const smoke = (g.loka_smoke ??= playSmoke(
 
 export default function App() {
   const [starts, setStarts] = useState(0); // a start over opens a fresh book (its log, its pages)
+  const [, redraw] = useState({});
   const startOver = () => {
+    const before = smoke.game();
     smoke.startOver();
-    setStarts((n) => n + 1);
+    // Only a start over that replaced the game opens a fresh book; a failed one keeps this book
+    // and its log (which says why), so the log must not restart.
+    if (smoke.game() !== before) setStarts((n) => n + 1);
+    else redraw({});
   };
   const game = smoke.game();
   if (!game) return <SaveError failed={smoke.failed()!} startOver={startOver} />;
