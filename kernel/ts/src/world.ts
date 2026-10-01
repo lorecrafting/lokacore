@@ -5,7 +5,7 @@
 import { encode } from './canonical.ts';
 import { KernelError } from './error.ts';
 import type { Installed } from './cartridge.ts';
-import { compose, key, target, type Fault } from './compose.ts';
+import { compose, key, over, target, type Fault } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
   LIMITS,
@@ -36,7 +36,7 @@ import {
   type State,
   type World,
 } from './decision.ts';
-import { factChanged, invariants as factInvariants, typedFact } from './fact.ts';
+import { factChanged, invariants as factInvariants, typedFact, type Base } from './fact.ts';
 import { id, jobCommandId } from './id_source.ts';
 import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
@@ -49,6 +49,7 @@ import * as movement from './rules/movement.ts';
 import * as quest from './rules/quest.ts';
 import * as schedule from './rules/schedule.ts';
 import { deliver } from './quest.ts';
+import { sequence, triggered } from './reaction.ts';
 import { newWorld, NIL } from './fresh.ts';
 import { cmp } from './validate.ts';
 
@@ -125,7 +126,7 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (refused) return reject(refused);
   const mint = allocator(world, command);
   try {
-    const decided = drain(world, command, deliver(world, admit(owner, rule(world, command, mint))));
+    const decided = deliver(world, admit(owner, rule(world, command, mint)));
     return adopt(world, decided, command as Actor, mint);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
@@ -135,32 +136,27 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
 }
 
 /**
- * Composes an admitted decision's delta over the state, the fact defaults and the declared
- * capacities and adopts its containment, fact and clock changes; only admit() makes an Admitted. A
- * fact.assign whose fact, scope kind or value its FactSpec does not allow faults
- * precondition_failed (03 §7; 04 §5.1). Each that changes its fact adds a fact_changed at its
- * causal position (fact.ts factChanged). A result, these events included, over output_bytes
- * faults budget_exceeded (04 §5.4). A fault discards the whole proposal.
+ * Proposes an admitted decision whole (propose) and composes its delta over the state, the fact
+ * defaults and the declared capacities, adopting its containment, fact and clock changes; only
+ * admit() makes an Admitted. A fact.assign whose fact, scope kind or value its FactSpec does not
+ * allow faults precondition_failed (03 §7; 04 §5.1). A result over the events or output_bytes
+ * limit faults budget_exceeded (04 §5.4). A fault discards the whole proposal.
  */
 export function adopt(world: World, decision: Admitted, command: Actor, mint: Mint): Stepped {
-  if (decision.kind !== 'accepted') return { decision, world };
-  const assigns = decision.delta.ops.filter((o) => o.op === 'fact.assign') as Assign[];
+  const out = propose(world, decision, command, mint);
+  if (out.kind !== 'accepted') return { decision: out, world };
+  const assigns = out.delta.ops.filter((o) => o.op === 'fact.assign') as Assign[];
   const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
   if (bad)
     return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
-  const applied = apply(world, decision.delta.ops);
+  const applied = apply(world, out.delta.ops);
   if ('fault' in applied) return { decision: applied.fault, world };
-  // The command's own events, its fact_changed placed among them, then its jobs' (drain), whose
-  // cause is their run_job, each at the next position.
-  const own = decision.events.filter((e) => (e.causation_id as string) === command.id);
-  const ran = decision.events.filter((e) => (e.causation_id as string) !== command.id);
-  const placed = factChanged(world, command, mint, assigns, own);
-  const last = Math.max(0, ...placed.map((e) => e.position));
-  const all = [...placed, ...ran.map((e, i) => ({ ...e, position: last + i + 1 }))];
-  const out = ran.length || placed !== own ? { ...decision, events: all } : decision;
-  if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
+  if (
+    over({ events: out.events.length }) ||
+    utf8(encode(out as never)).length > LIMITS.output_bytes!
+  )
     return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
-  const state = { ...applied.state, rng: decision.rng } as World['state'];
+  const state = { ...applied.state, rng: out.rng } as World['state'];
   return { decision: out, world: { ...world, state } };
 }
 
@@ -192,54 +188,123 @@ function apply(world: World, ops: readonly DeltaOp[]): { state: State } | { faul
 }
 
 /**
- * An explicit advance's due jobs (04 §5.4), joined to the admitted decision whose delta has a
- * time.advance (a wait, or a recipe's duration): the pending jobs due at or before its target,
- * snapshotted from the committed state and run in (due_time, job_id) order (job ids compared as
- * UTF-8 bytes, never in row order), each as its run_job (rules/schedule.ts) with the job's
- * CommandId (id_source.ts jobCommandId) against the proposal so far, its ops in writer group
- * i + 1 for the i-th job (the decision's own are group 0; quest.ts deliver also numbers its
- * groups from 1, a collision no decision reaches yet: only take earns a delivery, and take has
- * no duration) and its events, correlated to the command, placed after the command's own
- * (adopt). adopt() composes the
- * whole advance once, so final invariants, the strictly-later-than-target rule for new jobs
- * (nonfuture_job), the job budgets (budget_exceeded) and conflicts between groups apply to it as
- * one proposal, and a fault discards all of it, time included. A run_job that is not accepted is
- * the advance's result. Admission never meets an already-due job: every advance drains its own,
- * and each new job is later than the advance's target, so 04 §5.2 step 2 has nothing to drain.
+ * The whole proposal of an admitted root decision (04 §5.2 steps 4-6, §5.4), each explicit
+ * sequence joining in turn: its ops, then its events, with the fact_changed of each assign that
+ * changes its fact (fact.ts factChanged) at its causal position, numbered after the events before
+ * them and correlated to the command; each event then queued FIFO for the reactions it triggers
+ * (reaction.ts). The root sequence (writer group 0, then quest.ts deliver's groups) and its
+ * reactions to quiescence; then, when its delta has a time.advance (a wait, or a recipe's
+ * duration), each due job and its reactions to quiescence before the next. One counter numbers
+ * every later writer group: each job and each reaction delivery takes the next.
+ *
+ * The due jobs: the pending jobs due at or before the advance's target, snapshotted from the
+ * committed state and run in (due_time, job_id) order (job ids compared as UTF-8 bytes, never in
+ * row order), each as its run_job (rules/schedule.ts) with the job's CommandId (id_source.ts
+ * jobCommandId) and IdSource against the proposal so far, its events caused by that run_job.
+ * adopt() composes the whole advance once, so final invariants, the strictly-later-than-target
+ * rule for new jobs (nonfuture_job), the job budgets (budget_exceeded) and conflicts between
+ * groups apply to it as one proposal, and a fault discards all of it, time included. A run_job
+ * that is not accepted is the advance's result. Admission never meets an already-due job: every
+ * advance drains its own, and each new job is later than the advance's target, so 04 §5.2 step 2
+ * has nothing to drain.
+ *
+ * A reaction delivery (04 §5.2 steps 5-6): each rule an event triggers, in rule-key order, whose
+ * `when` holds on the proposal so far at the event's logical time, is a delivery of its own
+ * writer group at one more than its cause's reaction depth (a root's or job's events are at 0),
+ * its fact_changed caused by that event at its logical time, its ids from the IdSource of the
+ * root or job that began the chain. A delivery past the deliveries, events or reaction_depth
+ * limit (compose.ts over) faults budget_exceeded: a cycle ends there, never truncated.
+ * ponytail: quest.ts deliver sees only the root's events: a quest objective meets only an
+ * item_acquired, which no job or reaction emits; route their events through it when one can.
  * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
  * (rules/schedule.ts), and a stale entry it refuses rejects the whole advance instead of being
- * skipped as ineligible. Nothing in schedule@1 cancels, reschedules or completes another job, so
- * no entry goes stale yet; the first operation that can (a cancel op, or reaction@1) turns that
- * refusal into a skip and adds the generation to the comparison.
+ * skipped as ineligible. Nothing in schedule@1 or reaction@1 cancels, reschedules or completes
+ * another job, so no entry goes stale yet; the first operation that can turns that refusal into a
+ * skip and adds the generation to the comparison.
  */
-function drain(world: World, command: Pick<Command, 'id'>, decided: Admitted): Admitted {
-  if (decided.kind !== 'accepted') return decided;
-  const advance = decided.delta.ops.find((o) => o.op === 'time.advance');
-  if (!advance) return decided;
-  const due = Object.entries(world.state.jobs ?? {})
-    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance.to)
+function propose(world: World, root: Admitted, command: Actor, mint: Mint): Admitted {
+  if (root.kind !== 'accepted') return root;
+  const ops: DeltaOp[] = [];
+  const events: DomainEvent[] = [];
+  const queue: { cause: DomainEvent; depth: number; mint: Mint }[] = [];
+  let group = Math.max(0, ...root.delta.ops.map((o) => o.writer_group));
+  let deliveries = group;
+  // The proposal so far, composed lazily: only a job or a delivery reads it.
+  let proposal = world;
+  let applied = 0;
+  const now = (): World | Admitted => {
+    if (applied < ops.length) {
+      const r = apply(proposal, ops.slice(applied));
+      if ('fault' in r) return r.fault as Admitted;
+      [proposal, applied] = [{ ...world, state: r.state }, ops.length];
+    }
+    return proposal;
+  };
+  const join = (
+    own: readonly DeltaOp[],
+    evs: readonly DomainEvent[],
+    base: Base,
+    depth: number,
+    m: Mint,
+  ) => {
+    ops.push(...own);
+    const assigns = own.filter((o) => o.op === 'fact.assign') as Assign[];
+    for (const e of factChanged(base, m, assigns, evs)) {
+      const placed = { ...e, position: events.length + 1, correlation_id: base.correlation_id };
+      events.push(placed);
+      queue.push({ cause: placed, depth, mint: m });
+    }
+  };
+  const corr = command.id as string as Corr;
+  const cause = (logical_time: number, id: string) => ({
+    world_context_id: world.context,
+    logical_time,
+    causation_id: id as DomainEvent['causation_id'],
+    correlation_id: corr,
+  });
+  // The queue's deliveries to quiescence, or the fault that ends them.
+  const react = (): Admitted | undefined => {
+    for (let next; (next = queue.shift());) {
+      for (const rule of triggered(world, next.cause)) {
+        const at = now();
+        if (!('cartridge' in at)) return at;
+        const own = sequence(at, command.payload.actor_id, rule, next.cause, group + 1);
+        if (!own) continue;
+        group++;
+        join(own, [], cause(next.cause.logical_time, next.cause.id), next.depth + 1, next.mint);
+        if (
+          over({ deliveries: ++deliveries, events: events.length, reaction_depth: next.depth + 1 })
+        )
+          return { kind: 'fault', code: 'budget_exceeded' } as Admitted;
+      }
+    }
+  };
+  const actor = { actor_id: command.payload.actor_id };
+  join(root.delta.ops, root.events, { ...cause(world.state.clock, command.id), ...actor }, 0, mint);
+  const ended = react();
+  if (ended) return ended;
+  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
+  const due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
+    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
-  if (!due.length) return decided;
-  const ops = [...decided.delta.ops];
-  const events = [...decided.events];
-  let proposal = apply(world, ops);
-  for (const [i, [job_id, { due_time }]] of due.entries()) {
-    if ('fault' in proposal) return proposal.fault as Admitted;
-    const at = { ...world, state: proposal.state };
+  for (const [job_id, { due_time }] of due) {
+    const at = now();
+    if (!('cartridge' in at)) return at;
     const run = {
       id: jobCommandId(job_id, due_time) as CommandId,
       world_context_id: world.context,
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
-    const ran = admit('schedule', schedule.decide(at, run, allocator(at, run)));
+    const m = allocator(at, run);
+    const ran = admit('schedule', schedule.decide(at, run, m));
     if (ran.kind !== 'accepted') return ran;
-    // Reaction@1 (slice R) drains this job's events to quiescence here, before the next job.
-    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: i + 1 }));
-    ops.push(...own);
-    events.push(...ran.events.map((e) => ({ ...e, correlation_id: command.id as string as Corr })));
-    proposal = apply(at, own);
+    group++;
+    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: group }));
+    join(own, ran.events, cause(due_time, run.id), 0, m);
+    const failed = react();
+    if (failed) return failed;
   }
-  return { ...decided, delta: { ops }, events };
+  return { ...root, delta: { ops }, events };
 }
 type Corr = DomainEvent['correlation_id'];
 

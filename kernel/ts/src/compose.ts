@@ -116,13 +116,21 @@ function overBudget(state: State, ops: readonly DeltaOp[]): boolean {
   const pending = jobs.filter((j) => get(j, 'status') === 'pending').length;
   const created = count('job.schedule');
   const due = count('job.complete');
-  return (
-    ops.length > LIMITS.operations! ||
-    created > LIMITS.created_jobs! ||
-    due > LIMITS.due_jobs_per_advance! ||
-    pending + created - due > LIMITS.pending_jobs!
-  );
+  return over({
+    operations: ops.length,
+    created_jobs: created,
+    due_jobs_per_advance: due,
+    pending_jobs: pending + created - due,
+  });
 }
+
+/**
+ * True when a count passes its composition-profile limit (04 §5.4: one aggregate budget across
+ * the root and all its descendants): compose's operation and job counts, and the events, reaction
+ * deliveries and reaction depth world.ts counts across a decision.
+ */
+export const over = (counts: Readonly<Record<string, number>>): boolean =>
+  Object.entries(counts).some(([k, n]) => n > LIMITS[k]!);
 
 const fault = (code: ErrorCode, t: MutationTarget): Result => ({
   fault: { kind: 'fault', code, target: t },
