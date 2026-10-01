@@ -1,8 +1,8 @@
 // size: allow 560, every save-open outcome shares this file's one-process harness
 // The save's identity and pin, a new game, and a corrupt save (10 §§31-32 as amended; 07 §9;
-// OFF-07) on Node with real SQLite (node:sqlite) in WAL mode, one connection per simulated
-// process, as local_story.test.ts. Expected values are literals from the fixtures named beside
-// them, never from the code under test.
+// OFF-07) on Node with real SQLite (node:sqlite) in the phone's rollback journal (no WAL), one
+// connection per simulated process, as local_story.test.ts. Expected values are literals from the
+// fixtures named beside them, never from the code under test.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync } from 'node:fs';
@@ -70,7 +70,6 @@ function processOn(
   { newId = none, tap = ((_, run) => run()) as Tap, releases = [dusk] as Releases } = {},
 ) {
   const sql = new DatabaseSync(path);
-  sql.exec('PRAGMA journal_mode = WAL');
   type P = (string | number | null)[];
   const db = {
     execSync: (s: string) => void tap(s, () => sql.exec(s)),
@@ -90,7 +89,7 @@ function processOn(
   return { sql, opened, story, one, all };
 }
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-s3a-')), 'save.db');
-/** The save file's bytes, by hash; read with no connection open (WAL checkpointed). */
+/** The save file's bytes, by hash; read with no connection open. */
 const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
 /** The content hash the save is pinned to. */
 const pinned = (p: ReturnType<typeof processOn>) =>
@@ -240,10 +239,12 @@ test('a save of an unknown format is refused with nothing written and no new gam
   }
 });
 
-// Breaks (OFF-07; 10 §31; 23 §11): a damaged identity (a format name that is not a higher vN, a
-// dropped or renamed column, the table gone beside the rest) opened, taken for a newer format or
-// written before the player's new game; that new game reusing the damaged table (it throws, or a
-// reopen is still corrupt), dropping a pending report, keeping old ids, or not all-or-nothing.
+// Breaks (OFF-07; 10 §31; 23 §11; 03 §14): a damaged identity (a format name that is not a higher
+// vN, a dropped or renamed column, a lineage or run not a UUID, the table gone beside the rest)
+// opened (a retry then misses its receipt under a malformed scope and commits twice), taken for a
+// newer format or written before the player's new game; that new game reusing the damaged table (it
+// throws, or a reopen is still corrupt), dropping a pending report, keeping old ids, or not
+// all-or-nothing.
 test('a damaged identity is save_corrupt and untouched; its new game repairs it', () => {
   const names = ['loka-savf-v1', 'loka-save-v0', 'loka-save-v01', 'loka-save-v02', 'loka-save-v2x'];
   const REPORT = "INSERT INTO report VALUES ('r', 'l', NULL, '{}', 'pending', NULL, 0)";
@@ -255,10 +256,16 @@ test('a damaged identity is save_corrupt and untouched; its new game repairs it'
     a.sql.close();
     return path;
   };
+  const retyped = (v: string) => `ALTER TABLE save RENAME TO old; CREATE TABLE save AS SELECT one,
+    format, ${v} AS lineage_id, run_id, parent, seed, pin, binding FROM old; DROP TABLE old`;
   for (const damage of [
     ...names.map((f) => `UPDATE save SET format = '${f}'`),
     'ALTER TABLE save DROP COLUMN format',
     'ALTER TABLE save RENAME COLUMN format TO fmt',
+    ...['lineage_id', 'run_id', 'binding'].map((c) => `ALTER TABLE save DROP COLUMN ${c}`),
+    ...['NULL', '7'].map(retyped), // a lineage that is not a string (a rebuilt, lax table)
+    ...["''", "'lineage'"].map((v) => `UPDATE save SET lineage_id = ${v}`), // not a UUID
+    "UPDATE save SET run_id = ''",
     'DROP TABLE save',
     'DROP TABLE state_row',
     'DROP TABLE receipt',
@@ -316,8 +323,8 @@ test('an app update reopens a save on its pinned release; new games pin the newe
 
 // Breaks (OFF-07): a head that does not parse replaced by the fresh world or opened at all; a
 // corrupt save under a release not installed reported corrupt, not missing; a save missing its
-// head (or head and identity) taken for an empty one and overwritten; a head RNG of the wrong
-// shape opened; the player's new game not making a playable save
+// head (or head and identity) taken for an empty one and overwritten; a head RNG or run seed
+// of the wrong shape opened; the player's new game not making a playable save
 // with new ids or its trace segment not starting fresh.
 test('a save that does not parse is save_corrupt until the player starts a new game', () => {
   const path = save();
@@ -336,6 +343,7 @@ test('a save that does not parse is save_corrupt until the player starts a new g
   for (const damage of [
     'DELETE FROM head; DELETE FROM save', // rows and receipts survive: not an empty database
     "UPDATE head SET rng = '[1,2]'", // parses, but is no RngState
+    "UPDATE save SET seed = '[1,2]'", // the run's seed, in every trace entry's ids
   ]) {
     const other = processOn(save(), { newId: ids() });
     other.story.invoke(pick(1));

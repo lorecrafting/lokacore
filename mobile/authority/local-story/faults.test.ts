@@ -1,13 +1,14 @@
-// The fault corpus (14 §R6; OFF-03..07; 03 §§14-15; ADR-072): the kernel simulator's seeded
-// command sequences (kernel/ts/test/sim.ts) played through the local authority on real SQLite
-// (node:sqlite, WAL), with real faults: SQLITE_FULL from a clamped max_page_count, a COMMIT a
-// deferred foreign key fails, and a child process SIGKILLed just before or after its COMMIT, then
-// the same invocation delivered again. Oracle: after each fault, memory and storage are exactly
-// the revision before or after the faulted command, never between; no `saved` reply without its
-// receipt durable; and the run then ends exactly as the same seed's fault-free run. That run is a
-// metamorphic reference, allowed here because it is the independent fault-free execution of the
-// same kernel path, not the code under test computing its own answer; the literal anchors below
-// are hand-checked. A failing run's trace goes to tmp/obs/game_trace/ (ADR-075 §2, CI artifact).
+// The fault corpus (14 §R6; OFF-03..07; 03 §§14-15; ADR-072): the kernel simulator's seeded command
+// sequences (kernel/ts/test/sim.ts) played through the local authority on real SQLite (node:sqlite,
+// the phone's rollback journal, no WAL), with real faults: SQLITE_FULL from a clamped
+// max_page_count, a COMMIT a deferred foreign key fails, and a child process SIGKILLed just before
+// or after its COMMIT, then the same invocation delivered again. Oracle: after each fault, memory
+// and storage are exactly the revision before or after the faulted command, never between; no
+// `saved` reply without its receipt durable; and the run then ends exactly as the same seed's
+// fault-free run. That run is a metamorphic reference, allowed here because it is the independent
+// fault-free execution of the same kernel path, not the code under test computing its own answer;
+// the literal anchors below are hand-checked. A failing run's trace goes to tmp/obs/game_trace/
+// (ADR-075 §2, CI artifact).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync } from 'node:fs';
@@ -33,7 +34,7 @@ type Tap = (statement: string, run: () => unknown) => unknown;
 function processOn(path: string, seed: number, tap: Tap = (_, run) => run()) {
   const s = simulate(seed);
   const sql = new DatabaseSync(path);
-  sql.exec('PRAGMA page_size = 512; PRAGMA journal_mode = WAL'); // small pages: the FULL fault
+  sql.exec('PRAGMA page_size = 512'); // small pages: the FULL fault
   const db = {
     execSync: (q: string) => void tap(q, () => sql.exec(q)),
     runSync: (q: string, ...p: (string | number | null)[]) =>

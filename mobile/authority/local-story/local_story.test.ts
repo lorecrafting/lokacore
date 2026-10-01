@@ -1,7 +1,8 @@
-// The local Story authority on Node with real SQLite (node:sqlite) in WAL mode, as expo-sqlite
-// opens it, one connection per simulated process; a restart closes it and opens a new one on the
-// same file, and a kill is a real child process (03 §§14-15; 07 §§8-9; ADR-075 §4).
-// Expected values are literals from the fixtures named beside them, never from the code under test.
+// The local Story authority on Node with real SQLite (node:sqlite) in its default rollback journal
+// (no WAL), as expo-sqlite opens the save on iOS, one connection per simulated process; a restart
+// closes it and opens a new one on the same file, and a kill is a real child process (03 §§14-15;
+// 07 §§8-9; ADR-075 §4). Expected values are literals from the fixtures named beside them, never
+// from the code under test.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
@@ -56,8 +57,7 @@ const adapt = (sql: DatabaseSync, tap: Tap = (_, run) => run()) => ({
 /** A process: one connection to the save at `path`, the one place a test's `tap` faults. */
 function processOn(path: string, story = items, pageSize = 0, tap?: Tap) {
   const sql = new DatabaseSync(path);
-  if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`); // before WAL fixes it
-  sql.exec('PRAGMA journal_mode = WAL');
+  if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`); // a new file's; fixed once written
   const one = (q: string) => Object.values(sql.prepare(q).get()!)[0];
   return { sql, story: opened(openStory(adapt(sql, tap), installed(story), story.host)), one };
 }

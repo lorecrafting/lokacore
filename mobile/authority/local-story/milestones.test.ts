@@ -1,9 +1,10 @@
-// Milestone capture and delayed delivery (03 §26; 23 §§3-5, §11; pre-release-proof P2/P6) on
-// Node with real SQLite (node:sqlite) in WAL mode, one connection per simulated process, as
-// local_story.test.ts. The milestone is the bell known answer's ring_bell recipe emitting the
-// custom event bell_rung (protocol/fixtures/cartridge_bell_hash.json; kernel/ts/test/checks.test.ts
-// for its ids). The platform is a fake (the network is external): it keeps one acceptance per
-// report id. Expected values are hand-written literals, never from the code under test.
+// Milestone capture and delayed delivery (03 §26; 23 §§3-5, §11; pre-release-proof P2/P6) on Node
+// with real SQLite (node:sqlite) in the phone's rollback journal (no WAL), one connection per
+// simulated process, as local_story.test.ts. The milestone is the bell known answer's ring_bell
+// recipe emitting the custom event bell_rung (protocol/fixtures/cartridge_bell_hash.json;
+// kernel/ts/test/checks.test.ts for its ids). The platform is a fake (the network is external): it
+// keeps one acceptance per report id. Expected values are hand-written literals, never from the
+// code under test.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
@@ -86,7 +87,6 @@ type Options = {
 /** A process on the save at `path`: one connection, expo-sqlite's sync names, `tap` faults. */
 function processOn(path: string, { newId = none, tap = (_, run) => run(), ...o }: Options = {}) {
   const sql = new DatabaseSync(path);
-  sql.exec('PRAGMA journal_mode = WAL');
   type P = (string | number | null)[];
   const db = {
     execSync: (s: string) => void tap(s, () => sql.exec(s)),

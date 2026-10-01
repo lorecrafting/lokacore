@@ -1,6 +1,7 @@
 // Recovery carries of R6 S2/S3a/S3b and the phone trace cap (ADR-075 §§2, 4; OFF-07; 03 §15), on
-// Node with real SQLite (node:sqlite) in WAL mode, one connection per simulated process, as
-// local_story.test.ts. Expected values are literals, never from the code under test.
+// Node with real SQLite (node:sqlite) in the phone's rollback journal (no WAL), one connection per
+// simulated process, as local_story.test.ts. Expected values are literals, never from the code
+// under test.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
@@ -45,10 +46,9 @@ const adapt = (sql: DatabaseSync, tap: Tap = (_, run) => run()) => ({
     tap(s, () => sql.prepare(s).all(...p)) as T[],
   isInTransactionSync: () => sql.isTransaction,
 });
-/** A process on the save at `path`: its connection in WAL mode and what `openStory` returns. */
+/** A process on the save at `path`: its connection and what `openStory` returns. */
 function processOn(path: string, tap?: Tap) {
   const sql = new DatabaseSync(path);
-  sql.exec('PRAGMA journal_mode = WAL');
   const one = (q: string) => Object.values(sql.prepare(q).get() ?? {})[0];
   return { sql, opened: openStory(adapt(sql, tap), releases, host()), one };
 }
@@ -104,7 +104,7 @@ test('a leftover transaction is settled before the trace catches up', () => {
   ]);
 });
 
-/** The save's file with no connection open (WAL checkpointed), by hash. */
+/** The save's file with no connection open, by hash. */
 const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
 /** A save at revision 1 (the satchel taken), its connection closed. */
 function taken() {
@@ -134,7 +134,7 @@ function corruptPage(path: string, table: string) {
 test('a file that is not a database or has a corrupt page is save_corrupt', () => {
   const notadb = save();
   writeFileSync(notadb, Buffer.alloc(4096, 'x'));
-  const sql = new DatabaseSync(notadb); // no WAL pragma: SQLite rejects the file at its first read
+  const sql = new DatabaseSync(notadb); // SQLite rejects the file at its first read
   assert.equal(openStory(adapt(sql), releases, host()).kind, 'save_corrupt');
   sql.close();
   for (const table of ['state_row', 'head', 'receipt']) {
@@ -254,4 +254,25 @@ test('a run that drops an entry pair below the cap writes nothing more', () => {
   let scans = 0; // catch-up reads of untraced receipts
   const q = open(path, (s, run) => ((scans += +s.includes('FROM receipt WHERE command')), run()));
   assert.deepEqual([scans, q.one('SELECT max(rowid) FROM trace')], [0, last]);
+});
+
+// Breaks (ADR-075 §2, cap rule at its boundary): a catch-up that treats the run as full one row
+// early (`>=` for `>`), so at 4,998 rows the missed entry of a committed give is never written; or
+// a catch-up that writes it at 4,999 rows, into the last slot, leaving no room for a pair.
+test('catch-up at the cap boundary writes a missed entry at 4,998 rows and not at 4,999', () => {
+  for (const [rows, written] of [
+    [CAP - 2, true],
+    [CAP - 1, false],
+  ] as const) {
+    const path = save();
+    const p = open(path);
+    p.story.invoke(take);
+    p.story.invoke(give);
+    p.sql.exec('DELETE FROM trace WHERE ordinal = 2'); // give committed; its entry never written
+    pad(p, rows);
+    p.sql.close();
+    const q = open(path);
+    assert.equal(q.one('SELECT count(*) FROM trace'), written ? rows + 1 : rows);
+    assert.equal(q.one('SELECT max(ordinal) FROM trace'), written ? 2 : 1);
+  }
 });
