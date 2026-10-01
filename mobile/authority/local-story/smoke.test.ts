@@ -242,12 +242,12 @@ test('a confirmed reply that fails to format propagates and still ends the attem
 
 // The app's save file under playSmoke, as App.tsx wires it: `remove` closes the handle and deletes
 // the file, as expo's closeSync and deleteDatabaseSync do (the main file only).
-const app = (path: string, refuse?: string) => {
+const app = (path: string, refuse?: string, tap?: (s: string, run: () => unknown) => unknown) => {
   let sql: DatabaseSync | undefined;
   const c = playSmoke(
     () => {
       if (refuse) throw new Error(refuse); // the open itself fails, as expo's can
-      return adapt((sql = new DatabaseSync(path)));
+      return adapt((sql = new DatabaseSync(path)), tap);
     },
     () => {
       sql!.close();
@@ -377,6 +377,32 @@ test('a start over that fails during play keeps the game and its retry', () => {
   a.sql().exec('PRAGMA query_only = 0');
   a.press('scan');
   assert.deepEqual(a.now().log.slice(-2), ['> Go north', 'moved']);
+});
+
+// Breaks (03 §15): a start over whose COMMIT outcome is unknown leaving the old game playable: its
+// next press settles the new game, then applies the abandoned run's move to it. The ack is lost and
+// the first reconcile read fails, as lostAck stages it; the next start over settles it.
+test('a pending start over leaves no game to play until it settles', () => {
+  let stage = 0;
+  const a = app(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'), undefined, (s, run) => {
+    if (stage === 2 && s.startsWith('SELECT')) {
+      stage = 3;
+      throw new Error('read failed');
+    }
+    const out = run();
+    if (stage === 1 && s === 'COMMIT') {
+      stage = 2;
+      throw new Error('COMMIT acknowledgement lost');
+    }
+    return out;
+  });
+  a.press('Go north');
+  stage = 1;
+  a.c.startOver();
+  assert.equal(a.c.game(), undefined);
+  a.c.startOver();
+  assert.equal(a.now().place, 'Ferry Landing');
+  assert.deepEqual(a.now().log, []);
 });
 
 // Gate R6 (docs/evidence/2026-09-30-gate-r6-iphone11/README.md): the tap script the owner plays on

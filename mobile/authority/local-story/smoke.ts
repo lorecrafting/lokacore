@@ -104,7 +104,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
   const host = { kernel_version: KERNEL_VERSION, newId };
   const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
-  if (story.kind !== 'open') throw new Error(`save not opened: ${story.kind}`, { cause: story });
+  if (story.kind !== 'open') throw Object.assign(new Error(story.kind), { cause: story });
   // The unconfirmed attempt, resent unchanged (same id, same intent) until it settles (03 §§14-15).
   let retry: { label: string; invocation: object } | undefined;
   let fault: string | undefined; // the last press's throw, shown with start over beside the retry
@@ -160,18 +160,14 @@ export type Failed = {
  * corrupt page: its new game throws as corrupt, or the open throws untyped as corrupt) is replaced.
  * Never started over: a newer app's save (`unsupported_save_format`, update the app, 10 §32) or an
  * open that failed for another reason (a full disk: the save may be intact). A start over that
- * fails otherwise keeps the game being played.
+ * fails otherwise keeps the game being played; one whose outcome is unknown does not (its next
+ * press would settle the new game, then apply to it).
  */
-export function playSmoke(
-  open: () => Db,
-  remove: () => void,
-  bundled: Bundled,
-  newId: () => string,
-) {
+export function playSmoke(open: () => Db, remove: () => void, items: Bundled, newId: () => string) {
   const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
   const reopen = () => {
     try {
-      s.game = openSmoke((s.db ??= open()), bundled, newId);
+      s.game = openSmoke((s.db ??= open()), items, newId);
       s.failed = undefined;
     } catch (e) {
       const { kind, newGame } = ((e as Error).cause ?? {}) as Failed;
@@ -187,7 +183,10 @@ export function playSmoke(
       const newGame = s.game?.newGame ?? s.failed?.newGame;
       if (!newGame && !s.failed?.replace) return;
       try {
-        if (newGame?.().kind === 'pending') throw new Error('start over not confirmed; try again');
+        if (newGame?.().kind === 'pending') {
+          s.game = undefined;
+          return void (s.failed = { ...s.failed, message: 'start over not confirmed', newGame });
+        }
         if (newGame) return reopen();
       } catch (e) {
         if (!corrupt(e)) return void (s.failed = { ...s.failed, message: (e as Error).message });
