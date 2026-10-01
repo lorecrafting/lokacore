@@ -17,7 +17,8 @@
       "calendar": 1,
       "schedule": 1,
       "fact": 1,
-      "reaction": 1
+      "reaction": 1,
+      "description_variant": 1
     },
     "client_features": []
   },
