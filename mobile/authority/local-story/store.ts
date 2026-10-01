@@ -5,7 +5,7 @@
 // lessons).
 import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
 import { target } from '../../../kernel/ts/src/compose.ts';
-import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { DecisionResult, MilestoneReport } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { row } from '../../../kernel/ts/src/world.ts';
@@ -47,7 +47,10 @@ CREATE TABLE IF NOT EXISTS trace (ordinal INTEGER NOT NULL, command_id TEXT,
   commit_state TEXT, record TEXT NOT NULL) STRICT;
 CREATE TABLE IF NOT EXISTS save (one INTEGER PRIMARY KEY CHECK (one = 1), format TEXT NOT NULL,
   lineage_id TEXT NOT NULL, run_id TEXT NOT NULL, parent TEXT NOT NULL, seed TEXT NOT NULL,
-  pin TEXT NOT NULL) STRICT;`;
+  pin TEXT NOT NULL) STRICT;
+CREATE TABLE IF NOT EXISTS report (report_id TEXT PRIMARY KEY, lineage_id TEXT NOT NULL,
+  binding TEXT, report TEXT NOT NULL, disposition TEXT NOT NULL CHECK (disposition IN
+  ('pending', 'accepted', 'rejected', 'needs_attention')), acceptance TEXT) STRICT;`;
 
 /**
  * The save's identity (10 §§31-32; 07 §9): its lineage and run, its causal parent (null: every
@@ -155,13 +158,36 @@ export function receipt(db: Db, scope: string, invocation_id: string): Receipt |
 }
 
 /**
- * Commits one decision in one transaction (03 §15): for an accepted one the rows its delta
- * wrote, the revision, clock and RNG of `next`; always the receipt. Throws, with nothing written,
- * on a definite failure; false when the outcome is unknown (`transaction`; then `reconcile`).
- * The caller adopts `next` only after this returns true.
+ * A milestone report captured with its gameplay commit (23 §§4-5; 03 §26): the payload, the
+ * originating lineage and the account/profile binding when it was reached (null: a guest). A
+ * host record outside `state_row`, so never in the canonical state, and kept by a new game
+ * (23 §11).
  */
-export function commit(db: Db, next: World, decision: DecisionResult, r: Receipt): boolean {
+export type Captured = { report: MilestoneReport; lineage_id: string; binding: string | null };
+
+/**
+ * Commits one decision in one transaction (03 §15): for an accepted one the rows its delta
+ * wrote, the revision, clock and RNG of `next`, and its pending milestone reports; always the
+ * receipt. Throws, with nothing written, on a definite failure; false when the outcome is
+ * unknown (`transaction`; then `reconcile`). The caller adopts `next` only after this returns
+ * true.
+ */
+export function commit(
+  db: Db,
+  next: World,
+  decision: DecisionResult,
+  r: Receipt,
+  reports: Captured[],
+): boolean {
   return transaction(db, () => {
+    for (const c of reports)
+      db.runSync(
+        "INSERT INTO report VALUES (?, ?, ?, ?, 'pending', NULL)",
+        c.report.report_id,
+        c.lineage_id,
+        c.binding,
+        encode(c.report as never),
+      );
     if (decision.kind === 'accepted') {
       db.runSync(HEAD, r.revision, next.state.clock, encode(next.state.rng as Json));
       for (const op of decision.delta.ops) {
@@ -202,7 +228,8 @@ export function reconcile<T>(db: Db, read: () => T): T {
  * would read as saved). Either false is settled by `reconcile` before the next decision.
  */
 export function transaction(db: Db, writes: () => void): boolean {
-  // Only a failed trace write can leave one open here (reconcile settles gameplay's first).
+  // Only a failed trace or delivery write can leave one open here (reconcile settles gameplay's
+  // first; a delivery's acknowledgement is resent).
   if (db.isInTransactionSync()) db.execSync('ROLLBACK');
   db.execSync('BEGIN IMMEDIATE');
   try {

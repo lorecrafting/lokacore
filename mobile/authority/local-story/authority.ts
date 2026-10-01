@@ -7,7 +7,7 @@ import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
 import { commit, load, pinOf, receipt, reconcile, replace } from './store.ts';
-import type { Db, Meta, Receipt } from './store.ts';
+import type { Captured, Db, Meta, Receipt } from './store.ts';
 import { catchUp, traceCommand, type CommitState, type RunIds } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
@@ -22,9 +22,20 @@ export type Reply =
 
 /**
  * What the host supplies: the bundled cartridge's content hash, the build's kernel version
- * (ADR-075 RunIds) and a fresh random UUID per call, for each new save's lineage and run ids.
+ * (ADR-075 RunIds) and a fresh random UUID per call, for each new save's lineage and run ids and
+ * each milestone report's id. `milestones` maps a `custom_event` key to the milestone and outcome
+ * its commit reaches (none by default); `binding` is the signed-in account/profile now, read when
+ * a milestone is reached (23 §5; null, the default: a guest).
  */
-export type Host = { content_hash: string; kernel_version: string; newId: () => string };
+export type Host = {
+  content_hash: string;
+  kernel_version: string;
+  newId: () => string;
+  // ponytail: stands in for the cartridge's own milestone declaration and the typed
+  // story.milestone_reached event (23 §3), which freeze with the R7 feature schema.
+  milestones?: ReadonlyMap<string, { milestone: string; outcome: string }>;
+  binding?: () => string | null;
+};
 const SAVE_FORMAT = 'loka-save-v1';
 
 /**
@@ -148,7 +159,7 @@ function invoke(s: Story, value: unknown): Reply {
   // ponytail: no rule emits effects yet; the outbox (03 §16) comes with the first that does.
   if (d.kind === 'accepted' && d.effects.length) throw new Error('effect outbox not built');
   const r = { scope: scope(s), invocation_id: i.invocation_id, command_id, actor_id: i.actor_id };
-  return save(s, next, trace, {
+  return save(s, next, trace, reached(s, d, s.revision + 1), {
     ...r,
     intent_digest_version: INTENT_DIGEST_VERSION,
     intent_digest,
@@ -158,17 +169,37 @@ function invoke(s: Story, value: unknown): Reply {
   });
 }
 
+/**
+ * The pending reports of the milestones an accepted decision reaches (23 §§4-5; 03 §26), each
+ * with its id allocated once here and committed with the decision, its run, lineage and release,
+ * and the binding now. A receipt replay never comes here, so it adds no second report.
+ */
+function reached(s: Story, d: DecisionResult, revision: number): Captured[] {
+  if (d.kind !== 'accepted') return [];
+  const { cartridge_id, cartridge_version, content_hash } = s.meta.pin;
+  const release = { cartridge_id, cartridge_version, cartridge_hash: content_hash } as never;
+  return d.events.flatMap(({ payload: p }) => {
+    const m = p.type === 'custom_event' ? s.host.milestones?.get(p.event.key) : undefined;
+    if (!m) return [];
+    const { lineage_id, run_id } = s.meta;
+    const report = { report_id: s.host.newId(), run_id, release, observed_revision: revision };
+    const binding = s.host.binding?.() ?? null;
+    return [{ lineage_id, binding, report: { ...report, ...m } as never }];
+  });
+}
+
 /** Commits a NEW attempt's decision, then adopts it; the reply never claims an unknown save. */
 function save(
   s: Story,
   next: { world: World; decision: DecisionResult },
   trace: Trace,
+  reports: Captured[],
   r: Receipt,
 ): Reply {
   const at = r.revision;
   let committed: boolean;
   try {
-    committed = commit(s.db, next.world, next.decision, r);
+    committed = commit(s.db, next.world, next.decision, r, reports);
   } catch (e) {
     trace(at, 'failed');
     throw e;
