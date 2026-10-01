@@ -2,7 +2,13 @@
 // through the real local authority, plain so any view can replace the React one. It exposes the
 // current GameView, its text, the offered actions as buttons and a log; it adds no mechanics.
 import type { GameView, Key } from '../../../kernel/ts/src/contracts.gen.ts';
-import { gameView, INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
+import {
+  gameView,
+  INSTALLED,
+  KERNEL_ID,
+  loadCartridge,
+  newWorld,
+} from '../../../kernel/ts/src/index.ts';
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import { openStory, type Reply } from './authority.ts';
 import type { Db } from './store.ts';
@@ -17,6 +23,10 @@ const SCOPE = 'story/smoke';
 // ponytail: one fixed world context and seed; a real start draws them per lineage (R6P).
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const SEED = [1, 2, 3, 4];
+// ponytail: no build commit on the phone yet, so the kernel version is marked dirty; one run id
+// per save (a real start draws one per run, R6P).
+const KERNEL_VERSION = `${KERNEL_ID}@${'0'.repeat(40)}-dirty`;
+const RUN_ID = '5a5a5a5a-1111-4222-8333-444444444444';
 
 type Say = (key: string) => string;
 
@@ -48,6 +58,7 @@ function buttonsOf(v: GameView, label: Say, text: Say): Button[] {
 
 // What one press answers: the narration or outcome of an accepted command, else the refusal.
 function said(r: Reply, text: Say): string {
+  if (r.kind === 'pending') return '(pending: not confirmed saved; press again)';
   if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision as { kind: string; outcome?: string; narration?: { key: string }[] };
   if (d.kind === 'rejected')
@@ -55,13 +66,24 @@ function said(r: Reply, text: Say): string {
   return d.narration?.map((t) => text(t.key)).join(' ') || d.outcome!;
 }
 
-/** The save in `db` (a new one if empty) of the bundled cartridge; open `db` once per process. */
-export function openSmoke(db: Db, bundled: Bundled) {
+function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   if (!loaded.ok) throw new Error(`cartridge did not load: ${JSON.stringify(loaded)}`);
-  const cartridge = loaded.cartridge as Cartridge;
-  const story = openStory(db, newWorld(cartridge, CONTEXT as never, SEED as never), SCOPE);
+  return loaded.cartridge as Cartridge;
+}
+
+/** The save in `db` (a new one if empty) of the bundled cartridge; open `db` once per process. */
+export function openSmoke(db: Db, bundled: Bundled) {
+  const cartridge = cartridgeOf(bundled);
+  const ids = {
+    content_hash: bundled.sha256,
+    kernel_version: KERNEL_VERSION,
+    seed: SEED,
+    run_id: RUN_ID,
+  };
+  const story = openStory(db, newWorld(cartridge, CONTEXT as never, SEED as never), SCOPE, ids);
+  let pending = false; // the last press's COMMIT outcome is unknown; the next press settles it
   // Ids continue from the highest receipt saved (replies without a receipt leave no trace).
   const last = db.getFirstSync<{ id: string | null }>(
     'SELECT max(invocation_id) AS id FROM receipt WHERE scope = ?',
@@ -76,7 +98,7 @@ export function openSmoke(db: Db, bundled: Bundled) {
   return {
     screen: () => {
       const view = gameView(story.world());
-      return { view, text, buttons: buttonsOf(view, label, text), log };
+      return { view, text, buttons: buttonsOf(view, label, text), log, pending };
     },
     press(b: Button): void {
       const invocation = {
@@ -86,7 +108,9 @@ export function openSmoke(db: Db, bundled: Bundled) {
         target_ids: b.target_ids,
         input: b.input,
       };
-      log.push(`> ${b.label}`, said(story.invoke(invocation), text));
+      const reply = story.invoke(invocation);
+      pending = reply.kind === 'pending';
+      log.push(`> ${b.label}`, said(reply, text));
     },
   };
 }

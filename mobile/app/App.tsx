@@ -12,7 +12,7 @@ const smoke = openSmoke(openDatabaseSync('loka-smoke.db'), items);
 
 export default function App() {
   const [, redraw] = useState(0);
-  const { view, text, buttons, log } = smoke.screen();
+  const { view, text, buttons, log, pending } = smoke.screen();
   const here = [text(view.place.title.key), text(view.place.description.key)];
   const names = (es: typeof view.entities) => es.map((e) => text(e.name)).join(', ') || 'nothing';
   return (
@@ -24,6 +24,7 @@ export default function App() {
         <Text>Exits: {view.exits.map((e) => e.direction).join(', ') || 'none'}</Text>
         <Text>Carrying: {names(view.inventory)}</Text>
         <Text>Time: {view.time}</Text>
+        {pending && <Text>Save not confirmed (pending)</Text>}
         <Text>{log.slice(-20).join('\n')}</Text>
         {buttons.map((b, i) => (
           <Button
