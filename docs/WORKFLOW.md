@@ -22,8 +22,8 @@ default, Astra for hard reviews (escalate freely)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
 answer verbatim to the review record, and adds its findings to the fix list.
+If codex is out of quota, a Fable subagent stands in for it on a kernel or contract-freeze slice's head (an exception to "Fable rarely"), never on fix re-reviews; and the PM has an Opus subagent draft briefs and stage slice plans so the PM session stays thin, the PM deciding (owner, 2026-10-01, paraphrased).
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
-Owner, 2026-10-01 (paraphrased): an Opus subagent drafts briefs and stage slice plans so the PM session stays thin (the PM decides); if codex is out of quota, a Fable subagent stands in for the cross-vendor review on kernel slice heads, never on fix re-reviews.
 
 ## Loop
 
