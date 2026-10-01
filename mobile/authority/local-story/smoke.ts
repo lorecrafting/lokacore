@@ -133,8 +133,8 @@ export function openSmoke(db: Db, bundled: Bundled) {
         log.push(`(not confirmed: ${(e as Error).message}; the next press retries ${retry.label})`);
         return;
       }
+      if (reply.kind !== 'pending') retry = undefined; // before said(): it may throw
       log.push(said(reply, text));
-      if (reply.kind !== 'pending') retry = undefined;
     },
   };
 }

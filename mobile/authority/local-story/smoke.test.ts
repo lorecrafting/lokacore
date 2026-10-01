@@ -215,3 +215,19 @@ test('a read error after a durable commit does not commit the press twice', () =
   assert.equal(p.sql.prepare('SELECT revision FROM head').get()!.revision, 1);
   assert.equal(p.now().pending, false);
 });
+
+// Breaks: the retry cleared only after said() succeeds, so a confirmed reply that cannot be
+// formatted (a TypeError: malformed narration in the stored receipt) leaves pending set and every
+// later button retrying the confirmed "scan" instead of its own action.
+test('a confirmed reply that fails to format propagates and still ends the attempt', () => {
+  const { p, arm } = lostAck();
+  arm();
+  p.press('scan'); // committed, ack lost, first reconcile read fails: pending
+  p.sql.exec(
+    `UPDATE receipt SET response = '{"kind":"accepted","narration":5,"outcome":"scanned"}'`,
+  );
+  assert.throws(() => p.press('scan'), TypeError); // settles, replays the receipt, cannot format it
+  assert.equal(p.now().pending, false);
+  p.press('Go north');
+  assert.deepEqual(p.now().log.slice(-2), ['> Go north', 'moved']);
+});
