@@ -385,6 +385,22 @@ test('the loader checks quest references, texts, keys and the lock', () => {
   const label = { label: 'quest.lantern.accept', accessibility: 'quest.lantern.accept' };
   const action = { key: 'lantern', ...label, ...look, policy: always };
   fails((c) => (c.actions[`${E}:action/lantern`] = action), 'DUPLICATE_DEFINITION', Q);
+  const recipe = (c: any) => {
+    for (const m of [c.manifest.requires.capabilities, c.lock.capabilities])
+      Object.assign(m, { action_recipe: 1, inspectable_detail: 1 });
+    const landing = c.rooms[`${E}:room/ferry_landing`];
+    landing.details = { post: { aliases: ['post'], description: 'quest.lantern.title' } };
+    const target = { kind: 'detail', room: ref('room', 'ferry_landing'), detail: 'post' };
+    const success = {
+      sequence: [{ op: 'event.emit', event: 'rang' }],
+      narration: { actor: 'quest.lantern.title' },
+    };
+    const r = { key: 'lantern', label: 'quest.lantern.accept', aliases: ['lantern'], target };
+    c.recipes = {
+      [`${E}:recipe/lantern`]: { ...r, priority: 0, policy: always, outcomes: { success } },
+    };
+  };
+  fails(recipe, 'DUPLICATE_DEFINITION', Q);
   fails((c) => unlock(c, 'quest'), 'UNDECLARED_CAPABILITY', `${Q}`, { capability: 'quest' }, [
     'quest@1',
   ]);
