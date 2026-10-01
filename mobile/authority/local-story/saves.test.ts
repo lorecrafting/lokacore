@@ -461,7 +461,7 @@ test('a new game whose COMMIT fails keeps the old save, memory and receipts', ()
 test('a committed new game is adopted before play; a retry does not replace it twice', () => {
   let [armed, unread] = [false, false];
   const tap: Tap = (s, run) => {
-    if (unread && s.startsWith('SELECT revision')) {
+    if (unread && s === 'SELECT * FROM head') {
       unread = false;
       throw new Error('read failed');
     }

@@ -78,3 +78,9 @@ jobs:
       - run: node bin/check_ts_size.mjs
       - run: bin/ts_size_red_controls.sh
       - run: bin/kernel_red_controls.sh
+      - if: failure() # a failing run's game trace (ADR-075 §2), fault corpus or simulator
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: game-trace
+          path: tmp/obs/game_trace/
+          if-no-files-found: ignore
