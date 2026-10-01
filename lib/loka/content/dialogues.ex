@@ -43,29 +43,33 @@ defmodule Loka.Content.Dialogues do
   end
 
   defp dialogue({rel, d}, ctx) do
-    duplicate =
-      if d["key"] in ctx.taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
-
-    speaker = Enum.any?(d["roles"], fn {_, r} -> r == %{"role" => "npc", "npc" => d["npc"]} end)
-
-    target =
-      "#{d["npc"]["cartridge_id"]}@#{d["npc"]["cartridge_version"]}:#{d["npc"]["kind"]}/#{d["npc"]["key"]}"
-
     owned(at(rel, []), "dialogue", ctx.kinds) ++
-      duplicate ++
+      own(rel, d, ctx.taken) ++
       texts(rel, [{["prompt"], d["prompt"]}], ctx.text) ++
-      reference(rel, [], "npc", d, ctx.m, ctx.defs) ++
-      if(d["quest"], do: reference(rel, [], "quest", d, ctx.m, ctx.defs), else: []) ++
-      Enum.flat_map(d["roles"], &role(rel, &1, ctx)) ++
-      if(speaker,
-        do: [],
-        else: [diag("UNRESOLVED_REFERENCE", at(rel, ["npc"]), %{"target" => target})]
-      ) ++
-      if(d["choices"] == %{},
-        do: [diag("SCHEMA_VIOLATION", at(rel, ["choices"]), %{"error" => "too_few_items"})],
-        else: []
-      ) ++
+      refs(rel, d, ctx) ++
       Enum.flat_map(d["choices"], &choice(rel, &1, d["roles"], ctx))
+  end
+
+  # Its speaker, quest and roles name definitions of this cartridge.
+  defp refs(rel, d, ctx) do
+    for(f <- ~w(npc quest), is_map_key(d, f), do: reference(rel, [], f, d, ctx.m, ctx.defs))
+    |> Enum.concat()
+    |> Enum.concat(Enum.flat_map(d["roles"], &role(rel, &1, ctx)))
+  end
+
+  # The dialogue's own checks: its key, its speaker among its npc roles, at least one choice.
+  defp own(rel, d, taken) do
+    n = d["npc"]
+    target = "#{n["cartridge_id"]}@#{n["cartridge_version"]}:#{n["kind"]}/#{n["key"]}"
+    empty = %{"error" => "too_few_items"}
+
+    for {true, diag} <- [
+          {d["key"] in taken, diag("DUPLICATE_DEFINITION", at(rel, []))},
+          {%{"role" => "npc", "npc" => n} not in Map.values(d["roles"]),
+           diag("UNRESOLVED_REFERENCE", at(rel, ["npc"]), %{"target" => target})},
+          {d["choices"] == %{}, diag("SCHEMA_VIOLATION", at(rel, ["choices"]), empty)}
+        ],
+        do: diag
   end
 
   defp role(rel, {name, %{"role" => kind} = r}, ctx) do

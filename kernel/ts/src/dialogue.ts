@@ -27,12 +27,6 @@ export const definition = (world: World, source: DefinitionRef): DialogueDefinit
 /** A new ContinuationId from the decision's IdSource allocator: the choice's occurrence id. */
 export const continuationId = (mint: Mint) => mint() as ContinuationId;
 
-/** The DefinitionRef of this cartridge's dialogue `d`. */
-export const refOf = (world: World, d: DialogueDefinition): DefinitionRef => {
-  const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
-  return { cartridge_id, cartridge_version, kind: 'dialogue', key: d.key };
-};
-
 /**
  * Each role of `d` bound to the EntityId of the NPC or item it names, in role-name order (06 §33,
  * §43: bound once at talk; a choice reads the binding, never a name).

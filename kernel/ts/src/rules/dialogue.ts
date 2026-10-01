@@ -30,15 +30,7 @@ import {
   type Rule,
   type World,
 } from '../decision.ts';
-import {
-  blocked,
-  bind,
-  choiceIds,
-  continuationId,
-  definition,
-  pending,
-  refOf,
-} from '../dialogue.ts';
+import { blocked, bind, choiceIds, continuationId, definition, pending } from '../dialogue.ts';
 import { assigned } from '../fact.ts';
 import { resolution } from '../quest.ts';
 
@@ -66,12 +58,13 @@ function talk(world: World, command: Command<'talk'>, mint: Mint) {
   if (!d) return rejected('not_found');
   if (pending(world, p.actor_id)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
+  const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const op = {
     op: 'choice.open',
     writer_group: 0,
     continuation_id,
     actor_id: p.actor_id,
-    source: refOf(world, d),
+    source: { cartridge_id, cartridge_version, kind: 'dialogue', key: d.key },
     beat: d.key,
     roles: bind(world, d),
     choice_ids: choiceIds(d),
