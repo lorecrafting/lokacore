@@ -233,3 +233,68 @@ test('a confirmed reply that fails to format propagates and still ends the attem
   p.press('Go north');
   assert.deepEqual(p.now().log.slice(-2), ['> Go north', 'moved']);
 });
+
+// Gate R6 (docs/evidence/2026-09-30-gate-r6-iphone11/README.md): the tap script the owner plays on
+// the phone, its three kill points (a kill after tap N is a close and reopen), and the end state
+// declared in advance. The state literals are hand-checked: seven accepted commands, so revision
+// 7; the satchel dropped at the Village Green, the player back at the Ferry Landing.
+const GATE_TAPS = [
+  'take a leather satchel',
+  'Go north',
+  'Go south',
+  'scan',
+  'Go north',
+  'drop a leather satchel',
+  'Go south',
+];
+const GATE_KILLS = [2, 5, 6];
+const gateRun = (kills: number[]) => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-gate-')), 'save.db');
+  let p = processOn(path);
+  GATE_TAPS.forEach((label, i) => {
+    p.press(label);
+    if (!kills.includes(i + 1)) return;
+    p.sql.close();
+    p = processOn(path);
+  });
+  return { path, p };
+};
+/** What the gate compares: the head, every world row and the receipt count. */
+const dump = (path: string) => {
+  const sql = new DatabaseSync(path, { readOnly: true });
+  const all = (q: string) => sql.prepare(q).all();
+  const out = {
+    head: all('SELECT * FROM head'),
+    rows: all('SELECT * FROM state_row ORDER BY section, key'),
+    receipts: (all('SELECT count(*) AS n FROM receipt')[0] as { n: number }).n,
+  };
+  sql.close();
+  return out;
+};
+
+// Breaks: a tap that sends the wrong invocation, or a restart that loses or repeats a press, so the
+// script ends anywhere but revision 7 at the Ferry Landing with an empty satchel slot; or an end
+// state that depends on where the kills fall.
+test('the gate tap script ends at its declared state, wherever the kills fall', () => {
+  const { path, p } = gateRun(GATE_KILLS);
+  assert.equal(p.now().place, 'Ferry Landing');
+  assert.deepEqual(p.now().carrying, []);
+  assert.deepEqual(p.now().buttons, ['look', 'scan', 'Go north']);
+  p.sql.close();
+  const end = dump(path);
+  assert.deepEqual(
+    end.head.map((h) => h.revision),
+    [7],
+  );
+  assert.equal(end.receipts, 7);
+  assert.deepEqual(end, dump(gateRun([]).path));
+});
+
+// The device comparison: LOKA_DEVICE_DB names the save copied off the phone after the run.
+test(
+  'the save copied from the phone equals the reference',
+  { skip: !process.env.LOKA_DEVICE_DB },
+  () => {
+    assert.deepEqual(dump(process.env.LOKA_DEVICE_DB!), dump(gateRun(GATE_KILLS).path));
+  },
+);

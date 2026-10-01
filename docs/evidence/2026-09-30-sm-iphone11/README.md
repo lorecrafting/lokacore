@@ -12,7 +12,7 @@ Facts, by source:
   app code (no dev wiring), free personal team, automatic signing, installed with `devicectl`; the
   phone was unlocked (`passcodeRequired: false`); the app launched and its process was still alive
   after 10 s. The phone reported iOS 26.6.2 in the device listing.
-- **Inspected (save, before the owner's run):** `Documents/SQLite/loka-smoke.db` copied from the app
+- **Inspected (save, before the owner's run):** `Documents/SQLite/loka-save.db` copied from the app
   container had `head.revision` 0 and 5 `state_row` rows, so expo-sqlite opened and `openStory`
   saved the fresh world on the device.
 - **Not checked:** the screen was not captured by me; I could not tap it. The database after the
