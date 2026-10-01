@@ -1,3 +1,4 @@
+// size: allow 310, the reference stage and the walks every loader stage shares
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -15,6 +16,7 @@ import { typed } from './fact.ts';
 import { barriers } from './cartridge_barriers.ts';
 import { links } from './cartridge_links.ts';
 import { quests } from './cartridge_quests.ts';
+import { reactions } from './cartridge_reactions.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -141,9 +143,9 @@ function checkers(c: Obj, out: Diagnostic[]) {
 // NPC, an item, a barrier, a variant, an action or a recipe uses has a catalog entry, every
 // touch link names what it may (cartridge_links.ts), every detail's first alias is its own and
 // typable, items and NPCs start where containment allows, recipes and rooms' action
-// contributions name what exists (recipes), quests are coherent (cartridge_quests.ts), each
-// reaction's trigger names a fact or room of it and each of its fact.assign a fact of it with a
-// value of its type, and each resource's bounds hold its start (RESOURCE_SPEC_INVALID).
+// contributions name what exists (recipes), quests and reactions are coherent
+// (cartridge_quests.ts, cartridge_reactions.ts), and each resource's bounds hold its start
+// (RESOURCE_SPEC_INVALID).
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -176,16 +178,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
-  out.push(...quests(c, check));
-  for (const [ref, r] of Object.entries((c.reactions ?? {}) as Obj)) {
-    const at = `.cartridge.reactions${step(ref)}`;
-    if (r.on.fact) named(r.on.fact, 'fact', `${at}.on.fact`);
-    if (r.on.room) named(r.on.room, 'room', `${at}.on.room`);
-    r.apply.forEach((s: Obj, i: number) => {
-      named(s.fact, 'fact', `${at}.apply[${i}].fact`);
-      typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
-    });
-  }
+  out.push(...quests(c, check), ...reactions(c, check));
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj))
     if (!(s.minimum <= s.start && s.start <= s.maximum))
       out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));

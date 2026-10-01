@@ -1,45 +1,33 @@
 // World state from a loaded loka-cartridge-v2 artifact, the command step and the GameView
 // (03 §1, §3, §23; 04 §1-§5.1, §14; 21 §5). Rules are pure and live in rules/<capability>.ts
 // (lint/rules/ts-rule-module-*.yml); this module routes each command to the rule of the
-// capability that owns it (capability_registry.json), composes the delta and commits it.
-import { encode } from './canonical.ts';
+// capability that owns it (capability_registry.json); proposal.ts proposes, composes and adopts
+// its result.
 import { KernelError } from './error.ts';
 import type { Installed } from './cartridge.ts';
-import { compose, key, over, target, type Fault } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
-  LIMITS,
   type CharacterId,
   type Command,
-  type CommandId,
   type DecisionResult,
-  type DeltaOp,
-  type DomainEvent,
   type EntityId,
   type ErrorCode,
-  type JobId,
   type Owned,
   type WorldContextId,
 } from './contracts.gen.ts';
 import {
   allocator,
-  COMPOSES,
-  event,
   refString,
   rejected,
-  row,
   type Cartridge,
   type Detail,
   type Entity,
   type Mint,
   type Rule,
-  type State,
   type World,
 } from './decision.ts';
-import { factChanged, invariants as factInvariants, typedFact, type Base } from './fact.ts';
-import { id, jobCommandId } from './id_source.ts';
+import { invariants as factInvariants } from './fact.ts';
 import type { RngState } from './rng.ts';
-import { utf8 } from './sha256.ts';
 import { refusal } from './actions.ts';
 import * as action_recipe from './rules/action_recipe.ts';
 import * as barrier from './rules/barrier.ts';
@@ -49,9 +37,8 @@ import * as movement from './rules/movement.ts';
 import * as quest from './rules/quest.ts';
 import * as schedule from './rules/schedule.ts';
 import { deliver } from './quest.ts';
-import { sequence, triggered } from './reaction.ts';
+import { admit, adopt, ownerOf, type Actor, type Stepped } from './proposal.ts';
 import { newWorld, NIL } from './fresh.ts';
-import { cmp } from './validate.ts';
 
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
@@ -100,12 +87,6 @@ export function step(world: World, command: Command): Stepped {
   return decideWith(world, command, owner, rule);
 }
 
-// The capability owning a command or event type; own keys only, so `constructor` names none.
-const ownerOf = (owners: Readonly<Record<string, string>>, type: string) =>
-  Object.hasOwn(owners, type) ? owners[type]!.split('@')[0] : undefined;
-
-type Stepped = { decision: DecisionResult; world: World };
-type Actor = Parameters<typeof event>[1];
 type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
 
 /**
@@ -136,197 +117,6 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   }
 }
 
-/**
- * Proposes an admitted decision whole (propose) and composes its delta over the state, the fact
- * defaults and the declared capacities, adopting its containment, fact and clock changes; only
- * admit() makes an Admitted. A fact.assign whose fact, scope kind or value its FactSpec does not
- * allow faults precondition_failed (03 §7; 04 §5.1). A result over the events or output_bytes
- * limit faults budget_exceeded (04 §5.4). A fault discards the whole proposal.
- */
-export function adopt(world: World, decision: Admitted, command: Actor, mint: Mint): Stepped {
-  const out = propose(world, decision, command, mint);
-  if (out.kind !== 'accepted') return { decision: out, world };
-  const assigns = out.delta.ops.filter((o) => o.op === 'fact.assign') as Assign[];
-  const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
-  if (bad)
-    return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
-  const applied = apply(world, out.delta.ops);
-  if ('fault' in applied) return { decision: applied.fault, world };
-  if (
-    over({ events: out.events.length }) ||
-    utf8(encode(out as never)).length > LIMITS.output_bytes!
-  )
-    return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
-  const state = { ...applied.state, rng: out.rng } as World['state'];
-  return { decision: out, world: { ...world, state } };
-}
-
-// The state after composing `ops` over the world's state, the fact defaults, the declared
-// capacities, the resource specs and the barriers' initial states, or composition's fault. Only
-// written sections join the state, so a world that never sets a fact, resource, cooldown,
-// barrier or job keeps its earlier state hash.
-function apply(world: World, ops: readonly DeltaOp[]): { state: State } | { fault: Fault } {
-  const base = {
-    ...world.state,
-    fact_defaults: world.factDefaults,
-    capacities: world.capacities,
-    resource_specs: world.resourceSpecs,
-    barrier_initial: world.barrierInitial,
-  };
-  const result = compose(base as unknown as Parameters<typeof compose>[0], { ops });
-  if ('fault' in result) return result;
-  // ponytail: copies each written section per call (O(rows)); persistent maps when big.
-  const written: Record<string, Record<string, unknown>> = {};
-  let clock = world.state.clock;
-  for (const { target, value } of result.changes) {
-    if (target.kind === 'clock') clock = value as number;
-    const [name, at] = row(target) ?? [];
-    if (!name) continue;
-    written[name] ??= { ...world.state[name] };
-    written[name][at!] = value;
-  }
-  return { state: { ...world.state, ...written, clock } as State };
-}
-
-/**
- * The whole proposal of an admitted root decision (04 §5.2 steps 4-6, §5.4), each explicit
- * sequence joining in turn: its ops, then its events, with the fact_changed of each assign that
- * changes its fact (fact.ts factChanged) at its causal position, numbered after the events before
- * them and correlated to the command; each event then queued FIFO for the reactions it triggers
- * (reaction.ts). The root sequence (writer group 0, then quest.ts deliver's groups) and its
- * reactions to quiescence; then, when its delta has a time.advance (a wait, or a recipe's
- * duration), each due job and its reactions to quiescence before the next. One counter numbers
- * every later writer group: each job and each reaction delivery takes the next.
- *
- * The due jobs: the pending jobs due at or before the advance's target, snapshotted from the
- * committed state and run in (due_time, job_id) order (job ids compared as UTF-8 bytes, never in
- * row order), each as its run_job (rules/schedule.ts) with the job's CommandId (id_source.ts
- * jobCommandId) and IdSource against the proposal so far, its events caused by that run_job.
- * adopt() composes the whole advance once, so final invariants, the strictly-later-than-target
- * rule for new jobs (nonfuture_job), the job budgets (budget_exceeded) and conflicts between
- * groups apply to it as one proposal, and a fault discards all of it, time included. A run_job
- * that is not accepted is the advance's result. Admission never meets an already-due job: every
- * advance drains its own, and each new job is later than the advance's target, so 04 §5.2 step 2
- * has nothing to drain.
- *
- * A reaction delivery (04 §5.2 steps 5-6): each rule an event triggers, in rule-key order, whose
- * `when` holds on the proposal so far at the event's logical time, is a delivery of its own
- * writer group at one more than its cause's reaction depth (a root's or job's events are at 0),
- * its fact_changed caused by that event at its logical time, its ids from the IdSource of the
- * root or job that began the chain. A delivery past the deliveries or reaction_depth limit
- * (compose.ts over) faults budget_exceeded: a cycle ends there, never truncated (adopt checks
- * the events limit on the whole proposal).
- * ponytail: quest.ts deliver sees only the root's events: a quest objective meets only an
- * item_acquired, which no job or reaction emits; route their events through it when one can.
- * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
- * (rules/schedule.ts), and a stale entry it refuses rejects the whole advance instead of being
- * skipped as ineligible. Nothing in schedule@1 or reaction@1 cancels, reschedules or completes
- * another job, so no entry goes stale yet; the first operation that can turns that refusal into a
- * skip and adds the generation to the comparison.
- */
-function propose(world: World, root: Admitted, command: Actor, mint: Mint): Admitted {
-  if (root.kind !== 'accepted') return root;
-  const ops: DeltaOp[] = [];
-  const events: DomainEvent[] = [];
-  const queue: { cause: DomainEvent; depth: number; mint: Mint }[] = [];
-  let group = Math.max(0, ...root.delta.ops.map((o) => o.writer_group));
-  let deliveries = group;
-  // The proposal so far, composed lazily: only a job or a delivery reads it.
-  let proposal = world;
-  let applied = 0;
-  const now = (): World | Admitted => {
-    if (applied < ops.length) {
-      const r = apply(proposal, ops.slice(applied));
-      if ('fault' in r) return r.fault as Admitted;
-      [proposal, applied] = [{ ...world, state: r.state }, ops.length];
-    }
-    return proposal;
-  };
-  const join = (
-    own: readonly DeltaOp[],
-    evs: readonly DomainEvent[],
-    base: Base,
-    depth: number,
-    m: Mint,
-  ) => {
-    ops.push(...own);
-    const assigns = own.filter((o) => o.op === 'fact.assign') as Assign[];
-    for (const e of factChanged(base, m, assigns, evs)) {
-      const placed = { ...e, position: events.length + 1, correlation_id: base.correlation_id };
-      events.push(placed);
-      queue.push({ cause: placed, depth, mint: m });
-    }
-  };
-  const corr = command.id as string as Corr;
-  const cause = (logical_time: number, id: string) => ({
-    world_context_id: world.context,
-    logical_time,
-    causation_id: id as DomainEvent['causation_id'],
-    correlation_id: corr,
-  });
-  // The queue's deliveries to quiescence, or the fault that ends them.
-  const react = (): Admitted | undefined => {
-    for (let next; (next = queue.shift());) {
-      for (const rule of triggered(world, next.cause)) {
-        const at = now();
-        if (!('cartridge' in at)) return at;
-        const own = sequence(at, command.payload.actor_id, rule, next.cause, group + 1);
-        if (!own) continue;
-        group++;
-        join(own, [], cause(next.cause.logical_time, next.cause.id), next.depth + 1, next.mint);
-        if (over({ deliveries: ++deliveries, reaction_depth: next.depth + 1 }))
-          return { kind: 'fault', code: 'budget_exceeded' } as Admitted;
-      }
-    }
-  };
-  const actor = { actor_id: command.payload.actor_id };
-  join(root.delta.ops, root.events, { ...cause(world.state.clock, command.id), ...actor }, 0, mint);
-  const ended = react();
-  if (ended) return ended;
-  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
-  const due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
-    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
-    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
-  for (const [job_id, { due_time }] of due) {
-    const at = now();
-    if (!('cartridge' in at)) return at;
-    const run = {
-      id: jobCommandId(job_id, due_time) as CommandId,
-      world_context_id: world.context,
-      payload: { type: 'run_job', job_id: job_id as JobId },
-    } as const;
-    const m = allocator(at, run);
-    const ran = admit('schedule', schedule.decide(at, run, m));
-    if (ran.kind !== 'accepted') return ran;
-    group++;
-    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: group }));
-    join(own, ran.events, cause(due_time, run.id), 0, m);
-    const failed = react();
-    if (failed) return failed;
-  }
-  return { ...root, delta: { ops }, events };
-}
-type Corr = DomainEvent['correlation_id'];
-
-type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
-
-/**
- * An accepted rule result as the host admits it (04 §5.2 step 7): an event type neither the
- * owning capability nor one it COMPOSES owns faults unowned_event, which discards the whole
- * proposal. adopt() checks the output budget once the host's events are added.
- */
-export function admit(owner: string, decision: DecisionResult): Admitted {
-  if (decision.kind !== 'accepted') return decision as Admitted;
-  const may: readonly unknown[] = [owner, ...(COMPOSES[owner as keyof typeof COMPOSES] ?? [])];
-  if (decision.events.some((e) => !may.includes(ownerOf(CAPABILITY_OWNERS.event, e.payload.type))))
-    return { kind: 'fault', code: 'unowned_event' } as Admitted;
-  return decision as Admitted;
-}
-
-declare const ADMITTED: unique symbol;
-/** A DecisionResult that passed admit(); adopt() takes only this, so step cannot skip admit. */
-export type Admitted = DecisionResult & { readonly [ADMITTED]: true };
-
 const INVARIANTS = { ...movement.invariants, ...factInvariants, ...containment.invariants };
 
 /** True when the registered invariant holds for the world; throws for an unknown id. */
@@ -335,6 +125,7 @@ export function holds(id: string, world: World): boolean {
   return INVARIANTS[id](world);
 }
 
+export { admit, adopt, type Admitted } from './proposal.ts';
 export { gameView } from './view.ts';
 export { newWorld };
 export { row } from './decision.ts';

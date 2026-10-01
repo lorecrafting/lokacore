@@ -1,4 +1,4 @@
-// size: allow 560, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs) shares this harness
+// size: allow 580, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions) shares this harness
 // The local Story authority on Node with real SQLite (node:sqlite) in its default rollback journal
 // (no WAL), as expo-sqlite opens the save on iOS, one connection per simulated process; a restart
 // closes it and opens a new one on the same file, and a kill is a real child process (03 §§14-15;

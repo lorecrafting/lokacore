@@ -18,6 +18,7 @@ import {
   type Data,
   type Obj,
 } from './cartridge_refs.ts';
+import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from './sha256.ts';
 import { cmp, validate } from './validate.ts';
 
@@ -184,12 +185,7 @@ function lockStage(c: Obj): Diagnostic[] {
     use('definition', 'resource', `.cartridge.resources${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
     use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
-  for (const [ref, r] of Object.entries((c.reactions ?? {}) as Obj)) {
-    const at = `.cartridge.reactions${step(ref)}`;
-    use('definition', 'reaction', at);
-    use('event', r.on.event, `${at}.on.event`);
-    r.apply.forEach((_: Obj, i: number) => use('event', 'fact_changed', `${at}.apply[${i}].op`));
-  }
+  for (const [kind, name, at] of uses(c)) use(kind, name, at);
   return out;
 }
 
