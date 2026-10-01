@@ -23,7 +23,7 @@ export function SaveError({ failed, startOver }: { failed: Failed; startOver: ()
         {PLAIN[failed.kind!] ?? 'The save could not be opened.'}
       </Text>
       <Text>({failed.message})</Text>
-      {failed.kind !== 'unsupported_save_format' && (
+      {(failed.newGame || failed.replace) && (
         <Button title="Start over" onPress={() => confirmStartOver(startOver)} />
       )}
     </SafeAreaView>

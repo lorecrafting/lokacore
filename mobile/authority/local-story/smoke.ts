@@ -140,16 +140,27 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   };
 }
 
-/** Why the save is not playable: the refusal's kind (none for an untyped throw) and its message. */
-export type Failed = { kind?: string; message: string; newGame?: () => { kind: string } };
+/**
+ * Why the save is not playable, or why start over failed: the refusal's kind (none for an untyped
+ * throw), its message, and how start over may proceed: the refusal's new game, or `replace` the
+ * file (a corrupt file, or one whose replacing failed). Neither: no start over.
+ */
+export type Failed = {
+  kind?: string;
+  message: string;
+  newGame?: () => { kind: string };
+  replace?: boolean;
+};
 
 /**
  * The game on the save file, or why it does not open, and start over (10 §31: the host has the
  * player confirm first). `open` opens the file (once per process); `remove` closes that handle
  * and deletes the file. Start over is the authority's new game where it offers one: it keeps the
  * file, so the old runs' trace and any pending report survive. A file it cannot repair (NOTADB, a
- * corrupt page: its new game throws as corrupt) or an untyped open failure is replaced instead.
- * A newer app's save (`unsupported_save_format`) is never started over: update the app (10 §32).
+ * corrupt page: its new game throws as corrupt, or the open throws untyped as corrupt) is replaced.
+ * Never started over: a newer app's save (`unsupported_save_format`, update the app, 10 §32) or an
+ * open that failed for another reason (a full disk: the save may be intact). A start over that
+ * fails otherwise keeps the game being played.
  */
 export function playSmoke(
   open: () => Db,
@@ -163,8 +174,9 @@ export function playSmoke(
       s.game = openSmoke((s.db ??= open()), bundled, newId);
       s.failed = undefined;
     } catch (e) {
-      const refused = (e as Error).cause as Failed | undefined;
-      s.failed = { kind: refused?.kind, message: (e as Error).message, newGame: refused?.newGame };
+      const { kind, newGame } = ((e as Error).cause ?? {}) as Failed;
+      s.game = undefined;
+      s.failed = { kind, message: (e as Error).message, newGame, replace: !kind && corrupt(e) };
     }
   };
   reopen();
@@ -172,21 +184,20 @@ export function playSmoke(
     game: () => s.game,
     failed: () => s.failed,
     startOver(): void {
-      if (s.failed?.kind === 'unsupported_save_format') return;
       const newGame = s.game?.newGame ?? s.failed?.newGame;
-      s.game = undefined;
+      if (!newGame && !s.failed?.replace) return;
       try {
         if (newGame?.().kind === 'pending') throw new Error('start over not confirmed; try again');
         if (newGame) return reopen();
       } catch (e) {
-        if (!corrupt(e)) return void (s.failed = { message: (e as Error).message, newGame });
+        if (!corrupt(e)) return void (s.failed = { ...s.failed, message: (e as Error).message });
       }
       try {
-        s.db = undefined; // the handle goes with the file
+        [s.game, s.db] = [undefined, undefined]; // the handle goes with the file
         remove();
         reopen();
       } catch (e) {
-        s.failed = { message: (e as Error).message };
+        s.failed = { message: (e as Error).message, replace: true };
       }
     },
   };

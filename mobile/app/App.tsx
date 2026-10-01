@@ -49,6 +49,7 @@ export default function App() {
         <Text>Carrying: {names(view.inventory)}</Text>
         <Text>Time: {view.time}</Text>
         {pending && <Text>Save not confirmed (pending)</Text>}
+        {smoke.failed() && <Text>Start over failed: {smoke.failed()!.message}</Text>}
         <Text>{log.slice(-20).join('\n')}</Text>
         {buttons.map((b, i) => (
           <Button

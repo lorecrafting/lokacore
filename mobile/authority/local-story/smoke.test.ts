@@ -242,10 +242,13 @@ test('a confirmed reply that fails to format propagates and still ends the attem
 
 // The app's save file under playSmoke, as App.tsx wires it: `remove` closes the handle and deletes
 // the file, as expo's closeSync and deleteDatabaseSync do (the main file only).
-const app = (path: string) => {
+const app = (path: string, refuse?: string) => {
   let sql: DatabaseSync | undefined;
   const c = playSmoke(
-    () => adapt((sql = new DatabaseSync(path))),
+    () => {
+      if (refuse) throw new Error(refuse); // the open itself fails, as expo's can
+      return adapt((sql = new DatabaseSync(path)));
+    },
     () => {
       sql!.close();
       rmSync(path);
@@ -343,6 +346,37 @@ test("a newer app's save is never started over", () => {
   assert.equal(b.c.failed()?.kind, 'unsupported_save_format');
   b.sql().close();
   assert.deepEqual(readFileSync(path), before);
+});
+
+// Breaks: start over deleting a save whose open failed for a reason other than corruption (a full
+// disk, an I/O error): the save may be intact once the cause is gone, so nothing is offered.
+test('an open that fails but not as corrupt is never started over', () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
+  processOn(path).sql.close();
+  const before = readFileSync(path);
+  const a = app(path, 'disk I/O error');
+  assert.deepEqual(a.c.failed(), {
+    kind: undefined,
+    message: 'disk I/O error',
+    newGame: undefined,
+    replace: false,
+  });
+  a.c.startOver();
+  assert.deepEqual(readFileSync(path), before);
+});
+
+// Breaks: a start over during play that fails (here every write refused: PRAGMA query_only)
+// dropping the game being played, so the press can no longer be retried.
+test('a start over that fails during play keeps the game and its retry', () => {
+  const a = app(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'));
+  a.sql().exec('PRAGMA query_only = 1');
+  a.press('Go north');
+  assert.match(a.now().fault!, /readonly/);
+  a.c.startOver();
+  assert.match(a.c.failed()!.message, /readonly/);
+  a.sql().exec('PRAGMA query_only = 0');
+  a.press('scan');
+  assert.deepEqual(a.now().log.slice(-2), ['> Go north', 'moved']);
 });
 
 // Gate R6 (docs/evidence/2026-09-30-gate-r6-iphone11/README.md): the tap script the owner plays on
