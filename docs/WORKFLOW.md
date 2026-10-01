@@ -62,9 +62,14 @@ Report at the end of the slice, not at every step.
    requirements from the spec before reading the diff, and tests the tests by breaking
    the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, links it from
    [the index](reviews/README.md), and returns the findings.
-5. **Fix (same developer).** PM forwards the findings with `SendMessage` to the developer,
-   whose context is intact (after a PM session restart: a fresh developer gets the brief
-   plus the findings). Every fix message restates the whole open finding list, not just the
+5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
+   developer, whose context is intact, while that context is small (about 220k tokens or
+   less); past that, or after a PM session restart, a fresh developer gets the brief, the
+   review record, the PR diff and the findings (every call re-reads the whole context, so a
+   large one makes each fix call the most expensive of the slice). One message per round:
+   batch every request for that round. A conflict with `main` in an index or roadmap line is
+   resolved by the PM in a throwaway worktree (merge, never rebase) without waking the
+   developer; a conflict in code goes to the developer. Every fix message restates the whole open finding list, not just the
    new ones (a resumed agent drops earlier directives). The developer runs `git pull --rebase` first (the review record is on the
    branch), never force-pushes, fixes or disputes each finding with a reason, reruns the
    checks and pushes.
@@ -136,7 +141,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 - Same-model reviewers share blind spots with the developer. Deriving requirements from
   the spec first, breaking the code to test the tests, and a cross-vendor review are
   the counterweights; a longer checklist is not.
-- The developer keeps its context across fixes, so fixes are cheap and consistent; the
+- The developer keeps its context across small fix rounds, so fixes are cheap and consistent;
+  a large context makes every call expensive, so a fresh developer takes over (step 5). The
   reviewer stays fresh so its judgment is independent.
 - If a step keeps finding nothing across slices, the PM proposes dropping it to the owner.
 
