@@ -2,14 +2,16 @@
 // expo-sqlite. The logic is in authority/local-story/smoke.ts; this file only draws it.
 import { useState } from 'react';
 import { Button, SafeAreaView, ScrollView, Text } from 'react-native';
+import { randomUUID } from 'expo-crypto';
 import { openDatabaseSync } from 'expo-sqlite';
 import { openSmoke } from '../authority/local-story/smoke';
 import items from '../../protocol/fixtures/cartridge_items_hash.json';
 
 // Opened once per process, kept on globalThis so a Fast Refresh does not open a second handle
-// (mobile lessons: a second handle on the same file crashes).
+// (mobile lessons: a second handle on the same file crashes). A new file name: a save from before
+// R6 S3a has no identity row, so it would open as corrupt.
 const g = globalThis as { loka_smoke?: ReturnType<typeof openSmoke> };
-const smoke = (g.loka_smoke ??= openSmoke(openDatabaseSync('loka-smoke.db'), items));
+const smoke = (g.loka_smoke ??= openSmoke(openDatabaseSync('loka-save.db'), items, randomUUID));
 
 export default function App() {
   const [, redraw] = useState(0);

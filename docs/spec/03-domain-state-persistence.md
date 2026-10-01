@@ -829,3 +829,5 @@ A rule-owned terminal milestone and its host-side pending report persist atomica
 ## 27. Initial run-lifetime persistence obligations
 
 Document 10 §31–33 governs action-driven Story time, per-accepted-attempt durability, three manual bookmarks, immutable package references, rollback-safe migrations and bounded export/import. Keep current head, immutable restore points and migration staging distinct. Document 23 §11 governs inherited report provenance when restoring/forking; a new lineage is not a replay of all historical effects. Actual storage/fault evidence belongs at R6/R12; account acceptance remains a separate server record.
+
+*Amendment 2026-09-30 ([owner decision](../decisions/owner-decision-one-save-2026-09-30.md)):* one save per story and no manual bookmarks (10 §31 as amended); the restore points kept distinct from the head are the recovery copies.

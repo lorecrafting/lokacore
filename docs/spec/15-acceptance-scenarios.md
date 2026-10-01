@@ -1912,6 +1912,8 @@ Read slowly, resize text, view history, background and return after a week. Defa
 
 Create three named bookmarks, update the app, and run package garbage collection offline. Current save, bookmarks and recovery copies retain every required release/capability dependency. A deliberate old-branch restore creates a new lineage; same-state recovery/retry does not. A completed-account badge is not treated as a backup. Evidence: real storage/package/UI integration at R6/R12, not implemented by this model amendment.
 
+*Amendment 2026-09-30 ([owner decision](../decisions/owner-decision-one-save-2026-09-30.md)):* no bookmarks exist (10 §31 as amended): the current save and recovery copies retain their dependencies, and the old-branch restore is an import or backup restore. A confirmed new game replaces the save under a new lineage with no parent.
+
 ### RUN-03 — Interrupted migration and missing dependency
 
 Inject failure before/after migration staging, validation and atomic head adoption. The original save remains recoverable; no partial new head is used. Missing packages or unsupported versions preserve the working run and produce a precise recovery error. Every released public save/continuation shape has a fixture before breaking app release. Evidence: real local migration/release compatibility tests at R6/R12.
@@ -1923,6 +1925,8 @@ Export contains no tokens or purchase grant. Import malformed/oversized/unknown-
 ### RUN-05 — Forked milestones retain provenance
 
 Restore a bookmark with already accepted or pending milestone history. Preserve the original occurrence/report/run/account identity for inherited history; genuinely new post-fork occurrences use the new run. Do not regrant, rebind, resurrect deleted accounts/withdrawn eligibility or let report order choose the campaign branch. Extend ACCOUNT-01–12 with actual restore/fork integration at R6/R12A; existing account-model passes alone are insufficient.
+
+*Amendment 2026-09-30 ([owner decision](../decisions/owner-decision-one-save-2026-09-30.md)):* the restore is of an imported export or a backup, not a bookmark (10 §31 as amended).
 
 ### RUN-06 — Optional snapshot backup divergence
 

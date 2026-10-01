@@ -112,7 +112,7 @@ This is planning applicability, not a release certificate or a frozen engine reg
 - **INSTANCE:** Spatial instancing closure, entry/export/teardown/recovery before feature use.
 - **ESCROW:** Queued ServiceJob custody, capacity, retry/fault and reconciliation before use.
 - **ACCOUNT:** R12A first-public-app account lifecycle and real milestone sync; local capture/model adapter in proof; admission at R14/R15 (doc 23).
-- **RUN:** R12 first-public-Story bookmarks, pinned-save compatibility, rollback-safe migrations and bounded manual export/import (doc 10 sections 31-33, RUN-01-05). Optional backup has separate RUN-06 evidence when delivered.
+- **RUN:** R12 first-public-Story one save per story with a confirmed new game, pinned-save compatibility, rollback-safe migrations and bounded manual export/import (doc 10 sections 31-33, RUN-01-05). Optional backup has separate RUN-06 evidence when delivered.
 
 ## Limits and later scope
 

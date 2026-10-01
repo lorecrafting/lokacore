@@ -843,6 +843,8 @@ The Ferryman's Lantern uses a current-possession objective to support finding th
 
 Story defaults to action-driven time, durable accepted-attempt autosave, three manual bookmarks and exact release/capability pins. Valid public v3 saves remain openable on supported environments through compatibility or certified rollback-safe local migration; no rolling latest-two-app expiration. Old-branch continuation creates explicit lineage; receipt/crash recovery does not. Campaign branch choice is independent of account completion.
 
+*Note 2026-09-30 ([owner decision](../decisions/owner-decision-one-save-2026-09-30.md)):* the three manual bookmarks are dropped for one save per story with a confirmed new game (10 §31 as amended); the record above is unchanged.
+
 Manual bounded export/import is part of R12's first public release. Whole-save cloud backup remains optional later, separate from mandatory R12A progress sync and not a new hard R13 gate. Support/end-of-service promises are published before paid launch without promising perpetual new-platform or store availability. See 10 §31–33 and 23 §11.
 
 ## ADR-067 — Bounded start, early representation review, no speculative expansion

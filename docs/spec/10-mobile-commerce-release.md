@@ -563,6 +563,8 @@ Default Story time is action-driven logical time: declared costs, waits and tran
 
 Provide one current autosaved position and **three named manual bookmarks per playthrough** at the first public Story release. A bookmark is an immutable restore point, not a full world serialization on every action. Retain bounded internal recovery checkpoints and a pre-migration recovery copy under a documented quota. Never discard the only working/unbacked save merely to meet a quota.
 
+*Amendment 2026-09-30 ([owner decision](../decisions/owner-decision-one-save-2026-09-30.md), paraphrased):* one autosaved current position **per story**; there are no manual bookmarks, so the three named bookmarks above and restoring one are dropped. Starting a **new game** replaces that save only after the player explicitly confirms: the fresh world under a new run/branch identity with no causal parent. The recovery checkpoints and the pre-migration recovery copy above stand. An older branch restored from an import or backup (§33) still creates a new run/branch identity and causal parent.
+
 Restoring an older semantic branch creates a new run/branch identity and causal parent. Same-state crash recovery, receipt replay and redelivery are not new branches. Restore the saved RNG; neither unlimited undo, ironman anti-reload nor a cloud branch editor is required. Account binding and inherited milestone delivery provenance follow 23 §11, not the currently signed-in profile.
 
 ## 32. Content pins, upgrades and continuity
