@@ -15,7 +15,8 @@
 // steps before it left it, adding by and stopping at the bounds (none when that changes nothing), each event.emit a custom_event at its causal position; a fact.assign
 // that changes its fact leaves the next position free for the fact_changed the host puts there
 // (proposal.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
-// reads the outcome's narration. A cooldown adds a cooldown.start at the admission time, and a
+// reads the outcome's narration, each of its participants pinned here to its EntityId (an NPC's
+// or item's, the actor's body), so the committed line never resolves them again (06 §43). A cooldown adds a cooldown.start at the admission time, and a
 // duration one time.advance after the steps; events keep the admission time. Result bands join
 // later.
 import type {
@@ -24,6 +25,8 @@ import type {
   EntityId,
   EventPayload,
   FactValue,
+  NarrationParticipant,
+  RecipeNarration,
   RecipeStep,
 } from '../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../actions.ts';
@@ -33,6 +36,8 @@ import {
   bodyOf,
   event,
   has,
+  keys,
+  refString,
   rejected,
   type Mint,
   type Rule,
@@ -77,10 +82,23 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
     rolled?.outcome ?? 'performed',
     [...run.ops, ...cooldown, ...time],
     [...run.events, ...completed],
-    [{ key: narration.actor }],
+    [{ key: narration.actor, ...pinned(world, narration.participants, body) }],
     rolled?.rng,
   );
 };
+
+// The narration's participants as EntityIds; the loader checked each npc or item resolves.
+function pinned(world: World, participants: RecipeNarration['participants'], body: EntityId) {
+  if (!participants) return {};
+  const id = (p: NarrationParticipant) =>
+    p.role === 'actor' ? body : world.entityIds[refString(p.role === 'npc' ? p.npc : p.item)]!;
+  return {
+    participants: keys(participants).reduce<Record<string, EntityId>>(
+      (o, n) => ({ ...o, [n]: id(participants[n]!) }),
+      {},
+    ),
+  };
+}
 
 // ponytail: at most 8 draws; at bound 100 one is rejected with probability 96 / 2^32, so
 // rng_budget_exhausted (which throws and discards the decision) is practically unreachable.

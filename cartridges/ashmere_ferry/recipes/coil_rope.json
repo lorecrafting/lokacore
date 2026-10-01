@@ -26,7 +26,16 @@
         }
       ],
       "narration": {
-        "actor": "narration.coil_rope.actor"
+        "actor": "narration.coil_rope.actor",
+        "participants": {
+          "actor": {
+            "role": "actor"
+          },
+          "bram": {
+            "role": "npc",
+            "npc": "bram"
+          }
+        }
       }
     }
   }

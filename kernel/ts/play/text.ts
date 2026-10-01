@@ -111,6 +111,15 @@ export const plain = (s: string): string => s.replace(/\[([^[\]]+)\](?:\([^()]*\
 /** The cartridge's text for a key, as plain words (the key itself if it has none). */
 export const say = (cartridge: Cartridge, key: string): string => plain(cartridge.text[key] ?? key);
 
+// A narration line's committed key and participants as the receipt holds them (06 §43), or
+// nothing for a line without participants; names are not rendered (presentation, later).
+export const pinned = (t: { key: string; participants?: Readonly<Record<string, string>> }) =>
+  t.participants
+    ? `[${t.key}: ${Object.entries(t.participants)
+        .map(([n, id]) => `${n} ${id}`)
+        .join(', ')}]\n`
+    : '';
+
 /**
  * The current room's title, description (none when `brief`), the room line of each NPC and item
  * in it (an item's room-line variants), and exits, each marked closed or locked while its barrier

@@ -165,3 +165,21 @@ test('the status line follows the pools; exhaustion, costs and cooldowns read as
   assert.match(r.stdout, /> pray\nYou can't do that again yet\.\n/);
   assert.match(r.stdout, /> east\nYou are too exhausted\.\n/);
 });
+
+// Breaks (06 §43; PM ruling for N): a narration line's committed key or pinned participants not
+// shown. Ids are the ferry transcript's own records: its move's entity_entered_room (the body)
+// and Bram's at 19:00.
+test('play shows a narration line with its key and pinned participants', () => {
+  const ferry = read('protocol/fixtures/cartridge_ferry_hash.json');
+  const file = join(dir, 'ferry.json');
+  writeFileSync(file, `{"cartridge":${ferry.canonical},"content_hash":"${ferry.sha256}"}`);
+  const transcript = `${ROOT}cartridges/ashmere_ferry/transcripts/schedule.jsonl`;
+  const r = spawnSync('node', [`${ROOT}kernel/ts/play/main.ts`, file, '--replay', transcript], {
+    encoding: 'utf8',
+  });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(
+    r.stdout,
+    /\nYou coil the wet rope around the post, slowly, the way Bram does it\.\n\[narration\.coil_rope\.actor: actor 186cae63-3b7a-89c8-aa32-f7272aeb290a, bram d8785996-8e35-8a4b-a2fe-d59147a72b59\]\n/,
+  );
+});

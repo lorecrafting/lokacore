@@ -23,6 +23,7 @@ import {
   inventory,
   journal,
   parse,
+  pinned,
   reason,
   room,
   say,
@@ -171,7 +172,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
     decision.kind !== 'accepted'
       ? `${reason(decision, lockless ? 'lockless' : p.type)}\n`
       : narrated
-        ? narrated.map((t) => `${say(cartridge, t.key)}\n`).join('')
+        ? narrated.map((t) => `${say(cartridge, t.key)}\n${pinned(t)}`).join('')
         : (done[decision.outcome] ??
           (p.target_id
             ? detail(cartridge, r.world, p.target_id)

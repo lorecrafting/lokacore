@@ -61,6 +61,35 @@ defmodule Loka.ContentFerryTest do
     assert compile(dir, schedule(full)) == {:ok, @expected, []}
   end
 
+  # coil_rope with its Bram participant replaced by `p`.
+  defp bram(p) do
+    r = src("recipes/coil_rope.json")
+    %{"recipes/coil_rope.json" => put_in(r, ~w(outcomes success narration participants bram), p)}
+  end
+
+  @bram "recipes/coil_rope.outcomes.success.narration.participants.bram"
+
+  # Breaks: a participant's short npc left short (Checks.expand; the loader would reject it).
+  test "a full participant reference compiles to the same artifact", %{tmp_dir: dir} do
+    full = %{"role" => "npc", "npc" => Map.put(ref("bram"), "kind", "npc")}
+    assert compile(dir, bram(full)) == {:ok, @expected, []}
+  end
+
+  # Breaks: a participant naming no npc or item of its role compiling (the kernel would pin an
+  # undefined EntityId).
+  test "a participant naming no definition of its role is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
+    unresolved = &{:error, [d("UNRESOLVED_REFERENCE", @bram <> &1, %{"target" => &2})]}
+
+    assert compile(Path.join(dir, "a"), bram(%{"role" => "npc", "npc" => "ada"})) ==
+             unresolved.(".npc", "ashmere_ferry@0.0.1:npc/ada")
+
+    assert compile(Path.join(dir, "b"), bram(%{"role" => "npc", "npc" => ref("ferry_landing")})) ==
+             unresolved.(".npc", "ashmere_ferry@0.0.1:room/ferry_landing")
+
+    assert compile(Path.join(dir, "c"), bram(%{"role" => "item", "item" => "bram"})) ==
+             unresolved.(".item", "ashmere_ferry@0.0.1:item/bram")
+  end
+
   # Breaks: a schedule naming a room the cartridge lacks compiling (run_job would crash).
   test "a schedule's unknown room is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
     assert compile(dir, schedule(%{"6" => "ferry_landing", "19" => "shed"})) ==

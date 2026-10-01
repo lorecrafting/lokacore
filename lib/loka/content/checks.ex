@@ -61,7 +61,7 @@ defmodule Loka.Content.Checks do
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
   node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
   included), a recipe's fact.assign fact, its target's room or the resource of its cost,
-  threshold check or resource.adjust step, an exit's `to` and `barrier`, a barrier's
+  threshold check or resource.adjust step, a narration participant's npc or item, an exit's `to` and `barrier`, a barrier's
   `key_item`, a quest objective's `item_acquired`, a reaction trigger's fact or room, an item's location (its room,
   npc or item, as `in` selects), an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
@@ -83,6 +83,10 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"event" => "entity_entered_room", "room" => k} = on, m) when is_binary(k),
     do: Map.put(on, "room", ref(k, "room", m))
+
+  # A recipe narration's participant (NarrationParticipant): the npc or item its role selects.
+  def expand(%{"role" => k} = p, m) when k in ~w(npc item) and is_map_key(p, k),
+    do: Map.update!(p, k, &ref(&1, k, m))
 
   # A post_activation_event objective (QuestObjective): its short item.
   def expand(%{"item_acquired" => k} = objective, m) when is_binary(k),

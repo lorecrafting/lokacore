@@ -46,5 +46,5 @@ Example transcripts replay in `kernel/ts/test/transcripts.test.ts`.
 | topics@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | relationship@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | faction@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
-| narration@1 | portable_capability, portable | proof on (R7) | not yet | — | none | none | — | — | none | — |
+| narration@1 | portable_capability, portable | proof on (R7) | Early R7/R8 N a recipe narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again | 06 §43; 04 §5.2 steps 7-8, §15; 21 §4 NarrationSpec | `Text`, `RecipeNarration`, `NarrationParticipant`, `DecisionResult` | `kernel/ts/src/rules/action_recipe.ts`, `kernel/ts/src/cartridge_refs.ts` | `protocol/fixtures/cartridge_ferry_hash.json` | `retry_replays_receipt` | none | no: TypeScript only (ADR-074) |
 | sense_cue@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |

@@ -1,4 +1,4 @@
-// size: allow 580, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions) shares this harness
+// size: allow 600, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions, narration) shares this harness
 // The local Story authority on Node with real SQLite (node:sqlite) in its default rollback journal
 // (no WAL), as expo-sqlite opens the save on iOS, one connection per simulated process; a restart
 // closes it and opens a new one on the same file, and a kill is a real child process (03 §§14-15;
@@ -566,4 +566,28 @@ test('a move whose reactions commit replays its events byte for byte after a res
   const again = b.story.invoke(north) as Saved;
   assert.equal(encode(again.decision as never), encode(first.decision as never));
   assert.deepEqual([again.replay, again.revision], [true, 1]);
+});
+
+// Breaks (06 §43; 03 §14): a narration's participants dropped from the stored receipt or its
+// replay, or resolved again from the reopened world (here one whose Bram ref names the body)
+// instead of returned as committed.
+test("a recipe narration's pinned participants survive a restart and replay unchanged", () => {
+  const [path, coil, bram] = [
+    save(),
+    invocation(1, 'coil_rope', []),
+    'ashmere_ferry@0.0.1:npc/bram',
+  ];
+  const a = processOn(path, ferry);
+  const first = a.story.invoke(coil) as Saved;
+  a.sql.close();
+  const entityIds = { ...ferry.fresh.entityIds, [bram]: ferry.fresh.body };
+  const again = processOn(path, { ...ferry, fresh: { ...ferry.fresh, entityIds } }).story.invoke(
+    coil,
+  );
+  assert.deepEqual(saved(again), [true, 1]);
+  assert.equal(encode((again as Saved).decision as never), encode(first.decision as never));
+  // BODY: ordinal 1 under this context in any world.
+  assert.deepEqual((first.decision as { narration: unknown }).narration, [
+    { key: 'narration.coil_rope.actor', participants: { actor: BODY, bram: BRAM } },
+  ]);
 });

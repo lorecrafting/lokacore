@@ -24,6 +24,7 @@ defmodule Loka.Content.Recipes do
   its costs, threshold check and resource.adjust steps name resources of this cartridge; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
   of this cartridge and a detail of that room, each fact.assign a fact with a value of its type,
+  each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
   and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
   key is an action's or a
@@ -107,7 +108,17 @@ defmodule Loka.Content.Recipes do
           d <- reference(rel, steps, "fact", s, m, defs),
           do: d
 
-    target(rel, r["target"], m, defs) ++ facts ++ resources(rel, r, m, defs)
+    target(rel, r["target"], m, defs) ++
+      facts ++ resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
+  end
+
+  # Each narration participant but the actor names this cartridge's npc or item its role says.
+  defp participants(rel, r, m, defs) do
+    for {name, o} <- r["outcomes"],
+        {n, %{"role" => k} = p} <- Map.get(o["narration"], "participants", %{}),
+        k != "actor",
+        d <- reference(rel, ["outcomes", name, "narration", "participants", n], k, p, m, defs),
+        do: d
   end
 
   defp resources(rel, r, m, defs),
@@ -141,7 +152,7 @@ defmodule Loka.Content.Recipes do
           {["label"], r["label"]}
           | for(
               {name, o} <- r["outcomes"],
-              {k, v} <- o["narration"],
+              {k, v} <- Map.take(o["narration"], ~w(actor observers)),
               do: {["outcomes", name, "narration", k], v}
             )
         ],
