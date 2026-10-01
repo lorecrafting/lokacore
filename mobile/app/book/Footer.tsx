@@ -35,6 +35,11 @@ type Ui = {
 function joystick(u: Ui) {
   const to = (v: number) =>
     Animated.timing(u.zoom, { toValue: v, duration: 160, useNativeDriver: true }).start();
+  const reset = () => {
+    u.setLit(null);
+    u.knob.setValue({ x: 0, y: 0 });
+    to(0);
+  };
   let d = { t: 0, moved: false, pick: null as string | null };
   return PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -60,14 +65,11 @@ function joystick(u: Ui) {
         stair ? { x: stair[0] * ZOOM, y: stair[1] * ZOOM } : { x: dx * k * ZOOM, y: dy * k * ZOOM },
       );
     },
-    onPanResponderRelease: () =>
-      !d.moved && Date.now() - d.t < TAP_MS ? u.openMap() : u.walk(d.pick),
-    onPanResponderEnd: (_, g) => {
-      if (g.numberActiveTouches > 0) return; // another finger lifted: the gesture goes on
-      u.setLit(null);
-      u.knob.setValue({ x: 0, y: 0 });
-      to(0);
+    onPanResponderRelease: () => {
+      !d.moved && Date.now() - d.t < TAP_MS ? u.openMap() : u.walk(d.pick);
+      reset();
     },
+    onPanResponderTerminate: reset, // a stolen gesture walks nowhere
   });
 }
 
