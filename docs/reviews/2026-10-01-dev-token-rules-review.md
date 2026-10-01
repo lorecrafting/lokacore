@@ -16,3 +16,11 @@ PR #89 at `cd70db5`. Short review (docs/config only, no mutation testing). Verdi
 5. **nit**, `developer.md:~45`: "two fix attempts" / "fix round 2" counters are lost with a fresh developer; the restated finding list must say the round number. Say so in step 5.
 
 Checked, no finding: step 6, Git hygiene (merge not rebase, PM-owned main checkout), AGENTS.md (outline line 121 is consistent; no conflicting fact), Why line (consistent with step 5).
+
+## Fix round 1 re-check (scoped to the fix commit)
+- F1 fixed (`developer.md:45-46`). Nit: "follows only this paragraph" points at the skip paragraph itself, the findings paragraph is the next one; say "the next paragraph". Not blocking.
+- F2 accepted: harness grants advisor regardless of `tools:`; the token audit shows developer advisor calls (Q 2, R 1, N 2).
+- F3 fixed (step 5 names the token-count source). F4 fixed (rewrapped, no line over 100). F5 fixed ("name the round (1 or 2)").
+- Direct callers: step 6 and the Why line unchanged and consistent.
+
+Verdict: APPROVE (one non-blocking wording nit).
