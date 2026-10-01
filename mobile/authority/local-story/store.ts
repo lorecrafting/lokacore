@@ -114,6 +114,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
  * Makes the save `fresh` at revision 0 under the identity `meta`, with no receipts, in one
  * transaction (a first save or a new game; one save per story), as `transaction` reports.
  */
+// ponytail: reuses the tables it finds; an unknown format's that differ make it throw, nothing
+// written (its new game then never succeeds). Recreate them with the first format change.
 export function replace(db: Db, fresh: World, meta: Meta): boolean {
   return transaction(db, () => {
     const { clock, rng, ...sections } = fresh.state;
