@@ -30,6 +30,8 @@ Before handing off:
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
 
+Token hygiene (docs/WORKFLOW.md): send check, test, push and pre-push output to a scratchpad file named for your slice; read only the exit status, the failures and the tail. Read diffs per hunk.
+
 Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
 
 When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
