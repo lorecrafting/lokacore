@@ -115,6 +115,7 @@ function keyStage(c: Obj): Diagnostic[] {
     'recipes',
     'resources',
     'barriers',
+    'quests',
   ]) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
@@ -141,7 +142,8 @@ function keyStage(c: Obj): Diagnostic[] {
 // definition kind (room, detail, NPC, item, variant, recipe, resource, barrier), recipe check (by the
 // events it produces, check@1's) and recipe step of any outcome (by the event it produces:
 // fact_changed for fact.assign, custom_event for event.emit; a resource.adjust, like a cost,
-// through the resource it names) the cartridge uses has its owner in the lock.
+// through the resource it names) and quest (by its quest_activated) the cartridge uses has its
+// owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const required: Obj = c.manifest.requires.capabilities;
@@ -177,6 +179,8 @@ function lockStage(c: Obj): Diagnostic[] {
   }
   for (const ref of Object.keys((c.resources ?? {}) as Obj))
     use('definition', 'resource', `.cartridge.resources${step(ref)}`);
+  for (const ref of Object.keys((c.quests ?? {}) as Obj))
+    use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
   return out;
 }
 

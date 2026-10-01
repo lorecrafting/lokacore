@@ -8,7 +8,7 @@ defmodule Loka.Content.Checks do
 
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
-  alias Loka.Content.{Barriers, Entities, Recipes, RoomParts}
+  alias Loka.Content.{Barriers, Entities, Quests, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
   @supported_pin 1
@@ -62,7 +62,7 @@ defmodule Loka.Content.Checks do
   node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
   included), a recipe's fact.assign fact, its target's room or the resource of its cost,
   threshold check or resource.adjust step, an exit's `to` and `barrier`, a barrier's
-  `key_item`, an item's location (its room,
+  `key_item`, a quest objective's `item_acquired`, an item's location (its room,
   npc or item, as `in` selects) or an NPC's room goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
   """
@@ -76,6 +76,10 @@ defmodule Loka.Content.Checks do
     exit = fn {d, e} -> {d, Map.new(e, field)} end
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
   end
+
+  # A post_activation_event objective (QuestObjective): its short item.
+  def expand(%{"item_acquired" => k} = objective, m) when is_binary(k),
+    do: Map.put(objective, "item_acquired", ref(k, "item", m))
 
   # A barrier (a details map may have a detail keyed key_item, whose value is a map).
   def expand(%{"key_item" => k} = barrier, m) when is_binary(k),
@@ -222,11 +226,13 @@ defmodule Loka.Content.Checks do
   defp tree({rel, steps, root}, ctx),
     do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
-  # Every policy tree: a named policy's root, each action's inline one and each variant's.
+  # Every policy tree: a named policy's root, each action's inline one, each variant's, each
+  # recipe's and each quest's (its offer's and a current_state objective's).
   defp trees(defs, actions) do
     for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
       for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
-      RoomParts.conditions(defs) ++ Entities.conditions(defs) ++ Recipes.conditions(defs)
+      RoomParts.conditions(defs) ++
+      Entities.conditions(defs) ++ Recipes.conditions(defs) ++ Quests.conditions(defs)
   end
 
   defp command(rel, name, required) do

@@ -1,9 +1,10 @@
 // The player's GameView (04 §14; 00 §4.10), read from a World.
-import type { EntityId, EntityView, GameView, Key, TextKey } from './contracts.gen.ts';
+import type { EntityId, EntityView, GameView, Key, QuestView, TextKey } from './contracts.gen.ts';
 import { lists } from './actions.ts';
-import { COMPASS, type World } from './decision.ts';
+import { COMPASS, refString, type QuestRow, type World } from './decision.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
+import { cmp } from './validate.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -13,7 +14,8 @@ import * as movement from './rules/movement.ts';
  * the NPCs and items in the room and the items the player's body holds (03 §23), each named by
  * its short description with its actions (actions.ts lists: an item here by the room_contents
  * scope, an NPC by room_occupants, a held item by inventory), NPCs first, then in
- * DefinitionRefString order.
+ * DefinitionRefString order; and the journal, each quest the player has an instance of with its
+ * state and title (04 §15 quest journal state), in DefinitionRefString order.
  */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
@@ -44,7 +46,15 @@ export function gameView(world: World): GameView {
     actions: actions.place,
     entities: within(here),
     inventory: within(world.body),
-    journal: [],
+    journal: journal(world),
     time: world.state.clock,
   };
+}
+
+function journal(world: World): QuestView[] {
+  const title = (q: QuestRow) => world.cartridge.quests![refString(q.quest)].title;
+  return Object.values(world.state.quests ?? {})
+    .filter(({ scope: s }) => s.kind === 'player' && s.character_id === world.character)
+    .map((q) => ({ quest: q.quest, state: q.state, title: title(q) }))
+    .sort((a, b) => cmp(refString(a.quest), refString(b.quest)));
 }

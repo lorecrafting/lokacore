@@ -11662,6 +11662,184 @@
     ]
   },
   {
+    "contract": "QuestDefinition",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/objective",
+        "code": "missing_property"
+      },
+      {
+        "path": "/offer",
+        "code": "missing_property"
+      },
+      {
+        "path": "/title",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "QuestDefinition",
+    "value": {
+      "key": "K",
+      "title": "T",
+      "offer": {
+        "x": 1
+      },
+      "objective": {
+        "evidence": "current_state",
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/offer/label",
+        "code": "missing_property"
+      },
+      {
+        "path": "/offer/policy",
+        "code": "missing_property"
+      },
+      {
+        "path": "/offer/x",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/title",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "QuestObjective",
+    "value": {
+      "evidence": "remembered"
+    },
+    "errors": [
+      {
+        "path": "/evidence",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "contract": "QuestObjective",
+    "value": {
+      "evidence": "current_state",
+      "item_acquired": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "lantern"
+      }
+    },
+    "errors": [
+      {
+        "path": "/item_acquired",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/policy",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "QuestObjective",
+    "value": {
+      "evidence": "post_activation_event",
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/item_acquired",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policy",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "quests": {
+        "c@1.0.0:item/x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policies",
+        "code": "missing_property"
+      },
+      {
+        "path": "/quests/c@1.0.0:item~1x",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/quests/c@1.0.0:item~1x",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
     "contract": "DeltaOp",
     "value": {
       "op": "barrier.transition"

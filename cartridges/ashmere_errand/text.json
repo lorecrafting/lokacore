@@ -1,0 +1,15 @@
+{
+  "room.ferry_landing.title": "Ferry Landing",
+  "room.ferry_landing.description": "Reeds crowd a slick wooden landing. Across the water, a light swings once and goes dark.",
+  "room.ferry_landing.waiting": "Reeds crowd a slick wooden landing. Bram keeps glancing north, toward the green.",
+  "room.village_green.title": "Village Green",
+  "room.village_green.description": "An old elm shades a patch of trodden grass.",
+  "npc.bram.short": "Bram the ferryman",
+  "npc.bram.room": "[Bram] the ferryman stands here, one boot on the ferry.",
+  "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry.",
+  "item.lantern.short": "a brass lantern",
+  "item.lantern.room": "A [brass lantern] lies in the weeds.",
+  "item.lantern.description": "Dented brass, still smelling of oil. It would light a fen path.",
+  "quest.lantern.title": "Bram's lantern",
+  "quest.lantern.accept": "Offer to fetch Bram's lantern"
+}

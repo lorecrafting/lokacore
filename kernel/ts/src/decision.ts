@@ -20,11 +20,15 @@ import {
   type InspectableDetail,
   type ItemDefinition,
   type Key,
+  type MutationTarget,
   type NpcDefinition,
   type Owned,
+  type QuestInstanceId,
+  type QuestState,
   type ResourceSpec,
   type RoomDefinition,
   type StateDelta,
+  type StateScope,
   type Text,
   type WorldContextId,
 } from './contracts.gen.ts';
@@ -36,8 +40,8 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
 
 /**
  * The mutable, hashed part of a world: logical time, containment (03 §23), the RNG, and the
- * facts, resources, cooldowns and barrier states written so far, each by canonical
- * MutationTarget text (compose.ts); each absent until one is written, as an unset fact has its
+ * facts, resources, cooldowns, barrier states and quest instances written so far, each by canonical
+ * MutationTarget text (a quest instance by its id; compose.ts); each absent until one is written, as an unset fact has its
  * default, an unset resource its start (fact.schema.json ScopedFact; resource.ts) and an unset
  * barrier its initial state, so a world that never writes one keeps its state hash.
  */
@@ -49,6 +53,39 @@ export type State = {
   readonly resources?: Readonly<Record<string, Stored>>;
   readonly cooldowns?: Readonly<Record<string, number>>;
   readonly barriers?: Readonly<Record<string, BarrierState>>;
+  readonly quests?: Readonly<Record<string, QuestRow>>; // by QuestInstanceId
+};
+
+// The State section each written MutationTarget kind lives in (the clock is State.clock).
+const SECTIONS: Readonly<
+  Record<string, 'containers' | 'facts' | 'resources' | 'cooldowns' | 'barriers' | 'quests'>
+> = {
+  containment: 'containers',
+  fact: 'facts',
+  resource: 'resources',
+  cooldown: 'cooldowns',
+  barrier: 'barriers',
+  quest: 'quests',
+};
+
+/**
+ * Where adopt() keeps a written MutationTarget: its State section and row (not the clock), as
+ * compose.ts reads it: an entity's container by its id, a quest instance by its id, else by
+ * canonical target text.
+ */
+export const row = (t: MutationTarget) =>
+  SECTIONS[t.kind] &&
+  ([
+    SECTIONS[t.kind]!,
+    t.kind === 'containment' ? t.entity_id : t.kind === 'quest' ? t.instance_id : key(t),
+  ] as const);
+
+/** A QuestInstance as composition stores it (compose.ts quest; 03 §12, 06 §4). */
+export type QuestRow = {
+  readonly quest: DefinitionRef;
+  readonly scope: StateScope;
+  readonly state: QuestState;
+  readonly outcome?: Key;
 };
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */
@@ -192,6 +229,21 @@ export const exitTo = (room: RoomDefinition, direction: string): DefinitionRef |
 /** A barrier's current state (barrier@1): its stored state, else its initial one. */
 export const barrierState = (world: World, barrier: DefinitionRef): BarrierState =>
   world.state.barriers?.[key({ kind: 'barrier', barrier })] ?? world.barrierInitial[key(barrier)];
+
+/**
+ * `actor`'s instance of `quest` (player scope, 06 §2), if it has one: its id and row. One per
+ * quest and actor, since the offer is withdrawn once one exists (actions.ts).
+ */
+export function questOf(
+  world: World,
+  actor: CharacterId,
+  quest: DefinitionRef,
+): [QuestInstanceId, QuestRow] | undefined {
+  const scope: StateScope = { kind: 'player', character_id: actor };
+  return Object.entries(world.state.quests ?? {}).find(
+    ([, q]) => key(q.quest) === key(quest) && key(q.scope) === key(scope),
+  ) as [QuestInstanceId, QuestRow] | undefined;
+}
 
 /** Own-key test and values for rule modules, which may not name Object (ts-rule-module-pure). */
 export const has = (o: object, key: string): boolean => Object.hasOwn(o, key);

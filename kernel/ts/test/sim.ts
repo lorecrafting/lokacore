@@ -284,7 +284,7 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
 }
 
 // A command the GameView offers, available or not: each place action (a recipe's perform, a
-// direction verb through each exit, wait to a boundary), each action on a listed entity, and
+// quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each action on a listed entity, and
 // look at each detail of the room.
 function offered(world: World, g: Gen): Payload {
   const view = gameView(world);
@@ -295,6 +295,7 @@ function offered(world: World, g: Gen): Payload {
   const options: Payload[] = view.actions.flatMap((a): Payload[] => {
     const o = set[a.action_key]!;
     if (o.recipe) return [{ type: 'perform', action: o.key }];
+    if (o.quest) return [{ type: o.command, quest: o.quest }];
     if (o.input.includes('direction'))
       return exits.map((direction) => ({ type: o.command, direction }));
     if (o.input.includes('until')) return [{ type: 'wait', until: g.pick(boundaries(world)) }];

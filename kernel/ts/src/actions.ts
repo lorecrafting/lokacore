@@ -2,7 +2,8 @@
 // actions are the contributions of its sources composed by stable action key, then each
 // action's policy is evaluated for the actor and the lists are sorted for the GameView (04 §14,
 // §19). Sources today, in this order: the engine verbs of the capabilities the cartridge locks
-// (union), the cartridge's actions and recipes (override: a cartridge may redefine a verb), and
+// (union), the cartridge's actions, recipes and quest offers (override: a cartridge may redefine a
+// verb), and
 // the actor's room's contributions (each with its authored op). Later sources (equipment, status
 // effects, skills, quest grants, scripts, modal state) are further contributions in this order.
 import {
@@ -13,6 +14,7 @@ import {
   type AdvertisedAction,
   type CharacterId,
   type CommandPayload,
+  type DefinitionRef,
   type EntityId,
   type ErrorCode,
   type Key,
@@ -21,8 +23,8 @@ import {
   type TextKey,
   type VersionedPolicy,
 } from './contracts.gen.ts';
-import { key } from './compose.ts';
-import { bodyOf, refString, type World } from './decision.ts';
+import { key, same } from './compose.ts';
+import { bodyOf, questOf, refString, type World } from './decision.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
 import { holds } from './policy.ts';
@@ -30,8 +32,9 @@ import { cmp } from './validate.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
- * recipe when it is one (whose invocation needs no target: the recipe names its own), and
- * whether it is an engine verb, whose rule is its target and input contract (see accepts).
+ * recipe when it is one (whose invocation needs no target: the recipe names its own), the quest
+ * when it is a quest's offer (accept_quest of that quest), and whether it is an engine verb,
+ * whose rule is its target and input contract (see accepts).
  */
 export type Offered = {
   readonly key: Key;
@@ -42,6 +45,7 @@ export type Offered = {
   readonly policy: VersionedPolicy;
   readonly command: Key;
   readonly recipe?: ActionRecipe;
+  readonly quest?: DefinitionRef;
   readonly engine?: true;
 };
 export type ActionSet = Readonly<Record<string, Offered>>;
@@ -105,10 +109,11 @@ function engine(world: World): ActionSet {
   );
 }
 
-// The cartridge's actions and recipes by key: disjoint, since the compiler and the loader reject
-// a recipe whose key is an action's or a registered command's (DUPLICATE_DEFINITION), so no key
-// has two definitions here.
-function cartridge(world: World): ActionSet {
+// The cartridge's actions, recipes and the offers of the quests `actor` has no instance of, by
+// key: disjoint, since the compiler and the loader reject a recipe or quest whose key is an
+// action's, a recipe's or a registered command's (DUPLICATE_DEFINITION), so no key has two
+// definitions here.
+function cartridge(world: World, actor: CharacterId): ActionSet {
   const recipes = Object.values(world.cartridge.recipes ?? {}).map((recipe): [string, Offered] => {
     const { key, label, priority, policy } = recipe;
     const target = { kind: 'none' } as const;
@@ -119,12 +124,20 @@ function cartridge(world: World): ActionSet {
     a.key,
     { ...a, label: a.label as TextKey },
   ]);
-  return Object.fromEntries([...actions, ...recipes]);
+  const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
+  const quests = Object.values(world.cartridge.quests ?? {}).flatMap(({ key, offer }) => {
+    const quest = { cartridge_id, cartridge_version, kind: 'quest', key } as DefinitionRef;
+    if (questOf(world, actor, quest)) return [];
+    const command = 'accept_quest' as Key;
+    const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
+    return [[key, o] as [string, Offered]];
+  });
+  return Object.fromEntries([...actions, ...recipes, ...quests]);
 }
 
 /** `actor`'s ActionSet before any policy is evaluated: every source composed, in order. */
 export function resolved(world: World, actor: CharacterId): ActionSet {
-  const [verbs, own] = [engine(world), cartridge(world)];
+  const [verbs, own] = [engine(world), cartridge(world, actor)];
   const all = { ...verbs, ...own };
   const body = bodyOf(world, actor);
   const room = body === undefined ? undefined : world.rooms[world.state.containers[body]];
@@ -177,10 +190,12 @@ const INPUTS: readonly string[] = ['direction', 'choice_id', 'continuation_id', 
  * item's take is invalid_state, not refused here). Another action's is its TargetSpec: none
  * takes no target id, an entity one the id (target_id or item_id) of an entity in one of its
  * scopes for the actor (a room's detail is in none); and its input lists exactly the payload's
- * input parameters.
+ * input parameters. accept_quest resolves only through the offer of the quest it names (an
+ * action of the cartridge's with command accept_quest names no quest, so it never does).
  */
 function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandPayload): boolean {
   if (a.command !== payload.type) return false;
+  if (payload.type === 'accept_quest') return a.quest !== undefined && same(a.quest, payload.quest);
   if (a.engine) return true;
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const id = p.target_id ?? p.item_id;

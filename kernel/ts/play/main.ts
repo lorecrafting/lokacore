@@ -21,6 +21,7 @@ import {
   detail,
   door,
   inventory,
+  journal,
   parse,
   reason,
   room,
@@ -82,6 +83,8 @@ async function session(script: string | undefined) {
       process.stdout.write(`Brief mode ${(brief = !brief) ? 'on' : 'off'}.\n`);
     else if (parsed && typeof parsed === 'object' && 'door' in parsed) opening(r, parsed);
     else if (parsed === 'inventory') process.stdout.write(inventory(cartridge, r.world));
+    else if (parsed === 'journal') process.stdout.write(journal(cartridge, r.world));
+    else if (parsed === 'accept') accept(r);
     else if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
     else if (parsed && 'perform' in parsed) perform(r, parsed);
     else if (parsed && 'lookup' in parsed) lookup(r, parsed);
@@ -160,6 +163,8 @@ function turn(r: Run, cmd: Command, measured = true): string {
     closed: `You close ${it}.\n`,
     locked: `You lock ${it}.\n`,
     unlocked: `You unlock ${it}.\n`,
+    activated: 'You agree to help.\n',
+    activated_with_possession: 'You agree to help, and you already have what is needed.\n',
   };
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
@@ -204,6 +209,18 @@ function opening(r: Run, p: { door: string; direction?: string; words?: string }
     return void process.stdout.write(ds.length ? which : "You don't see that here.\n");
   }
   const payload = { type: p.door, direction: ds[0] };
+  append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+}
+
+// accept: the quest offer of the player's ActionSet (actions.ts) builds an accept_quest Command;
+// several ask which (by label), none builds nothing.
+function accept(r: Run) {
+  const offers = Object.values(resolved(r.world, r.world.character)).filter((a) => a.quest);
+  if (offers.length !== 1) {
+    const labels = offers.map((a) => say(cartridge, a.label)).join(' or ');
+    return void process.stdout.write(offers.length ? `Which: ${labels}?\n` : 'No one asks.\n');
+  }
+  const payload = { type: 'accept_quest', quest: offers[0].quest };
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 

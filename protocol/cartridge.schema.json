@@ -170,6 +170,16 @@
               "additionalProperties": {
                 "$ref": "room.schema.json#/$defs/BarrierDefinition"
               }
+            },
+            "quests": {
+              "description": "The cartridge's quests, keyed by DefinitionRefString of kind quest; absent when it has none (Early R7/R8 Q, an optional map: the tag stays).",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):quest/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "quest.schema.json#/$defs/QuestDefinition"
+              }
             }
           },
           "required": [

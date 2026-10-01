@@ -429,6 +429,15 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
 - **QuestState**: Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.
 - **VersionedPolicy**: A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.
 
+## Quest contracts (`protocol/quest.schema.json`)
+
+QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation policy, §43; 04 §5.2), owned by quest@1. The persisted lifecycle state is policy.schema.json QuestState.
+
+- **QuestDefinition**: An offered quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields.
+- **QuestObjective**: A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture).
+  - `current_state`
+  - `post_activation_event`
+
 ## Relation and provenance contracts (`protocol/relation.schema.json`)
 
 Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05 §25).
