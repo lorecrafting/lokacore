@@ -18,10 +18,8 @@ const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize
 export default function Book({ smoke }: { smoke: Smoke }) {
   const [loaded, fontError] = useFonts(fonts);
   const [stack, setStack] = useState<Page[]>([]);
-  // `turn` counts page turns (a new page animates in); `dir` is 1 going on, -1 going back.
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
-  // Where the room's event log starts: the log length just before the last move.
-  const [from, setFrom] = useState(0);
+  const [from, setFrom] = useState(0); // the room log starts here: log length at the last place change
   if (!loaded && !fontError) return null;
 
   const screen = smoke.screen();
@@ -31,10 +29,12 @@ export default function Book({ smoke }: { smoke: Smoke }) {
     setStack(next);
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
-  // Pressing an action turns to a fresh room page, where its answer is in the log.
+  // Pressing turns to a fresh room page with the answer in the log; the log restarts on a place
+  // change, not on the tapped button (a pending retry may run another action).
   const press: Parameters<typeof Footer>[0]['press'] = (b) => {
-    if (b.action_key === 'move') setFrom(screen.log.length);
+    const [placeId, logLength] = [view.place.id, screen.log.length];
     smoke.press(b);
+    if (smoke.screen().view.place.id !== placeId) setFrom(logLength);
     go([], 1);
   };
   const page = stack.at(-1);
@@ -64,7 +64,15 @@ function Status(p: {
   open: (k: 'character' | 'journal' | 'carrying') => void;
 }) {
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 14 }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+        columnGap: 14,
+      }}
+    >
       <Text style={{ ...small, color: paper.dim }}>time {p.time}</Text>
       {(['character', 'journal', 'carrying'] as const).map((k) => (
         <Pressable
@@ -77,7 +85,11 @@ function Status(p: {
           <Text style={{ ...small, color: paper.accent }}>{k}</Text>
         </Pressable>
       ))}
-      {p.pending && <Text style={{ ...small, color: paper.dim }}>not saved</Text>}
+      {p.pending && (
+        <Text style={{ ...small, color: paper.dim, width: '100%', textAlign: 'center' }}>
+          save not confirmed
+        </Text>
+      )}
     </View>
   );
 }

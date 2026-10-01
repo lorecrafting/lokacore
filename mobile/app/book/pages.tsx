@@ -11,7 +11,7 @@ export type Thing = GameView['entities'][number];
 
 const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
 const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
-const note = { ...prose, color: paper.dim, fontStyle: 'italic' as const };
+const note = { ...prose, color: paper.dim };
 
 function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
   return (
@@ -79,7 +79,7 @@ function Sheet({ title, children }: { title: string; children: ReactNode }) {
 export function ThingPage(p: { name: string; actions: Button[]; press: (b: Button) => void }) {
   return (
     <Sheet title={p.name}>
-      {p.actions.length === 0 && <Text style={note}>There is nothing to do with it.</Text>}
+      {p.actions.length === 0 && <Text style={note}>Nothing to do here.</Text>}
       {p.actions.map((b) => (
         <Tap key={b.label} label={b.label} onPress={() => p.press(b)}>
           <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>

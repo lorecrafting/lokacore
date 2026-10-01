@@ -39,10 +39,11 @@ test('exits, the look title, place actions and a thing page come from the right 
   assert.deepEqual(g.on('bram-1'), []);
 });
 
-// Breaks: the Ferry Landing description shown with its raw link syntax, "[mooring post](mooring_post)".
+// Breaks: raw link syntax shown (Ferry Landing's "[mooring post](mooring_post)"), or a greedy
+// pattern that swallows the text between two links.
 test('a touch link is shown as its label', () => {
   assert.equal(
-    plain('A [mooring post](mooring_post) leans into the current.'),
-    'A mooring post leans into the current.',
+    plain('A [mooring post](mooring_post) leans by a [reed](reed_bed) in the current.'),
+    'A mooring post leans by a reed in the current.',
   );
 });
