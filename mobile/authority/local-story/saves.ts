@@ -6,7 +6,7 @@
 import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { sha256Hex, utf8 } from '../../../kernel/ts/src/sha256.ts';
-import { transaction, writeState, type Db } from './store.ts';
+import { transaction, writeState, type Db, type Meta } from './store.ts';
 
 export type Kind = 'bookmark' | 'recovery';
 /** A snapshot's content: the whole state at `revision` of the run it was taken in. */
@@ -47,8 +47,8 @@ export function verifying(db: Db) {
 }
 
 /**
- * Makes snapshot `kind` `slot` the head, as the new run `ids` forked from the snapshot's run at
- * its revision (10 §31), in one transaction that first keeps `checkpoint` (the head being left)
+ * Makes snapshot `kind` `slot` the head, as the new run `ids` (format, lineage, run, pin) forked
+ * from the snapshot's run at its revision (10 §31), in one transaction that first keeps `checkpoint` (the head being left)
  * as the newest recovery checkpoint and then evicts the oldest beyond the cap, so the copy just
  * taken is never the one evicted. 'save_corrupt' or 'missing' with nothing written; otherwise as
  * `transaction` reports.
@@ -57,38 +57,43 @@ export function restoreFrom(
   db: Db,
   kind: Kind,
   slot: number,
-  ids: { lineage_id: string; run_id: string },
+  ids: Meta,
   checkpoint?: string,
 ): boolean | 'save_corrupt' | 'missing' {
   try {
     return transaction(db, () => {
       const snap = read(db, kind, slot);
       if (typeof snap === 'string') throw snap; // rolled back, then returned below
-      if (checkpoint) {
-        db.runSync(
-          `INSERT INTO snapshot SELECT 'recovery', coalesce(max(slot), 0) + 1, NULL, ?, ?
-            FROM snapshot WHERE kind = 'recovery'`,
-          checkpoint,
-          sha(checkpoint),
-        );
-        db.runSync(
-          `DELETE FROM snapshot WHERE kind = 'recovery'
-            AND slot <= (SELECT max(slot) FROM snapshot WHERE kind = 'recovery') - ?`,
-          RECOVERY_CAP,
-        );
-      }
+      if (checkpoint) keep(db, checkpoint);
       writeState(db, snap.revision, snap.state);
       const { lineage_id, run_id, revision } = snap;
       db.runSync(
-        'UPDATE save SET lineage_id = ?, run_id = ?, parent = ?, seed = ?',
+        'INSERT OR REPLACE INTO save VALUES (1, ?, ?, ?, ?, ?, ?)',
+        ids.format,
         ids.lineage_id,
         ids.run_id,
         encode({ lineage_id, run_id, revision }),
         encode(snap.state.rng as Json),
+        encode(ids.pin),
       );
     });
   } catch (e) {
     if (e === 'save_corrupt' || e === 'missing') return e;
     throw e;
   }
+}
+
+/** Keeps `checkpoint` as the newest recovery checkpoint, then evicts the oldest beyond the cap. */
+function keep(db: Db, checkpoint: string) {
+  db.runSync(
+    `INSERT INTO snapshot SELECT 'recovery', coalesce(max(slot), 0) + 1, NULL, ?, ?
+        FROM snapshot WHERE kind = 'recovery'`,
+    checkpoint,
+    sha(checkpoint),
+  );
+  db.runSync(
+    `DELETE FROM snapshot WHERE kind = 'recovery'
+        AND slot <= (SELECT max(slot) FROM snapshot WHERE kind = 'recovery') - ?`,
+    RECOVERY_CAP,
+  );
 }

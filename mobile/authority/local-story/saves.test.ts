@@ -355,13 +355,13 @@ test('recovery checkpoints keep the newest three, never the one just taken', () 
 
 // Breaks (10 §31: never discard the only working save; pin 5: one transaction): a fault part way
 // through a restore, after the checkpoint and the new rows, leaving a mixed head, an evicted
-// checkpoint, new ids or changed memory. Real fault: the identity row's update raises.
+// checkpoint, new ids or changed memory. Real fault: the identity row's write raises.
 test('a restore that fails part way leaves the old head, its checkpoints and memory', () => {
   const p = bookmarked();
   cycle(p, 3);
   p.story.invoke(pick(2));
   const [before, world] = [stored(p), p.story.world()];
-  p.sql.exec(`CREATE TRIGGER t BEFORE UPDATE ON save BEGIN SELECT RAISE(ABORT, 'I/O error'); END`);
+  p.sql.exec(`CREATE TRIGGER t BEFORE INSERT ON save BEGIN SELECT RAISE(ABORT, 'I/O error'); END`);
   assert.throws(() => p.story.restore('bookmark', 1), /I\/O error/);
   assert.deepEqual(stored(p), before);
   assert.equal(p.story.world(), world);
@@ -369,7 +369,7 @@ test('a restore that fails part way leaves the old head, its checkpoints and mem
 
 // Breaks (OFF-07; pin 7): a head that does not parse replaced by the fresh world, or a snapshot
 // adopted without the player's pick; a snapshot failing its sha256 offered; the pick not restoring
-// the head as a fork of the snapshot's run.
+// the head as a fork of the snapshot's run, or leaving an identity that does not parse (the pin).
 test('a save whose head does not parse is save_corrupt and offers what verifies', () => {
   const path = save();
   const a = bookmarked(path);
@@ -377,7 +377,7 @@ test('a save whose head does not parse is save_corrupt and offers what verifies'
   a.sql.exec(`${FLIP} WHERE slot = 2`);
   a.story.invoke(pick(2));
   a.story.restore('bookmark', 1);
-  a.sql.exec(`UPDATE state_row SET value = '{' WHERE section = 'jobs'`);
+  a.sql.exec(`UPDATE state_row SET value = '{' WHERE section = 'jobs'; UPDATE save SET pin = '{'`);
   const before = stored(a);
   a.sql.close();
   let n = 8;
@@ -396,6 +396,7 @@ test('a save whose head does not parse is save_corrupt and offers what verifies'
   b.sql.close();
   const c = processOn(path);
   assert.equal(encode(c.story.world().state as never), STATE2);
+  assert.equal(c.one('SELECT pin FROM save'), encode(PIN));
   assert.deepEqual(c.all('SELECT lineage_id, run_id, parent FROM save'), [
     [id(9), id(10), parent(1, 2)],
   ]);

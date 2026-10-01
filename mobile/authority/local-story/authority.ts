@@ -42,7 +42,7 @@ const SAVE_FORMAT = 'loka-save-v1';
  */
 export function openStory(db: Db, fresh: World, host: Host) {
   const loaded = load(db, fresh, () => first(fresh, host));
-  if (!loaded) return corrupt(db, host);
+  if (!loaded) return corrupt(db, fresh, host);
   const { pin } = loaded.meta;
   if (pin.content_hash !== host.content_hash)
     return { kind: 'pinned_release_missing' as const, pinned: pin, offered: host.content_hash };
@@ -97,13 +97,14 @@ function first(fresh: World, host: Host): Meta {
 }
 
 /** OFF-07: the snapshots that verify, for the player to pick; reopen the story after one. */
-function corrupt(db: Db, host: Host) {
+function corrupt(db: Db, fresh: World, host: Host) {
   return {
     kind: 'save_corrupt' as const,
     snapshots: verifying(db),
-    // ponytail: no recovery copy of a head that does not parse, and a lost identity row stays lost.
+    // ponytail: no recovery copy of a head that does not parse. The identity is rewritten whole,
+    // pinned to the bundled release, since the old one may be what does not parse.
     restore: (kind: Kind, slot: number) => {
-      const r = restoreFrom(db, kind, slot, fork(host));
+      const r = restoreFrom(db, kind, slot, first(fresh, host));
       return { kind: r === true ? 'restored' : r || 'pending' } as const;
     },
   };
@@ -254,7 +255,7 @@ function bookmark(s: Story, slot: number, label: unknown, replace: boolean) {
  */
 function restore(s: Story, kind: Kind, slot: number) {
   if (fenced(s)) return { kind: 'pending' } as const;
-  const next = fork(s.host);
+  const next = { ...s.meta, ...fork(s.host) };
   const r = restoreFrom(s.db, kind, slot, next, here(s)); // throws on a definite failure
   if (r === 'save_corrupt') return { kind: r, snapshots: verifying(s.db) } as const;
   if (r === 'missing') return { kind: 'missing' } as const;
