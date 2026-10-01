@@ -21,3 +21,11 @@
 - **N2 nit** `docs/ROADMAP.md:51`: the SM2c plan says "then an iPhone install for the owner"; the new text says only "the owner's tryout is pending". State whether the install happened, so the row does not leave it ambiguous.
 - R6 row (`docs/ROADMAP.md:50`) "S6a's carries ... to the SM2 row and R12": fine as is. It is a pointer, still true, and the SM2 row now says "done by #78"; restating done there would duplicate the fact.
 - Lessons (`docs/lessons/mobile.md:47-54`): both meet the bar. UIScene: changes what you do (patch locally, never commit `ios/`, which is gitignored at `mobile/app/.gitignore:3`) and names its versions, so it ages visibly rather than silently. `simctl` cannot tap: changes what a simulator screenshot may be offered as evidence for, consistent with the SM2b record's "not exercised on the simulator" list.
+
+## Fix round 1 (`47af5a9`)
+
+Scoped to the fix commit (`docs/ROADMAP.md:51` only). Verdict: **APPROVE**.
+
+- S1: fixed. The row now carries the corrupt `report` page case (Start over "succeeds" in place, corruption remains) to R12 with typed detection, before the first story with milestones. Question (not blocking): the Early R7/R8 row lands the cartridge's own milestone declaration, which may precede R12; the trigger "before the first story with milestones" should then win over the R12 label.
+- N1: fixed. The scope-decision link appears once in the row.
+- N2: fixed. States `8bb123a` was installed on the iPhone 11 on 2026-10-01 (not evidence); the touch tryout is pending.
