@@ -64,15 +64,16 @@ Report at the end of the slice, not at every step.
    [the index](reviews/README.md), and returns the findings.
 5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
    developer, whose context is intact, while that context is small (about 220k tokens or
-   less); past that, or after a PM session restart, a fresh developer gets the brief, the
-   review record, the PR diff and the findings (every call re-reads the whole context, so a
-   large one makes each fix call the most expensive of the slice). One message per round:
-   batch every request for that round. A conflict with `main` in an index or roadmap line is
+   less, the subagent token count in its last completion notice); past that, or after a PM
+   session restart, a fresh developer gets the brief, the review record, the PR diff and the
+   findings (every call re-reads the whole context, so a large one makes each fix call the
+   most expensive of the slice). One message per round: batch every request for that round,
+   and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
    resolved by the PM in a throwaway worktree (merge, never rebase) without waking the
-   developer; a conflict in code goes to the developer. Every fix message restates the whole open finding list, not just the
-   new ones (a resumed agent drops earlier directives). The developer runs `git pull --rebase` first (the review record is on the
-   branch), never force-pushes, fixes or disputes each finding with a reason, reruns the
-   checks and pushes.
+   developer; a conflict in code goes to the developer. Every fix message restates the whole
+   open finding list, not just the new ones (a resumed agent drops earlier directives). The
+   developer runs `git pull --rebase` first (the review record is on the branch), never
+   force-pushes, fixes or disputes each finding with a reason, reruns the checks and pushes.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
    the same reviewer. It checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
