@@ -417,3 +417,20 @@ compare).
 Note: "R12" (the typed deep-page detection, the snapshot export) has no ROADMAP stage row yet. It
 is recorded in the closed R6 row, and 10 §33 already puts the export at R12 in the spec. Whoever
 plans R12 reads it from there. This is not a finding.
+
+## Cross-vendor review (codex Astra), fix round 1
+
+Appended verbatim by the reviewer at the PM's request (codex, gpt-6-astra, read-only, on `b427e13`):
+
+CHANGES REQUIRED
+
+```text
+G1 | not fixed | Missing/non-string identities are rejected; healthy saves reopen and guard-removal controls fail. Empty lineage still permits duplicate execution (H1).
+G2 | carried | Owner-approved R6P P6 landing. Failed-COMMIT and SIGKILL tests retain meaningful failure/before/after paths under DELETE; file-backed corpus not rerun in this read-only checkout.
+G3 | carried | ROADMAP R6P owns registration and exhausted-limit reporting for all three hosts before compiled Lantern.
+G4 | carried | ROADMAP R6P P6 owns the Hermes producer and phone timing evidence.
+G5 | carried | Device SQLITE_CORRUPT verification explicitly remains unchecked and lands at R6P P6.
+
+H1 | blocker | mobile/authority/local-story/store.ts:106 at b427e13 | Identity validation checks only typeof. Reproduced on real in-memory SQLite: commit pick_lock, UPDATE save SET lineage_id = '', reopen, resend the identical invocation. The save opens; story//... misses the original receipt and returns replay:false, revision 1→2, clock 600→1200. Reject malformed lineage values as save_corrupt and cover this case; the added tests exercise missing/non-string lineage but omit malformed strings.
+```
+PM ruling: H1 (= reviewer N5) fixed in fix round 2 together with N4.
