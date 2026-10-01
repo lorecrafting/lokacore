@@ -124,15 +124,17 @@ export function openSmoke(db: Db, bundled: Bundled) {
       // While unconfirmed any press retries that attempt, whatever button it was.
       retry ??= { label: b.label, invocation: invocationOf(b, ++sent, story.world().character) };
       log.push(`> ${retry.label}`);
+      let reply: Reply;
       try {
-        const reply = story.invoke(retry.invocation);
-        log.push(said(reply, text));
-        if (reply.kind === 'pending') return;
+        reply = story.invoke(retry.invocation);
       } catch (e) {
-        // A definite failure: nothing was saved, so the attempt is over; the next press is new.
-        log.push(`(not saved: ${(e as Error).message})`);
+        // A throw cannot tell a failed save from a failed read: keep the attempt and resend it,
+        // which replays its receipt if one exists and is a fresh attempt if not (03 §14).
+        log.push(`(not confirmed: ${(e as Error).message}; the next press retries ${retry.label})`);
+        return;
       }
-      retry = undefined;
+      log.push(said(reply, text));
+      if (reply.kind !== 'pending') retry = undefined;
     },
   };
 }

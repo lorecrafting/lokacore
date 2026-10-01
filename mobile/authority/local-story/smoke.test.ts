@@ -172,24 +172,46 @@ test('a same-scope receipt from another allocator does not move the id counter',
   assert.deepEqual(b.now().log, ['> Go south', 'moved']);
 });
 
-// Breaks: a definite write failure (real SQLITE_FULL) that leaves the pending retry set and
-// logs nothing: "scan" then re-ran the failed "Go north".
-test('a definite write failure is logged and the next press is a new action', () => {
-  const p = processOn(
-    join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'),
-    undefined,
-    512, // a receipt then needs new pages, which max_page_count forbids
-  );
+// Breaks: a throw shown as "not saved" with the retry cleared (a read error can follow a durable
+// commit), or a throw that leaves no log line or a retry that is not resent. A real SQLITE_FULL
+// (512-byte page, max_page_count clamped); lifting the clamp, the next press resends "Go north".
+test('a failed write is not claimed unsaved; the next press retries it', () => {
+  const p = processOn(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'), undefined, 512);
   const one = (q: string) => Object.values(p.sql.prepare(q).get()!)[0];
   p.sql.exec(`PRAGMA max_page_count = ${one('PRAGMA page_count')}`);
   p.press('Go north');
-  const failed = p.now();
-  assert.equal(failed.pending, false);
-  assert.equal(failed.log[0], '> Go north');
-  assert.match(failed.log[1], /^\(not saved: .*full/i);
+  assert.equal(p.now().pending, true);
+  assert.equal(p.now().log[0], '> Go north');
+  assert.match(p.now().log[1], /^\(not confirmed: .*full.*retries Go north\)$/i);
   assert.equal(one('SELECT revision FROM head'), 0);
-  assert.equal(failed.place, 'Ferry Landing');
   p.sql.exec('PRAGMA max_page_count = 1000000');
   p.press('scan');
-  assert.equal(p.now().log[2], '> scan');
+  assert.deepEqual(p.now().log.slice(2), ['> Go north', 'moved']);
+  assert.equal(p.now().place, 'Village Green');
+  assert.equal(p.now().pending, false);
+});
+
+// Breaks: after "scan" committed with its ack lost, a retry whose receipt lookup fails clears the
+// attempt as "not saved"; the next press then mints a new id and commits scan again (revision 2).
+test('a read error after a durable commit does not commit the press twice', () => {
+  let reads = 0; // receipt reads since the ack was lost
+  let armed = false;
+  let lost = false;
+  const tap = (s: string, run: () => unknown) => {
+    if (lost && s.startsWith('SELECT * FROM receipt') && [1, 3].includes(++reads))
+      throw new Error('read failed');
+    const out = run();
+    if (armed && !lost && s === 'COMMIT') {
+      lost = true;
+      throw new Error('COMMIT acknowledgement lost');
+    }
+    return out;
+  };
+  const p = processOn(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'), tap);
+  armed = true;
+  p.press('scan'); // committed, ack lost, first reconcile read fails: pending
+  p.press('scan'); // reconcile reads, then the receipt lookup fails
+  p.press('scan'); // the receipt is read: replayed, not applied again
+  assert.equal(p.sql.prepare('SELECT revision FROM head').get()!.revision, 1);
+  assert.equal(p.now().pending, false);
 });
