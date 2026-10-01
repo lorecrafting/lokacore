@@ -1,7 +1,8 @@
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §38, §43; 04 §5.3 Choice/continuation
-// resolution; 21 §20): talk, choose and close_choice. talk reaches here only through the talk of a
-// dialogue whose speaker is its target and in the actor's room, its policy holding (actions.ts):
-// a talk while the actor has a pending choice is invalid_state; else one choice.open of a new
+// resolution; 21 §20): talk, choose and close_choice. talk: a target that is no dialogue's speaker
+// is not_found; else the dialogue's policy is enforced here, since a cartridge action with command
+// talk (an alias) passes admission on its own policy: failing it, or a pending choice of the
+// actor's, is invalid_state; else one choice.open of a new
 // continuation (its id the command's IdSource ordinal 0: each talk is a distinct occurrence),
 // beat the dialogue's key, each role bound to its EntityId in role-name order, the choice ids in
 // key order, and its choice_opened. choose: a continuation that is not pending, not the actor's or
@@ -32,6 +33,7 @@ import {
 } from '../decision.ts';
 import { blocked, bind, choiceIds, continuationId, definition, pending } from '../dialogue.ts';
 import { assigned } from '../fact.ts';
+import { holds } from '../policy.ts';
 import { resolution } from '../quest.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
@@ -56,6 +58,7 @@ function talk(world: World, command: Command<'talk'>, mint: Mint) {
     (x) => world.entityIds[refString(x.npc)] === p.target_id,
   );
   if (!d) return rejected('not_found');
+  if (!holds(world, p.actor_id, d.policy.root)) return rejected('invalid_state');
   if (pending(world, p.actor_id)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;

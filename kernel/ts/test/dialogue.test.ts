@@ -109,6 +109,12 @@ test('talk opens one pending choice bound to EntityIds, stamped with its revisio
   assert.equal(w.state.choices![C]!.opened_revision, 3);
 });
 
+// Breaks: every accepted action copying the choices map (O(choice history) per step).
+test('an action that opens no choice shares the choices map', () => {
+  const w = talked();
+  assert.equal(ok(w, { type: 'look' }, 4).world.state.choices, w.state.choices);
+});
+
 // Breaks: loka play's host not passing the revision its commit takes (its choose would fault).
 test('under loka play the stamp is the run revision and choose is accepted', () => {
   const r = {
@@ -152,8 +158,9 @@ test('the GameView shows the pending choice; a dropped lantern makes both option
   assert.ok(!gameView(w).actions.some((a) => ['choose', 'close_choice'].includes(a.action_key)));
 });
 
-// Breaks: a talk advertised on every NPC in the room though it accepts only its speaker.
-test('the talk is listed on its speaker only', () => {
+// Breaks: a talk advertised on every NPC in the room though it accepts only its speaker, or
+// admitted for another NPC (actions.ts accepts; the rule would then answer invalid_state).
+test('the talk is listed on and accepts its speaker only', () => {
   const w = world((c) => {
     const npc = c.npcs[`${F}:npc/bram`];
     c.npcs[`${F}:npc/ada`] = { ...npc, key: 'ada', keywords: ['ada'] };
@@ -164,6 +171,64 @@ test('the talk is listed on its speaker only', () => {
       .entities.filter((e) => e.kind === 'npc' && e.id === w.entityIds[`${F}:npc/${name}`])
       .flatMap((e) => e.actions.map((a) => a.action_key));
   assert.deepEqual([talks('bram'), talks('ada')], [['bram'], []]);
+  refused(w, { type: 'talk', target_id: w.entityIds[`${F}:npc/ada`] }, 'unsupported_capability');
+});
+
+const talkView = (w: World) =>
+  gameView(w)
+    .entities.find((e) => e.id === BRAM)!
+    .actions.filter((a) => a.action_key === 'bram')
+    .map((a) => ('reason' in a ? [a.available, a.reason] : [a.available]));
+const unavailable = [[false, { code: 'invalid_state' }]];
+
+// Breaks (Decision 9): Bram's talk offered, or a choice opened, before the quest is accepted or
+// after it resolves (the talk's policy ignored in the ActionSet and the view).
+test('talk is unavailable and refused before accepting and after resolving', () => {
+  const resolved = ok(talked(), choose('leave'), 4).world;
+  for (const w of [world(), resolved]) {
+    assert.deepEqual(talkView(w), unavailable);
+    refused(w, talk, 'invalid_state');
+  }
+  assert.deepEqual(talkView(held()), [[true]]);
+});
+
+// Breaks: a talk admitted through another offered talk (Bram's, or a cartridge talk action
+// whose own policy holds) opening a dialogue whose policy fails; the rule must enforce it.
+test("the rule enforces the target's dialogue policy whatever talk admitted it", () => {
+  const ada = world((c) => {
+    const npc = c.npcs[`${F}:npc/bram`];
+    c.npcs[`${F}:npc/ada`] = { ...npc, key: 'ada', keywords: ['ada'] };
+    delete c.npcs[`${F}:npc/ada`].daily_schedule;
+    const d = structuredClone(c.dialogues[`${F}:dialogue/bram`]);
+    d.key = 'ada';
+    d.npc = d.roles.bram.npc = ref('npc', 'ada');
+    d.policy.root.state = 'resolved';
+    c.dialogues[`${F}:dialogue/ada`] = d;
+  });
+  const active = ok(ada, accept, 1, ACCEPT).world;
+  refused(active, { type: 'talk', target_id: ada.entityIds[`${F}:npc/ada`] }, 'invalid_state');
+  const alias = world((c) => {
+    c.actions[`${F}:action/chat`] = {
+      key: 'chat',
+      label: 'action.talk',
+      accessibility: 'action.talk',
+      target: { kind: 'entity', scopes: ['room_occupants'] },
+      command: 'talk',
+      priority: 0,
+      input: [],
+      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+    };
+  });
+  refused(alias, talk, 'invalid_state');
+});
+
+// Breaks: a room contribution naming a dialogue's talk unresolved by the loader, though its key
+// is an ActionSet identity (test/loka/content_ferry_test.exs compiles the same).
+test("a room contribution may subtract a dialogue's talk", () => {
+  const w = world((c) => {
+    c.rooms[`${F}:room/ferry_landing`].actions = [{ op: 'subtract', actions: ['bram'] }];
+  });
+  assert.deepEqual(talkView(ok(w, accept, 1, ACCEPT).world), []);
 });
 
 // Breaks: a consequence, the hand-over, the quest or the choice applied apart (21 §20, 04 §5.3),

@@ -175,6 +175,19 @@ defmodule Loka.ContentFerryTest do
   defp dialogue(f, rel \\ "dialogues/bram.json"),
     do: %{rel => f.(src("dialogues/bram.json"))}
 
+  # Breaks: a room contribution naming a dialogue's talk unresolved (its key is an ActionSet
+  # identity; kernel/ts/test/dialogue.test.ts loads the same).
+  test "a room contribution may name a dialogue's talk", %{tmp_dir: dir} do
+    room = src("rooms/ferry_landing.json")
+
+    files = %{
+      "rooms/ferry_landing.json" =>
+        Map.put(room, "actions", [%{"op" => "subtract", "actions" => ["bram"]}])
+    }
+
+    assert {:ok, _, []} = compile(dir, files)
+  end
+
   # Breaks: a dialogue's short speaker, quest, role or fact left short (Checks.expand; the loader
   # would reject the artifact).
   test "a full-reference dialogue compiles to the same artifact", %{tmp_dir: dir} do

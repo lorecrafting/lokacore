@@ -249,11 +249,13 @@ function recipes(c: Obj, { named, typedValue, text }: ReturnType<typeof checkers
   return [...out, ...contributions(c)];
 }
 
-// Each key of a room's action contribution names a registered command, an action, a recipe or a
-// quest (its offer).
+// Each key of a room's action contribution names a registered command, an action, a recipe, a
+// quest (its offer) or a dialogue (its talk).
 function contributions(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const defs: Obj[] = [c.actions, c.recipes ?? {}, c.quests ?? {}].flatMap(Object.values);
+  const defs: Obj[] = [c.actions, c.recipes ?? {}, c.quests ?? {}, c.dialogues ?? {}].flatMap(
+    Object.values,
+  );
   const keys = new Set([...Object.keys(CAPABILITY_OWNERS.command), ...defs.map((d) => d.key)]);
   for (const [ref, r] of Object.entries(c.rooms as Obj))
     (r.actions ?? []).forEach((a: Obj, i: number) =>

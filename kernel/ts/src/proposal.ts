@@ -55,12 +55,13 @@ export function adopt(
     utf8(encode(out as never)).length > LIMITS.output_bytes!
   )
     return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
-  const choices = { ...applied.state.choices };
+  let choices = applied.state.choices;
   for (const o of out.delta.ops)
-    if (o.op === 'choice.open')
-      choices[o.continuation_id] = { ...choices[o.continuation_id]!, opened_revision: revision };
-  const stamped = applied.state.choices && { choices };
-  const state = { ...applied.state, ...stamped, rng: out.rng } as World['state'];
+    if (o.op === 'choice.open') {
+      const row = { ...choices![o.continuation_id]!, opened_revision: revision };
+      choices = { ...choices, [o.continuation_id]: row };
+    }
+  const state = { ...applied.state, ...(choices && { choices }), rng: out.rng } as World['state'];
   return { decision: out, world: { ...world, state } };
 }
 
