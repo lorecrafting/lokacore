@@ -43,7 +43,7 @@ Token hygiene (docs/WORKFLOW.md): send check, test, push and pre-push output to 
 Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
 
 A developer spawned for a fix round on an existing PR skips the build, self-review and PR steps
-above and follows only this paragraph.
+above and follows only the next paragraph.
 
 When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
 checks, push, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
