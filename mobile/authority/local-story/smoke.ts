@@ -140,10 +140,8 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   };
 }
 
-type Smoke = ReturnType<typeof openSmoke>;
-type NewGame = () => { kind: string };
 /** Why the save is not playable: the refusal's kind (none for an untyped throw) and its message. */
-export type Failed = { kind?: string; message: string; newGame?: NewGame };
+export type Failed = { kind?: string; message: string; newGame?: () => { kind: string } };
 
 /**
  * The game on the save file, or why it does not open, and start over (10 §31: the host has the
@@ -159,7 +157,7 @@ export function playSmoke(
   bundled: Bundled,
   newId: () => string,
 ) {
-  const s: { db?: Db; game?: Smoke; failed?: Failed } = {};
+  const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
   const reopen = () => {
     try {
       s.game = openSmoke((s.db ??= open()), bundled, newId);

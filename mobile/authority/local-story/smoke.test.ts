@@ -256,7 +256,6 @@ const app = (path: string) => {
   const screen = () => screenOf(c.game()!);
   return { c, sql: () => sql!, now: () => screen().now(), press: (l: string) => screen().press(l) };
 };
-const SQLITE_HEADER = 'SQLite format 3\0';
 
 /** A save at revision 1 (the satchel taken) whose index `name` has its b-tree page type byte broken. */
 const damaged = (name: string) => {
@@ -292,7 +291,7 @@ test('start over replaces a file that does not open with a fresh game', () => {
     assert.equal(a.now().place, 'Ferry Landing');
     a.press('Go north');
     assert.deepEqual(a.now().log, ['> Go north', 'moved']);
-    assert.equal(readFileSync(path!).subarray(0, 16).toString('latin1'), SQLITE_HEADER);
+    assert.equal(readFileSync(path!).subarray(0, 16).toString('latin1'), 'SQLite format 3\0');
   }
 });
 
