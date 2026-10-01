@@ -25,7 +25,7 @@ export type Parsed =
   | { door: (typeof DOORS)[number]; direction?: string; words?: string }
   | { wait: number }
   | 'inventory'
-  | 'accept'
+  | { accept: string }
   | 'journal'
   | 'brief'
   | 'quit'
@@ -41,7 +41,6 @@ const WORDS: Record<string, Parsed> = {
   q: 'quit',
   inventory: 'inventory',
   i: 'inventory',
-  accept: 'accept',
   journal: 'journal',
   j: 'journal',
   brief: 'brief',
@@ -61,7 +60,7 @@ const VERBS: Record<string, 'take' | 'drop' | 'give'> = {
  * `look`/`l`, `look`/`l`/`examine`/`x` <words> (a lookup; `look at the post` and `look post`
  * alike, target.ts normalize), `get`/`take` <words>, `drop` <words>, `give` <words> `to`
  * <words>, `open`/`close`/`lock`/`unlock` <a direction, its initial, or words naming a door>,
- * `scan`, `inventory`/`i`, `accept` (a quest offer), `journal`/`j`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
+ * `scan`, `inventory`/`i`, `accept` [words of its label] (a quest offer), `journal`/`j`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
  * omitted], `brief` (brief mode on or off), `quit`/`q`. Only the
  * six compass words become a move: any other word after `go` is a message, never a Command, so
  * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand
@@ -86,6 +85,7 @@ export function parse(text: string): Parsed {
       return { door, direction: known.direction };
     return normalize(rest).length ? { door, words: rest } : `${capital(door)} what?`;
   }
+  if (words[0] === 'accept') return { accept: rest.toLowerCase() };
   if (LOOK.includes(words[0])) {
     if (normalize(rest).length) return { lookup: rest };
     return words[0] === 'examine' || words[0] === 'x' ? 'Examine what?' : WORDS.look;
