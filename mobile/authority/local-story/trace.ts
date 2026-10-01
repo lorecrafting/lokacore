@@ -15,11 +15,11 @@ export type RunIds = {
 };
 export type CommitState = 'committed' | 'failed' | 'unknown' | 'unavailable';
 
-// ponytail: the trace grows with the save; R6 S6 sets the phone cap (ROADMAP).
 /**
  * Appends the entries of `command`, decided as `d` and stored (or meant to be) at revision `at`,
  * one per commit outcome in `states` (an unknown commit and its settled follow-up share one
- * ordinal, ADR-075 §4), in one transaction. False when the write failed, which is swallowed.
+ * ordinal, ADR-075 §4), in one transaction, under the cap (`room`). False when the write failed,
+ * which is swallowed; 'capped' when the cap dropped them.
  */
 export function traceCommand(
   db: Db,
@@ -28,9 +28,11 @@ export function traceCommand(
   d: DecisionResult,
   at: number,
   states: readonly CommitState[],
-): boolean {
+): boolean | 'capped' {
+  let capped = false;
   try {
-    return transaction(db, () => {
+    const written = transaction(db, () => {
+      if ((capped = !room(db, ids.run_id))) return;
       // The last row, an entry or its header (0), holds the run's highest ordinal; rowid: O(1).
       const last = db.getFirstSync<{ n: number }>(
         'SELECT ordinal AS n FROM trace ORDER BY rowid DESC LIMIT 1',
@@ -43,8 +45,34 @@ export function traceCommand(
         db.runSync(TRACE, ordinal, command.id, state, entry);
       }
     });
+    return written && capped ? 'capped' : written;
   } catch {
     return false;
+  }
+}
+
+// ponytail: rows counted by their rowid span, O(1) per entry, which holds while rows are deleted
+// only here, oldest first (no VACUUM); about 5 MB at the entry size measured in R6 S6a.
+const CAP = 5000;
+/**
+ * Room for an entry of `run_id`'s under the phone cap (ADR-075 §2, amended R6 S6a): over it, the
+ * oldest whole runs other than `run_id`'s are deleted; false when `run_id`'s run alone fills it, so
+ * its later entries are dropped and its replayable prefix stays.
+ */
+function room(db: Db, run_id: string): boolean {
+  const runOf = (record: string) => JSON.parse(record).ids.run_id as string;
+  for (;;) {
+    const { n, first } = db.getFirstSync<{ n: number; first: string }>(
+      `SELECT max(rowid) - min(rowid) + 1 AS n,
+        (SELECT record FROM trace ORDER BY rowid LIMIT 1) AS first FROM trace`,
+    )!;
+    if (!(n >= CAP)) return true;
+    const oldest = runOf(first);
+    if (oldest === run_id) return false;
+    type Head = { rowid: number; record: string };
+    const heads = db.getAllSync<Head>('SELECT rowid, record FROM trace WHERE ordinal = 0');
+    const next = heads.find((h) => runOf(h.record) !== oldest)!; // its run's header follows
+    db.runSync('DELETE FROM trace WHERE rowid < ?', next.rowid);
   }
 }
 
@@ -70,32 +98,40 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
     );
     if (!last && !header(FRESH)) return false;
     // ponytail: receipts do not record the deciding ids, so if an updated process never wrote its
-    // header, its missed entries land in the previous segment; rare, R6 S6 owns it (ROADMAP).
+    // header, its missed entries land in the previous segment; rare, accepted in R6 S6a.
     const lastIds: RunIds = last ? JSON.parse(last.record).ids : ids;
     // A new run_id is a new game, whose receipts are the only ones left: its header comes first,
     // then they follow it (ADR-075 §4). ponytail: an imported fork (R12) is not a fresh world.
     const newRun = lastIds.run_id !== ids.run_id;
     if (newRun && !header(FRESH)) return false;
     const prior = newRun ? ids : lastIds;
-    type Row = { command: string; response: string; revision: number };
-    const missing = db.getAllSync<Row>(
-      `SELECT command, response, revision FROM receipt WHERE command != 'null' AND command_id != ?
-        AND command_id NOT IN (SELECT command_id FROM trace WHERE commit_state = 'committed')
-        ORDER BY rowid`,
-      skip,
+    return (
+      missed(db, prior, skip) && (encode(prior as never) === encode(ids as never) || header(SAVED))
     );
-    // Stops at the first failure: a later entry never overtakes a missed one.
-    for (const r of missing)
-      if (
-        !traceCommand(db, prior, JSON.parse(r.command), JSON.parse(r.response), r.revision, [
-          'committed',
-        ])
-      )
-        return false;
-    return encode(prior as never) === encode(ids as never) || header(SAVED);
   } catch {
     return false;
   }
+}
+
+/**
+ * Writes the committed entry of every receipted Command that has none but `skip`, in commit order,
+ * under `ids`; stops at the first failure (false: a later entry never overtakes a missed one) or
+ * at the cap (the rest are dropped).
+ */
+function missed(db: Db, ids: RunIds, skip: string): boolean {
+  type Row = { command: string; response: string; revision: number };
+  const missing = db.getAllSync<Row>(
+    `SELECT command, response, revision FROM receipt WHERE command != 'null' AND command_id != ?
+      AND command_id NOT IN (SELECT command_id FROM trace WHERE commit_state = 'committed')
+      ORDER BY rowid`,
+    skip,
+  );
+  for (const r of missing) {
+    const [command, d] = [JSON.parse(r.command), JSON.parse(r.response)];
+    const written = traceCommand(db, ids, command, d, r.revision, ['committed']);
+    if (written !== true) return !!written;
+  }
+  return true;
 }
 
 const TRACE = 'INSERT INTO trace VALUES (?, ?, ?, ?)';

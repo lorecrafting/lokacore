@@ -163,3 +163,56 @@ test('a head with a damaged column is save_corrupt; its new game recreates the h
   assert.deepEqual([q.one('SELECT revision FROM head'), q.one('SELECT clock FROM head')], [0, 0]);
   assert.equal(revision(q.story.invoke(take)), 1);
 });
+
+// The phone trace cap in rows (ADR-075 §2 as amended in R6 S6a).
+const CAP = 5000;
+/** Copies the trace's first entry until the trace holds `rows` rows: one run's long play. */
+const pad = (p: { sql: DatabaseSync }, rows: number) =>
+  p.sql
+    .prepare(
+      `WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < ? - (SELECT
+        count(*) FROM trace)) INSERT INTO trace SELECT t.* FROM n, trace t WHERE t.ordinal = 1`,
+    )
+    .run(rows);
+const runs = (p: { sql: DatabaseSync }) =>
+  p.sql
+    .prepare('SELECT record FROM trace ORDER BY rowid')
+    .all()
+    .map((r) => JSON.parse(r.record as string).ids.run_id);
+
+// Breaks (ADR-075 §2, cap rule): a trace that grows past the cap, or that makes room by dropping
+// part of a run (its header or beginning, which replay needs) or the current run, not the old one.
+test('at the cap a new game deletes the oldest run whole and keeps the current one', () => {
+  const p = open(save());
+  p.story.invoke(take);
+  pad(p, CAP - 2);
+  assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
+  assert.equal(revision(p.story.invoke(take)), 1);
+  assert.equal(p.one('SELECT count(*) FROM trace'), CAP);
+  assert.equal(revision(p.story.invoke(give)), 2);
+  assert.deepEqual(runs(p), [id(4), id(4), id(4)]);
+  assert.deepEqual(traced(p), [
+    [1, 0, 'committed'],
+    [2, 1, 'committed'],
+  ]);
+});
+
+// Breaks (ADR-075 §2, cap rule): with the current run alone at the cap, its entries still
+// appended, its own beginning deleted to make room, the dropped entries caught up at the next open,
+// or the cap reaching play.
+test('a run alone at the cap keeps its beginning and appends no more entries', () => {
+  const path = save();
+  const p = open(path);
+  p.story.invoke(take);
+  pad(p, CAP);
+  const last = p.one('SELECT max(rowid) FROM trace');
+  assert.equal(revision(p.story.invoke(give)), 2);
+  p.sql.close();
+  const q = open(path);
+  assert.equal(revision(q.story.invoke(invocation(3, 'take', [SATCHEL]))), 2); // given: rejected
+  assert.deepEqual(
+    [q.one('SELECT count(*) FROM trace'), q.one('SELECT max(rowid) FROM trace')],
+    [CAP, last],
+  );
+  assert.equal(q.one('SELECT ordinal FROM trace ORDER BY rowid LIMIT 1'), 0);
+});
