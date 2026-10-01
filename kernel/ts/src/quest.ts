@@ -41,7 +41,9 @@ export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef)
  * never counts, and a give to someone else is not the actor's acquisition. ponytail: an instance
  * activated in this decision receives none of its events (only accept_quest activates, and it
  * emits nothing after quest_activated); compare positions with its quest_activated when one
- * decision can do both. It adds no event, so an admitted decision stays admitted (its type kept).
+ * decision can do both. ponytail: scans every instance per decision (06 §7 allows a simple scan
+ * for a private cartridge); index active instances by event type and target when worlds grow. It
+ * adds no event, so an admitted decision stays admitted (its type kept).
  */
 export function deliver<D extends DecisionResult>(world: World, decision: D): D {
   if (decision.kind !== 'accepted' || !world.cartridge.quests) return decision;
