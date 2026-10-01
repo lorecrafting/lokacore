@@ -3,14 +3,13 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { pick } from './joystick.ts';
 
-// Breaks: sectors off by one (east lit for a north drag, or the wrong 45-degree edge), a diagonal
-// drag walking to a cardinal exit when its own sector has none, a non-existent exit lit.
-test('a drag points at the exit in its 45-degree sector, only if that exit exists', () => {
-  const both = ['north', 'northeast'];
-  assert.equal(pick(0, -10, both), 'north');
-  assert.equal(pick(3.42, -9.4, both), 'north'); // 20 degrees from north
-  assert.equal(pick(4.23, -9.06, both), 'northeast'); // 25 degrees
-  assert.equal(pick(7, -7, ['north', 'east']), null); // northeast sector, no such exit
+// Breaks: sectors off by one (east lit for a north drag, or a wrong quadrant edge), a quadrant
+// that is too narrow (a drag 30 degrees off north does nothing), a non-existent exit lit.
+test('a drag points at the exit in its 90-degree quadrant, only if that exit exists', () => {
+  assert.equal(pick(0, -10, ['north', 'east']), 'north');
+  assert.equal(pick(5.8, -10, ['north']), 'north'); // 30 degrees from north
+  assert.equal(pick(9.4, -3.4, ['north', 'east']), 'east'); // 70 degrees
+  assert.equal(pick(9.4, -3.4, ['north']), null); // the east quadrant, no east exit
   assert.equal(pick(-10, 0, ['west']), 'west');
   assert.equal(pick(0, 10, ['north']), null);
 });

@@ -2,7 +2,7 @@
 // maths: joystick.ts). Press to zoom, drag toward a path to light it, release to walk, drag back
 // to the middle to cancel; a tap opens the Map page. RN Animated and PanResponder only.
 import { useRef, useState, type MutableRefObject } from 'react';
-import { Animated, PanResponder, Pressable, Text, View } from 'react-native';
+import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../authority/local-story/smoke.ts';
 import { pick, STAIR, ZOOM } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
@@ -16,8 +16,8 @@ type Props = {
   openMap: () => void;
 };
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
-const hidden = { position: 'absolute' as const, width: 1, height: 1, opacity: 0.02 };
 const TAP_MS = 500;
+const rule = { flex: 1, height: 1, backgroundColor: paper.line };
 // ponytail: session memory only: the tip shows again after the app restarts.
 let learned = false;
 
@@ -26,7 +26,7 @@ type Ui = {
   walk: (direction: string | null) => void;
   openMap: () => void;
   setLit: (d: string | null) => void;
-  clearNote: () => void;
+  setNote: (s: string) => void;
   zoom: Animated.Value;
   knob: Animated.ValueXY;
 };
@@ -41,7 +41,7 @@ function joystick(u: Ui) {
     onPanResponderTerminationRequest: () => false,
     onPanResponderGrant: () => {
       d = { t: Date.now(), moved: false, pick: null };
-      u.clearNote();
+      u.setNote('');
       to(1);
     },
     onPanResponderMove: (_, g) => {
@@ -62,7 +62,8 @@ function joystick(u: Ui) {
     },
     onPanResponderRelease: () =>
       !d.moved && Date.now() - d.t < TAP_MS ? u.openMap() : u.walk(d.pick),
-    onPanResponderEnd: () => {
+    onPanResponderEnd: (_, g) => {
+      if (g.numberActiveTouches > 0) return; // another finger lifted: the gesture goes on
       u.setLit(null);
       u.knob.setValue({ x: 0, y: 0 });
       to(0);
@@ -82,24 +83,27 @@ export function Footer(p: Props) {
   const walk = (d: string | null) => {
     const e = now.current.exits.find((x) => x.direction === d);
     if (e?.available) (now.current.go(e.direction), learn());
-    else if (e) setNote(`${e.direction}: ${why(e, now.current.text)}`);
+    else if (e) {
+      const reason = why(e, now.current.text); // a screen reader hears it too
+      (setNote(`${e.direction}: ${reason}`), AccessibilityInfo.announceForAccessibility(reason));
+    }
   };
   const openMap = () => (now.current.openMap(), learn());
-  const [pan] = useState(() =>
-    joystick({ now, walk, openMap, setLit, clearNote: () => setNote(''), zoom, knob }),
-  );
+  const [pan] = useState(() => joystick({ now, walk, openMap, setLit, setNote, zoom, knob }));
   const e = p.exits.find((x) => x.direction === lit);
   const said = e ? `${e.direction}${e.available ? '' : ` · ${why(e, p.text)}`}` : note;
-  const rule = { flex: 1, height: 1, backgroundColor: paper.line };
   return (
     <View>
       {tip && <Tip dismiss={learn} />}
       <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
         <View style={rule} />
-        <View style={{ width: 56, height: 56 }} {...pan.panHandlers}>
+        <View
+          style={{ width: 56, height: 56, zIndex: 1 }} // above the rules: the zoomed map covers them
+          {...readerActions(p.exits, walk, openMap)}
+          {...pan.panHandlers}
+        >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
           <Said text={said} />
-          <Reachable exits={p.exits} text={p.text} walk={walk} openMap={openMap} />
         </View>
         <View style={rule} />
       </View>
@@ -147,25 +151,22 @@ function Said({ text }: { text: string }) {
   );
 }
 
-// Hidden buttons so a screen reader can walk, and open the map, without the gesture.
-function Reachable(p: Omit<Props, 'go'> & { walk: (direction: string) => void }) {
-  return (
-    <>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Map"
-        onPress={p.openMap}
-        style={hidden}
-      />
-      {p.exits.map((x) => (
-        <Pressable
-          key={x.direction}
-          accessibilityRole="button"
-          accessibilityLabel={`Go ${x.direction}${x.available ? '' : `, ${why(x, p.text)}`}`}
-          onPress={() => p.walk(x.direction)}
-          style={hidden}
-        />
-      ))}
-    </>
-  );
+// A screen reader gets the map as one button: activate opens the Map page, and each exit is an
+// action ("Go north") that walks (a closed one announces its reason). No touch targets to collide.
+function readerActions(
+  exits: Props['exits'],
+  walk: (direction: string) => void,
+  openMap: () => void,
+) {
+  return {
+    accessible: true,
+    accessibilityRole: 'button' as const,
+    accessibilityLabel: 'Map',
+    accessibilityActions: [
+      { name: 'activate' },
+      ...exits.map((x) => ({ name: x.direction, label: `Go ${x.direction}` })),
+    ],
+    onAccessibilityAction: (a: { nativeEvent: { actionName: string } }) =>
+      a.nativeEvent.actionName === 'activate' ? openMap() : walk(a.nativeEvent.actionName),
+  };
 }
