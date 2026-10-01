@@ -7,6 +7,7 @@ import type { Button, openSmoke } from '../../authority/local-story/smoke.ts';
 import { Footer } from './Footer.tsx';
 import { group } from './model.ts';
 import { body, fonts, paper } from './paper.ts';
+import { confirmStartOver } from '../SaveError.tsx';
 import { CarryingPage, CharacterPage, JournalPage, RoomPage, ThingPage } from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
@@ -15,7 +16,10 @@ type Smoke = ReturnType<typeof openSmoke>;
 
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
-export default function Book({ smoke }: { smoke: Smoke }) {
+// Pressing turns to a fresh room page with the answer in the log; the log restarts on a place
+// change, not on the tapped button (a pending retry may run another action). A press that threw
+// shows its fault with Start over.
+export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: () => void }) {
   const [loaded, fontError] = useFonts(fonts);
   const [stack, setStack] = useState<Page[]>([]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
@@ -29,8 +33,6 @@ export default function Book({ smoke }: { smoke: Smoke }) {
     setStack(next);
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
-  // Pressing turns to a fresh room page with the answer in the log; the log restarts on a place
-  // change, not on the tapped button (a pending retry may run another action).
   const press: Parameters<typeof Footer>[0]['press'] = (b) => {
     const [placeId, logLength] = [view.place.id, screen.log.length];
     smoke.press(b);
@@ -51,6 +53,7 @@ export default function Book({ smoke }: { smoke: Smoke }) {
           <Footer exits={g.exits} place={g.place} press={press} />
         )}
         <Status time={view.time} pending={pending} open={(kind) => open({ kind })} />
+        {screen.fault && <Fault fault={screen.fault} startOver={startOver} />}
       </View>
     </SafeAreaView>
   );
@@ -125,6 +128,22 @@ function Body(p: {
   if (page.kind === 'character') return <CharacterPage />;
   if (page.kind === 'journal') return <JournalPage view={view} text={text} />;
   return <CarryingPage items={view.inventory} text={text} open={openThing} />;
+}
+
+// A press that threw (a damaged page, a full disk): its message, and Start over beside the retry
+// that any press still sends (03 §14).
+function Fault(p: { fault: string; startOver: () => void }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Start over"
+      onPress={() => confirmStartOver(p.startOver)}
+      style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
+    >
+      <Text style={{ ...small, color: paper.dim }}>{p.fault}</Text>
+      <Text style={{ ...small, color: paper.accent }}>start over</Text>
+    </Pressable>
+  );
 }
 
 function Back({ onPress }: { onPress: () => void }) {

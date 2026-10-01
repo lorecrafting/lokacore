@@ -11,7 +11,7 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import { openStory, type Reply } from './authority.ts';
-import type { Db } from './store.ts';
+import { corrupt, type Db } from './store.ts';
 
 export type { GameView };
 /** A tappable action: its text and the invocation it sends (id and actor are added on press). */
@@ -96,18 +96,18 @@ function invocationOf(b: Button, n: number, actor: string) {
 
 /**
  * The save in `db` (a new one if empty, its ids from `newId`, a random UUID each call) of the
- * bundled cartridge; open `db` once per process. A save that does not open throws its kind.
+ * bundled cartridge; open `db` once per process. A save that does not open throws, its refusal
+ * (kind and newGame) as the error's cause.
  */
 export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   const cartridge = cartridgeOf(bundled);
   const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
-  const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], {
-    kernel_version: KERNEL_VERSION,
-    newId,
-  });
-  if (story.kind !== 'open') throw new Error(`save not opened: ${story.kind}`);
+  const host = { kernel_version: KERNEL_VERSION, newId };
+  const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
+  if (story.kind !== 'open') throw Object.assign(new Error(story.kind), { cause: story });
   // The unconfirmed attempt, resent unchanged (same id, same intent) until it settles (03 §§14-15).
   let retry: { label: string; invocation: object } | undefined;
+  let fault: string | undefined; // the last press's throw, shown with start over beside the retry
   let sent = lastId(db);
   const log: string[] = [];
   const text: Say = (key) => cartridge.text[key as Key] ?? key;
@@ -117,7 +117,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   return {
     screen: () => {
       const view = gameView(story.world());
-      return { view, text, buttons: buttonsOf(view, label, text), log, pending: !!retry };
+      return { view, text, buttons: buttonsOf(view, label, text), log, pending: !!retry, fault };
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
@@ -127,13 +127,78 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
       try {
         reply = story.invoke(retry.invocation);
       } catch (e) {
-        // A throw cannot tell a failed save from a failed read: keep the attempt and resend it,
-        // which replays its receipt if one exists and is a fresh attempt if not (03 §14).
-        log.push(`(not confirmed: ${(e as Error).message}; the next press retries ${retry.label})`);
+        // A throw may follow a durable commit: keep the attempt; a resend replays it (03 §14).
+        fault = (e as Error).message;
+        log.push(`(not confirmed: ${fault}; the next press retries ${retry.label})`);
         return;
       }
+      fault = undefined;
       if (reply.kind !== 'pending') retry = undefined; // before said(): it may throw
       log.push(said(reply, text));
+    },
+    newGame: story.newGame,
+  };
+}
+
+/**
+ * Why the save is not playable, or why start over failed: the refusal's kind (none for an untyped
+ * throw), its message, and how start over may proceed: the refusal's new game, or `replace` the
+ * file (a corrupt file, or one whose replacing failed). Neither: no start over.
+ */
+export type Failed = {
+  kind?: string;
+  message: string;
+  newGame?: () => { kind: string };
+  replace?: boolean;
+};
+
+/**
+ * The game on the save file, or why it does not open, and start over (10 §31: the host has the
+ * player confirm first). `open` opens the file (once per process); `remove` closes that handle
+ * and deletes the file. Start over is the authority's new game where it offers one: it keeps the
+ * file, so the old runs' trace and any pending report survive. A file it cannot repair (NOTADB, a
+ * corrupt page: its new game throws as corrupt, or the open throws untyped as corrupt) is replaced.
+ * Never started over: a newer app's save (`unsupported_save_format`, update the app, 10 §32) or an
+ * open that failed for another reason (a full disk: the save may be intact). A start over that
+ * fails otherwise keeps the game being played and says so in its log; one whose outcome is
+ * unknown does not (its next press would settle the new game, then apply to it).
+ */
+export function playSmoke(open: () => Db, remove: () => void, items: Bundled, newId: () => string) {
+  const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
+  const reopen = () => {
+    try {
+      s.game = openSmoke((s.db ??= open()), items, newId);
+      s.failed = undefined;
+    } catch (e) {
+      const { message, cause } = e as Error;
+      [s.game, s.failed] = [undefined, { ...(cause as Failed), message, replace: corrupt(e) }];
+    }
+  };
+  reopen();
+  return {
+    game: () => s.game,
+    failed: () => s.failed,
+    startOver(): void {
+      const newGame = s.game?.newGame ?? s.failed?.newGame;
+      if (!newGame && !s.failed?.replace) return;
+      try {
+        if (newGame?.().kind === 'pending') {
+          s.game = undefined;
+          return void (s.failed = { ...s.failed, message: 'start over not confirmed', newGame });
+        }
+        if (newGame) return reopen();
+      } catch (e) {
+        const { message } = e as Error; // in play, logged once: no message outlives the game's state
+        if (!corrupt(e) && s.game) return void s.game.screen().log.push(`(start over: ${message})`);
+        if (!corrupt(e)) return void (s.failed = { ...s.failed, message });
+      }
+      try {
+        [s.game, s.db] = [undefined, undefined]; // the handle goes with the file
+        remove();
+        reopen();
+      } catch (e) {
+        s.failed = { message: (e as Error).message, replace: true };
+      }
     },
   };
 }
