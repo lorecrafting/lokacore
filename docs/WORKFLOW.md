@@ -53,7 +53,7 @@ Report at the end of the slice, not at every step.
    the main checkout; fix what they find. A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md). Commit, push, open
    the PR (description cites spec sections and includes the ponytail result). Hand back a short note: what changed,
-   branch and head SHA, the commands actually run with output, self-review findings and
+   branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
    dispositions, deviations from the brief, open questions.
 4. **Verify and review.** PM does not relay claims: it confirms CI is green on the pushed
    commit (or reruns the check line) before review. Then it spawns a *fresh* `reviewer`
@@ -84,9 +84,10 @@ Report at the end of the slice, not at every step.
 
 ## Token hygiene
 
-- Big outputs (logs, diffs, check runs) stay out of every agent's context, subagents' too: the
-  PM delegates; any agent sends a check, test or push run to a file and reads only the exit
-  status, the failing lines and the tail. Batch independent tool calls.
+- Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
+  and check runs; any agent sends a check, test or push run to a scratchpad file named for the
+  slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
+  reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
 - Delegate mechanical work; clear the session after each merge and resume from the PM state
   file. No plugin or CLAUDE.md changes mid-session (they bust the prompt cache).
 - Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
