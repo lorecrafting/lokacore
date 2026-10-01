@@ -51,10 +51,11 @@ export function traceCommand(
 /**
  * Brings the trace up to the store (ADR-075 §4): a header for a new trace; the committed entry of
  * every receipted Command that has none but `skip`, in commit order, under the ids of the header
- * they were decided under; then, when `ids` differ from that header's (an app or content update),
- * a new run header starting from the saved state. False, never a throw, unless all was written.
+ * they were decided under; then, when `ids` differ from that header's (an update, a new game),
+ * a new run header starting from `initial`: the saved state, or a new game's fresh world. False,
+ * never a throw, unless all was written.
  */
-export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolean {
+export function catchUp(db: Db, ids: RunIds, context: string, skip = '', initial = SAVED): boolean {
   const header = (initial: object) =>
     transaction(db, () => {
       const data = { world_context_id: context, initial_state: initial, fault_schedule: NONE };
@@ -65,7 +66,7 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
     const last = db.getFirstSync<Head>(
       'SELECT record FROM trace WHERE ordinal = 0 ORDER BY rowid DESC LIMIT 1',
     );
-    if (!last && !header({ state: 'fresh' })) return false;
+    if (!last && !header(FRESH)) return false;
     // ponytail: receipts do not record the deciding ids, so if an updated process never wrote its
     // header, its missed entries land in the previous segment; rare, R6 S6 owns it (ROADMAP).
     const prior: RunIds = last ? JSON.parse(last.record).ids : ids;
@@ -84,7 +85,7 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
         ])
       )
         return false;
-    return encode(prior as never) === encode(ids as never) || header(SAVED);
+    return encode(prior as never) === encode(ids as never) || header(initial);
   } catch {
     return false;
   }
@@ -92,7 +93,8 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
 
 const TRACE = 'INSERT INTO trace VALUES (?, ?, ?, ?)';
 const NONE = { state: 'unavailable', reason: 'not_applicable' };
-const SAVED = { state: 'unavailable', reason: 'not_collected' }; // from the saved state (ADR-075)
+const SAVED: object = { state: 'unavailable', reason: 'not_collected' }; // from the saved state (ADR-075)
+export const FRESH = { state: 'fresh' }; // from the world `context` starts with (a new game)
 const record = (event: string, ids: object, data: object) =>
   encode({ format: 'loka-obs-v1', event, store: 'game_trace', ids, data } as never);
 

@@ -1,7 +1,8 @@
 // The local Story save in SQLite (07 §9; 03 §§14-15; ADR-072; 10 §§31-32): the current state as
 // rows, the head (revision, clock, RNG), the save's identity and pin, and the command receipts.
-// The row schema is the implementation's (ADR-072: "the per-row schema is an R2+ design task"). Every write is one transaction opened
-// and committed here, never by a driver helper (mobile lessons).
+// The row schema is the implementation's (ADR-072: "the per-row schema is an R2+ design task").
+// Every write is one transaction opened and committed here, never by a driver helper (mobile
+// lessons).
 import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
 import { target } from '../../../kernel/ts/src/compose.ts';
 import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
@@ -45,14 +46,11 @@ CREATE TABLE IF NOT EXISTS trace (ordinal INTEGER NOT NULL, command_id TEXT,
   commit_state TEXT, record TEXT NOT NULL) STRICT;
 CREATE TABLE IF NOT EXISTS save (one INTEGER PRIMARY KEY CHECK (one = 1), format TEXT NOT NULL,
   lineage_id TEXT NOT NULL, run_id TEXT NOT NULL, parent TEXT NOT NULL, seed TEXT NOT NULL,
-  pin TEXT NOT NULL) STRICT;
-CREATE TABLE IF NOT EXISTS snapshot (kind TEXT NOT NULL CHECK (kind IN ('bookmark', 'recovery')),
-  slot INTEGER NOT NULL, label TEXT, bytes TEXT NOT NULL, sha256 TEXT NOT NULL,
-  PRIMARY KEY (kind, slot)) STRICT;`;
+  pin TEXT NOT NULL) STRICT;`;
 
 /**
- * The save's identity (10 §§31-32): its lineage and run, the fork it came from (lineage, run,
- * revision; null for a new save), the run's initial RNG (ADR-075 seed) and the release it pins.
+ * The save's identity (10 §§31-32; 07 §9): its lineage and run, its causal parent (null: every
+ * save here is a new game), the run's initial RNG (ADR-075 seed) and the release it pins.
  */
 export type Meta = {
   readonly format: string;
@@ -79,18 +77,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   const head = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head');
   if (!head) {
     const meta = first();
-    const saved = transaction(db, () => {
-      writeState(db, 0, fresh.state);
-      const { format, lineage_id, run_id, parent, seed, pin } = meta;
-      const json = [parent, seed, pin].map((v) => encode(v as Json));
-      db.runSync(
-        'INSERT INTO save VALUES (1, ?, ?, ?, ?, ?, ?)',
-        format,
-        lineage_id,
-        run_id,
-        ...json,
-      );
-    });
+    const saved = replace(db, fresh, meta);
     if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
     return { world: fresh, revision: 0, meta };
   }
@@ -112,14 +99,38 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   }
 }
 
-/** Replaces the head and every row with `state` at `revision`, inside the caller's transaction. */
-export function writeState(db: Db, revision: number, state: World['state']) {
-  const { clock, rng, ...sections } = state;
-  db.runSync(HEAD, revision, clock, encode(rng as Json));
-  db.runSync('DELETE FROM state_row');
-  for (const [section, rows] of Object.entries(sections))
-    for (const [key, value] of Object.entries(rows))
-      db.runSync(UPSERT, section, key, encode(value));
+/**
+ * Makes the save `fresh` at revision 0 under the identity `meta`, with no receipts, in one
+ * transaction (a first save or a new game; one save per story), as `transaction` reports.
+ */
+export function replace(db: Db, fresh: World, meta: Meta): boolean {
+  return transaction(db, () => {
+    const { clock, rng, ...sections } = fresh.state;
+    db.runSync(HEAD, 0, clock, encode(rng as Json));
+    db.runSync('DELETE FROM state_row');
+    for (const [section, rows] of Object.entries(sections))
+      for (const [key, value] of Object.entries(rows))
+        db.runSync(UPSERT, section, key, encode(value));
+    const { format, lineage_id, run_id, parent, seed, pin } = meta;
+    const json = [parent, seed, pin].map((v) => encode(v as Json));
+    db.runSync(
+      'INSERT OR REPLACE INTO save VALUES (1, ?, ?, ?, ?, ?, ?)',
+      format,
+      lineage_id,
+      run_id,
+      ...json,
+    );
+    db.runSync('DELETE FROM receipt');
+  });
+}
+
+/** The pinned release of a save that does not load, if its identity row still parses. */
+export function pinOf(db: Db): Meta['pin'] | undefined {
+  try {
+    return JSON.parse(db.getFirstSync<{ pin: string }>('SELECT pin FROM save')!.pin);
+  } catch {
+    return undefined;
+  }
 }
 
 /** The receipt of `invocation_id` in `scope`, if one was committed. */

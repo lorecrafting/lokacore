@@ -110,6 +110,14 @@ The table below describes the files as imported. Later amendments are in git his
     and §4.1 (governed by the new paragraph), the R1 history (07 §14, 09 §42, 14 R1/R2,
     16 ADR-070 and the sequencing entry) and the release-time Android requirements
     (09 §19, 10 §23, 11 §22, 14 R13).
+- 2026-09-30, [owner decision](../decisions/owner-decision-one-save-2026-09-30.md)
+  (paraphrased): one save per story, no manual bookmarks; a new game replaces the save after
+  the player confirms. The rule lives in 10 §31 (amendment paragraph).
+  - Amendment notes: 03 §27; 14 readiness notes (R6, R12); 15 RUN-02 and RUN-05;
+    release-scope RUN gate meaning (json and md edited identically).
+  - Note only, text unchanged: 16 ADR-066 entry. Retained unchanged: 10 §16's garbage
+    collection condition (its "manual bookmark" clause is vacuous) and 23 §11's fork
+    provenance (forks still come from import or backup).
 
 ## Link rewrites (the only byte changes at import)
 

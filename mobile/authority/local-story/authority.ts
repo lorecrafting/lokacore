@@ -6,9 +6,9 @@ import type { Command, DecisionResult, ErrorCode } from '../../../kernel/ts/src/
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
-import { bytesOf, occupied, restoreFrom, verifying, writeBookmark, type Kind } from './saves.ts';
-import { commit, load, receipt, reconcile, type Db, type Meta, type Receipt } from './store.ts';
-import { catchUp, traceCommand, type CommitState, type RunIds } from './trace.ts';
+import { commit, load, pinOf, receipt, reconcile, replace } from './store.ts';
+import type { Db, Meta, Receipt } from './store.ts';
+import { catchUp, FRESH, traceCommand, type CommitState, type RunIds } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -22,7 +22,7 @@ export type Reply =
 
 /**
  * What the host supplies: the bundled cartridge's content hash, the build's kernel version
- * (ADR-075 RunIds) and a fresh random UUID per call, for a new save's and each fork's ids.
+ * (ADR-075 RunIds) and a fresh random UUID per call, for each new save's lineage and run ids.
  */
 export type Host = { content_hash: string; kernel_version: string; newId: () => string };
 const SAVE_FORMAT = 'loka-save-v1';
@@ -38,14 +38,20 @@ const SAVE_FORMAT = 'loka-save-v1';
  * committed before it is adopted. A fault discards its proposal and gets no receipt (ADR-075 §4;
  * 04 §5.2 step 7). A failed commit throws, with memory and storage unchanged. A COMMIT whose
  * outcome is unknown fences every call, answered `pending`, until the store settles it (03 §15).
- * Each command's game-trace entry follows its commit. `bookmark` and `restore`: below.
+ * Each command's game-trace entry follows its commit. `newGame`: below.
  */
 export function openStory(db: Db, fresh: World, host: Host) {
   const loaded = load(db, fresh, () => first(fresh, host));
-  if (!loaded) return corrupt(db, fresh, host);
-  const { pin } = loaded.meta;
-  if (pin.content_hash !== host.content_hash)
+  // Checked first, so a corrupt save under another release is never replaced unawares.
+  const pin = loaded ? loaded.meta.pin : pinOf(db);
+  if (pin && pin.content_hash !== host.content_hash)
     return { kind: 'pinned_release_missing' as const, pinned: pin, offered: host.content_hash };
+  // OFF-07: nothing to recover from until S3b; only the player's explicit new game moves on.
+  if (!loaded)
+    return {
+      kind: 'save_corrupt' as const,
+      newGame: () => ({ kind: replace(db, fresh, first(fresh, host)) ? 'replaced' : 'pending' }),
+    };
   const s: Story = { db, fresh, host, ...loaded, behind: false };
   s.behind = !catchUp(db, ids(s), fresh.context);
   // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
@@ -53,8 +59,7 @@ export function openStory(db: Db, fresh: World, host: Host) {
     kind: 'open' as const,
     world: () => s.world,
     invoke: (value: unknown) => invoke(s, value),
-    bookmark: (slot: number, label: unknown, replace = false) => bookmark(s, slot, label, replace),
-    restore: (kind: Kind, slot: number) => restore(s, kind, slot),
+    newGame: () => newGame(s),
   };
 }
 
@@ -72,7 +77,6 @@ type Story = {
   fence?: (() => Receipt | undefined) | undefined;
 };
 
-const fork = (host: Host) => ({ lineage_id: host.newId(), run_id: host.newId() });
 const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
 const ids = (s: Story): RunIds => ({
   content_hash: s.host.content_hash,
@@ -93,21 +97,9 @@ function first(fresh: World, host: Host): Meta {
     numeric_profile: null, // ponytail: neither kernel exports a profile version yet
     rng_profile: null,
   };
-  return { format: SAVE_FORMAT, ...fork(host), parent: null, seed: fresh.state.rng as never, pin };
-}
-
-/** OFF-07: the snapshots that verify, for the player to pick; reopen the story after one. */
-function corrupt(db: Db, fresh: World, host: Host) {
-  return {
-    kind: 'save_corrupt' as const,
-    snapshots: verifying(db),
-    // ponytail: no recovery copy of a head that does not parse. The identity is rewritten whole,
-    // pinned to the bundled release, since the old one may be what does not parse.
-    restore: (kind: Kind, slot: number) => {
-      const r = restoreFrom(db, kind, slot, first(fresh, host));
-      return { kind: r === true ? 'restored' : r || 'pending' } as const;
-    },
-  };
+  const [lineage_id, run_id] = [host.newId(), host.newId()];
+  const seed = fresh.state.rng as never;
+  return { format: SAVE_FORMAT, lineage_id, run_id, parent: null, seed, pin };
 }
 
 /** True while a fenced attempt's outcome is still unknown; otherwise settles it first. */
@@ -226,52 +218,32 @@ function traceAfter(
   if (!written && states.includes('committed')) s.behind = true;
 }
 
-/** The head as a snapshot: the whole state at the current revision of this run. */
-const here = ({ meta, revision, world }: Story) =>
-  bytesOf({ lineage_id: meta.lineage_id, run_id: meta.run_id, revision, state: world.state });
-
 /**
- * Keeps the current state as bookmark `slot` (1 to 3) named `label` (10 §31), after settling any
- * fenced attempt; never on the action path. A label is trimmed, then 1 to 40 characters (code
- * points); an occupied slot is overwritten only when `replace` says so.
+ * Replaces the save with a new game (10 §31, one save per story; the host has the player confirm
+ * first): after settling any fenced attempt, in one transaction, the fresh world at revision 0, a
+ * new lineage and run with no parent pinned to the bundled release, and no receipts (the old
+ * lineage's would otherwise answer its invocation ids). Memory adopts it only after the commit,
+ * and the new run's trace opens with its header. An unknown COMMIT fences like an invocation's.
  */
-function bookmark(s: Story, slot: number, label: unknown, replace: boolean) {
+function newGame(s: Story) {
   if (fenced(s)) return { kind: 'pending' } as const;
-  const name = typeof label === 'string' ? label.trim() : '';
-  if (![1, 2, 3].includes(slot) || !name || [...name].length > 40)
-    return { kind: 'invalid_bookmark' } as const;
-  if (!replace && occupied(s.db, slot)) return { kind: 'occupied' } as const;
-  // Unknown COMMIT: the bookmark may or may not exist; nothing in play depends on it.
-  return { kind: writeBookmark(s.db, slot, name, here(s)) ? 'bookmarked' : 'pending' } as const;
-}
-
-/**
- * Restores snapshot `kind` `slot` (10 §31) after settling any fenced attempt, so no pending
- * invocation crosses branches: in one transaction the head being left becomes a recovery
- * checkpoint and the snapshot's state, clock, RNG and revision become the head of a new lineage
- * and run whose parent is the snapshot's run at its revision. Memory adopts it only after the
- * commit, and the new run's trace opens with its header. A snapshot that fails its sha256 is
- * `save_corrupt` with nothing written. An unknown COMMIT fences like an invocation's.
- */
-function restore(s: Story, kind: Kind, slot: number) {
-  if (fenced(s)) return { kind: 'pending' } as const;
-  const next = { ...s.meta, ...fork(s.host) };
-  const r = restoreFrom(s.db, kind, slot, next, here(s)); // throws on a definite failure
-  if (r === 'save_corrupt') return { kind: r, snapshots: verifying(s.db) } as const;
-  if (r === 'missing') return { kind: 'missing' } as const;
-  const restored = () => {
+  // Before its receipts go: the old run's missed entries are recovered from them.
+  if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
+  const next = first(s.fresh, s.host);
+  const replaced = () => {
     adopt(s);
-    s.behind = !catchUp(s.db, ids(s), s.fresh.context);
+    s.behind = !catchUp(s.db, ids(s), s.fresh.context, '', FRESH);
   };
-  if (r) restored();
+  // replace throws on a definite failure, with nothing written.
+  if (replace(s.db, s.fresh, next)) replaced();
   else {
     s.fence = () => {
       const run = () => s.db.getFirstSync<{ run_id: string }>('SELECT run_id FROM save')?.run_id;
-      if (reconcile(s.db, run) === next.run_id) restored();
+      if (reconcile(s.db, run) === next.run_id) replaced();
       return undefined;
     };
     if (fenced(s)) return { kind: 'pending' } as const;
-    if (s.meta.run_id !== next.run_id) throw new Error('COMMIT failed; nothing was restored');
+    if (s.meta.run_id !== next.run_id) throw new Error('COMMIT failed; nothing was replaced');
   }
-  return { kind: 'restored', revision: s.revision } as const;
+  return { kind: 'replaced' } as const;
 }
