@@ -23,6 +23,7 @@ PR, head SHA, spec sections, focus and the output format (verdict, then findings
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
 answer verbatim to the review record, and adds its findings to the fix list.
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
+Owner, 2026-10-01 (paraphrased): an Opus subagent drafts briefs and stage slice plans so the PM session stays thin (the PM decides); if codex is out of quota, a Fable subagent stands in for the cross-vendor review on kernel slice heads, never on fix re-reviews.
 
 ## Loop
 
