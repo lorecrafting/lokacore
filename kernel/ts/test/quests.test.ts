@@ -347,6 +347,12 @@ test('the loader checks quest references, texts, keys and the lock', () => {
     `${Q}.objective.policy.root.item`,
     { target: `${E}:item/oil` },
   );
+  fails(
+    (c) => (quest(c).offer.policy.root = { op: 'has_item', item: ref('item', 'oil') }),
+    'UNRESOLVED_REFERENCE',
+    `${Q}.offer.policy.root.item`,
+    { target: `${E}:item/oil` },
+  );
   fails((c) => (quest(c).title = 'quest.none'), 'UNRESOLVED_REFERENCE', `${Q}.title`, {
     target: 'quest.none',
   });

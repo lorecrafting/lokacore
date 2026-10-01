@@ -30,12 +30,18 @@ defmodule Loka.Content.Quests do
     keys = for kind <- ~w(action recipe), {_, {_, [], d}} <- defs[kind], do: d["key"]
     taken = MapSet.new(commands() ++ keys)
 
-    Enum.flat_map(all(defs), fn {rel, q} ->
-      duplicate = if q["key"] in taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
+    Enum.flat_map(
+      all(defs),
+      &quest(&1, %{m: m, defs: defs, text: text, events: events, taken: taken})
+    )
+  end
 
-      owned(at(rel, []), "quest_activated", events) ++
-        duplicate ++ texts(rel, q, text) ++ item(rel, q["objective"], m, defs)
-    end)
+  defp quest({rel, q}, ctx) do
+    duplicate =
+      if q["key"] in ctx.taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
+
+    owned(at(rel, []), "quest_activated", ctx.events) ++
+      duplicate ++ texts(rel, q, ctx.text) ++ item(rel, q["objective"], ctx.m, ctx.defs)
   end
 
   defp texts(_, _, :unknown), do: []
