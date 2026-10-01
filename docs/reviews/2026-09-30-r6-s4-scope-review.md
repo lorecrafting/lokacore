@@ -78,3 +78,13 @@ Line 14 also runs past the file's wrap width and line 17 is an orphaned fragment
 The owner chose "R6P P3/P4"; the PM moved the owner of the drain to the Early R7/R8 schedule
 slice. Pre-release-proof.md:74 makes that slice a P4 input, so it lands on the same path,
 which reads as a placement refinement. Confirm that the owner does not need to re-approve it.
+
+## Fix round 2 — `9ee3af0`
+
+Verdict: **APPROVE**
+
+- R1-1: resolved. The record keeps the owner's "R6P P3/P4" wording and points to the
+  ROADMAP for the placement without restating it; the link anchor is `#slices`; line 14 is
+  rewrapped. The orphaned fragment at line 16 ("`real_elapsed` time and") remains, cosmetic
+  only, not reopened.
+- Q1 (owner confirmation of the Early R7/R8 owner) stays with the PM.
