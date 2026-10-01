@@ -340,3 +340,80 @@ Opus reviewer's position on each finding:
 - **Astra G5: concur.** This is my N1. Source inspection (vendored SQLite messages passed through
   unchanged) makes the CORRUPT text low-risk, so recording it as not checked on the device is
   enough.
+
+## Re-review: fix round 1, `ea859be` to `b427e13`
+
+**APPROVE WITH NOTES.** Gate R6 passes. Nothing is open: every finding is either fixed or carried
+by the owner's ruling (`owner-decision-gate-r6-carries-2026-09-30.md`), with a landing row. I
+re-checked the gate claims broadly wherever the fixes touched them. CI is green at `b427e13`, and
+the mobile suite passes in a throwaway detached worktree (69 pass, 1 skipped, which is the device
+compare).
+
+### Dispositions
+
+- **Astra G1, resolved.** `load` (`store.ts:105-106`) now requires these, or the save is
+  `save_corrupt`:
+  - number `revision` and `clock`;
+  - string `lineage_id` and `run_id`;
+  - a string or null `binding`;
+  - a head RNG and a run seed that are both RngState (`:111`).
+
+  `saves.test.ts:258-264` adds the dropped-column cases and the NULL and `7` lineage cases. My
+  earlier probe is now one of them.
+
+  Mutants, each reverted, each red:
+
+  | Mutant | Result |
+  |---|---|
+  | the old head-only check | the damaged-identity test fails |
+  | `binding` unchecked | the damaged-identity test fails |
+  | the seed unchecked | the save-that-does-not-parse test fails |
+
+  A pre-#73 save (no `binding` column) now opens as `save_corrupt`. This agrees with the S5
+  ruling that saves from before that PR are unsupported, and nothing has been released.
+- **Opus G3 / Astra G2, resolved.**
+  - The five suites drop the WAL pragma. Their headers and `docs/lessons/storage.md` state the
+    phone's rollback journal.
+  - The PM's inspected `pragma journal_mode` = `delete` is recorded in the evidence.
+
+  Mutants run in rollback-journal mode, each reverted:
+
+  | Mutant | Result |
+  |---|---|
+  | no `BEGIN IMMEDIATE` | all 8 corpus seeds, the anchors, the after-COMMIT kill and both reconcile tests fail |
+  | a COMMIT failure reported as success | the genuinely-failed-COMMIT and definite-failure tests fail |
+  | the head committed in its own transaction before the receipt (a torn commit) | all 8 corpus seeds, the after-COMMIT kill test, the fence test and both reconcile tests fail |
+
+  The SIGKILL corpus therefore still catches a torn commit in the phone's mode. The device
+  mid-commit kill is carried to R6P (owner).
+- **Opus G4, resolved.** The SM evidence line is reverted to `loka-smoke.db`.
+- **Opus G2, resolved.** The R6 row is closed:
+  - it links this review;
+  - it holds the one deferral list, each item with its condition or row;
+  - "snapshots" is mapped (ADR-072 item 5; the export lands with the 10 §33 manual export, R12);
+  - the truncated sentence is gone.
+
+  The SM2 row now carries the corrupt-save screen, the file-replace repair, the untyped
+  deep-page throw and the safe-area note. The slice count reads 34.
+- **N1 / Astra G5, resolved.** SQLITE_CORRUPT on the device is listed as not checked, with the
+  source fact, and is carried to R6P P6.
+- **N2, N3, resolved.** The runbook names the branch commit. The deferral list appears once, in
+  the R6 row, and the evidence links to it.
+- **Opus G1 / Astra G3, Astra G4, Astra G2's device kill: carried by the owner** to the R6P row:
+  the budget producer before the compiled Lantern; latency and the mid-commit kill in P6. The
+  decision record is marked (paraphrased) and indexed.
+
+### New findings (nits)
+
+- **N4 — nit, `mobile/authority/local-story/authority.ts:196`.** The default in
+  `binding = null` can no longer fire, because `load` now guarantees a string or null and
+  `first()` writes null. Delete the default.
+- **N5 — nit, `mobile/authority/local-story/store.ts:105`.** An empty-string `lineage_id` or
+  `run_id` still passes the type check. Failure scenario: a rebuilt table with `lineage_id = ''`
+  opens, the receipt scope becomes `story//<actor>`, and a retry misses its receipt and commits
+  again. The trigger is contrived (the same class as the NULL case, but needing a hand-edited
+  value), so a fix is optional: test `typeof v === 'string' && v !== ''`.
+
+Note: "R12" (the typed deep-page detection, the snapshot export) has no ROADMAP stage row yet. It
+is recorded in the closed R6 row, and 10 §33 already puts the export at R12 in the spec. Whoever
+plans R12 reads it from there. This is not a finding.
