@@ -121,7 +121,7 @@ defmodule Loka.ContentErrandTest do
   end
 
   # Breaks: a quest or quest_state compiling without quest@1 in the manifest, or a quest whose
-  # offer takes a registered command's key.
+  # offer takes a registered command's or an action's key (the offer would replace the action).
   test "a quest needs quest@1 and a key of its own", %{tmp_dir: dir} do
     m = src("cartridge.json")
     caps = ["requires", "capabilities"]
@@ -143,5 +143,40 @@ defmodule Loka.ContentErrandTest do
 
     assert compile(Path.join(dir, "b"), take) ==
              {:error, [d("DUPLICATE_DEFINITION", "quests/take")]}
+
+    action = %{
+      "label" => "quest.lantern.accept",
+      "accessibility" => "quest.lantern.accept",
+      "target" => %{"kind" => "none"},
+      "command" => "look",
+      "priority" => 0,
+      "input" => [],
+      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+    }
+
+    assert compile(Path.join(dir, "c"), %{"actions/lantern.json" => action}) ==
+             {:error, [d("DUPLICATE_DEFINITION", "quests/lantern")]}
+  end
+
+  # Breaks: a room's action contribution naming a quest's offer rejected as unresolved.
+  test "a room may contribute a quest's offer", %{tmp_dir: dir} do
+    landing = src("rooms/ferry_landing.json")
+
+    contribute = fn k ->
+      %{
+        "rooms/ferry_landing.json" =>
+          Map.put(landing, "actions", [%{"op" => "replace", "actions" => [k]}])
+      }
+    end
+
+    assert {:ok, _, []} = compile(Path.join(dir, "a"), contribute.("lantern"))
+
+    assert compile(Path.join(dir, "b"), contribute.("shed")) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "rooms/ferry_landing.actions[0].actions[0]", %{
+                  "target" => "shed"
+                })
+              ]}
   end
 end

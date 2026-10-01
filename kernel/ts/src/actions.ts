@@ -163,7 +163,8 @@ export const detailOf = (world: World, t: RecipeTarget): EntityId =>
 /**
  * Why `actor` may not issue `payload` now, if it may not (04 §19; ACT-09): no action of its set
  * resolves to that Command and accepts its target and input (unsupported_capability), or for
- * perform a key that names no recipe of the cartridge (not_found), or none that does is
+ * perform a key that names no recipe of the cartridge or for accept_quest a quest it does not
+ * declare (not_found), or none that does is
  * available, its policy failing (invalid_state).
  */
 export function refusal(world: World, payload: CommandPayload): ErrorCode | undefined {
@@ -172,10 +173,10 @@ export function refusal(world: World, payload: CommandPayload): ErrorCode | unde
   const matching = Object.values(resolved(world, actor)).filter((a) =>
     perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload),
   );
-  if (!matching.length)
-    return perform && !recipeKeys(world).includes(payload.action)
-      ? 'not_found'
-      : 'unsupported_capability';
+  const unknown =
+    (perform && !recipeKeys(world).includes(payload.action)) ||
+    (payload.type === 'accept_quest' && !world.cartridge.quests?.[refString(payload.quest)]);
+  if (!matching.length) return unknown ? 'not_found' : 'unsupported_capability';
   return matching.some((a) => holds(world, actor, a.policy.root)) ? undefined : 'invalid_state';
 }
 

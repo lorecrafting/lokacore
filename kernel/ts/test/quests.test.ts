@@ -12,6 +12,7 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
+import { decode, encode } from '../src/canonical.ts';
 import { identify, resolve } from '../src/invocation.ts';
 import { holds } from '../src/policy.ts';
 import { resolution } from '../src/quest.ts';
@@ -49,14 +50,20 @@ const world = (f: (c: any) => void = () => {}): World => {
   assert.ok(loaded.ok, JSON.stringify(loaded));
   return newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], [1, 2, 3, 4]);
 };
+const quest = (c: any) => c.quests[`${E}:quest/lantern`];
 const strict = () => world((c) => (c.quests[`${E}:quest/lantern`].objective = STRICT));
-const cmd = (w: World, payload: object): Command =>
+const cmd = (w: World, payload: object, id = CMD): Command =>
   ({
-    id: CMD,
+    id,
     world_context_id: CONTEXT,
     payload: { actor_id: w.character, ...payload },
   }) as Command;
 const ACCEPT = { type: 'accept_quest', quest: QUEST };
+// IdSource ordinal 0 of the accept under CMD (and CMD2) in CONTEXT: the first 16 bytes of SHA-256
+// over ["loka-id-v1",CONTEXT,CMD,0] as a UUIDv8, computed with Python hashlib (numeric profile).
+const ID = 'e2870386-6797-8a1b-8e1a-b2c028c16c49';
+const CMD2 = 'f6a7b8c9-d0e1-8f2a-9b3c-5d6e7f8a9b0c';
+const ID2 = 'c90fc0ec-5e30-89fa-a48a-1f45508f8e05';
 const lantern = (w: World) => w.entityIds[`${E}:item/lantern`];
 const take = (w: World) => ({ type: 'take', item_id: lantern(w) });
 const drop = (w: World) => ({ type: 'drop', item_id: lantern(w) });
@@ -98,28 +105,28 @@ test('accept activates the quest: one quest.activate and its quest_activated', (
   const { world: next, decision: d } = run(w, ACCEPT);
   assert.ok(d?.kind === 'accepted');
   assert.equal(d.outcome, 'activated'); // lantern-traces.json step accept
-  const [op] = d.delta.ops as any[];
   const scope = { kind: 'player', character_id: w.character };
   assert.deepEqual(plain(d.delta.ops), [
-    { op: 'quest.activate', writer_group: 0, quest: QUEST, scope, instance_id: op.instance_id },
+    { op: 'quest.activate', writer_group: 0, quest: QUEST, scope, instance_id: ID },
   ]);
   assert.deepEqual(plain(d.events.map((e) => [e.position, e.payload])), [
-    [1, { type: 'quest_activated', quest: QUEST, instance_id: op.instance_id }],
+    [1, { type: 'quest_activated', quest: QUEST, instance_id: ID }],
   ]);
   assert.deepEqual(plain(next.state.quests), {
-    [op.instance_id]: { quest: QUEST, scope, state: 'active' },
+    [ID]: { quest: QUEST, scope, state: 'active' },
   });
   assert.equal(is(next, 'active'), true);
   assert.equal(is(next, 'resolved'), false);
 });
 
 // Breaks: a second activation admitted (or faulting instead of refused), or a forged accept of a
-// quest the cartridge does not declare reaching the rule.
+// quest the cartridge does not declare reaching the rule or refused as anything but not_found
+// (perform's code for a recipe it does not declare).
 test('a second accept and an accept of an undeclared quest are refused', () => {
   const accepted = after(world(), ACCEPT);
   refused(accepted, ACCEPT, 'unsupported_capability');
-  refused(world(), { ...ACCEPT, quest: ref('quest', 'missing') }, 'unsupported_capability');
-  refused(world(), { ...ACCEPT, quest: ref('item', 'lantern') }, 'unsupported_capability');
+  refused(world(), { ...ACCEPT, quest: ref('quest', 'missing') }, 'not_found');
+  refused(world(), { ...ACCEPT, quest: ref('item', 'lantern') }, 'not_found');
 });
 
 // Breaks: the offer not resolving to accept_quest of its quest (the frozen accept request carries
@@ -189,7 +196,7 @@ test('a post-activation acquisition completes a strict objective; current state 
   assert.deepEqual(plain(transition), {
     op: 'quest.transition',
     writer_group: 1,
-    instance_id: Object.keys(done.state.quests!)[0],
+    instance_id: ID,
     from: 'active',
     to: 'objectives_complete',
   });
@@ -258,10 +265,20 @@ test('resolution re-checks current possession and resolves an open instance once
 });
 
 // Breaks: a strict objective resolved while only active (the lantern held since before
-// activation), or one completed by its event not resolvable.
+// activation), or one completed by its event not resolvable; delivery to an instance no longer
+// active (a re-take after objectives_complete or resolved then faults precondition_failed).
 test('a strict objective resolves only once its event completed it', () => {
   const early = after(strict(), move('north'), take, ACCEPT);
   assert.equal(resolved(early), 'quest_requirement');
+  const complete = after(early, drop, take, drop, take);
+  assert.deepEqual(state(complete), ['objectives_complete']);
+  assert.deepEqual(state(after(resolved(complete) as World, drop, take)), ['resolved']);
+  // The current contract: a strict objective stays met once complete, custody lost or not; the
+  // resolving rule (slice D) checks custody and presence before it calls resolution.
+  assert.equal(
+    typeof resolution(after(complete, drop), early.character, QUEST, 'carry' as never, 0),
+    'object',
+  );
   const r = resolution(after(early, drop, take), early.character, QUEST, 'carry' as never, 0);
   assert.equal(
     typeof r === 'string'
@@ -317,7 +334,6 @@ const fails = (
     },
   });
 const Q = `.cartridge.quests["${E}:quest/lantern"]`;
-const quest = (c: any) => c.quests[`${E}:quest/lantern`];
 const unlock = (c: any, cap: string) => {
   delete c.manifest.requires.capabilities[cap];
   delete c.lock.capabilities[cap];
@@ -364,6 +380,11 @@ test('the loader checks quest references, texts, keys and the lock', () => {
     c.rooms[`${E}:room/ferry_landing`].variants[0].when.root.quest.key = key;
   };
   fails(renamed('take'), 'DUPLICATE_DEFINITION', `.cartridge.quests["${E}:quest/take"]`);
+  const look = { target: { kind: 'none' }, command: 'look', priority: 0, input: [] };
+  const always = { policy_version: 1, root: { op: 'all', items: [] } };
+  const label = { label: 'quest.lantern.accept', accessibility: 'quest.lantern.accept' };
+  const action = { key: 'lantern', ...label, ...look, policy: always };
+  fails((c) => (c.actions[`${E}:action/lantern`] = action), 'DUPLICATE_DEFINITION', Q);
   fails((c) => unlock(c, 'quest'), 'UNDECLARED_CAPABILITY', `${Q}`, { capability: 'quest' }, [
     'quest@1',
   ]);
@@ -386,4 +407,32 @@ test('the loader checks quest references, texts, keys and the lock', () => {
     gameView(contributed).actions.map((a) => a.action_key),
     ['lantern'],
   );
+});
+
+// Breaks (04 §5.2 step 6): deliveries ordered by stored row order, so the same canonical state
+// restored from a save (rows in instance-id order) gives other writer groups.
+test('two strict quests on one item complete in quest order, also after a restore', () => {
+  const w = world((c) => {
+    quest(c).objective = STRICT;
+    c.quests[`${E}:quest/shed`] = { ...quest(c), key: 'shed' };
+  });
+  const accepted = after(w, ACCEPT, move('north'));
+  const both = step(
+    accepted,
+    cmd(accepted, { ...ACCEPT, quest: ref('quest', 'shed') }, CMD2),
+  ).world;
+  const restored = {
+    ...both,
+    state: decode(encode(both.state as never)) as unknown as World['state'],
+  };
+  for (const at of [both, restored]) {
+    const d = step(at, cmd(at, take(at))).decision as any;
+    assert.deepEqual(
+      d.delta.ops.slice(1).map((o: any) => [o.instance_id, o.writer_group]),
+      [
+        [ID, 1], // quest/lantern
+        [ID2, 2], // quest/shed
+      ],
+    );
+  }
 });

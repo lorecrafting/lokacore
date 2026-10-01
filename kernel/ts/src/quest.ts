@@ -15,6 +15,7 @@ import type {
 } from './contracts.gen.ts';
 import { bodyOf, questOf, refString, type Mint, type QuestRow, type World } from './decision.ts';
 import { holds } from './policy.ts';
+import { cmp } from './validate.ts';
 
 /** The cartridge's definition of `quest` (the loader resolves every quest reference). */
 const definition = (world: World, quest: DefinitionRef): QuestDefinition =>
@@ -60,9 +61,12 @@ export function deliver<D extends DecisionResult>(world: World, decision: D): D 
       )
     );
   };
-  const done = Object.entries(world.state.quests ?? {}).filter(
-    ([, q]) => q.state === 'active' && met(q),
-  );
+  // In stable semantic order (04 §5.2 step 6): by quest DefinitionRefString, then instance id,
+  // never the order the rows were stored or restored in.
+  const order = ([i, q]: [string, QuestRow]) => `${refString(q.quest)} ${i}`;
+  const done = Object.entries(world.state.quests ?? {})
+    .filter(([, q]) => q.state === 'active' && met(q))
+    .sort((a, b) => cmp(order(a), order(b)));
   if (!done.length) return decision;
   const ops = done.map(([instance_id], n) => ({
     op: 'quest.transition' as const,
@@ -85,6 +89,8 @@ type Resolved = Extract<EventPayload, { type: 'quest_resolved' }>;
  * resolved quest never resolves again), quest_requirement while its objective is unmet: a
  * current_state objective is evaluated now (06 §43: a historical acquisition never authorizes
  * giving an item no longer held), a post_activation_event one is met once objectives_complete.
+ * The resolving rule checks custody and presence first (slice D): a strict objective stays met
+ * after the item is dropped.
  */
 export function resolution(
   world: World,

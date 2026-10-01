@@ -26,8 +26,11 @@ import { append, kernelVersion, line, ROOT } from '../play/obs.ts';
 import { decide } from '../play/run.ts';
 import { read } from './read.ts';
 
-/** Bump when a seed would generate a different sequence; sim_seeds.json records it. */
-export const GENERATOR = 1;
+/**
+ * Bump when a seed would generate a different sequence, a new demo cartridge known answer
+ * included (begin picks among them by seed); sim_seeds.json records it.
+ */
+export const GENERATOR = 2;
 /** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
 /** invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {

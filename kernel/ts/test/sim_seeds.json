@@ -1,5 +1,5 @@
 {
-  "generator": 1,
+  "generator": 2,
   "seeds": [
     {
       "seed": 3,
@@ -9,7 +9,7 @@
     {
       "seed": 98,
       "type": "toString",
-      "found": "step threw on a command type that is an Object prototype key (toString), from a drained start (found as seed 1; seed 98 since ashmere_errand joined the cartridges, Early R7/R8 Q)"
+      "found": "step threw on a command type that is an Object prototype key (toString), from a drained start (generator 1 seed 1; generator 2, with ashmere_errand, seed 98)"
     }
   ]
 }

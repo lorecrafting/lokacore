@@ -65,7 +65,7 @@
       ]
     },
     "QuestObjective": {
-      "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture).",
+      "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).",
       "oneOf": [
         {
           "type": "object",
