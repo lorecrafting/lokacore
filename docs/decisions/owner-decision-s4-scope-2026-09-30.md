@@ -11,9 +11,10 @@ due jobs ([07 §10](../spec/07-offline-storypacks-to-mmo.md#10-offline-time),
 What lands now?
 
 - A: the due-job drain (the 04 §5.4 explicit-advance due set, `run_job` and its
-  authority-internal IdSource tag) lands with the first real job, Bram's schedule in R6P
-  P3/P4 ([pre-release-proof](../spec/pre-release-proof.md): "wait to hour 19 moves Bram
-  through a durable scheduled command", 00a:689). `real_elapsed` time and
+  authority-internal IdSource tag) lands with the first real job, Bram's schedule (owner: R6P P3/P4; the PM placed its owner in the
+  [Early R7/R8 ROADMAP row](../ROADMAP.md#proposed-r6-slices), which R6P P4 integrates; "wait to hour 19
+  moves Bram through a durable scheduled command", [00a:689](../spec/00a-chapter-one-content.md)).
+  `real_elapsed` time and
   [OFF-08, OFF-09 and OFF-13](../spec/15-acceptance-scenarios.md#b-offline-lifecycle) become
   a ROADMAP carry until a `real_elapsed` cartridge is planned (10 §31 calls it a future
   profile). The `play_time` proof (reading, backgrounding, view and restart never advance
@@ -31,7 +32,10 @@ list is unchanged; the gate review reports the carry.
 
 ## Resume-design notes for whoever builds `real_elapsed`
 
-PM notes, not decisions:
+PM notes, not policy. The cartridge declares the clamp/rollback policy
+([07 §10](../spec/07-offline-storypacks-to-mmo.md#10-offline-time)); the formula below is only
+an example of one. Committed chunks would need the separately tested continuation contract
+04 §5.4 requires.
 
 - The wall-clock anchor is committed in the same transaction as the advance.
 - Accepted interval = `clamp(now - anchor, 0, cap)`. On rollback accept 0 and leave the
