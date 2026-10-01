@@ -71,4 +71,5 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [one save per story, no bookmarks; a new game replaces it after confirmation](owner-decision-one-save-2026-09-30.md).
 - Owner decision: [S4 scope: job drain waits for the first real job (Bram's schedule); `real_elapsed` and OFF-08/09/13 carried](owner-decision-s4-scope-2026-09-30.md).
 - Owner decision: [Gate R6 "finish": a fixed tap script to a declared end state, the save equal to a headless run; a real story is R6P's gate](owner-decision-gate-r6-finish-2026-09-30.md).
+- Owner decision: [Gate R6 carries to R6P: device mid-commit kill evidence, the `evaluation.budget_exceeded` producer, the Hermes `kernel.decision_latency` producer](owner-decision-gate-r6-carries-2026-09-30.md).
 - Owner decision: [S3b scope: bundled releases reopen saves on their pin, typed refusals; GC, migration staging and downloads carried](owner-decision-s3b-scope-2026-09-30.md).

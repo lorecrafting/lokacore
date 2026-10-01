@@ -147,8 +147,10 @@ Run date 2026-09-30; build commit `c963af1` (Release, Hermes, free personal team
   only NOTADB; from source, expo-sqlite passes SQLite's own message through and its vendored
   `sqlite3.c` holds both texts; carried to R6P's device proof (P6).
 - **Not checked:** the exact full on-screen line (partly hidden); a kill during a COMMIT on the
-  device (S6a's headless corpus covers it); where run 1's two extra commands came from.
+  device (Gate R6 accepts S6a's headless corpus plus the kills between taps; the device kill is
+  carried to R6P, [owner decision](../../decisions/owner-decision-gate-r6-carries-2026-09-30.md)); where run 1's two extra commands came from.
 
 ## Deferred, not passed (Gate R6)
 
-Listed once, in the [ROADMAP R6 row](../../ROADMAP.md#slices).
+Listed once, in the [ROADMAP R6 row](../../ROADMAP.md#slices); the owner's three Gate R6 carries
+([record](../../decisions/owner-decision-gate-r6-carries-2026-09-30.md)) land in its R6P row.
