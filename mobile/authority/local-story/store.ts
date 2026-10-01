@@ -71,6 +71,11 @@ export type Meta = {
 const UPSERT = 'INSERT OR REPLACE INTO state_row VALUES (?, ?, ?)';
 const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
 
+/** The identity's receipt scope and replay ids are UUIDs (03 §14), its binding a string or null. */
+const whole = (m: Record<string, Json>) =>
+  [m.lineage_id, m.run_id].every((v) => !validate('StoryRunId', v).length) &&
+  (typeof m.binding === 'string' || m.binding === null);
+
 /**
  * The saved world, revision and identity; with no save, `fresh` saved whole at revision 0 under
  * the identity `first()` allocates. Undefined when the head, a row or the identity does not parse
@@ -98,12 +103,11 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   db.getFirstSync('SELECT * FROM receipt LIMIT 1'); // the table, not its index
   type Head = { revision?: number; clock?: number; rng?: string };
   const h = db.getFirstSync<Head>('SELECT * FROM head')!; // any columns: a damaged one is corrupt
-  const m = db.getFirstSync<Record<string, unknown>>('SELECT * FROM save')!;
+  const m = db.getFirstSync<Record<string, Json>>('SELECT * FROM save')!;
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };
-  const got = [h.revision, h.clock, m.lineage_id, m.run_id, m.binding === null ? '' : m.binding];
-  if (got.map((v) => typeof v).join() !== 'number,number,string,string,string') return undefined;
+  if (typeof h.revision !== 'number' || typeof h.clock !== 'number' || !whole(m)) return undefined;
   try {
     for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
       (state[r.section] ??= {})[r.key] = JSON.parse(r.value);

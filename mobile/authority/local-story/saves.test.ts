@@ -240,10 +240,11 @@ test('a save of an unknown format is refused with nothing written and no new gam
 });
 
 // Breaks (OFF-07; 10 §31; 23 §11; 03 §14): a damaged identity (a format name that is not a higher
-// vN, a dropped or renamed column, a lineage not a string, the table gone beside the rest) opened
-// (a retry then misses its receipt under story/undefined/... and commits twice), taken for a newer format or
-// written before the player's new game; that new game reusing the damaged table (it throws, or a
-// reopen is still corrupt), dropping a pending report, keeping old ids, or not all-or-nothing.
+// vN, a dropped or renamed column, a lineage or run not a UUID, the table gone beside the rest)
+// opened (a retry then misses its receipt under a malformed scope and commits twice), taken for a
+// newer format or written before the player's new game; that new game reusing the damaged table (it
+// throws, or a reopen is still corrupt), dropping a pending report, keeping old ids, or not
+// all-or-nothing.
 test('a damaged identity is save_corrupt and untouched; its new game repairs it', () => {
   const names = ['loka-savf-v1', 'loka-save-v0', 'loka-save-v01', 'loka-save-v02', 'loka-save-v2x'];
   const REPORT = "INSERT INTO report VALUES ('r', 'l', NULL, '{}', 'pending', NULL, 0)";
@@ -263,6 +264,8 @@ test('a damaged identity is save_corrupt and untouched; its new game repairs it'
     'ALTER TABLE save RENAME COLUMN format TO fmt',
     ...['lineage_id', 'run_id', 'binding'].map((c) => `ALTER TABLE save DROP COLUMN ${c}`),
     ...['NULL', '7'].map(retyped), // a lineage that is not a string (a rebuilt, lax table)
+    ...["''", "'lineage'"].map((v) => `UPDATE save SET lineage_id = ${v}`), // not a UUID
+    "UPDATE save SET run_id = ''",
     'DROP TABLE save',
     'DROP TABLE state_row',
     'DROP TABLE receipt',
