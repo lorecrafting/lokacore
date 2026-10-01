@@ -23,6 +23,7 @@ import {
   inventory,
   journal,
   parse,
+  pinned,
   reason,
   room,
   say,
@@ -141,15 +142,6 @@ const command = (r: Run, parsed: { type: string }): Command =>
     world_context_id: r.world.context,
     payload: { ...parsed, actor_id: r.world.character } as CommandPayload,
   }) as Command;
-
-// A narration line's committed key and participants as the receipt holds them (06 §43), or
-// nothing for a line without participants; names are not rendered (presentation, later).
-const pinned = (t: { key: string; participants?: Readonly<Record<string, string>> }) =>
-  t.participants
-    ? `[${t.key}: ${Object.entries(t.participants)
-        .map(([n, id]) => `${n} ${id}`)
-        .join(', ')}]\n`
-    : '';
 
 // Decides one command, prints what the player sees, the state hash and the step time, and
 // returns its game_trace line; the latency metric goes to operations.
