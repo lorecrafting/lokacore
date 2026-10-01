@@ -199,7 +199,8 @@ test('at the cap a new game deletes the oldest run whole and keeps the current o
 
 // Breaks (ADR-075 §2, cap rule): with the current run alone at the cap, its entries still
 // appended, its own beginning deleted to make room, the dropped entries caught up at the next open,
-// or the cap reaching play.
+// the cap reaching play, or a dropped entry counted as a failed write (every later command would
+// then rescan the receipts to catch up).
 test('a run alone at the cap keeps its beginning and appends no more entries', () => {
   const path = save();
   const p = open(path);
@@ -208,8 +209,11 @@ test('a run alone at the cap keeps its beginning and appends no more entries', (
   const last = p.one('SELECT max(rowid) FROM trace');
   assert.equal(revision(p.story.invoke(give)), 2);
   p.sql.close();
-  const q = open(path);
+  let scans = 0;
+  const q = open(path, (s, run) => ((scans += +s.includes('FROM receipt WHERE command')), run()));
+  scans = 0;
   assert.equal(revision(q.story.invoke(invocation(3, 'take', [SATCHEL]))), 2); // given: rejected
+  assert.equal(scans, 0);
   assert.deepEqual(
     [q.one('SELECT count(*) FROM trace'), q.one('SELECT max(rowid) FROM trace')],
     [CAP, last],
