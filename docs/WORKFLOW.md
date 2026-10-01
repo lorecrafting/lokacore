@@ -84,8 +84,9 @@ Report at the end of the slice, not at every step.
 
 ## Token hygiene
 
-- Big outputs (logs, diffs, check runs) stay out of the main context: delegate, or write to
-  the scratchpad and read the tail. Batch independent tool calls.
+- Big outputs (logs, diffs, check runs) stay out of every agent's context, subagents' too: the
+  PM delegates; any agent sends a check, test or push run to a file and reads only the exit
+  status, the failing lines and the tail. Batch independent tool calls.
 - Delegate mechanical work; clear the session after each merge and resume from the PM state
   file. No plugin or CLAUDE.md changes mid-session (they bust the prompt cache).
 - Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
