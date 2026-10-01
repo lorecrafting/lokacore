@@ -35,7 +35,8 @@ yet; the R6 gate reports it as carried.
 
 A second release-process rule (PM ruling, PR #74 review): every future save format keeps the
 `save` table's `format` field readable by older apps, so an older app always detects a newer
-save as `unsupported_save_format` rather than corrupt. An unsupported format offers no new game:
+save as `unsupported_save_format` rather than corrupt. Newer means `loka-save-vN` with a higher
+N; any other value the app does not know is `save_corrupt`, which offers a new game (OFF-07). An unsupported format offers no new game:
 the player updates the app, since a new game would discard the only working save
 ([10 §§31–32](../spec/10-mobile-commerce-release.md#31-initial-player-run-lifetime-defaults),
 [23 §11](../spec/23-accounts-progress-admission.md#11-restored-and-forked-run-provenance)).

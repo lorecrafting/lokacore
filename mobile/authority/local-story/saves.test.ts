@@ -237,6 +237,18 @@ test('a save of an unknown format is refused with nothing written and no new gam
     b.sql.close();
     assert.equal(bytes(path), before);
   }
+  // Not a newer format: a damaged name, an older or non-canonical number, no format column.
+  const set = (format: string) => `UPDATE save SET format = '${format}'`;
+  const damages = ['loka-savf-v1', 'loka-save-v0', 'loka-save-v01'].map(set);
+  for (const damage of [...damages, 'ALTER TABLE save DROP COLUMN format']) {
+    const p = processOn(save(), { newId: ids() });
+    p.sql.exec(damage);
+    const { kind, newGame } = processOn(p.sql.location()!).opened as {
+      kind: string;
+      newGame?: unknown;
+    };
+    assert.deepEqual([kind, typeof newGame], ['save_corrupt', 'function'], damage);
+  }
 });
 
 // Breaks (10 §32; OFF-11): after an app update adds a newer release, a save reopened on the newest

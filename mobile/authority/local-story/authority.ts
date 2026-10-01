@@ -39,16 +39,16 @@ export type Host = {
   milestones?: ReadonlyMap<string, { milestone: string; outcome: string }>;
   binding?: () => string | null;
 };
-const SAVE_FORMAT = 'loka-save-v1';
+const SAVE_VERSION = 1;
+const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
 
 /**
  * The story saved in `db`, on the installed release its pin names (10 §32, OFF-11), or the newest
  * release's fresh world saved at revision 0 as a new save pinning it. Its idempotency scope is
  * the save's lineage and the world's character; its actor is the character. Not opened, nothing
- * written: a save of another format (`unsupported_save_format`, checked first; the player updates
- * the app, no new game discards it, 10 §§31-32), and, offering only the player's new game (settled
- * as any; reopen once `replaced`), an uninstalled pin (`pinned_release_missing`, 10 §32) or a save
- * that does not parse (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
+ * written: a newer format (`unsupported_save_format`, checked first; the player updates the app,
+ * 10 §§31-32), and, offering only the player's new game (settled as any; reopen once `replaced`),
+ * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
  * conflict) before anything is resolved against the current world; a NEW one is resolved, decided
  * once and committed before it is adopted. A fault discards its proposal and gets no receipt
@@ -60,12 +60,12 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
   const saved = identityOf(db);
   const { fresh } = releases[0]; // meta stays undefined until a save is loaded or replaced
   const s = { db, releases, fresh, host, world: fresh, revision: 0, behind: false } as Story;
-  // ponytail: no migration or recovery copy yet (owner-decision-s3b-scope-2026-09-30.md).
-  const refuse = <T>(r: T) => ({ ...r, newGame: () => newGame(s) });
-  const format = saved?.format;
-  if (saved && format !== SAVE_FORMAT)
+  const refuse = <T>(r: T) => ({ ...r, newGame: () => newGame(s) }); // ponytail: no migration yet
+  const format = saved?.format; // a higher loka-save-vN: a newer app's; any other but ours: corrupt
+  if (Number(/^loka-save-v([1-9][0-9]*)$/.exec(format ?? '')?.[1]) > SAVE_VERSION)
     return { kind: 'unsupported_save_format' as const, format, supported: [SAVE_FORMAT] };
-  if (saved && !saved.pin) return refuse({ kind: 'save_corrupt' as const });
+  if (saved && (format !== SAVE_FORMAT || !saved.pin))
+    return refuse({ kind: 'save_corrupt' as const });
   const release = saved
     ? releases.find((r) => r.content_hash === saved.pin!.content_hash)
     : releases[0]; // no save row: a new save, or half a save that load reports corrupt
