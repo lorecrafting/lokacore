@@ -306,3 +306,37 @@ Keep one (ROADMAP, after G2) and link to it from the evidence README.
   - `docs/lessons/mobile.md` and `protocol/README.md`: no duplicated or stale fact.
   - `.claude/agents/*` and WORKFLOW: nothing stale.
   - ROADMAP and the evidence: G2, G4, N3.
+
+## Cross-vendor review (codex Astra)
+
+Run by the PM with `codex exec` (gpt-6-astra, read-only) on PR #76 at `8dd14bc`, in parallel; it did not see this record. Appended verbatim:
+
+CHANGES REQUIRED
+
+```text
+G1 | blocker | mobile/authority/local-story/store.ts:112 at 8dd14bc | Save identity is cast to Meta without validating lineage_id. Reproduced: commit pick_lock, drop save.lineage_id, reopen, resend the identical invocation. The save opens; the retry uses story/undefined/... and commits again: revision 1→2, clock 600→1200, another RNG draw. Reject damaged identity as save_corrupt; existing corruption tests miss this OFF-07/03 §14 violation.
+G2 | blocker | docs/evidence/2026-09-30-gate-r6-iphone11/README.md:51 at 8dd14bc | Every phone kill occurs between completed taps. This proves reopening committed saves, but not Gate R6's “kill app during actions” on expo-sqlite. Node SIGKILL tests cover the implementation on another host; the finish decision changes only the finish criterion. Supply device interruption evidence or an explicit approved deferral.
+G3 | blocker | docs/ROADMAP.md:50 at 8dd14bc | The evaluation.budget_exceeded producer and registration deferred from R5 still land in R6, but neither exists. A budget fault supplies no exhausted-limit diagnostic required by 04 §5.4. The gate's deferral list omits this obligation and names no subsequent landing row. Implement it or explicitly carry it forward.
+G4 | should-fix | mobile/authority/local-story/authority.ts:160 at 8dd14bc | Local decisions emit no kernel.decision_latency operations records. ADR-075 §2 names this producer, and protocol/event_registry.json assigns the Hermes producer to R6, with phone timing at R6P. No roadmap carry accounts for its absence; phone commands therefore lack the promised measurement.
+G5 | should-fix | docs/evidence/2026-09-30-gate-r6-iphone11/README.md:134 at 8dd14bc | The device corruption test supplies only a garbage file (SQLITE_NOTADB). It never exercises SQLITE_CORRUPT from a damaged page in a valid database, although S6b requires both expo-sqlite errors to become save_corrupt. Test that second case or explicitly record its device verification as deferred.
+```
+Opus reviewer's position on each finding:
+
+- **Astra G1: concur; reproduced.** I added a probe in a throwaway worktree, then reverted it: commit
+  a take, `ALTER TABLE save DROP COLUMN lineage_id`, reopen, resend the same invocation. The save
+  opens. `load` casts the row to Meta unchecked (`store.ts:112`), the receipt scope becomes
+  `story/undefined/…`, and the retry returns `replay: false`, committing a second receipt.
+  This violates 03 §14 and OFF-07. I missed it. My severity is should-fix, the same class as S3a's
+  "a head that parses with the wrong shape opens", but the PM's call stands.
+- **Astra G2: concur.** This is my G3. The PM has since inspected run 1's and run 2's copied
+  saves: `pragma journal_mode` = `delete` and `page_size` = 4096. That confirms the phone runs a
+  rollback journal and the headless corpus does not. Fix: drop the pragmas, and record the
+  mapping or have it approved as a deferral.
+- **Astra G3: concur.** This is my G1.
+- **Astra G4: concur, new to me.** `protocol/event_registry.json:36` names "the local authority
+  on Hermes (R6, R6P phone timing)" as a `kernel.decision_latency` producer. Only
+  `kernel/ts/play/run.ts:47` emits it, and the ROADMAP has no carry for it. Should-fix: emit it
+  from the local authority, or carry it with a landing row (R6P) and correct the registry text.
+- **Astra G5: concur.** This is my N1. Source inspection (vendored SQLite messages passed through
+  unchanged) makes the CORRUPT text low-risk, so recording it as not checked on the device is
+  enough.
