@@ -1,3 +1,4 @@
+// size: allow 560, every save-open outcome shares this file's one-process harness
 // The save's identity and pin, a new game, and a corrupt save (10 §§31-32 as amended; 07 §9;
 // OFF-07) on Node with real SQLite (node:sqlite) in WAL mode, one connection per simulated
 // process, as local_story.test.ts. Expected values are literals from the fixtures named beside
@@ -237,18 +238,57 @@ test('a save of an unknown format is refused with nothing written and no new gam
     b.sql.close();
     assert.equal(bytes(path), before);
   }
-  // Not a newer format: a damaged name, an older or non-canonical number, no format column.
-  const set = (format: string) => `UPDATE save SET format = '${format}'`;
-  const damages = ['loka-savf-v1', 'loka-save-v0', 'loka-save-v01'].map(set);
-  for (const damage of [...damages, 'ALTER TABLE save DROP COLUMN format']) {
-    const p = processOn(save(), { newId: ids() });
-    p.sql.exec(damage);
-    const { kind, newGame } = processOn(p.sql.location()!).opened as {
-      kind: string;
-      newGame?: unknown;
-    };
-    assert.deepEqual([kind, typeof newGame], ['save_corrupt', 'function'], damage);
+});
+
+// Breaks (OFF-07; 10 §31; 23 §11): a damaged identity (a format name that is not a higher vN, a
+// dropped or renamed column, the table gone beside the rest) opened, taken for a newer format or
+// written before the player's new game; that new game reusing the damaged table (it throws, or a
+// reopen is still corrupt), dropping a pending report, keeping old ids, or not all-or-nothing.
+test('a damaged identity is save_corrupt and untouched; its new game repairs it', () => {
+  const names = ['loka-savf-v1', 'loka-save-v0', 'loka-save-v01', 'loka-save-v02', 'loka-save-v2x'];
+  const REPORT = "INSERT INTO report VALUES ('r', 'l', NULL, '{}', 'pending', NULL, 0)";
+  const damaged = (damage: string) => {
+    const path = save();
+    const a = processOn(path, { newId: ids() });
+    a.story.invoke(pick(1));
+    a.sql.exec(`${REPORT}; ${damage}`);
+    a.sql.close();
+    return path;
+  };
+  for (const damage of [
+    ...names.map((f) => `UPDATE save SET format = '${f}'`),
+    'ALTER TABLE save DROP COLUMN format',
+    'ALTER TABLE save RENAME COLUMN format TO fmt',
+    'DROP TABLE save',
+  ]) {
+    const path = damaged(damage);
+    const before = bytes(path);
+    const b = processOn(path);
+    assert.equal(b.opened.kind, 'save_corrupt', damage);
+    b.sql.close();
+    assert.equal(bytes(path), before, damage);
+    let n = 4;
+    const c = processOn(path, { newId: () => id(++n) });
+    assert.deepEqual((c.opened as { newGame: () => unknown }).newGame(), { kind: 'replaced' });
+    c.sql.close();
+    const d = processOn(path);
+    const reports = d.all('SELECT report_id, disposition FROM report');
+    assert.deepEqual(
+      [d.opened.kind, d.all(IDENTITY), reports],
+      ['open', [identity(5)], [['r', 'pending']]],
+      damage,
+    );
   }
+  // Real fault after the identity table is recreated: deleting the receipts raises.
+  const path = damaged('ALTER TABLE save DROP COLUMN format');
+  const f = processOn(path, { newId: ids() });
+  f.sql.exec(`CREATE TRIGGER t BEFORE DELETE ON receipt BEGIN SELECT RAISE(ABORT, 'I/O'); END`);
+  f.sql.close();
+  const before = bytes(path);
+  const g = processOn(path, { newId: ids() });
+  assert.throws(() => (g.opened as { newGame: () => unknown }).newGame(), /I\/O/);
+  g.sql.close();
+  assert.equal(bytes(path), before);
 });
 
 // Breaks (10 §32; OFF-11): after an app update adds a newer release, a save reopened on the newest
@@ -392,10 +432,10 @@ test('a new game whose COMMIT is unknown is fenced; settling it moves play to th
 });
 
 // The definite COMMIT failure of the storage lessons: a deferred foreign-key violation, raised by
-// the identity row's write, fails the real COMMIT; its ROLLBACK succeeds.
+// a fresh state row's write, fails the real COMMIT; its ROLLBACK succeeds.
 const FAIL_COMMIT = `PRAGMA foreign_keys = ON; CREATE TABLE parent (id INTEGER PRIMARY KEY);
   CREATE TABLE orphan (id INTEGER REFERENCES parent DEFERRABLE INITIALLY DEFERRED);
-  CREATE TRIGGER orphaned AFTER INSERT ON save BEGIN INSERT INTO orphan VALUES (1); END;`;
+  CREATE TRIGGER orphaned AFTER INSERT ON state_row BEGIN INSERT INTO orphan VALUES (1); END;`;
 
 // Breaks (03 §15; 10 §31): a new game whose COMMIT genuinely failed answered as replaced (or
 // pending forever), memory or the save changed, or the old run's receipts no longer replaying.

@@ -79,31 +79,33 @@ const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
 export function load(db: Db, fresh: World, first: () => Meta) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
-  db.execSync(SCHEMA);
-  type Head = { revision: number; clock: number; rng: string };
-  const head = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head');
-  const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save');
-  // Empty only when no table holds progress (the trace is derived): a missing head or identity
-  // beside surviving rows or receipts is corrupt.
-  const any = (t: string) => !!db.getFirstSync(`SELECT 1 FROM ${t} LIMIT 1`);
-  if (!head && !m && !['state_row', 'receipt'].some(any)) {
+  // Classified before any table is created: empty only when no table holds progress (the trace
+  // is derived); a missing head or identity beside surviving rows or receipts is corrupt.
+  const table = (t: string) => db.getFirstSync('SELECT 1 FROM sqlite_master WHERE name = ?', t);
+  const any = (t: string) => !!table(t) && !!db.getFirstSync(`SELECT 1 FROM ${t} LIMIT 1`);
+  const [head, save] = ['head', 'save'].map(any);
+  if (!head && !save && !['state_row', 'receipt'].some(any)) {
     const meta = first();
     const saved = replace(db, fresh, meta);
     if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
     return { world: fresh, revision: 0, meta };
   }
-  if (!head || !m) return undefined; // half a save: never taken for a new one
+  if (!head || !save) return undefined; // half a save: never taken for a new one, nothing written
+  db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report)
+  type Head = { revision: number; clock: number; rng: string };
+  const h = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head')!;
+  const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save')!;
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };
   try {
     for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
       (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
-    const rng = JSON.parse(head.rng);
+    const rng = JSON.parse(h.rng);
     if (validate('RngState', rng).length) return undefined; // parses, but no RNG state
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v!));
-    const world = { ...fresh, state: { ...state, clock: head.clock, rng } as World['state'] };
-    return { world, revision: head.revision, meta: { ...m, parent, seed, pin } as Meta };
+    const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
+    return { world, revision: h.revision, meta: { ...m, parent, seed, pin } as Meta };
   } catch (e) {
     if (e instanceof SyntaxError) return undefined;
     throw e;
@@ -112,10 +114,12 @@ export function load(db: Db, fresh: World, first: () => Meta) {
 
 /**
  * Makes the save `fresh` at revision 0 under the identity `meta`, with no receipts, in one
- * transaction (a first save or a new game; one save per story), as `transaction` reports.
+ * transaction (a first save or a new game; one save per story), as `transaction` reports. The
+ * identity table is recreated, whatever shape a corrupt save left it in; reports stay (23 §11).
  */
 export function replace(db: Db, fresh: World, meta: Meta): boolean {
   return transaction(db, () => {
+    db.execSync(`DROP TABLE IF EXISTS save; ${SCHEMA}`);
     const { clock, rng, ...sections } = fresh.state;
     db.runSync(HEAD, 0, clock, encode(rng as Json));
     db.runSync('DELETE FROM state_row');
