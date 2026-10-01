@@ -14,11 +14,10 @@ nothing, so most of that has no consumer yet. What lands now?
 PM recommendation: build only what is real now.
 
 - (a) The app may carry several bundled releases. An app update that adds a newer one still
-  reopens a save on the release it is pinned to (OFF-11); new saves and new games pin the
-  newest.
+  reopens a save on the release it is pinned to (OFF-11).
 - (b) A save whose pinned release is not installed, or whose save format is unknown or too
   new, gets a typed result (`pinned_release_missing`, `unsupported_save_format`). The save is
-  untouched and never half-loaded; the player's explicit new game is the only way on.
+  untouched and never half-loaded.
 
 Owner (paraphrased): yes, approved the recommendation.
 

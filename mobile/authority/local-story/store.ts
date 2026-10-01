@@ -144,7 +144,7 @@ export function replace(db: Db, fresh: World, meta: Meta): boolean {
  */
 export function identityOf(db: Db) {
   if (!db.getFirstSync("SELECT 1 FROM sqlite_master WHERE name = 'save'")) return undefined;
-  const m = db.getFirstSync<{ format: string; pin: string }>('SELECT format, pin FROM save');
+  const m = db.getFirstSync<{ format: string; pin: string }>('SELECT * FROM save'); // any columns
   if (!m) return undefined;
   let pin: Meta['pin'] | undefined;
   try {
