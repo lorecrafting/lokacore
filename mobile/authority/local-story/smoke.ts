@@ -73,8 +73,8 @@ function cartridgeOf(bundled: Bundled): Cartridge {
 }
 
 // Ids continue from the highest receipt in this allocator's own namespace (replies without a
-// receipt leave no trace; a new game deletes the receipts, and its new scope starts again at 1). ponytail: reads the receipt table directly; openStory exposes
-// none.
+// receipt leave no trace; a new game deletes the receipts, and its new scope starts again at 1).
+// ponytail: reads the receipt table directly; openStory exposes none.
 function lastId(db: Db): number {
   const last = db.getFirstSync<{ id: string | null }>(
     'SELECT max(invocation_id) AS id FROM receipt WHERE invocation_id LIKE ?',
