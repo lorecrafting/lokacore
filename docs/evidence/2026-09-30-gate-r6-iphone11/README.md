@@ -90,15 +90,13 @@ xcrun devicectl device process launch --device $DEVICE --console --terminate-exi
   --timeout 120 2>&1 | redact | tail -30
 ```
 
-The owner reports what the screen shows. Intended: the smoke screen shows `save_corrupt`, no crash.
-**Expected from the code today (inspected, not run): a crash.** `mobile/app/App.tsx:14` calls
-`openSmoke` at module load and `smoke.ts` throws `save not opened: save_corrupt` for any save that
-does not open, with no UI to catch it; the screen has no recovery view (SM2 and R12, [roadmap S6a
-carries](../../ROADMAP.md#proposed-r6-slices)). That is a finding to report, not to fix here. The
-wording check is in the console: a message containing `save_corrupt` means expo-sqlite's error
-text matched `corrupt()` in `mobile/authority/local-story/store.ts`; the raw expo-sqlite error
-(`file is not a database` or another text) means it did not, which fails the S6b acceptance. If the
-console prints nothing, record "not checked".
+The owner reports what the screen shows. Expected: one plain line, `Save could not be opened: save not
+opened: save_corrupt` (`mobile/app/App.tsx`, which catches the open failure; no new-game button, that
+recovery screen is SM2's), and no crash. Not testable headlessly (the catch is in the React file), so
+this step is its only proof. Backup, the console: a message containing `save_corrupt` means
+expo-sqlite's error text matched `corrupt()` in `mobile/authority/local-story/store.ts`; a raw
+expo-sqlite error (`file is not a database` or another text) shown instead means it did not, which
+fails the S6b acceptance. If neither the screen nor the console shows it, record "not checked".
 
 ## Result (PM fills after the run)
 
@@ -107,7 +105,7 @@ Run date, build commit, phone OS: _
 - **Owner-reported (paraphrased), tap script and kills:** _
 - **Owner-reported (paraphrased), airplane mode and lock state:** _
 - **Inspected, copied save:** files in the folder _; `head.revision` _; receipt count _; compare test _
-- **Inspected, corrupt check:** console message _; whether it matches `corrupt()` _
+- **Inspected, corrupt check:** console message (backup) _; whether it matches `corrupt()` _
 - **Owner-reported (paraphrased), corrupt check screen:** _
 - **Not checked:** _
 

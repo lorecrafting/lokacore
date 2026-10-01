@@ -11,10 +11,19 @@ import items from '../../protocol/fixtures/cartridge_items_hash.json';
 // (mobile lessons: a second handle on the same file crashes). A new file name: a save from before
 // R6 S3a has no identity row, so it would open as corrupt.
 const g = globalThis as { loka_smoke?: ReturnType<typeof openSmoke> };
-const smoke = (g.loka_smoke ??= openSmoke(openDatabaseSync('loka-save.db'), items, randomUUID));
+// A save that does not open (save_corrupt, OFF-07) is shown as one line, not thrown at load.
+// ponytail: any open error is shown, typed or not; the new-game recovery screen is SM2's.
+let smoke: ReturnType<typeof openSmoke> | undefined;
+let failed = '';
+try {
+  smoke = g.loka_smoke ??= openSmoke(openDatabaseSync('loka-save.db'), items, randomUUID);
+} catch (e) {
+  failed = `Save could not be opened: ${(e as Error).message}`;
+}
 
 export default function App() {
   const [, redraw] = useState(0);
+  if (!smoke) return <Text>{failed}</Text>;
   const { view, text, buttons, log, pending } = smoke.screen();
   const here = [text(view.place.title.key), text(view.place.description.key)];
   const names = (es: typeof view.entities) => es.map((e) => text(e.name)).join(', ') || 'nothing';
