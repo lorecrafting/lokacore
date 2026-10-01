@@ -45,16 +45,16 @@ const SAVE_FORMAT = 'loka-save-v1';
  * The story saved in `db`, on the installed release its pin names (10 §32, OFF-11), or the newest
  * release's fresh world saved at revision 0 as a new save pinning it. Its idempotency scope is
  * the save's lineage and the world's character; its actor is the character. Not opened, nothing
- * written, only the player's new game offered (settled as any; reopen once `replaced`): a save of
- * another format (`unsupported_save_format`, checked first), an uninstalled pin
- * (`pinned_release_missing`, 10 §32) or a save that does not parse (`save_corrupt`, OFF-07).
- * `invoke` takes one ActionInvocation: malformed or another actor's gets no receipt; a known
- * invocation replays its receipt (altered intent is a conflict) before anything is resolved
- * against the current world; a NEW one is resolved, decided once and committed before it is
- * adopted. A fault discards its proposal and gets no receipt (ADR-075 §4; 04 §5.2 step 7). A
- * failed commit throws, with memory and storage unchanged. A COMMIT whose outcome is unknown
- * fences every call, answered `pending`, until the store settles it (03 §15). Each command's
- * game-trace entry follows its commit. `newGame`: below.
+ * written: a save of another format (`unsupported_save_format`, checked first; the player updates
+ * the app, no new game discards it, 10 §§31-32), and, offering only the player's new game (settled
+ * as any; reopen once `replaced`), an uninstalled pin (`pinned_release_missing`, 10 §32) or a save
+ * that does not parse (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
+ * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
+ * conflict) before anything is resolved against the current world; a NEW one is resolved, decided
+ * once and committed before it is adopted. A fault discards its proposal and gets no receipt
+ * (ADR-075 §4; 04 §5.2 step 7). A failed commit throws, with memory and storage unchanged. A
+ * COMMIT whose outcome is unknown fences every call, answered `pending`, until the store settles
+ * it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
  */
 export function openStory(db: Db, releases: readonly [Release, ...Release[]], host: Host) {
   const saved = identityOf(db);
@@ -64,7 +64,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
   const refuse = <T>(r: T) => ({ ...r, newGame: () => newGame(s) });
   const format = saved?.format;
   if (saved && format !== SAVE_FORMAT)
-    return refuse({ kind: 'unsupported_save_format' as const, format, supported: [SAVE_FORMAT] });
+    return { kind: 'unsupported_save_format' as const, format, supported: [SAVE_FORMAT] };
   if (saved && !saved.pin) return refuse({ kind: 'save_corrupt' as const });
   const release = saved
     ? releases.find((r) => r.content_hash === saved.pin!.content_hash)

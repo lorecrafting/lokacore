@@ -32,3 +32,10 @@ until then: an app update may not drop a bundled release that a shipped save may
 ships a tested migration for it (10 §32, rows "Breaking capability version" and "Missing
 required package"). The app has no deletion path, so nothing in code can pass or fail OFF-12
 yet; the R6 gate reports it as carried.
+
+A second release-process rule (PM ruling, PR #74 review): every future save format keeps the
+`save` table's `format` field readable by older apps, so an older app always detects a newer
+save as `unsupported_save_format` rather than corrupt. An unsupported format offers no new game:
+the player updates the app, since a new game would discard the only working save
+([10 §§31–32](../spec/10-mobile-commerce-release.md#31-initial-player-run-lifetime-defaults),
+[23 §11](../spec/23-accounts-progress-admission.md#11-restored-and-forked-run-provenance)).

@@ -215,15 +215,16 @@ test('a save whose pinned release is missing is refused untouched; a new game mo
 });
 
 // Breaks (07 §9 save format version; 10 §32): a save of another format read or opened (as corrupt,
-// or by its pin), or a table created for it, before its format is checked; no new game from it.
-test('a save of an unknown format is refused with nothing written; a new game moves on', () => {
+// or by its pin), or a table created for it, before its format is checked; a new game offered,
+// which would rewrite it to this format and drop its receipts (10 §§31-32: update the app).
+test('a save of an unknown format is refused with nothing written and no new game', () => {
   const unsupported = {
     kind: 'unsupported_save_format',
     format: 'loka-save-v2',
     supported: ['loka-save-v1'],
   };
-  // A newer app's save, pinned to dusk: another format, without a table this one creates; then
-  // also a renamed identity column (its new game is the carried case: replace() throws).
+  // A newer app's save, pinned to dusk: another format, without a table this one creates or with
+  // a renamed identity column.
   for (const newer of ['DROP TABLE trace', 'ALTER TABLE save RENAME COLUMN pin TO pins']) {
     const path = save();
     const a = processOn(path, { newId: ids() });
@@ -232,10 +233,9 @@ test('a save of an unknown format is refused with nothing written; a new game mo
     a.sql.close();
     const before = bytes(path);
     const b = processOn(path, { releases: LATER });
-    assert.deepEqual(typed(b.opened as never), unsupported, newer);
+    assert.deepEqual(b.opened, unsupported, newer);
     b.sql.close();
     assert.equal(bytes(path), before);
-    if (newer.startsWith('DROP')) startOver(path);
   }
 });
 
