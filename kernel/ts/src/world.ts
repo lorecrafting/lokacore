@@ -5,16 +5,18 @@
 import { encode } from './canonical.ts';
 import { KernelError } from './error.ts';
 import type { Installed } from './cartridge.ts';
-import { compose, key, target } from './compose.ts';
+import { compose, key, target, type Fault } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
   LIMITS,
   type CharacterId,
   type Command,
+  type CommandId,
   type DecisionResult,
   type DeltaOp,
   type EntityId,
   type ErrorCode,
+  type JobId,
   type Owned,
   type WorldContextId,
 } from './contracts.gen.ts';
@@ -30,10 +32,11 @@ import {
   type Entity,
   type Mint,
   type Rule,
+  type State,
   type World,
 } from './decision.ts';
 import { factChanged, invariants as factInvariants, typedFact } from './fact.ts';
-import { id } from './id_source.ts';
+import { id, jobCommandId } from './id_source.ts';
 import type { RngState } from './rng.ts';
 import { utf8 } from './sha256.ts';
 import { refusal } from './actions.ts';
@@ -45,6 +48,7 @@ import * as movement from './rules/movement.ts';
 import * as quest from './rules/quest.ts';
 import * as schedule from './rules/schedule.ts';
 import { deliver } from './quest.ts';
+import { newWorld, NIL } from './fresh.ts';
 import { cmp } from './validate.ts';
 
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
@@ -61,7 +65,15 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
 // them (fact.ts, policy.ts, resource.ts; details in target.ts and look; a recipe's check in
 // rules/action_recipe.ts). Each has feature map cells.
-const RULELESS = ['fact', 'policy', 'inspectable_detail', 'check', 'resource'];
+const RULELESS = [
+  'fact',
+  'policy',
+  'inspectable_detail',
+  'check',
+  'resource',
+  'behavior',
+  'calendar',
+];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
@@ -71,101 +83,6 @@ export const INSTALLED: Installed = {
   rule_ir: 1,
   client_features: [],
 };
-
-const NIL = '00000000-0000-0000-0000-000000000000';
-
-/**
- * A fresh world: IdSource ids under the nil CommandId (ordinal 0 the player's CharacterId, 1 its
- * body entity, then each room in DefinitionRefString order, then each room's details in the same
- * room order and detail-key order, then each NPC, then each item, both in DefinitionRefString
- * order: numeric profile, Initial world ids), the body in the entry room, each NPC in its room
- * and each item at its location, time 0, each fact's default by its canonical DefinitionRef text
- * and no fact set.
- */
-export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
-  let ordinal = 0;
-  const mint = () => id(context, NIL, ordinal++) as EntityId;
-  const [character, body] = [mint() as string as CharacterId, mint()];
-  const refs = Object.keys(cartridge.rooms).sort(cmp);
-  const roomIds = Object.fromEntries(refs.map((r) => [r, mint()]));
-  const details: Record<string, Detail> = {};
-  for (const r of refs)
-    for (const [key, d] of Object.entries(cartridge.rooms[r].details ?? {}).sort(([a], [b]) =>
-      cmp(a, b),
-    ))
-      details[mint()] = { ...d, room: roomIds[r], key };
-  const { entities, entityIds, containers, capacities } = place(cartridge, roomIds, mint);
-  containers[body] = roomIds[refString(cartridge.entry)];
-  const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
-  const factDefaults = Object.fromEntries(
-    Object.values(cartridge.facts).map((f) => [
-      key({ cartridge_id, cartridge_version, kind: 'fact', key: f.key }),
-      f.value_type.default,
-    ]),
-  );
-  return {
-    cartridge,
-    context,
-    character,
-    body,
-    rooms: Object.fromEntries(refs.map((r) => [roomIds[r], cartridge.rooms[r]])),
-    roomIds,
-    details,
-    entities,
-    entityIds,
-    capacities,
-    factDefaults,
-    resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
-    barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
-    state: { clock: 0, containers, rng: seed },
-  };
-}
-
-// A definition map's values by canonical DefinitionRef text, as composition reads them (the
-// ResourceSpecs, each barrier's initial state).
-const byRef = <D extends { key: string }, V>(
-  c: Cartridge,
-  kind: string,
-  defs: Readonly<Record<string, D>> = {},
-  value: (d: D) => V,
-) =>
-  Object.fromEntries(
-    Object.values(defs).map((d) => {
-      const { id: cartridge_id, version: cartridge_version } = c.manifest;
-      return [key({ cartridge_id, cartridge_version, kind, key: d.key }), value(d)];
-    }),
-  );
-
-// Each NPC, then each item, in DefinitionRefString order, with its minted id, its container (an
-// NPC's room, an item's location) and its declared capacity.
-function place(
-  cartridge: Cartridge,
-  roomIds: Readonly<Record<string, EntityId>>,
-  mint: () => EntityId,
-) {
-  const sorted = <T>(m?: Readonly<Record<string, T>>) =>
-    Object.entries(m ?? {}).sort(([a], [b]) => cmp(a, b));
-  const defs: [string, Entity][] = [
-    ...sorted(cartridge.npcs).map(([r, d]): [string, Entity] => [r, { ...d, kind: 'npc' }]),
-    ...sorted(cartridge.items).map(([r, d]): [string, Entity] => [r, { ...d, kind: 'item' }]),
-  ];
-  const entityIds = Object.fromEntries(defs.map(([r]) => [r, mint()]));
-  const ids = { ...roomIds, ...entityIds };
-  const containers: Record<string, EntityId> = {};
-  for (const [r, e] of defs) {
-    const l = e.kind === 'item' ? e.location : { in: 'room' as const, room: e.room };
-    containers[entityIds[r]] =
-      ids[refString(l.in === 'room' ? l.room : l.in === 'npc' ? l.npc : l.item)];
-  }
-  return {
-    entities: Object.fromEntries(defs.map(([r, e]) => [entityIds[r], e])),
-    entityIds,
-    containers,
-    capacities: Object.fromEntries(
-      defs.flatMap(([r, e]) => (e.capacity === undefined ? [] : [[entityIds[r], e.capacity]])),
-    ),
-  };
-}
 
 /**
  * Decides and, when accepted, composes and commits one command (04 §5): routes it to the rule
@@ -207,7 +124,7 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (refused) return reject(refused);
   const mint = allocator(world, command);
   try {
-    const decided = deliver(world, admit(owner, rule(world, command, mint)));
+    const decided = drain(world, deliver(world, admit(owner, rule(world, command, mint))));
     return adopt(world, decided, command as Actor, mint);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
@@ -230,6 +147,21 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
   const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
   if (bad)
     return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
+  const applied = apply(world, decision.delta.ops);
+  if ('fault' in applied) return { decision: applied.fault, world };
+  const events = factChanged(world, command, mint, assigns, decision.events);
+  const out = events === decision.events ? decision : { ...decision, events };
+  if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
+    return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
+  const state = { ...applied.state, rng: decision.rng } as World['state'];
+  return { decision: out, world: { ...world, state } };
+}
+
+// The state after composing `ops` over the world's state, the fact defaults, the declared
+// capacities, the resource specs and the barriers' initial states, or composition's fault. Only
+// written sections join the state, so a world that never sets a fact, resource, cooldown,
+// barrier or job keeps its earlier state hash.
+function apply(world: World, ops: readonly DeltaOp[]): { state: State } | { fault: Fault } {
   const base = {
     ...world.state,
     fact_defaults: world.factDefaults,
@@ -237,9 +169,9 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
     resource_specs: world.resourceSpecs,
     barrier_initial: world.barrierInitial,
   };
-  const result = compose(base as unknown as Parameters<typeof compose>[0], decision.delta);
-  if ('fault' in result) return { decision: result.fault, world };
-  // ponytail: copies each written section per step (O(rows)); persistent maps when big.
+  const result = compose(base as unknown as Parameters<typeof compose>[0], { ops });
+  if ('fault' in result) return result;
+  // ponytail: copies each written section per call (O(rows)); persistent maps when big.
   const written: Record<string, Record<string, unknown>> = {};
   let clock = world.state.clock;
   for (const { target, value } of result.changes) {
@@ -249,14 +181,51 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
     written[name] ??= { ...world.state[name] };
     written[name][at!] = value;
   }
-  const events = factChanged(world, command, mint, assigns, decision.events);
-  const out = events === decision.events ? decision : { ...decision, events };
-  if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
-    return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
-  // Only written sections join the state, so a world that never sets a fact, resource,
-  // cooldown or barrier keeps its earlier state hash.
-  const state = { ...world.state, ...written, clock, rng: decision.rng } as World['state'];
-  return { decision: out, world: { ...world, state } };
+  return { state: { ...world.state, ...written, clock } as State };
+}
+
+/**
+ * An explicit advance's due jobs (04 §5.4), joined to the admitted decision whose delta has a
+ * time.advance (a wait, or a recipe's duration): the pending jobs due at or before its target,
+ * snapshotted from the committed state and run in (due_time, job_id) order (job ids compared as
+ * UTF-8 bytes, never in row order), each as its run_job (rules/schedule.ts) with the job's
+ * CommandId (id_source.ts jobCommandId) against the proposal so far, its ops in
+ * writer group i + 1 for the i-th job (the decision's own are group 0). adopt() composes the
+ * whole advance once, so final invariants, the strictly-later-than-target rule for new jobs
+ * (nonfuture_job), the job budgets (budget_exceeded) and conflicts between groups apply to it as
+ * one proposal, and a fault discards all of it, time included. A run_job that is not accepted is
+ * the advance's result. Admission never meets an already-due job: every advance drains its own,
+ * and each new job is later than the advance's target, so 04 §5.2 step 2 has nothing to drain.
+ * ponytail: no re-read of each entry's lifecycle before it runs (04 §5.4): nothing in schedule@1
+ * cancels, reschedules or completes another job, so the snapshot cannot go stale; it joins with
+ * the first operation that can (a cancel op, or reaction@1).
+ */
+function drain(world: World, decided: Admitted): Admitted {
+  if (decided.kind !== 'accepted') return decided;
+  const advance = decided.delta.ops.find((o) => o.op === 'time.advance');
+  if (!advance) return decided;
+  const due = Object.entries(world.state.jobs ?? {})
+    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance.to)
+    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
+  if (!due.length) return decided;
+  const ops = [...decided.delta.ops];
+  let proposal = apply(world, ops);
+  for (const [i, [job_id, { due_time }]] of due.entries()) {
+    if ('fault' in proposal) return proposal.fault as Admitted;
+    const at = { ...world, state: proposal.state };
+    const run = {
+      id: jobCommandId(job_id, due_time) as CommandId,
+      world_context_id: world.context,
+      payload: { type: 'run_job', job_id: job_id as JobId },
+    } as const;
+    const ran = admit('schedule', schedule.decide(at, run, allocator(at, run)));
+    if (ran.kind !== 'accepted') return ran;
+    // Reaction@1 (slice R) drains this job's events to quiescence here, before the next job.
+    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: i + 1 }));
+    ops.push(...own);
+    proposal = apply(at, own);
+  }
+  return { ...decided, delta: { ops } };
 }
 
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
@@ -287,4 +256,5 @@ export function holds(id: string, world: World): boolean {
 }
 
 export { gameView } from './view.ts';
+export { newWorld };
 export { row } from './decision.ts';

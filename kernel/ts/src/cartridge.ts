@@ -139,7 +139,8 @@ function keyStage(c: Obj): Diagnostic[] {
 }
 
 // The lock equals requires.capabilities, every command is owned, and every command, policy op,
-// definition kind (room, detail, NPC, item, variant, recipe, resource, barrier), recipe check (by the
+// definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar, recipe, resource,
+// barrier), recipe check (by the
 // events it produces, check@1's) and recipe step of any outcome (by the event it produces:
 // fact_changed for fact.assign, custom_event for event.emit; a resource.adjust, like a cost,
 // through the resource it names) and quest (by its quest_activated) the cartridge uses has its

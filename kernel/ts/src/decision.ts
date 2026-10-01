@@ -40,7 +40,7 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
 
 /**
  * The mutable, hashed part of a world: logical time, containment (03 §23), the RNG, and the
- * facts, resources, cooldowns, barrier states and quest instances written so far, each by canonical
+ * facts, resources, cooldowns, barrier states, quest instances and jobs written so far, each by canonical
  * MutationTarget text (a quest instance by its id; compose.ts); each absent until one is written, as an unset fact has its
  * default, an unset resource its start (fact.schema.json ScopedFact; resource.ts) and an unset
  * barrier its initial state, so a world that never writes one keeps its state hash.
@@ -54,11 +54,22 @@ export type State = {
   readonly cooldowns?: Readonly<Record<string, number>>;
   readonly barriers?: Readonly<Record<string, BarrierState>>;
   readonly quests?: Readonly<Record<string, QuestRow>>; // by QuestInstanceId
+  readonly jobs?: Readonly<Record<string, JobRow>>; // by JobId
+};
+
+/** A scheduled job as composition stores it (compose.ts job.schedule; 03 §13; 04 §5.4). */
+export type JobRow = {
+  readonly job: DefinitionRef;
+  readonly due_time: number;
+  readonly status: 'pending' | 'completed';
 };
 
 // The State section each written MutationTarget kind lives in (the clock is State.clock).
 const SECTIONS: Readonly<
-  Record<string, 'containers' | 'facts' | 'resources' | 'cooldowns' | 'barriers' | 'quests'>
+  Record<
+    string,
+    'containers' | 'facts' | 'resources' | 'cooldowns' | 'barriers' | 'quests' | 'jobs'
+  >
 > = {
   containment: 'containers',
   fact: 'facts',
@@ -66,18 +77,25 @@ const SECTIONS: Readonly<
   cooldown: 'cooldowns',
   barrier: 'barriers',
   quest: 'quests',
+  job: 'jobs',
 };
 
 /**
  * Where adopt() keeps a written MutationTarget: its State section and row (not the clock), as
- * compose.ts reads it: an entity's container by its id, a quest instance by its id, else by
- * canonical target text.
+ * compose.ts reads it: an entity's container by its id, a quest instance or job by its id, else
+ * by canonical target text.
  */
 export const row = (t: MutationTarget) =>
   SECTIONS[t.kind] &&
   ([
     SECTIONS[t.kind]!,
-    t.kind === 'containment' ? t.entity_id : t.kind === 'quest' ? t.instance_id : key(t),
+    t.kind === 'containment'
+      ? t.entity_id
+      : t.kind === 'quest'
+        ? t.instance_id
+        : t.kind === 'job'
+          ? t.job_id
+          : key(t),
   ] as const);
 
 /** A QuestInstance as composition stores it (compose.ts quest; 03 §12, 06 §4). */

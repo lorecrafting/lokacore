@@ -12054,5 +12054,80 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "k",
+      "keywords": [
+        "k"
+      ],
+      "short": "s",
+      "room_line": "r",
+      "description": "d",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "r"
+      },
+      "daily_schedule": {
+        "24": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "r"
+        },
+        "06": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "r"
+        },
+        "6": 3
+      }
+    },
+    "errors": [
+      {
+        "path": "/daily_schedule/06",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/daily_schedule/24",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/daily_schedule/6",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "Calendar",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/start",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Calendar",
+    "value": {
+      "start": -1
+    },
+    "errors": [
+      {
+        "path": "/start",
+        "code": "below_minimum"
+      }
+    ]
   }
 ]

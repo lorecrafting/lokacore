@@ -180,6 +180,9 @@
               "additionalProperties": {
                 "$ref": "quest.schema.json#/$defs/QuestDefinition"
               }
+            },
+            "calendar": {
+              "$ref": "#/$defs/Calendar"
             }
           },
           "required": [
@@ -648,6 +651,24 @@
               "room.well_lane.description": "Worn steps lead to the village well. A bucket hangs from its chain."
             }
           }
+        }
+      ]
+    },
+    "Calendar": {
+      "description": "calendar@1 (21 §4 Time; capability_registry.json definitions): start, the logical time a fresh world begins at (command.schema.json LogicalTime units; 21600 is 06:00 of day 1). Absent, a world begins at 0. An optional map of loka-cartridge-v2 (Early R7/R8 S): the tag stays. In source it is cartridge.json's calendar, beside entry.",
+      "type": "object",
+      "properties": {
+        "start": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "start": 21600
         }
       ]
     },

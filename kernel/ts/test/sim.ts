@@ -30,7 +30,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 2;
+export const GENERATOR = 3;
 /** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
 /** invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -52,13 +52,13 @@ export const CHECKED = {
     'rejection_consumes_nothing',
     'unknown_types_fail_closed',
     'gameview_agrees_with_admission',
+    'job_complete_owned_by_run',
   ],
   none: {
     no_proposed_event_escapes: 'publication after a host commit: R6 authority',
     command_id_ignores_placement: 'authority placement: R6 host',
     retry_replays_receipt: 'receipts: R6 host',
     idempotency_payload_conflict: 'receipts: R6 host',
-    job_complete_owned_by_run: 'jobs: schedule slice',
   },
 };
 

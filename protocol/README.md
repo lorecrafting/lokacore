@@ -28,13 +28,13 @@ lists only what a file adds to that.
 | `error.schema.json`, `error_registry.json` | GameError and the one error registry | 04 §7 | |
 | `gameview.schema.json` | the GameView envelope and freshness | 04 §14-§16; 00 §4.10 | |
 | **Content and capabilities** | | | |
-| `capability.schema.json`, `capability_registry.json` | capability versions, the lock, residency, owned commands, events and policy ops | 05 §3, §6, §11; 09 §21 | `capability_lock_hash.json` |
+| `capability.schema.json`, `capability_registry.json` | capability versions, the lock, residency, owned commands, definitions, events and policy ops | 05 §3, §6, §11; 09 §21 | `capability_lock_hash.json` |
 | `residency.json` | 05 §6 rows that are not capabilities | 05 §6 | each row names its own |
 | `room.schema.json` | rooms and their exits (Connection), owned by movement; details and description variants, owned by inspectable_detail and description_variant; barriers (BarrierDefinition, BarrierState), owned by barrier | 21 §5, §6; 05 §17, §25; 00 §4.10; 00a §2, §12 | `cartridge_rooms_hash.json`, `cartridge_details_hash.json`, `cartridge_facts_hash.json`, `cartridge_gate_hash.json` |
-| `entity.schema.json` | items and NPCs (ItemDefinition, NpcDefinition, ItemLocation), owned by containment | 21 §8; 03 §23; 00 §4.4; 00a §5, §12 | `cartridge_items_hash.json` |
+| `entity.schema.json` | items and NPCs (ItemDefinition, NpcDefinition, ItemLocation), owned by containment; an NPC's daily_schedule, owned by behavior | 21 §8, §10; 03 §23; 06 §13; 00 §4.4; 00a §5, §12 | `cartridge_items_hash.json`, `cartridge_ferry_hash.json` |
 | `quest.schema.json` | quests (QuestDefinition and its QuestObjective evidence policy), owned by quest; the lifecycle state is policy.schema.json QuestState | 06 §1-§5, §43; 04 §5.2 | `cartridge_errand_hash.json` |
 | `manifest.schema.json` | cartridge, deployment, campaign manifests | 05 §3, §20, §22; 07 §15; 01 A5 | |
-| `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_loader.json` (loader corpus, TypeScript) |
+| `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text; its Calendar, owned by calendar), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5; 21 §4 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_ferry_hash.json` (calendar), `cartridge_loader.json` (loader corpus, TypeScript) |
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |
 | **Host, platform, verification** | | | |
 | `account.schema.json` | account/run binding, milestone reports, admission | 23 §2-§7, §11; 03 §25-§27 | |

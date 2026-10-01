@@ -35,9 +35,18 @@ const REACHED = [
 ];
 // Each v2 demo cartridge, and the unregistered command types (Object prototype keys among them,
 // the bug class of the regression seeds): each must turn up in the fresh sequences.
-const PICKED = ['bell', 'details', 'dusk', 'errand', 'facts', 'gate', 'items', 'road', 'rooms'].map(
-  (c) => `ashmere_${c}`,
-);
+const PICKED = [
+  'bell',
+  'details',
+  'dusk',
+  'errand',
+  'facts',
+  'ferry',
+  'gate',
+  'items',
+  'road',
+  'rooms',
+].map((c) => `ashmere_${c}`);
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 
 // Breaks: SHOWN's inherited constructor is treated as a list of view refusal codes.
@@ -141,9 +150,26 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   assert.ok(f.shrunk.length <= 4 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 2, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 3, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-4] commands:\n/);
+});
+
+// Breaks: job_complete_owned_by_run not checked per step, or blind to a job.complete in the
+// command's own writer group (a rule completing a job instead of the job's run_job).
+test('red control: a job completed in the root writer group trips job_complete_owned_by_run', () => {
+  const f = caught(
+    planted({
+      step: (w, c) => {
+        const s = step(w, c);
+        if (s.decision.kind !== 'accepted') return s;
+        const ops = s.decision.delta.ops.map((o) => ({ ...o, writer_group: 0 }));
+        return { ...s, decision: { ...s.decision, delta: { ops } } };
+      },
+    }),
+  );
+  assert.equal(f.id, 'job_complete_owned_by_run');
+  assert.match(f.text, /cartridge ashmere_ferry/);
 });
 
 test('red control: a rejection that moves the clock trips rejection_consumes_nothing', () => {
@@ -196,7 +222,9 @@ test('red control: a GameView that disagrees with admission trips gameview_agree
   for (const kernel of [open, shut]) {
     const f = caught(kernel);
     assert.equal(f.id, 'gameview_agrees_with_admission');
-    assert.ok(f.shrunk.length <= 2, f.text);
+    // A refusal the view hides may need MV drained first (which seed finds it depends on the
+    // demo cartridges): moves, then the refused command.
+    assert.ok(f.shrunk.length <= 4, f.text);
   }
 });
 
