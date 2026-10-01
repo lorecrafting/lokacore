@@ -285,7 +285,7 @@ function newGame(s: Story) {
   // Settled like an unknown COMMIT even when committed, so memory never serves the old run after
   // the new one is saved: a failed read while adopting it fences every call until it is adopted.
   const fence = () => {
-    const run = () => s.db.getFirstSync<{ run_id: string }>('SELECT run_id FROM save')?.run_id;
+    const run = () => identityOf(s.db)?.run_id; // a rolled-back repair may leave no save table
     if (replaced || reconcile(s.db, run) === next.run_id) {
       s.fresh = newest.fresh;
       adopt(s);

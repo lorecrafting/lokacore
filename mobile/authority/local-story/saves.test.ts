@@ -260,6 +260,8 @@ test('a damaged identity is save_corrupt and untouched; its new game repairs it'
     'ALTER TABLE save DROP COLUMN format',
     'ALTER TABLE save RENAME COLUMN format TO fmt',
     'DROP TABLE save',
+    'DROP TABLE state_row',
+    'DROP TABLE receipt',
   ]) {
     const path = damaged(damage);
     const before = bytes(path);
@@ -279,14 +281,17 @@ test('a damaged identity is save_corrupt and untouched; its new game repairs it'
       damage,
     );
   }
-  // Real fault after the identity table is recreated: deleting the receipts raises.
-  const path = damaged('ALTER TABLE save DROP COLUMN format');
+  // A real failed COMMIT after the identity table is recreated: settled as not replaced (not
+  // pending forever), with the table and every byte as they were.
+  const path = damaged('DROP TABLE save');
   const f = processOn(path, { newId: ids() });
-  f.sql.exec(`CREATE TRIGGER t BEFORE DELETE ON receipt BEGIN SELECT RAISE(ABORT, 'I/O'); END`);
+  f.sql.exec(FAIL_COMMIT);
   f.sql.close();
   const before = bytes(path);
   const g = processOn(path, { newId: ids() });
-  assert.throws(() => (g.opened as { newGame: () => unknown }).newGame(), /I\/O/);
+  g.sql.exec('PRAGMA foreign_keys = ON'); // per connection
+  const newGame = (g.opened as { newGame: () => unknown }).newGame;
+  assert.throws(newGame, /nothing was replaced/);
   g.sql.close();
   assert.equal(bytes(path), before);
 });

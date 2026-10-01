@@ -90,7 +90,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
     return { world: fresh, revision: 0, meta };
   }
-  if (!head || !save) return undefined; // half a save: never taken for a new one, nothing written
+  // Half a save (rows or receipts without their table too): never taken for a new one, unwritten.
+  if (!head || !save || !['state_row', 'receipt'].every(table)) return undefined;
   db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report)
   type Head = { revision: number; clock: number; rng: string };
   const h = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head')!;
@@ -146,13 +147,13 @@ export function replace(db: Db, fresh: World, meta: Meta): boolean {
  */
 export function identityOf(db: Db) {
   if (!db.getFirstSync("SELECT 1 FROM sqlite_master WHERE name = 'save'")) return undefined;
-  const m = db.getFirstSync<{ format: string; pin: string }>('SELECT * FROM save'); // any columns
+  const m = db.getFirstSync<{ format: string; run_id?: string; pin: string }>('SELECT * FROM save'); // any columns
   if (!m) return undefined;
   let pin: Meta['pin'] | undefined;
   try {
     pin = JSON.parse(m.pin);
   } catch {}
-  return { format: m.format, pin };
+  return { format: m.format, run_id: m.run_id, pin };
 }
 
 /** The receipt of `invocation_id` in `scope`, if one was committed. */
