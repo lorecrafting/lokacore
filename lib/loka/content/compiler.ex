@@ -4,7 +4,7 @@ defmodule Loka.Content.Compiler do
   Each stage runs on the parts the stages before it accepted, so one bad file does not hide
   the diagnostics of the others.
   """
-  alias Loka.Content.{Checks, Links, Recipes, Resources}
+  alias Loka.Content.{Checks, Links, Quests, Recipes, Resources}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
 
@@ -39,13 +39,14 @@ defmodule Loka.Content.Compiler do
   defp checks(manifest, defs, v2, registry) do
     Checks.check(manifest, defs, registry) ++
       Checks.rooms(manifest, defs, v2, registry) ++
-      Recipes.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
+      Recipes.check(manifest, defs, v2, registry) ++
+      Quests.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
   end
 
-  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, an entry, a text
+  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, an entry, a text
   # catalog or resources.json (CompiledCartridge).
   defp v2(defs, entry, text, resources) do
-    if Enum.any?(~w(room item npc recipe barrier), &(defs[&1] != %{})) or entry != nil or
+    if Enum.any?(~w(room item npc recipe barrier quest), &(defs[&1] != %{})) or entry != nil or
          text != nil or
          resources != [],
        do: {entry, text || %{}}
@@ -93,7 +94,8 @@ defmodule Loka.Content.Compiler do
     {"item", :item, "ItemDefinition"},
     {"npc", :npc, "NpcDefinition"},
     {"recipe", :recipe, "ActionRecipe"},
-    {"barrier", :barrier, "BarrierDefinition"}
+    {"barrier", :barrier, "BarrierDefinition"},
+    {"quest", :quest, "QuestDefinition"}
   ]
 
   defp definitions(files, m) do
@@ -241,7 +243,7 @@ defmodule Loka.Content.Compiler do
     }
   end
 
-  # items, npcs, recipes and barriers are optional maps (CompiledCartridge): absent when empty. The
+  # items, npcs, recipes, barriers and quests are optional maps (CompiledCartridge): absent when empty. The
   # default pools are always there, with resource@1 (Resources).
   defp cartridge(m, defs, {entry, text}) do
     m = Resources.requires(m)
@@ -251,7 +253,8 @@ defmodule Loka.Content.Compiler do
             {"item", "items"},
             {"npc", "npcs"},
             {"recipe", "recipes"},
-            {"barrier", "barriers"}
+            {"barrier", "barriers"},
+            {"quest", "quests"}
           ],
           defs[k] != %{},
           into: %{},

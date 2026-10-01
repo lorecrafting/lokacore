@@ -32,6 +32,7 @@ lists only what a file adds to that.
 | `residency.json` | 05 §6 rows that are not capabilities | 05 §6 | each row names its own |
 | `room.schema.json` | rooms and their exits (Connection), owned by movement; details and description variants, owned by inspectable_detail and description_variant; barriers (BarrierDefinition, BarrierState), owned by barrier | 21 §5, §6; 05 §17, §25; 00 §4.10; 00a §2, §12 | `cartridge_rooms_hash.json`, `cartridge_details_hash.json`, `cartridge_facts_hash.json`, `cartridge_gate_hash.json` |
 | `entity.schema.json` | items and NPCs (ItemDefinition, NpcDefinition, ItemLocation), owned by containment | 21 §8; 03 §23; 00 §4.4; 00a §5, §12 | `cartridge_items_hash.json` |
+| `quest.schema.json` | quests (QuestDefinition and its QuestObjective evidence policy), owned by quest; the lifecycle state is policy.schema.json QuestState | 06 §1-§5, §43; 04 §5.2 | `cartridge_errand_hash.json` |
 | `manifest.schema.json` | cartridge, deployment, campaign manifests | 05 §3, §20, §22; 07 §15; 01 A5 | |
 | `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_loader.json` (loader corpus, TypeScript) |
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |

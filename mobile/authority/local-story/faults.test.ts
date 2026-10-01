@@ -25,9 +25,11 @@ import { append } from '../../../kernel/ts/play/obs.ts';
 import { simulate } from '../../../kernel/ts/test/sim.ts';
 import { openStory, type Reply } from './authority.ts';
 
-// One seed per demo cartridge: facts, gate, items, dusk, road, bell, details, rooms. None emits an
-// effect (no outbox is built yet); every sequence commits several NEW commands.
-const SEEDS = [1, 2, 3, 6, 11, 12, 13, 15];
+// One seed per demo cartridge: bell, rooms, facts, items, dusk, details, road, errand (accepting
+// its quest), gate (sim.ts picks by seed among the cartridge known answers, so a new demo
+// cartridge remaps them). None emits an effect (no outbox is built yet); every sequence commits
+// several NEW commands.
+const SEEDS = [2, 3, 4, 6, 7, 13, 14, 23, 29];
 
 type Tap = (statement: string, run: () => unknown) => unknown;
 /** A process on `path` playing seed `seed`'s release; its ids count from 1, as in every run. */
@@ -259,7 +261,7 @@ const pages = (sql: DatabaseSync) => Object.values(sql.prepare('PRAGMA page_coun
 // Breaks (the corpus's own footing): the driver or the authority drifting from answers checked by
 // hand against the fixtures. Seed 13 (cartridge_details_hash.json): wait until 1 advances the clock
 // to 1; its room has no exits, so move up is not_found and keeps the revision; looking at a detail
-// changes nothing but the revision. Seed 5 (cartridge_dusk_hash.json): ring_bell lasts 60.
+// changes nothing but the revision. Seed 18 (cartridge_dusk_hash.json): ring_bell lasts 60.
 test('hand-checked anchors', () => {
   const p = processOn(save(), 13);
   const replies = [0, 1, 2].map((k) => p.send(k) as Extract<Reply, { kind: 'saved' }>);
@@ -280,7 +282,7 @@ test('hand-checked anchors', () => {
     { ...p.sql.prepare('SELECT revision, clock FROM head').get() },
     { revision: 2, clock: 1 },
   );
-  const d = processOn(save(), 5);
+  const d = processOn(save(), 18);
   d.send(0);
   assert.deepEqual(
     { ...d.sql.prepare('SELECT revision, clock FROM head').get() },

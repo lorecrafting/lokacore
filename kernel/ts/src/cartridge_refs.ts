@@ -14,6 +14,7 @@ import { refString } from './decision.ts';
 import { typed } from './fact.ts';
 import { barriers } from './cartridge_barriers.ts';
 import { links } from './cartridge_links.ts';
+import { quests } from './cartridge_quests.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -63,7 +64,8 @@ export function parts(c: Obj): [string, Obj, string][] {
   return out;
 }
 
-// Each node, with its path, of every action's, named policy's, recipe's and variant's condition.
+// Each node, with its path, of every action's, named policy's, recipe's, variant's, quest offer's
+// and current_state objective's condition.
 export function nodes(c: Obj): [Obj, string][] {
   const walk = (p: Obj, at: string): [Obj, string][] => [
     [p, at],
@@ -83,6 +85,12 @@ export function nodes(c: Obj): [Obj, string][] {
     ...parts(c).flatMap(([k, v, at]) =>
       k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
     ),
+    ...Object.entries((c.quests ?? {}) as Obj).flatMap(([ref, q]) => [
+      ...walk(q.offer.policy.root, `.cartridge.quests${step(ref)}.offer.policy.root`),
+      ...(q.objective.policy
+        ? walk(q.objective.policy.root, `.cartridge.quests${step(ref)}.objective.policy.root`)
+        : []),
+    ]),
   ];
 }
 
@@ -118,14 +126,15 @@ function checkers(c: Obj, out: Diagnostic[]) {
 }
 
 // Every fact_compare names a fact of this cartridge with a value of its type, every has_item
-// an item of it, every barrier_state a barrier of it (the kernel reads them; any format, since v1 action policies are evaluated too),
+// an item of it, every barrier_state a barrier of it, every quest_state a quest of it (the kernel reads them; any format, since v1 action policies are evaluated too),
 // and no time_window is empty (EMPTY_TIME_WINDOW). v2: the entry and every exit name a room of
 // this cartridge, an exit's barrier a barrier of it, which each exit of its destination back to
 // its room names too (BARRIER_MISMATCH), a barrier's key_item an item of it, every text key a
 // room, a detail, an NPC, an item, a barrier, a variant, an action or a recipe uses has a
 // catalog entry, every touch link names what it may (cartridge_links.ts), every detail's first
 // alias is its own and typable, items and NPCs start where containment allows, recipes and
-// rooms' action contributions name what exists (recipes), and each resource's bounds hold its start (RESOURCE_SPEC_INVALID).
+// rooms' action contributions name what exists (recipes), quests are coherent (cartridge_quests.ts),
+// and each resource's bounds hold its start (RESOURCE_SPEC_INVALID).
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -137,6 +146,7 @@ export function refStage(c: Obj): Diagnostic[] {
     }
     if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
     if (n.op === 'barrier_state') named(n.barrier, 'barrier', `${at}.barrier`);
+    if (n.op === 'quest_state') named(n.quest, 'quest', `${at}.quest`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }
   if (c.format !== 'loka-cartridge-v2') return out;
@@ -158,6 +168,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
+  out.push(...quests(c, check));
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj))
     if (!(s.minimum <= s.start && s.start <= s.maximum))
       out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));
@@ -210,10 +221,11 @@ function recipes(c: Obj, { named, typedValue, text }: ReturnType<typeof checkers
   return [...out, ...contributions(c)];
 }
 
-// Each key of a room's action contribution names a registered command, an action or a recipe.
+// Each key of a room's action contribution names a registered command, an action, a recipe or a
+// quest (its offer).
 function contributions(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const defs: Obj[] = [...Object.values(c.actions as Obj), ...Object.values(c.recipes ?? {})];
+  const defs: Obj[] = [c.actions, c.recipes ?? {}, c.quests ?? {}].flatMap(Object.values);
   const keys = new Set([...Object.keys(CAPABILITY_OWNERS.command), ...defs.map((d) => d.key)]);
   for (const [ref, r] of Object.entries(c.rooms as Obj))
     (r.actions ?? []).forEach((a: Obj, i: number) =>

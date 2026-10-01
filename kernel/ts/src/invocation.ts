@@ -67,8 +67,9 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
  * A NEW invocation as the typed Command its action in the actor's current ActionSet resolves to
  * (04 §2), or a terminal rejection: unsupported_capability when the set has no such action, or its
  * Command takes not that many targets or not that input. The rest (target presence, policy) is
- * step's. ponytail: choose, close_choice and accept_quest are not ActionSet actions yet, so they
- * resolve as unsupported until the dialogue and quest slices say how they pass admission.
+ * step's. A quest's offer fills the quest it accepts, as a recipe fills its key. ponytail: choose
+ * and close_choice are not ActionSet actions yet, so they resolve as unsupported until the
+ * dialogue slice says how they pass admission.
  */
 export function resolve(
   world: World,
@@ -80,8 +81,8 @@ export function resolve(
   // A target past the Command's slots lands under an unknown key, which validate rejects.
   const slots = TARGETS[a.command] ?? [];
   const targets = Object.fromEntries(i.target_ids.map((t, n) => [slots[n], t]));
-  const recipe = a.recipe && { action: a.key };
-  const payload = { type: a.command, actor_id: i.actor_id, ...recipe, ...i.input, ...targets };
+  const named = a.recipe ? { action: a.key } : a.quest && { quest: a.quest };
+  const payload = { type: a.command, actor_id: i.actor_id, ...named, ...i.input, ...targets };
   const command = { id: command_id, world_context_id: world.context, payload };
   return validate('Command', command).length
     ? rejected('unsupported_capability')

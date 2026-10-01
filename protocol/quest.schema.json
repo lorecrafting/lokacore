@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Quest contracts",
+  "description": "QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation policy, §43; 04 §5.2), owned by quest@1. The persisted lifecycle state is policy.schema.json QuestState.",
+  "$defs": {
+    "QuestDefinition": {
+      "description": "An offered quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "offer": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "policy": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "required": ["label", "policy"],
+          "additionalProperties": false
+        },
+        "objective": {
+          "$ref": "#/$defs/QuestObjective"
+        }
+      },
+      "required": ["key", "title", "offer", "objective"],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "lantern",
+          "title": "quest.lantern.title",
+          "offer": {
+            "label": "quest.lantern.accept",
+            "policy": {
+              "policy_version": 1,
+              "root": {
+                "op": "all",
+                "items": []
+              }
+            }
+          },
+          "objective": {
+            "evidence": "current_state",
+            "policy": {
+              "policy_version": 1,
+              "root": {
+                "op": "has_item",
+                "item": {
+                  "cartridge_id": "ferrymans_lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "item",
+                  "key": "lantern"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "QuestObjective": {
+      "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "evidence": {
+              "const": "current_state"
+            },
+            "policy": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "required": ["evidence", "policy"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "evidence": {
+              "const": "post_activation_event"
+            },
+            "item_acquired": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": ["evidence", "item_acquired"],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "evidence": "post_activation_event",
+          "item_acquired": {
+            "cartridge_id": "tiny",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      ]
+    }
+  }
+}

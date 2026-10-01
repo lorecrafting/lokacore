@@ -242,5 +242,35 @@
       "rejection_consumes_nothing"
     ],
     "implemented_in": "R5 S7 open, close, lock, unlock, barrier_state, closed and locked exits"
+  },
+  "quest": {
+    "spec": "06 §1, §2, §3 Objective credit/causation policy, §4, §5, §43; 04 §5.2; 03 §12",
+    "contracts": [
+      "QuestDefinition",
+      "QuestObjective",
+      "QuestState",
+      "QuestView",
+      "CommandPayload",
+      "EventPayload",
+      "DeltaOp",
+      "MutationTarget",
+      "Policy"
+    ],
+    "modules": [
+      "kernel/ts/src/quest.ts",
+      "kernel/ts/src/actions.ts",
+      "kernel/ts/src/policy.ts",
+      "kernel/ts/src/view.ts",
+      "kernel/ts/src/cartridge_quests.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_errand_hash.json",
+      "protocol/fixtures/composition.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "rejection_consumes_nothing"
+    ],
+    "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal"
   }
 }

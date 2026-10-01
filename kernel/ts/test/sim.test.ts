@@ -35,7 +35,7 @@ const REACHED = [
 ];
 // Each v2 demo cartridge, and the unregistered command types (Object prototype keys among them,
 // the bug class of the regression seeds): each must turn up in the fresh sequences.
-const PICKED = ['bell', 'details', 'dusk', 'facts', 'gate', 'items', 'road', 'rooms'].map(
+const PICKED = ['bell', 'details', 'dusk', 'errand', 'facts', 'gate', 'items', 'road', 'rooms'].map(
   (c) => `ashmere_${c}`,
 );
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
@@ -136,12 +136,14 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
     }),
   );
   assert.equal(f.id, 'containment_acyclic');
-  assert.ok(f.shrunk.length <= 3 && types(f.shrunk).at(-1) === 'drop', f.text);
+  // move, take, drop; a drained start may need a wait first (which seed finds it depends on the
+  // demo cartridges).
+  assert.ok(f.shrunk.length <= 4 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 1, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 2, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
-  assert.match(f.text, /shrunk from \d+ to [1-3] commands:\n/);
+  assert.match(f.text, /shrunk from \d+ to [1-4] commands:\n/);
 });
 
 test('red control: a rejection that moves the clock trips rejection_consumes_nothing', () => {

@@ -28,7 +28,7 @@ defmodule Loka.Content.Recipes do
   and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
   key is an action's or a
   registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
-  contribution names a registered command, an action or a recipe.
+  contribution names a registered command, an action, a recipe or a quest (its offer).
   """
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
   def check(m, _, v2, _) when m == nil or v2 == nil, do: []
@@ -159,9 +159,13 @@ defmodule Loka.Content.Recipes do
         do: unresolved(rel, ["actions", i, "actions", j], key)
   end
 
-  # The registered commands and this cartridge's action and recipe keys.
-  defp known(defs, actions),
-    do: MapSet.new(commands() ++ for({_, r} <- all(defs), do: r["key"])) |> MapSet.union(actions)
+  # The registered commands and this cartridge's action, recipe and quest keys.
+  defp known(defs, actions) do
+    quests = for {_, {_, [], q}} <- defs["quest"], do: q["key"]
+
+    MapSet.new(commands() ++ quests ++ for({_, r} <- all(defs), do: r["key"]))
+    |> MapSet.union(actions)
+  end
 
   defp unresolved(rel, steps, target),
     do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => target})
