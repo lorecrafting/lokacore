@@ -31,3 +31,13 @@
 
 - Reviewer mutation runs: "the failing lines" keeps real test failures visible; item 4 holds.
 - No duplicate of the "Subagent returns" bullet (returns vs. tool output) or of AGENTS.md.
+
+## Fix round 1: `caebeff`
+
+Verdict: **APPROVE**
+
+- TH-1 verified, `docs/WORKFLOW.md:87-90`: diffs sit on the PM's delegate side; diffs a developer
+  or reviewer must read are read per file or hunk, never by tail. No conflict with `reviewer.md` or `developer.md`.
+- TH-2 verified, `docs/WORKFLOW.md:56` and `.claude/agents/developer.md:28` both say
+  "(exit status, failing lines)"; no other "with output" remains in WORKFLOW, AGENTS.md or the agent files.
+- TH-3 verified, `docs/WORKFLOW.md:88`: "a scratchpad file named for the slice", consistent with `docs/WORKFLOW.md:111`.
