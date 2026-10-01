@@ -8,10 +8,19 @@ import { Footer } from './Footer.tsx';
 import { group } from './model.ts';
 import { body, fonts, paper } from './paper.ts';
 import { confirmStartOver } from '../SaveError.tsx';
-import { CarryingPage, CharacterPage, JournalPage, RoomPage, ThingPage } from './pages.tsx';
+import {
+  CarryingPage,
+  CharacterPage,
+  JournalPage,
+  MapPage,
+  RoomPage,
+  SettingsPage,
+  ThingPage,
+} from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
-type Page = { kind: 'character' | 'journal' | 'carrying' } | { kind: 'thing'; id: string };
+type Kind = 'character' | 'journal' | 'carrying' | 'map' | 'settings';
+type Page = { kind: Kind } | { kind: 'thing'; id: string };
 type Smoke = ReturnType<typeof openSmoke>;
 
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
@@ -27,13 +36,13 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   if (!loaded && !fontError) return null;
 
   const screen = smoke.screen();
-  const { view, buttons, pending } = screen;
+  const { view, buttons } = screen;
   const g = group(buttons);
   const go = (next: Page[], dir: 1 | -1) => {
     setStack(next);
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
-  const press: Parameters<typeof Footer>[0]['press'] = (b) => {
+  const press = (b: Button) => {
     const [placeId, logLength] = [view.place.id, screen.log.length];
     smoke.press(b);
     if (smoke.screen().view.place.id !== placeId) setFrom(logLength);
@@ -41,21 +50,43 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   };
   const page = stack.at(-1);
   const open = (p: Page) => go([...stack, p], 1);
+  // a start over that failed shows its message in the room page's log
+  const ctx = { screen, g, press, open, startOver: () => (startOver(), go([], 1)) };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={flip.turn} dir={flip.dir}>
-        <Body page={page} screen={screen} g={g} from={from} press={press} open={open} />
+        <Body {...ctx} page={page} from={from} />
       </Turn>
-      <View style={{ borderTopWidth: 1, borderColor: paper.line, padding: 8 }}>
-        {page ? (
-          <Back onPress={() => go(stack.slice(0, -1), -1)} />
-        ) : (
-          <Footer exits={g.exits} place={g.place} press={press} />
-        )}
-        <Status time={view.time} pending={pending} open={(kind) => open({ kind })} />
-        {screen.fault && <Fault fault={screen.fault} startOver={startOver} />}
-      </View>
+      <Bottom {...ctx} back={page && (() => go(stack.slice(0, -1), -1))} />
     </SafeAreaView>
+  );
+}
+
+// The footer (or Back on a page), the status line and a press's fault.
+function Bottom(p: {
+  screen: Screen;
+  g: ReturnType<typeof group>;
+  press: (b: Button) => void;
+  open: (p: Page) => void;
+  back?: () => void;
+  startOver: () => void;
+}) {
+  const { view, text, pending, fault } = p.screen;
+  return (
+    <View style={{ borderTopWidth: 1, borderColor: paper.line, padding: 8 }}>
+      {p.back ? (
+        <Back onPress={p.back} />
+      ) : (
+        <Footer
+          exits={view.exits}
+          text={text}
+          go={(d) => p.press(p.g.exits.find((e) => e.direction === d)!.button)}
+          openMap={() => p.open({ kind: 'map' })}
+        />
+      )}
+      <Status time={view.time} pending={pending} open={(kind) => p.open({ kind })} />
+      {fault && <Fault fault={fault} startOver={p.startOver} />}
+    </View>
   );
 }
 
@@ -64,7 +95,7 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
 function Status(p: {
   time: number;
   pending: boolean;
-  open: (k: 'character' | 'journal' | 'carrying') => void;
+  open: (k: 'character' | 'journal' | 'carrying' | 'settings') => void;
 }) {
   return (
     <View
@@ -77,7 +108,7 @@ function Status(p: {
       }}
     >
       <Text style={{ ...small, color: paper.dim }}>time {p.time}</Text>
-      {(['character', 'journal', 'carrying'] as const).map((k) => (
+      {(['character', 'journal', 'carrying', 'settings'] as const).map((k) => (
         <Pressable
           key={k}
           accessibilityRole="button"
@@ -106,6 +137,7 @@ function Body(p: {
   from: number;
   press: (b: Button) => void;
   open: (p: Page) => void;
+  startOver: () => void;
 }) {
   const { view, text, log } = p.screen;
   const { page } = p;
@@ -126,6 +158,9 @@ function Body(p: {
     return <ThingPage name={t ? text(t.name) : ''} actions={p.g.on(page.id)} press={p.press} />;
   }
   if (page.kind === 'character') return <CharacterPage />;
+  if (page.kind === 'map')
+    return <MapPage view={view} text={text} place={p.g.place} press={p.press} />;
+  if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;
   if (page.kind === 'journal') return <JournalPage view={view} text={text} />;
   return <CarryingPage items={view.inventory} text={text} open={openThing} />;
 }
