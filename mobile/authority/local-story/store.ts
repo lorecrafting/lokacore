@@ -47,14 +47,16 @@ CREATE TABLE IF NOT EXISTS trace (ordinal INTEGER NOT NULL, command_id TEXT,
   commit_state TEXT, record TEXT NOT NULL) STRICT;
 CREATE TABLE IF NOT EXISTS save (one INTEGER PRIMARY KEY CHECK (one = 1), format TEXT NOT NULL,
   lineage_id TEXT NOT NULL, run_id TEXT NOT NULL, parent TEXT NOT NULL, seed TEXT NOT NULL,
-  pin TEXT NOT NULL) STRICT;
+  pin TEXT NOT NULL, binding TEXT) STRICT;
 CREATE TABLE IF NOT EXISTS report (report_id TEXT PRIMARY KEY, lineage_id TEXT NOT NULL,
   binding TEXT, report TEXT NOT NULL, disposition TEXT NOT NULL CHECK (disposition IN
-  ('pending', 'accepted', 'rejected', 'needs_attention')), acceptance TEXT) STRICT;`;
+  ('pending', 'accepted', 'rejected', 'needs_attention')), acceptance TEXT,
+  tried INTEGER NOT NULL DEFAULT 0) STRICT;`;
 
 /**
  * The save's identity (10 §§31-32; 07 §9): its lineage and run, its causal parent (null: every
- * save here is a new game), the run's initial RNG (ADR-075 seed) and the release it pins.
+ * save here is a new game), the run's initial RNG (ADR-075 seed), the release it pins and the
+ * account/profile the run is bound to when it starts, never rebound (23 §§4-5, §11; null: a guest).
  */
 export type Meta = {
   readonly format: string;
@@ -63,6 +65,7 @@ export type Meta = {
   readonly parent: Json;
   readonly seed: Json;
   readonly pin: { readonly content_hash: string } & Record<string, Json>;
+  readonly binding: string | null;
 };
 
 const UPSERT = 'INSERT OR REPLACE INTO state_row VALUES (?, ?, ?)';
@@ -119,14 +122,15 @@ export function replace(db: Db, fresh: World, meta: Meta): boolean {
     for (const [section, rows] of Object.entries(sections))
       for (const [key, value] of Object.entries(rows))
         db.runSync(UPSERT, section, key, encode(value));
-    const { format, lineage_id, run_id, parent, seed, pin } = meta;
+    const { format, lineage_id, run_id, parent, seed, pin, binding } = meta;
     const json = [parent, seed, pin].map((v) => encode(v as Json));
     db.runSync(
-      'INSERT OR REPLACE INTO save VALUES (1, ?, ?, ?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO save VALUES (1, ?, ?, ?, ?, ?, ?, ?)',
       format,
       lineage_id,
       run_id,
       ...json,
+      binding,
     );
     db.runSync('DELETE FROM receipt');
   });
@@ -159,7 +163,7 @@ export function receipt(db: Db, scope: string, invocation_id: string): Receipt |
 
 /**
  * A milestone report captured with its gameplay commit (23 §§4-5; 03 §26): the payload, the
- * originating lineage and the account/profile binding when it was reached (null: a guest). A
+ * originating lineage and its run's account/profile binding (null: a guest). A
  * host record outside `state_row`, so never in the canonical state, and kept by a new game
  * (23 §11).
  */
@@ -182,7 +186,7 @@ export function commit(
   return transaction(db, () => {
     for (const c of reports)
       db.runSync(
-        "INSERT INTO report VALUES (?, ?, ?, ?, 'pending', NULL)",
+        "INSERT INTO report (report_id, lineage_id, binding, report, disposition) VALUES (?, ?, ?, ?, 'pending')",
         c.report.report_id,
         c.lineage_id,
         c.binding,

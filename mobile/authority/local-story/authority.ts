@@ -5,6 +5,7 @@ import type { Json } from '../../../kernel/ts/src/canonical.ts';
 import type { Command, DecisionResult, ErrorCode } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
+import { validate } from '../../../kernel/ts/src/validate.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
 import { commit, load, pinOf, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta, Receipt } from './store.ts';
@@ -24,8 +25,8 @@ export type Reply =
  * What the host supplies: the bundled cartridge's content hash, the build's kernel version
  * (ADR-075 RunIds) and a fresh random UUID per call, for each new save's lineage and run ids and
  * each milestone report's id. `milestones` maps a `custom_event` key to the milestone and outcome
- * its commit reaches (none by default); `binding` is the signed-in account/profile now, read when
- * a milestone is reached (23 §5; null, the default: a guest).
+ * its commit reaches (none by default); `binding` is the signed-in account/profile, read once when
+ * a run starts, which binds it (23 §§4-5, §11; null, the default: a guest).
  */
 export type Host = {
   content_hash: string;
@@ -106,7 +107,7 @@ const ids = (s: Story): RunIds => ({
   run_id: s.meta.run_id,
 });
 
-/** A new save's identity: no parent, its initial RNG, and the release it pins (10 §32). */
+/** A new save's identity: no parent, its initial RNG, the release it pins (10 §32), its binding. */
 function first(fresh: World, host: Host): Meta {
   const { id, version, requires } = fresh.cartridge.manifest;
   const pin = {
@@ -120,7 +121,8 @@ function first(fresh: World, host: Host): Meta {
   };
   const [lineage_id, run_id] = [host.newId(), host.newId()];
   const seed = fresh.state.rng as never;
-  return { format: SAVE_FORMAT, lineage_id, run_id, parent: null, seed, pin };
+  const binding = host.binding?.() ?? null;
+  return { format: SAVE_FORMAT, lineage_id, run_id, parent: null, seed, pin, binding };
 }
 
 /** True while a fenced attempt's outcome is still unknown; otherwise settles it first. */
@@ -171,20 +173,21 @@ function invoke(s: Story, value: unknown): Reply {
 
 /**
  * The pending reports of the milestones an accepted decision reaches (23 §§4-5; 03 §26), each
- * with its id allocated once here and committed with the decision, its run, lineage and release,
- * and the binding now. A receipt replay never comes here, so it adds no second report.
+ * with its id allocated once here and committed with the decision, its run, lineage, release and
+ * the run's binding. A receipt replay never comes here, so it adds no second report. A report
+ * that is not a MilestoneReport (a bad host key) throws before anything is stored.
  */
-function reached(s: Story, d: DecisionResult, revision: number): Captured[] {
+function reached(s: Story, d: DecisionResult, observed_revision: number): Captured[] {
   if (d.kind !== 'accepted') return [];
   const { cartridge_id, cartridge_version, content_hash } = s.meta.pin;
   const release = { cartridge_id, cartridge_version, cartridge_hash: content_hash } as never;
   return d.events.flatMap(({ payload: p }) => {
     const m = p.type === 'custom_event' ? s.host.milestones?.get(p.event.key) : undefined;
     if (!m) return [];
-    const { lineage_id, run_id } = s.meta;
-    const report = { report_id: s.host.newId(), run_id, release, observed_revision: revision };
-    const binding = s.host.binding?.() ?? null;
-    return [{ lineage_id, binding, report: { ...report, ...m } as never }];
+    const { lineage_id, run_id, binding = null } = s.meta;
+    const report = { report_id: s.host.newId(), run_id, release, observed_revision, ...m };
+    if (validate('MilestoneReport', report).length) throw new Error('not a MilestoneReport');
+    return [{ lineage_id, binding, report: report as never }];
   });
 }
 
