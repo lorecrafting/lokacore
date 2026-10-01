@@ -10,3 +10,7 @@ Findings (nits only):
 1. nit, docs/WORKFLOW.md:26: the Fable stand-in is an exception to "Fable only as a rare backstop" (line 17) and to the table's "Fable rarely" (line 13), but neither points to it; and the line sits after the Explore sentence, away from the cross-vendor sentence it modifies (lines 18-25). Move it beside the codex sentence or add "(or the stand-in below)".
 2. nit, docs/WORKFLOW.md:26: "an Opus subagent drafts briefs" vs table line 11 (PM: briefs) and Loop step 2 "Brief (PM)". Not a contradiction (PM decides), but say "the PM has an Opus subagent draft".
 3. nit, docs/WORKFLOW.md:26: "kernel slice heads" is undefined; step 2 says "kernel or contract-freeze slice". Reuse that wording.
+
+## Fix re-check: `92f935e`
+
+APPROVE. Nit 1: line now follows the codex paragraph and names the exception to "Fable rarely". Nit 2: "the PM has an Opus subagent draft briefs". Nit 3: "a kernel or contract-freeze slice's head". Line scoped re-check only; no new findings.
