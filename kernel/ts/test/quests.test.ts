@@ -452,3 +452,117 @@ test('two strict quests on one item complete in quest order, also after a restor
     );
   }
 });
+
+// A strict errand world with an instance fact `flag` and a reaction setting `seen` when flag
+// changes, and a hand-built root of `ops` and its events at the given positions (position 1 left
+// free for the fact_changed of a changing assign, as a rule leaves it).
+function reacting() {
+  const fact = (key: string) => ({
+    key,
+    version: 1,
+    value_type: { type: 'bool', default: false },
+    scopes: ['instance'],
+    meaning: key,
+  });
+  return world((c) => {
+    quest(c).objective = STRICT;
+    for (const cap of ['fact', 'reaction']) {
+      c.lock.capabilities[cap] = 1;
+      c.manifest.requires.capabilities[cap] = 1;
+    }
+    c.facts = { [`${E}:fact/flag`]: fact('flag'), [`${E}:fact/seen`]: fact('seen') };
+    c.reactions = {
+      [`${E}:reaction/notice`]: {
+        key: 'notice',
+        on: { event: 'fact_changed', fact: ref('fact', 'flag') },
+        apply: [{ op: 'fact.assign', fact: ref('fact', 'seen'), value: true }],
+      },
+    };
+  });
+}
+const instance = { kind: 'instance', world_context_id: CONTEXT };
+const flag = { op: 'fact.assign', writer_group: 0, fact: ref('fact', 'flag'), scope: instance };
+const handed = (w: World) => ({
+  op: 'entity.transfer',
+  writer_group: 0,
+  entity_id: lantern(w),
+  source_id: w.state.containers[lantern(w)],
+  destination_id: w.body,
+});
+function root(w: World, ops: object[], events: [number, object][]) {
+  const ev = events.map(([position, payload]) => ({
+    id: `${CMD.slice(0, -1)}${position}`,
+    world_context_id: CONTEXT,
+    scope: { kind: 'player', character_id: w.character },
+    actor_id: w.character,
+    logical_time: w.state.clock,
+    position,
+    causation_id: CMD,
+    correlation_id: CMD,
+    payload,
+  }));
+  const d = {
+    kind: 'accepted',
+    outcome: 'x',
+    delta: { ops },
+    events: ev,
+    effects: [],
+    rng: w.state.rng,
+  };
+  return adopt(w, d as never, cmd(w, {}) as never, () => CMD2).decision as any;
+}
+const acquired = (w: World) => ({ type: 'item_acquired', item_id: lantern(w), holder_id: w.body });
+const groups = (d: any) => d.delta.ops.map((o: any) => [o.op, o.writer_group]);
+
+// Breaks: quest delivery folded at the root again (its group before the reaction's), delivery
+// crediting an instance this decision activated (the p.world half dropped), or delivery moving an
+// instance the root already resolved (the now half dropped: conflicting_write).
+test('quest delivery runs in FIFO order after the root, only to instances active before and now', () => {
+  const w = after(reacting(), ACCEPT);
+  const fifo = root(w, [{ ...flag, expected: false, value: true }, handed(w)], [[2, acquired(w)]]);
+  assert.deepEqual(groups(fifo), [
+    ['fact.assign', 0],
+    ['entity.transfer', 0],
+    ['fact.assign', 1], // notice, delivered flag's fact_changed at position 1
+    ['quest.transition', 2], // the lantern instance, delivered item_acquired at position 2
+  ]);
+
+  const fresh = reacting();
+  const scope = { kind: 'player', character_id: fresh.character };
+  const activate = { op: 'quest.activate', writer_group: 0, quest: QUEST, scope, instance_id: ID };
+  const activated = { type: 'quest_activated', quest: QUEST, instance_id: ID };
+  const both = root(
+    fresh,
+    [activate, handed(fresh)],
+    [
+      [1, activated],
+      [2, acquired(fresh)],
+    ],
+  );
+  assert.deepEqual(groups(both), [
+    ['quest.activate', 0],
+    ['entity.transfer', 0],
+  ]);
+
+  const id = Object.keys(w.state.quests!)[0];
+  const t = { op: 'quest.transition', writer_group: 0, instance_id: id };
+  const resolve = [
+    { ...t, from: 'active', to: 'objectives_complete' },
+    { ...t, from: 'objectives_complete', to: 'resolved', outcome: 'carry' },
+  ];
+  const resolved_ = { type: 'quest_resolved', quest: QUEST, instance_id: id, outcome: 'carry' };
+  const done = root(
+    w,
+    [...resolve, handed(w)],
+    [
+      [1, resolved_],
+      [2, acquired(w)],
+    ],
+  );
+  assert.equal(done.kind, 'accepted', JSON.stringify(done));
+  assert.deepEqual(groups(done), [
+    ['quest.transition', 0],
+    ['quest.transition', 0],
+    ['entity.transfer', 0],
+  ]);
+});

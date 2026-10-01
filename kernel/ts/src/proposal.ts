@@ -15,6 +15,7 @@ import {
 import { allocator, COMPOSES, event, row, type Mint, type State, type World } from './decision.ts';
 import { factChanged, typedFact, type Base } from './fact.ts';
 import { jobCommandId } from './id_source.ts';
+import { earned } from './quest.ts';
 import { sequence, triggered } from './reaction.ts';
 import * as schedule from './rules/schedule.ts';
 import { utf8 } from './sha256.ts';
@@ -99,10 +100,9 @@ const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * sequence joining in turn: its ops, then its events, with the fact_changed of each assign that
  * changes its fact (fact.ts factChanged) at its causal position, numbered after the events before
  * them and correlated to the command; each event then queued FIFO for the reactions it triggers
- * (reaction.ts). The root sequence (writer group 0, then quest.ts deliver's groups) and its
- * reactions to quiescence; then, when its delta has a time.advance (a wait, or a recipe's
+ * (reaction.ts). The root sequence (writer group 0) and its deliveries to quiescence; then, when its delta has a time.advance (a wait, or a recipe's
  * duration), each due job and its reactions to quiescence before the next. One counter numbers
- * every later writer group: each job and each reaction delivery takes the next.
+ * every later writer group: each job, quest delivery and reaction delivery takes the next.
  *
  * The due jobs: the pending jobs due at or before the advance's target, snapshotted from the
  * committed state and run in (due_time, job_id) order (job ids compared as UTF-8 bytes, never in
@@ -115,7 +115,10 @@ const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * advance drains its own, and each new job is later than the advance's target, so 04 §5.2 step 2
  * has nothing to drain.
  *
- * A reaction delivery (04 §5.2 steps 5-6): each rule an event triggers, in rule-key order, at
+ * The deliveries of each queued event, at its FIFO position (04 §5.2 steps 5-6): first each quest
+ * instance it earns (quest.ts earned: active before this decision) that is still active in the
+ * proposal so far, one quest.transition to objectives_complete as its own writer group, counted
+ * toward the deliveries budget; then each rule it triggers, in rule-key order, at
  * one more than its cause's reaction depth (a root's or job's events are at 0). Each counts
  * toward the deliveries budget and its `when`'s policy leaves toward query_steps, read on the
  * proposal so far at the event's logical time; only one whose `when` holds runs, as its own
@@ -125,8 +128,6 @@ const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * there, never truncated (adopt checks the events limit on the whole proposal). ponytail: only
  * reaction guards count query_steps; root and action policies join when their callers pass
  * holds() a counter.
- * ponytail: quest.ts deliver sees only the root's events: a quest objective meets only an
- * item_acquired, which no job or reaction emits; route their events through it when one can.
  * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
  * (rules/schedule.ts), and a stale entry it refuses rejects the whole advance instead of being
  * skipped as ineligible. Nothing in schedule@1 or reaction@1 cancels, reschedules or completes
@@ -193,6 +194,21 @@ const cause = (p: P, logical_time: number, id: string) => ({
 // The queue's deliveries to quiescence, or the fault that ends them.
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
+    const earns = earned(p.world, next.cause.payload);
+    for (const instance_id of earns) {
+      const at = now(p);
+      if (!('cartridge' in at)) return at;
+      if (at.state.quests![instance_id]!.state !== 'active') continue;
+      if (over({ deliveries: ++p.deliveries })) return BUDGET;
+      const writer_group = ++p.group;
+      p.ops.push({
+        op: 'quest.transition',
+        writer_group,
+        instance_id,
+        from: 'active',
+        to: 'objectives_complete',
+      });
+    }
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;

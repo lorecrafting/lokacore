@@ -36,7 +36,6 @@ import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
 import * as quest from './rules/quest.ts';
 import * as schedule from './rules/schedule.ts';
-import { deliver } from './quest.ts';
 import { admit, adopt, ownerOf, type Actor, type Stepped } from './proposal.ts';
 import { newWorld, NIL } from './fresh.ts';
 
@@ -96,8 +95,8 @@ type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
  * command for another world (not_found) or another actor (not_found) is rejected, and so is one
  * the actor's ActionSet does not offer or offers unavailable (actions.ts refusal; 04 §19, ACT-09).
  * A KernelError thrown while deciding is an evaluator_error fault with the world unchanged. After it: admit() checks the
- * result, quest delivery adds the objective transitions its events earn (quest.ts deliver; no
- * event, so it stays admitted), then the delta composes or faults before the changes are adopted.
+ * result, then its proposal (proposal.ts, quest deliveries included) composes or faults before the
+ * changes are adopted.
  */
 function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
@@ -109,8 +108,7 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (refused) return reject(refused);
   const mint = allocator(world, command);
   try {
-    const decided = deliver(world, admit(owner, rule(world, command, mint)));
-    return adopt(world, decided, command as Actor, mint);
+    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
     if (!(e instanceof KernelError)) throw e;

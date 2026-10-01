@@ -1,10 +1,9 @@
 // quest@1 (capability_registry.json; 06 §1-§5, §43; 04 §5.2): what the quest rule
-// (rules/quest.ts), step (world.ts) and a rule that resolves a quest share: an objective's
-// current-state evaluation, the delivery of a decision's events to active instances, and
-// resolution. A QuestInstance is a row of State.quests (decision.ts questOf).
+// (rules/quest.ts), the proposal (proposal.ts) and a rule that resolves a quest share: an
+// objective's current-state evaluation, the instances an event earns, and resolution. A
+// QuestInstance is a row of State.quests (decision.ts questOf).
 import type {
   CharacterId,
-  DecisionResult,
   DefinitionRef,
   DeltaOp,
   ErrorCode,
@@ -27,7 +26,7 @@ export const instanceId = (mint: Mint) => mint() as QuestInstanceId;
 /**
  * True when `actor`'s current_state objective of `quest` holds now (06 §43: evaluated on the
  * state at hand, never stored); false for a post_activation_event objective, which only an
- * event meets (deliver).
+ * event meets (earned).
  */
 export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef): boolean {
   const o = definition(world, quest).objective;
@@ -35,48 +34,33 @@ export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef)
 }
 
 /**
- * `decision` with each post_activation_event objective its events meet moved to
- * objectives_complete (06 §5; 04 §5.2 steps 5-6): an item_acquired of the objective's item whose
- * holder is the body of the instance's actor meets an instance that was active before this
- * decision, each delivery its own writer group after the root's (0). An event before activation
- * never counts, and a give to someone else is not the actor's acquisition. ponytail: an instance
- * activated in this decision receives none of its events (only accept_quest activates, and it
- * emits nothing after quest_activated); compare positions with its quest_activated when one
- * decision can do both. ponytail: scans every instance per decision (06 §7 allows a simple scan
- * for a private cartridge); index active instances by event type and target when worlds grow. It
- * adds no event, so an admitted decision stays admitted (its type kept).
+ * The instances, of those active in `world` (before this decision), whose post_activation_event
+ * objective event `e` meets (06 §5; 04 §5.2 steps 5-6): an item_acquired of the objective's item
+ * whose holder is the body of the instance's actor. A give to someone else is not the actor's
+ * acquisition. In stable semantic order (04 §5.2 step 6): by quest DefinitionRefString, then
+ * instance id, never the order the rows were stored or restored in. proposal.ts react delivers
+ * each queued event here at its FIFO position, to each instance also still active in the proposal
+ * so far, as its own writer group: an instance activated in this decision was not active before
+ * it, and one the decision already resolved is no longer active. ponytail: scans every instance
+ * per event (06 §7 allows a simple scan for a private cartridge); index active instances by event
+ * type and target when worlds grow.
  */
-export function deliver<D extends DecisionResult>(world: World, decision: D): D {
-  if (decision.kind !== 'accepted' || !world.cartridge.quests) return decision;
+export function earned(world: World, e: EventPayload): QuestInstanceId[] {
+  if (e.type !== 'item_acquired' || !world.cartridge.quests) return [];
   const met = (q: QuestRow) => {
     const o = definition(world, q.quest).objective;
     const body = q.scope.kind === 'player' ? bodyOf(world, q.scope.character_id) : undefined;
     return (
       o.evidence === 'post_activation_event' &&
-      decision.events.some(
-        ({ payload: e }) =>
-          e.type === 'item_acquired' &&
-          e.item_id === world.entityIds[refString(o.item_acquired)] &&
-          e.holder_id === body,
-      )
+      e.item_id === world.entityIds[refString(o.item_acquired)] &&
+      e.holder_id === body
     );
   };
-  // In stable semantic order (04 §5.2 step 6): by quest DefinitionRefString, then instance id,
-  // never the order the rows were stored or restored in.
   const order = ([i, q]: [string, QuestRow]) => `${refString(q.quest)} ${i}`;
-  const done = Object.entries(world.state.quests ?? {})
+  return Object.entries(world.state.quests ?? {})
     .filter(([, q]) => q.state === 'active' && met(q))
-    .sort((a, b) => cmp(order(a), order(b)));
-  if (!done.length) return decision;
-  // Groups from 1, after the root's 0; proposal.ts continues the count for jobs and reactions.
-  const ops = done.map(([instance_id], n) => ({
-    op: 'quest.transition' as const,
-    writer_group: n + 1,
-    instance_id: instance_id as QuestInstanceId,
-    from: 'active' as const,
-    to: 'objectives_complete' as const,
-  }));
-  return { ...decision, delta: { ops: [...decision.delta.ops, ...ops] } } as D;
+    .sort((a, b) => cmp(order(a), order(b)))
+    .map(([i]) => i as QuestInstanceId);
 }
 
 type Resolved = Extract<EventPayload, { type: 'quest_resolved' }>;
