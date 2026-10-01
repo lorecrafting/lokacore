@@ -99,13 +99,14 @@ export const spokenBy = (world: World, target: EntityId | undefined) =>
   );
 
 /**
- * Whether `target`'s dialogue refuses `actor`'s talk now, its policy failing: the talk rule's
- * check after admission, and the GameView's for every talk listed on the target, since a
- * cartridge action with command talk (an alias) is admitted on its own policy.
+ * Whether `target`'s dialogue refuses `actor`'s talk now, its policy failing or the actor having a
+ * pending choice (one per actor): the talk rule's check after admission, and the GameView's for
+ * every talk listed on the target, since a cartridge action with command talk (an alias) is
+ * admitted on its own policy.
  */
 export function talkRefused(world: World, actor: CharacterId, target: EntityId | undefined) {
   const d = spokenBy(world, target);
-  return d !== undefined && !holds(world, actor, d.policy.root);
+  return d !== undefined && (!holds(world, actor, d.policy.root) || !!pending(world, actor));
 }
 
 /**

@@ -338,11 +338,12 @@ test('a stale choice revalidates custody and presence; close still works', () =>
   ok(moved, close(), 5);
 });
 
-// Breaks: a second pending choice, a consumed choice resurrected (06 §43), another actor's or an
-// unoffered option chosen, or close of nothing.
+// Breaks: a second pending choice (or one listed available), a consumed choice resurrected
+// (06 §43), another actor's or an unoffered option chosen, or close of nothing.
 test('talk while pending, and choose or close of no pending continuation, are invalid_state', () => {
   const w = talked();
   refused(w, talk, 'invalid_state');
+  assert.deepEqual([talkView(w), talkView(ok(w, close(), 4).world)], [unavailable, [[true]]]);
   refused(w, choose('stay'), 'invalid_state');
   refused(w, choose('leave', C2), 'invalid_state');
   const done = ok(w, choose('leave'), 4).world;

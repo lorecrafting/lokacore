@@ -35,7 +35,6 @@ import {
   choiceIds,
   continuationId,
   definition,
-  pending,
   spokenBy,
   talkRefused,
 } from '../dialogue.ts';
@@ -63,7 +62,6 @@ function talk(world: World, command: Command<'talk'>, mint: Mint) {
   const d = spokenBy(world, p.target_id);
   if (!d) return rejected('not_found');
   if (talkRefused(world, p.actor_id, p.target_id)) return rejected('invalid_state');
-  if (pending(world, p.actor_id)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const op = {
