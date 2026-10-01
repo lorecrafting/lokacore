@@ -100,8 +100,11 @@ function invocationOf(b: Button, n: number, actor: string) {
  */
 export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   const cartridge = cartridgeOf(bundled);
-  const host = { content_hash: bundled.sha256, kernel_version: KERNEL_VERSION, newId };
-  const story = openStory(db, newWorld(cartridge, CONTEXT as never, SEED as never), host);
+  const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
+  const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], {
+    kernel_version: KERNEL_VERSION,
+    newId,
+  });
   if (story.kind !== 'open') throw new Error(`save not opened: ${story.kind}`);
   // The unconfirmed attempt, resent unchanged (same id, same intent) until it settles (03 §§14-15).
   let retry: { label: string; invocation: object } | undefined;

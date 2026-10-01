@@ -96,9 +96,10 @@ function processOn(path: string, { newId = none, tap = (_, run) => run(), ...o }
     isInTransactionSync: () => sql.isTransaction,
   };
   const { fresh, hash } = o.on ?? bell;
-  const host = { content_hash: hash, kernel_version: `loka-kernel@${'0'.repeat(40)}`, newId };
+  const host = { kernel_version: `loka-kernel@${'0'.repeat(40)}`, newId };
   const milestones = o.milestones ?? MILESTONES;
-  const opened = openStory(db, fresh, { ...host, milestones, binding: o.binding ?? (() => A) });
+  const binding = o.binding ?? (() => A);
+  const opened = openStory(db, [{ content_hash: hash, fresh }], { ...host, milestones, binding });
   assert.equal(opened.kind, 'open');
   const story = opened as Extract<typeof opened, { kind: 'open' }>;
   const all = (q: string) =>
