@@ -53,3 +53,28 @@ says "needs a separately tested durable continuation/ordering contract". Failure
 builder treats the note as the policy and skips the declared-policy field or the
 continuation contract. Fix: "per the cartridge's declared policy, e.g. ..." and cite the
 04 §5.4 continuation requirement beside "committed chunks".
+
+## Fix round 1 — `2b3db0e`
+
+Verdict: **APPROVE WITH NOTES**
+
+- S-1: resolved. The Early R7/R8 row (`docs/ROADMAP.md:51`) owns the drain in its schedule
+  slice; the R6P row (`:52`) and the S4 row (`:66`) only point to it.
+- N1: resolved; the quote now links 00a.
+- N2: resolved; the notes say the cartridge declares the policy, the formula is an example,
+  and chunks need the 04 §5.4 continuation contract.
+
+### R1-1 should-fix — `docs/decisions/owner-decision-s4-scope-2026-09-30.md:14-16`
+
+The record restates the placement as a second fact ("the PM placed its owner in the Early
+R7/R8 ROADMAP row, which R6P P4 integrates"), and its link goes to `#proposed-r6-slices`,
+while the Early R7/R8 row is under `#slices` (ROADMAP line 45). Failure: a later ROADMAP
+move of the drain leaves this record stating the old row, and the link lands on the R6
+table. Fix: "(owner: R6P P3/P4; the [ROADMAP](../ROADMAP.md#slices) holds the placement)".
+Line 14 also runs past the file's wrap width and line 17 is an orphaned fragment (nit).
+
+### Q1 question
+
+The owner chose "R6P P3/P4"; the PM moved the owner of the drain to the Early R7/R8 schedule
+slice. Pre-release-proof.md:74 makes that slice a P4 input, so it lands on the same path,
+which reads as a placement refinement. Confirm that the owner does not need to re-approve it.
