@@ -242,22 +242,29 @@ test('a confirmed reply that fails to format propagates and still ends the attem
 
 // The app's save file under playSmoke, as App.tsx wires it: `remove` closes the handle and deletes
 // the file, as expo's closeSync and deleteDatabaseSync do (the main file only).
-const app = (path: string, refuse?: string, tap?: (s: string, run: () => unknown) => unknown) => {
+// `fail` names a step that throws: 'open' always (as expo's open can), 'remove' once.
+const app = (path: string, fail?: 'open' | 'remove', tap?: Parameters<typeof adapt>[1]) => {
   let sql: DatabaseSync | undefined;
   const c = playSmoke(
     () => {
-      if (refuse) throw new Error(refuse); // the open itself fails, as expo's can
+      if (fail === 'open') throw new Error('disk I/O error');
       return adapt((sql = new DatabaseSync(path)), tap);
     },
     () => {
-      sql!.close();
+      sql?.close(); // as App.tsx: the handle is closed once, then forgotten
+      sql = undefined;
+      if (fail === 'remove') {
+        fail = undefined;
+        throw new Error('could not delete');
+      }
       rmSync(path);
     },
     ITEMS,
     randomUUID,
   );
-  const screen = () => screenOf(c.game()!);
-  return { c, sql: () => sql!, now: () => screen().now(), press: (l: string) => screen().press(l) };
+  const now = () => screenOf(c.game()!).now();
+  const press = (l: string) => screenOf(c.game()!).press(l);
+  return { c, sql: () => sql!, now, press };
 };
 
 /** A save at revision 1 (the satchel taken) whose index `name` has its b-tree page type byte broken. */
@@ -348,32 +355,41 @@ test("a newer app's save is never started over", () => {
   assert.deepEqual(readFileSync(path), before);
 });
 
+// Breaks: a start over whose delete failed (expo's can throw) offering no start over again, so the
+// player is stuck on the error screen until a restart.
+test('a start over whose delete failed can be tried again', () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
+  writeFileSync(path, Buffer.alloc(4096, 'x'));
+  const a = app(path, 'remove');
+  a.c.startOver();
+  assert.equal(a.c.failed()?.message, 'could not delete');
+  a.c.startOver();
+  assert.equal(a.now().place, 'Ferry Landing');
+});
+
 // Breaks: start over deleting a save whose open failed for a reason other than corruption (a full
 // disk, an I/O error): the save may be intact once the cause is gone, so nothing is offered.
 test('an open that fails but not as corrupt is never started over', () => {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
   processOn(path).sql.close();
   const before = readFileSync(path);
-  const a = app(path, 'disk I/O error');
-  assert.deepEqual(a.c.failed(), {
-    kind: undefined,
-    message: 'disk I/O error',
-    newGame: undefined,
-    replace: false,
-  });
+  const a = app(path, 'open');
+  assert.equal(a.c.failed()?.message, 'disk I/O error');
   a.c.startOver();
   assert.deepEqual(readFileSync(path), before);
 });
 
 // Breaks: a start over during play that fails (here every write refused: PRAGMA query_only)
-// dropping the game being played, so the press can no longer be retried.
+// dropping the game being played, so the press can no longer be retried; or its failure kept as
+// state that outlives the play's recovery (shown again beside a later, unrelated fault).
 test('a start over that fails during play keeps the game and its retry', () => {
   const a = app(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'));
   a.sql().exec('PRAGMA query_only = 1');
   a.press('Go north');
   assert.match(a.now().fault!, /readonly/);
   a.c.startOver();
-  assert.match(a.c.failed()!.message, /readonly/);
+  assert.equal(a.now().log.at(-1), '(start over: attempt to write a readonly database)');
+  assert.equal(a.c.failed(), undefined); // a cached failure would outlive the play's recovery
   a.sql().exec('PRAGMA query_only = 0');
   a.press('scan');
   assert.deepEqual(a.now().log.slice(-2), ['> Go north', 'moved']);

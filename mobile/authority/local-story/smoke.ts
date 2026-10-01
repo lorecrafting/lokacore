@@ -160,8 +160,8 @@ export type Failed = {
  * corrupt page: its new game throws as corrupt, or the open throws untyped as corrupt) is replaced.
  * Never started over: a newer app's save (`unsupported_save_format`, update the app, 10 §32) or an
  * open that failed for another reason (a full disk: the save may be intact). A start over that
- * fails otherwise keeps the game being played; one whose outcome is unknown does not (its next
- * press would settle the new game, then apply to it).
+ * fails otherwise keeps the game being played and says so in its log; one whose outcome is
+ * unknown does not (its next press would settle the new game, then apply to it).
  */
 export function playSmoke(open: () => Db, remove: () => void, items: Bundled, newId: () => string) {
   const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
@@ -170,9 +170,8 @@ export function playSmoke(open: () => Db, remove: () => void, items: Bundled, ne
       s.game = openSmoke((s.db ??= open()), items, newId);
       s.failed = undefined;
     } catch (e) {
-      const { kind, newGame } = ((e as Error).cause ?? {}) as Failed;
-      s.game = undefined;
-      s.failed = { kind, message: (e as Error).message, newGame, replace: !kind && corrupt(e) };
+      const { message, cause } = e as Error;
+      [s.game, s.failed] = [undefined, { ...(cause as Failed), message, replace: corrupt(e) }];
     }
   };
   reopen();
@@ -189,7 +188,9 @@ export function playSmoke(open: () => Db, remove: () => void, items: Bundled, ne
         }
         if (newGame) return reopen();
       } catch (e) {
-        if (!corrupt(e)) return void (s.failed = { ...s.failed, message: (e as Error).message });
+        const { message } = e as Error; // in play, logged once: no message outlives the game's state
+        if (!corrupt(e) && s.game) return void s.game.screen().log.push(`(start over: ${message})`);
+        if (!corrupt(e)) return void (s.failed = { ...s.failed, message });
       }
       try {
         [s.game, s.db] = [undefined, undefined]; // the handle goes with the file

@@ -20,7 +20,7 @@ export function SaveError({ failed, startOver }: { failed: Failed; startOver: ()
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
       <Text style={{ fontWeight: 'bold' }}>
-        {PLAIN[failed.kind!] ?? 'The save could not be opened.'}
+        {PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}
       </Text>
       <Text>({failed.message})</Text>
       {(failed.newGame || failed.replace) && (

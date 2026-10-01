@@ -12,8 +12,8 @@ import { confirmStartOver, SaveError } from './SaveError';
 // (mobile lessons: a second handle on the same file crashes). A new file name: a save from before
 // R6 S3a has no identity row, so it would open as corrupt. Start over closes the handle before it
 // deletes the file (expo refuses to delete an open database).
-// ponytail: deleteDatabaseSync removes the main file only; a hot -journal left by a crash would be
-// rolled into the fresh file. Delete it too (expo-file-system) if that is ever seen.
+// deleteDatabaseSync removes the main file only; SQLite discards a -journal left beside the new,
+// empty file rather than replaying it, so nothing else needs deleting.
 const NAME = 'loka-save.db';
 let db: SQLiteDatabase | undefined;
 const g = globalThis as { loka_smoke?: ReturnType<typeof playSmoke> };
@@ -49,7 +49,6 @@ export default function App() {
         <Text>Carrying: {names(view.inventory)}</Text>
         <Text>Time: {view.time}</Text>
         {pending && <Text>Save not confirmed (pending)</Text>}
-        {fault && smoke.failed() && <Text>Start over failed: {smoke.failed()!.message}</Text>}
         <Text>{log.slice(-20).join('\n')}</Text>
         {buttons.map((b, i) => (
           <Button
