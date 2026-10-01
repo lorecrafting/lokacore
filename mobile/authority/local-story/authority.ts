@@ -8,7 +8,7 @@ import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src
 import { step } from '../../../kernel/ts/src/world.ts';
 import { commit, load, pinOf, receipt, reconcile, replace } from './store.ts';
 import type { Db, Meta, Receipt } from './store.ts';
-import { catchUp, FRESH, traceCommand, type CommitState, type RunIds } from './trace.ts';
+import { catchUp, traceCommand, type CommitState, type RunIds } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -227,12 +227,13 @@ function traceAfter(
  */
 function newGame(s: Story) {
   if (fenced(s)) return { kind: 'pending' } as const;
-  // Before its receipts go: the old run's missed entries are recovered from them.
+  // Best effort before its receipts go (the trace is derived and never blocks the player): the
+  // old run's missed entries can be recovered only from them.
   if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   const next = first(s.fresh, s.host);
   const replaced = () => {
     adopt(s);
-    s.behind = !catchUp(s.db, ids(s), s.fresh.context, '', FRESH);
+    s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   };
   // replace throws on a definite failure, with nothing written.
   if (replace(s.db, s.fresh, next)) replaced();

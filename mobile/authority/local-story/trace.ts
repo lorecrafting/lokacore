@@ -52,10 +52,10 @@ export function traceCommand(
  * Brings the trace up to the store (ADR-075 §4): a header for a new trace; the committed entry of
  * every receipted Command that has none but `skip`, in commit order, under the ids of the header
  * they were decided under; then, when `ids` differ from that header's (an update, a new game),
- * a new run header starting from `initial`: the saved state, or a new game's fresh world. False,
- * never a throw, unless all was written.
+ * a new run header: from the saved state after an update, from the fresh world for a new game's
+ * run. False, never a throw, unless all was written.
  */
-export function catchUp(db: Db, ids: RunIds, context: string, skip = '', initial = SAVED): boolean {
+export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolean {
   const header = (initial: object) =>
     transaction(db, () => {
       const data = { world_context_id: context, initial_state: initial, fault_schedule: NONE };
@@ -85,7 +85,9 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = '', initial
         ])
       )
         return false;
-    return encode(prior as never) === encode(ids as never) || header(initial);
+    if (encode(prior as never) === encode(ids as never)) return true;
+    // ponytail: another run_id is a new game, from the fresh world; an imported fork (R12) is not.
+    return header(prior.run_id === ids.run_id ? SAVED : FRESH);
   } catch {
     return false;
   }
@@ -93,8 +95,8 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = '', initial
 
 const TRACE = 'INSERT INTO trace VALUES (?, ?, ?, ?)';
 const NONE = { state: 'unavailable', reason: 'not_applicable' };
-const SAVED: object = { state: 'unavailable', reason: 'not_collected' }; // from the saved state (ADR-075)
-export const FRESH = { state: 'fresh' }; // from the world `context` starts with (a new game)
+const SAVED = { state: 'unavailable', reason: 'not_collected' }; // from the saved state (ADR-075)
+const FRESH = { state: 'fresh' }; // from the world `context` starts with
 const record = (event: string, ids: object, data: object) =>
   encode({ format: 'loka-obs-v1', event, store: 'game_trace', ids, data } as never);
 

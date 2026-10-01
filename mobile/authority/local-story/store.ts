@@ -75,14 +75,14 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   db.execSync(SCHEMA);
   type Head = { revision: number; clock: number; rng: string };
   const head = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head');
-  if (!head) {
+  const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save');
+  if (!head && !m) {
     const meta = first();
     const saved = replace(db, fresh, meta);
     if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
     return { world: fresh, revision: 0, meta };
   }
-  const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save');
-  if (!m) return undefined; // a head without an identity: not a save this format wrote
+  if (!head || !m) return undefined; // half a save: never taken for a new one
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };

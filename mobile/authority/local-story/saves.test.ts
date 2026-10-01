@@ -181,8 +181,9 @@ test('a save opened with another content hash is refused and left untouched', ()
 });
 
 // Breaks (OFF-07): a head that does not parse replaced by the fresh world or opened at all; a
-// corrupt save under another release offered a new game (re-pinned unawares); the player's new
-// game not making a playable save with new ids.
+// corrupt save under another release offered a new game (re-pinned unawares); a save missing its
+// head taken for an empty one and overwritten; the player's new game not making a playable save
+// with new ids or its trace segment not starting fresh.
 test('a save that does not parse is save_corrupt until the player starts a new game', () => {
   const path = save();
   const a = processOn(path, { newId: ids() });
@@ -194,15 +195,22 @@ test('a save that does not parse is save_corrupt until the player starts a new g
   const b = processOn(path, { newId: () => id(9) });
   assert.equal(b.opened.kind, 'save_corrupt');
   assert.deepEqual(stored(b), before);
-  b.sql.exec('DELETE FROM save'); // no identity left: no pin to compare, still corrupt
-  const c = processOn(path, { newId: ids() });
+  const lone = processOn(save(), { newId: ids() }); // a head without its identity row
+  lone.sql.exec('DELETE FROM save');
+  assert.equal(processOn(lone.sql.location()!).opened.kind, 'save_corrupt');
+  b.sql.exec('DELETE FROM head');
+  assert.equal(processOn(path).opened.kind, 'save_corrupt'); // never a new save over the rest
+  b.sql.exec("UPDATE save SET pin = '{'"); // an unreadable identity: no pin to compare
+  let n = 4;
+  const c = processOn(path, { newId: () => id(++n) });
   assert.equal(c.opened.kind, 'save_corrupt');
   const corrupt = c.opened as Extract<typeof c.opened, { kind: 'save_corrupt' }>;
   assert.deepEqual(corrupt.newGame(), { kind: 'replaced' });
   c.sql.close();
   const d = processOn(path);
   assert.equal(state(d), FRESH);
-  assert.deepEqual(d.all(IDENTITY), [identity(1)]);
+  assert.deepEqual(d.all(IDENTITY), [identity(5)]);
+  assert.deepEqual(traced(d).at(-1), [id(6), 'fresh']);
 });
 
 // Breaks (10 §31 as amended; pin 8): a new game keeping the old state (a row the old game wrote), ids or receipts (an old
