@@ -12353,5 +12353,167 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "contract": "Text",
+    "value": {
+      "key": "k",
+      "participants": []
+    },
+    "errors": [
+      {
+        "path": "/participants",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "Text",
+    "value": {
+      "key": "k",
+      "participants": {
+        "Bad": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+        "n": "bram",
+        "m": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/participants/Bad",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/participants/m",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/participants/n",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeNarration",
+    "value": {
+      "participants": {}
+    },
+    "errors": [
+      {
+        "path": "/actor",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeNarration",
+    "value": {
+      "actor": "k",
+      "bindings": {}
+    },
+    "errors": [
+      {
+        "path": "/bindings",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeNarration",
+    "value": {
+      "actor": "k",
+      "participants": {
+        "Bad": {
+          "role": "actor"
+        },
+        "x": {
+          "role": "actor"
+        },
+        "y": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/participants/Bad",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/participants/y",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "NarrationParticipant",
+    "value": {},
+    "errors": [
+      {
+        "path": "/role",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "NarrationParticipant",
+    "value": {
+      "role": "room"
+    },
+    "errors": [
+      {
+        "path": "/role",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "contract": "NarrationParticipant",
+    "value": {
+      "role": "npc"
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "NarrationParticipant",
+    "value": {
+      "role": "item",
+      "npc": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "npc",
+        "key": "bram"
+      }
+    },
+    "errors": [
+      {
+        "path": "/item",
+        "code": "missing_property"
+      },
+      {
+        "path": "/npc",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "NarrationParticipant",
+    "value": {
+      "role": "actor",
+      "npc": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "npc",
+        "key": "bram"
+      }
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

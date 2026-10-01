@@ -200,7 +200,8 @@ const npcRooms = (c: Obj): [Obj, string][] =>
 // its target names a room of this cartridge and a detail of that room,
 // it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), its threshold check,
 // costs and resource.adjust steps name resources of it, each outcome's fact.assign names a fact
-// of it, and its label and narrations have catalog entries; each key of
+// of it, its label and narrations have catalog entries and each narration participant but the
+// actor names an NPC or item of it, as its role says; each key of
 // a room's action contribution names an engine verb (a registered command), an action or a
 // recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
 function recipes(c: Obj, { named, typedValue, text }: ReturnType<typeof checkers>): Diagnostic[] {
@@ -235,6 +236,9 @@ function recipes(c: Obj, { named, typedValue, text }: ReturnType<typeof checkers
         typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
       });
       text(o.narration, ['actor', 'observers'], `${path}.narration`);
+      for (const [n, p] of Object.entries((o.narration.participants ?? {}) as Obj))
+        if (p.role !== 'actor')
+          named(p[p.role], p.role, `${path}.narration.participants${step(n)}.${p.role}`);
     }
     text(r, ['label'], at);
   }

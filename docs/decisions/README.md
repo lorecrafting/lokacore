@@ -75,3 +75,4 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [S3b scope: bundled releases reopen saves on their pin, typed refusals; GC, migration staging and downloads carried](owner-decision-s3b-scope-2026-09-30.md).
 - Owner decision: [SM2 scope: the book-style UI over the smoke controller in three slices, real GameView data only, fonts and a simple page turn](owner-decision-sm2-scope-2026-10-01.md).
 - Owner decision: [Early R7/R8 plan: slices Q, S, R, N, D in order, R5 deferrals moved to R7/R8 for chapter one, GameView slice G for resources only](owner-decision-early-r7r8-plan-2026-10-01.md).
+- Owner decision: [narrow slice N: recipe narration pins its participants' EntityIds at commit; PM rulings on the committed and authored shapes](owner-decision-narrow-n-2026-10-01.md).

@@ -625,19 +625,7 @@
                   "maxItems": 16
                 },
                 "narration": {
-                  "type": "object",
-                  "properties": {
-                    "actor": {
-                      "$ref": "text.schema.json#/$defs/TextKey"
-                    },
-                    "observers": {
-                      "$ref": "text.schema.json#/$defs/TextKey"
-                    }
-                  },
-                  "required": [
-                    "actor"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/$defs/RecipeNarration"
                 }
               },
               "required": [
@@ -658,19 +646,7 @@
                   "maxItems": 16
                 },
                 "narration": {
-                  "type": "object",
-                  "properties": {
-                    "actor": {
-                      "$ref": "text.schema.json#/$defs/TextKey"
-                    },
-                    "observers": {
-                      "$ref": "text.schema.json#/$defs/TextKey"
-                    }
-                  },
-                  "required": [
-                    "actor"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/$defs/RecipeNarration"
                 }
               },
               "required": [
@@ -1007,6 +983,126 @@
             "chance": 50
           },
           "duration": 60
+        }
+      ]
+    },
+    "RecipeNarration": {
+      "type": "object",
+      "properties": {
+        "actor": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "observers": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "participants": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/NarrationParticipant"
+          }
+        }
+      },
+      "required": [
+        "actor"
+      ],
+      "additionalProperties": false,
+      "description": "A recipe outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).",
+      "examples": [
+        {
+          "actor": "narration.coil_rope.actor"
+        },
+        {
+          "actor": "narration.coil_rope.actor",
+          "observers": "narration.coil_rope.observers",
+          "participants": {
+            "actor": {
+              "role": "actor"
+            },
+            "bram": {
+              "role": "npc",
+              "npc": {
+                "cartridge_id": "ashmere_ferry",
+                "cartridge_version": "0.0.1",
+                "kind": "npc",
+                "key": "bram"
+              }
+            },
+            "rope": {
+              "role": "item",
+              "item": {
+                "cartridge_id": "ashmere_ferry",
+                "cartridge_version": "0.0.1",
+                "kind": "item",
+                "key": "rope"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "NarrationParticipant": {
+      "description": "An entity a recipe's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The loader reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "role": {
+              "const": "npc"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "role",
+            "npc"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "role": {
+              "const": "item"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "role",
+            "item"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "role": {
+              "const": "actor"
+            }
+          },
+          "required": [
+            "role"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "role": "actor"
+        },
+        {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
         }
       ]
     },

@@ -34,7 +34,7 @@
       ]
     },
     "Text": {
-      "description": "Localized text: a string id and its named bindings (04 §15 'localized string IDs plus interpolation data'; 06 §43 'pinned text keys and bindings'). Binding names are lowercase snake_case, at most 64 characters.",
+      "description": "Localized text: a string id and its named bindings (04 §15 'localized string IDs plus interpolation data'; 06 §43 'pinned text keys and bindings'). Binding names are lowercase snake_case, at most 64 characters. Participants: the entities a committed line names, each pinned to its EntityId when the line commits (06 §43 'pinned text keys and bindings', 'bound participant identities'), so redisplay never resolves them again; names are lowercase snake_case, at most 64 characters.",
       "type": "object",
       "properties": {
         "key": {
@@ -47,6 +47,15 @@
           },
           "additionalProperties": {
             "$ref": "#/$defs/TextValue"
+          }
+        },
+        "participants": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "identity.schema.json#/$defs/EntityId"
           }
         }
       },
@@ -74,6 +83,13 @@
         {
           "key": "k",
           "bindings": {}
+        },
+        {
+          "key": "narration.coil_rope.actor",
+          "participants": {
+            "actor": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+            "bram": "ff864ad5-cd56-80c8-9392-dc88bdc28fd2"
+          }
         }
       ]
     },

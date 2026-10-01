@@ -1,6 +1,7 @@
 // schedule@1, behavior@1 and calendar@1 (Early R7/R8 S; 04 §5.4; 06 §13; 21 §4, §10): the
 // fresh world's first job, the due-job drain in wait and in a recipe's duration, run_job and its
-// job CommandId, and the loader's schedule and calendar checks. Worlds are the ferry known answer
+// job CommandId, the loader's schedule and calendar checks, and coil_rope's narration participants
+// (Early R7/R8 N). Worlds are the ferry known answer
 // (protocol/fixtures/cartridge_ferry_hash.json: the world starts at 06:00 with Bram at the ferry
 // landing, his daily schedule landing from hour 6 and village green from hour 19, a one-hour
 // coil_rope recipe at the landing), variants re-hashed with node:crypto over their canonical
@@ -15,6 +16,7 @@ import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { decode, encode } from '../src/canonical.ts';
 import { newWorld, step } from '../src/world.ts';
+import { validate } from '../src/validate.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -325,5 +327,48 @@ test('the loader checks schedule rooms and the schedule and calendar owners', ()
     '.cartridge.calendar',
     { capability: 'calendar' },
     ['calendar@1'],
+  );
+});
+
+// Narration participants (Early R7/R8 N; 06 §43 "pinned text keys and bindings"): ferry's
+// coil_rope names the actor and Bram. BODY is ordinal 1 under the nil CommandId (fresh.ts).
+const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157';
+const COIL = `.cartridge.recipes["${F}:recipe/coil_rope"].outcomes.success.narration.participants`;
+const coil = (c: any) => c.recipes[`${F}:recipe/coil_rope`].outcomes.success.narration;
+
+// Breaks: participants dropped from the committed line, the actor pinned to its CharacterId
+// instead of its body, or an NPC to the wrong entity.
+test("a recipe's committed narration pins its participants' EntityIds", () => {
+  const w = world();
+  const { decision } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }));
+  assert.deepEqual(validate('DecisionResult', decision), []);
+  assert.ok(decision.kind === 'accepted');
+  assert.deepEqual(decision.narration, [
+    { key: 'narration.coil_rope.actor', participants: { actor: BODY, bram: BRAM_ID } },
+  ]);
+  assert.deepEqual(decision.effects, []);
+});
+
+// Breaks: the kernel would pin an undefined EntityId because the loader let in a participant
+// naming no definition, or one of another kind than its role says; or a participant's field
+// outside its role's branch (cartridge.schema.json DiagnosticCode UNKNOWN_FIELD) let in.
+test('the loader rejects a narration participant naming no npc or item of its role', () => {
+  const npc = (r: DefinitionRef) => (c: any) => (coil(c).participants.bram.npc = r);
+  fails(npc(ref('npc', 'ada')), 'UNRESOLVED_REFERENCE', `${COIL}.bram.npc`, {
+    target: `${F}:npc/ada`,
+  });
+  fails(npc(ref('room', 'ferry_landing')), 'UNRESOLVED_REFERENCE', `${COIL}.bram.npc`, {
+    target: `${F}:room/ferry_landing`,
+  });
+  fails(
+    (c) => (coil(c).participants.bram = { role: 'item', item: BRAM }),
+    'UNRESOLVED_REFERENCE',
+    `${COIL}.bram.item`,
+    { target: `${F}:npc/bram` },
+  );
+  fails(
+    (c) => (coil(c).participants.actor = { role: 'actor', npc: BRAM }),
+    'UNKNOWN_FIELD',
+    `${COIL}.actor.npc`,
   );
 });

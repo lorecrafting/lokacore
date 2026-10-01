@@ -338,5 +338,25 @@
       "fault_discards_whole_proposal"
     ],
     "implemented_in": "Early R7/R8 R reaction rules on fact_changed and entity_entered_room, a when policy, fact.assign consequences, delivered FIFO in the proposal under the deliveries, events and reaction_depth budgets"
+  },
+  "narration": {
+    "spec": "06 §43; 04 §5.2 steps 7-8, §15; 21 §4 NarrationSpec",
+    "contracts": [
+      "Text",
+      "RecipeNarration",
+      "NarrationParticipant",
+      "DecisionResult"
+    ],
+    "modules": [
+      "kernel/ts/src/rules/action_recipe.ts",
+      "kernel/ts/src/cartridge_refs.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_ferry_hash.json"
+    ],
+    "invariants": [
+      "retry_replays_receipt"
+    ],
+    "implemented_in": "Early R7/R8 N a recipe narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   }
 }
