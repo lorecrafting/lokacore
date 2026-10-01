@@ -1,3 +1,4 @@
+// size: allow 315, one terminal session: its loop, each command's dispatch and the replay
 // `loka play <artifact> [script]` and `loka play <artifact> --replay <transcript>`: a
 // single-player, MUD-style terminal over the TypeScript kernel on Node (owner decisions
 // 2026-09-25, R5 setup and R5 plan). Each session writes its transcript, the game_trace
@@ -10,6 +11,7 @@ import { decode, encode, hash, type Json } from '../src/canonical.ts';
 import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts';
 import { commandId } from '../src/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
+import { gameView } from '../src/view.ts';
 import { sha256Hex } from '../src/sha256.ts';
 import { validate } from '../src/validate.ts';
 import { doors, normalize } from '../src/target.ts';
@@ -17,6 +19,7 @@ import { detailOf, resolved, type Offered } from '../src/actions.ts';
 import { append, kernelVersion, line, redact } from './obs.ts';
 import {
   barrierAt,
+  choice,
   clock,
   detail,
   door,
@@ -25,6 +28,7 @@ import {
   parse,
   pinned,
   reason,
+  type Parsed,
   room,
   say,
   scan,
@@ -85,9 +89,11 @@ async function session(script: string | undefined) {
     else if (parsed && typeof parsed === 'object' && 'door' in parsed) opening(r, parsed);
     else if (parsed === 'inventory') process.stdout.write(inventory(cartridge, r.world));
     else if (parsed === 'journal') process.stdout.write(journal(cartridge, r.world));
+    else if (parsed === 'bye') answer(r, parsed);
     else if (typeof parsed === 'string') process.stdout.write(`${parsed}\n`);
     else if (parsed && 'perform' in parsed) perform(r, parsed);
     else if (parsed && 'accept' in parsed) accept(r, parsed.accept);
+    else if (parsed && 'choose' in parsed) answer(r, parsed);
     else if (parsed && 'lookup' in parsed) lookup(r, parsed);
     else if (parsed && 'wait' in parsed) {
       const payload = { type: 'wait', until: r.world.state.clock + parsed.wait * 3600 };
@@ -166,6 +172,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
     unlocked: `You unlock ${it}.\n`,
     activated: 'You agree to help.\n',
     activated_with_possession: 'You agree to help, and you already have what is needed.\n',
+    choice_opened: choice(cartridge, r.world),
   };
   const narrated = decision.kind === 'accepted' && decision.narration;
   const shown =
@@ -187,16 +194,18 @@ function turn(r: Run, cmd: Command, measured = true): string {
 
 // Resolves the player's words (target.ts; 04 §17), and for give the recipient's: each unique
 // id goes into a look, take, drop or give Command; none and ambiguous build no Command.
-function lookup(r: Run, p: { lookup: string; verb?: 'take' | 'drop' | 'give'; to?: string }) {
+function lookup(r: Run, p: Extract<Parsed, { lookup: string }>) {
   const id = found(r, p.lookup);
   const to = p.verb === 'give' && id ? found(r, p.to!) : undefined;
   if (!id || (p.verb === 'give' && !to)) return;
   const payload =
     p.verb === 'give'
       ? { type: 'give', item_id: id, recipient_id: to }
-      : p.verb
-        ? { type: p.verb, item_id: id }
-        : { type: 'look', target_id: id };
+      : p.verb === 'talk'
+        ? { type: 'talk', target_id: id }
+        : p.verb
+          ? { type: p.verb, item_id: id }
+          : { type: 'look', target_id: id };
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 
@@ -210,6 +219,15 @@ function opening(r: Run, p: { door: string; direction?: string; words?: string }
     return void process.stdout.write(ds.length ? which : "You don't see that here.\n");
   }
   const payload = { type: p.door, direction: ds[0] };
+  append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+}
+
+// choose <option> or bye: a choose or close_choice Command of the pending choice (GameView).
+function answer(r: Run, p: 'bye' | { choose: string }) {
+  const c = gameView(r.world).choice;
+  if (!c) return void process.stdout.write('You have nothing to choose.\n');
+  const input = p === 'bye' ? { type: 'close_choice' } : { type: 'choose', choice_id: p.choose };
+  const payload = { ...input, continuation_id: c.continuation_id };
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 

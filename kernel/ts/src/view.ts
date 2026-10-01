@@ -2,6 +2,7 @@
 import type { EntityId, EntityView, GameView, Key, QuestView, TextKey } from './contracts.gen.ts';
 import { lists } from './actions.ts';
 import { COMPASS, refString, type QuestRow, type World } from './decision.ts';
+import { choiceView } from './dialogue.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
 import { cmp } from './validate.ts';
@@ -15,7 +16,8 @@ import { cmp } from './validate.ts';
  * its short description with its actions (actions.ts lists: an item here by the room_contents
  * scope, an NPC by room_occupants, a held item by inventory), NPCs first, then in
  * DefinitionRefString order; and the journal, each quest the player has an instance of with its
- * state and title (04 §15 quest journal state), in DefinitionRefString order.
+ * state and title (04 §15 quest journal state), in DefinitionRefString order; and the player's
+ * pending choice, if any (dialogue.ts choiceView).
  */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
@@ -34,6 +36,7 @@ export function gameView(world: World): GameView {
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
+  const choice = choiceView(world, world.character);
   return {
     actor_id: world.character,
     place: { id: here, title: text(room.title), description },
@@ -48,6 +51,7 @@ export function gameView(world: World): GameView {
     inventory: within(world.body),
     journal: journal(world),
     time: world.state.clock,
+    ...(choice && { choice }),
   };
 }
 

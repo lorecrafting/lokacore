@@ -33,6 +33,7 @@ import * as action_recipe from './rules/action_recipe.ts';
 import * as barrier from './rules/barrier.ts';
 import * as containment from './rules/containment.ts';
 import * as description_variant from './rules/description_variant.ts';
+import * as dialogue from './rules/dialogue.ts';
 import * as movement from './rules/movement.ts';
 import * as quest from './rules/quest.ts';
 import * as schedule from './rules/schedule.ts';
@@ -48,6 +49,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   schedule: schedule.decide,
   barrier: barrier.decide,
   quest: quest.decide,
+  dialogue: dialogue.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements

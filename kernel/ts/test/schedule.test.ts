@@ -41,6 +41,9 @@ const H = (h: number) => h * 3600;
 
 const load = (f: (c: any) => void) => {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
+  // The ferry as S and N pinned it: without D1's lantern, quest and dialogue (dialogue.test.ts),
+  // so the fresh-world ordinals below stay theirs.
+  for (const k of ['items', 'quests', 'dialogues']) delete c[k];
   f(c);
   // Canonical bytes (JSON.stringify would put the schedule's integer-like keys first).
   const text = encode(c);

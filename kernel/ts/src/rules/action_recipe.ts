@@ -30,12 +30,10 @@ import type {
   RecipeStep,
 } from '../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../actions.ts';
-import { key, same } from '../compose.ts';
 import {
   accepted,
   bodyOf,
   event,
-  has,
   keys,
   refString,
   rejected,
@@ -43,7 +41,7 @@ import {
   type Rule,
   type World,
 } from '../decision.ts';
-import { scopeOf, value } from '../fact.ts';
+import { assigned } from '../fact.ts';
 import { add } from '../int.ts';
 import { adjust, level, type Levels } from '../resource.ts';
 import { uniform } from '../rng.ts';
@@ -162,18 +160,5 @@ const step =
       const e = event(world, command, mint, r.position + 1, payload);
       return { ...r, position: r.position + 1, events: [...r.events, e] };
     }
-    const actor = command.payload.actor_id;
-    const scope = scopeOf(world, actor, s.fact);
-    const at = key({ kind: 'fact', fact: s.fact, scope });
-    const expected = has(r.facts, at) ? r.facts[at] : value(world, actor, s.fact);
-    const op = {
-      op: 'fact.assign',
-      writer_group: 0,
-      fact: s.fact,
-      scope,
-      expected,
-      value: s.value,
-    } as const;
-    const position = r.position + (same(expected, s.value) ? 0 : 1);
-    return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
+    return assigned(world, command.payload.actor_id, r, s);
   };

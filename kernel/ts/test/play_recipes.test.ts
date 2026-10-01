@@ -180,6 +180,6 @@ test('play shows a narration line with its key and pinned participants', () => {
   assert.equal(r.status, 0, r.stderr);
   assert.match(
     r.stdout,
-    /\nYou coil the wet rope around the post, slowly, the way Bram does it\.\n\[narration\.coil_rope\.actor: actor 186cae63-3b7a-89c8-aa32-f7272aeb290a, bram d8785996-8e35-8a4b-a2fe-d59147a72b59\]\n/,
+    /\nYou coil the wet rope around the post, slowly, the way Bram does it\.\n\[narration\.coil_rope\.actor: actor 62bd45eb-552d-8dff-9c3a-eb0b986065c3, bram 794b69e3-5f9c-8787-bee1-0724d4442dc6\]\n/,
   );
 });

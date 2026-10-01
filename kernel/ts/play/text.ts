@@ -21,7 +21,9 @@ export type Parsed =
   | { type: 'look' }
   | { type: 'scan' }
   | { type: 'move'; direction: string }
-  | { lookup: string; verb?: 'take' | 'drop' | 'give'; to?: string }
+  | { lookup: string; verb?: 'take' | 'drop' | 'give' | 'talk'; to?: string }
+  | { choose: string }
+  | 'bye'
   | { door: (typeof DOORS)[number]; direction?: string; words?: string }
   | { wait: number }
   | 'inventory'
@@ -44,12 +46,14 @@ const WORDS: Record<string, Parsed> = {
   journal: 'journal',
   j: 'journal',
   brief: 'brief',
+  bye: 'bye',
 };
 for (const d of COMPASS) WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d };
 
 const LOOK = ['look', 'l', 'examine', 'x'];
 const DOORS = ['open', 'close', 'lock', 'unlock'] as const;
-const VERBS: Record<string, 'take' | 'drop' | 'give'> = {
+const VERBS: Record<string, 'take' | 'drop' | 'give' | 'talk'> = {
+  talk: 'talk',
   get: 'take',
   take: 'take',
   drop: 'drop',
@@ -60,7 +64,8 @@ const VERBS: Record<string, 'take' | 'drop' | 'give'> = {
  * `look`/`l`, `look`/`l`/`examine`/`x` <words> (a lookup; `look at the post` and `look post`
  * alike, target.ts normalize), `get`/`take` <words>, `drop` <words>, `give` <words> `to`
  * <words>, `open`/`close`/`lock`/`unlock` <a direction, its initial, or words naming a door>,
- * `scan`, `inventory`/`i`, `accept` [words of its label] (a quest offer), `journal`/`j`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
+ * `scan`, `inventory`/`i`, `accept` [words of its label] (a quest offer), `talk` <words>,
+ * `choose` <choice id> and `bye` (the pending choice: choose an option or close it), `journal`/`j`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
  * omitted], `brief` (brief mode on or off), `quit`/`q`. Only the
  * six compass words become a move: any other word after `go` is a message, never a Command, so
  * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand
@@ -86,6 +91,7 @@ export function parse(text: string): Parsed {
     return normalize(rest).length ? { door, words: rest } : `${capital(door)} what?`;
   }
   if (words[0] === 'accept') return { accept: rest.toLowerCase() };
+  if (words[0] === 'choose' && words.length === 2) return { choose: words[1] };
   if (LOOK.includes(words[0])) {
     if (normalize(rest).length) return { lookup: rest };
     return words[0] === 'examine' || words[0] === 'x' ? 'Examine what?' : WORDS.look;
@@ -175,6 +181,17 @@ export function barrierAt(cartridge: Cartridge, world: World, direction: string)
 export function inventory(cartridge: Cartridge, world: World): string {
   const items = gameView(world).inventory.map((e) => `  ${say(cartridge, e.name)}\n`);
   return items.length ? `You are carrying:\n${items.join('')}` : 'You are carrying nothing.\n';
+}
+
+/** The pending choice (GameView choice): its prompt and each option, with why it is unavailable. */
+export function choice(cartridge: Cartridge, world: World): string {
+  const c = gameView(world).choice;
+  if (!c) return 'You have nothing to choose.\n';
+  const options = c.choices.map(
+    (o) =>
+      `  ${o.choice_id}: ${say(cartridge, o.label)}${o.available ? '' : ` (${o.reason.code})`}\n`,
+  );
+  return `${say(cartridge, c.prompt.key)}\n${options.join('')}(choose <option>, or bye)\n`;
 }
 
 /** The journal (GameView journal): each quest's title and lifecycle state. */
