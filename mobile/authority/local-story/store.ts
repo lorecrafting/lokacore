@@ -264,7 +264,7 @@ export function transaction(db: Db, writes: () => void): boolean {
 }
 
 /** Tries ROLLBACK; true only when the connection answers that no transaction is open after it. */
-function rollback(db: Db): boolean {
+export function rollback(db: Db): boolean {
   try {
     db.execSync('ROLLBACK');
   } catch {}

@@ -4,7 +4,7 @@
 // failure never reaches the game.
 import { encode, hash } from '../../../kernel/ts/src/canonical.ts';
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
-import { transaction, type Db } from './store.ts';
+import { rollback, transaction, type Db } from './store.ts';
 
 /** The run's ids (ADR-075 RunIds), from the host: kernel_version names the build's commit. */
 export type RunIds = {
@@ -62,6 +62,8 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
       db.runSync(TRACE, 0, null, null, record('trace.run', ids, data));
     });
   try {
+    // A transaction a failed ROLLBACK left open holds uncommitted rows: never read them as written.
+    if (db.isInTransactionSync() && !rollback(db)) return false;
     type Head = { record: string };
     const last = db.getFirstSync<Head>(
       'SELECT record FROM trace WHERE ordinal = 0 ORDER BY rowid DESC LIMIT 1',
