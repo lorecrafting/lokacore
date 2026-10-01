@@ -19,7 +19,8 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * its location, the calendar's start time (0 without one), each NPC's first job pending at its
  * schedule's first listed hour strictly after that time (behavior.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
- * and no fact set.
+ * and no fact set. A world that starts after 0 stores the body's resources at their start values
+ * at that time, since an unset resource regenerates from time 0 (compose.ts current).
  */
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
@@ -37,13 +38,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   containers[body] = roomIds[refString(cartridge.entry)];
   const clock = cartridge.calendar?.start ?? 0;
   const jobs = firstJobs(cartridge, clock, mint);
-  const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
-  const factDefaults = Object.fromEntries(
-    Object.values(cartridge.facts).map((f) => [
-      key({ cartridge_id, cartridge_version, kind: 'fact', key: f.key }),
-      f.value_type.default,
-    ]),
-  );
+  const resources = clock ? started(cartridge, body, clock) : {};
   return {
     cartridge,
     context,
@@ -55,10 +50,10 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entities,
     entityIds,
     capacities,
-    factDefaults,
+    factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
     resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
-    state: { clock, containers, rng: seed, ...(Object.keys(jobs).length && { jobs }) },
+    state: { clock, containers, rng: seed, ...written({ jobs, resources }) },
   };
 }
 
@@ -107,3 +102,19 @@ function place(
     ),
   };
 }
+
+// The body's resources stored at their start values at `clock` (resource.schema.json ResourceSpec
+// start: a new body's value), by canonical resource target text.
+function started(cartridge: Cartridge, body: EntityId, clock: number) {
+  const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
+  return Object.fromEntries(
+    Object.values(cartridge.resources ?? {}).map((s) => {
+      const resource = { cartridge_id, cartridge_version, kind: 'resource', key: s.key };
+      return [key({ kind: 'resource', resource, entity_id: body }), { value: s.start, at: clock }];
+    }),
+  );
+}
+
+// The sections that have rows: a world that writes none keeps its earlier state hash.
+const written = (sections: Record<string, object>) =>
+  Object.fromEntries(Object.entries(sections).filter(([, rows]) => Object.keys(rows).length));

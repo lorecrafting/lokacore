@@ -14,6 +14,7 @@ import {
   type CommandId,
   type DecisionResult,
   type DeltaOp,
+  type DomainEvent,
   type EntityId,
   type ErrorCode,
   type JobId,
@@ -124,7 +125,7 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (refused) return reject(refused);
   const mint = allocator(world, command);
   try {
-    const decided = drain(world, deliver(world, admit(owner, rule(world, command, mint))));
+    const decided = drain(world, command, deliver(world, admit(owner, rule(world, command, mint))));
     return adopt(world, decided, command as Actor, mint);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
@@ -149,8 +150,14 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
     return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
   const applied = apply(world, decision.delta.ops);
   if ('fault' in applied) return { decision: applied.fault, world };
-  const events = factChanged(world, command, mint, assigns, decision.events);
-  const out = events === decision.events ? decision : { ...decision, events };
+  // The command's own events, its fact_changed placed among them, then its jobs' (drain), whose
+  // cause is their run_job, each at the next position.
+  const own = decision.events.filter((e) => (e.causation_id as string) === command.id);
+  const ran = decision.events.filter((e) => (e.causation_id as string) !== command.id);
+  const placed = factChanged(world, command, mint, assigns, own);
+  const last = Math.max(0, ...placed.map((e) => e.position));
+  const all = [...placed, ...ran.map((e, i) => ({ ...e, position: last + i + 1 }))];
+  const out = ran.length || placed !== own ? { ...decision, events: all } : decision;
   if (utf8(encode(out as never)).length > LIMITS.output_bytes!)
     return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
   const state = { ...applied.state, rng: decision.rng } as World['state'];
@@ -189,18 +196,23 @@ function apply(world: World, ops: readonly DeltaOp[]): { state: State } | { faul
  * time.advance (a wait, or a recipe's duration): the pending jobs due at or before its target,
  * snapshotted from the committed state and run in (due_time, job_id) order (job ids compared as
  * UTF-8 bytes, never in row order), each as its run_job (rules/schedule.ts) with the job's
- * CommandId (id_source.ts jobCommandId) against the proposal so far, its ops in
- * writer group i + 1 for the i-th job (the decision's own are group 0). adopt() composes the
+ * CommandId (id_source.ts jobCommandId) against the proposal so far, its ops in writer group
+ * i + 1 for the i-th job (the decision's own are group 0; quest.ts deliver also numbers its
+ * groups from 1, a collision no decision reaches yet: only take earns a delivery, and take has
+ * no duration) and its events, correlated to the command, placed after the command's own
+ * (adopt). adopt() composes the
  * whole advance once, so final invariants, the strictly-later-than-target rule for new jobs
  * (nonfuture_job), the job budgets (budget_exceeded) and conflicts between groups apply to it as
  * one proposal, and a fault discards all of it, time included. A run_job that is not accepted is
  * the advance's result. Admission never meets an already-due job: every advance drains its own,
  * and each new job is later than the advance's target, so 04 §5.2 step 2 has nothing to drain.
- * ponytail: no re-read of each entry's lifecycle before it runs (04 §5.4): nothing in schedule@1
- * cancels, reschedules or completes another job, so the snapshot cannot go stale; it joins with
- * the first operation that can (a cancel op, or reaction@1).
+ * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
+ * (rules/schedule.ts), and a stale entry it refuses rejects the whole advance instead of being
+ * skipped as ineligible. Nothing in schedule@1 cancels, reschedules or completes another job, so
+ * no entry goes stale yet; the first operation that can (a cancel op, or reaction@1) turns that
+ * refusal into a skip and adds the generation to the comparison.
  */
-function drain(world: World, decided: Admitted): Admitted {
+function drain(world: World, command: Pick<Command, 'id'>, decided: Admitted): Admitted {
   if (decided.kind !== 'accepted') return decided;
   const advance = decided.delta.ops.find((o) => o.op === 'time.advance');
   if (!advance) return decided;
@@ -209,6 +221,7 @@ function drain(world: World, decided: Admitted): Admitted {
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
   if (!due.length) return decided;
   const ops = [...decided.delta.ops];
+  const events = [...decided.events];
   let proposal = apply(world, ops);
   for (const [i, [job_id, { due_time }]] of due.entries()) {
     if ('fault' in proposal) return proposal.fault as Admitted;
@@ -223,10 +236,12 @@ function drain(world: World, decided: Admitted): Admitted {
     // Reaction@1 (slice R) drains this job's events to quiescence here, before the next job.
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: i + 1 }));
     ops.push(...own);
+    events.push(...ran.events.map((e) => ({ ...e, correlation_id: command.id as string as Corr })));
     proposal = apply(at, own);
   }
-  return { ...decided, delta: { ops } };
+  return { ...decided, delta: { ops }, events };
 }
+type Corr = DomainEvent['correlation_id'];
 
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 

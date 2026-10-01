@@ -369,7 +369,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Advance logical time to `until` (schedule@1): accepted only when `until` is later than the world's time (else invalid_state, and nothing changes); the decision is one time.advance and no event. Due jobs join the advance with the schedule slice (04 §5.4).",
+          "description": "Advance logical time to `until` (schedule@1): accepted only when `until` is later than the world's time (else invalid_state, and nothing changes); the decision is one time.advance and no event of its own; the host runs the jobs due by `until` in the same decision, each a run_job in its own writer group with its events after (04 §5.4).",
           "type": "object",
           "properties": {
             "type": {
@@ -390,7 +390,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Execute a due scheduled job (authority-internal).",
+          "description": "Execute a due scheduled job (authority-internal, 04 §1): built only by the host's drain of an explicit advance, never from an invocation; its id is the job CommandId (numeric-profile.md).",
           "type": "object",
           "properties": {
             "type": {

@@ -12129,5 +12129,17 @@
         "code": "below_minimum"
       }
     ]
+  },
+  {
+    "contract": "Calendar",
+    "value": {
+      "start": 86400
+    },
+    "errors": [
+      {
+        "path": "/start",
+        "code": "above_maximum"
+      }
+    ]
   }
 ]

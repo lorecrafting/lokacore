@@ -249,8 +249,9 @@ defmodule Loka.Content.Checks do
       Entities.conditions(defs) ++ Recipes.conditions(defs) ++ Quests.conditions(defs)
   end
 
+  # run_job is authority-internal (04 §1): no action builds it.
   defp command(rel, name, required) do
-    if name in commands(),
+    if name in commands() and name != "run_job",
       do: owned(at(rel, ["command"]), name, required),
       else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end

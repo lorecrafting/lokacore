@@ -68,6 +68,7 @@ export function deliver<D extends DecisionResult>(world: World, decision: D): D 
     .filter(([, q]) => q.state === 'active' && met(q))
     .sort((a, b) => cmp(order(a), order(b)));
   if (!done.length) return decision;
+  // Groups from 1, as world.ts drain numbers its jobs' (see there).
   const ops = done.map(([instance_id], n) => ({
     op: 'quest.transition' as const,
     writer_group: n + 1,

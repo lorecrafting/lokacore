@@ -7,11 +7,14 @@
 // invocation. It runs one pending job of an NPC's daily schedule (behavior.ts), reading the
 // time from the job's due time: the NPC moves to the room listed for that hour unless it is
 // there already, the job completes, and the next job is scheduled at the schedule's next listed
-// hour, its id this run_job's first IdSource ordinal. No event (schedule@1 owns none). A job that
-// is not pending is invalid_state.
+// hour, its id this run_job's first IdSource ordinal; a move reports the NPC's
+// entity_entered_room (behavior.ts entered), its id the second. A job that is not pending is
+// invalid_state.
+// ponytail: every job is an NPC daily-schedule job (behavior.ts); a second job kind dispatches on
+// the job's DefinitionRef kind here.
 import { accepted, rejected, refString, type Rule } from '../decision.ts';
 import type { DeltaOp } from '../contracts.gen.ts';
-import { hourOf, jobId, next, scheduleOf } from '../behavior.ts';
+import { entered, hourOf, jobId, next, scheduleOf } from '../behavior.ts';
 
 export const decide: Rule<'schedule'> = (world, command, mint) => {
   const { payload } = command;
@@ -26,15 +29,16 @@ export const decide: Rule<'schedule'> = (world, command, mint) => {
     const move: DeltaOp[] =
       from === room ? [] : [{ ...transfer, source_id: from, destination_id: room }];
     const due_time = next(schedule, row.due_time);
+    const job_id = jobId(mint);
     return accepted(
       world,
       'job_ran',
       [
         ...move,
         { op: 'job.complete', writer_group: 0, job_id: payload.job_id },
-        { op: 'job.schedule', writer_group: 0, job_id: jobId(mint), job: row.job, due_time },
+        { op: 'job.schedule', writer_group: 0, job_id, job: row.job, due_time },
       ],
-      [],
+      move.length ? [entered(world, command, mint, npc, room, row.due_time)] : [],
     );
   }
   const from = world.state.clock;

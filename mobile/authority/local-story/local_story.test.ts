@@ -520,11 +520,7 @@ test('jobs survive a restart: waiting to 19:00 after it moves Bram as without it
   const b = processOn(path, ferry);
   assert.equal(
     b.one(`SELECT value FROM state_row WHERE section = 'jobs' AND key = '${J0}'`),
-    encode({
-      job: { cartridge_id: 'ashmere_ferry', cartridge_version: '0.0.1', kind: 'npc', key: 'bram' },
-      due_time: 68400,
-      status: 'pending',
-    }),
+    '{"due_time":68400,"job":{"cartridge_id":"ashmere_ferry","cartridge_version":"0.0.1","key":"bram","kind":"npc"},"status":"pending"}',
   );
   b.story.invoke(waitUntil(2, 19 * 3600));
   const c = processOn(other, ferry);

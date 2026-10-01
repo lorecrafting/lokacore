@@ -138,8 +138,9 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// The lock equals requires.capabilities (mismatched), every command is owned, and every command,
-// policy op, definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar,
+// The lock equals requires.capabilities (mismatched), every action's command is owned and none is
+// run_job (authority-internal, 04 §1; checked as an unowned name), and every command, policy op,
+// definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar,
 // recipe, resource, barrier), recipe check (by the events it produces, check@1's), recipe step
 // of any outcome (by the event it produces: fact_changed for fact.assign, custom_event for
 // event.emit; a resource.adjust, like a cost, through the resource it names), quest (by its
@@ -157,7 +158,11 @@ function lockStage(c: Obj): Diagnostic[] {
       out.push(diag('UNDECLARED_CAPABILITY', path, { capability: owner }, [owners[name]]));
   };
   for (const [ref, a] of Object.entries(c.actions as Obj))
-    use('command', a.command, `.cartridge.actions${step(ref)}.command`);
+    use(
+      'command',
+      a.command === 'run_job' ? '' : a.command,
+      `.cartridge.actions${step(ref)}.command`,
+    );
   for (const [n, at] of nodes(c)) use('policy', n.op, `${at}.op`);
   for (const [kind, , at] of parts(c)) {
     use('definition', kind, at);

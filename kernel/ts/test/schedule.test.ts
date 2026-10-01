@@ -32,6 +32,9 @@ const J0 = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
 // J1: ordinal 0 under J0's run_job at 19:00, whose CommandId is
 // ["loka-job-command-v1", J0, 68400] (63bed74b-a081-88a7-9adc-a76f5846057f).
 const J1 = '5786a91b-185a-8097-aff4-19944692e75c';
+const RUN_J0 = '63bed74b-a081-88a7-9adc-a76f5846057f';
+// Ordinal 1 under that run_job: Bram's entity_entered_room.
+const ARRIVED = 'de2dcdb6-b269-8159-b084-258a27e0ec96';
 const H = (h: number) => h * 3600;
 
 const load = (f: (c: any) => void) => {
@@ -87,7 +90,9 @@ test('a fresh world starts at 06:00 with Bram at the landing and his job due at 
 
 // Breaks: the drain skipped, a job run under the client CommandId tag or the wait's own, the
 // next occurrence computed from the wait's target instead of the job's due time, the job's ops
-// left in the root's writer group, or Bram moved before his hour.
+// left in the root's writer group, Bram moved before his hour, or his arrival not reported (a
+// reaction on entity_entered_room would never see him), reported at the wait's time instead of
+// his, or not correlated to the wait.
 test('wait to 19:00 moves Bram to the green through his job; 18:59 does not', () => {
   const w = world();
   const early = wait(w, H(19) - 60);
@@ -108,6 +113,18 @@ test('wait to 19:00 moves Bram to the green through his job; 18:59 does not', ()
     },
     { op: 'job.complete', writer_group: 1, job_id: J0 },
     { op: 'job.schedule', writer_group: 1, job_id: J1, job: BRAM, due_time: H(24 + 6) },
+  ]);
+  assert.deepEqual(decision.kind === 'accepted' && decision.events, [
+    {
+      id: ARRIVED,
+      world_context_id: CONTEXT,
+      scope: { kind: 'instance', world_context_id: CONTEXT },
+      logical_time: H(19),
+      position: 1,
+      causation_id: RUN_J0,
+      correlation_id: CMD,
+      payload: { type: 'entity_entered_room', entity_id: BRAM_ID, room_id: GREEN },
+    },
   ]);
   assert.equal(after.state.clock, H(19) + 1800);
   assert.equal(after.state.containers[BRAM_ID], GREEN);
@@ -191,8 +208,25 @@ test("a recipe's duration runs the job due inside it in the player's proposal", 
       ['job.schedule', 1],
     ],
   );
+  // The recipe's own events first (custom_event, action_completed), then Bram's arrival.
+  assert.deepEqual(
+    decision.kind === 'accepted' && decision.events.map((e) => [e.position, e.payload.type]),
+    [
+      [1, 'custom_event'],
+      [2, 'action_completed'],
+      [3, 'entity_entered_room'],
+    ],
+  );
   assert.equal(after.state.clock, H(19) + 1800);
   assert.equal(after.state.containers[BRAM_ID], GREEN);
+});
+
+// Breaks (resource.schema.json ResourceSpec start, a new body's value): a body that regenerates
+// from time 0 to the calendar's start, so a 06:00 world starting with mv 0 can still move.
+test('a body starts with its resources at their start values at the calendar start', () => {
+  const w = world((c) => (c.resources[`${F}:resource/mv`].start = 0));
+  const out = step(w, cmd(w, { type: 'move', direction: 'north' }));
+  assert.deepEqual(out.decision, { kind: 'rejected', error: { code: 'insufficient_resource' } });
 });
 
 // Breaks: an advance over the job budgets committing part of itself (time or jobs) instead of
@@ -242,7 +276,9 @@ const unlock = (c: any, cap: string) => {
 // Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): a
 // schedule naming a room the cartridge lacks (run_job would move Bram nowhere), a schedule or
 // calendar whose owner (behavior@1, calendar@1) is not locked, or a schedule without schedule@1
-// (the drain would run its jobs under a capability the cartridge never declared).
+// (the drain would run its jobs under a capability the cartridge never declared), a calendar
+// start past day 1 (its first job's due time could leave the safe integers and the first save
+// throw), or an action built on run_job (authority-internal, 04 §1: a dead action).
 test('the loader checks schedule rooms and the schedule and calendar owners', () => {
   const bram = `.cartridge.npcs["${F}:npc/bram"]`;
   fails(
@@ -264,6 +300,24 @@ test('the loader checks schedule rooms and the schedule and calendar owners', ()
     `${bram}.daily_schedule`,
     { capability: 'schedule' },
     ['schedule@1'],
+  );
+  fails((c) => (c.calendar.start = 86400), 'SCHEMA_VIOLATION', '.cartridge.calendar.start', {
+    error: 'above_maximum',
+  });
+  fails(
+    (c) =>
+      (c.actions[`${F}:action/hurry`] = {
+        key: 'hurry',
+        label: 'actions.coil_rope',
+        accessibility: 'actions.coil_rope',
+        target: { kind: 'none' },
+        command: 'run_job',
+        priority: 0,
+        input: [],
+        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      }),
+    'UNKNOWN_COMMAND',
+    `.cartridge.actions["${F}:action/hurry"].command`,
   );
   fails(
     (c) => unlock(c, 'calendar'),

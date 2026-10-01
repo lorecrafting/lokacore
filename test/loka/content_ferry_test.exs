@@ -98,7 +98,8 @@ defmodule Loka.ContentFerryTest do
               ]}
   end
 
-  # Breaks: an hour outside 0-23 (or with a leading zero) or a calendar without start compiling.
+  # Breaks: an hour outside 0-23 (or with a leading zero), a calendar without start or a start
+  # past day 1 (its first job's due time could leave the safe integers) compiling.
   test "schedule hours and the calendar are schema-checked", %{tmp_dir: dir} do
     assert compile(Path.join(dir, "a"), schedule(%{"06" => "ferry_landing"})) ==
              {:error,
@@ -107,6 +108,12 @@ defmodule Loka.ContentFerryTest do
                   "error" => "pattern_mismatch"
                 })
               ]}
+
+    late = Map.put(src("cartridge.json"), "calendar", %{"start" => 86_400})
+
+    assert compile(Path.join(dir, "c"), %{"cartridge.json" => late}) ==
+             {:error,
+              [d("SCHEMA_VIOLATION", "cartridge.calendar.start", %{"error" => "above_maximum"})]}
 
     m = Map.put(src("cartridge.json"), "calendar", %{})
 
@@ -117,5 +124,21 @@ defmodule Loka.ContentFerryTest do
                   "error" => "missing_property"
                 })
               ]}
+  end
+
+  # Breaks: an action built on run_job compiling (authority-internal, 04 §1: a dead action).
+  test "an action's command is never run_job", %{tmp_dir: dir} do
+    action = %{
+      "label" => "actions.coil_rope",
+      "accessibility" => "actions.coil_rope",
+      "target" => %{"kind" => "none"},
+      "command" => "run_job",
+      "priority" => 0,
+      "input" => [],
+      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+    }
+
+    assert compile(dir, %{"actions/hurry.json" => action}) ==
+             {:error, [d("UNKNOWN_COMMAND", "actions/hurry.command", %{})]}
   end
 end
