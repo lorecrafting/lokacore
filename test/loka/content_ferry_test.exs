@@ -11,7 +11,7 @@ defmodule Loka.ContentFerryTest do
   @src "cartridges/ashmere_ferry"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
-  # ashmere_ferry's source with `files` merged over it.
+  # ashmere_ferry's source with `files` merged over it (a nil file removed).
   defp compile(dir, files) do
     base =
       for rel <- Path.wildcard("#{@src}/**/*.json"),
@@ -19,7 +19,7 @@ defmodule Loka.ContentFerryTest do
           into: %{},
           do: {Path.relative_to(rel, @src), JSON.decode!(File.read!(rel))}
 
-    for {rel, v} <- Map.merge(base, files) do
+    for {rel, v} <- Map.merge(base, files), v != nil do
       File.mkdir_p!(Path.join(dir, Path.dirname(rel)))
       File.write!(Path.join(dir, rel), JSON.encode!(v))
     end
@@ -169,5 +169,103 @@ defmodule Loka.ContentFerryTest do
 
     assert compile(dir, %{"actions/hurry.json" => action}) ==
              {:error, [d("UNKNOWN_COMMAND", "actions/hurry.command", %{})]}
+  end
+
+  # Bram's dialogue source with `f` applied, under `rel` (dialogues/bram.json by default).
+  defp dialogue(f, rel \\ "dialogues/bram.json"),
+    do: %{rel => f.(src("dialogues/bram.json"))}
+
+  # Breaks: a room contribution naming a dialogue's talk unresolved (its key is an ActionSet
+  # identity; kernel/ts/test/dialogue.test.ts loads the same).
+  test "a room contribution may name a dialogue's talk", %{tmp_dir: dir} do
+    room = src("rooms/ferry_landing.json")
+
+    files = %{
+      "rooms/ferry_landing.json" =>
+        Map.put(room, "actions", [%{"op" => "subtract", "actions" => ["bram"]}])
+    }
+
+    assert {:ok, _, []} = compile(dir, files)
+  end
+
+  # Breaks: a dialogue's short speaker, quest, role or fact left short (Checks.expand; the loader
+  # would reject the artifact).
+  test "a full-reference dialogue compiles to the same artifact", %{tmp_dir: dir} do
+    full = fn kind, key -> Map.merge(ref(key), %{"kind" => kind}) end
+
+    files =
+      dialogue(fn d ->
+        d
+        |> Map.merge(%{"npc" => full.("npc", "bram"), "quest" => full.("quest", "lantern")})
+        |> put_in(~w(roles bram npc), full.("npc", "bram"))
+        |> put_in(~w(roles lantern item), full.("item", "lantern"))
+        |> update_in(~w(choices carry sequence), fn [s] ->
+          [%{s | "fact" => full.("fact", "search_plan")}]
+        end)
+      end)
+
+    assert compile(dir, files) == {:ok, @expected, []}
+  end
+
+  # Breaks: the compiler admitting what the loader rejects (kernel/ts/test/dialogue.test.ts): an
+  # unresolved speaker, role, quest or policy quest; a speaker that is no npc role; a hand_over
+  # through a role of the wrong kind; a missing text; an undeclared fact or a wrong value; a role
+  # named actor; no choice; a talk key another action's; dialogue@1 not required; two dialogues of
+  # one speaker.
+  test "the compiler checks dialogue references, roles, texts, facts, keys and the lock", %{
+    tmp_dir: dir
+  } do
+    at = "dialogues/bram"
+    unresolved = &d("UNRESOLVED_REFERENCE", at <> &1, %{"target" => &2})
+    missing = &"ashmere_ferry@0.0.1:#{&1}/missing"
+    m = src("cartridge.json")
+
+    cases = [
+      {dialogue(&Map.put(&1, "npc", "missing")), unresolved.(".npc", missing.("npc"))},
+      {dialogue(&put_in(&1, ~w(roles lantern item), "missing")),
+       unresolved.(".roles.lantern.item", missing.("item"))},
+      {dialogue(&Map.put(&1, "quest", "missing")), unresolved.(".quest", missing.("quest"))},
+      {dialogue(&put_in(&1, ~w(policy root quest), "missing")),
+       unresolved.(".policy.root.quest", missing.("quest"))},
+      {dialogue(fn d ->
+         d
+         |> put_in(~w(roles bram), %{"role" => "item", "item" => "lantern"})
+         |> update_in(~w(choices leave), &Map.delete(&1, "hand_over"))
+       end), unresolved.(".npc", "ashmere_ferry@0.0.1:npc/bram")},
+      {dialogue(&put_in(&1, ~w(choices leave hand_over item), "bram")),
+       unresolved.(".choices.leave.hand_over.item", "bram")},
+      {dialogue(&put_in(&1, ~w(choices leave hand_over to), "lantern")),
+       unresolved.(".choices.leave.hand_over.to", "lantern")},
+      {dialogue(&Map.put(&1, "prompt", "dialogue.none")),
+       unresolved.(".prompt", "dialogue.none")},
+      {dialogue(&put_in(&1, ~w(choices carry narration), "dialogue.none")),
+       unresolved.(".choices.carry.narration", "dialogue.none")},
+      {dialogue(
+         &update_in(&1, ~w(choices carry sequence), fn [s] -> [%{s | "fact" => "missing"}] end)
+       ), unresolved.(".choices.carry.sequence[0].fact", missing.("fact"))},
+      {dialogue(
+         &update_in(&1, ~w(choices carry sequence), fn [s] -> [%{s | "value" => "lost"}] end)
+       ), d("FACT_TYPE_MISMATCH", at <> ".choices.carry.sequence[0].value", %{})},
+      {dialogue(&put_in(&1, ~w(roles actor), %{"role" => "npc", "npc" => "bram"})),
+       d("DUPLICATE_DEFINITION", at <> ".roles.actor", %{})},
+      {dialogue(&Map.put(&1, "choices", %{})),
+       d("SCHEMA_VIOLATION", at <> ".choices", %{"error" => "too_few_items"})},
+      {Map.merge(dialogue(& &1, "dialogues/lantern.json"), %{"dialogues/bram.json" => nil}),
+       d("DUPLICATE_DEFINITION", "dialogues/lantern", %{})},
+      {%{
+         "cartridge.json" => update_in(m, ~w(requires capabilities), &Map.delete(&1, "dialogue"))
+       }, d("UNDECLARED_CAPABILITY", at, %{"capability" => "dialogue"}, ["dialogue@1"])}
+    ]
+
+    for {{files, diag}, n} <- Enum.with_index(cases) do
+      assert compile(Path.join(dir, "#{n}"), files) == {:error, [diag]}, inspect(diag)
+    end
+
+    assert compile(Path.join(dir, "two"), dialogue(& &1, "dialogues/bram_two.json")) ==
+             {:error,
+              [
+                d("DUPLICATE_DEFINITION", "dialogues/bram.npc", %{}),
+                d("DUPLICATE_DEFINITION", "dialogues/bram_two.npc", %{})
+              ]}
   end
 end

@@ -65,7 +65,7 @@ const take = (w: World, key: string) => ({
 // Runs payloads in order, each accepted; returns the last world.
 const run = (w: World, ...ps: object[]) =>
   ps.reduce((at: World, p) => {
-    const s = step(at, cmd(at, p));
+    const s = step(at, cmd(at, p), 0);
     assert.equal(
       s.decision.kind,
       'accepted',
@@ -75,7 +75,7 @@ const run = (w: World, ...ps: object[]) =>
   }, w);
 // A rejection with `code` that leaves the world as it was (04 §5.0).
 const refused = (w: World, p: object, code: string) => {
-  const s = step(w, cmd(w, p));
+  const s = step(w, cmd(w, p), 0);
   assert.deepEqual(s.decision, { kind: 'rejected', error: { code } }, JSON.stringify(p));
   assert.equal(s.world, w, JSON.stringify(p));
 };
@@ -112,7 +112,7 @@ test('only legal transitions are admitted; an illegal one changes nothing', () =
 // state.
 test('open proposes one barrier.transition and barrier_changed', () => {
   const w = world();
-  const d = step(w, cmd(w, door('open', 'north'))).decision;
+  const d = step(w, cmd(w, door('open', 'north')), 0).decision;
   assert.equal(d.kind, 'accepted');
   if (d.kind !== 'accepted') return;
   assert.equal(d.outcome, 'opened');

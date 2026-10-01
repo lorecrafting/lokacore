@@ -33,10 +33,10 @@ import * as action_recipe from './rules/action_recipe.ts';
 import * as barrier from './rules/barrier.ts';
 import * as containment from './rules/containment.ts';
 import * as description_variant from './rules/description_variant.ts';
+import * as dialogue from './rules/dialogue.ts';
 import * as movement from './rules/movement.ts';
 import * as quest from './rules/quest.ts';
 import * as schedule from './rules/schedule.ts';
-import { deliver } from './quest.ts';
 import { admit, adopt, ownerOf, type Actor, type Stepped } from './proposal.ts';
 import { newWorld, NIL } from './fresh.ts';
 
@@ -49,6 +49,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   schedule: schedule.decide,
   barrier: barrier.decide,
   quest: quest.decide,
+  dialogue: dialogue.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
@@ -76,16 +77,17 @@ export const INSTALLED: Installed = {
 };
 
 /**
- * Decides and, when accepted, composes and commits one command (04 §5): routes it to the rule
+ * Decides and, when accepted, composes and adopts one command as the commit at `revision` would
+ * store it (04 §5; proposal.ts adopt): routes it to the rule
  * of the capability that owns its type (capability_registry.json), rejecting it with
  * unsupported_capability when that capability is not in the lock or has no rule here.
  */
-export function step(world: World, command: Command): Stepped {
+export function step(world: World, command: Command, revision: number): Stepped {
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
     return { decision: rejected('unsupported_capability'), world };
-  return decideWith(world, command, owner, rule);
+  return decideWith(world, command, owner, rule, revision);
 }
 
 type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
@@ -96,10 +98,16 @@ type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
  * command for another world (not_found) or another actor (not_found) is rejected, and so is one
  * the actor's ActionSet does not offer or offers unavailable (actions.ts refusal; 04 §19, ACT-09).
  * A KernelError thrown while deciding is an evaluator_error fault with the world unchanged. After it: admit() checks the
- * result, quest delivery adds the objective transitions its events earn (quest.ts deliver; no
- * event, so it stays admitted), then the delta composes or faults before the changes are adopted.
+ * result, then its proposal (proposal.ts, quest deliveries included) composes or faults before the
+ * changes are adopted.
  */
-function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
+function decideWith(
+  world: World,
+  command: Command,
+  owner: string,
+  rule: AnyRule,
+  revision: number,
+): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
   if (command.id === NIL) return reject('permission_denied');
   if (command.world_context_id !== world.context) return reject('not_found');
@@ -109,8 +117,7 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (refused) return reject(refused);
   const mint = allocator(world, command);
   try {
-    const decided = deliver(world, admit(owner, rule(world, command, mint)));
-    return adopt(world, decided, command as Actor, mint);
+    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint, revision);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
     if (!(e instanceof KernelError)) throw e;

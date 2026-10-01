@@ -143,7 +143,7 @@ export function simulate(seed: number, kernel = KERNEL): Outcome {
   for (let n = 0; n < length; n++) {
     const cid = id(SIM, String(seed), n + 2) as Command['id'];
     s.commands.push(generate(world, g, s.commands.at(-1), cid));
-    const r = checked(kernel, world, s.commands[n]!);
+    const r = checked(kernel, world, s.commands[n]!, n + 1);
     if (r.failure) return { ...s, digest: '', codes, failure: { ...r.failure, at: n } };
     digest.update(r.bytes);
     codes.push(r.code);
@@ -156,7 +156,7 @@ export function simulate(seed: number, kernel = KERNEL): Outcome {
 function replay(start: World, commands: readonly Command[], kernel = KERNEL) {
   let world = start;
   for (const [at, c] of commands.entries()) {
-    const r = checked(kernel, world, c);
+    const r = checked(kernel, world, c, at + 1);
     if (r.failure) return { ...r.failure, at };
     world = r.world;
   }
@@ -178,14 +178,15 @@ export function shrink(s: Sequence, failed: string, kernel = KERNEL): Command[] 
 
 type Checked = { world: World; bytes: string; code: string; failure?: Omit<Failure, 'at'> };
 
-// One step through `kernel`: a throw or a broken invariant is a failure, never a crash.
-function checked(kernel: Kernel, before: World, command: Command): Checked {
+// One step through `kernel`, as the commit at `revision`: a throw or a broken invariant is a
+// failure, never a crash.
+function checked(kernel: Kernel, before: World, command: Command, revision: number): Checked {
   try {
     const view = kernel.gameView(before);
-    const { decision, world } = kernel.step(before, command);
+    const { decision, world } = kernel.step(before, command, revision);
     const bad =
       violated(before, command, view, decision, world) ??
-      (decision.kind === 'accepted' && !adopted(before, decision, world)
+      (decision.kind === 'accepted' && !adopted(before, decision, world, revision)
         ? 'adopt_mismatch'
         : undefined);
     const code = decision.kind === 'accepted' ? 'accepted' : kindCode(decision);
@@ -250,7 +251,7 @@ function violated(
 // An accepted step's State is the State before with its delta's composed changes and its rng,
 // and nothing else (proposal.ts adopt); a delta that does not compose is never accepted. A simulator
 // failure (adopt_mismatch), not a registered invariant.
-function adopted(before: World, decision: Accepted, after: World): boolean {
+function adopted(before: World, decision: Accepted, after: World, revision: number): boolean {
   const result = compose(base(before) as never, decision.delta);
   if ('fault' in result) return false;
   const want: Record<string, unknown> = { ...before.state, rng: decision.rng };
@@ -259,6 +260,12 @@ function adopted(before: World, decision: Accepted, after: World): boolean {
     const at = row(target);
     if (at) want[at[0]] = { ...(want[at[0]] as object), [at[1]]: value };
   }
+  // A continuation opened here carries the revision its commit takes (proposal.ts adopt).
+  for (const o of decision.delta.ops)
+    if (o.op === 'choice.open') {
+      const choices = want.choices as Record<string, object>;
+      choices[o.continuation_id] = { ...choices[o.continuation_id], opened_revision: revision };
+    }
   return same(want, after.state);
 }
 type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;

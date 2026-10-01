@@ -18,7 +18,10 @@
       "policy": 1,
       "action_recipe": 1,
       "behavior": 1,
-      "calendar": 1
+      "calendar": 1,
+      "fact": 1,
+      "quest": 1,
+      "dialogue": 1
     },
     "client_features": []
   },

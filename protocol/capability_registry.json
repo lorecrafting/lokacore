@@ -201,6 +201,9 @@
     "events": [
       "choice_opened",
       "choice_resolved"
+    ],
+    "definitions": [
+      "dialogue"
     ]
   },
   {

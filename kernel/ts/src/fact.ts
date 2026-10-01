@@ -31,6 +31,40 @@ export function value(world: World, actor: CharacterId, fact: DefinitionRef): Fa
   return world.state.facts?.[key({ kind: 'fact', fact, scope })] ?? world.factDefaults[key(fact)];
 }
 
+/** A sequence run so far: its ops, last causal position and facts as set so far (by target text). */
+export type Assigned = {
+  readonly ops: readonly DeltaOp[];
+  readonly position: number;
+  readonly facts: Readonly<Record<string, FactValue>>;
+};
+
+/**
+ * `r` with one authored fact.assign step of `actor` appended (a recipe outcome's or a dialogue
+ * choice's sequence): a delta fact.assign at the fact's scope whose expected value is the fact as
+ * the steps before it left it; one that changes its fact leaves the next causal position free for
+ * the fact_changed the host puts there (proposal.ts).
+ */
+export function assigned<R extends Assigned>(
+  world: World,
+  actor: CharacterId,
+  r: R,
+  s: { readonly fact: DefinitionRef; readonly value: FactValue },
+): R {
+  const scope = scopeOf(world, actor, s.fact);
+  const at = key({ kind: 'fact', fact: s.fact, scope });
+  const expected = Object.hasOwn(r.facts, at) ? r.facts[at]! : value(world, actor, s.fact);
+  const op = {
+    op: 'fact.assign',
+    writer_group: 0,
+    fact: s.fact,
+    scope,
+    expected,
+    value: s.value,
+  } as const;
+  const position = r.position + (same(expected, s.value) ? 0 : 1);
+  return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
+}
+
 /** True when `v` is of FactType `t` (the loader checks authored values with it too). */
 export const typed = (v: FactValue, t: FactType): boolean =>
   t.type === 'bool'

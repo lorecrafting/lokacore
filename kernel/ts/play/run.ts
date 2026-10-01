@@ -29,7 +29,7 @@ export type Run = {
  */
 export function decide(r: Run, command: Command) {
   const t0 = performance.now();
-  const { decision, world } = step(r.world, command);
+  const { decision, world } = step(r.world, command, r.revision + 1);
   const micros = Math.round((performance.now() - t0) * 1000);
   const ids = { ...r.ids, command_id: command.id, revision: r.revision };
   r.world = world;

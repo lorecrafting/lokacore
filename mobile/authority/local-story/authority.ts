@@ -157,7 +157,10 @@ function invoke(s: Story, value: unknown): Reply {
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   const command = resolve(s.world, id);
-  const next = 'kind' in command ? { world: s.world, decision: command } : step(s.world, command);
+  const next =
+    'kind' in command
+      ? { world: s.world, decision: command }
+      : step(s.world, command, s.revision + 1);
   const d = next.decision;
   // A rejection before a Command existed has no trace entry: TraceEntry needs the Command.
   const trace: Trace = (at, ...states) => {

@@ -56,7 +56,7 @@ const world = (f: (c: any) => void = () => {}): World => {
 };
 const cmd = (w: World, payload: object, id = CMD): Command =>
   ({ id, world_context_id: CONTEXT, payload: { actor_id: w.character, ...payload } }) as Command;
-const move = (w: World, direction: string) => step(w, cmd(w, { type: 'move', direction }));
+const move = (w: World, direction: string) => step(w, cmd(w, { type: 'move', direction }), 0);
 const instance = { kind: 'instance', world_context_id: CONTEXT };
 const assign = (fact: string, writer_group: number) => ({
   op: 'fact.assign',
@@ -120,7 +120,7 @@ test("a wait runs Bram's arrival's reactions to quiescence before Maud's job", (
     return newWorld({ ...w.cartridge, reactions }, CONTEXT as World['context'], [1, 2, 3, 4]);
   };
   for (const w of [world(), reversed(world())]) {
-    const s = step(w, cmd(w, { type: 'wait', until: H(20) + 1800 }));
+    const s = step(w, cmd(w, { type: 'wait', until: H(20) + 1800 }), 0);
     assert.ok(s.decision.kind === 'accepted', JSON.stringify(s.decision));
     assert.deepEqual(
       s.decision.delta.ops.map((o) => [o.writer_group, o.op, 'fact' in o ? o.fact.key : '']),
@@ -237,7 +237,7 @@ test('reaction guards past 32768 policy leaves exceed query_steps', () => {
 // ignored or answered with a partial advance (Bram moved, the clock or jobs advanced).
 test("a chain past reaction_depth from Bram's 19:00 arrival discards the whole wait", () => {
   const w = chain(33, 'village_green');
-  const s = step(w, cmd(w, { type: 'wait', until: H(19) + 1800 }));
+  const s = step(w, cmd(w, { type: 'wait', until: H(19) + 1800 }), 0);
   assert.deepEqual(s.decision, { kind: 'fault', code: 'budget_exceeded' });
   assert.equal(s.world, w);
 });
@@ -260,6 +260,7 @@ test('4097 events exceed the events budget; 4096 commit', () => {
       admit('action_recipe', accepted(w, 'x', [], events as never) as never),
       SET,
       allocator(w, SET),
+      0,
     );
     assert.equal(r.decision.kind, kind, `${n}`);
   }

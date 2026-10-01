@@ -1,4 +1,4 @@
-// size: allow 600, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions, narration) shares this harness
+// size: allow 650, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions, narration, choices) shares this harness
 // The local Story authority on Node with real SQLite (node:sqlite) in its default rollback journal
 // (no WAL), as expo-sqlite opens the save on iOS, one connection per simulated process; a restart
 // closes it and opens a new one on the same file, and a kill is a real child process (03 §§14-15;
@@ -499,12 +499,15 @@ test('a save does not open inside a transaction left open', () => {
   assert.throws(() => openStory(db, installed(items), items.host), /transaction is open/);
 });
 
-// ashmere_ferry ids (kernel/ts/test/schedule.test.ts): Bram, the green, his first job (19:00) and
-// the one its run_job schedules (06:00 the next day).
+// ashmere_ferry ids, IdSource and job CommandIds in Python hashlib (numeric profile): Bram
+// (ordinal 5 under the nil CommandId), the green (3), the lantern (6, Early R7/R8 D1), his first
+// job (7, due 19:00) and the one its run_job (["loka-job-command-v1", J0, 68400]) schedules as
+// its ordinal 0 (06:00 the next day).
 const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
 const GREEN = '91fde0fc-dd14-846f-826e-245e45d16ec7';
-const J0 = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
-const J1 = '5786a91b-185a-8097-aff4-19944692e75c';
+const LANTERN = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
+const J0 = '0f5f2329-bcff-82f4-948a-3d22a75fb068';
+const J1 = '035d3ce3-f3f4-8640-90e0-f3ce0502adfb';
 const waitUntil = (n: number, until: number) => ({
   ...invocation(n, 'wait', []),
   input: { until },
@@ -590,4 +593,56 @@ test("a recipe narration's pinned participants survive a restart and replay unch
   assert.deepEqual((first.decision as { narration: unknown }).narration, [
     { key: 'narration.coil_rope.actor', participants: { actor: BODY, bram: BRAM } },
   ]);
+});
+
+// Bram's dialogue through the local authority (Early R7/R8 D1): accept the lantern quest, take
+// the lantern, talk to Bram (revisions 1-3), from invocation ids 1-3.
+const talked = (path: string) => {
+  const p = processOn(path, ferry);
+  p.story.invoke(invocation(1, 'lantern', []));
+  p.story.invoke(invocation(2, 'take', [LANTERN]));
+  const talk = p.story.invoke(invocation(3, 'bram', [BRAM])) as Saved;
+  const op = (talk.decision as { delta: { ops: { continuation_id: string }[] } }).delta.ops[0]!;
+  return { p, talk, continuation_id: op.continuation_id };
+};
+const choosing = (n: number, choice_id: string, continuation_id: string) => ({
+  ...invocation(n, 'choose', []),
+  input: { choice_id, continuation_id },
+});
+
+// Breaks (Decision 1): opened_revision stamped only in memory, or only at adopt after the rows
+// were written, so the reopened save's continuation lacks it and choose faults precondition_failed.
+test('a talk committed, then a restart: the stored choice carries its revision and choose works', () => {
+  const path = save();
+  const { p, talk, continuation_id } = talked(path);
+  assert.deepEqual([outcome(talk).outcome, talk.revision], ['choice_opened', 3]);
+  p.sql.close();
+  const b = processOn(path, ferry);
+  const row = b.one(`SELECT value FROM state_row WHERE section = 'choices'`) as string;
+  assert.equal(JSON.parse(row).opened_revision, 3);
+  const chose = b.story.invoke(choosing(4, 'leave', continuation_id)) as Saved;
+  assert.deepEqual([outcome(chose).outcome, chose.revision], ['leave', 4]);
+});
+
+// Breaks (06 §43, 03 §14; adverse-cases.json moved-bram-keeps-receipt, altered-choice): a retried
+// committed choice deciding again after Bram left (not_present) instead of replaying its receipt,
+// another choice under the same invocation id accepted, or the receipt lost on restart.
+test('a committed choice replays from its receipt after Bram leaves and after a restart', () => {
+  const path = save();
+  const { p, continuation_id } = talked(path);
+  const leave = choosing(4, 'leave', continuation_id);
+  const first = p.story.invoke(leave) as Saved;
+  assert.equal(outcome(first).outcome, 'leave');
+  p.story.invoke(waitUntil(5, 19 * 3600));
+  assert.equal(
+    (p.story.world().state as { containers: Record<string, string> }).containers[BRAM],
+    GREEN,
+  );
+  const again = p.story.invoke(leave) as Saved;
+  assert.deepEqual([again.replay, again.revision], [true, 4]);
+  assert.equal(encode(again.decision), encode(first.decision));
+  assert.deepEqual(p.story.invoke(choosing(4, 'carry', continuation_id)), { kind: 'conflict' });
+  p.sql.close();
+  const b = processOn(path, ferry);
+  assert.equal(encode((b.story.invoke(leave) as Saved).decision), encode(first.decision));
 });

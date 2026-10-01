@@ -14,6 +14,7 @@ import {
   type AdvertisedAction,
   type CharacterId,
   type CommandPayload,
+  type ContinuationId,
   type DefinitionRef,
   type EntityId,
   type ErrorCode,
@@ -25,6 +26,7 @@ import {
 } from './contracts.gen.ts';
 import { key, same } from './compose.ts';
 import { bodyOf, questOf, refString, type World } from './decision.ts';
+import { MODAL, modal, talkRefused, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
 import { holds } from './policy.ts';
@@ -33,8 +35,9 @@ import { cmp } from './validate.ts';
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
  * recipe when it is one (whose invocation needs no target: the recipe names its own), the quest
- * when it is a quest's offer (accept_quest of that quest), and whether it is an engine verb,
- * whose rule is its target and input contract (see accepts).
+ * when it is a quest's offer (accept_quest of that quest), the speaker when it is a dialogue's
+ * talk (its only target), the continuation when it is close_choice of the pending choice, and
+ * whether it is an engine verb, whose rule is its target and input contract (see accepts).
  */
 export type Offered = {
   readonly key: Key;
@@ -46,6 +49,8 @@ export type Offered = {
   readonly command: Key;
   readonly recipe?: ActionRecipe;
   readonly quest?: DefinitionRef;
+  readonly speaker?: EntityId;
+  readonly continuation?: ContinuationId;
   readonly engine?: true;
 };
 export type ActionSet = Readonly<Record<string, Offered>>;
@@ -77,8 +82,8 @@ const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
 // when a host's presentation needs one first. ponytail: this table names other capabilities'
 // verbs (schedule's wait joined in R5 S6, barrier's open, close, lock and unlock in S7,
 // movement's scan in S8, per the briefs); each verb's target and input move onto its command's
-// registry entry when dialogue's talk lands, and that slice decides how choose and close_choice
-// (answers to a pending choice, not ActionSet actions) pass admission.
+// registry entry when a second capability contributes a verb outside VERBS (dialogue's talk,
+// choose and close_choice come from dialogue.ts).
 const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   look: [{ kind: 'none' }, []],
   move: [{ kind: 'none' }, ['direction']],
@@ -109,10 +114,10 @@ function engine(world: World): ActionSet {
   );
 }
 
-// The cartridge's actions, recipes and the offers of the quests `actor` has no instance of, by
-// key: disjoint, since the compiler and the loader reject a recipe or quest whose key is an
-// action's, a recipe's or a registered command's (DUPLICATE_DEFINITION), so no key has two
-// definitions here.
+// The cartridge's actions, recipes, the offers of the quests `actor` has no instance of and the
+// talks of the dialogues whose speaker is in the actor's room, by key: disjoint, since the
+// compiler and the loader reject a recipe, quest or dialogue whose key is an action's, a recipe's,
+// a quest's or a registered command's (DUPLICATE_DEFINITION), so no key has two definitions here.
 function cartridge(world: World, actor: CharacterId): ActionSet {
   const recipes = Object.values(world.cartridge.recipes ?? {}).map((recipe): [string, Offered] => {
     const { key, label, priority, policy } = recipe;
@@ -132,16 +137,20 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
     return [[key, o] as [string, Offered]];
   });
-  return Object.fromEntries([...actions, ...recipes, ...quests]);
+  return Object.fromEntries([...actions, ...recipes, ...quests, ...talks(world, actor)]);
 }
 
-/** `actor`'s ActionSet before any policy is evaluated: every source composed, in order. */
+/**
+ * `actor`'s ActionSet before any policy is evaluated: every source composed, in order, then the
+ * answers to a pending choice (modal state, dialogue.ts modal; 06 §37: no room contribution
+ * removes them, so the actor is never trapped), which the GameView never lists (lists).
+ */
 export function resolved(world: World, actor: CharacterId): ActionSet {
   const [verbs, own] = [engine(world), cartridge(world, actor)];
   const all = { ...verbs, ...own };
   const body = bodyOf(world, actor);
   const room = body === undefined ? undefined : world.rooms[world.state.containers[body]];
-  return (room?.actions ?? []).reduce(
+  const set = (room?.actions ?? []).reduce(
     (set, c) =>
       apply(
         set,
@@ -150,6 +159,7 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
       ),
     apply(apply({}, 'union', verbs), 'override', own),
   );
+  return { ...set, ...modal(world, actor) };
 }
 
 /** The target id of a recipe's detail (the loader checks it exists). */
@@ -192,14 +202,18 @@ const INPUTS: readonly string[] = ['direction', 'choice_id', 'continuation_id', 
  * takes no target id, an entity one the id (target_id or item_id) of an entity in one of its
  * scopes for the actor (a room's detail is in none); and its input lists exactly the payload's
  * input parameters. accept_quest resolves only through the offer of the quest it names (an
- * action of the cartridge's with command accept_quest names no quest, so it never does).
+ * action of the cartridge's with command accept_quest names no quest, so it never does), a talk
+ * only to its dialogue's speaker, and close_choice only through the close_choice of the pending
+ * continuation it names.
  */
 function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandPayload): boolean {
   if (a.command !== payload.type) return false;
   if (payload.type === 'accept_quest') return a.quest !== undefined && same(a.quest, payload.quest);
+  if (payload.type === 'close_choice') return payload.continuation_id === a.continuation;
   if (a.engine) return true;
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const id = p.target_id ?? p.item_id;
+  if (a.speaker !== undefined && id !== a.speaker) return false;
   const inputs = Object.keys(payload).filter((k) => INPUTS.includes(k));
   if (inputs.length !== a.input.length || !a.input.every((i) => inputs.includes(i))) return false;
   if (a.target.kind === 'none') return id === undefined;
@@ -248,23 +262,27 @@ export function lists(world: World, actor: CharacterId) {
   const here = (a: Offered) =>
     !a.recipe ||
     world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!];
-  const advertise = (a: Offered): AdvertisedAction => {
+  const advertise = (a: Offered, id?: string): AdvertisedAction => {
     const shown = { action_key: a.key, label: a.label, target: a.target, input: a.input };
     const admitted = a.recipe && admission(world, a.recipe, actor, body!);
-    const code = !holds(world, actor, a.policy.root)
-      ? 'invalid_state'
-      : typeof admitted === 'string'
-        ? admitted
-        : undefined;
+    const refused = a.command === 'talk' && talkRefused(world, actor, id as EntityId | undefined);
+    const code =
+      refused || !holds(world, actor, a.policy.root)
+        ? 'invalid_state'
+        : typeof admitted === 'string'
+          ? admitted
+          : undefined;
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   };
-  const listed = (fits: (t: TargetSpec) => boolean) =>
+  const listed = (fits: (t: TargetSpec) => boolean, id?: string) =>
     Object.values(set)
-      .filter((a) => fits(a.target) && here(a))
+      .filter((a) => fits(a.target) && here(a) && !MODAL.includes(a.command))
+      .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
-      .map(advertise);
+      .map((a) => advertise(a, id));
   return {
     place: listed((t) => t.kind === 'none'),
-    of: (scope: string) => listed((t) => t.kind === 'entity' && t.scopes.includes(scope as never)),
+    of: (scope: string, id: string) =>
+      listed((t) => t.kind === 'entity' && t.scopes.includes(scope as never), id),
   };
 }

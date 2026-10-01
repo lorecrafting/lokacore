@@ -170,11 +170,11 @@ defmodule Loka.Content.Recipes do
         do: unresolved(rel, ["actions", i, "actions", j], key)
   end
 
-  # The registered commands and this cartridge's action, recipe and quest keys.
+  # The registered commands and this cartridge's action, recipe, quest and dialogue keys.
   defp known(defs, actions) do
-    quests = for {_, {_, [], q}} <- defs["quest"], do: q["key"]
+    others = for kind <- ~w(quest dialogue), {_, {_, [], d}} <- defs[kind], do: d["key"]
 
-    MapSet.new(commands() ++ quests ++ for({_, r} <- all(defs), do: r["key"]))
+    MapSet.new(commands() ++ others ++ for({_, r} <- all(defs), do: r["key"]))
     |> MapSet.union(actions)
   end
 

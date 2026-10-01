@@ -13,13 +13,16 @@ export type Case = {
   readonly steps: readonly { readonly invocation: unknown; readonly result: Json }[];
 };
 
-/** One invocation from `world`: identified, resolved and stepped, as far as each gets. */
-export function attempt(world: World, scope: string, value: unknown) {
+/**
+ * One invocation from `world`: identified, resolved and stepped (as the commit at `revision`), as
+ * far as each gets.
+ */
+export function attempt(world: World, scope: string, value: unknown, revision: number) {
   const id = identify(scope, world.character, value);
   if (id.kind !== 'identified') return { world, result: id as Json };
   const { command_id } = id;
   const command = resolve(world, id);
-  const s = 'kind' in command ? { world, decision: command } : step(world, command);
+  const s = 'kind' in command ? { world, decision: command } : step(world, command, revision);
   const d = s.decision;
   const decision =
     d.kind === 'accepted'
@@ -35,10 +38,11 @@ export function attempt(world: World, scope: string, value: unknown) {
 /** Every mismatch of `cases`, each case from `world`; empty when all match. */
 export function run(world: World, cases: readonly Case[]): string[] {
   return cases.flatMap((c) => {
-    let w = world;
+    let [w, revision] = [world, 0];
     return c.steps.flatMap((s, n) => {
       const before = w;
-      const got = attempt(w, c.scope, s.invocation);
+      const got = attempt(w, c.scope, s.invocation, revision + 1);
+      if (got.world !== w) revision++;
       w = got.world;
       const [want, have] = [encode(s.result), encode(got.result)];
       if (want === have) return [];

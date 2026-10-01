@@ -2,6 +2,7 @@
 import type { EntityId, EntityView, GameView, Key, QuestView, TextKey } from './contracts.gen.ts';
 import { lists } from './actions.ts';
 import { COMPASS, refString, type QuestRow, type World } from './decision.ts';
+import { choiceView } from './dialogue.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
 import { cmp } from './validate.ts';
@@ -13,9 +14,10 @@ import { cmp } from './validate.ts';
  * movement.passage, else insufficient_resource while the body cannot pay a move, movement.fare), the place's actions,
  * the NPCs and items in the room and the items the player's body holds (03 §23), each named by
  * its short description with its actions (actions.ts lists: an item here by the room_contents
- * scope, an NPC by room_occupants, a held item by inventory), NPCs first, then in
- * DefinitionRefString order; and the journal, each quest the player has an instance of with its
- * state and title (04 §15 quest journal state), in DefinitionRefString order.
+ * scope, an NPC by room_occupants, a held item by inventory; a talk only on its speaker), NPCs
+ * first, then in DefinitionRefString order; and the journal, each quest the player has an instance of with its
+ * state and title (04 §15 quest journal state), in DefinitionRefString order; and the player's
+ * pending choice, if any (dialogue.ts choiceView).
  */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
@@ -28,12 +30,13 @@ export function gameView(world: World): GameView {
         id: id as EntityId,
         name: e.short,
         kind: e.kind as Key,
-        actions: actions.of(holder === world.body ? 'inventory' : scope[e.kind]),
+        actions: actions.of(holder === world.body ? 'inventory' : scope[e.kind], id),
       }));
   const room = world.rooms[here];
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
+  const choice = choiceView(world, world.character);
   return {
     actor_id: world.character,
     place: { id: here, title: text(room.title), description },
@@ -48,6 +51,7 @@ export function gameView(world: World): GameView {
     inventory: within(world.body),
     journal: journal(world),
     time: world.state.clock,
+    ...(choice && { choice }),
   };
 }
 

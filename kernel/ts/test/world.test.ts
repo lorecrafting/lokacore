@@ -22,7 +22,7 @@ const freeze = <T>(v: T): T => {
   }
   return v;
 };
-const step = (w: World, c: Command) => kernelStep(freeze(w), c);
+const step = (w: World, c: Command) => kernelStep(freeze(w), c, 0);
 
 const kat = read('protocol/fixtures/cartridge_rooms_hash.json');
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -95,7 +95,7 @@ test('a body out of mv waits an hour and moves again', () => {
   let w = fresh();
   let n = 0;
   const next = (payload: object) => {
-    const s = kernelStep(w, { ...cmd(payload), id: commandId(CMD, String(n++)) } as Command);
+    const s = kernelStep(w, { ...cmd(payload), id: commandId(CMD, String(n++)) } as Command, 0);
     w = s.world;
     return s.decision.kind === 'rejected' ? s.decision.error.code : s.decision.kind;
   };

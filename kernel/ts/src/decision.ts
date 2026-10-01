@@ -26,6 +26,7 @@ import {
   type QuestInstanceId,
   type QuestState,
   type ResourceSpec,
+  type RoleBinding,
   type RoomDefinition,
   type StateDelta,
   type StateScope,
@@ -40,7 +41,7 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
 
 /**
  * The mutable, hashed part of a world: logical time, containment (03 §23), the RNG, and the
- * facts, resources, cooldowns, barrier states, quest instances and jobs written so far, each by canonical
+ * facts, resources, cooldowns, barrier states, quest instances, jobs and choices written so far, each by canonical
  * MutationTarget text (a quest instance by its id; compose.ts); each absent until one is written, as an unset fact has its
  * default, an unset resource its start (fact.schema.json ScopedFact; resource.ts) and an unset
  * barrier its initial state, so a world that never writes one keeps its state hash.
@@ -55,6 +56,22 @@ export type State = {
   readonly barriers?: Readonly<Record<string, BarrierState>>;
   readonly quests?: Readonly<Record<string, QuestRow>>; // by QuestInstanceId
   readonly jobs?: Readonly<Record<string, JobRow>>; // by JobId
+  readonly choices?: Readonly<Record<string, ChoiceRow>>; // by ContinuationId
+};
+
+/**
+ * A pending choice's continuation as composition stores it (compose.ts choice; 04 §5.3), with the
+ * revision of the commit that opened it, which adopt() stamps (proposal.ts) and choose expects.
+ */
+export type ChoiceRow = {
+  readonly actor_id: CharacterId;
+  readonly source: DefinitionRef;
+  readonly beat: Key;
+  readonly roles: readonly RoleBinding[];
+  readonly choice_ids: readonly Key[];
+  readonly status: 'pending' | 'resolved' | 'closed';
+  readonly opened_revision: number;
+  readonly choice_id?: Key;
 };
 
 /** A scheduled job as composition stores it (compose.ts job.schedule; 03 §13; 04 §5.4). */
@@ -68,7 +85,7 @@ export type JobRow = {
 const SECTIONS: Readonly<
   Record<
     string,
-    'containers' | 'facts' | 'resources' | 'cooldowns' | 'barriers' | 'quests' | 'jobs'
+    'containers' | 'facts' | 'resources' | 'cooldowns' | 'barriers' | 'quests' | 'jobs' | 'choices'
   >
 > = {
   containment: 'containers',
@@ -78,12 +95,13 @@ const SECTIONS: Readonly<
   barrier: 'barriers',
   quest: 'quests',
   job: 'jobs',
+  choice: 'choices',
 };
 
 /**
  * Where adopt() keeps a written MutationTarget: its State section and row (not the clock), as
- * compose.ts reads it: an entity's container by its id, a quest instance or job by its id, else
- * by canonical target text.
+ * compose.ts reads it: an entity's container by its id, a quest instance, job or continuation by
+ * its id, else by canonical target text.
  */
 export const row = (t: MutationTarget) =>
   SECTIONS[t.kind] &&
@@ -95,7 +113,9 @@ export const row = (t: MutationTarget) =>
         ? t.instance_id
         : t.kind === 'job'
           ? t.job_id
-          : key(t),
+          : t.kind === 'choice'
+            ? t.continuation_id
+            : key(t),
   ] as const);
 
 /** A QuestInstance as composition stores it (compose.ts quest; 03 §12, 06 §4). */
@@ -153,9 +173,14 @@ export type Mint = () => string;
  * The capabilities whose events a capability's rule also emits, because it runs them inside its
  * own decision: a recipe resolves its check (check@1) in the perform decision (21 §7: costs,
  * checks and outcomes join one proposal); a scheduled NPC's run_job moves it and reports its
- * entity_entered_room (movement@1's) as a move does.
+ * entity_entered_room (movement@1's) as a move does; a choice resolves its dialogue's quest
+ * (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give).
  */
-export const COMPOSES = { action_recipe: ['check'], schedule: ['movement'] } as const;
+export const COMPOSES = {
+  action_recipe: ['check'],
+  schedule: ['movement'],
+  dialogue: ['quest', 'containment'],
+} as const;
 type Composed<C> = C extends keyof typeof COMPOSES
   ? Owned[(typeof COMPOSES)[C][number]]['event']
   : never;

@@ -81,13 +81,18 @@ test('fault, rejection and failed attempt stay distinct; only the attempt change
     r.outcomes.failure = { sequence: [], narration: { actor: 'narration.ring_bell.actor' } };
   });
   const invoke = (w: World, action_key: string) =>
-    attempt(w, 'story/lineage-1/character-1', {
-      invocation_id: 'f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c',
-      action_key,
-      actor_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
-      target_ids: [],
-      input: {},
-    });
+    attempt(
+      w,
+      'story/lineage-1/character-1',
+      {
+        invocation_id: 'f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c',
+        action_key,
+        actor_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
+        target_ids: [],
+        input: {},
+      },
+      1,
+    );
   const [fault, rejection, failed] = [
     invoke(bad, 'ring_bell'),
     invoke(bad, 'take'),

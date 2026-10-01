@@ -1,3 +1,4 @@
+# size: allow 310, expand's one clause per short-reference shape keeps every source kind here
 defmodule Loka.Content.Checks do
   @moduledoc """
   Manifest requirements, capability ownership, references and fact types (05 §3, §4, §6;
@@ -8,7 +9,7 @@ defmodule Loka.Content.Checks do
 
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
-  alias Loka.Content.{Barriers, Entities, Quests, Reactions, Recipes, RoomParts}
+  alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
   @supported_pin 1
@@ -61,7 +62,8 @@ defmodule Loka.Content.Checks do
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
   node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
   included), a recipe's fact.assign fact, its target's room or the resource of its cost,
-  threshold check or resource.adjust step, a narration participant's npc or item, an exit's `to` and `barrier`, a barrier's
+  threshold check or resource.adjust step, a narration participant's or dialogue role's npc or item, a dialogue's npc and
+  quest, a dialogue choice's fact.assign fact, an exit's `to` and `barrier`, a barrier's
   `key_item`, a quest objective's `item_acquired`, a reaction trigger's fact or room, an item's location (its room,
   npc or item, as `in` selects), an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
@@ -116,6 +118,12 @@ defmodule Loka.Content.Checks do
   # map may have a detail keyed resource, whose value is a map).
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
+
+  # A dialogue (DialogueDefinition, its prompt a text key): its short speaker and quest.
+  def expand(%{"npc" => n, "prompt" => p} = d, m) when is_binary(p) do
+    q = Map.new(Map.take(d, ["quest"]), fn {k, v} -> {k, ref(v, "quest", m)} end)
+    d |> Map.drop(~w(npc quest)) |> expand(m) |> Map.merge(Map.put(q, "npc", ref(n, "npc", m)))
+  end
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
@@ -252,13 +260,15 @@ defmodule Loka.Content.Checks do
     do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
   # Every policy tree: a named policy's root, each action's inline one, each variant's, each
-  # recipe's, each quest's (its offer's and a current_state objective's) and each reaction's.
+  # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
+  # dialogue's.
   defp trees(defs, actions) do
     for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
       for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
       RoomParts.conditions(defs) ++
       Entities.conditions(defs) ++
-      Recipes.conditions(defs) ++ Quests.conditions(defs) ++ Reactions.conditions(defs)
+      Recipes.conditions(defs) ++
+      Quests.conditions(defs) ++ Reactions.conditions(defs) ++ Dialogues.conditions(defs)
   end
 
   # run_job is authority-internal (04 §1): no action builds it.

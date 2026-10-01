@@ -102,7 +102,7 @@ const advance = { op: 'time.advance', writer_group: 0, from: 0, to: 90 };
 // check event missing or not at position 1, the draw not committed, the success sequence not
 // run, or the duration not advancing the clock.
 test('a luck check of chance 21 passes on the roll of 20 and runs success', () => {
-  const { decision, world: w } = step(checked(21), ring);
+  const { decision, world: w } = step(checked(21), ring, 0);
   assert.deepEqual(plain(decision), {
     kind: 'accepted',
     outcome: 'success',
@@ -143,7 +143,7 @@ test('a luck check of chance 21 passes on the roll of 20 and runs success', () =
 // success outcome run anyway, or a retry rerolling the same state instead of the advanced one.
 test('a luck check of chance 20 fails on the roll of 20: accepted, draw and time commit', () => {
   const before = checked(20);
-  const { decision, world: w } = step(before, ring);
+  const { decision, world: w } = step(before, ring, 0);
   assert.deepEqual(plain(decision), {
     kind: 'accepted',
     outcome: 'failure',
@@ -158,24 +158,24 @@ test('a luck check of chance 20 fails on the roll of 20: accepted, draw and time
   });
   assert.deepEqual([w.state.rng, w.state.clock, w.state.facts], [AFTER_ONE_DRAW, 90, undefined]);
   // A new attempt draws from the advanced state: the second raw draw, 0, passes.
-  const again = step(w, ring).decision;
+  const again = step(w, ring, 0).decision;
   assert.ok(again.kind === 'accepted');
   assert.equal(again.outcome, 'success');
   assert.deepEqual(again.events[0].payload, check('check_passed'));
   // Seeded determinism: the same world and command decide byte-identically.
-  assert.equal(encode(step(before, ring).decision as never), encode(decision as never));
+  assert.equal(encode(step(before, ring, 0).decision as never), encode(decision as never));
 });
 
 // 04 §5.0. Breaks: a rejection that draws, advances time or commits anything.
 test('a rejected perform of a checked recipe draws nothing and changes nothing', () => {
   const w = checked(50);
-  const down = step(w, cmd({ type: 'move', direction: 'down' })).world;
-  const rung = step(checked(99), ring).world; // policy: the bell is not yet rung
+  const down = step(w, cmd({ type: 'move', direction: 'down' }), 0).world;
+  const rung = step(checked(99), ring, 0).world; // policy: the bell is not yet rung
   for (const [before, code] of [
     [down, 'not_present'],
     [rung, 'invalid_state'],
   ] as const) {
-    const r = step(before, ring);
+    const r = step(before, ring, 0);
     assert.deepEqual(r.decision, { kind: 'rejected', error: { code } });
     assert.equal(r.world, before);
   }
@@ -184,7 +184,7 @@ test('a rejected perform of a checked recipe draws nothing and changes nothing',
 // Breaks: a recipe without a check drawing or changing its outcome, or ignoring its duration.
 test('a recipe without a check keeps outcome performed and the RNG; duration still advances', () => {
   const w = world((c) => (c.recipes[RECIPE].duration = 3600));
-  const { decision, world: after } = step(w, ring);
+  const { decision, world: after } = step(w, ring, 0);
   assert.ok(decision.kind === 'accepted');
   assert.equal(decision.outcome, 'performed');
   assert.deepEqual(decision.rng, SEED);
@@ -197,10 +197,10 @@ test('a recipe without a check keeps outcome performed and the RNG; duration sti
 test('wait advances the clock to until, later than now only', () => {
   const w = world();
   const wait = (until: number) => cmd({ type: 'wait', until });
-  const now = step(w, wait(0));
+  const now = step(w, wait(0), 0);
   assert.deepEqual(now.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.equal(now.world, w);
-  const r = step(w, wait(1));
+  const r = step(w, wait(1), 0);
   assert.deepEqual(plain(r.decision), {
     kind: 'accepted',
     outcome: 'waited',
@@ -210,13 +210,13 @@ test('wait advances the clock to until, later than now only', () => {
     rng: SEED,
   });
   assert.equal(r.world.state.clock, 1);
-  const back = step(r.world, wait(1));
+  const back = step(r.world, wait(1), 0);
   assert.deepEqual(back.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   const unlocked = world((c) => {
     delete c.manifest.requires.capabilities.schedule;
     delete c.lock.capabilities.schedule;
   });
-  assert.deepEqual(step(unlocked, wait(1)).decision, {
+  assert.deepEqual(step(unlocked, wait(1), 0).decision, {
     kind: 'rejected',
     error: { code: 'unsupported_capability' },
   });
@@ -261,10 +261,10 @@ test('a clock overflow in a rule is an evaluator_error fault that changes nothin
   const loaded = loadCartridge(bytes, INSTALLED);
   assert.ok(loaded.ok);
   const fresh = newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], SEED);
-  const late = step(fresh, cmd({ type: 'wait', until: Number.MAX_SAFE_INTEGER }));
+  const late = step(fresh, cmd({ type: 'wait', until: Number.MAX_SAFE_INTEGER }), 0);
   assert.equal(late.world.state.clock, Number.MAX_SAFE_INTEGER);
   const pick = { ...cmd({ type: 'perform', action: 'pick_lock' }), id: IDS[0] } as Command;
-  const r = step(late.world, pick);
+  const r = step(late.world, pick, 0);
   assert.deepEqual(r.decision, { kind: 'fault', code: 'evaluator_error' });
   assert.equal(r.world, late.world);
 });
