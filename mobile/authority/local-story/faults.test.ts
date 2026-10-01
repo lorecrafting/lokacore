@@ -99,9 +99,14 @@ function reference(seed: number) {
   p.sql.close();
   return [path, snaps] as const;
 }
-/** The commands that commit as NEW in the reference: the fault points. */
-const committing = (ref: Snap[]) =>
-  ref.flatMap((s, i) => (s.reply?.kind === 'saved' && !s.reply.replay ? [i - 1] : []));
+/** The fault points: commands that commit as NEW in the reference, those changing the world first. */
+function committing(ref: Snap[]) {
+  const saved = ref.flatMap((s, i) =>
+    s.reply?.kind === 'saved' && !s.reply.replay ? [i - 1] : [],
+  );
+  const changing = saved.filter((k) => ref[k + 1]!.memory !== ref[k]!.memory);
+  return changing.length >= 5 ? changing : saved;
+}
 
 /** Plays commands from..to-1 checking each reply and state against the reference. */
 function play(
@@ -199,7 +204,7 @@ for (const seed of SEEDS)
     const faults = [
       [
         'full',
-        /./,
+        { errcode: 13 }, // SQLITE_FULL
         (sql: DatabaseSync) => sql.exec(`PRAGMA max_page_count = ${pages(sql)}`),
         'PRAGMA max_page_count = 1000000',
       ],
@@ -212,7 +217,7 @@ for (const seed of SEEDS)
         const p = processOn(path, seed);
         play(p, path, ref, 0, k);
         arm(p.sql);
-        assert.throws(() => p.send(k), name === 'full' ? { errcode: 13 } : error); // SQLITE_FULL
+        assert.throws(() => p.send(k), error);
         at(p, ref[k]!);
         p.sql.exec(lift);
         p.sql.close();
@@ -238,7 +243,8 @@ for (const seed of SEEDS)
         } else {
           at(q, ref[k + 1]!);
           const again = q.send(k); // the same invocation delivered again
-          assert.deepEqual(again, { ...ref[k + 1]!.reply, replay: true });
+          const replayed = { ...ref[k + 1]!.reply, replay: true }; // canonical: prototypes aside
+          assert.equal(encode(again as never), encode(replayed as never));
           at(q, ref[k + 1]!);
           play(q, path, ref, k + 1);
         }

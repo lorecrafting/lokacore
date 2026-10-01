@@ -199,8 +199,8 @@ test('at the cap a new game deletes the oldest run whole and keeps the current o
 
 // Breaks (ADR-075 §2, cap rule): with the current run alone at the cap, its entries still
 // appended, its own beginning deleted to make room, the dropped entries caught up at the next open,
-// the cap reaching play, or a dropped entry counted as a failed write (every later command would
-// then rescan the receipts to catch up).
+// the cap reaching play, or the untraced receipts read again to catch up (at every open, or after
+// every command if a dropped entry counted as a failed write), which grows with play.
 test('a run alone at the cap keeps its beginning and appends no more entries', () => {
   const path = save();
   const p = open(path);
@@ -209,9 +209,8 @@ test('a run alone at the cap keeps its beginning and appends no more entries', (
   const last = p.one('SELECT max(rowid) FROM trace');
   assert.equal(revision(p.story.invoke(give)), 2);
   p.sql.close();
-  let scans = 0;
+  let scans = 0; // catch-up reads of untraced receipts, at open and after
   const q = open(path, (s, run) => ((scans += +s.includes('FROM receipt WHERE command')), run()));
-  scans = 0;
   assert.equal(revision(q.story.invoke(invocation(3, 'take', [SATCHEL]))), 2); // given: rejected
   assert.equal(scans, 0);
   assert.deepEqual(
@@ -219,4 +218,14 @@ test('a run alone at the cap keeps its beginning and appends no more entries', (
     [CAP, last],
   );
   assert.equal(q.one('SELECT ordinal FROM trace ORDER BY rowid LIMIT 1'), 0);
+});
+
+// Breaks (ADR-075 §2, cap rule): a run header written past the cap (each new game adding one
+// while the old run fills it) instead of the old run being deleted to make room.
+test('a new game at the cap makes room for its header by deleting the old run', () => {
+  const p = open(save());
+  p.story.invoke(take);
+  pad(p, CAP);
+  assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
+  assert.deepEqual(runs(p), [id(4)]);
 });

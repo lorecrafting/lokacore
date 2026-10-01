@@ -32,7 +32,7 @@ export function traceCommand(
   let capped = false;
   try {
     const written = transaction(db, () => {
-      if ((capped = !room(db, ids.run_id))) return;
+      if ((capped = !room(db, ids.run_id, states.length))) return;
       // The last row, an entry or its header (0), holds the run's highest ordinal; rowid: O(1).
       const last = db.getFirstSync<{ n: number }>(
         'SELECT ordinal AS n FROM trace ORDER BY rowid DESC LIMIT 1',
@@ -54,28 +54,36 @@ export function traceCommand(
 // ponytail: rows counted by their rowid span, O(1) per entry, which holds while rows are deleted
 // only here, oldest first (no VACUUM); about 5 MB at the entry size measured in R6 S6a.
 const CAP = 5000;
+const runOf = (record: string) => JSON.parse(record).ids.run_id as string;
+/** The trace's rows, by rowid span, and the run of its oldest row. */
+function extent(db: Db) {
+  const { n, first } = db.getFirstSync<{ n: number | null; first: string | null }>(
+    `SELECT max(rowid) - min(rowid) + 1 AS n,
+      (SELECT record FROM trace ORDER BY rowid LIMIT 1) AS first FROM trace`,
+  )!;
+  return { n: n ?? 0, oldest: first && runOf(first) };
+}
+/** True when `run_id`'s run alone fills the cap: its later entries are dropped. */
+const full = (db: Db, run_id: string) => {
+  const { n, oldest } = extent(db);
+  return n >= CAP && oldest === run_id;
+};
 /**
- * Room for an entry of `run_id`'s under the phone cap (ADR-075 §2, amended R6 S6a): over it, the
- * oldest whole runs other than `run_id`'s are deleted; false when `run_id`'s run alone fills it, so
- * its later entries are dropped and its replayable prefix stays.
+ * Room for `rows` more of `run_id`'s under the phone cap (ADR-075 §2, amended R6 S6a): over it,
+ * the oldest whole runs other than `run_id`'s are deleted; false when `run_id`'s run alone fills
+ * it, so its later rows are dropped and its replayable prefix stays.
  */
-function room(db: Db, run_id: string): boolean {
-  const runOf = (record: string) => JSON.parse(record).ids.run_id as string;
-  for (;;) {
-    const { n, first } = db.getFirstSync<{ n: number; first: string }>(
-      `SELECT max(rowid) - min(rowid) + 1 AS n,
-        (SELECT record FROM trace ORDER BY rowid LIMIT 1) AS first FROM trace`,
-    )!;
-    if (!(n >= CAP)) return true;
-    const oldest = runOf(first);
-    if (oldest === run_id) return false;
+function room(db: Db, run_id: string, rows: number): boolean {
+  for (let e = extent(db); e.n + rows > CAP; e = extent(db)) {
+    if (e.oldest === run_id) return false;
     type Head = { rowid: number; record: string };
     const heads = db.getAllSync<Head>(
       'SELECT rowid, record FROM trace WHERE ordinal = 0 ORDER BY rowid',
     );
-    const next = heads.find((h) => runOf(h.record) !== oldest)!; // its run's header follows
-    db.runSync('DELETE FROM trace WHERE rowid < ?', next.rowid);
+    const next = heads.find((h) => runOf(h.record) !== e.oldest); // none: run_id's header is next
+    db.runSync('DELETE FROM trace WHERE rowid < ?', next?.rowid ?? Number.MAX_SAFE_INTEGER);
   }
+  return true;
 }
 
 /**
@@ -88,6 +96,7 @@ function room(db: Db, run_id: string): boolean {
 export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolean {
   const header = (initial: object) =>
     transaction(db, () => {
+      if (!room(db, ids.run_id, 1)) return; // a new kernel's header for a run alone at the cap
       const data = { world_context_id: context, initial_state: initial, fault_schedule: NONE };
       db.runSync(TRACE, 0, null, null, record('trace.run', ids, data));
     });
@@ -121,6 +130,7 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
  * at the cap (the rest are dropped).
  */
 function missed(db: Db, ids: RunIds, skip: string): boolean {
+  if (full(db, ids.run_id)) return true; // never read the receipts a capped run dropped
   type Row = { command: string; response: string; revision: number };
   const missing = db.getAllSync<Row>(
     `SELECT command, response, revision FROM receipt WHERE command != 'null' AND command_id != ?
