@@ -1,3 +1,4 @@
+// size: allow 310, one authority on one connection: open, invoke, settle and new game share Story
 // The local Story authority (07 §§8-9; 03 §§14-15; ADR-072; 10 §§31-32): the world in memory,
 // one SQLite save, and 03 §14's admission order. invoke is synchronous on one connection, so
 // commands run one at a time, as WorldInstance serializes them online (07 §8).
@@ -282,7 +283,8 @@ function newGame(s: Story) {
   if (fenced(s)) return { kind: 'pending' } as const;
   if (retried && s.meta?.run_id === retried) return { kind: 'replaced' } as const; // not twice
   // Best effort before its receipts go (the trace is derived and never blocks the player): the
-  // old run's missed entries can be recovered only from them.
+  // old run's missed entries can be recovered only from them. ponytail: if this catch-up fails they
+  // are lost with the run the player chose to abandon; a pre-write journal would make it authority.
   if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   const newest = s.releases[0];
   const next = first(newest, s.host);
