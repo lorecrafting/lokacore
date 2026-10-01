@@ -1,5 +1,7 @@
 // The screen for a save that does not open (OFF-07; 10 §32), plain until the book look restyles it.
 import { Alert, Button, SafeAreaView, Text } from 'react-native';
+import { useFonts } from 'expo-font';
+import { body, fonts, head, paper } from './book/paper.ts';
 import type { Failed } from '../authority/local-story/smoke';
 
 const PLAIN: Record<string, string> = {
@@ -17,14 +19,22 @@ export const confirmStartOver = (startOver: () => void) =>
   ]);
 
 export function SaveError({ failed, startOver }: { failed: Failed; startOver: () => void }) {
+  const [loaded, fontError] = useFonts(fonts);
+  if (!loaded && !fontError) return null;
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
-      <Text style={{ fontWeight: 'bold' }}>
+    <SafeAreaView
+      style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: paper.bg }}
+    >
+      <Text style={{ fontFamily: head, fontSize: 22, color: paper.fg }}>
         {PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}
       </Text>
-      <Text>({failed.message})</Text>
+      <Text style={{ fontFamily: body, color: paper.dim }}>({failed.message})</Text>
       {(failed.newGame || failed.replace) && (
-        <Button title="Start over" onPress={() => confirmStartOver(startOver)} />
+        <Button
+          title="Start over"
+          color={paper.accent}
+          onPress={() => confirmStartOver(startOver)}
+        />
       )}
     </SafeAreaView>
   );
