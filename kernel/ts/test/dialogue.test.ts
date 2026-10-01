@@ -174,10 +174,10 @@ test('the talk is listed on and accepts its speaker only', () => {
   refused(w, { type: 'talk', target_id: w.entityIds[`${F}:npc/ada`] }, 'unsupported_capability');
 });
 
-const talkView = (w: World) =>
+const talkView = (w: World, key = 'bram') =>
   gameView(w)
     .entities.find((e) => e.id === BRAM)!
-    .actions.filter((a) => a.action_key === 'bram')
+    .actions.filter((a) => a.action_key === key)
     .map((a) => ('reason' in a ? [a.available, a.reason] : [a.available]));
 const unavailable = [[false, { code: 'invalid_state' }]];
 
@@ -193,7 +193,8 @@ test('talk is unavailable and refused before accepting and after resolving', () 
 });
 
 // Breaks: a talk admitted through another offered talk (Bram's, or a cartridge talk action
-// whose own policy holds) opening a dialogue whose policy fails; the rule must enforce it.
+// whose own policy holds) opening a dialogue whose policy fails; the rule must enforce it, and
+// the view must list such an alias unavailable while the step would refuse it.
 test("the rule enforces the target's dialogue policy whatever talk admitted it", () => {
   const ada = world((c) => {
     const npc = c.npcs[`${F}:npc/bram`];
@@ -220,6 +221,8 @@ test("the rule enforces the target's dialogue policy whatever talk admitted it",
     };
   });
   refused(alias, talk, 'invalid_state');
+  assert.deepEqual(talkView(alias, 'chat'), unavailable);
+  assert.deepEqual(talkView(ok(alias, accept, 1, ACCEPT).world, 'chat'), [[true]]);
 });
 
 // Breaks: a room contribution naming a dialogue's talk unresolved by the loader, though its key

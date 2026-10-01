@@ -26,7 +26,7 @@ import {
 } from './contracts.gen.ts';
 import { key, same } from './compose.ts';
 import { bodyOf, questOf, refString, type World } from './decision.ts';
-import { MODAL, modal, talks } from './dialogue.ts';
+import { MODAL, modal, talkRefused, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
 import { holds } from './policy.ts';
@@ -262,14 +262,16 @@ export function lists(world: World, actor: CharacterId) {
   const here = (a: Offered) =>
     !a.recipe ||
     world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!];
-  const advertise = (a: Offered): AdvertisedAction => {
+  const advertise = (a: Offered, id?: string): AdvertisedAction => {
     const shown = { action_key: a.key, label: a.label, target: a.target, input: a.input };
     const admitted = a.recipe && admission(world, a.recipe, actor, body!);
-    const code = !holds(world, actor, a.policy.root)
-      ? 'invalid_state'
-      : typeof admitted === 'string'
-        ? admitted
-        : undefined;
+    const refused = a.command === 'talk' && talkRefused(world, actor, id as EntityId | undefined);
+    const code =
+      refused || !holds(world, actor, a.policy.root)
+        ? 'invalid_state'
+        : typeof admitted === 'string'
+          ? admitted
+          : undefined;
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   };
   const listed = (fits: (t: TargetSpec) => boolean, id?: string) =>
@@ -277,7 +279,7 @@ export function lists(world: World, actor: CharacterId) {
       .filter((a) => fits(a.target) && here(a) && !MODAL.includes(a.command))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
-      .map(advertise);
+      .map((a) => advertise(a, id));
   return {
     place: listed((t) => t.kind === 'none'),
     of: (scope: string, id: string) =>

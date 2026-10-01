@@ -10,6 +10,7 @@ import type {
   ContinuationId,
   DefinitionRef,
   DialogueDefinition,
+  EntityId,
   Key,
   PendingChoice,
   RoleBinding,
@@ -18,6 +19,7 @@ import type {
 } from './contracts.gen.ts';
 import { same } from './compose.ts';
 import { bodyOf, refString, type ChoiceRow, type Mint, type World } from './decision.ts';
+import { holds } from './policy.ts';
 import { cmp } from './validate.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
@@ -88,6 +90,22 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
         : { available: true, choice_id, label };
     }),
   };
+}
+
+/** The dialogue whose speaker is `target`, if any (the loader allows one per speaker). */
+export const spokenBy = (world: World, target: EntityId | undefined) =>
+  Object.values(world.cartridge.dialogues ?? {}).find(
+    (d) => world.entityIds[refString(d.npc)] === target,
+  );
+
+/**
+ * Whether `target`'s dialogue refuses `actor`'s talk now, its policy failing: the talk rule's
+ * check after admission, and the GameView's for every talk listed on the target, since a
+ * cartridge action with command talk (an alias) is admitted on its own policy.
+ */
+export function talkRefused(world: World, actor: CharacterId, target: EntityId | undefined) {
+  const d = spokenBy(world, target);
+  return d !== undefined && !holds(world, actor, d.policy.root);
 }
 
 /**

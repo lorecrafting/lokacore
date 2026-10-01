@@ -45,7 +45,7 @@ const lantern = (w: World) => w.entityIds[`${E}:item/lantern`];
 // A strict errand world with an instance fact `flag` and a reaction setting `seen` when flag
 // changes, and a hand-built root of `ops` and its events at the given positions (position 1 left
 // free for the fact_changed of a changing assign, as a rule leaves it).
-function reacting() {
+function reacting(f: (c: any) => void = () => {}) {
   const fact = (key: string) => ({
     key,
     version: 1,
@@ -70,6 +70,7 @@ function reacting() {
         apply: [{ op: 'fact.assign', fact: ref('fact', 'seen'), value: true }],
       },
     };
+    f(c);
   });
 }
 const instance = { kind: 'instance', world_context_id: CONTEXT };
@@ -158,4 +159,24 @@ test('quest delivery runs in FIFO order after the root, only to instances active
     ['quest.transition', 0],
     ['entity.transfer', 0],
   ]);
+});
+
+// Breaks (04 §5.4): quest deliveries not counted toward the deliveries budget. 1024 flag changes
+// each delivered to 8 empty rules are 8192 deliveries, the limit; the lantern's one more exceeds it.
+test('a quest delivery counts toward the deliveries budget', () => {
+  const w0 = reacting((c) => {
+    c.reactions = {};
+    for (let i = 0; i < 8; i++)
+      c.reactions[`${E}:reaction/r${i}`] = {
+        key: `r${i}`,
+        on: { event: 'fact_changed', fact: ref('fact', 'flag') },
+        apply: [],
+      };
+  });
+  const w = step(w0, cmd(w0, { type: 'accept_quest', quest: QUEST }), 1).world;
+  const changed = { type: 'fact_changed', fact: ref('fact', 'flag'), old: false, new: true };
+  const flags = Array.from({ length: 1024 }, (_, i) => [i + 1, changed] as [number, object]);
+  assert.equal(root(w, [], flags).kind, 'accepted');
+  const over = root(w, [handed(w)], [...flags, [1025, acquired(w)]]);
+  assert.deepEqual([over.kind, over.code], ['fault', 'budget_exceeded']);
 });

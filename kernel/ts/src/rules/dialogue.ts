@@ -24,16 +24,22 @@ import {
   event,
   has,
   rejected,
-  values,
-  refString,
   type ChoiceRow,
   type Mint,
   type Rule,
   type World,
 } from '../decision.ts';
-import { blocked, bind, choiceIds, continuationId, definition, pending } from '../dialogue.ts';
+import {
+  blocked,
+  bind,
+  choiceIds,
+  continuationId,
+  definition,
+  pending,
+  spokenBy,
+  talkRefused,
+} from '../dialogue.ts';
 import { assigned } from '../fact.ts';
-import { holds } from '../policy.ts';
 import { resolution } from '../quest.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
@@ -54,11 +60,9 @@ export const decide: Rule<'dialogue'> = (world, command, mint) => {
 
 function talk(world: World, command: Command<'talk'>, mint: Mint) {
   const p = command.payload;
-  const d = values(world.cartridge.dialogues ?? {}).find(
-    (x) => world.entityIds[refString(x.npc)] === p.target_id,
-  );
+  const d = spokenBy(world, p.target_id);
   if (!d) return rejected('not_found');
-  if (!holds(world, p.actor_id, d.policy.root)) return rejected('invalid_state');
+  if (talkRefused(world, p.actor_id, p.target_id)) return rejected('invalid_state');
   if (pending(world, p.actor_id)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
