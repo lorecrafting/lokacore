@@ -2,7 +2,8 @@
 // Node with real SQLite (node:sqlite) in WAL mode, one connection per simulated process, as
 // local_story.test.ts. Expected values are literals, never from the code under test.
 import assert from 'node:assert/strict';
-import { mkdtempSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
@@ -101,4 +102,64 @@ test('a leftover transaction is settled before the trace catches up', () => {
     [1, 0, 'committed'],
     [2, 1, 'committed'],
   ]);
+});
+
+/** The save's file with no connection open (WAL checkpointed), by hash. */
+const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
+/** A save at revision 1 (the satchel taken), its connection closed. */
+function taken() {
+  const path = save();
+  const p = open(path);
+  p.story.invoke(take);
+  p.sql.close();
+  return path;
+}
+/** `path` with byte 0 of `table`'s root page (its b-tree page type) overwritten. */
+function corruptPage(path: string, table: string) {
+  const sql = new DatabaseSync(path);
+  const at = (q: string) => Number(Object.values(sql.prepare(q).get()!)[0]);
+  const [root, size] = [
+    at(`SELECT rootpage FROM sqlite_master WHERE name = '${table}'`),
+    at('PRAGMA page_size'),
+  ];
+  sql.close();
+  const file = readFileSync(path);
+  file[(root - 1) * size] = 0xff;
+  writeFileSync(path, file);
+}
+
+// Breaks (OFF-07): a file SQLite rejects (NOTADB) or a page read that raises SQLITE_CORRUPT
+// throwing from openStory instead of the typed save_corrupt, or that open writing anything.
+// Real damage: a garbage file; a b-tree page whose type byte is invalid.
+test('a file that is not a database or has a corrupt page is save_corrupt', () => {
+  const notadb = save();
+  writeFileSync(notadb, Buffer.alloc(4096, 'x'));
+  const sql = new DatabaseSync(notadb); // no WAL pragma: SQLite rejects the file at its first read
+  assert.equal(openStory(adapt(sql), releases, host()).kind, 'save_corrupt');
+  sql.close();
+  for (const table of ['state_row', 'head']) {
+    const path = taken();
+    corruptPage(path, table);
+    const before = bytes(path);
+    const p = processOn(path);
+    assert.equal(p.opened.kind, 'save_corrupt', table);
+    p.sql.close();
+    assert.equal(bytes(path), before, table);
+  }
+});
+
+// Breaks (OFF-07; S3b review S3B-4/5): a head table with a dropped column throwing from openStory,
+// or the player's new game keeping that table (its head write then fails) instead of recreating it.
+test('a head with a damaged column is save_corrupt; its new game recreates the head', () => {
+  const path = taken();
+  const sql = new DatabaseSync(path);
+  sql.exec('ALTER TABLE head DROP COLUMN clock');
+  sql.close();
+  const p = processOn(path);
+  assert.equal(p.opened.kind, 'save_corrupt');
+  assert.deepEqual((p.opened as { newGame: () => unknown }).newGame(), { kind: 'replaced' });
+  p.sql.close();
+  const q = open(path);
+  assert.deepEqual([q.one('SELECT revision FROM head'), q.one('SELECT clock FROM head')], [0, 0]);
+  assert.equal(revision(q.story.invoke(take)), 1);
 });

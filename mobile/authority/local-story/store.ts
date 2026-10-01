@@ -93,16 +93,17 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   // Half a save (rows or receipts without their table too): never taken for a new one, unwritten.
   if (!head || !save || !['state_row', 'receipt'].every(table)) return undefined;
   db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report)
-  type Head = { revision: number; clock: number; rng: string };
-  const h = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head')!;
+  type Head = { revision?: number; clock?: number; rng?: string };
+  const h = db.getFirstSync<Head>('SELECT * FROM head')!; // any columns: a damaged one is corrupt
   const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save')!;
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };
+  if (typeof h.revision !== 'number' || typeof h.clock !== 'number') return undefined;
   try {
     for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
       (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
-    const rng = JSON.parse(h.rng);
+    const rng = JSON.parse(h.rng!);
     if (validate('RngState', rng).length) return undefined; // parses, but no RNG state
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v!));
     const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
@@ -113,14 +114,20 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   }
 }
 
+// ponytail: SQLite's own messages for SQLITE_NOTADB and SQLITE_CORRUPT, as node:sqlite reports
+// them; expo-sqlite's wording is checked on the phone (S6b), its error codes if it differs.
+/** True when SQLite reports the file is not a database or a page of it corrupt (OFF-07). */
+export const corrupt = (e: unknown) => /file is not a database|malformed/.test(String(e));
+
 /**
  * Makes the save `fresh` at revision 0 under the identity `meta`, with no receipts, in one
  * transaction (a first save or a new game; one save per story), as `transaction` reports. The
- * identity table is recreated, whatever shape a corrupt save left it in; reports stay (23 §11).
+ * identity and head tables are recreated, whatever shape a corrupt save left them in; reports stay
+ * (23 §11).
  */
 export function replace(db: Db, fresh: World, meta: Meta): boolean {
   return transaction(db, () => {
-    db.execSync(`DROP TABLE IF EXISTS save; ${SCHEMA}`);
+    db.execSync(`DROP TABLE IF EXISTS save; DROP TABLE IF EXISTS head; ${SCHEMA}`);
     const { clock, rng, ...sections } = fresh.state;
     db.runSync(HEAD, 0, clock, encode(rng as Json));
     db.runSync('DELETE FROM state_row');
