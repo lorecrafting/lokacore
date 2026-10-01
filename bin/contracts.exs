@@ -239,7 +239,7 @@ targets = %{
       Enum.join(
         [
           "export const EVALUATION_FAULTS: readonly ErrorCode[] = #{Gen.lit(faults)};",
-          "export const LIMITS: Readonly<Record<string, number>> = JSON.parse(#{Gen.lit(Gen.lit(limits))});",
+          "export const LIMITS: Readonly<Record<#{limits |> Map.keys() |> Enum.sort() |> Enum.map_join(" | ", &"'#{&1}'")}, number>> = JSON.parse(#{Gen.lit(Gen.lit(limits))});",
           "export const CAPABILITY_OWNERS: Readonly<Record<'command' | 'policy' | 'definition' | 'event', Readonly<Record<string, string>>>> = JSON.parse(#{Gen.lit(Gen.lit(owners))});",
           "export type Owned = { #{Enum.join(owned, "; ")} };",
           "export const ARTIFACT_MAX_BYTES = #{Loka.Core.Contracts.defs()["ArtifactSize"]["maximum"]};",

@@ -14,7 +14,7 @@
 // steps before it left it, each resource.adjust one from the resource's value as the costs and
 // steps before it left it, adding by and stopping at the bounds (none when that changes nothing), each event.emit a custom_event at its causal position; a fact.assign
 // that changes its fact leaves the next position free for the fact_changed the host puts there
-// (world.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
+// (proposal.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
 // reads the outcome's narration. A cooldown adds a cooldown.start at the admission time, and a
 // duration one time.advance after the steps; events keep the admission time. Result bands join
 // later.
@@ -68,7 +68,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const cooldown: DeltaOp[] = recipe.cooldown
     ? [{ op: 'cooldown.start', writer_group: 0, actor_id, action, ...since, at: from }]
     : [];
-  // An explicit advance: the host runs its due jobs in this proposal (world.ts drain; 04 §5.4).
+  // An explicit advance: the host runs its due jobs in this proposal (proposal.ts propose; 04 §5.4).
   const time: DeltaOp[] = duration
     ? [{ op: 'time.advance', writer_group: 0, from, to: add(from, duration) }]
     : [];

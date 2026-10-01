@@ -1,0 +1,12 @@
+{
+  "title": "room.village_green.title",
+  "description": "room.village_green.description",
+  "exits": {
+    "south": {
+      "to": "ferry_landing"
+    },
+    "east": {
+      "to": "belfry"
+    }
+  }
+}

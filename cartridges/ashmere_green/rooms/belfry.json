@@ -1,0 +1,9 @@
+{
+  "title": "room.belfry.title",
+  "description": "room.belfry.description",
+  "exits": {
+    "west": {
+      "to": "village_green"
+    }
+  }
+}

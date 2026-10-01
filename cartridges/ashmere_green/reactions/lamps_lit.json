@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "village_green"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "time_window",
+      "from": 19,
+      "to": 20
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "lamps_lit",
+      "value": true
+    }
+  ]
+}

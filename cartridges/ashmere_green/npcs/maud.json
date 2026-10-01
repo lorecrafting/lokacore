@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "maud"
+  ],
+  "short": "npc.maud.short",
+  "room_line": "npc.maud.room",
+  "description": "npc.maud.description",
+  "room": "village_green",
+  "daily_schedule": {
+    "6": "village_green",
+    "20": "ferry_landing"
+  }
+}

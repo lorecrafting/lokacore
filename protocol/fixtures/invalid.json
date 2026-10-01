@@ -12141,5 +12141,217 @@
         "code": "above_maximum"
       }
     ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/apply",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/on",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "fact_changed",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "r"
+        }
+      },
+      "apply": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "f"
+          },
+          "value": true
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on/fact",
+        "code": "missing_property"
+      },
+      {
+        "path": "/on/room",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "entity_entered_room",
+        "fact": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "f"
+        }
+      },
+      "apply": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "f"
+          },
+          "value": true
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on/fact",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/on/room",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "item_dropped",
+        "fact": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "f"
+        }
+      },
+      "apply": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "f"
+          },
+          "value": true
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on/event",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "f"
+        }
+      },
+      "apply": [
+        {
+          "op": "fact.assign"
+        },
+        {
+          "op": "event.emit",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "f"
+          },
+          "value": 1,
+          "x": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/fact",
+        "code": "missing_property"
+      },
+      {
+        "path": "/apply/0/value",
+        "code": "missing_property"
+      },
+      {
+        "path": "/apply/1/op",
+        "code": "const_mismatch"
+      },
+      {
+        "path": "/apply/1/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "f"
+        }
+      },
+      "apply": [
+        {
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "f"
+          },
+          "value": true
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/op",
+        "code": "missing_property"
+      }
+    ]
   }
 ]

@@ -6,15 +6,21 @@ import type { CharacterId, Policy } from './contracts.gen.ts';
 import { barrierState, bodyOf, questOf, refString, type World } from './decision.ts';
 import { value } from './fact.ts';
 
-/** True when the condition tree holds for `actor` in `world`. */
-export function holds(world: World, actor: CharacterId, p: Policy): boolean {
+/**
+ * True when the condition tree holds for `actor` in `world`; each leaf it evaluates adds one to
+ * `steps.n` (04 §5.4 query_steps).
+ */
+export function holds(world: World, actor: CharacterId, p: Policy, steps = { n: 0 }): boolean {
   switch (p.op) {
     case 'all':
-      return p.items.every((i) => holds(world, actor, i));
+      return p.items.every((i) => holds(world, actor, i, steps));
     case 'any':
-      return p.items.some((i) => holds(world, actor, i));
+      return p.items.some((i) => holds(world, actor, i, steps));
     case 'not':
-      return !holds(world, actor, p.item);
+      return !holds(world, actor, p.item, steps);
+  }
+  steps.n++;
+  switch (p.op) {
     case 'fact_compare':
       return value(world, actor, p.fact) === p.equals;
     case 'has_item':

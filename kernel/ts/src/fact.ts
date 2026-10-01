@@ -5,7 +5,6 @@ import { decode } from './canonical.ts';
 import { key, same } from './compose.ts';
 import type {
   CharacterId,
-  Command,
   DefinitionRef,
   DeltaOp,
   DomainEvent,
@@ -13,7 +12,7 @@ import type {
   FactValue,
   StateScope,
 } from './contracts.gen.ts';
-import { event, refString, type Mint, type World } from './decision.ts';
+import { refString, type Mint, type World } from './decision.ts';
 
 /**
  * The scope `actor` reads and sets `fact` at: its one scope (the loader admits only player or
@@ -59,16 +58,21 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
 
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 
+/** What a sequence's fact_changed events share: its world, cause, correlation, time and actor. */
+export type Base = Pick<
+  DomainEvent,
+  'world_context_id' | 'actor_id' | 'logical_time' | 'causation_id' | 'correlation_id'
+>;
+
 /**
  * `events` with a fact_changed (old, new, the fact's scope) for each of `assigns` that changes
- * its fact (owner decision, R5 S4 Q2), ids from the command's `mint` in op order, each at the
- * next causal position `events` leaves free, then after them (04 §5.2 steps 4-5): a rule whose
- * sequence assigns before it emits leaves that position (rules/action_recipe.ts). `events`
- * itself when none changes.
+ * its fact (owner decision, R5 S4 Q2), each `base` with its id from the sequence's `mint` in op
+ * order, at the next causal position `events` leaves free, then after them (04 §5.2 steps 4-5):
+ * a rule whose sequence assigns before it emits leaves that position (rules/action_recipe.ts).
+ * `events` itself when none changes.
  */
 export function factChanged(
-  world: World,
-  command: { readonly id: Command['id']; readonly payload: { readonly actor_id: CharacterId } },
+  base: Base,
   mint: Mint,
   assigns: readonly Assign[],
   events: readonly DomainEvent[],
@@ -88,7 +92,9 @@ export function factChanged(
       };
       do position++;
       while (taken.has(position));
-      return { ...event(world, command, mint, position, payload as never), scope: o.scope };
+      return { id: mint() as DomainEvent['id'], ...base, scope: o.scope, position, payload };
     });
-  return added.length ? [...events, ...added].sort((a, b) => a.position - b.position) : events;
+  return added.length
+    ? [...events, ...(added as DomainEvent[])].sort((a, b) => a.position - b.position)
+    : events;
 }

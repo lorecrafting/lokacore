@@ -1,3 +1,4 @@
+// size: allow 310, the reference stage and the walks every loader stage shares
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -15,6 +16,7 @@ import { typed } from './fact.ts';
 import { barriers } from './cartridge_barriers.ts';
 import { links } from './cartridge_links.ts';
 import { quests } from './cartridge_quests.ts';
+import { reactions } from './cartridge_reactions.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -68,8 +70,8 @@ export function parts(c: Obj): [string, Obj, string][] {
   return out;
 }
 
-// Each node, with its path, of every action's, named policy's, recipe's, variant's, quest offer's
-// and current_state objective's condition.
+// Each node, with its path, of every action's, named policy's, recipe's, variant's, quest offer's,
+// current_state objective's and reaction's condition.
 export function nodes(c: Obj): [Obj, string][] {
   const walk = (p: Obj, at: string): [Obj, string][] => [
     [p, at],
@@ -95,6 +97,9 @@ export function nodes(c: Obj): [Obj, string][] {
         ? walk(q.objective.policy.root, `.cartridge.quests${step(ref)}.objective.policy.root`)
         : []),
     ]),
+    ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
+      r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
+    ),
   ];
 }
 
@@ -138,8 +143,9 @@ function checkers(c: Obj, out: Diagnostic[]) {
 // NPC, an item, a barrier, a variant, an action or a recipe uses has a catalog entry, every
 // touch link names what it may (cartridge_links.ts), every detail's first alias is its own and
 // typable, items and NPCs start where containment allows, recipes and rooms' action
-// contributions name what exists (recipes), quests are coherent (cartridge_quests.ts), and each
-// resource's bounds hold its start (RESOURCE_SPEC_INVALID).
+// contributions name what exists (recipes), quests and reactions are coherent
+// (cartridge_quests.ts, cartridge_reactions.ts), and each resource's bounds hold its start
+// (RESOURCE_SPEC_INVALID).
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -172,7 +178,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
-  out.push(...quests(c, check));
+  out.push(...quests(c, check), ...reactions(c, check));
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj))
     if (!(s.minimum <= s.start && s.start <= s.maximum))
       out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));

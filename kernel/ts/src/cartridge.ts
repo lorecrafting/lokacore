@@ -18,6 +18,7 @@ import {
   type Data,
   type Obj,
 } from './cartridge_refs.ts';
+import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from './sha256.ts';
 import { cmp, validate } from './validate.ts';
 
@@ -116,6 +117,7 @@ function keyStage(c: Obj): Diagnostic[] {
     'resources',
     'barriers',
     'quests',
+    'reactions',
   ]) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
@@ -144,8 +146,9 @@ function keyStage(c: Obj): Diagnostic[] {
 // recipe, resource, barrier), recipe check (by the events it produces, check@1's), recipe step
 // of any outcome (by the event it produces: fact_changed for fact.assign, custom_event for
 // event.emit; a resource.adjust, like a cost, through the resource it names), quest (by its
-// quest_activated) and daily schedule (also by the run_job that runs it, schedule@1's) the
-// cartridge uses has its owner in the lock.
+// quest_activated), daily schedule (also by the run_job that runs it, schedule@1's) and reaction
+// (also by its trigger's event and each fact.assign's fact_changed) the cartridge uses has its
+// owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const out = mismatched(locked, c.manifest.requires.capabilities);
@@ -182,6 +185,7 @@ function lockStage(c: Obj): Diagnostic[] {
     use('definition', 'resource', `.cartridge.resources${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
     use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
+  for (const [kind, name, at] of uses(c)) use(kind, name, at);
   return out;
 }
 

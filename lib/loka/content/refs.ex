@@ -39,7 +39,7 @@ defmodule Loka.Content.Refs do
   Diagnostics for node `n`'s reference `field` (at `steps` of `rel`), which names a definition
   of `kind` (the field's name unless given as `{field, kind}`): UNRESOLVED_REFERENCE, or for a
   fact FACT_TYPE_MISMATCH when the node's `equals` (a fact_compare) or `value` (a fact.assign) is
-  not of its type.
+  not of its type (a node with neither, a reaction's trigger, names the fact only).
   """
   @spec reference(String.t(), list(), String.t() | {String.t(), String.t()}, map(), map(), map()) ::
           [map()]
@@ -54,7 +54,7 @@ defmodule Loka.Content.Refs do
         s = "#{ref["cartridge_id"]}@#{ref["cartridge_version"]}:#{ref["kind"]}/#{ref["key"]}"
         [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]
 
-      {_, _, %{"value_type" => t}} ->
+      {_, _, %{"value_type" => t}} when is_map_key(n, "value") or is_map_key(n, "equals") ->
         v = if is_map_key(n, "value"), do: "value", else: "equals"
 
         if typed?(n[v], t),

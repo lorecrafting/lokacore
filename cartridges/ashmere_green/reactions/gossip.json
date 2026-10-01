@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "green_busy"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "green_busy",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "gossip_spread",
+      "value": true
+    }
+  ]
+}

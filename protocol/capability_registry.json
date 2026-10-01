@@ -229,7 +229,10 @@
     "key": "reaction",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "reaction"
+    ]
   },
   {
     "key": "behavior",

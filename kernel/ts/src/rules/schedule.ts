@@ -1,7 +1,7 @@
 // schedule@1 (capability_registry.json): wait advances the logical clock to `until` as one
 // explicit advance (04 §5.4; command.schema.json wait): a time.advance from now, no event. An
 // `until` not later than now is invalid_state and changes nothing. The host runs the advance's
-// due jobs in the same proposal (world.ts drain), each a run_job decided here.
+// due jobs in the same proposal (proposal.ts propose), each a run_job decided here.
 //
 // run_job is authority-internal (04 §1): only the host's drain builds it, never a client
 // invocation. It runs one pending job of an NPC's daily schedule (behavior.ts), reading the

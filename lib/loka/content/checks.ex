@@ -8,7 +8,7 @@ defmodule Loka.Content.Checks do
 
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
-  alias Loka.Content.{Barriers, Entities, Quests, Recipes, RoomParts}
+  alias Loka.Content.{Barriers, Entities, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
   @supported_pin 1
@@ -62,7 +62,7 @@ defmodule Loka.Content.Checks do
   node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
   included), a recipe's fact.assign fact, its target's room or the resource of its cost,
   threshold check or resource.adjust step, an exit's `to` and `barrier`, a barrier's
-  `key_item`, a quest objective's `item_acquired`, an item's location (its room,
+  `key_item`, a quest objective's `item_acquired`, a reaction trigger's fact or room, an item's location (its room,
   npc or item, as `in` selects), an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
   """
@@ -76,6 +76,13 @@ defmodule Loka.Content.Checks do
     exit = fn {d, e} -> {d, Map.new(e, field)} end
     room |> Map.delete("exits") |> expand(m) |> Map.put("exits", Map.new(exits, exit))
   end
+
+  # A reaction's trigger (ReactionRule on): its short fact or room.
+  def expand(%{"event" => "fact_changed", "fact" => k} = on, m) when is_binary(k),
+    do: Map.put(on, "fact", ref(k, "fact", m))
+
+  def expand(%{"event" => "entity_entered_room", "room" => k} = on, m) when is_binary(k),
+    do: Map.put(on, "room", ref(k, "room", m))
 
   # A post_activation_event objective (QuestObjective): its short item.
   def expand(%{"item_acquired" => k} = objective, m) when is_binary(k),
@@ -241,12 +248,13 @@ defmodule Loka.Content.Checks do
     do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
   # Every policy tree: a named policy's root, each action's inline one, each variant's, each
-  # recipe's and each quest's (its offer's and a current_state objective's).
+  # recipe's, each quest's (its offer's and a current_state objective's) and each reaction's.
   defp trees(defs, actions) do
     for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}) ++
       for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}) ++
       RoomParts.conditions(defs) ++
-      Entities.conditions(defs) ++ Recipes.conditions(defs) ++ Quests.conditions(defs)
+      Entities.conditions(defs) ++
+      Recipes.conditions(defs) ++ Quests.conditions(defs) ++ Reactions.conditions(defs)
   end
 
   # run_job is authority-internal (04 §1): no action builds it.

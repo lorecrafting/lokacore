@@ -314,5 +314,29 @@
       "rejection_consumes_nothing"
     ],
     "implemented_in": "Early R7/R8 S the start time of a fresh world; units stay the kernel's fixed ones"
+  },
+  "reaction": {
+    "spec": "21 §3.4, §11; 06 §14; 04 §5.2-§5.4, §9",
+    "contracts": [
+      "ReactionRule",
+      "Policy",
+      "DeltaOp",
+      "EventPayload"
+    ],
+    "modules": [
+      "kernel/ts/src/reaction.ts",
+      "kernel/ts/src/proposal.ts",
+      "kernel/ts/src/world.ts",
+      "kernel/ts/src/compose.ts",
+      "kernel/ts/src/cartridge_refs.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_green_hash.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "fault_discards_whole_proposal"
+    ],
+    "implemented_in": "Early R7/R8 R reaction rules on fact_changed and entity_entered_room, a when policy, fact.assign consequences, delivered FIFO in the proposal under the deliveries, events and reaction_depth budgets"
   }
 }

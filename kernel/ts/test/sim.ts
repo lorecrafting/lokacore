@@ -30,7 +30,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 3;
+export const GENERATOR = 4;
 /** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
 /** invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -199,7 +199,7 @@ function checked(kernel: Kernel, before: World, command: Command): Checked {
 const kindCode = (d: Exclude<DecisionResult, { kind: 'accepted' }>) =>
   d.kind === 'rejected' ? d.error.code : `fault ${d.code}`;
 
-/** The state composition reads, as world.ts adopt builds it. */
+/** The state composition reads, as proposal.ts adopt builds it. */
 export const base = (w: World) => ({
   ...w.state,
   fact_defaults: w.factDefaults,
@@ -248,7 +248,7 @@ function violated(
 }
 
 // An accepted step's State is the State before with its delta's composed changes and its rng,
-// and nothing else (world.ts adopt); a delta that does not compose is never accepted. A simulator
+// and nothing else (proposal.ts adopt); a delta that does not compose is never accepted. A simulator
 // failure (adopt_mismatch), not a registered invariant.
 function adopted(before: World, decision: Accepted, after: World): boolean {
   const result = compose(base(before) as never, decision.delta);

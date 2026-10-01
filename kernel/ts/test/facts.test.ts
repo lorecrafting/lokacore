@@ -46,7 +46,7 @@ const SET = {
 } as never;
 
 // Sets facts as a rule will: an accepted decision with fact.assign ops, admitted, composed and
-// adopted (world.ts adopt).
+// adopted (proposal.ts adopt).
 type Assign = [key: string, scope: object, expected: unknown, value: unknown];
 function set(w: World, ...assigns: Assign[]): World {
   const ops = assigns.map(([key, scope, expected, value]) => ({

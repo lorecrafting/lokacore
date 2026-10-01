@@ -1,0 +1,59 @@
+{
+  "facts": {
+    "green.busy": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Someone has come up to the green today."
+    },
+    "gossip.spread": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The green's gossip has started."
+    },
+    "lamps.lit": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The green's lamps were lit at dusk."
+    },
+    "bell.up": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The belfry bell has swung up."
+    },
+    "rope.taut": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The bell rope is pulled taut."
+    }
+  }
+}
