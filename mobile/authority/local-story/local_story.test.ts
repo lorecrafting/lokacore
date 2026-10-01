@@ -44,6 +44,7 @@ const items = world('cartridge_items_hash.json', [1, 2, 3, 4]);
 // numeric-vectors.json rng_steps[3].state; its next draw fails pick_lock (invocation_cases.json).
 const dusk = world('cartridge_dusk_hash.json', [27274249, 25704967, 31982592, 12605441]);
 const ferry = world('cartridge_ferry_hash.json', [1, 2, 3, 4]);
+const green = world('cartridge_green_hash.json', [1, 2, 3, 4]);
 
 type Tap = (statement: string, run: () => unknown) => unknown;
 /** A connection adapted to expo-sqlite's sync names; `tap` wraps each statement to fault it. */
@@ -544,4 +545,25 @@ test('a recipe whose time cost runs a job replays its receipt on retry', () => {
   assert.equal((after.state as { containers: Record<string, string> }).containers[BRAM], GREEN);
   assert.deepEqual(a.story.invoke(coil), { ...first, replay: true });
   assert.equal(a.story.world(), after);
+});
+
+// Breaks (03 §14; 04 §5.2): a retried command whose reactions committed decided again after a
+// restart (its reactions delivered again, their events re-minted or reordered) instead of
+// replaying its stored receipt byte for byte.
+test('a move whose reactions commit replays its events byte for byte after a restart', () => {
+  const path = save();
+  const north = { ...invocation(1, 'move', []), input: { direction: 'north' } };
+  const a = processOn(path, green);
+  const first = a.story.invoke(north) as Saved;
+  const events = (first.decision as { events: { payload: { type: string } }[] }).events;
+  // ashmere_green: the move's entity_entered_room, then green_noticed's and gossip's fact_changed.
+  assert.deepEqual(
+    events.map((e) => e.payload.type),
+    ['entity_entered_room', 'fact_changed', 'fact_changed'],
+  );
+  a.sql.close();
+  const b = processOn(path, green);
+  const again = b.story.invoke(north) as Saved;
+  assert.equal(encode(again.decision as never), encode(first.decision as never));
+  assert.deepEqual([again.replay, again.revision], [true, 1]);
 });

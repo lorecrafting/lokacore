@@ -1,0 +1,14 @@
+{
+  "room.ferry_landing.title": "Ferry Landing",
+  "room.ferry_landing.description": "Reeds crowd a slick wooden landing below the village.",
+  "room.village_green.title": "Village Green",
+  "room.village_green.description": "An old elm shades a patch of trodden grass. Lamps hang from its lowest branches, and a squat belfry stands to the east.",
+  "room.belfry.title": "Belfry",
+  "room.belfry.description": "A bell the size of a cart hangs from a beam, its rope wound around a cleat.",
+  "npc.bram.short": "Bram the ferryman",
+  "npc.bram.room": "[Bram] the ferryman is here.",
+  "npc.bram.description": "A ferryman with rope-scarred hands. He keeps the landing by day and goes up to the green at dusk.",
+  "npc.maud.short": "Maud",
+  "npc.maud.room": "[Maud] is here, listening to everyone at once.",
+  "npc.maud.description": "Maud knows everything said on the green by evening, and goes down to the landing to say it again."
+}

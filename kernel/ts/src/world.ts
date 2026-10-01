@@ -65,8 +65,8 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements
-// them (fact.ts, policy.ts, resource.ts; details in target.ts and look; a recipe's check in
-// rules/action_recipe.ts). Each has feature map cells.
+// them (fact.ts, policy.ts, resource.ts, reaction.ts; details in target.ts and look; a recipe's
+// check in rules/action_recipe.ts). Each has feature map cells.
 const RULELESS = [
   'fact',
   'policy',
@@ -75,6 +75,7 @@ const RULELESS = [
   'resource',
   'behavior',
   'calendar',
+  'reaction',
 ];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */

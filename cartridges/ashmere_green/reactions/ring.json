@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "belfry"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "bell_up",
+      "value": true
+    }
+  ]
+}

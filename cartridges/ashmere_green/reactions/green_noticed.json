@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "village_green"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "green_busy",
+      "value": true
+    }
+  ]
+}

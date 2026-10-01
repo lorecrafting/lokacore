@@ -23,6 +23,7 @@ const REACHED = [
   'cooldown',
   'exit_closed',
   'exit_locked',
+  'fault budget_exceeded',
   'fault evaluator_error',
   'insufficient_resource',
   'invalid_state',
@@ -43,6 +44,7 @@ const PICKED = [
   'facts',
   'ferry',
   'gate',
+  'green',
   'items',
   'road',
   'rooms',
@@ -150,7 +152,7 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   assert.ok(f.shrunk.length <= 4 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 3, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 4, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-4] commands:\n/);
 });
@@ -169,7 +171,7 @@ test('red control: a job completed in the root writer group trips job_complete_o
     }),
   );
   assert.equal(f.id, 'job_complete_owned_by_run');
-  assert.match(f.text, /cartridge ashmere_ferry/);
+  assert.match(f.text, /cartridge ashmere_green/);
 });
 
 test('red control: a rejection that moves the clock trips rejection_consumes_nothing', () => {

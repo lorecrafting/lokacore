@@ -1,0 +1,542 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_green (Early R7/R8 R; 05 §11; CartridgeArtifact.content_hash): reaction@1 with eight reaction rules (reaction.schema.json ReactionRule): two on someone entering the green (one only between 19:00 and 20:00, a time_window when), one on green_busy changing with a fact_compare when, one on entering the belfry, and four on two facts changing that never settle; five instance-scoped bool facts, two NPCs with daily schedules (Bram: landing from hour 6, green from hour 19; Maud: green from hour 6, landing from hour 20), three rooms and a calendar start at 06:00. Assembled by hand from the source files (manifest without entry and calendar plus resource@1, the lock, facts keyed by name with each . made _, empty policies and actions, each room, NPC and reaction with key added and short references expanded, the default pools, entry, text, calendar), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding.",
+  "value": {
+    "actions": {},
+    "calendar": {
+      "start": 21600
+    },
+    "entry": {
+      "cartridge_id": "ashmere_green",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "ferry_landing"
+    },
+    "facts": {
+      "ashmere_green@0.0.1:fact/green_busy": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "Someone has come up to the green today.",
+        "key": "green_busy"
+      },
+      "ashmere_green@0.0.1:fact/gossip_spread": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "The green's gossip has started.",
+        "key": "gossip_spread"
+      },
+      "ashmere_green@0.0.1:fact/lamps_lit": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "The green's lamps were lit at dusk.",
+        "key": "lamps_lit"
+      },
+      "ashmere_green@0.0.1:fact/bell_up": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "The belfry bell has swung up.",
+        "key": "bell_up"
+      },
+      "ashmere_green@0.0.1:fact/rope_taut": {
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "instance"
+        ],
+        "meaning": "The bell rope is pulled taut.",
+        "key": "rope_taut"
+      }
+    },
+    "format": "loka-cartridge-v2",
+    "lock": {
+      "capabilities": {
+        "resource": 1,
+        "schedule": 1,
+        "movement": 1,
+        "containment": 1,
+        "behavior": 1,
+        "calendar": 1,
+        "fact": 1,
+        "reaction": 1
+      },
+      "format": "loka-capability-lock-v1"
+    },
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_green",
+      "version": "0.0.1",
+      "title": "Ashmere — Green",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "resource": 1,
+          "schedule": 1,
+          "movement": 1,
+          "containment": 1,
+          "behavior": 1,
+          "calendar": 1,
+          "fact": 1,
+          "reaction": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "npcs": {
+      "ashmere_green@0.0.1:npc/bram": {
+        "keywords": [
+          "bram",
+          "ferryman"
+        ],
+        "short": "npc.bram.short",
+        "room_line": "npc.bram.room",
+        "description": "npc.bram.description",
+        "room": {
+          "cartridge_id": "ashmere_green",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "ferry_landing"
+        },
+        "daily_schedule": {
+          "6": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "19": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "village_green"
+          }
+        },
+        "key": "bram"
+      },
+      "ashmere_green@0.0.1:npc/maud": {
+        "keywords": [
+          "maud"
+        ],
+        "short": "npc.maud.short",
+        "room_line": "npc.maud.room",
+        "description": "npc.maud.description",
+        "room": {
+          "cartridge_id": "ashmere_green",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "village_green"
+        },
+        "daily_schedule": {
+          "6": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "village_green"
+          },
+          "20": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          }
+        },
+        "key": "maud"
+      }
+    },
+    "policies": {},
+    "reactions": {
+      "ashmere_green@0.0.1:reaction/bell_falls": {
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "rope_taut"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "rope_taut"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "bell_up"
+            },
+            "value": false
+          }
+        ],
+        "key": "bell_falls"
+      },
+      "ashmere_green@0.0.1:reaction/bell_rises": {
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "rope_taut"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "rope_taut"
+            },
+            "equals": false
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "bell_up"
+            },
+            "value": true
+          }
+        ],
+        "key": "bell_rises"
+      },
+      "ashmere_green@0.0.1:reaction/gossip": {
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "gossip_spread"
+            },
+            "value": true
+          }
+        ],
+        "key": "gossip"
+      },
+      "ashmere_green@0.0.1:reaction/green_noticed": {
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "village_green"
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "value": true
+          }
+        ],
+        "key": "green_noticed"
+      },
+      "ashmere_green@0.0.1:reaction/lamps_lit": {
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "village_green"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "time_window",
+            "from": 19,
+            "to": 20
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "lamps_lit"
+            },
+            "value": true
+          }
+        ],
+        "key": "lamps_lit"
+      },
+      "ashmere_green@0.0.1:reaction/ring": {
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "belfry"
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "bell_up"
+            },
+            "value": true
+          }
+        ],
+        "key": "ring"
+      },
+      "ashmere_green@0.0.1:reaction/rope_pulls": {
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "bell_up"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "bell_up"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "rope_taut"
+            },
+            "value": true
+          }
+        ],
+        "key": "rope_pulls"
+      },
+      "ashmere_green@0.0.1:reaction/rope_slacks": {
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "bell_up"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "bell_up"
+            },
+            "equals": false
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "rope_taut"
+            },
+            "value": false
+          }
+        ],
+        "key": "rope_slacks"
+      }
+    },
+    "resources": {
+      "ashmere_green@0.0.1:resource/hp": {
+        "gain": 5,
+        "key": "hp",
+        "maximum": 20,
+        "minimum": 0,
+        "start": 20
+      },
+      "ashmere_green@0.0.1:resource/ma": {
+        "gain": 4,
+        "key": "ma",
+        "maximum": 100,
+        "minimum": 0,
+        "start": 100
+      },
+      "ashmere_green@0.0.1:resource/mv": {
+        "gain": 18,
+        "key": "mv",
+        "maximum": 82,
+        "minimum": 0,
+        "start": 82
+      }
+    },
+    "rooms": {
+      "ashmere_green@0.0.1:room/belfry": {
+        "title": "room.belfry.title",
+        "description": "room.belfry.description",
+        "exits": {
+          "west": {
+            "to": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "village_green"
+            }
+          }
+        },
+        "key": "belfry"
+      },
+      "ashmere_green@0.0.1:room/ferry_landing": {
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "village_green"
+            }
+          }
+        },
+        "key": "ferry_landing"
+      },
+      "ashmere_green@0.0.1:room/village_green": {
+        "title": "room.village_green.title",
+        "description": "room.village_green.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          },
+          "east": {
+            "to": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "belfry"
+            }
+          }
+        },
+        "key": "village_green"
+      }
+    },
+    "text": {
+      "room.ferry_landing.title": "Ferry Landing",
+      "room.ferry_landing.description": "Reeds crowd a slick wooden landing below the village.",
+      "room.village_green.title": "Village Green",
+      "room.village_green.description": "An old elm shades a patch of trodden grass. Lamps hang from its lowest branches, and a squat belfry stands to the east.",
+      "room.belfry.title": "Belfry",
+      "room.belfry.description": "A bell the size of a cart hangs from a beam, its rope wound around a cleat.",
+      "npc.bram.short": "Bram the ferryman",
+      "npc.bram.room": "[Bram] the ferryman is here.",
+      "npc.bram.description": "A ferryman with rope-scarred hands. He keeps the landing by day and goes up to the green at dusk.",
+      "npc.maud.short": "Maud",
+      "npc.maud.room": "[Maud] is here, listening to everyone at once.",
+      "npc.maud.description": "Maud knows everything said on the green by evening, and goes down to the landing to say it again."
+    }
+  },
+  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"entry\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_green@0.0.1:fact/bell_up\":{\"key\":\"bell_up\",\"meaning\":\"The belfry bell has swung up.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"ashmere_green@0.0.1:fact/gossip_spread\":{\"key\":\"gossip_spread\",\"meaning\":\"The green's gossip has started.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"ashmere_green@0.0.1:fact/green_busy\":{\"key\":\"green_busy\",\"meaning\":\"Someone has come up to the green today.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"ashmere_green@0.0.1:fact/lamps_lit\":{\"key\":\"lamps_lit\",\"meaning\":\"The green's lamps were lit at dusk.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"ashmere_green@0.0.1:fact/rope_taut\":{\"key\":\"rope_taut\",\"meaning\":\"The bell rope is pulled taut.\",\"scopes\":[\"instance\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"fact\":1,\"movement\":1,\"reaction\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_green\",\"requires\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"fact\":1,\"movement\":1,\"reaction\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Green\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_green@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"},\"ashmere_green@0.0.1:npc/maud\":{\"daily_schedule\":{\"20\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"description\":\"npc.maud.description\",\"key\":\"maud\",\"keywords\":[\"maud\"],\"room\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"room_line\":\"npc.maud.room\",\"short\":\"npc.maud.short\"}},\"policies\":{},\"reactions\":{\"ashmere_green@0.0.1:reaction/bell_falls\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":false}],\"key\":\"bell_falls\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"ashmere_green@0.0.1:reaction/bell_rises\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"bell_rises\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":false,\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"ashmere_green@0.0.1:reaction/gossip\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"gossip_spread\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"gossip\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"ashmere_green@0.0.1:reaction/green_noticed\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"green_busy\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"green_noticed\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"ashmere_green@0.0.1:reaction/lamps_lit\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"lamps_lit\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"lamps_lit\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}},\"when\":{\"policy_version\":1,\"root\":{\"from\":19,\"op\":\"time_window\",\"to\":20}}},\"ashmere_green@0.0.1:reaction/ring\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"ring\",\"on\":{\"event\":\"entity_entered_room\",\"room\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"belfry\",\"kind\":\"room\"}}},\"ashmere_green@0.0.1:reaction/rope_pulls\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"rope_pulls\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"ashmere_green@0.0.1:reaction/rope_slacks\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"rope_taut\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":false}],\"key\":\"rope_slacks\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":false,\"fact\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_up\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"resources\":{\"ashmere_green@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_green@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_green@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_green@0.0.1:room/belfry\":{\"description\":\"room.belfry.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"belfry\",\"title\":\"room.belfry.title\"},\"ashmere_green@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_green@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"belfry\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"ashmere_green\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"text\":{\"npc.bram.description\":\"A ferryman with rope-scarred hands. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"npc.maud.description\":\"Maud knows everything said on the green by evening, and goes down to the landing to say it again.\",\"npc.maud.room\":\"[Maud] is here, listening to everyone at once.\",\"npc.maud.short\":\"Maud\",\"room.belfry.description\":\"A bell the size of a cart hangs from a beam, its rope wound around a cleat.\",\"room.belfry.title\":\"Belfry\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing below the village.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass. Lamps hang from its lowest branches, and a squat belfry stands to the east.\",\"room.village_green.title\":\"Village Green\"}}",
+  "sha256": "27f9b89e68babac04ae08b6a143ef825b106f9d8373f4676ca0c97f687d55b56"
+}

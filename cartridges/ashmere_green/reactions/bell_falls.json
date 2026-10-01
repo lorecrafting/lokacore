@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "rope_taut"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "rope_taut",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "bell_up",
+      "value": false
+    }
+  ]
+}
