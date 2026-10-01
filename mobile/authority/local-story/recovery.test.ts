@@ -229,3 +229,20 @@ test('a new game at the cap makes room for its header by deleting the old run', 
   assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
   assert.deepEqual(runs(p), [id(4)]);
 });
+
+// Breaks (ADR-075 §2, cap rule): an unknown COMMIT's entry and its settled follow-up, written as
+// one pair, counted as one row, so the pair overshoots the cap. Simulated: the ack is lost.
+test('an entry pair one row below the cap is dropped whole', () => {
+  let lose = false;
+  const p = open(save(), (s, run) => {
+    const out = run();
+    if (!lose || s !== 'COMMIT') return out;
+    lose = false;
+    throw new Error('COMMIT acknowledgement lost');
+  });
+  p.story.invoke(take);
+  pad(p, CAP - 1);
+  lose = true;
+  assert.equal(revision(p.story.invoke(give)), 2);
+  assert.equal(p.one('SELECT count(*) FROM trace'), CAP - 1);
+});
