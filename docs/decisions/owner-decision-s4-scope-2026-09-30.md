@@ -11,8 +11,8 @@ due jobs ([07 §10](../spec/07-offline-storypacks-to-mmo.md#10-offline-time),
 What lands now?
 
 - A: the due-job drain (the 04 §5.4 explicit-advance due set, `run_job` and its
-  authority-internal IdSource tag) lands with the first real job, Bram's schedule (owner: R6P P3/P4; the PM placed its owner in the
-  [Early R7/R8 ROADMAP row](../ROADMAP.md#proposed-r6-slices), which R6P P4 integrates; "wait to hour 19
+  authority-internal IdSource tag) lands with the first real job, Bram's schedule in R6P
+  P3/P4 (the ROADMAP holds the placement, [slices](../ROADMAP.md#slices); "wait to hour 19
   moves Bram through a durable scheduled command", [00a:689](../spec/00a-chapter-one-content.md)).
   `real_elapsed` time and
   [OFF-08, OFF-09 and OFF-13](../spec/15-acceptance-scenarios.md#b-offline-lifecycle) become
