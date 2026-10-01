@@ -182,7 +182,8 @@ test('a save opened with another content hash is refused and left untouched', ()
 
 // Breaks (OFF-07): a head that does not parse replaced by the fresh world or opened at all; a
 // corrupt save under another release offered a new game (re-pinned unawares); a save missing its
-// head taken for an empty one and overwritten; the player's new game not making a playable save
+// head (or head and identity) taken for an empty one and overwritten; a head RNG of the wrong
+// shape opened; the player's new game not making a playable save
 // with new ids or its trace segment not starting fresh.
 test('a save that does not parse is save_corrupt until the player starts a new game', () => {
   const path = save();
@@ -198,6 +199,18 @@ test('a save that does not parse is save_corrupt until the player starts a new g
   const lone = processOn(save(), { newId: ids() }); // a head without its identity row
   lone.sql.exec('DELETE FROM save');
   assert.equal(processOn(lone.sql.location()!).opened.kind, 'save_corrupt');
+  for (const damage of [
+    'DELETE FROM head; DELETE FROM save', // rows and receipts survive: not an empty database
+    "UPDATE head SET rng = '[1,2]'", // parses, but is no RngState
+  ]) {
+    const other = processOn(save(), { newId: ids() });
+    other.story.invoke(pick(1));
+    other.sql.exec(damage);
+    const before = stored(other);
+    const reopened = processOn(other.sql.location()!);
+    assert.equal(reopened.opened.kind, 'save_corrupt', damage);
+    assert.deepEqual(stored(reopened), before);
+  }
   b.sql.exec('DELETE FROM head');
   assert.equal(processOn(path).opened.kind, 'save_corrupt'); // never a new save over the rest
   b.sql.exec("UPDATE save SET pin = '{'"); // an unreadable identity: no pin to compare
@@ -284,6 +297,98 @@ test('a new game whose COMMIT is unknown is fenced; settling it moves play to th
   assert.deepEqual(saved(p.story.invoke(pick(1))), [false, 1]);
   assert.equal(p.one('SELECT DISTINCT scope FROM receipt'), `story/${id(3)}/${ACTOR}`);
   assert.deepEqual(traced(p).slice(2), [
+    [id(4), 'fresh'],
+    [id(4), 1, 'committed'],
+  ]);
+});
+
+// The definite COMMIT failure of the storage lessons: a deferred foreign-key violation, raised by
+// the identity row's write, fails the real COMMIT; its ROLLBACK succeeds.
+const FAIL_COMMIT = `PRAGMA foreign_keys = ON; CREATE TABLE parent (id INTEGER PRIMARY KEY);
+  CREATE TABLE orphan (id INTEGER REFERENCES parent DEFERRABLE INITIALLY DEFERRED);
+  CREATE TRIGGER orphaned AFTER INSERT ON save BEGIN INSERT INTO orphan VALUES (1); END;`;
+
+// Breaks (03 §15; 10 §31): a new game whose COMMIT genuinely failed answered as replaced (or
+// pending forever), memory or the save changed, or the old run's receipts no longer replaying.
+test('a new game whose COMMIT fails keeps the old save, memory and receipts', () => {
+  const p = processOn(save(), { newId: ids() });
+  const first = p.story.invoke(pick(1));
+  p.sql.exec(FAIL_COMMIT);
+  const [before, world] = [stored(p), p.story.world()];
+  assert.throws(() => p.story.newGame(), /nothing was replaced/);
+  assert.deepEqual(stored(p), before);
+  assert.equal(p.story.world(), world);
+  assert.deepEqual(p.story.invoke(pick(1)), { ...(first as object), replay: true });
+});
+
+// Breaks (03 §15; ADR-072: memory after the commit): a committed new game whose adoption read
+// fails thrown with memory still the old run (the next action then saves the old world over the
+// new save), or a retry that replaces the save a second time under new ids.
+test('a committed new game is adopted before play; a retry does not replace it twice', () => {
+  let [armed, unread] = [false, false];
+  const tap: Tap = (s, run) => {
+    if (unread && s.startsWith('SELECT revision')) {
+      unread = false;
+      throw new Error('read failed');
+    }
+    const out = run();
+    if (armed && s === 'COMMIT') [armed, unread] = [false, true];
+    return out;
+  };
+  const p = processOn(save(), { newId: ids(), tap });
+  p.story.invoke(pick(1));
+  const world = p.story.world();
+  armed = true;
+  assert.deepEqual(p.story.newGame(), { kind: 'pending' });
+  assert.equal(p.story.world(), world);
+  assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
+  assert.deepEqual(p.all(IDENTITY), [identity(3)]);
+  assert.deepEqual(saved(p.story.invoke(pick(1))), [false, 1]);
+  assert.deepEqual([p.one('SELECT revision FROM head'), state(p)], [1, PICKED]);
+});
+
+// Breaks (OFF-07; 03 §15): the corrupt save's new game answering pending forever, or replaced, when
+// its COMMIT genuinely failed; answering replaced while its outcome is unknown; or a retry after an
+// unknown COMMIT that committed replacing it again under new ids.
+test("a corrupt save's new game settles its COMMIT like any other", () => {
+  const corrupted = (tap?: Tap) => {
+    const path = save();
+    const a = processOn(path, { newId: ids() });
+    a.story.invoke(pick(1));
+    a.sql.exec(`UPDATE state_row SET value = '{' WHERE section = 'jobs'`);
+    a.sql.close();
+    let n = 4;
+    const p = processOn(path, { newId: () => id(++n), ...(tap && { tap }) });
+    return { p, newGame: (p.opened as Extract<typeof p.opened, { kind: 'save_corrupt' }>).newGame };
+  };
+  const failing = corrupted();
+  failing.p.sql.exec(FAIL_COMMIT);
+  const before = stored(failing.p);
+  assert.throws(() => failing.newGame(), /nothing was replaced/);
+  assert.deepEqual(stored(failing.p), before);
+  const { tap, arm } = lostAck();
+  const lost = corrupted(tap);
+  arm();
+  assert.deepEqual(lost.newGame(), { kind: 'pending' });
+  assert.deepEqual(lost.newGame(), { kind: 'replaced' });
+  assert.deepEqual(lost.p.all(IDENTITY), [identity(5)]);
+});
+
+// Breaks (ADR-075 §4): with the trace unwritable across a new game and its first command, the
+// reopen filing the new run's entry under the old run's header (a replay of the old run would
+// apply it) instead of after the new run's own fresh header.
+test("a new run's entries missed by the trace follow its own header", () => {
+  const path = save();
+  const a = processOn(path, { newId: ids() });
+  a.story.invoke(pick(1));
+  a.sql.exec(`CREATE TRIGGER t BEFORE INSERT ON trace BEGIN SELECT RAISE(ABORT, 'no space'); END`);
+  assert.deepEqual(a.story.newGame(), { kind: 'replaced' });
+  assert.deepEqual(saved(a.story.invoke(pick(1))), [false, 1]);
+  a.sql.exec('DROP TRIGGER t');
+  a.sql.close();
+  assert.deepEqual(traced(processOn(path)), [
+    [id(2), 'fresh'],
+    [id(2), 1, 'committed'],
     [id(4), 'fresh'],
     [id(4), 1, 'committed'],
   ]);

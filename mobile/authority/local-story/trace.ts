@@ -49,11 +49,11 @@ export function traceCommand(
 }
 
 /**
- * Brings the trace up to the store (ADR-075 §4): a header for a new trace; the committed entry of
- * every receipted Command that has none but `skip`, in commit order, under the ids of the header
- * they were decided under; then, when `ids` differ from that header's (an update, a new game),
- * a new run header: from the saved state after an update, from the fresh world for a new game's
- * run. False, never a throw, unless all was written.
+ * Brings the trace up to the store (ADR-075 §4): a fresh header for a new trace or a new game's
+ * run; the committed entry of every receipted Command that has none but `skip`, in commit order,
+ * under the ids of the header they were decided under; then, when `ids` differ from that header's
+ * (an app or content update), a new header from the saved state. False, never a throw, unless all
+ * was written.
  */
 export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolean {
   const header = (initial: object) =>
@@ -69,7 +69,12 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
     if (!last && !header(FRESH)) return false;
     // ponytail: receipts do not record the deciding ids, so if an updated process never wrote its
     // header, its missed entries land in the previous segment; rare, R6 S6 owns it (ROADMAP).
-    const prior: RunIds = last ? JSON.parse(last.record).ids : ids;
+    const lastIds: RunIds = last ? JSON.parse(last.record).ids : ids;
+    // A new run_id is a new game, whose receipts are the only ones left: its header comes first,
+    // then they follow it (ADR-075 §4). ponytail: an imported fork (R12) is not a fresh world.
+    const newRun = lastIds.run_id !== ids.run_id;
+    if (newRun && !header(FRESH)) return false;
+    const prior = newRun ? ids : lastIds;
     type Row = { command: string; response: string; revision: number };
     const missing = db.getAllSync<Row>(
       `SELECT command, response, revision FROM receipt WHERE command != 'null' AND command_id != ?
@@ -85,9 +90,7 @@ export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolea
         ])
       )
         return false;
-    if (encode(prior as never) === encode(ids as never)) return true;
-    // ponytail: another run_id is a new game, from the fresh world; an imported fork (R12) is not.
-    return header(prior.run_id === ids.run_id ? SAVED : FRESH);
+    return encode(prior as never) === encode(ids as never) || header(SAVED);
   } catch {
     return false;
   }

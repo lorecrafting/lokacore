@@ -46,12 +46,20 @@ export function openStory(db: Db, fresh: World, host: Host) {
   const pin = loaded ? loaded.meta.pin : pinOf(db);
   if (pin && pin.content_hash !== host.content_hash)
     return { kind: 'pinned_release_missing' as const, pinned: pin, offered: host.content_hash };
-  // OFF-07: nothing to recover from until S3b; only the player's explicit new game moves on.
-  if (!loaded)
-    return {
-      kind: 'save_corrupt' as const,
-      newGame: () => ({ kind: replace(db, fresh, first(fresh, host)) ? 'replaced' : 'pending' }),
+  // OFF-07: nothing to recover from until S3b; only the player's explicit new game moves on,
+  // settled as any (reopen once it is `replaced`).
+  if (!loaded) {
+    const s: Story = {
+      db,
+      fresh,
+      host,
+      world: fresh,
+      revision: 0,
+      meta: undefined!,
+      behind: false,
     };
+    return { kind: 'save_corrupt' as const, newGame: () => newGame(s) };
+  }
   const s: Story = { db, fresh, host, ...loaded, behind: false };
   s.behind = !catchUp(db, ids(s), fresh.context);
   // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
@@ -70,7 +78,8 @@ type Story = {
   readonly host: Host;
   world: World;
   revision: number;
-  meta: Meta;
+  meta: Meta; // undefined only on a corrupt save, until its new game is adopted
+  game?: string | undefined; // the run of a new game whose COMMIT outcome is unknown
   behind: boolean; // the trace misses a committed entry or its header; catch up before the next
   // Settles the attempt whose COMMIT outcome is unknown, throwing while it still is; no decision
   // runs until it has.
@@ -226,25 +235,28 @@ function traceAfter(
  * and the new run's trace opens with its header. An unknown COMMIT fences like an invocation's.
  */
 function newGame(s: Story) {
+  const retried = s.fence && s.game; // a retry of the new game still fenced
   if (fenced(s)) return { kind: 'pending' } as const;
+  s.game = undefined;
+  if (retried && s.meta?.run_id === retried) return { kind: 'replaced' } as const; // not twice
   // Best effort before its receipts go (the trace is derived and never blocks the player): the
   // old run's missed entries can be recovered only from them.
   if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   const next = first(s.fresh, s.host);
-  const replaced = () => {
-    adopt(s);
-    s.behind = !catchUp(s.db, ids(s), s.fresh.context);
+  const replaced = replace(s.db, s.fresh, next); // throws on a definite failure, nothing written
+  // Settled like an unknown COMMIT even when committed, so memory never serves the old run after
+  // the new one is saved: a failed read while adopting it fences every call until it is adopted.
+  s.fence = () => {
+    const run = () => s.db.getFirstSync<{ run_id: string }>('SELECT run_id FROM save')?.run_id;
+    if (replaced || reconcile(s.db, run) === next.run_id) {
+      adopt(s);
+      s.behind = !catchUp(s.db, ids(s), s.fresh.context);
+    }
+    return undefined;
   };
-  // replace throws on a definite failure, with nothing written.
-  if (replace(s.db, s.fresh, next)) replaced();
-  else {
-    s.fence = () => {
-      const run = () => s.db.getFirstSync<{ run_id: string }>('SELECT run_id FROM save')?.run_id;
-      if (reconcile(s.db, run) === next.run_id) replaced();
-      return undefined;
-    };
-    if (fenced(s)) return { kind: 'pending' } as const;
-    if (s.meta.run_id !== next.run_id) throw new Error('COMMIT failed; nothing was replaced');
-  }
+  s.game = next.run_id;
+  if (fenced(s)) return { kind: 'pending' } as const;
+  s.game = undefined;
+  if (s.meta?.run_id !== next.run_id) throw new Error('COMMIT failed; nothing was replaced');
   return { kind: 'replaced' } as const;
 }

@@ -72,8 +72,8 @@ function cartridgeOf(bundled: Bundled): Cartridge {
   return loaded.cartridge as Cartridge;
 }
 
-// Ids continue from the highest receipt in this allocator's own namespace, across forks (replies
-// without a receipt leave no trace). ponytail: reads the receipt table directly; openStory exposes
+// Ids continue from the highest receipt in this allocator's own namespace (replies without a
+// receipt leave no trace; a new game deletes the receipts, and its new scope starts again at 1). ponytail: reads the receipt table directly; openStory exposes
 // none.
 function lastId(db: Db): number {
   const last = db.getFirstSync<{ id: string | null }>(

@@ -116,8 +116,8 @@ The table below describes the files as imported. Later amendments are in git his
   - Amendment notes: 03 §27; 14 readiness notes (R6, R12); 15 RUN-02 and RUN-05;
     release-scope RUN gate meaning (json and md edited identically).
   - Note only, text unchanged: 16 ADR-066 entry. Retained unchanged: 10 §16's garbage
-    collection condition (its "manual bookmark" clause is vacuous) and 23 §11's fork
-    provenance (forks still come from import or backup).
+    collection condition and 10 §32's package retention (their bookmark clauses are vacuous)
+    and 23 §11's fork provenance (forks still come from import or backup).
 
 ## Link rewrites (the only byte changes at import)
 

@@ -7,6 +7,7 @@ import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
 import { target } from '../../../kernel/ts/src/compose.ts';
 import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
+import { validate } from '../../../kernel/ts/src/validate.ts';
 import { row } from '../../../kernel/ts/src/world.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
@@ -76,7 +77,10 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   type Head = { revision: number; clock: number; rng: string };
   const head = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head');
   const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save');
-  if (!head && !m) {
+  // Empty only when no table holds progress (the trace is derived): a missing head or identity
+  // beside surviving rows or receipts is corrupt.
+  const any = (t: string) => !!db.getFirstSync(`SELECT 1 FROM ${t} LIMIT 1`);
+  if (!head && !m && !['state_row', 'receipt'].some(any)) {
     const meta = first();
     const saved = replace(db, fresh, meta);
     if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
@@ -90,6 +94,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
       (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
     const rng = JSON.parse(head.rng);
+    if (validate('RngState', rng).length) return undefined; // parses, but no RNG state
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v!));
     const world = { ...fresh, state: { ...state, clock: head.clock, rng } as World['state'] };
     return { world, revision: head.revision, meta: { ...m, parent, seed, pin } as Meta };
