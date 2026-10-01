@@ -74,7 +74,8 @@ const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
 /**
  * The saved world, revision and identity; with no save, `fresh` saved whole at revision 0 under
  * the identity `first()` allocates. Undefined when the head, a row or the identity does not parse
- * (OFF-07): a corrupt save is reported, never replaced by `fresh`.
+ * or lacks a field play relies on: the head's numbers, the receipt scope and replay ids (03 §14),
+ * the binding (null: a guest) (OFF-07). A corrupt save is reported, never replaced by `fresh`.
  */
 export function load(db: Db, fresh: World, first: () => Meta) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
@@ -101,11 +102,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };
-  if (typeof h.revision !== 'number' || typeof h.clock !== 'number') return undefined;
-  // The receipt scope and replay ids (03 §14) and the binding (null: a guest), as written.
-  const str = (v: unknown) => typeof v === 'string';
-  if (!str(m.lineage_id) || !str(m.run_id) || !(str(m.binding) || m.binding === null))
-    return undefined;
+  const got = [h.revision, h.clock, m.lineage_id, m.run_id, m.binding === null ? '' : m.binding];
+  if (got.map((v) => typeof v).join() !== 'number,number,string,string,string') return undefined;
   try {
     for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
       (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
