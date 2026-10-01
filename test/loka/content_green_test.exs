@@ -68,14 +68,18 @@ defmodule Loka.ContentGreenTest do
     assert compile(dir, files) == {:ok, @expected, []}
   end
 
-  # Breaks: a trigger of an unregistered event type, a trigger or fact.assign naming a fact or
-  # room the cartridge lacks, or a value not of its fact's type compiling.
+  # Breaks: a trigger of an unregistered event type, a trigger, `when` or fact.assign naming a
+  # fact or room the cartridge lacks, or a value not of its fact's type compiling.
   test "reaction triggers and consequences are checked", %{tmp_dir: dir} do
     cases = [
       {rule("ring", &put_in(&1, ["on", "event"], "bell_rung")),
        d("SCHEMA_VIOLATION", "reactions/ring.on.event", %{"error" => "unknown_variant"})},
       {rule("gossip", &put_in(&1, ["on", "fact"], "rumour")),
        d("UNRESOLVED_REFERENCE", "reactions/gossip.on.fact", %{
+         "target" => "ashmere_green@0.0.1:fact/rumour"
+       })},
+      {rule("gossip", &put_in(&1, ["when", "root", "fact"], "rumour")),
+       d("UNRESOLVED_REFERENCE", "reactions/gossip.when.root.fact", %{
          "target" => "ashmere_green@0.0.1:fact/rumour"
        })},
       {rule("ring", &put_in(&1, ["on", "room"], "tower")),
