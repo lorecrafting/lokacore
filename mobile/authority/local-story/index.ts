@@ -3,3 +3,4 @@
 export { KERNEL_ID } from '../../../kernel/ts/src/index.ts';
 export { openStory, type Reply } from './authority.ts';
 export type { Db } from './store.ts';
+export type { RunIds } from './trace.ts';

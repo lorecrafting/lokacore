@@ -14,6 +14,7 @@ export type Db = {
   runSync(sql: string, ...params: (string | number | null)[]): unknown;
   getFirstSync<T>(sql: string, ...params: (string | number | null)[]): T | null;
   getAllSync<T>(sql: string, ...params: (string | number | null)[]): T[];
+  isInTransactionSync(): boolean;
 };
 
 /** A command receipt (03 §14): the original intent, resolved command and stable response. */
@@ -39,24 +40,29 @@ CREATE TABLE IF NOT EXISTS state_row (section TEXT NOT NULL, key TEXT NOT NULL,
 CREATE TABLE IF NOT EXISTS receipt (scope TEXT NOT NULL, invocation_id TEXT NOT NULL,
   command_id TEXT NOT NULL, actor_id TEXT NOT NULL, intent_digest_version TEXT NOT NULL,
   intent_digest TEXT NOT NULL, command TEXT NOT NULL, revision INTEGER NOT NULL,
-  response TEXT NOT NULL, PRIMARY KEY (scope, invocation_id), UNIQUE (scope, command_id)) STRICT;`;
+  response TEXT NOT NULL, PRIMARY KEY (scope, invocation_id), UNIQUE (scope, command_id)) STRICT;
+CREATE TABLE IF NOT EXISTS trace (ordinal INTEGER NOT NULL, command_id TEXT,
+  commit_state TEXT, record TEXT NOT NULL) STRICT;`;
 
 const UPSERT = 'INSERT OR REPLACE INTO state_row VALUES (?, ?, ?)';
 const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
 
 /** The saved world and revision, or `fresh` saved whole at revision 0 when there is none. */
 export function load(db: Db, fresh: World): { world: World; revision: number } {
+  // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
+  if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
   db.execSync(SCHEMA);
   type Head = { revision: number; clock: number; rng: string };
   const head = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head');
   if (!head) {
     const { clock, rng, ...sections } = fresh.state;
-    transaction(db, () => {
+    const saved = transaction(db, () => {
       db.runSync(HEAD, 0, clock, encode(rng as Json));
       for (const [section, rows] of Object.entries(sections))
         for (const [key, value] of Object.entries(rows))
           db.runSync(UPSERT, section, key, encode(value));
     });
+    if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
     return { world: fresh, revision: 0 };
   }
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
@@ -88,10 +94,11 @@ export function receipt(db: Db, scope: string, invocation_id: string): Receipt |
 /**
  * Commits one decision in one transaction (03 §15): for an accepted one the rows its delta
  * wrote, the revision, clock and RNG of `next`; always the receipt. Throws, with nothing written,
- * on a definite failure; the caller adopts `next` only after this returns.
+ * on a definite failure; false when the outcome is unknown (`transaction`; then `reconcile`).
+ * The caller adopts `next` only after this returns true.
  */
-export function commit(db: Db, next: World, decision: DecisionResult, r: Receipt): void {
-  transaction(db, () => {
+export function commit(db: Db, next: World, decision: DecisionResult, r: Receipt): boolean {
+  return transaction(db, () => {
     if (decision.kind === 'accepted') {
       db.runSync(HEAD, r.revision, next.state.clock, encode(next.state.rng as Json));
       for (const op of decision.delta.ops) {
@@ -114,17 +121,51 @@ export function commit(db: Db, next: World, decision: DecisionResult, r: Receipt
   });
 }
 
-// ponytail: a failed COMMIT is treated as not committed; S2 fences and reconciles it (03 §15).
-function transaction(db: Db, writes: () => void): void {
+/**
+ * The receipt of `invocation_id` once the outcome of a failed COMMIT is settled (03 §15), or a
+ * throw while it is not. After ROLLBACK leaves the one connection outside a transaction, the
+ * attempt can no longer commit, so a missing receipt is a confirmed non-commit; inside one, a
+ * read would see the attempt's own uncommitted receipt.
+ */
+export function reconcile(db: Db, scope: string, invocation_id: string): Receipt | undefined {
+  if (!rollback(db)) throw new Error('transaction still open; outcome unknown');
+  return receipt(db, scope, invocation_id);
+}
+
+/**
+ * Runs `writes` and COMMIT in one transaction: true once committed; throws, rolled back, when a
+ * write fails; false, after trying ROLLBACK, when COMMIT itself fails (not proof of rollback,
+ * 03 §15) or when a failed write's ROLLBACK leaves the transaction open (its uncommitted rows
+ * would read as saved). Either false is settled by `reconcile` before the next decision.
+ */
+export function transaction(db: Db, writes: () => void): boolean {
+  // Only a failed trace write can leave one open here (reconcile settles gameplay's first).
+  if (db.isInTransactionSync()) db.execSync('ROLLBACK');
   db.execSync('BEGIN IMMEDIATE');
   try {
     writes();
-    db.execSync('COMMIT');
   } catch (e) {
     // SQLite may already have rolled back (SQLITE_FULL); the original error is the one to raise.
-    try {
-      db.execSync('ROLLBACK');
-    } catch {}
-    throw e;
+    if (rollback(db)) throw e;
+    return false;
+  }
+  try {
+    db.execSync('COMMIT');
+    return true;
+  } catch {
+    rollback(db); // a COMMIT that failed with the transaction open leaves it open
+    return false;
+  }
+}
+
+/** Tries ROLLBACK; true only when the connection answers that no transaction is open after it. */
+function rollback(db: Db): boolean {
+  try {
+    db.execSync('ROLLBACK');
+  } catch {}
+  try {
+    return !db.isInTransactionSync();
+  } catch {
+    return false; // a broken connection: unknown
   }
 }
