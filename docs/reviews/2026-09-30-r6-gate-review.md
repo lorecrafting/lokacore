@@ -199,16 +199,18 @@ connection reading while a write is open (`faults.test.ts:84`). It stays green i
 the phone the reader gets `SQLITE_BUSY` or the recovery differs, and no test runs the phone's
 mode.
 
-Edit (pick one):
+Edit: drop the five pragmas so the suites run as the phone does, and correct the five header
+comments. Do not set WAL in production instead: run 2 ran on the rollback journal, so a changed
+production journal mode voids it as gate evidence and needs the device steps run again (and it
+is an app storage change, a scope trigger in the S6b brief).
 
-- Drop the five pragmas so the suites run as the phone does, and correct the five header
-  comments.
-- Or set WAL in production, where the app opens the database.
-
-Either way:
+Also:
 
 - The evidence README states the mapping: kill during actions = S6a's SIGKILL corpus (phone
   journal mode) plus the device kills between taps.
+- PM: turn the journal mode into an inspected fact. If run 2's copy still exists, run
+  `sqlite3 <copy>/loka-save.db 'pragma journal_mode'`; expected `delete` (WAL is persisted in
+  the file header). Record the result in the evidence README.
 - Add a storage-lessons line: expo-sqlite on iOS does not enable WAL.
 
 ### G4 — should-fix: the docs tidy rewrote an inspected fact in the SM evidence record
@@ -292,8 +294,9 @@ Keep one (ROADMAP, after G2) and link to it from the evidence README.
     buttons) are hand-written. Kill-independence is checked against the kill-free run.
   - The N3 boundary test pins both sides of `full`.
 - `App.tsx` catch: minimal, with a `ponytail:` naming its limit. A dev fast refresh after a
-  failed open does not double-open, because expo-sqlite returns its cached handle per path
-  (`SQLiteModule.swift:108`).
+  failed open does not double-open on iOS, because expo-sqlite returns its cached handle per
+  path (`SQLiteModule.swift:108`). That shared handle is the Android double-open crash of the
+  mobile lessons, so this holds only while Android stays descoped.
 - 03 §§14–15 order and fencing: the receipt and write-path mutants above die. The S1–S6a
   reviews' findings were not reopened.
 - Emergence: the slice adds no mechanic. The smoke controller names no content.
