@@ -1,8 +1,8 @@
 // size: allow 560, every save-open outcome shares this file's one-process harness
 // The save's identity and pin, a new game, and a corrupt save (10 §§31-32 as amended; 07 §9;
-// OFF-07) on Node with real SQLite (node:sqlite) in WAL mode, one connection per simulated
-// process, as local_story.test.ts. Expected values are literals from the fixtures named beside
-// them, never from the code under test.
+// OFF-07) on Node with real SQLite (node:sqlite) in the phone's rollback journal (no WAL), one
+// connection per simulated process, as local_story.test.ts. Expected values are literals from the
+// fixtures named beside them, never from the code under test.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync } from 'node:fs';
@@ -70,7 +70,6 @@ function processOn(
   { newId = none, tap = ((_, run) => run()) as Tap, releases = [dusk] as Releases } = {},
 ) {
   const sql = new DatabaseSync(path);
-  sql.exec('PRAGMA journal_mode = WAL');
   type P = (string | number | null)[];
   const db = {
     execSync: (s: string) => void tap(s, () => sql.exec(s)),
@@ -90,7 +89,7 @@ function processOn(
   return { sql, opened, story, one, all };
 }
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-s3a-')), 'save.db');
-/** The save file's bytes, by hash; read with no connection open (WAL checkpointed). */
+/** The save file's bytes, by hash; read with no connection open. */
 const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
 /** The content hash the save is pinned to. */
 const pinned = (p: ReturnType<typeof processOn>) =>
