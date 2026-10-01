@@ -213,8 +213,9 @@ function apply(world: World, ops: readonly DeltaOp[]): { state: State } | { faul
  * `when` holds on the proposal so far at the event's logical time, is a delivery of its own
  * writer group at one more than its cause's reaction depth (a root's or job's events are at 0),
  * its fact_changed caused by that event at its logical time, its ids from the IdSource of the
- * root or job that began the chain. A delivery past the deliveries, events or reaction_depth
- * limit (compose.ts over) faults budget_exceeded: a cycle ends there, never truncated.
+ * root or job that began the chain. A delivery past the deliveries or reaction_depth limit
+ * (compose.ts over) faults budget_exceeded: a cycle ends there, never truncated (adopt checks
+ * the events limit on the whole proposal).
  * ponytail: quest.ts deliver sees only the root's events: a quest objective meets only an
  * item_acquired, which no job or reaction emits; route their events through it when one can.
  * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
@@ -273,9 +274,7 @@ function propose(world: World, root: Admitted, command: Actor, mint: Mint): Admi
         if (!own) continue;
         group++;
         join(own, [], cause(next.cause.logical_time, next.cause.id), next.depth + 1, next.mint);
-        if (
-          over({ deliveries: ++deliveries, events: events.length, reaction_depth: next.depth + 1 })
-        )
+        if (over({ deliveries: ++deliveries, reaction_depth: next.depth + 1 }))
           return { kind: 'fault', code: 'budget_exceeded' } as Admitted;
       }
     }

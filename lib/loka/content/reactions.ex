@@ -34,10 +34,11 @@ defmodule Loka.Content.Reactions do
     owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), on["event"], ctx.events) ++
       reference(rel, ["on"], kind, on, ctx.m, ctx.defs) ++
-      for {s, i} <- Enum.with_index(r["apply"]),
-          d <-
-            owned(at(rel, ["apply", i, "op"]), "fact_changed", ctx.events) ++
-              reference(rel, ["apply", i], "fact", s, ctx.m, ctx.defs),
-          do: d
+      Enum.flat_map(Enum.with_index(r["apply"]), &assign(rel, &1, ctx))
   end
+
+  defp assign(rel, {s, i}, ctx),
+    do:
+      owned(at(rel, ["apply", i, "op"]), "fact_changed", ctx.events) ++
+        reference(rel, ["apply", i], "fact", s, ctx.m, ctx.defs)
 end
