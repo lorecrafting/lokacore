@@ -121,7 +121,7 @@ test('the five ActionSet operations compose by stable key', () => {
 // assign not proposed or its change not adopted, a missing event, action_completed missing or
 // not last (review F2), no narration, or the S3 variants not following the committed fact.
 test('ring bell assigns the fact, then fact_changed, then the custom event, and narrates', () => {
-  const { decision, world: w } = step(world(), ring(BELL));
+  const { decision, world: w } = step(world(), ring(BELL), 0);
   assert.deepEqual(plain(decision), {
     kind: 'accepted',
     outcome: 'performed',
@@ -137,7 +137,7 @@ test('ring bell assigns the fact, then fact_changed, then the custom event, and 
   );
   assert.equal(gameView(w).place.description.key, 'room.belfry.rung');
   assert.equal(describe(w, w.character, w.details[BELL]), 'detail.bell.rung');
-  assert.deepEqual(plain(step(world(), ring()).decision), plain(decision)); // the recipe's own target
+  assert.deepEqual(plain(step(world(), ring(), 0).decision), plain(decision)); // the recipe's own target
 });
 
 // Breaks: an assign that keeps its value emits fact_changed, the second assign's expected value
@@ -148,7 +148,7 @@ test('an assign that keeps its value takes no position and emits no fact_changed
     r.policy.root = { op: 'all', items: [] };
     r.outcomes.success.sequence.splice(1, 0, r.outcomes.success.sequence[0]);
   });
-  const { decision } = step(w, ring());
+  const { decision } = step(w, ring(), 0);
   assert.ok(decision.kind === 'accepted');
   assert.deepEqual(plain(decision.delta.ops), [assign(false, true), assign(true, true)]);
   assert.deepEqual(plain(decision.events), [
@@ -162,8 +162,8 @@ test('an assign that keeps its value takes no position and emits no fact_changed
 // rejection that still commits, or the policy not re-evaluated after the bell is rung.
 test('perform is rejected for another target, key or room, and once its policy fails', () => {
   const w = world();
-  const rung = step(w, ring()).world;
-  const down = step(w, cmd({ type: 'move', direction: 'down' })).world;
+  const rung = step(w, ring(), 0).world;
+  const down = step(w, cmd({ type: 'move', direction: 'down' }), 0).world;
   const gone = world((c) => (c.rooms[ROOM].actions = [{ op: 'subtract', actions: ['ring_bell'] }]));
   const rows: [World, Command, string][] = [
     [w, ring(ROPE), 'invalid_target'],
@@ -173,7 +173,7 @@ test('perform is rejected for another target, key or room, and once its policy f
     [rung, ring(), 'invalid_state'],
   ];
   for (const [before, c, code] of rows) {
-    const r = step(before, c);
+    const r = step(before, c, 0);
     assert.deepEqual(r.decision, { kind: 'rejected', error: { code } }, code);
     assert.equal(r.world, before);
   }
@@ -187,7 +187,7 @@ test('a recipe assigning a wrongly typed value faults with nothing committed', (
   const cartridge = structuredClone(ok.cartridge) as any;
   cartridge.recipes[RECIPE].outcomes.success.sequence[0].value = 'yes';
   const w = { ...ok, cartridge };
-  const r = step(w, ring());
+  const r = step(w, ring(), 0);
   assert.deepEqual(plain(r.decision), {
     kind: 'fault',
     code: 'precondition_failed',
@@ -214,10 +214,10 @@ test("the place's actions: the recipe first while its detail is here, then the v
   // wait: the compiler adds schedule@1 with the pools (review #49 A1).
   const verbs = ['look', 'move', 'scan', 'wait'].map((v) => shown(v, `action.${v}`));
   assert.deepEqual(plain(gameView(w).actions), [ringBell, ...verbs]);
-  const rung = step(w, ring()).world;
+  const rung = step(w, ring(), 0).world;
   const greyed = shown('ring_bell', 'actions.ring_bell', false);
   assert.deepEqual(plain(gameView(rung).actions), [greyed, ...verbs]);
-  assert.deepEqual(places(step(w, cmd({ type: 'move', direction: 'down' })).world), [
+  assert.deepEqual(places(step(w, cmd({ type: 'move', direction: 'down' }), 0).world), [
     'look',
     'move',
     'scan',
@@ -252,10 +252,10 @@ test("a room's contributions shape its actions, and step admits only what they o
   for (const [actions, expected] of rows) {
     const w = with_(...actions);
     assert.deepEqual(places(w), expected, JSON.stringify(actions));
-    const code = step(w, look).decision.kind === 'accepted' ? 'accepted' : 'rejected';
+    const code = step(w, look, 0).decision.kind === 'accepted' ? 'accepted' : 'rejected';
     assert.equal(code, expected.includes('look') ? 'accepted' : 'rejected');
   }
-  const refused = step(with_({ op: 'subtract', actions: ['look'] }), look).decision;
+  const refused = step(with_({ op: 'subtract', actions: ['look'] }), look, 0).decision;
   assert.deepEqual(refused, { kind: 'rejected', error: { code: 'unsupported_capability' } });
 });
 
@@ -275,13 +275,13 @@ test('a cartridge action overrides the engine verb of its key, policy included',
     };
   });
   assert.deepEqual(plain(gameView(w).actions[0]), shown('look', 'actions.ring_bell'));
-  assert.equal(step(w, cmd({ type: 'look' })).decision.kind, 'accepted');
-  assert.deepEqual(step(w, cmd({ type: 'look', target_id: BELL })).decision, {
+  assert.equal(step(w, cmd({ type: 'look' }), 0).decision.kind, 'accepted');
+  assert.deepEqual(step(w, cmd({ type: 'look', target_id: BELL }), 0).decision, {
     kind: 'rejected',
     error: { code: 'unsupported_capability' }, // its target is none: no examine
   });
-  const rung = step(w, ring()).world;
-  assert.deepEqual(step(rung, cmd({ type: 'look' })).decision, {
+  const rung = step(w, ring(), 0).world;
+  assert.deepEqual(step(rung, cmd({ type: 'look' }), 0).decision, {
     kind: 'rejected',
     error: { code: 'invalid_state' },
   });
@@ -296,7 +296,7 @@ test('the output budget counts the fact_changed events adopt adds', () => {
     Array.from({ length: n }, (_, i) => assign(i % 2 === 1, i % 2 === 0)) as never;
   const under = accepted(w, 'x', toggles(2000), []);
   assert.ok(Buffer.byteLength(JSON.stringify(under)) < 1048576); // the rule's own result fits
-  const r = adopt(w, admit('fact', under as never), SET, allocator(w, SET));
+  const r = adopt(w, admit('fact', under as never), SET, allocator(w, SET), 0);
   assert.deepEqual(r.decision, { kind: 'fault', code: 'budget_exceeded' });
   assert.equal(r.world, w);
   const small = adopt(
@@ -304,6 +304,7 @@ test('the output budget counts the fact_changed events adopt adds', () => {
     admit('fact', accepted(w, 'x', toggles(2), []) as never),
     SET,
     allocator(w, SET),
+    0,
   );
   assert.equal(small.decision.kind, 'accepted');
 });
@@ -338,7 +339,7 @@ test("a command no offered action's target or input accepts is refused like an u
     cmd({ type: 'look', target_id: BELL }),
     cmd({ type: 'move', direction: 'down' }),
   ])
-    assert.deepEqual(step(w, c).decision, refused, JSON.stringify(c));
+    assert.deepEqual(step(w, c, 0).decision, refused, JSON.stringify(c));
 });
 
 // Breaks: an entity TargetSpec that accepts nothing, its scope read from the wrong container, or
@@ -372,14 +373,14 @@ test("an entity target in the action's scope is admitted", () => {
   const look = (target_id: string) => cmd({ type: 'look', target_id });
   const refused = { kind: 'rejected', error: { code: 'unsupported_capability' } };
   const w = offering('inventory');
-  assert.deepEqual(step(w, look(SATCHEL)).decision, refused); // in the room, not held
-  const held = step(w, cmd({ type: 'take', item_id: SATCHEL })).world;
-  assert.equal(step(held, look(SATCHEL)).decision.kind, 'accepted');
-  assert.deepEqual(step(held, look(POST)).decision, refused);
+  assert.deepEqual(step(w, look(SATCHEL), 0).decision, refused); // in the room, not held
+  const held = step(w, cmd({ type: 'take', item_id: SATCHEL }), 0).world;
+  assert.equal(step(held, look(SATCHEL), 0).decision.kind, 'accepted');
+  assert.deepEqual(step(held, look(POST), 0).decision, refused);
   const contents = offering('room_contents');
-  assert.equal(step(contents, look(SATCHEL)).decision.kind, 'accepted');
-  assert.deepEqual(step(contents, look(BRAM)).decision, refused); // an NPC is no room content
+  assert.equal(step(contents, look(SATCHEL), 0).decision.kind, 'accepted');
+  assert.deepEqual(step(contents, look(BRAM), 0).decision, refused); // an NPC is no room content
   const occupants = offering('room_occupants');
-  assert.equal(step(occupants, look(BRAM)).decision.kind, 'accepted');
-  assert.deepEqual(step(occupants, look(SATCHEL)).decision, refused); // an item is no occupant
+  assert.equal(step(occupants, look(BRAM), 0).decision.kind, 'accepted');
+  assert.deepEqual(step(occupants, look(SATCHEL), 0).decision, refused); // an item is no occupant
 });

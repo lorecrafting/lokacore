@@ -75,16 +75,17 @@ export const INSTALLED: Installed = {
 };
 
 /**
- * Decides and, when accepted, composes and commits one command (04 §5): routes it to the rule
+ * Decides and, when accepted, composes and adopts one command as the commit at `revision` would
+ * store it (04 §5; proposal.ts adopt): routes it to the rule
  * of the capability that owns its type (capability_registry.json), rejecting it with
  * unsupported_capability when that capability is not in the lock or has no rule here.
  */
-export function step(world: World, command: Command): Stepped {
+export function step(world: World, command: Command, revision: number): Stepped {
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
     return { decision: rejected('unsupported_capability'), world };
-  return decideWith(world, command, owner, rule);
+  return decideWith(world, command, owner, rule, revision);
 }
 
 type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
@@ -98,7 +99,13 @@ type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
  * result, then its proposal (proposal.ts, quest deliveries included) composes or faults before the
  * changes are adopted.
  */
-function decideWith(world: World, command: Command, owner: string, rule: AnyRule): Stepped {
+function decideWith(
+  world: World,
+  command: Command,
+  owner: string,
+  rule: AnyRule,
+  revision: number,
+): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
   if (command.id === NIL) return reject('permission_denied');
   if (command.world_context_id !== world.context) return reject('not_found');
@@ -108,7 +115,7 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   if (refused) return reject(refused);
   const mint = allocator(world, command);
   try {
-    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint);
+    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint, revision);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
     if (!(e instanceof KernelError)) throw e;

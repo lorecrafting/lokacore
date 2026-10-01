@@ -78,7 +78,7 @@ const give = (w: World) => ({
 const run = (w: World, ...ps: (object | ((w: World) => object))[]) =>
   ps.reduce(
     ({ world: at }: { world: World; decision?: DecisionResult }, p) => {
-      const s = step(at, cmd(at, typeof p === 'function' ? p(at) : p));
+      const s = step(at, cmd(at, typeof p === 'function' ? p(at) : p), 0);
       assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
       return s;
     },
@@ -86,7 +86,7 @@ const run = (w: World, ...ps: (object | ((w: World) => object))[]) =>
   );
 const after = (w: World, ...ps: (object | ((w: World) => object))[]) => run(w, ...ps).world;
 const refused = (w: World, p: object, code: string) => {
-  const s = step(w, cmd(w, p));
+  const s = step(w, cmd(w, p), 0);
   assert.deepEqual(s.decision, { kind: 'rejected', error: { code } }, JSON.stringify(p));
   assert.equal(s.world, w);
 };
@@ -151,7 +151,7 @@ test('the offer is a place action that resolves to accept_quest and is withdrawn
   if (id.kind !== 'identified') return;
   const c = resolve(w, id) as Command;
   assert.deepEqual(plain(c.payload), { type: 'accept_quest', actor_id: w.character, quest: QUEST });
-  const next = step(w, c).world;
+  const next = step(w, c, 0).world;
   assert.equal(
     gameView(next).actions.some((a) => a.action_key === 'lantern'),
     false,
@@ -236,7 +236,7 @@ function resolved(w: World, out = 'carry') {
     effects: [],
     rng: w.state.rng,
   };
-  const s = adopt(w, admit('quest', d as never), c as never, () => CMD);
+  const s = adopt(w, admit('quest', d as never), c as never, () => CMD, 0);
   assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
   return s.world;
 }
@@ -436,13 +436,14 @@ test('two strict quests on one item complete in quest order, also after a restor
   const both = step(
     accepted,
     cmd(accepted, { ...ACCEPT, quest: ref('quest', 'shed') }, CMD2),
+    0,
   ).world;
   const restored = {
     ...both,
     state: decode(encode(both.state as never)) as unknown as World['state'],
   };
   for (const at of [both, restored]) {
-    const d = step(at, cmd(at, take(at))).decision as any;
+    const d = step(at, cmd(at, take(at)), 0).decision as any;
     assert.deepEqual(
       d.delta.ops.slice(1).map((o: any) => [o.instance_id, o.writer_group]),
       [
@@ -509,7 +510,7 @@ function root(w: World, ops: object[], events: [number, object][]) {
     effects: [],
     rng: w.state.rng,
   };
-  return adopt(w, d as never, cmd(w, {}) as never, () => CMD2).decision as any;
+  return adopt(w, d as never, cmd(w, {}) as never, () => CMD2, 0).decision as any;
 }
 const acquired = (w: World) => ({ type: 'item_acquired', item_id: lantern(w), holder_id: w.body });
 const groups = (d: any) => d.delta.ops.map((o: any) => [o.op, o.writer_group]);

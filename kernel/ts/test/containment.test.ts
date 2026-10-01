@@ -43,7 +43,7 @@ const drop = (item_id: string) => cmd({ type: 'drop', item_id });
 const give = (item_id: string, recipient_id: string) =>
   cmd({ type: 'give', item_id, recipient_id });
 const move = (direction: string) => cmd({ type: 'move', direction });
-const run = (w: World, ...cs: Command[]) => cs.reduce((x, c) => step(x, c).world, w);
+const run = (w: World, ...cs: Command[]) => cs.reduce((x, c) => step(x, c, 0).world, w);
 // An engine verb as the GameView advertises it on an entity (actions.ts).
 const verb = (key: string, scope: string) => ({
   available: true,
@@ -82,7 +82,7 @@ test('a fresh world mints NPCs then items after the details and places each', ()
 // Breaks: a take that proposes another op, source or destination, a missing event, the
 // contents of a container left behind (stored twice), or the change not adopted.
 test('take proposes one transfer to the body and item_acquired, at the Python state hash', () => {
-  const { decision, world } = step(fresh(), take(SATCHEL));
+  const { decision, world } = step(fresh(), take(SATCHEL), 0);
   assert.deepEqual(decision, {
     kind: 'accepted',
     outcome: 'taken',
@@ -126,14 +126,14 @@ test('take proposes one transfer to the body and item_acquired, at the Python st
 // Breaks: a drop or give with the wrong destination or event, or a wrong event payload.
 test('drop leaves the item in the room with item_dropped; give hands it to the NPC', () => {
   const held = run(fresh(), take(SATCHEL));
-  const dropped = step(held, drop(SATCHEL));
+  const dropped = step(held, drop(SATCHEL), 0);
   assert.equal(dropped.world.state.containers[SATCHEL], FERRY);
   assert.deepEqual(dropped.decision.kind === 'accepted' && dropped.decision.events[0].payload, {
     type: 'item_dropped',
     item_id: SATCHEL,
     room_id: FERRY,
   });
-  const given = step(held, give(SATCHEL, BRAM));
+  const given = step(held, give(SATCHEL, BRAM), 0);
   assert.equal(given.world.state.containers[SATCHEL], BRAM);
   assert.deepEqual(given.decision.kind === 'accepted' && given.decision.events[0].payload, {
     type: 'item_acquired',
@@ -162,7 +162,7 @@ test('each bad take, drop and give is rejected with its code and consumes nothin
     [full, give(SATCHEL, BRAM), 'invalid_state'], // Bram's capacity is 1
   ];
   for (const [w, c, code] of rows) {
-    const r = step(w, c);
+    const r = step(w, c, 0);
     assert.deepEqual(r.decision, { kind: 'rejected', error: { code } }, JSON.stringify(c.payload));
     assert.equal(r.world, w);
   }
@@ -204,7 +204,7 @@ test('a transfer past a capacity or into its own contents faults and commits not
   const transfer = (entity_id: string, source_id: string, destination_id: string) => {
     const ops = [{ op: 'entity.transfer', writer_group: 0, entity_id, source_id, destination_id }];
     const decision = admit('containment', accepted(w, 'x', ops as never, []) as never);
-    return adopt(w, decision, take(SATCHEL) as never, allocator(w, take(SATCHEL)));
+    return adopt(w, decision, take(SATCHEL) as never, allocator(w, take(SATCHEL)), 0);
   };
   const target = (e: string) => ({ kind: 'containment', entity_id: e });
   for (const [r, code, e] of [
@@ -246,7 +246,8 @@ test('target resolution names items and NPCs in the room and items the actor hol
 
 // Breaks: examine that ignores entities, or admits one elsewhere.
 test('look with a target_id examines an item or NPC here or held, else not_present', () => {
-  const look = (w: World, target_id: string) => step(w, cmd({ type: 'look', target_id })).decision;
+  const look = (w: World, target_id: string) =>
+    step(w, cmd({ type: 'look', target_id }), 0).decision;
   const examined = accepted(fresh(), 'examined', [], []);
   assert.deepEqual(look(fresh(), BRAM), examined);
   assert.deepEqual(look(fresh(), SATCHEL), examined);
@@ -259,7 +260,7 @@ test('look with a target_id examines an item or NPC here or held, else not_prese
 // there (the oil in the satchel), or changing anything: state, RNG, time, events (00 §4.1).
 test('scan lists the NPCs and items in each room beyond, and changes nothing', () => {
   const w = fresh();
-  const s = step(w, cmd({ type: 'scan' }));
+  const s = step(w, cmd({ type: 'scan' }), 0);
   const nothing = { delta: { ops: [] }, events: [], effects: [], rng: SEED };
   assert.deepEqual(s.decision, { kind: 'accepted', outcome: 'scanned', ...nothing });
   assert.deepEqual(s.world.state, w.state);

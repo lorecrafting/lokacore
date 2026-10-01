@@ -58,7 +58,7 @@ function set(w: World, ...assigns: Assign[]): World {
     value,
   }));
   const decision = admit('fact', accepted(w, 'set', ops as never, []) as never);
-  const { decision: d, world } = adopt(w, decision, SET, allocator(w, SET));
+  const { decision: d, world } = adopt(w, decision, SET, allocator(w, SET), 0);
   assert.equal(d.kind, 'accepted', JSON.stringify(d));
   return world;
 }
@@ -71,7 +71,7 @@ const cmd = (payload: object): Command =>
     payload: { actor_id: CHARACTER, ...payload },
   }) as Command;
 const walk = (w: World, ...dirs: string[]) =>
-  dirs.reduce((x, direction) => step(x, cmd({ type: 'move', direction })).world, w);
+  dirs.reduce((x, direction) => step(x, cmd({ type: 'move', direction }), 0).world, w);
 const place = (w: World) => gameView(w).place.description.key;
 
 // Breaks: defaults keyed other than by canonical DefinitionRef text, or a facts section in a
@@ -114,6 +114,7 @@ test('fact.assign through the delta path commits one record, at the Python state
     admit('fact', accepted(w, 'set', ops, []) as never),
     SET,
     allocator(w, SET),
+    0,
   );
   assert.deepEqual(stale.decision, {
     kind: 'fault',
@@ -229,6 +230,7 @@ test('a fact.assign its FactSpec does not allow faults precondition_failed', () 
       admit('fact', accepted(w, 'set', ops as never, []) as never),
       SET,
       allocator(w, SET),
+      0,
     );
     const target = { kind: 'fact', fact: fact(bad[0] as string), scope: bad[1] };
     assert.deepEqual(r.decision, { kind: 'fault', code: 'precondition_failed', target });
@@ -261,7 +263,7 @@ test('each fact.assign that changes its fact appends fact_changed after the rule
     holder_id: BODY,
   } as never);
   const decision = admit('containment', accepted(w, 'x', ops as never, [own]) as never);
-  const { decision: d } = adopt(w, decision, SET, mint);
+  const { decision: d } = adopt(w, decision, SET, mint, 0);
   const changed = (id: string, position: number, old: boolean) => ({
     id,
     world_context_id: CONTEXT,

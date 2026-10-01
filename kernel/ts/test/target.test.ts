@@ -36,7 +36,7 @@ const cmd = (payload: object): Command =>
     world_context_id: CONTEXT,
     payload: { actor_id: CHARACTER, ...payload },
   }) as Command;
-const north = (w: World) => step(w, cmd({ type: 'move', direction: 'north' })).world;
+const north = (w: World) => step(w, cmd({ type: 'move', direction: 'north' }), 0).world;
 
 // Breaks: detail ids minted in another order (such as the object's key order) or from other
 // ordinals, or tied to the wrong room.
@@ -87,11 +87,14 @@ test('resolution is none, unique or ambiguous per the hand-written table', () =>
 // Breaks: look ignores its target, or a stale or foreign target_id is admitted.
 test('look with a target_id examines a detail of this room, else not_found or not_present', () => {
   const w = fresh();
-  const look = (target_id: string) => step(w, cmd({ type: 'look', target_id })).decision;
+  const look = (target_id: string) => step(w, cmd({ type: 'look', target_id }), 0).decision;
   assert.equal((look(MOORING) as { outcome?: string }).outcome, 'examined');
   assert.deepEqual(look(BUCKET), { kind: 'rejected', error: { code: 'not_present' } });
   assert.deepEqual(look(FERRY), { kind: 'rejected', error: { code: 'not_found' } });
-  assert.equal((step(w, cmd({ type: 'look' })).decision as { outcome?: string }).outcome, 'looked');
+  assert.equal(
+    (step(w, cmd({ type: 'look' }), 0).decision as { outcome?: string }).outcome,
+    'looked',
+  );
 });
 
 // Breaks: a resolution over the contract's 1024 candidates returned (out of contract, as a

@@ -60,7 +60,7 @@ const world = (f: (c: any) => void = () => {}): World => {
 };
 const cmd = (w: World, payload: object, id = CMD): Command =>
   ({ id, world_context_id: CONTEXT, payload: { actor_id: w.character, ...payload } }) as Command;
-const wait = (w: World, until: number) => step(w, cmd(w, { type: 'wait', until }));
+const wait = (w: World, until: number) => step(w, cmd(w, { type: 'wait', until }), 0);
 const job = (due_time: number, status: 'pending' | 'completed' = 'pending') => ({
   job: BRAM,
   due_time,
@@ -189,7 +189,7 @@ test('jobs due at one time run in job-id order whatever the row order', () => {
 test('a run_job submitted to step is refused and changes nothing', () => {
   const w = world();
   const run = { id: CMD, world_context_id: CONTEXT, payload: { type: 'run_job', job_id: J0 } };
-  const out = step(w, run as Command);
+  const out = step(w, run as Command, 0);
   assert.deepEqual(out.decision, { kind: 'rejected', error: { code: 'not_found' } });
   assert.equal(out.world, w);
 });
@@ -198,7 +198,7 @@ test('a run_job submitted to step is refused and changes nothing', () => {
 // advance), the job's ops sharing the recipe's writer group.
 test("a recipe's duration runs the job due inside it in the player's proposal", () => {
   const w = wait(world(), H(18) + 1800).world;
-  const { decision, world: after } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }));
+  const { decision, world: after } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }), 0);
   assert.equal(decision.kind, 'accepted');
   const ops = decision.kind === 'accepted' ? decision.delta.ops : [];
   assert.deepEqual(
@@ -227,7 +227,7 @@ test("a recipe's duration runs the job due inside it in the player's proposal", 
 // from time 0 to the calendar's start, so a 06:00 world starting with mv 0 can still move.
 test('a body starts with its resources at their start values at the calendar start', () => {
   const w = world((c) => (c.resources[`${F}:resource/mv`].start = 0));
-  const out = step(w, cmd(w, { type: 'move', direction: 'north' }));
+  const out = step(w, cmd(w, { type: 'move', direction: 'north' }), 0);
   assert.deepEqual(out.decision, { kind: 'rejected', error: { code: 'insufficient_resource' } });
 });
 
@@ -247,7 +247,7 @@ test('an advance over a job budget faults whole, in a wait and in a recipe', () 
   assert.deepEqual(waited.decision, budget);
   assert.equal(waited.world, crowded);
   const late = { ...crowded, state: { ...crowded.state, clock: H(18) + 1800 } };
-  const performed = step(late, cmd(late, { type: 'perform', action: 'coil_rope' }));
+  const performed = step(late, cmd(late, { type: 'perform', action: 'coil_rope' }), 0);
   assert.deepEqual(performed.decision, budget);
   assert.equal(performed.world, late);
 });
@@ -340,7 +340,7 @@ const coil = (c: any) => c.recipes[`${F}:recipe/coil_rope`].outcomes.success.nar
 // instead of its body, or an NPC to the wrong entity.
 test("a recipe's committed narration pins its participants' EntityIds", () => {
   const w = world();
-  const { decision } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }));
+  const { decision } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }), 0);
   assert.deepEqual(validate('DecisionResult', decision), []);
   assert.ok(decision.kind === 'accepted');
   assert.deepEqual(decision.narration, [
@@ -372,7 +372,7 @@ test("an item participant is pinned to the item's EntityId", () => {
     };
     coil(c).participants.rope = { role: 'item', item: ref('item', 'rope') };
   });
-  const { decision } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }));
+  const { decision } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }), 0);
   assert.deepEqual(decision.kind === 'accepted' && decision.narration?.[0]?.participants, {
     actor: BODY,
     bram: BRAM_ID,

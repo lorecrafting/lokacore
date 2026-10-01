@@ -64,7 +64,7 @@ const adjust = (key: string, from: number, to: number) => ({
 // Runs commands in order, each accepted; returns the last world.
 const run = (w: World, ...cs: Command[]) =>
   cs.reduce((at, c) => {
-    const s = step(at, c);
+    const s = step(at, c, 0);
     assert.equal(
       s.decision.kind,
       'accepted',
@@ -77,11 +77,11 @@ const stored = (w: World, key: string) =>
     JSON.stringify({ entity_id: BODY, kind: 'resource', resource: sorted(ref(key)) })
   ];
 const ops = (w: World, c: Command) => {
-  const d = step(w, c).decision;
+  const d = step(w, c, 0).decision;
   return d.kind === 'accepted' ? JSON.parse(JSON.stringify(d.delta.ops)) : d;
 };
 const rejects = (w: World, c: Command, code: string) => {
-  const s = step(w, c);
+  const s = step(w, c, 0);
   assert.deepEqual(s.decision, { kind: 'rejected', error: { code } });
   assert.equal(s.world, w); // nothing changes: no cost, draw, cooldown or time
 };
@@ -89,14 +89,14 @@ const rejects = (w: World, c: Command, code: string) => {
 // Breaks: a cost checked but not paid, or a threshold not read from the resource.
 test('a failed threshold check still pays its cost; success runs the outcome', () => {
   const w = world();
-  const failed = step(w, perform('shove_cart'));
+  const failed = step(w, perform('shove_cart'), 0);
   assert.equal(failed.decision.kind === 'accepted' && failed.decision.outcome, 'failure');
   assert.deepEqual(ops(w, perform('shove_cart')), [adjust('mv', 3, 2)]);
   assert.deepEqual(stored(failed.world, 'mv'), { value: 2, at: 0 });
   assert.equal(failed.world.state.rng, w.state.rng); // a threshold draws nothing
   // hp 15 (difficulty 15, at least): passes.
   const strong = world((c) => (c.resources['ashmere_road@0.0.1:resource/hp'].start = 15));
-  const passed = step(strong, perform('shove_cart')).decision;
+  const passed = step(strong, perform('shove_cart'), 0).decision;
   assert.equal(passed.kind === 'accepted' && passed.outcome, 'success');
 });
 
@@ -110,7 +110,7 @@ test('a threshold reads the resource before the recipe pays its costs', () => {
       difficulty: 3,
     };
   });
-  const d = step(w, perform('shove_cart')).decision;
+  const d = step(w, perform('shove_cart'), 0).decision;
   assert.equal(d.kind === 'accepted' && d.outcome, 'success'); // mv 3 >= 3, then pays 1
 });
 
@@ -152,7 +152,7 @@ test('a cartridge without the pools moves for free and writes no resource', () =
     ops(w, move('north')).map((o: { op: string }) => o.op),
     ['entity.transfer'],
   );
-  assert.equal(step(w, move('north')).world.state.resources, undefined);
+  assert.equal(step(w, move('north'), 0).world.state.resources, undefined);
 });
 
 // Breaks: regeneration counted in whole hours since the write instead of hour boundaries, or
@@ -175,7 +175,7 @@ test('regeneration adds gain per hour boundary crossed, stopping at the maximum'
 test('a resource.adjust step stops at the maximum; at full value it changes nothing', () => {
   // pray at 0 (hp 15), at 3600 (hp 15 + 5 regen = 20, + 5 = 25), then at 7200 hp is 25 already.
   const full = run(world(), move('east'), perform('pray'), wait(3600), perform('pray'), wait(7200));
-  const at = step(full, perform('pray')).decision;
+  const at = step(full, perform('pray'), 0).decision;
   assert.equal(at.kind === 'accepted' && at.outcome, 'performed');
   assert.deepEqual(
     ops(full, perform('pray')).map((o: { op: string }) => o.op),
@@ -219,7 +219,7 @@ test('a cooldown refuses the recipe until exactly its end', () => {
 // Breaks: a failed attempt not starting the cooldown.
 test('a failed attempt starts the cooldown too', () => {
   const w = world((c) => (c.recipes[SHOVE].cooldown = 60));
-  const failed = step(w, perform('shove_cart'));
+  const failed = step(w, perform('shove_cart'), 0);
   assert.equal(failed.decision.kind === 'accepted' && failed.decision.outcome, 'failure');
   rejects(failed.world, perform('shove_cart'), 'cooldown');
 });

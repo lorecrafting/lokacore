@@ -11,7 +11,7 @@ for (let seed = 1; cases.length < want; seed++) {
   const o = simulate(seed);
   let world = o.start;
   for (const c of o.commands) {
-    const { decision, world: after } = step(world, c);
+    const { decision, world: after } = step(world, c, 0);
     if (decision.kind === 'accepted' && decision.delta.ops.length && cases.length < want)
       cases.push({ state: base(world), delta: decision.delta });
     world = after;

@@ -31,9 +31,17 @@ type Corr = DomainEvent['correlation_id'];
  * defaults and the declared capacities, adopting its containment, fact and clock changes; only
  * admit() makes an Admitted. A fact.assign whose fact, scope kind or value its FactSpec does not
  * allow faults precondition_failed (03 §7; 04 §5.1). A result over the events or output_bytes
- * limit faults budget_exceeded (04 §5.4). A fault discards the whole proposal.
+ * limit faults budget_exceeded (04 §5.4). A fault discards the whole proposal. Each continuation a
+ * choice.open of it creates is stamped with `revision`, the one its commit will take (04 §5.3:
+ * the expected revision a choice.resolve must match), in the state whose rows the host commits.
  */
-export function adopt(world: World, decision: Admitted, command: Actor, mint: Mint): Stepped {
+export function adopt(
+  world: World,
+  decision: Admitted,
+  command: Actor,
+  mint: Mint,
+  revision: number,
+): Stepped {
   const out = propose(world, decision, command, mint);
   if (out.kind !== 'accepted') return { decision: out, world };
   const assigns = out.delta.ops.filter((o) => o.op === 'fact.assign') as Assign[];
@@ -47,7 +55,12 @@ export function adopt(world: World, decision: Admitted, command: Actor, mint: Mi
     utf8(encode(out as never)).length > LIMITS.output_bytes!
   )
     return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
-  const state = { ...applied.state, rng: out.rng } as World['state'];
+  const choices = { ...applied.state.choices };
+  for (const o of out.delta.ops)
+    if (o.op === 'choice.open')
+      choices[o.continuation_id] = { ...choices[o.continuation_id]!, opened_revision: revision };
+  const stamped = applied.state.choices && { choices };
+  const state = { ...applied.state, ...stamped, rng: out.rng } as World['state'];
   return { decision: out, world: { ...world, state } };
 }
 
