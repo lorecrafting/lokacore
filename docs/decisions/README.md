@@ -69,3 +69,4 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [P1 merges on its Node proof; the iPhone 11 Hermes run is batched before S3](owner-decision-p1-hermes-batching-2026-09-30.md).
 - Owner decision: [a parallel phone smoke screen before R6P (wiring proof for the UI slice)](owner-decision-r6-smoke-2026-09-30.md).
 - Owner decision: [one save per story, no bookmarks; a new game replaces it after confirmation](owner-decision-one-save-2026-09-30.md).
+- Owner decision: [S4 scope: job drain waits for the first real job (Bram's schedule); `real_elapsed` and OFF-08/09/13 carried](owner-decision-s4-scope-2026-09-30.md).
