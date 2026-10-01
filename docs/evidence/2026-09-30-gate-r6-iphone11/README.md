@@ -78,14 +78,14 @@ count only; the trace is derived and not compared.
 
 ## 3. Corrupt-file check (S6a carry (c))
 
-Last, because it destroys the save. The PM terminates the app, then replaces the save with garbage
+Last, because it destroys the save. The PM terminates the app, then replaces the whole `SQLite` folder with one garbage `loka-save.db` (no stale `-wal` or `-journal` beside it)
 and launches with the console attached:
 
 ```sh
-yes 'not a database' | head -c 4096 > "$OUT/garbage.db"
+mkdir "$OUT/bad" && yes 'not a database' | head -c 4096 > "$OUT/bad/loka-save.db"
 xcrun devicectl device copy to --device $DEVICE --domain-type appDataContainer \
-  --domain-identifier $BUNDLE_ID --source "$OUT/garbage.db" \
-  --destination Documents/SQLite/loka-save.db --remove-existing-content true 2>&1 | redact
+  --domain-identifier $BUNDLE_ID --source "$OUT/bad" \
+  --destination Documents/SQLite --remove-existing-content true 2>&1 | redact
 xcrun devicectl device process launch --device $DEVICE --console --terminate-existing $BUNDLE_ID \
   --timeout 120 2>&1 | redact | tail -30
 ```
