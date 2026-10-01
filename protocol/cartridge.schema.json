@@ -181,6 +181,16 @@
                 "$ref": "quest.schema.json#/$defs/QuestDefinition"
               }
             },
+            "dialogues": {
+              "description": "The cartridge's dialogues, keyed by DefinitionRefString of kind dialogue; absent when it has none (Early R7/R8 D1, an optional map: the tag stays).",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):dialogue/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "dialogue.schema.json#/$defs/DialogueDefinition"
+              }
+            },
             "reactions": {
               "description": "The cartridge's reaction rules, keyed by DefinitionRefString of kind reaction; absent when it has none (Early R7/R8 R, an optional map: the tag stays).",
               "type": "object",

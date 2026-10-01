@@ -12515,5 +12515,293 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "DialogueDefinition",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/choices",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/npc",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policy",
+        "code": "missing_property"
+      },
+      {
+        "path": "/prompt",
+        "code": "missing_property"
+      },
+      {
+        "path": "/roles",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "Bad",
+      "npc": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "Bad",
+      "roles": {
+        "Bad": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "it": {
+          "role": "actor"
+        },
+        "np": {
+          "role": "npc"
+        },
+        "nq": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "bram"
+          },
+          "x": 1
+        },
+        "ni": {
+          "role": "item"
+        }
+      },
+      "choices": {
+        "Bad": {
+          "label": "a",
+          "narration": "b"
+        },
+        "abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {
+          "label": "a",
+          "narration": "b"
+        },
+        "c": {
+          "x": 1
+        },
+        "d": {
+          "label": "a",
+          "narration": "b",
+          "sequence": [
+            {
+              "op": "event.emit",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "npc",
+                "key": "bram"
+              },
+              "value": true
+            },
+            {
+              "op": "fact.assign"
+            },
+            {
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "npc",
+                "key": "bram"
+              },
+              "value": true
+            }
+          ],
+          "hand_over": {
+            "x": 1
+          }
+        },
+        "e": {
+          "label": "a",
+          "narration": "b",
+          "hand_over": {
+            "item": "Bad",
+            "to": "B"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/choices/Bad",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/choices/abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/choices/c/label",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/c/narration",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/c/x",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/choices/d/hand_over/item",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/d/hand_over/to",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/d/hand_over/x",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/choices/d/sequence/0/op",
+        "code": "const_mismatch"
+      },
+      {
+        "path": "/choices/d/sequence/1/fact",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/d/sequence/1/value",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/d/sequence/2/op",
+        "code": "missing_property"
+      },
+      {
+        "path": "/choices/e/hand_over/item",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/choices/e/hand_over/to",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/key",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/prompt",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/roles/Bad",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/roles/abbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/roles/it/role",
+        "code": "unknown_variant"
+      },
+      {
+        "path": "/roles/ni/item",
+        "code": "missing_property"
+      },
+      {
+        "path": "/roles/np/npc",
+        "code": "missing_property"
+      },
+      {
+        "path": "/roles/nq/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "dialogues": {
+        "c@1.0.0:quest/x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/dialogues/c@1.0.0:quest~1x",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/dialogues/c@1.0.0:quest~1x",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policies",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
   }
 ]
