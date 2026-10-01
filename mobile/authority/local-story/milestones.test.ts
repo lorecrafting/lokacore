@@ -94,7 +94,7 @@ const payload = (report: string, run: string) =>
 function platform(result = 'accepted') {
   const kept = new Map<string, object>();
   const f = { kept, result, lose: false, offline: false, calls: [] as [string, string][] };
-  const submit = (report: MilestoneReport, account: string) => {
+  const submit = async (report: MilestoneReport, account: string) => {
     if (f.offline) throw new Error('offline');
     const { report_id, release, milestone, outcome } = report;
     f.calls.push([report_id, account]);
@@ -124,7 +124,7 @@ function platform(result = 'accepted') {
 // delivery (newId is `none` after the capture); a receipt replay adding a second report; the
 // binding read at open or at delivery instead of when the milestone is reached; an offline
 // completion lost by a restart.
-test('a milestone reached offline is captured once, survives restart, and is delivered', () => {
+test('a milestone reached offline is captured once, survives restart, and is delivered', async () => {
   const path = save();
   let who: string | null = A;
   const a = processOn(path, { newId: ids(), binding: () => who });
@@ -139,7 +139,7 @@ test('a milestone reached offline is captured once, survives restart, and is del
   assert.deepEqual(saved(b.story.invoke(ring())), [true, 1]);
   assert.deepEqual(b.all(REPORTS), [pending]);
   const fake = platform();
-  deliver(b.db, fake.submit, 10);
+  await deliver(b.db, fake.submit, 10);
   assert.deepEqual(fake.calls, [[id(3), B]]);
   assert.deepEqual(b.all(REPORTS), [[...pending.slice(0, 4), 'accepted']]);
 });
@@ -207,7 +207,7 @@ test('a report commits with its gameplay result or not at all', () => {
 
 // Breaks (23 §11, 10 §31 as amended; pin 6): a new game wiping the reports (red control: a
 // `DELETE FROM report` in `replace`), or rewriting their run, lineage or release to the new game's.
-test('a new game keeps a pending report, delivered under its original run', () => {
+test('a new game keeps a pending report, delivered under its original run', async () => {
   const path = save();
   const a = processOn(path, { newId: ids() });
   a.story.invoke(ring());
@@ -218,7 +218,7 @@ test('a new game keeps a pending report, delivered under its original run', () =
     [id(1), payload(id(3), id(2))],
   ]);
   const fake = platform();
-  deliver(b.db, fake.submit, 10);
+  await deliver(b.db, fake.submit, 10);
   assert.deepEqual(fake.calls, [[id(3), A]]);
   assert.deepEqual(b.all('SELECT disposition FROM report'), [['accepted']]);
 });
@@ -240,13 +240,13 @@ const DISPOSITIONS = 'SELECT binding, disposition FROM report ORDER BY rowid';
 // reply leaving nothing for the retry to read back (the platform keeps one acceptance per report
 // id, so a report id minted again at retry would earn a second); an acceptance stored that differs
 // from the platform's.
-test('a lost reply is retried and reads back the one acceptance', () => {
+test('a lost reply is retried and reads back the one acceptance', async () => {
   const p = reports(A);
   const fake = platform();
   fake.lose = true;
-  assert.throws(() => deliver(p.db, fake.submit, 10), /response lost/);
+  await assert.rejects(deliver(p.db, fake.submit, 10), /response lost/);
   assert.deepEqual(p.all(DISPOSITIONS), [[A, 'pending']]);
-  deliver(p.db, fake.submit, 10);
+  await deliver(p.db, fake.submit, 10);
   assert.equal(fake.kept.size, 1);
   const stored = JSON.parse(p.all('SELECT acceptance FROM report')[0]![0] as string);
   assert.deepEqual(stored, fake.kept.get(id(3)));
@@ -254,27 +254,30 @@ test('a lost reply is retried and reads back the one acceptance', () => {
 });
 
 // Breaks (23 §4; pin 7): a batch not bounded; a conflict or rejection stored as accepted or left
-// pending (resent forever); an unreachable platform or a malformed or misaddressed reply dropping
+// pending (resent forever); an unreachable platform or a malformed reply, or one for another account or outcome, dropping
 // or settling a report; a guest's report sent under no account; delivery reading a transaction
 // that is still open (its uncommitted reports would be sent as saved).
-test('delivery is bounded, persists each disposition and drops nothing', () => {
+test('delivery is bounded, persists each disposition and drops nothing', async () => {
   const p = reports(A, B, C, null);
   const fake = platform();
   fake.offline = true;
-  assert.throws(() => deliver(p.db, fake.submit, 10), /offline/);
+  await assert.rejects(deliver(p.db, fake.submit, 10), /offline/);
   fake.offline = false;
   fake.result = 'rejected';
-  deliver(p.db, fake.submit, 1);
+  await deliver(p.db, fake.submit, 1);
   fake.result = 'outcome_conflict';
-  deliver(p.db, fake.submit, 1);
-  const malformed = (r: { report_id: string }) => ({ report_id: r.report_id, account_id: C });
-  assert.throws(() => deliver(p.db, malformed as never, 10), /not an acceptance/);
+  await deliver(p.db, fake.submit, 1);
+  const malformed = async (r: MilestoneReport) => ({ report_id: r.report_id, account_id: C });
+  await assert.rejects(deliver(p.db, malformed, 10), /not an acceptance/);
   fake.result = 'accepted';
-  const misaddressed = (r: MilestoneReport, a: string) => ({
-    ...(fake.submit(r, a) as object),
-    account_id: A,
-  });
-  assert.throws(() => deliver(p.db, misaddressed, 10), /not an acceptance/);
+  // A valid acceptance, but of another account or another outcome than the report's.
+  for (const wrong of [{ account_id: A }, { outcome: 'tolled' }]) {
+    const answer = async (r: MilestoneReport, a: string) => ({
+      ...(await fake.submit(r, a)),
+      ...wrong,
+    });
+    await assert.rejects(deliver(p.db, answer, 10), /not an acceptance/);
+  }
   assert.deepEqual(p.all(DISPOSITIONS), [
     [A, 'rejected'],
     [B, 'needs_attention'],
@@ -282,9 +285,9 @@ test('delivery is bounded, persists each disposition and drops nothing', () => {
     [null, 'pending'],
   ]);
   p.sql.exec('BEGIN');
-  assert.throws(() => deliver(p.db, fake.submit, 10), /transaction is open/);
+  await assert.rejects(deliver(p.db, fake.submit, 10), /transaction is open/);
   p.sql.exec('ROLLBACK');
-  deliver(p.db, fake.submit, 10);
+  await deliver(p.db, fake.submit, 10);
   assert.deepEqual(p.all(DISPOSITIONS).slice(2), [
     [C, 'accepted'],
     [null, 'pending'],

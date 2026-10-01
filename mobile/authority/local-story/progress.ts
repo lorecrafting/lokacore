@@ -4,8 +4,8 @@ import type { MilestoneAcceptance, MilestoneReport } from '../../../kernel/ts/sr
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { transaction, type Db } from './store.ts';
 
-/** The platform's answer to one report for `account` (23 §5); throws when it is unreachable. */
-export type Submit = (report: MilestoneReport, account: string) => unknown;
+/** The platform's answer to one report for `account` (23 §5); rejects when it is unreachable. */
+export type Submit = (report: MilestoneReport, account: string) => Promise<unknown>;
 
 /**
  * Delivers up to `limit` pending reports, oldest first, each for the binding it was captured
@@ -15,7 +15,7 @@ export type Submit = (report: MilestoneReport, account: string) => unknown;
  * malformed answer) leaves the rest pending for the next call. An unknown acknowledgement commit
  * is resent, and the platform answers it again from its own record.
  */
-export function deliver(db: Db, submit: Submit, limit: number) {
+export async function deliver(db: Db, submit: Submit, limit: number) {
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
   type Row = { report_id: string; binding: string; report: string };
   // ponytail: a guest's report (null binding) waits; claiming a run is explicit (23 §5), R12A.
@@ -25,15 +25,16 @@ export function deliver(db: Db, submit: Submit, limit: number) {
     limit,
   );
   for (const r of rows) {
-    const a = submit(JSON.parse(r.report), r.binding) as MilestoneAcceptance;
-    if (
-      validate('MilestoneAcceptance', a).length ||
-      a.report_id !== r.report_id ||
-      a.account_id !== r.binding
-    )
-      throw new Error(`not an acceptance of report ${r.report_id}`);
-    const disposition =
-      a.result === 'accepted' || a.result === 'rejected' ? a.result : 'needs_attention';
+    const report = JSON.parse(r.report) as MilestoneReport;
+    const a = (await submit(report, r.binding)) as MilestoneAcceptance;
+    const fail = new Error(`not an acceptance of report ${r.report_id}`);
+    if (validate('MilestoneAcceptance', a).length) throw fail;
+    // The answer is about this report and account: all but the platform's own fields match.
+    const { payload_digest, evidence_class, policy_revision, result, ...about } = a;
+    const { report_id, release, milestone, outcome } = report;
+    if (encode(about) !== encode({ report_id, account_id: r.binding, release, milestone, outcome }))
+      throw fail;
+    const disposition = result === 'accepted' || result === 'rejected' ? result : 'needs_attention';
     transaction(db, () =>
       db.runSync(
         'UPDATE report SET disposition = ?, acceptance = ? WHERE report_id = ?',
