@@ -43,3 +43,12 @@ Hard-won lessons for `mobile/` and physical-device runs.
   owner's free personal team (automatic signing); nothing paid, no EAS.
 - iOS symbolication with `atos`: look up the return address minus 1, or it names the
   wrong function.
+
+**iOS simulator**
+- The iOS 27 simulator runtime refuses to launch the Expo 57 template app until the
+  prebuilt, gitignored `ios/` is patched locally to adopt the UIScene lifecycle; never
+  commit that patch. Physical-device Release builds of the unpatched template launched
+  (Gate R6).
+- `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
+  edit that starts the app on that state; such shots are static and prove layout only,
+  not navigation or gestures.
