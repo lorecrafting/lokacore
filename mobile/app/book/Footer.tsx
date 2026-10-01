@@ -24,6 +24,7 @@ let learned = false;
 type Ui = {
   now: MutableRefObject<Props>;
   walk: (direction: string | null) => void;
+  openMap: () => void;
   setLit: (d: string | null) => void;
   clearNote: () => void;
   zoom: Animated.Value;
@@ -60,7 +61,7 @@ function joystick(u: Ui) {
       );
     },
     onPanResponderRelease: () =>
-      !d.moved && Date.now() - d.t < TAP_MS ? u.now.current.openMap() : u.walk(d.pick),
+      !d.moved && Date.now() - d.t < TAP_MS ? u.openMap() : u.walk(d.pick),
     onPanResponderEnd: () => {
       u.setLit(null);
       u.knob.setValue({ x: 0, y: 0 });
@@ -77,29 +78,28 @@ export function Footer(p: Props) {
   const knob = useRef(new Animated.ValueXY()).current;
   const now = useRef(p);
   now.current = p;
+  const learn = () => ((learned = true), setTip(false)); // a walk or a tap that opens the map
   const walk = (d: string | null) => {
     const e = now.current.exits.find((x) => x.direction === d);
-    if (e?.available) {
-      learned = true;
-      setTip(false);
-      now.current.go(e.direction);
-    } else if (e) setNote(`${e.direction}: ${why(e, now.current.text)}`);
+    if (e?.available) (now.current.go(e.direction), learn());
+    else if (e) setNote(`${e.direction}: ${why(e, now.current.text)}`);
   };
+  const openMap = () => (now.current.openMap(), learn());
   const [pan] = useState(() =>
-    joystick({ now, walk, setLit, clearNote: () => setNote(''), zoom, knob }),
+    joystick({ now, walk, openMap, setLit, clearNote: () => setNote(''), zoom, knob }),
   );
   const e = p.exits.find((x) => x.direction === lit);
   const said = e ? `${e.direction}${e.available ? '' : ` · ${why(e, p.text)}`}` : note;
   const rule = { flex: 1, height: 1, backgroundColor: paper.line };
   return (
     <View>
-      {tip && <Tip dismiss={() => ((learned = true), setTip(false))} />}
+      {tip && <Tip dismiss={learn} />}
       <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
         <View style={rule} />
         <View style={{ width: 56, height: 56 }} {...pan.panHandlers}>
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
           <Said text={said} />
-          <Reachable exits={p.exits} text={p.text} walk={walk} openMap={p.openMap} />
+          <Reachable exits={p.exits} text={p.text} walk={walk} openMap={openMap} />
         </View>
         <View style={rule} />
       </View>

@@ -51,7 +51,8 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   const page = stack.at(-1);
   const open = (p: Page) => go([...stack, p], 1);
   // a start over that failed shows its message in the room page's log
-  const ctx = { screen, g, press, open, startOver: () => (startOver(), go([], 1)) };
+  const walk = (d: string) => press(g.exits.find((e) => e.direction === d)!.button);
+  const ctx = { screen, g, press, walk, open, startOver: () => (startOver(), go([], 1)) };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={flip.turn} dir={flip.dir}>
@@ -67,6 +68,7 @@ function Bottom(p: {
   screen: Screen;
   g: ReturnType<typeof group>;
   press: (b: Button) => void;
+  walk: (direction: string) => void;
   open: (p: Page) => void;
   back?: () => void;
   startOver: () => void;
@@ -80,7 +82,7 @@ function Bottom(p: {
         <Footer
           exits={view.exits}
           text={text}
-          go={(d) => p.press(p.g.exits.find((e) => e.direction === d)!.button)}
+          go={p.walk}
           openMap={() => p.open({ kind: 'map' })}
         />
       )}
@@ -136,6 +138,7 @@ function Body(p: {
   g: ReturnType<typeof group>;
   from: number;
   press: (b: Button) => void;
+  walk: (direction: string) => void;
   open: (p: Page) => void;
   startOver: () => void;
 }) {
@@ -159,7 +162,7 @@ function Body(p: {
   }
   if (page.kind === 'character') return <CharacterPage />;
   if (page.kind === 'map')
-    return <MapPage view={view} text={text} place={p.g.place} press={p.press} />;
+    return <MapPage view={view} text={text} place={p.g.place} press={p.press} walk={p.walk} />;
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;
   if (page.kind === 'journal') return <JournalPage view={view} text={text} />;
   return <CarryingPage items={view.inventory} text={text} open={openThing} />;

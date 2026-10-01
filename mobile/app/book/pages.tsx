@@ -137,17 +137,24 @@ export function MapPage(p: {
   text: Say;
   place: Button[];
   press: (b: Button) => void;
+  walk: (direction: string) => void;
 }) {
   return (
     <Sheet title="Map">
       <Text style={prose}>{p.text(p.view.place.title.key)}</Text>
       {p.view.exits.length === 0 && <Text style={note}>No way out is known.</Text>}
-      {p.view.exits.map((e) => (
-        <Text key={e.direction} style={e.available ? prose : note}>
-          {e.direction.charAt(0).toUpperCase() + e.direction.slice(1)}
-          {e.available ? '' : `: ${why(e, p.text)}`}
-        </Text>
-      ))}
+      {p.view.exits.map((e) => {
+        const name = e.direction.charAt(0).toUpperCase() + e.direction.slice(1);
+        return e.available ? (
+          <Tap key={e.direction} label={`Go ${e.direction}`} onPress={() => p.walk(e.direction)}>
+            <Text style={prose}>{name}</Text>
+          </Tap>
+        ) : (
+          <Text key={e.direction} style={note}>
+            {name}: {why(e, p.text)}
+          </Text>
+        );
+      })}
       {p.place.map((b) => (
         <Tap key={b.label} label={b.label} onPress={() => p.press(b)}>
           <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>
