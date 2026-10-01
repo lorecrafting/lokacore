@@ -97,17 +97,21 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   db.getFirstSync('SELECT * FROM receipt LIMIT 1'); // the table, not its index
   type Head = { revision?: number; clock?: number; rng?: string };
   const h = db.getFirstSync<Head>('SELECT * FROM head')!; // any columns: a damaged one is corrupt
-  const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save')!;
+  const m = db.getFirstSync<Record<string, unknown>>('SELECT * FROM save')!;
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };
   if (typeof h.revision !== 'number' || typeof h.clock !== 'number') return undefined;
+  // The receipt scope and replay ids (03 §14) and the binding (null: a guest), as written.
+  const str = (v: unknown) => typeof v === 'string';
+  if (!str(m.lineage_id) || !str(m.run_id) || !(str(m.binding) || m.binding === null))
+    return undefined;
   try {
     for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
       (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
     const rng = JSON.parse(h.rng!);
     if (validate('RngState', rng).length) return undefined; // parses, but no RNG state
-    const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v!));
+    const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
     return { world, revision: h.revision, meta: { ...m, parent, seed, pin } as Meta };
   } catch (e) {
