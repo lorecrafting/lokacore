@@ -434,3 +434,42 @@ G5 | carried | Device SQLITE_CORRUPT verification explicitly remains unchecked a
 H1 | blocker | mobile/authority/local-story/store.ts:106 at b427e13 | Identity validation checks only typeof. Reproduced on real in-memory SQLite: commit pick_lock, UPDATE save SET lineage_id = '', reopen, resend the identical invocation. The save opens; story//... misses the original receipt and returns replay:false, revision 1→2, clock 600→1200. Reject malformed lineage values as save_corrupt and cover this case; the added tests exercise missing/non-string lineage but omit malformed strings.
 ```
 PM ruling: H1 (= reviewer N5) fixed in fix round 2 together with N4.
+
+## Fix check: round 2, `34a560f` and `dfad99b`
+
+**APPROVE.** Gate R6 passes. This check covers the two fixes and the direct callers of `load`
+(open, and `adopt` after a new game). The mobile suite at `dfad99b`, run in a throwaway detached
+worktree: 69 pass, 1 skipped.
+
+- **N5 / Astra H1, resolved.** `whole()` (`store.ts:75-77`) now does two things:
+  - it validates `lineage_id` and `run_id` against `StoryRunId`, which is the lowercase UUID
+    pattern in `protocol/account.schema.json:25`;
+  - it requires `binding` to be a string or null.
+
+  Healthy saves are unaffected:
+  - On the phone, expo-crypto's `randomUUID` returns lowercase (`CryptoModule.swift:23`:
+    `uuidString.lowercased()`), and so does Node's.
+  - Every suite opens, reopens and replaces saves with these ids, including the new-game
+    adopt path, and none of them reports `save_corrupt`.
+
+  Mutants, each reverted, each red (the damaged-identity test fails):
+
+  | Mutant | Result |
+  |---|---|
+  | `typeof` string instead of the UUID check | red |
+  | only the lineage validated, not the run | red |
+  | `binding` unchecked | red |
+- **N4, resolved.** `authority.ts:196` drops the default. `first()` writes
+  `host.binding?.() ?? null`, and `load` now guarantees a string or null, so the default could
+  never fire. The behaviour is unchanged, and the milestone binding tests still pass.
+
+New nit:
+
+- **N6 — nit, `mobile/authority/local-story/authority.ts` `first()`.** The ids are checked on
+  read but not on write. `first()` saves `host.newId()` without validating it. Failure
+  scenario: a later host whose id source returns uppercase UUIDs (for example a bare iOS
+  `UUID().uuidString`). It writes a save that plays until the next launch, which then reports
+  `save_corrupt` and offers a new game over the player's progress. Today's hosts (expo-crypto,
+  Node) are lowercase, so this is not live. A one-line `validate('StoryRunId', …)` throw in
+  `first()` would make such a host fail at once. Optional; SM2 can take it if it changes the id
+  source.
