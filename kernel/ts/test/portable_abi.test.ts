@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { decode, encode, hash } from '../src/canonical.ts';
 import { add, divide, mul, sub } from '../src/int.ts';
-import { commandId, id } from '../src/id_source.ts';
+import { commandId, id, jobCommandId } from '../src/id_source.ts';
 import { next, uniform } from '../src/rng.ts';
 import { read } from './read.ts';
 
@@ -227,4 +227,18 @@ test('CommandId rejects bad ids', () => {
   assert.throws(() => commandId(null as never, 'i'), code('invalid_id'));
   assert.throws(() => commandId('s', 1 as never), code('invalid_id'));
   assert.throws(() => commandId('\ud800', 'i'), code('invalid_canonical'));
+});
+
+// Catches the job tag sharing the client tag, the occurrence left out of the hash, or swapped
+// arguments. Same fixture as the Elixir suite; expected ids computed with Python hashlib.
+test('job CommandId known answers', () => {
+  for (const c of read('protocol/fixtures/job_command_id.json'))
+    assert.equal(jobCommandId(c.job_id, c.occurrence), c.command_id, c.command_id);
+});
+
+// Catches a non-string job id or an unsafe occurrence hashing instead of Elixir's typed error.
+test('job CommandId rejects bad input', () => {
+  assert.throws(() => jobCommandId(null as never, 0), code('invalid_id'));
+  assert.throws(() => jobCommandId('j', -1), code('invalid_ordinal'));
+  assert.throws(() => jobCommandId('j', 1.5), code('invalid_ordinal'));
 });
