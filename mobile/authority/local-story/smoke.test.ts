@@ -16,8 +16,10 @@ type P = (string | number | null)[];
 const processOn = (
   path: string,
   tap: (s: string, run: () => unknown) => unknown = (_, r) => r(),
+  pageSize = 0,
 ) => {
   const sql = new DatabaseSync(path);
+  if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`);
   const smoke = openSmoke(
     {
       execSync: (s) => void tap(s, () => sql.exec(s)),
@@ -168,4 +170,26 @@ test('a same-scope receipt from another allocator does not move the id counter',
   const b = processOn(path);
   b.press('Go south');
   assert.deepEqual(b.now().log, ['> Go south', 'moved']);
+});
+
+// Breaks: a definite write failure (real SQLITE_FULL) that leaves the pending retry set and
+// logs nothing: "scan" then re-ran the failed "Go north".
+test('a definite write failure is logged and the next press is a new action', () => {
+  const p = processOn(
+    join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'),
+    undefined,
+    512, // a receipt then needs new pages, which max_page_count forbids
+  );
+  const one = (q: string) => Object.values(p.sql.prepare(q).get()!)[0];
+  p.sql.exec(`PRAGMA max_page_count = ${one('PRAGMA page_count')}`);
+  p.press('Go north');
+  const failed = p.now();
+  assert.equal(failed.pending, false);
+  assert.equal(failed.log[0], '> Go north');
+  assert.match(failed.log[1], /^\(not saved: .*full/i);
+  assert.equal(one('SELECT revision FROM head'), 0);
+  assert.equal(failed.place, 'Ferry Landing');
+  p.sql.exec('PRAGMA max_page_count = 1000000');
+  p.press('scan');
+  assert.equal(p.now().log[2], '> scan');
 });

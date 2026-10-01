@@ -86,6 +86,17 @@ function lastId(db: Db): number {
   return last ? parseInt(last.slice(-12), 16) : 0;
 }
 
+function invocationOf(b: Button, n: number, actor: string) {
+  const invocation_id = `${ID_PREFIX}${n.toString(16).padStart(12, '0')}`;
+  return {
+    invocation_id,
+    action_key: b.action_key,
+    actor_id: actor,
+    target_ids: b.target_ids,
+    input: b.input,
+  };
+}
+
 /** The save in `db` (a new one if empty) of the bundled cartridge; open `db` once per process. */
 export function openSmoke(db: Db, bundled: Bundled) {
   const cartridge = cartridgeOf(bundled);
@@ -111,19 +122,17 @@ export function openSmoke(db: Db, bundled: Bundled) {
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
-      retry ??= {
-        label: b.label,
-        invocation: {
-          invocation_id: `${ID_PREFIX}${(++sent).toString(16).padStart(12, '0')}`,
-          action_key: b.action_key,
-          actor_id: story.world().character,
-          target_ids: b.target_ids,
-          input: b.input,
-        },
-      };
-      const reply = story.invoke(retry.invocation);
-      log.push(`> ${retry.label}`, said(reply, text));
-      if (reply.kind !== 'pending') retry = undefined;
+      retry ??= { label: b.label, invocation: invocationOf(b, ++sent, story.world().character) };
+      log.push(`> ${retry.label}`);
+      try {
+        const reply = story.invoke(retry.invocation);
+        log.push(said(reply, text));
+        if (reply.kind === 'pending') return;
+      } catch (e) {
+        // A definite failure: nothing was saved, so the attempt is over; the next press is new.
+        log.push(`(not saved: ${(e as Error).message})`);
+      }
+      retry = undefined;
     },
   };
 }
