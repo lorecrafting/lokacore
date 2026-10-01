@@ -208,7 +208,7 @@ function decideWith(world: World, command: Command, owner: string, rule: AnyRule
   const mint = allocator(world, command);
   try {
     const decided = deliver(world, admit(owner, rule(world, command, mint)));
-    return adopt(world, decided as Admitted, command as Actor, mint);
+    return adopt(world, decided, command as Actor, mint);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
     if (!(e instanceof KernelError)) throw e;

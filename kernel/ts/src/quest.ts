@@ -17,7 +17,7 @@ import { bodyOf, questOf, refString, type Mint, type QuestRow, type World } from
 import { holds } from './policy.ts';
 
 /** The cartridge's definition of `quest` (the loader resolves every quest reference). */
-export const definition = (world: World, quest: DefinitionRef): QuestDefinition =>
+const definition = (world: World, quest: DefinitionRef): QuestDefinition =>
   world.cartridge.quests![refString(quest)];
 
 /** A new QuestInstanceId from the decision's IdSource allocator. */
@@ -41,9 +41,9 @@ export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef)
  * never counts, and a give to someone else is not the actor's acquisition. ponytail: an instance
  * activated in this decision receives none of its events (only accept_quest activates, and it
  * emits nothing after quest_activated); compare positions with its quest_activated when one
- * decision can do both.
+ * decision can do both. It adds no event, so an admitted decision stays admitted (its type kept).
  */
-export function deliver(world: World, decision: DecisionResult): DecisionResult {
+export function deliver<D extends DecisionResult>(world: World, decision: D): D {
   if (decision.kind !== 'accepted' || !world.cartridge.quests) return decision;
   const met = (q: QuestRow) => {
     const o = definition(world, q.quest).objective;
@@ -69,7 +69,7 @@ export function deliver(world: World, decision: DecisionResult): DecisionResult 
     from: 'active' as const,
     to: 'objectives_complete' as const,
   }));
-  return { ...decision, delta: { ops: [...decision.delta.ops, ...ops] } };
+  return { ...decision, delta: { ops: [...decision.delta.ops, ...ops] } } as D;
 }
 
 type Resolved = Extract<EventPayload, { type: 'quest_resolved' }>;
