@@ -34,3 +34,15 @@
 **N2 nit — docs/ROADMAP.md:76.** "Each is a kernel slice ... cross-vendor review on every head" covers G, but the owner set that process for the five kernel slices; "every head" is broader than the record's "every slice head and core fix head". State "Q to D", and link to the record instead of rewording it.
 
 **Q1 question — docs/ROADMAP.md:85.** Row G's Spec cites only the schema; the bands (`hale`, `hurt`, `badly_hurt`) appear only in `design/room-view/README.md:34`. Who owns the thresholds (cartridge `resource@1` config or kernel)? G will need that spec line first.
+
+## Fix round 1 — `431c58f`
+
+Scope: the fix commit only (`git diff 8bf909f 431c58f`), with the lines it touched.
+
+- **S1 fixed.** ROADMAP:52 now holds only the table link and the knock/map R10 line. Row S carries the 04 §5.4 due set, the authority-internal IdSource tag, the S4 record, pre-release-proof and 00a:689 links; row D carries the milestone declaration (key, outcome, trigger), `story.milestone_reached` and the `authority.ts` pointer. Nothing from the old row was dropped; each fact now has one place.
+- **N1 fixed.** The decision record (line 17) now names `position@1` as an R5 deferral on the chapter-one row, which matches `release-scope.json:134` and ROADMAP:54.
+- **N2 fixed.** ROADMAP:76 limits the process to "Q to D" and links to the record instead of restating it.
+- **Q1 answered.** Row G (ROADMAP:85) says the band thresholds are unspecified and that a spec amendment comes first.
+- Nit (new, on a touched line): ROADMAP:76 links the same decision record twice in one sentence pair ("[record]" and "[the record]"). One link would do. This does not block.
+
+Verdict: **APPROVE.**
