@@ -325,6 +325,7 @@
     ],
     "modules": [
       "kernel/ts/src/reaction.ts",
+      "kernel/ts/src/proposal.ts",
       "kernel/ts/src/world.ts",
       "kernel/ts/src/compose.ts",
       "kernel/ts/src/cartridge_refs.ts"

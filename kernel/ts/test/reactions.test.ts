@@ -160,9 +160,9 @@ test('entering the belfry starts a cycle that faults budget_exceeded and commits
   assert.equal(s.world, green);
 });
 
-// A world whose reactions are only a chain of `n` rules: entering the belfry sets c0, and each
+// A world whose reactions are only a chain of `n` rules: entering `room` sets c0, and each
 // c(i-1) changing sets ci, so the last delivery is at reaction depth n.
-const chain = (n: number) =>
+const chain = (n: number, room = 'belfry') =>
   world((c) => {
     const bool = { version: 1, value_type: { type: 'bool', default: false }, scopes: ['instance'] };
     c.reactions = {};
@@ -172,7 +172,7 @@ const chain = (n: number) =>
         key: `k${i}`,
         on:
           i === 0
-            ? { event: 'entity_entered_room', room: ref('room', 'belfry') }
+            ? { event: 'entity_entered_room', room: ref('room', room) }
             : { event: 'fact_changed', fact: ref('fact', `c${i - 1}`) },
         apply: [{ op: 'fact.assign', fact: ref('fact', `c${i}`), value: true }],
       };
@@ -191,25 +191,55 @@ test('a chain of 32 deliveries commits; one of 33 exceeds reaction_depth', () =>
   }
 });
 
-// Breaks: no deliveries budget (8193 deliveries of one event commit: with an empty apply they add
-// no operation or event), or an off-by-one limit.
-test('8193 deliveries of one event exceed deliveries; 8192 commit', () => {
-  for (const [n, kind] of [
-    [8192, 'accepted'],
-    [8193, 'fault'],
-  ] as const) {
-    const w = world((c) => {
-      c.reactions = {};
-      for (let i = 0; i < n; i++)
-        c.reactions[`${G}:reaction/r${i}`] = {
-          key: `r${i}`,
-          on: { event: 'entity_entered_room', room: ref('room', 'belfry') },
-          apply: [],
-        };
-    });
-    const s = move(move(w, 'north').world, 'east');
-    assert.equal(s.decision.kind, kind, `${n}`);
+// A world whose reactions are only `n` rules on entering the belfry, each with an empty apply
+// (no operation or event) and `rest`; policy@1 locked for an `all`.
+const belfry = (n: number, rest: object = {}) =>
+  world((c) => {
+    c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;
+    c.reactions = {};
+    for (let i = 0; i < n; i++)
+      c.reactions[`${G}:reaction/r${i}`] = {
+        key: `r${i}`,
+        on: { event: 'entity_entered_room', room: ref('room', 'belfry') },
+        apply: [],
+        ...rest,
+      };
+  });
+const enter = (w: World) => move(move(w, 'north').world, 'east').decision.kind;
+const leaf = (equals: boolean) => ({ op: 'fact_compare', fact: ref('fact', 'bell_up'), equals });
+
+// Breaks (04 §5.2, §5.4: a delivery is each rule an event triggers, its guard evaluated at
+// delivery): no deliveries budget, an off-by-one limit, or a rule whose `when` is false not
+// counted as a delivery (8193 of them commit).
+test('8193 deliveries of one event exceed deliveries, whether their `when` holds or not', () => {
+  const never = { when: { policy_version: 1, root: leaf(true) } }; // bell_up is false
+  for (const rest of [{}, never]) {
+    assert.equal(enter(belfry(8192, rest)), 'accepted');
+    assert.equal(enter(belfry(8193, rest)), 'fault');
   }
+});
+
+// Breaks (04 §5.4 query_steps): reaction guards not counted, or an off-by-one limit. 1024 guards
+// of 32 leaves evaluate exactly 32768; of 33, 33792. Each leaf is true at 06:00 and small, so the
+// artifact stays under 4 MiB.
+test('reaction guards past 32768 policy leaves exceed query_steps', () => {
+  const all = (n: number) => ({
+    when: {
+      policy_version: 1,
+      root: { op: 'all', items: Array(n).fill({ op: 'time_window', from: 0, to: 12 }) },
+    },
+  });
+  assert.equal(enter(belfry(1024, all(32))), 'accepted');
+  assert.equal(enter(belfry(1024, all(33))), 'fault');
+});
+
+// Breaks (04 §5.4: over-limit work discards the whole advance): a job-root reaction overflow
+// ignored or answered with a partial advance (Bram moved, the clock or jobs advanced).
+test("a chain past reaction_depth from Bram's 19:00 arrival discards the whole wait", () => {
+  const w = chain(33, 'village_green');
+  const s = step(w, cmd(w, { type: 'wait', until: H(19) + 1800 }));
+  assert.deepEqual(s.decision, { kind: 'fault', code: 'budget_exceeded' });
+  assert.equal(s.world, w);
 });
 
 // Breaks: no events budget at the end of the proposal (a result of 4097 events commits), or an

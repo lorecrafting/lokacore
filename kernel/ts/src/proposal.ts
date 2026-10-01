@@ -88,6 +88,7 @@ type P = {
   queue: Queued[];
   group: number;
   deliveries: number;
+  steps: { n: number };
   at: World;
   applied: number;
 };
@@ -114,13 +115,16 @@ const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * advance drains its own, and each new job is later than the advance's target, so 04 §5.2 step 2
  * has nothing to drain.
  *
- * A reaction delivery (04 §5.2 steps 5-6): each rule an event triggers, in rule-key order, whose
- * `when` holds on the proposal so far at the event's logical time, is a delivery of its own
- * writer group at one more than its cause's reaction depth (a root's or job's events are at 0),
- * its fact_changed caused by that event at its logical time, its ids from the IdSource of the
- * root or job that began the chain. A delivery past the deliveries or reaction_depth limit
- * (compose.ts over) faults budget_exceeded: a cycle ends there, never truncated (adopt checks
- * the events limit on the whole proposal).
+ * A reaction delivery (04 §5.2 steps 5-6): each rule an event triggers, in rule-key order, at
+ * one more than its cause's reaction depth (a root's or job's events are at 0). Each counts
+ * toward the deliveries budget and its `when`'s policy leaves toward query_steps, read on the
+ * proposal so far at the event's logical time; only one whose `when` holds runs, as its own
+ * writer group, its fact_changed caused by that event at its logical time, its ids from the
+ * IdSource of the root or job that began the chain. A delivery past the deliveries,
+ * reaction_depth or query_steps limit (compose.ts over) faults budget_exceeded: a cycle ends
+ * there, never truncated (adopt checks the events limit on the whole proposal). ponytail: only
+ * reaction guards count query_steps; root and action policies join when their callers pass
+ * holds() a counter.
  * ponytail: quest.ts deliver sees only the root's events: a quest objective meets only an
  * item_acquired, which no job or reaction emits; route their events through it when one can.
  * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
@@ -140,6 +144,7 @@ export function propose(world: World, root: Admitted, command: Actor, mint: Mint
     queue: [],
     group,
     deliveries: group,
+    steps: { n: 0 },
     at: world,
     applied: 0,
   };
@@ -191,11 +196,13 @@ function react(p: P): Admitted | undefined {
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
-      const own = sequence(at, p.command.payload.actor_id, rule, next.cause, p.group + 1);
+      const own = sequence(at, p.command.payload.actor_id, rule, next.cause, p.group + 1, p.steps);
+      const depth = next.depth + 1;
+      if (over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n }))
+        return BUDGET;
       if (!own) continue;
       p.group++;
-      join(p, own, [], cause(p, next.cause.logical_time, next.cause.id), next.depth + 1, next.mint);
-      if (over({ deliveries: ++p.deliveries, reaction_depth: next.depth + 1 })) return BUDGET;
+      join(p, own, [], cause(p, next.cause.logical_time, next.cause.id), depth, next.mint);
     }
   }
 }
