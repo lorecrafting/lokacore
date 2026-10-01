@@ -3,6 +3,7 @@
 // items fixture (protocol/fixtures/cartridge_items_hash.json): the Ferry Landing holds Bram and
 // a leather satchel with an exit north to the Village Green.
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -30,6 +31,7 @@ const processOn = (
       getAllSync: <T>(s: string, ...p: P) => tap(s, () => sql.prepare(s).all(...p)) as T[],
     },
     read('protocol/fixtures/cartridge_items_hash.json') as never,
+    randomUUID,
   );
   const now = () => {
     const { view, text, buttons, log, pending } = smoke.screen();

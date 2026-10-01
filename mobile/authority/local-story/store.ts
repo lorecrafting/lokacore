@@ -1,6 +1,6 @@
-// The local Story save in SQLite (07 §9; 03 §§14-15; ADR-072): the current state as rows, the
-// head (revision, clock, RNG) and the command receipts. The row schema is the implementation's
-// (ADR-072: "the per-row schema is an R2+ design task"). Every write is one transaction opened
+// The local Story save in SQLite (07 §9; 03 §§14-15; ADR-072; 10 §§31-32): the current state as
+// rows, the head (revision, clock, RNG), the save's identity and pin, and the command receipts.
+// The row schema is the implementation's (ADR-072: "the per-row schema is an R2+ design task"). Every write is one transaction opened
 // and committed here, never by a driver helper (mobile lessons).
 import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
 import { target } from '../../../kernel/ts/src/compose.ts';
@@ -42,37 +42,84 @@ CREATE TABLE IF NOT EXISTS receipt (scope TEXT NOT NULL, invocation_id TEXT NOT 
   intent_digest TEXT NOT NULL, command TEXT NOT NULL, revision INTEGER NOT NULL,
   response TEXT NOT NULL, PRIMARY KEY (scope, invocation_id), UNIQUE (scope, command_id)) STRICT;
 CREATE TABLE IF NOT EXISTS trace (ordinal INTEGER NOT NULL, command_id TEXT,
-  commit_state TEXT, record TEXT NOT NULL) STRICT;`;
+  commit_state TEXT, record TEXT NOT NULL) STRICT;
+CREATE TABLE IF NOT EXISTS save (one INTEGER PRIMARY KEY CHECK (one = 1), format TEXT NOT NULL,
+  lineage_id TEXT NOT NULL, run_id TEXT NOT NULL, parent TEXT NOT NULL, seed TEXT NOT NULL,
+  pin TEXT NOT NULL) STRICT;
+CREATE TABLE IF NOT EXISTS snapshot (kind TEXT NOT NULL CHECK (kind IN ('bookmark', 'recovery')),
+  slot INTEGER NOT NULL, label TEXT, bytes TEXT NOT NULL, sha256 TEXT NOT NULL,
+  PRIMARY KEY (kind, slot)) STRICT;`;
+
+/**
+ * The save's identity (10 §§31-32): its lineage and run, the fork it came from (lineage, run,
+ * revision; null for a new save), the run's initial RNG (ADR-075 seed) and the release it pins.
+ */
+export type Meta = {
+  readonly format: string;
+  readonly lineage_id: string;
+  readonly run_id: string;
+  readonly parent: Json;
+  readonly seed: Json;
+  readonly pin: { readonly content_hash: string } & Record<string, Json>;
+};
 
 const UPSERT = 'INSERT OR REPLACE INTO state_row VALUES (?, ?, ?)';
 const HEAD = 'INSERT OR REPLACE INTO head VALUES (1, ?, ?, ?)';
 
-/** The saved world and revision, or `fresh` saved whole at revision 0 when there is none. */
-export function load(db: Db, fresh: World): { world: World; revision: number } {
+/**
+ * The saved world, revision and identity; with no save, `fresh` saved whole at revision 0 under
+ * the identity `first()` allocates. Undefined when the head, a row or the identity does not parse
+ * (OFF-07): a corrupt save is reported, never replaced by `fresh`.
+ */
+export function load(db: Db, fresh: World, first: () => Meta) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
   db.execSync(SCHEMA);
   type Head = { revision: number; clock: number; rng: string };
   const head = db.getFirstSync<Head>('SELECT revision, clock, rng FROM head');
   if (!head) {
-    const { clock, rng, ...sections } = fresh.state;
+    const meta = first();
     const saved = transaction(db, () => {
-      db.runSync(HEAD, 0, clock, encode(rng as Json));
-      for (const [section, rows] of Object.entries(sections))
-        for (const [key, value] of Object.entries(rows))
-          db.runSync(UPSERT, section, key, encode(value));
+      writeState(db, 0, fresh.state);
+      const { format, lineage_id, run_id, parent, seed, pin } = meta;
+      const json = [parent, seed, pin].map((v) => encode(v as Json));
+      db.runSync(
+        'INSERT INTO save VALUES (1, ?, ?, ?, ?, ?, ?)',
+        format,
+        lineage_id,
+        run_id,
+        ...json,
+      );
     });
     if (!saved) throw new Error('outcome of the first save unknown; reopen the story');
-    return { world: fresh, revision: 0 };
+    return { world: fresh, revision: 0, meta };
   }
+  const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save');
+  if (!m) return undefined; // a head without an identity: not a save this format wrote
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };
-  for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
-    (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
-  const rng = JSON.parse(head.rng);
-  const world = { ...fresh, state: { ...state, clock: head.clock, rng } as World['state'] };
-  return { world, revision: head.revision };
+  try {
+    for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
+      (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
+    const rng = JSON.parse(head.rng);
+    const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v!));
+    const world = { ...fresh, state: { ...state, clock: head.clock, rng } as World['state'] };
+    return { world, revision: head.revision, meta: { ...m, parent, seed, pin } as Meta };
+  } catch (e) {
+    if (e instanceof SyntaxError) return undefined;
+    throw e;
+  }
+}
+
+/** Replaces the head and every row with `state` at `revision`, inside the caller's transaction. */
+export function writeState(db: Db, revision: number, state: World['state']) {
+  const { clock, rng, ...sections } = state;
+  db.runSync(HEAD, revision, clock, encode(rng as Json));
+  db.runSync('DELETE FROM state_row');
+  for (const [section, rows] of Object.entries(sections))
+    for (const [key, value] of Object.entries(rows))
+      db.runSync(UPSERT, section, key, encode(value));
 }
 
 /** The receipt of `invocation_id` in `scope`, if one was committed. */
@@ -122,14 +169,14 @@ export function commit(db: Db, next: World, decision: DecisionResult, r: Receipt
 }
 
 /**
- * The receipt of `invocation_id` once the outcome of a failed COMMIT is settled (03 §15), or a
+ * `read()` (a receipt, the run id) once the outcome of a failed COMMIT is settled (03 §15), or a
  * throw while it is not. After ROLLBACK leaves the one connection outside a transaction, the
- * attempt can no longer commit, so a missing receipt is a confirmed non-commit; inside one, a
- * read would see the attempt's own uncommitted receipt.
+ * attempt can no longer commit, so what `read` misses is a confirmed non-commit; inside one, a
+ * read would see the attempt's own uncommitted writes.
  */
-export function reconcile(db: Db, scope: string, invocation_id: string): Receipt | undefined {
+export function reconcile<T>(db: Db, read: () => T): T {
   if (!rollback(db)) throw new Error('transaction still open; outcome unknown');
-  return receipt(db, scope, invocation_id);
+  return read();
 }
 
 /**

@@ -4,6 +4,7 @@
 // Expected values are literals from the fixtures named beside them, never from the code under test.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -18,7 +19,6 @@ import { INSTALLED } from '../../../kernel/ts/src/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Reply, type Saved } from './authority.ts';
 
-const SCOPE = 'story/lineage-1/character-1';
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
 // ashmere_items ids (kernel/ts/test/invocation_cases.json): the satchel, the NPC, the body.
 const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
@@ -33,8 +33,7 @@ const world = (fixture: string, seed: readonly number[]) => {
   const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId;
   const fresh = newWorld(loaded.cartridge as Cartridge, context, seed as RngState);
   const kernel_version = `loka-kernel@${'0123456789'.repeat(4)}`;
-  const run_id = '6f6f6f6f-1111-4222-8333-444444444444';
-  return { fresh, ids: { content_hash: kat.sha256, kernel_version, seed, run_id } };
+  return { fresh, host: { content_hash: kat.sha256, kernel_version, newId: randomUUID } };
 };
 const items = world('cartridge_items_hash.json', [1, 2, 3, 4]);
 // numeric-vectors.json rng_steps[3].state; its next draw fails pick_lock (invocation_cases.json).
@@ -57,7 +56,12 @@ function processOn(path: string, story = items, pageSize = 0, tap?: Tap) {
   if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`); // before WAL fixes it
   sql.exec('PRAGMA journal_mode = WAL');
   const one = (q: string) => Object.values(sql.prepare(q).get()!)[0];
-  return { sql, story: openStory(adapt(sql, tap), story.fresh, SCOPE, story.ids), one };
+  return { sql, story: opened(openStory(adapt(sql, tap), story.fresh, story.host)), one };
+}
+/** An opened story; anything else fails the test. */
+function opened(o: ReturnType<typeof openStory>) {
+  assert.equal(o.kind, 'open');
+  return o as Extract<typeof o, { kind: 'open' }>;
 }
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-s1-')), 'save.db');
 const invocation = (n: number, action_key: string, target_ids: string[], token?: string) => ({
@@ -429,7 +433,7 @@ test('an updated kernel starts a new segment after recovering the old one', () =
   a.sql.close();
   const kernel_version = `loka-kernel@${'f'.repeat(40)}`;
   let opening = true;
-  const b = processOn(path, { ...items, ids: { ...items.ids, kernel_version } }, 0, (s, run) => {
+  const b = processOn(path, { ...items, host: { ...items.host, kernel_version } }, 0, (s, run) => {
     if (opening && s.includes('FROM trace')) throw new Error('trace unreadable');
     return run();
   });
@@ -440,12 +444,13 @@ test('an updated kernel starts a new segment after recovering the old one', () =
     [1, 1, 'committed', 2],
   ]);
   const heads = b.sql.prepare('SELECT record FROM trace WHERE ordinal = 0 ORDER BY rowid').all();
+  const run_id = b.one('SELECT run_id FROM save');
   const run = (h: Record<string, unknown>) => JSON.parse(h.record as string);
   assert.deepEqual(
     heads.map(run).map((h) => [h.ids.run_id, h.ids.kernel_version, h.data.initial_state]),
     [
-      [items.ids.run_id, items.ids.kernel_version, { state: 'fresh' }],
-      [items.ids.run_id, kernel_version, { state: 'unavailable', reason: 'not_collected' }],
+      [run_id, items.host.kernel_version, { state: 'fresh' }],
+      [run_id, kernel_version, { state: 'unavailable', reason: 'not_collected' }],
     ],
   );
 });
@@ -483,7 +488,7 @@ test('a save does not open inside a transaction left open', () => {
     if (jam && (s === 'COMMIT' || s === 'ROLLBACK')) throw new Error(`${s} failed`);
     return run();
   });
-  assert.throws(() => openStory(db, items.fresh, SCOPE, items.ids), /first save unknown/);
+  assert.throws(() => openStory(db, items.fresh, items.host), /first save unknown/);
   jam = false;
-  assert.throws(() => openStory(db, items.fresh, SCOPE, items.ids), /transaction is open/);
+  assert.throws(() => openStory(db, items.fresh, items.host), /transaction is open/);
 });

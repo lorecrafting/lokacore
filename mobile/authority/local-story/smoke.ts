@@ -19,16 +19,13 @@ export type Button = { label: string; action_key: string; target_ids: string[]; 
 /** A cartridge fixture: its canonical JSON text and content hash. */
 export type Bundled = { canonical: string; sha256: string };
 
-const SCOPE = 'story/smoke';
 // ponytail: one fixed world context and seed; a real start draws them per lineage (R6P).
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const SEED = [1, 2, 3, 4];
 // ponytail: no build commit on the phone yet, so the kernel version is marked dirty and no phone
-// trace counts as evidence until it comes from the build (ROADMAP R6 SM); the run id, scope and
-// context above are fixed for every save (S3 allocates them per save).
+// trace counts as evidence until it comes from the build (ROADMAP R6 SM).
 const KERNEL_VERSION = `${KERNEL_ID}@${'0'.repeat(40)}-dirty`;
 const ID_PREFIX = '00000000-0000-4000-8000-';
-const RUN_ID = '5a5a5a5a-1111-4222-8333-444444444444';
 
 type Say = (key: string) => string;
 
@@ -75,12 +72,12 @@ function cartridgeOf(bundled: Bundled): Cartridge {
   return loaded.cartridge as Cartridge;
 }
 
-// Ids continue from the highest receipt in this allocator's own namespace (replies without a
-// receipt leave no trace). ponytail: reads the receipt table directly; openStory exposes none.
+// Ids continue from the highest receipt in this allocator's own namespace, across forks (replies
+// without a receipt leave no trace). ponytail: reads the receipt table directly; openStory exposes
+// none.
 function lastId(db: Db): number {
   const last = db.getFirstSync<{ id: string | null }>(
-    'SELECT max(invocation_id) AS id FROM receipt WHERE scope = ? AND invocation_id LIKE ?',
-    SCOPE,
+    'SELECT max(invocation_id) AS id FROM receipt WHERE invocation_id LIKE ?',
     `${ID_PREFIX}%`,
   )!.id;
   return last ? parseInt(last.slice(-12), 16) : 0;
@@ -97,16 +94,15 @@ function invocationOf(b: Button, n: number, actor: string) {
   };
 }
 
-/** The save in `db` (a new one if empty) of the bundled cartridge; open `db` once per process. */
-export function openSmoke(db: Db, bundled: Bundled) {
+/**
+ * The save in `db` (a new one if empty, its ids from `newId`, a random UUID each call) of the
+ * bundled cartridge; open `db` once per process. A save that does not open throws its kind.
+ */
+export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   const cartridge = cartridgeOf(bundled);
-  const ids = {
-    content_hash: bundled.sha256,
-    kernel_version: KERNEL_VERSION,
-    seed: SEED,
-    run_id: RUN_ID,
-  };
-  const story = openStory(db, newWorld(cartridge, CONTEXT as never, SEED as never), SCOPE, ids);
+  const host = { content_hash: bundled.sha256, kernel_version: KERNEL_VERSION, newId };
+  const story = openStory(db, newWorld(cartridge, CONTEXT as never, SEED as never), host);
+  if (story.kind !== 'open') throw new Error(`save not opened: ${story.kind}`);
   // The unconfirmed attempt, resent unchanged (same id, same intent) until it settles (03 §§14-15).
   let retry: { label: string; invocation: object } | undefined;
   let sent = lastId(db);
