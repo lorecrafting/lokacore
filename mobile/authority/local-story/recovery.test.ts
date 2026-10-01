@@ -137,7 +137,7 @@ test('a file that is not a database or has a corrupt page is save_corrupt', () =
   const sql = new DatabaseSync(notadb); // no WAL pragma: SQLite rejects the file at its first read
   assert.equal(openStory(adapt(sql), releases, host()).kind, 'save_corrupt');
   sql.close();
-  for (const table of ['state_row', 'head']) {
+  for (const table of ['state_row', 'head', 'receipt']) {
     const path = taken();
     corruptPage(path, table);
     const before = bytes(path);

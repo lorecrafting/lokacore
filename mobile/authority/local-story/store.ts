@@ -93,6 +93,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   // Half a save (rows or receipts without their table too): never taken for a new one, unwritten.
   if (!head || !save || !['state_row', 'receipt'].every(table)) return undefined;
   db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report)
+  // ponytail: a corrupt receipt page fails here, at open, only on the path to its first row.
+  db.getFirstSync('SELECT * FROM receipt LIMIT 1'); // the table, not its index
   type Head = { revision?: number; clock?: number; rng?: string };
   const h = db.getFirstSync<Head>('SELECT * FROM head')!; // any columns: a damaged one is corrupt
   const m = db.getFirstSync<Record<string, string>>('SELECT * FROM save')!;
