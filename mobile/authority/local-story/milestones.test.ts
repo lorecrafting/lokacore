@@ -254,9 +254,10 @@ test('a lost reply is retried and reads back the one acceptance', async () => {
 });
 
 // Breaks (23 §4; pin 7): a batch not bounded; a conflict or rejection stored as accepted or left
-// pending (resent forever); an unreachable platform or a malformed reply, or one for another account or outcome, dropping
-// or settling a report; a guest's report sent under no account; delivery reading a transaction
-// that is still open (its uncommitted reports would be sent as saved).
+// pending (resent forever); an unreachable platform, or a reply that is malformed or for another
+// account or outcome, dropping or settling a report; a guest's report sent under no account;
+// delivery reading or writing while a transaction is open (its uncommitted reports would be sent
+// as saved, or the open transaction rolled back by the acknowledgement).
 test('delivery is bounded, persists each disposition and drops nothing', async () => {
   const p = reports(A, B, C, null);
   const fake = platform();
@@ -267,11 +268,9 @@ test('delivery is bounded, persists each disposition and drops nothing', async (
   await deliver(p.db, fake.submit, 1);
   fake.result = 'outcome_conflict';
   await deliver(p.db, fake.submit, 1);
-  const malformed = async (r: MilestoneReport) => ({ report_id: r.report_id, account_id: C });
-  await assert.rejects(deliver(p.db, malformed, 10), /not an acceptance/);
   fake.result = 'accepted';
-  // A valid acceptance, but of another account or another outcome than the report's.
-  for (const wrong of [{ account_id: A }, { outcome: 'tolled' }]) {
+  // An acceptance with a result outside the schema, of another account, of another outcome.
+  for (const wrong of [{ result: 'credited' }, { account_id: A }, { outcome: 'tolled' }]) {
     const answer = async (r: MilestoneReport, a: string) => ({
       ...(await fake.submit(r, a)),
       ...wrong,
@@ -284,8 +283,17 @@ test('delivery is bounded, persists each disposition and drops nothing', async (
     [C, 'pending'],
     [null, 'pending'],
   ]);
+  const sent = fake.calls.length;
   p.sql.exec('BEGIN');
   await assert.rejects(deliver(p.db, fake.submit, 10), /transaction is open/);
+  p.sql.exec('ROLLBACK');
+  assert.equal(fake.calls.length, sent);
+  const opening = async (r: MilestoneReport, a: string) => {
+    const answer = await fake.submit(r, a);
+    p.sql.exec('BEGIN'); // left open while the answer was awaited
+    return answer;
+  };
+  await assert.rejects(deliver(p.db, opening, 10), /transaction is open/);
   p.sql.exec('ROLLBACK');
   await deliver(p.db, fake.submit, 10);
   assert.deepEqual(p.all(DISPOSITIONS).slice(2), [

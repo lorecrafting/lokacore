@@ -11,12 +11,16 @@ export type Submit = (report: MilestoneReport, account: string) => Promise<unkno
  * Delivers up to `limit` pending reports, oldest first, each for the binding it was captured
  * under (23 §5: never rebound), and records the platform's answer before acknowledging it: an
  * accepted or rejected result as itself, a conflict as `needs_attention` (23 §4). Called by the
- * host when connected, outside any transaction; nothing is ever dropped, and a throw (offline, a
+ * host when connected, outside any transaction; nothing is ever dropped, and a rejection (offline, a
  * malformed answer) leaves the rest pending for the next call. An unknown acknowledgement commit
  * is resent, and the platform answers it again from its own record.
  */
 export async function deliver(db: Db, submit: Submit, limit: number) {
-  if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
+  // Checked again after each answer: a gameplay COMMIT may have left one open meanwhile.
+  const closed = () => {
+    if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
+  };
+  closed();
   type Row = { report_id: string; binding: string; report: string };
   // ponytail: a guest's report (null binding) waits; claiming a run is explicit (23 §5), R12A.
   const rows = db.getAllSync<Row>(
@@ -35,6 +39,7 @@ export async function deliver(db: Db, submit: Submit, limit: number) {
     if (encode(about) !== encode({ report_id, account_id: r.binding, release, milestone, outcome }))
       throw fail;
     const disposition = result === 'accepted' || result === 'rejected' ? result : 'needs_attention';
+    closed();
     transaction(db, () =>
       db.runSync(
         'UPDATE report SET disposition = ?, acceptance = ? WHERE report_id = ?',
