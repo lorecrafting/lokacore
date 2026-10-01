@@ -232,8 +232,8 @@ export function reconcile<T>(db: Db, read: () => T): T {
  * would read as saved). Either false is settled by `reconcile` before the next decision.
  */
 export function transaction(db: Db, writes: () => void): boolean {
-  // Only a failed trace or delivery write can leave one open here (reconcile settles gameplay's
-  // first; a delivery's acknowledgement is resent).
+  // A failed trace or delivery write, or an unknown gameplay COMMIT before a delivery write, can
+  // leave one open here: rolled back, as reconcile would (a delivery's acknowledgement is resent).
   if (db.isInTransactionSync()) db.execSync('ROLLBACK');
   db.execSync('BEGIN IMMEDIATE');
   try {
