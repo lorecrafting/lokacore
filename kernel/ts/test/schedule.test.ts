@@ -349,6 +349,37 @@ test("a recipe's committed narration pins its participants' EntityIds", () => {
   assert.deepEqual(decision.effects, []);
 });
 
+// Breaks: an item participant resolved through another field or to the actor's body. The rope,
+// an item added at the landing, takes ordinal 6 (after Bram, before his job): IdSource over
+// ["loka-id-v1", CONTEXT, nil, 6] in Python hashlib.
+test("an item participant is pinned to the item's EntityId", () => {
+  const w = world((c) => {
+    const [short, room_line, description] = [
+      'npc.bram.short',
+      'npc.bram.room',
+      'detail.mooring_post',
+    ];
+    const location = { in: 'room', room: ref('room', 'ferry_landing') };
+    c.items = {
+      [`${F}:item/rope`]: {
+        key: 'rope',
+        keywords: ['rope'],
+        short,
+        room_line,
+        description,
+        location,
+      },
+    };
+    coil(c).participants.rope = { role: 'item', item: ref('item', 'rope') };
+  });
+  const { decision } = step(w, cmd(w, { type: 'perform', action: 'coil_rope' }));
+  assert.deepEqual(decision.kind === 'accepted' && decision.narration?.[0]?.participants, {
+    actor: BODY,
+    bram: BRAM_ID,
+    rope: '6a70d262-b6ea-8b64-9809-ec7f79d1521e',
+  });
+});
+
 // Breaks: the kernel would pin an undefined EntityId because the loader let in a participant
 // naming no definition, or one of another kind than its role says; or a participant's field
 // outside its role's branch (cartridge.schema.json DiagnosticCode UNKNOWN_FIELD) let in.
