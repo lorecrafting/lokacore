@@ -185,10 +185,10 @@ const runs = (p: { sql: DatabaseSync }) =>
 test('at the cap a new game deletes the oldest run whole and keeps the current one', () => {
   const p = open(save());
   p.story.invoke(take);
-  pad(p, CAP - 2);
+  pad(p, CAP - 3); // the new header and take fit, keeping room for a two-entry write; give does not
   assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
   assert.equal(revision(p.story.invoke(take)), 1);
-  assert.equal(p.one('SELECT count(*) FROM trace'), CAP);
+  assert.equal(p.one('SELECT count(*) FROM trace'), CAP - 1);
   assert.equal(revision(p.story.invoke(give)), 2);
   assert.deepEqual(runs(p), [id(4), id(4), id(4)]);
   assert.deepEqual(traced(p), [
@@ -230,11 +230,14 @@ test('a new game at the cap makes room for its header by deleting the old run', 
   assert.deepEqual(runs(p), [id(4)]);
 });
 
-// Breaks (ADR-075 §2, cap rule): an unknown COMMIT's entry and its settled follow-up, written as
-// one pair, counted as one row, so the pair overshoots the cap. Simulated: the ack is lost.
-test('an entry pair one row below the cap is dropped whole', () => {
+// Breaks (ADR-075 §2, cap rule: once a run drops an entry it writes no later one): one row below
+// the cap, an unknown COMMIT's pair dropped and then a single entry written in the last slot (the
+// trace then replays without give: no longer a prefix), or a reopen reading the dropped receipts
+// again. Simulated: give's COMMIT acknowledgement is lost.
+test('a run that drops an entry pair below the cap writes nothing more', () => {
+  const path = save();
   let lose = false;
-  const p = open(save(), (s, run) => {
+  const p = open(path, (s, run) => {
     const out = run();
     if (!lose || s !== 'COMMIT') return out;
     lose = false;
@@ -242,7 +245,13 @@ test('an entry pair one row below the cap is dropped whole', () => {
   });
   p.story.invoke(take);
   pad(p, CAP - 1);
+  const last = p.one('SELECT max(rowid) FROM trace');
   lose = true;
   assert.equal(revision(p.story.invoke(give)), 2);
-  assert.equal(p.one('SELECT count(*) FROM trace'), CAP - 1);
+  assert.equal(revision(p.story.invoke(invocation(3, 'take', [SATCHEL]))), 2); // given: rejected
+  assert.equal(p.one('SELECT max(rowid) FROM trace'), last);
+  p.sql.close();
+  let scans = 0; // catch-up reads of untraced receipts
+  const q = open(path, (s, run) => ((scans += +s.includes('FROM receipt WHERE command')), run()));
+  assert.deepEqual([scans, q.one('SELECT max(rowid) FROM trace')], [0, last]);
 });

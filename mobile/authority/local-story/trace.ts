@@ -32,7 +32,7 @@ export function traceCommand(
   let capped = false;
   try {
     const written = transaction(db, () => {
-      if ((capped = !room(db, ids.run_id, states.length))) return;
+      if ((capped = !room(db, ids.run_id))) return;
       // The last row, an entry or its header (0), holds the run's highest ordinal; rowid: O(1).
       const last = db.getFirstSync<{ n: number }>(
         'SELECT ordinal AS n FROM trace ORDER BY rowid DESC LIMIT 1',
@@ -63,18 +63,21 @@ function extent(db: Db) {
   )!;
   return { n: n ?? 0, oldest: first && runOf(first) };
 }
-/** True when `run_id`'s run alone fills the cap: its later entries are dropped. */
+// The rows one write may need (an unknown entry and its settled follow-up): each write keeps this
+// much room, so a run that drops one write has too little for any later one (a terminal state).
+const WRITE = 2;
+/** True when `run_id`'s run alone has too little room left under the cap: it writes no more. */
 const full = (db: Db, run_id: string) => {
   const { n, oldest } = extent(db);
-  return n >= CAP && oldest === run_id;
+  return n + WRITE > CAP && oldest === run_id;
 };
 /**
- * Room for `rows` more of `run_id`'s under the phone cap (ADR-075 §2, amended R6 S6a): over it,
- * the oldest whole runs other than `run_id`'s are deleted; false when `run_id`'s run alone fills
- * it, so its later rows are dropped and its replayable prefix stays.
+ * Room for a write of `run_id`'s under the phone cap (ADR-075 §2, amended R6 S6a): while fewer
+ * than WRITE rows remain, the oldest whole runs other than `run_id`'s are deleted; false when
+ * `run_id`'s run alone is left, so it writes nothing more and its replayable prefix stays.
  */
-function room(db: Db, run_id: string, rows: number): boolean {
-  for (let e = extent(db); e.n + rows > CAP; e = extent(db)) {
+function room(db: Db, run_id: string): boolean {
+  for (let e = extent(db); e.n + WRITE > CAP; e = extent(db)) {
     if (e.oldest === run_id) return false;
     type Head = { rowid: number; record: string };
     const heads = db.getAllSync<Head>(
@@ -96,7 +99,7 @@ function room(db: Db, run_id: string, rows: number): boolean {
 export function catchUp(db: Db, ids: RunIds, context: string, skip = ''): boolean {
   const header = (initial: object) =>
     transaction(db, () => {
-      if (!room(db, ids.run_id, 1)) return; // a new kernel's header for a run alone at the cap
+      if (!room(db, ids.run_id)) return; // a new kernel's header for a run alone at the cap
       const data = { world_context_id: context, initial_state: initial, fault_schedule: NONE };
       db.runSync(TRACE, 0, null, null, record('trace.run', ids, data));
     });
