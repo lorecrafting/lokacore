@@ -23,9 +23,11 @@ const SCOPE = 'story/smoke';
 // ponytail: one fixed world context and seed; a real start draws them per lineage (R6P).
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const SEED = [1, 2, 3, 4];
-// ponytail: no build commit on the phone yet, so the kernel version is marked dirty; one run id
-// per save (a real start draws one per run, R6P).
+// ponytail: no build commit on the phone yet, so the kernel version is marked dirty and no phone
+// trace counts as evidence until it comes from the build (ROADMAP R6 SM); the run id, scope and
+// context above are fixed for every save (S3 allocates them per save).
 const KERNEL_VERSION = `${KERNEL_ID}@${'0'.repeat(40)}-dirty`;
+const ID_PREFIX = '00000000-0000-4000-8000-';
 const RUN_ID = '5a5a5a5a-1111-4222-8333-444444444444';
 
 type Say = (key: string) => string;
@@ -58,7 +60,7 @@ function buttonsOf(v: GameView, label: Say, text: Say): Button[] {
 
 // What one press answers: the narration or outcome of an accepted command, else the refusal.
 function said(r: Reply, text: Say): string {
-  if (r.kind === 'pending') return '(pending: not confirmed saved; press again)';
+  if (r.kind === 'pending') return '(pending: not confirmed saved; press any button to retry it)';
   if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision as { kind: string; outcome?: string; narration?: { key: string }[] };
   if (d.kind === 'rejected')
@@ -73,6 +75,17 @@ function cartridgeOf(bundled: Bundled): Cartridge {
   return loaded.cartridge as Cartridge;
 }
 
+// Ids continue from the highest receipt in this allocator's own namespace (replies without a
+// receipt leave no trace). ponytail: reads the receipt table directly; openStory exposes none.
+function lastId(db: Db): number {
+  const last = db.getFirstSync<{ id: string | null }>(
+    'SELECT max(invocation_id) AS id FROM receipt WHERE scope = ? AND invocation_id LIKE ?',
+    SCOPE,
+    `${ID_PREFIX}%`,
+  )!.id;
+  return last ? parseInt(last.slice(-12), 16) : 0;
+}
+
 /** The save in `db` (a new one if empty) of the bundled cartridge; open `db` once per process. */
 export function openSmoke(db: Db, bundled: Bundled) {
   const cartridge = cartridgeOf(bundled);
@@ -83,13 +96,9 @@ export function openSmoke(db: Db, bundled: Bundled) {
     run_id: RUN_ID,
   };
   const story = openStory(db, newWorld(cartridge, CONTEXT as never, SEED as never), SCOPE, ids);
-  let pending = false; // the last press's COMMIT outcome is unknown; the next press settles it
-  // Ids continue from the highest receipt saved (replies without a receipt leave no trace).
-  const last = db.getFirstSync<{ id: string | null }>(
-    'SELECT max(invocation_id) AS id FROM receipt WHERE scope = ?',
-    SCOPE,
-  )!.id;
-  let sent = last ? parseInt(last.slice(-12), 16) : 0;
+  // The unconfirmed attempt, resent unchanged (same id, same intent) until it settles (03 §§14-15).
+  let retry: { label: string; invocation: object } | undefined;
+  let sent = lastId(db);
   const log: string[] = [];
   const text: Say = (key) => cartridge.text[key as Key] ?? key;
   // ponytail: the cartridge has no text for action labels yet, so show the key's last word.
@@ -98,19 +107,23 @@ export function openSmoke(db: Db, bundled: Bundled) {
   return {
     screen: () => {
       const view = gameView(story.world());
-      return { view, text, buttons: buttonsOf(view, label, text), log, pending };
+      return { view, text, buttons: buttonsOf(view, label, text), log, pending: !!retry };
     },
     press(b: Button): void {
-      const invocation = {
-        invocation_id: `00000000-0000-4000-8000-${(++sent).toString(16).padStart(12, '0')}`,
-        action_key: b.action_key,
-        actor_id: story.world().character,
-        target_ids: b.target_ids,
-        input: b.input,
+      // While unconfirmed any press retries that attempt, whatever button it was.
+      retry ??= {
+        label: b.label,
+        invocation: {
+          invocation_id: `${ID_PREFIX}${(++sent).toString(16).padStart(12, '0')}`,
+          action_key: b.action_key,
+          actor_id: story.world().character,
+          target_ids: b.target_ids,
+          input: b.input,
+        },
       };
-      const reply = story.invoke(invocation);
-      pending = reply.kind === 'pending';
-      log.push(`> ${b.label}`, said(reply, text));
+      const reply = story.invoke(retry.invocation);
+      log.push(`> ${retry.label}`, said(reply, text));
+      if (reply.kind !== 'pending') retry = undefined;
     },
   };
 }
