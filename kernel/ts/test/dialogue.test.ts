@@ -152,6 +152,20 @@ test('the GameView shows the pending choice; a dropped lantern makes both option
   assert.ok(!gameView(w).actions.some((a) => ['choose', 'close_choice'].includes(a.action_key)));
 });
 
+// Breaks: a talk advertised on every NPC in the room though it accepts only its speaker.
+test('the talk is listed on its speaker only', () => {
+  const w = world((c) => {
+    const npc = c.npcs[`${F}:npc/bram`];
+    c.npcs[`${F}:npc/ada`] = { ...npc, key: 'ada', keywords: ['ada'] };
+    delete c.npcs[`${F}:npc/ada`].daily_schedule;
+  });
+  const talks = (name: string) =>
+    gameView(w)
+      .entities.filter((e) => e.kind === 'npc' && e.id === w.entityIds[`${F}:npc/${name}`])
+      .flatMap((e) => e.actions.map((a) => a.action_key));
+  assert.deepEqual([talks('bram'), talks('ada')], [['bram'], []]);
+});
+
 // Breaks: a consequence, the hand-over, the quest or the choice applied apart (21 §20, 04 §5.3),
 // resolution read after the transfer (quest_requirement), or narration re-resolved by name.
 test('leave hands the lantern to Bram, sets party_led and resolves quest and choice at once', () => {
@@ -313,8 +327,8 @@ const bram = (c: any) => c.dialogues[`${F}:dialogue/bram`];
 // Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): the
 // kernel would bind a role, speaker or quest that does not exist, hand over through a role of the
 // wrong kind, show a missing text, assign an undeclared fact or a wrong value, run a dialogue its
-// capability is not locked for, shadow the actor participant, open a choice with no option, or
-// list a talk under another action's key.
+// capability is not locked for, shadow the actor participant, open a choice with no option, list
+// a talk under another action's key, or give one NPC two dialogues (talk names only its target).
 test('the loader checks dialogue references, roles, texts, facts, keys and the lock', () => {
   const missing = (kind: string) => ({ target: `${F}:${kind}/missing` });
   fails(
@@ -396,6 +410,11 @@ test('the loader checks dialogue references, roles, texts, facts, keys and the l
     },
     'DUPLICATE_DEFINITION',
     `.cartridge.dialogues["${F}:dialogue/lantern"]`,
+  );
+  fails(
+    (c) => (c.dialogues[`${F}:dialogue/bram_two`] = { ...bram(c), key: 'bram_two' }),
+    'DUPLICATE_DEFINITION',
+    `${D}.npc`,
   );
   fails(
     (c) => {

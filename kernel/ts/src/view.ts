@@ -14,8 +14,8 @@ import { cmp } from './validate.ts';
  * movement.passage, else insufficient_resource while the body cannot pay a move, movement.fare), the place's actions,
  * the NPCs and items in the room and the items the player's body holds (03 §23), each named by
  * its short description with its actions (actions.ts lists: an item here by the room_contents
- * scope, an NPC by room_occupants, a held item by inventory), NPCs first, then in
- * DefinitionRefString order; and the journal, each quest the player has an instance of with its
+ * scope, an NPC by room_occupants, a held item by inventory; a talk only on its speaker), NPCs
+ * first, then in DefinitionRefString order; and the journal, each quest the player has an instance of with its
  * state and title (04 §15 quest journal state), in DefinitionRefString order; and the player's
  * pending choice, if any (dialogue.ts choiceView).
  */
@@ -30,7 +30,7 @@ export function gameView(world: World): GameView {
         id: id as EntityId,
         name: e.short,
         kind: e.kind as Key,
-        actions: actions.of(holder === world.body ? 'inventory' : scope[e.kind]),
+        actions: actions.of(holder === world.body ? 'inventory' : scope[e.kind], id),
       }));
   const room = world.rooms[here];
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it

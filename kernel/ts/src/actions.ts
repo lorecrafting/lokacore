@@ -272,13 +272,15 @@ export function lists(world: World, actor: CharacterId) {
         : undefined;
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   };
-  const listed = (fits: (t: TargetSpec) => boolean) =>
+  const listed = (fits: (t: TargetSpec) => boolean, id?: string) =>
     Object.values(set)
       .filter((a) => fits(a.target) && here(a) && !MODAL.includes(a.command))
+      .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .map(advertise);
   return {
     place: listed((t) => t.kind === 'none'),
-    of: (scope: string) => listed((t) => t.kind === 'entity' && t.scopes.includes(scope as never)),
+    of: (scope: string, id: string) =>
+      listed((t) => t.kind === 'entity' && t.scopes.includes(scope as never), id),
   };
 }

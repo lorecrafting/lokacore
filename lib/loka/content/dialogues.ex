@@ -4,6 +4,7 @@ defmodule Loka.Content.Dialogues do
   `kernel/ts/src/cartridge_dialogues.ts`: each dialogue's owner (dialogue@1) and each
   fact.assign's (fact@1, by its fact_changed) is required; its key is no registered command's,
   action's, recipe's or quest's (DUPLICATE_DEFINITION: its talk is an ActionSet identity); its
+  speaker no other dialogue's (DUPLICATE_DEFINITION at npc: one dialogue per NPC); its
   prompt, labels and narrations have catalog entries (unless the catalog was rejected,
   `:unknown`); its speaker, roles and quest name an NPC, item or quest of this cartridge; its
   speaker is one of its npc roles (else UNRESOLVED_REFERENCE at npc); no role is named actor
@@ -35,6 +36,7 @@ defmodule Loka.Content.Dialogues do
       defs: defs,
       text: text,
       taken: MapSet.new(commands() ++ keys),
+      shared: shared(defs),
       kinds: {caps, owners(registry, ["definitions"])},
       events: {caps, owners(registry, ["events"])}
     }
@@ -42,9 +44,13 @@ defmodule Loka.Content.Dialogues do
     Enum.flat_map(all(defs), &dialogue(&1, ctx))
   end
 
+  # The speakers of more than one dialogue.
+  defp shared(defs),
+    do: for({n, c} <- Enum.frequencies(for {_, d} <- all(defs), do: d["npc"]), c > 1, do: n)
+
   defp dialogue({rel, d}, ctx) do
     owned(at(rel, []), "dialogue", ctx.kinds) ++
-      own(rel, d, ctx.taken) ++
+      own(rel, d, ctx) ++
       texts(rel, [{["prompt"], d["prompt"]}], ctx.text) ++
       refs(rel, d, ctx) ++
       Enum.flat_map(d["choices"], &choice(rel, &1, d["roles"], ctx))
@@ -57,14 +63,16 @@ defmodule Loka.Content.Dialogues do
     |> Enum.concat(Enum.flat_map(d["roles"], &role(rel, &1, ctx)))
   end
 
-  # The dialogue's own checks: its key, its speaker among its npc roles, at least one choice.
-  defp own(rel, d, taken) do
+  # The dialogue's own checks: its key, its speaker no other dialogue's and among its npc roles,
+  # at least one choice.
+  defp own(rel, d, ctx) do
     n = d["npc"]
     target = "#{n["cartridge_id"]}@#{n["cartridge_version"]}:#{n["kind"]}/#{n["key"]}"
     empty = %{"error" => "too_few_items"}
 
     for {true, diag} <- [
-          {d["key"] in taken, diag("DUPLICATE_DEFINITION", at(rel, []))},
+          {d["key"] in ctx.taken, diag("DUPLICATE_DEFINITION", at(rel, []))},
+          {n in ctx.shared, diag("DUPLICATE_DEFINITION", at(rel, ["npc"]))},
           {%{"role" => "npc", "npc" => n} not in Map.values(d["roles"]),
            diag("UNRESOLVED_REFERENCE", at(rel, ["npc"]), %{"target" => target})},
           {d["choices"] == %{}, diag("SCHEMA_VIOLATION", at(rel, ["choices"]), empty)}

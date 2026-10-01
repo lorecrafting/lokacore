@@ -2,13 +2,14 @@
 // references exist, §17, §33), twin of lib/loka/content/dialogues.ex: what each dialogue uses, for
 // the lock stage (cartridge.ts): its own kind and each fact.assign's fact_changed; and its
 // references: its key is no registered command's, action's, recipe's or quest's
-// (DUPLICATE_DEFINITION: its talk is an ActionSet identity), its prompt, labels and narrations have
-// catalog entries, its speaker, roles and quest name an NPC, item or quest of this cartridge, its
-// speaker is one of its npc roles, no role is named actor (the actor is always a participant:
-// DUPLICATE_DEFINITION), it has a choice (the subset has no minProperties: SCHEMA_VIOLATION
-// too_few_items), each hand_over gives an item role to an npc role, and each fact.assign names a
-// fact of it with a value of its type. Its policy is walked with every other policy
-// (cartridge_refs.ts nodes).
+// (DUPLICATE_DEFINITION: its talk is an ActionSet identity), its speaker no other dialogue's
+// (DUPLICATE_DEFINITION at npc: a talk names only its target, so one dialogue per NPC), its
+// prompt, labels and narrations have catalog entries, its speaker, roles and quest name an NPC,
+// item or quest of this cartridge, its speaker is one of its npc roles, no role is named actor
+// (the actor is always a participant: DUPLICATE_DEFINITION), it has a choice (the subset has no
+// minProperties: SCHEMA_VIOLATION too_few_items), each hand_over gives an item role to an npc
+// role, and each fact.assign names a fact of it with a value of its type. Its policy is walked
+// with every other policy (cartridge_refs.ts nodes).
 import {
   CAPABILITY_OWNERS,
   type DefinitionRef,
@@ -51,8 +52,12 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     ...[c.actions, c.recipes ?? {}, c.quests ?? {}].flatMap(Object.values).map((d: Obj) => d.key),
   ]);
   const out: Diagnostic[] = [];
+  const speakers = each(c).map(([d]) => refString(d.npc as DefinitionRef));
   for (const [d, at] of each(c)) {
     if (taken.has(d.key)) out.push(diag('DUPLICATE_DEFINITION', at));
+    const speaker = refString(d.npc as DefinitionRef);
+    if (speakers.filter((s) => s === speaker).length > 1)
+      out.push(diag('DUPLICATE_DEFINITION', `${at}.npc`));
     text(d, ['prompt'], at);
     named(d.npc, 'npc', `${at}.npc`);
     if (d.quest) named(d.quest, 'quest', `${at}.quest`);

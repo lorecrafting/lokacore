@@ -197,7 +197,8 @@ defmodule Loka.ContentFerryTest do
   # Breaks: the compiler admitting what the loader rejects (kernel/ts/test/dialogue.test.ts): an
   # unresolved speaker, role, quest or policy quest; a speaker that is no npc role; a hand_over
   # through a role of the wrong kind; a missing text; an undeclared fact or a wrong value; a role
-  # named actor; no choice; a talk key another action's; dialogue@1 not required.
+  # named actor; no choice; a talk key another action's; dialogue@1 not required; two dialogues of
+  # one speaker.
   test "the compiler checks dialogue references, roles, texts, facts, keys and the lock", %{
     tmp_dir: dir
   } do
@@ -246,5 +247,12 @@ defmodule Loka.ContentFerryTest do
     for {{files, diag}, n} <- Enum.with_index(cases) do
       assert compile(Path.join(dir, "#{n}"), files) == {:error, [diag]}, inspect(diag)
     end
+
+    assert compile(Path.join(dir, "two"), dialogue(& &1, "dialogues/bram_two.json")) ==
+             {:error,
+              [
+                d("DUPLICATE_DEFINITION", "dialogues/bram.npc", %{}),
+                d("DUPLICATE_DEFINITION", "dialogues/bram_two.npc", %{})
+              ]}
   end
 end
