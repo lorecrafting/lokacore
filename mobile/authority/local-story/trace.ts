@@ -70,7 +70,9 @@ function room(db: Db, run_id: string): boolean {
     const oldest = runOf(first);
     if (oldest === run_id) return false;
     type Head = { rowid: number; record: string };
-    const heads = db.getAllSync<Head>('SELECT rowid, record FROM trace WHERE ordinal = 0');
+    const heads = db.getAllSync<Head>(
+      'SELECT rowid, record FROM trace WHERE ordinal = 0 ORDER BY rowid',
+    );
     const next = heads.find((h) => runOf(h.record) !== oldest)!; // its run's header follows
     db.runSync('DELETE FROM trace WHERE rowid < ?', next.rowid);
   }
