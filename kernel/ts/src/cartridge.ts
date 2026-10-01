@@ -138,24 +138,16 @@ function keyStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// The lock equals requires.capabilities, every command is owned, and every command, policy op,
-// definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar, recipe, resource,
-// barrier), recipe check (by the
-// events it produces, check@1's) and recipe step of any outcome (by the event it produces:
-// fact_changed for fact.assign, custom_event for event.emit; a resource.adjust, like a cost,
-// through the resource it names) and quest (by its quest_activated) the cartridge uses has its
-// owner in the lock.
+// The lock equals requires.capabilities (mismatched), every command is owned, and every command,
+// policy op, definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar,
+// recipe, resource, barrier), recipe check (by the events it produces, check@1's), recipe step
+// of any outcome (by the event it produces: fact_changed for fact.assign, custom_event for
+// event.emit; a resource.adjust, like a cost, through the resource it names), quest (by its
+// quest_activated) and daily schedule (also by the run_job that runs it, schedule@1's) the
+// cartridge uses has its owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
-  const required: Obj = c.manifest.requires.capabilities;
-  const out: Diagnostic[] = [];
-  for (const key of new Set([...Object.keys(locked), ...Object.keys(required)])) {
-    if (locked[key] === required[key]) continue;
-    const data: Data = { capability: key };
-    if (Object.hasOwn(required, key)) data.required = required[key];
-    if (Object.hasOwn(locked, key)) data.locked = locked[key];
-    out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
-  }
+  const out = mismatched(locked, c.manifest.requires.capabilities);
   const use = (kind: 'command' | 'policy' | 'definition' | 'event', name: string, path: string) => {
     const owners = CAPABILITY_OWNERS[kind];
     // The schema closes policy ops, so only a command can be unowned.
@@ -167,7 +159,10 @@ function lockStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     use('command', a.command, `.cartridge.actions${step(ref)}.command`);
   for (const [n, at] of nodes(c)) use('policy', n.op, `${at}.op`);
-  for (const [kind, , at] of parts(c)) use('definition', kind, at);
+  for (const [kind, , at] of parts(c)) {
+    use('definition', kind, at);
+    if (kind === 'schedule') use('command', 'run_job', at);
+  }
   for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
     const at = `.cartridge.recipes${step(ref)}`;
     use('definition', 'recipe', at);
@@ -182,6 +177,19 @@ function lockStage(c: Obj): Diagnostic[] {
     use('definition', 'resource', `.cartridge.resources${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
     use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
+  return out;
+}
+
+// LOCK_MANIFEST_MISMATCH for each capability whose locked and required versions differ.
+function mismatched(locked: Obj, required: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  for (const key of new Set([...Object.keys(locked), ...Object.keys(required)])) {
+    if (locked[key] === required[key]) continue;
+    const data: Data = { capability: key };
+    if (Object.hasOwn(required, key)) data.required = required[key];
+    if (Object.hasOwn(locked, key)) data.locked = locked[key];
+    out.push(diag('LOCK_MANIFEST_MISMATCH', `.cartridge.lock.capabilities${step(key)}`, data));
+  }
   return out;
 }
 
