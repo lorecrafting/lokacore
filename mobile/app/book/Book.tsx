@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
-import type { Button, openSmoke } from '../../authority/local-story/smoke.ts';
+import { clock, type Button, type openSmoke } from '../../authority/local-story/smoke.ts';
 import { Footer } from './Footer.tsx';
-import { group } from './model.ts';
+import { group, said, type Pool } from './model.ts';
 import { body, fonts, paper } from './paper.ts';
 import { confirmStartOver } from '../SaveError.tsx';
 import {
@@ -17,11 +17,10 @@ import {
   SettingsPage,
   ThingPage,
   bands,
-  type Pool,
 } from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
-type Kind = 'character' | 'journal' | 'carrying' | 'map' | 'settings';
+type Kind = 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'wait';
 type Page = { kind: Kind } | { kind: 'thing'; id: string };
 type Smoke = ReturnType<typeof openSmoke>;
 
@@ -99,10 +98,9 @@ function Bottom(p: {
   );
 }
 
-// One line: the time, then the way into each page; the character button shows the body's
+// One line: the time as HH:MM, then the way into each page; the character button shows the body's
 // resources coloured by band when GameView carries them (the room-view status line, an owner-
-// ruled departure). ponytail: the time is the plain logical value; no clock-face mapping is
-// specified (07 §10 only says play_time advances by explicit actions).
+// ruled departure).
 function Status(p: {
   time: number;
   resources?: readonly Pool[];
@@ -119,7 +117,7 @@ function Status(p: {
         columnGap: 14,
       }}
     >
-      <Text style={{ ...small, color: paper.dim }}>time {p.time}</Text>
+      <Text style={{ ...small, color: paper.dim }}>{clock(p.time)}</Text>
       {(['character', 'journal', 'carrying', 'settings'] as const).map((k) => (
         <Pressable
           key={k}
@@ -142,9 +140,7 @@ function Status(p: {
   );
 }
 
-// The resources as the status line says them (its label) and shows them (coloured by band).
-const said = (rs: readonly Pool[]) =>
-  `Character, ${rs.map((r) => `${r.resource.key} ${r.current} of ${r.maximum}`).join(', ')}`;
+// The resources as the status line shows them (coloured by band); its label is model.ts `said`.
 const shown = (rs: readonly Pool[]) =>
   rs.map((r, i) => (
     <Text key={r.resource.key} style={{ color: bands[r.band][0] }}>
@@ -173,15 +169,18 @@ function Body(p: {
         view={view}
         text={text}
         log={log.slice(p.from)}
-        look={p.g.look}
+        g={p.g}
         press={p.press}
         open={openThing}
+        openWait={p.screen.waits.length ? () => p.open({ kind: 'wait' }) : undefined}
       />
     );
   if (page.kind === 'thing') {
     const t = [...view.entities, ...view.inventory].find((e) => e.id === page.id);
     return <ThingPage name={t ? text(t.name) : ''} actions={p.g.on(page.id)} press={p.press} />;
   }
+  if (page.kind === 'wait')
+    return <ThingPage name="Wait" actions={p.screen.waits} press={p.press} />;
   if (page.kind === 'character') return <CharacterPage resources={view.resources} />;
   if (page.kind === 'map')
     return <MapPage view={view} text={text} place={p.g.place} press={p.press} walk={p.walk} />;

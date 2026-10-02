@@ -322,15 +322,14 @@ test('start over of a damaged identity keeps the file and its old run', () => {
   assert.equal(runs.get()!.n, 2);
 });
 
-// Breaks: a malformed page found during play (the receipt command-id index, written by the
-// commit; the open does not read it) thrown out of press (a crash on the phone), or swallowed so
-// no start over is offered; or a start over that cannot get past it.
-test('corruption found during play is shown with start over, which gives a fresh game', () => {
+// Breaks: a malformed receipt command-id index (the reopen's narration read uses it, R6P P5b)
+// swallowed so the save plays on, or thrown out of the open (a crash on the phone) with no start
+// over; or a start over that cannot get past it.
+test('a damaged receipt index fails the open with start over, which gives a fresh game', () => {
   const b = app(damaged('sqlite_autoindex_receipt_2'));
-  assert.deepEqual(b.now().carrying, ['a leather satchel']); // it opens
-  b.press('Go north');
-  assert.match(b.now().fault!, /malformed/);
-  assert.equal(b.now().pending, true); // the retry stays possible (03 §14)
+  assert.equal(b.c.game(), undefined);
+  assert.match(b.c.failed()!.message, /malformed/);
+  assert.equal(b.c.failed()!.replace, true);
   b.c.startOver();
   assert.equal(b.now().place, 'Ferry Landing');
   assert.deepEqual(b.now().carrying, []);

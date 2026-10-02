@@ -1,10 +1,10 @@
 // The footer: the map joystick between two hairline rules (the drawing: MapDrawing.tsx; the drag
 // maths: joystick.ts). Press to zoom, drag toward a path to light it, release to walk, drag back
 // to the middle to cancel; a tap opens the Map page. RN Animated and PanResponder only.
-import { useRef, useState, type MutableRefObject } from 'react';
+import { useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../authority/local-story/smoke.ts';
-import { pick, STAIR, ZOOM } from './joystick.ts';
+import { gesture, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { why } from './model.ts';
 import { body, paper } from './paper.ts';
@@ -16,63 +16,11 @@ type Props = {
   openMap: () => void;
 };
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
-const TAP_MS = 500;
 const rule = { flex: 1, height: 1, backgroundColor: paper.line };
 // ponytail: session memory only: the tip shows again after the app restarts.
 let learned = false;
 
-type Ui = {
-  now: MutableRefObject<Props>;
-  walk: (direction: string | null) => void;
-  openMap: () => void;
-  setLit: (d: string | null) => void;
-  setNote: (s: string) => void;
-  zoom: Animated.Value;
-  knob: Animated.ValueXY;
-};
-
-// The gesture. Distances are in map units (drag px / ZOOM); a drag under 2.5 units is still a tap.
-function joystick(u: Ui) {
-  const to = (v: number) =>
-    Animated.timing(u.zoom, { toValue: v, duration: 160, useNativeDriver: true }).start();
-  const reset = () => {
-    u.setLit(null);
-    u.knob.setValue({ x: 0, y: 0 });
-    to(0);
-  };
-  let d = { t: 0, moved: false, pick: null as string | null };
-  return PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderTerminationRequest: () => false,
-    onPanResponderGrant: () => {
-      d = { t: Date.now(), moved: false, pick: null };
-      u.setNote('');
-      to(1);
-    },
-    onPanResponderMove: (_, g) => {
-      const [dx, dy] = [g.dx / ZOOM, g.dy / ZOOM];
-      d.moved ||= Math.hypot(dx, dy) > 2.5;
-      if (!d.moved) return;
-      d.pick = pick(
-        dx,
-        dy,
-        u.now.current.exits.map((e) => e.direction),
-      );
-      u.setLit(d.pick);
-      const stair = d.pick && STAIR[d.pick];
-      const k = Math.min(1, 17 / (Math.hypot(dx, dy) || 1)); // the dot stays inside the map
-      u.knob.setValue(
-        stair ? { x: stair[0] * ZOOM, y: stair[1] * ZOOM } : { x: dx * k * ZOOM, y: dy * k * ZOOM },
-      );
-    },
-    onPanResponderRelease: () => {
-      !d.moved && Date.now() - d.t < TAP_MS ? u.openMap() : u.walk(d.pick);
-      reset();
-    },
-    onPanResponderTerminate: reset, // a stolen gesture walks nowhere
-  });
-}
-
+// A walk goes by the props it was offered on (`at`: a drag's start), never newer ones (04 §16).
 export function Footer(p: Props) {
   const [lit, setLit] = useState<string | null>(null);
   const [note, setNote] = useState(''); // a closed exit's reason, kept after release until the next press
@@ -82,16 +30,16 @@ export function Footer(p: Props) {
   const now = useRef(p);
   now.current = p;
   const learn = () => ((learned = true), setTip(false)); // a walk or a tap that opens the map
-  const walk = (d: string | null) => {
-    const e = now.current.exits.find((x) => x.direction === d);
-    if (e?.available) (now.current.go(e.direction), learn());
+  const walk = (d: string | null, at: Props) => {
+    const e = at.exits.find((x) => x.direction === d);
+    if (e?.available) (at.go(e.direction), learn());
     else if (e) {
-      const reason = why(e, now.current.text); // a screen reader hears it too
+      const reason = why(e, at.text); // a screen reader hears it too
       (setNote(`${e.direction}: ${reason}`), AccessibilityInfo.announceForAccessibility(reason));
     }
   };
   const openMap = () => (now.current.openMap(), learn());
-  const [pan] = useState(() => joystick({ now, walk, openMap, setLit, setNote, zoom, knob }));
+  const [pan] = useState(() => responder({ now, walk, openMap, setLit, setNote }, zoom, knob));
   const e = p.exits.find((x) => x.direction === lit);
   const said = e ? `${e.direction}${e.available ? '' : ` · ${why(e, p.text)}`}` : note;
   return (
@@ -101,7 +49,7 @@ export function Footer(p: Props) {
         <View style={rule} />
         <View
           style={{ width: 56, height: 56, zIndex: 1 }} // above the rules: the zoomed map covers them
-          {...readerActions(p.exits, walk, openMap)}
+          {...readerActions(p.exits, (d) => walk(d, p), openMap)}
           {...pan.panHandlers}
         >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
@@ -111,6 +59,17 @@ export function Footer(p: Props) {
       </View>
     </View>
   );
+}
+
+// The drag (joystick.ts `gesture`) over RN's PanResponder and the drawing's Animated values.
+function responder(
+  u: Omit<Ui<Props>, 'zoom' | 'knob'>,
+  zoom: Animated.Value,
+  knob: Animated.ValueXY,
+) {
+  const to = (v: number) =>
+    Animated.timing(zoom, { toValue: v, duration: 160, useNativeDriver: true }).start();
+  return PanResponder.create(gesture({ ...u, zoom: to, knob: (x, y) => knob.setValue({ x, y }) }));
 }
 
 function Tip({ dismiss }: { dismiss: () => void }) {

@@ -6,7 +6,7 @@ import { randomUUID } from 'expo-crypto';
 import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 import { playSmoke } from '../authority/local-story/smoke';
 import Book from './book/Book.tsx';
-import items from '../../protocol/fixtures/cartridge_items_hash.json';
+import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';
 import { SaveError } from './SaveError';
 
 // Opened once per process, kept on globalThis so a Fast Refresh does not open a second handle
@@ -15,7 +15,9 @@ import { SaveError } from './SaveError';
 // deletes the file (expo refuses to delete an open database).
 // deleteDatabaseSync removes the main file only; SQLite discards a -journal left beside the new,
 // empty file rather than replaying it, so nothing else needs deleting.
-const NAME = 'loka-save.db';
+// The build ships one playable story, the Lantern, in its own file (one save per story); the items
+// story's loka-save.db stays on the phone untouched. ponytail: no story picker until a second story.
+const NAME = 'loka-lantern.db';
 let db: SQLiteDatabase | undefined;
 const g = globalThis as { loka_smoke?: ReturnType<typeof playSmoke> };
 const smoke = (g.loka_smoke ??= playSmoke(
@@ -25,7 +27,7 @@ const smoke = (g.loka_smoke ??= playSmoke(
     db = undefined;
     deleteDatabaseSync(NAME);
   },
-  items,
+  lantern,
   randomUUID,
 ));
 
