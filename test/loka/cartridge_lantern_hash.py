@@ -59,9 +59,9 @@ value = {
  "story_points": {k("story_point","proof_terminal"): {"key": "proof_terminal", "outcomes": {
    "carry": {"dialogue": ref("dialogue","bram"), "choice": "carry"},
    "leave": {"dialogue": ref("dialogue","bram"), "choice": "leave"}}}},
- "resources": {k("resource","hp"): {"minimum":0,"maximum":20,"start":20,"gain":5,"key":"hp"},
+ "resources": {k("resource","hp"): {"minimum":0,"maximum":10,"start":10,"gain":5,"key":"hp"},
                k("resource","ma"): {"minimum":0,"maximum":100,"start":100,"gain":4,"key":"ma"},
-               k("resource","mv"): {"minimum":0,"maximum":82,"start":82,"gain":18,"key":"mv"}},
+               k("resource","mv"): {"minimum":0,"maximum":100,"start":100,"gain":18,"key":"mv"}},
  "entry": ref("room","landing"),
  "text": json.load(open("cartridges/lantern_proof/text.json")),
  "calendar": {"start": 21600},
@@ -78,10 +78,11 @@ DESC = ("Known answer for the loka-cartridge-v2 content hash of cartridges/lante
  "the landing with no schedule (owner decision, docs/decisions/owner-decision-untimed-lantern-2026-10-02.md); the lantern at the shelter; the quest lantern (offered, current_state has_item "
  "objective); the player fact search_plan; Bram's dialogue (talk while the quest is active, roles bram and lantern, carry "
  "setting player_led with narration proof.carry, leave setting party_led, handing the lantern to Bram, narration proof.leave); "
- "the story point proof_terminal (outcomes carry and leave, Bram's dialogue choice of that name). Assembled by hand from the "
+ "the story point proof_terminal (outcomes carry and leave, Bram's dialogue choice of that name). "
+ "resources.json (owner decision, untimed Lantern record): hp 10 of 10, ma 100 of 100, mv 100 of 100, the default gains. Assembled by hand from the "
  "source files (manifest without entry and calendar plus resource@1 and schedule@1, the lock, empty policies and actions, each "
- "fact, room, barrier, NPC, item, quest, dialogue and story point with key added and short references expanded, the default "
- "pools, entry, text, calendar) before the compiler was run, its canonical bytes by Python json.dumps(sort_keys=True, "
+ "fact, room, barrier, NPC, item, quest, dialogue and story point with key added and short references expanded, the pools "
+ "(resources.json over the defaults), entry, text, calendar) before the compiler was run, its canonical bytes by Python json.dumps(sort_keys=True, "
  "separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels. For these values (small integers "
  "only, ASCII only, no control characters) Python's output is the loka-numeric-v1 encoding.")
 out = {"description": DESC, "value": value, "canonical": c, "sha256": sha}

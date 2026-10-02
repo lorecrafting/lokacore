@@ -26,5 +26,13 @@ Later the same day the owner added (paraphrased):
   (a new game) is 甲子. It is not shown now; a later status pane shows it, and its mapping is
   written then.
 
+During the slice's review the owner also set (paraphrased):
+
+- **Starting stats are HP 10, MA 100, MV 100,** each starting at its maximum. They grow as the
+  character grows (later progression). Time recovers MV, and resting recovers it faster (the later
+  time-model slice). Until then a body out of MV in the Lantern cannot move, and Start over is the
+  way out. Applied now to the Lantern only, by its `resources.json` (gains unchanged); the engine
+  defaults (`lib/loka/content/resources.ex`) change in a later slice.
+
 Effect: [pre-release-proof](../spec/pre-release-proof.md#concrete-proof-the-ferrymans-lantern) and
 [ROADMAP](../ROADMAP.md) R6P row (slice Untime) and the R7/R8 for chapter one row (the time model).
