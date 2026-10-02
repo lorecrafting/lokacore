@@ -1,5 +1,5 @@
 {
-  "fixture_version": 1,
+  "fixture_version": 2,
   "evidence_class": "specification-known-answers",
   "note": "Adverse known answers. Tiny and Lantern steps use the cases.json/lantern-traces.json shapes; see conformance/README.md.",
   "uniform": [
@@ -3922,8 +3922,8 @@
       ]
     },
     {
-      "id": "moved-bram-rejects-new-choice",
-      "description": "After the schedule moves Bram away, a new choice is rejected and can be closed.",
+      "id": "walked-away-rejects-new-choice",
+      "description": "After the player walks away from Bram, a new choice is rejected and can be closed.",
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
@@ -3932,28 +3932,28 @@
       "steps": [
         {
           "request": {
-            "id": "wait",
+            "id": "away",
             "actor": "hero",
-            "action": "wait",
+            "action": "move",
             "input": {
-              "until": 19
+              "direction": "north"
             }
           },
           "result": {
             "kind": "accepted",
-            "code": "waited",
+            "code": "moved",
             "revision": 10,
             "delivery": "new"
           },
           "state": {
             "revision": 10,
-            "room": "landing",
+            "room": "green",
             "lantern": "hero",
             "quest": "active",
             "choice": "proof-choice:talk",
             "search_plan": "undecided",
-            "clock": 19,
-            "bram_room": "green",
+            "clock": 6,
+            "bram_room": "landing",
             "rng": [
               1,
               2,
@@ -3982,13 +3982,13 @@
           },
           "state": {
             "revision": 10,
-            "room": "landing",
+            "room": "green",
             "lantern": "hero",
             "quest": "active",
             "choice": "proof-choice:talk",
             "search_plan": "undecided",
-            "clock": 19,
-            "bram_room": "green",
+            "clock": 6,
+            "bram_room": "landing",
             "rng": [
               1,
               2,
@@ -4013,13 +4013,13 @@
           },
           "state": {
             "revision": 11,
-            "room": "landing",
+            "room": "green",
             "lantern": "hero",
             "quest": "active",
             "choice": null,
             "search_plan": "undecided",
-            "clock": 19,
-            "bram_room": "green",
+            "clock": 6,
+            "bram_room": "landing",
             "rng": [
               1,
               2,
@@ -4033,8 +4033,8 @@
       ]
     },
     {
-      "id": "moved-bram-keeps-receipt",
-      "description": "A choice made before Bram moves still replays its receipt afterwards, without restoring the old view.",
+      "id": "walked-away-keeps-receipt",
+      "description": "A choice made before the player walks away from Bram still replays its receipt afterwards, without restoring the old view.",
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
@@ -4092,28 +4092,28 @@
         },
         {
           "request": {
-            "id": "wait",
+            "id": "away",
             "actor": "hero",
-            "action": "wait",
+            "action": "move",
             "input": {
-              "until": 19
+              "direction": "north"
             }
           },
           "result": {
             "kind": "accepted",
-            "code": "waited",
+            "code": "moved",
             "revision": 11,
             "delivery": "new"
           },
           "state": {
             "revision": 11,
-            "room": "landing",
+            "room": "green",
             "lantern": "bram",
             "quest": "resolved",
             "choice": null,
             "search_plan": "party_led",
-            "clock": 19,
-            "bram_room": "green",
+            "clock": 6,
+            "bram_room": "landing",
             "rng": [
               1,
               2,
@@ -4157,13 +4157,13 @@
           },
           "state": {
             "revision": 11,
-            "room": "landing",
+            "room": "green",
             "lantern": "bram",
             "quest": "resolved",
             "choice": null,
             "search_plan": "party_led",
-            "clock": 19,
-            "bram_room": "green",
+            "clock": 6,
+            "bram_room": "landing",
             "rng": [
               1,
               2,
@@ -4524,9 +4524,9 @@
           "request": {
             "id": "other",
             "actor": "hero",
-            "action": "wait",
+            "action": "move",
             "input": {
-              "until": 19
+              "direction": "north"
             }
           },
           "result": {
@@ -4733,9 +4733,9 @@
           "request": {
             "id": "other",
             "actor": "hero",
-            "action": "wait",
+            "action": "move",
             "input": {
-              "until": 19
+              "direction": "north"
             }
           },
           "result": {
