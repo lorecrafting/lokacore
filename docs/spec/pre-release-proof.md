@@ -38,7 +38,7 @@ There are three distinct artifacts:
 
 R1 lives in a disposable workspace. After explicit R0 acceptance, R1 selection and R2 cutover, production implementation lives in the **new repository**. Do not patch or import legacy engine modules, compatibility shims, server actions, or UI stores to make the proof work. Lokacore remains specification/provenance; the checks committed here are a small specification model, not the production engine.
 
-R6P needs the constitutional contracts, the minimal compiler/local authority/SQLite path, and only the selected early R7/R8 narrative/schedule slices in `release-scope.json`. It does not wait for every feature in R7/R8, Builder generalization, purchases, Foundry, or production Realm authority. Subsequent capability work must keep the proof green.
+R6P needs the constitutional contracts, the minimal compiler/local authority/SQLite path, and only the selected early R7/R8 narrative/schedule slices in `release-scope.json`. schedule@1 stays an engine dependency (every v2 lock carries it, with `wait`), while the Lantern has no wait control or NPC schedule. It does not wait for every feature in R7/R8, Builder generalization, purchases, Foundry, or production Realm authority. Subsequent capability work must keep the proof green.
 
 ## Concrete proof: The Ferryman's Lantern
 
@@ -56,7 +56,7 @@ No new general scripting, dream-space runtime, combat, economy, or party system 
 
 [Lantern traces](conformance/lantern-traces.json) define prepared four-place examples and full per-step projected semantic state/outcome expectations. These are retained explicit expected values reviewed during the amendment, not a candidate-generated oracle or compiled production cartridge. This assistant authored and self-reviewed them; genuinely independent oracle approval remains PREP-02. The separate two-room Tiny case retains its strict acquisition event and failed-roll semantics.
 
-The fixture starts at 06:00 on the game clock; no proof action advances it. Bram stays at the landing; the proof has no schedule and no wait ([owner decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md)). Landing connects north to green, green east to reed bank, reed bank east to lantern shelter, with reciprocal routes. The lantern starts at the shelter. A deliberately blocked west exit at landing advertises unavailable feedback without another room.
+The fixture starts at 06:00 on the game clock; no proof action advances it. Bram stays at the landing; the proof has no schedule and no wait ([owner decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md)). With no wait control on the phone, a body out of mv cannot move (`insufficient_resource`; `loka play` says "You are too exhausted."), and Start over is the way out for the Lantern; recovery by time, faster by resting, comes with the later time-model slice (owner direction, paraphrased). Landing connects north to green, green east to reed bank, reed bank east to lantern shelter, with reciprocal routes. The lantern starts at the shelter. A deliberately blocked west exit at landing advertises unavailable feedback without another room.
 
 Both paths: accept → travel to shelter → take → return → talk → choose. `carry` retains custody and sets `search_plan=player_led`; `leave` transfers to Bram and sets `search_plan=party_led`. Each atomically resolves the quest/choice and stores stable required narration plus a **proof-only** terminal story point. This is not an account-authorized production onboarding grant.
 
