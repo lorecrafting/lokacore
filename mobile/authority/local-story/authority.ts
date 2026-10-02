@@ -49,9 +49,9 @@ const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
  * conflict) before anything is resolved against the current world; a NEW one is resolved, decided
  * once and committed before it is adopted. A fault discards its proposal and gets no receipt
- * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4). A failed commit throws, with memory and storage unchanged. A
- * COMMIT whose outcome is unknown fences every call, answered `pending`, until the store settles
- * it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
+ * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4).
+ * A failed commit throws, with memory and storage unchanged. A COMMIT whose outcome is unknown
+ * fences every call, answered `pending`, until the store settles it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
  */
 export function openStory(db: Db, releases: readonly [Release, ...Release[]], host: Host) {
   const { fresh } = releases[0]; // meta stays undefined until a save is loaded or replaced
