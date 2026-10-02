@@ -29,6 +29,7 @@ const smoke = (g.loka_smoke ??= playSmoke(
   },
   lantern,
   randomUUID,
+  { host: 'hermes_ios', now: () => performance.now() }, // each decision's kernel.decision_latency
 ));
 
 export default function App() {

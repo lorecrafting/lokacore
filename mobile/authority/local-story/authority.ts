@@ -6,6 +6,7 @@ import type {
   Command,
   DecisionResult,
   ErrorCode,
+  HostKind,
   NarrationRecord,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
@@ -42,6 +43,7 @@ export type Host = {
   kernel_version: string;
   newId: () => string;
   binding?: () => string | null;
+  latency?: { host: HostKind; now: () => number }; // ms; each NEW decision's (11 §13), else none
 };
 const SAVE_VERSION = 1;
 const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
@@ -176,7 +178,7 @@ function invoke(s: Story, value: unknown): Reply {
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   if (stale(s, i.view_freshness_token)) return { kind: 'stale_view' };
-  const { command, next } = decided(s, id);
+  const { command, next, timed } = decided(s, id);
   const d = next.decision;
   // A rejection before a Command existed has no trace entry: TraceEntry needs the Command.
   const trace: Trace = (at, ...states) => {
@@ -185,12 +187,12 @@ function invoke(s: Story, value: unknown): Reply {
   if (d.kind === 'fault') {
     trace(s.revision, 'unavailable');
     if (next.limit) observe(s.db, budget(s, command_id, next.limit));
-    return { kind: 'fault', code: d.code };
+    return timed({ kind: 'fault', code: d.code });
   }
   // ponytail: no rule emits effects yet; the outbox (03 §16) comes with the first that does.
   if (d.kind === 'accepted' && d.effects.length) throw new Error('effect outbox not built');
   const r = { scope: scope(s), invocation_id: i.invocation_id, command_id, actor_id: i.actor_id };
-  return save(s, next, trace, reached(s, d, s.revision + 1), {
+  const reply = save(s, next, trace, reached(s, d, s.revision + 1), {
     ...r,
     intent_digest_version: INTENT_DIGEST_VERSION,
     intent_digest,
@@ -198,16 +200,30 @@ function invoke(s: Story, value: unknown): Reply {
     revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
     response: d as never,
   });
+  return timed(reply); // not if pending: the sink's transaction would roll back the open COMMIT
 }
 
-/** A NEW invocation resolved against the world and, once a Command, decided (03 §14). */
+// A NEW invocation resolved and decided (03 §14); `timed` observes how long (11 §13) if clocked.
 function decided(s: Story, id: Identified) {
+  const t0 = s.host.latency?.now();
   const command = resolve(s.world, id);
   const next: ReturnType<typeof step> =
     'kind' in command
       ? { world: s.world, decision: command }
       : step(s.world, command, s.revision + 1, id.invocation.action_key);
-  return { command, next };
+  const value = s.host.latency && Math.round((s.host.latency.now() - t0!) * 1000);
+  const { kernel_version, run_id } = ids(s);
+  const head = { format: 'loka-obs-v1', event: 'kernel.decision_latency', store: 'operations' };
+  const timed = (reply: Reply) => {
+    if (s.host.latency && reply.kind !== 'pending')
+      observe(s.db, {
+        ...head,
+        ids: { kernel_version, host: s.host.latency.host, run_id, command_id: id.command_id },
+        data: { state: 'observed', value },
+      });
+    return reply;
+  };
+  return { command, next, timed };
 }
 
 /**
