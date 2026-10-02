@@ -3,7 +3,18 @@
 // the controller draws real ones). Literal answers, not computed from the code under test.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { absent, cap, ended, group, hint, plain, refused, said, type Pool } from './model.ts';
+import {
+  absent,
+  branch,
+  cap,
+  ended,
+  group,
+  hint,
+  plain,
+  refused,
+  said,
+  type Pool,
+} from './model.ts';
 
 const b = (label: string, action_key: string, target_ids: string[] = [], input = {}) => ({
   label,
@@ -135,4 +146,22 @@ test('a hint survives a store that throws, for this session', () => {
   assert.equal(h.seen(), false);
   h.see();
   assert.equal(h.seen(), true);
+});
+
+// Breaks (owner decision, untimed Lantern record): branches on even hours (子 from 00:00), the
+// boundary a minute off, the day not wrapped, or a label naming the wrong animal or hours.
+test('the status line shows the double hour as its earthly branch', () => {
+  const at = (h: number, m = 0) => branch(h * 3600 + m * 60).glyph;
+  assert.deepEqual(
+    [at(22, 59), at(23), at(0, 59), at(1), at(6), at(30)],
+    ['亥', '子', '子', '丑', '卯', '卯'],
+  );
+  assert.deepEqual(
+    [branch(6 * 3600).label, branch(23 * 3600).label, branch(21 * 3600).label],
+    [
+      'Hour of the Rabbit, five to seven',
+      'Hour of the Rat, eleven to one',
+      'Hour of the Pig, nine to eleven',
+    ],
+  );
 });

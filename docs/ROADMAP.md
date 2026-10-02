@@ -102,7 +102,7 @@ Owner-approved ([record](decisions/owner-decision-r6p-plan-2026-10-01.md)), in t
 | P6a — latency producer | The local authority's `kernel.decision_latency` producer on the observation sink (no device needed) |
 | P6b — device proof | iPhone 11 evidence ([pre-release-proof](spec/pre-release-proof.md)): the phone timing, Node/Hermes byte comparison, device faults, failed-roll replay |
 | Polish — phone-test UX notes | The 18 P6b UX notes triaged; the FIX items (app words, labels, hints, the shelter text) |
-| Untime — no wait in the Lantern | Owner decision: Bram's schedule, the time window and the Wait page removed; four adverse cases rewritten with a walk away |
+| Untime — no wait in the Lantern | Owner decision: Bram's schedule, the time window and the Wait page removed; four adverse cases rewritten with a walk away; the status line shows the time as its earthly branch |
 | Gate R6P | Human proof by touch and the gate review |
 
 46 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 presenter split). Estimates and re-estimates are in [the archive](ROADMAP-archive.md).

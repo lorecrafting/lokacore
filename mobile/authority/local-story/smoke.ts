@@ -42,10 +42,6 @@ type Latency = Host['latency'];
 type HostPart = Pick<Host, 'newId' | 'latency'>; // its ids and its clock
 type Press = Omit<Button, 'token'>;
 
-/** Logical time as the clock shows it, HH:MM (ROADMAP R6P mapping: the hour is time / 3600). */
-export const clock = (t: number) =>
-  `${String(Math.floor(t / 3600)).padStart(2, '0')}:${String(Math.floor(t / 60) % 60).padStart(2, '0')}`;
-
 // The pending choice's available answers and its Close (06 §43: never a trap).
 function asked(v: GameView, label: Say): Press[] {
   const c = v.choice;

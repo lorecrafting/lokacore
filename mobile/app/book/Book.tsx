@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
-import { clock, type Button, type openSmoke } from '../../authority/local-story/smoke.ts';
+import { type Button, type openSmoke } from '../../authority/local-story/smoke.ts';
 import { Footer } from './Footer.tsx';
-import { cap, group, said, type Pool } from './model.ts';
+import { branch, cap, group, said, type Pool } from './model.ts';
 import { body, fonts, paper } from './paper.ts';
 import { confirmStartOver } from '../SaveError.tsx';
 import {
@@ -102,7 +102,7 @@ function Bottom(p: {
   );
 }
 
-// One line: the time as HH:MM, then the way into each page; the character button shows the body's
+// One line: the time as its earthly branch, then the way into each page; the character button shows the body's
 // resources coloured by band when GameView carries them (the room-view status line, an owner-
 // ruled departure).
 function Status(p: {
@@ -121,7 +121,9 @@ function Status(p: {
         columnGap: 14,
       }}
     >
-      <Text style={{ ...small, color: paper.dim }}>{clock(p.time)}</Text>
+      <Text style={{ ...small, color: paper.dim }} accessibilityLabel={branch(p.time).label}>
+        {branch(p.time).glyph}
+      </Text>
       {(['character', 'journal', 'carrying', 'settings'] as const).map((k) => (
         <Pressable
           key={k}
