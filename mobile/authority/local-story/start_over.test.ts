@@ -106,6 +106,35 @@ for (const name of ['report', 'sqlite_autoindex_report_1'])
     assert.equal(all(b.sql(), 'PRAGMA quick_check'), '[{"quick_check":"ok"}]');
   });
 
+/** `path` with the record-header length of `name`'s first leaf cell set to 0xff (page header intact). */
+function corruptRecord(path: string, name: string) {
+  const sql = new DatabaseSync(path);
+  const at = (q: string) => Number(Object.values(sql.prepare(q).get()!)[0]);
+  const page =
+    (at(`SELECT rootpage FROM sqlite_master WHERE name = '${name}'`) - 1) * at('PRAGMA page_size');
+  sql.close();
+  const file = readFileSync(path);
+  file[page + file.readUInt16BE(page + 8) + 1] = 0xff; // after the cell's 1-byte payload size
+  writeFileSync(path, file);
+}
+
+// Breaks (OFF-07): a scan that checks pages but not records (quick_check), so Start over succeeds
+// in place over a malformed report index record and the next story point fails again.
+test('a malformed report index record: Start over gives a working save', () => {
+  const path = save();
+  const a = app(path);
+  a.talk();
+  a.leave();
+  a.sql().close();
+  corruptRecord(path, 'sqlite_autoindex_report_1');
+  const b = app(path);
+  b.c.startOver();
+  b.talk();
+  b.leave();
+  assert.equal(b.screen().log.at(-1), LEAVE);
+  assert.equal(all(b.sql(), 'SELECT disposition FROM report'), '[{"disposition":"pending"}]');
+});
+
 // Breaks (23 §11): a false positive in the scan, which replaces the file and loses the pending
 // report. (A new game that drops or deletes the reports: story_points.test.ts "a new game keeps a
 // pending report"; Start over that always deletes the file: smoke.test.ts "damaged identity".)
@@ -174,7 +203,7 @@ const latest = (sql: DatabaseSync) => ({
 });
 
 // Breaks (06 §43; PM D2): the oldest narration instead of the latest, one read from memory
-// (none after a reopen), one read inside an open transaction, a replay that decides again or adds a receipt, or a narration kept
+// (none after a reopen), a later receipt without narration taken as the latest, one read inside an open transaction, a replay that decides again or adds a receipt, or a narration kept
 // after a new game deleted the receipts.
 test('the latest committed narration is read again on reopen, from the receipts', () => {
   const path = save();
@@ -186,6 +215,12 @@ test('the latest committed narration is read again on reopen, from the receipts'
   b.sql.exec('BEGIN'); // as after a failed ROLLBACK: what it reads may be uncommitted
   assert.equal(b.story.narration(), undefined);
   b.sql.exec('ROLLBACK');
+  assert.deepEqual(saved(send(b, 6, 'look')), [false, 6]); // accepted, no narration
+  const rejected = send(b, 7, 'take', [LANTERN]) as Saved; // Bram holds it now
+  assert.deepEqual(
+    [(rejected.decision as { kind: string }).kind, rejected.revision],
+    ['rejected', 6],
+  );
   const receipts = all(b.sql, RECEIPTS);
   assert.deepEqual(saved(send(b, 5, 'choose', [], input)), [true, 5]);
   assert.deepEqual(b.story.narration(), latest(b.sql));

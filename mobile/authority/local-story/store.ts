@@ -137,8 +137,9 @@ export const corrupt = (e: unknown) => /file is not a database|malformed/.test(S
 export function replace(db: Db, fresh: World, meta: Meta): boolean {
   return transaction(db, () => {
     db.execSync(`DROP TABLE IF EXISTS save; DROP TABLE IF EXISTS head; ${SCHEMA}`);
-    const check = db.getAllSync<{ quick_check: string }>('PRAGMA quick_check(report)');
-    if (check.length !== 1 || check[0]!.quick_check !== 'ok')
+    // integrity_check, not quick_check: quick_check misses a malformed index record.
+    const check = db.getAllSync<{ integrity_check: string }>('PRAGMA integrity_check(report)');
+    if (check.length !== 1 || check[0]!.integrity_check !== 'ok')
       throw new Error(`report table malformed: ${JSON.stringify(check)}`);
     const { clock, rng, ...sections } = fresh.state;
     db.runSync(HEAD, 0, clock, encode(rng as Json));
