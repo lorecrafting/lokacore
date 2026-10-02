@@ -6,6 +6,6 @@
     "orientation": "portrait",
     "android": { "package": "com.lorecrafting.loka" },
     "ios": { "bundleIdentifier": "com.lorecrafting.loka" },
-    "plugins": ["./plugins/with-ios-scene"]
+    "plugins": ["./plugins/with-ios-scene", "./plugins/with-ios-edge-gestures"]
   }
 }
