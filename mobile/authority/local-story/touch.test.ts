@@ -53,7 +53,7 @@ const fresh = () => processOn(join(mkdtempSync(join(tmpdir(), 'loka-touch-')), '
 // press is refused; or a choice drawn without its Close (a trap, 06 §43).
 test('talk by day offers one button per choice and Close; carry narrates', () => {
   const a = fresh();
-  a.tap(...FETCH, 'Talk Bram the ferryman');
+  a.tap(...FETCH, 'Talk to Bram the ferryman');
   const { view, buttons } = a.screen();
   const continuation_id = view.choice!.continuation_id;
   assert.deepEqual(
@@ -95,7 +95,7 @@ test('a reopen shows the last committed narration first; a fresh game none', () 
   const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
   const a = processOn(path);
   assert.deepEqual(a.screen().log, []);
-  a.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
   a.sql.close();
   assert.deepEqual(processOn(path).screen().log, [LEAVE]);
 });
@@ -105,7 +105,7 @@ test('a reopen shows the last committed narration first; a fresh game none', () 
 test('a corrupt narration receipt fails the reopen, with start over offered', () => {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
   const a = processOn(path);
-  a.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
   a.sql.exec(
     "UPDATE receipt SET response = '{' WHERE revision = (SELECT max(revision) FROM receipt)",
   );
@@ -125,7 +125,7 @@ test('a corrupt narration receipt fails the reopen, with start over offered', ()
 // plan or ends the quest), or a closed talk that cannot be opened again where Bram is.
 test('Bram gone at night: the choices say why, Close leaves the quest open, the green resolves it', () => {
   const a = fresh();
-  a.tap(...FETCH, 'Talk Bram the ferryman', 'Wait until 19:00');
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Wait until 19:00');
   assert.deepEqual(
     a.screen().view.choice!.choices.map((o) => [o.choice_id, o.available || o.reason.code]),
     [
@@ -142,7 +142,7 @@ test('Bram gone at night: the choices say why, Close leaves the quest open, the 
     ['active'],
   );
   assert.equal(text(view.place.description.key), PLAIN_LANDING); // search_plan unset
-  a.tap('Go north', 'Talk Bram the ferryman', 'Carry it along the bank');
+  a.tap('Go north', 'Talk to Bram the ferryman', 'Carry it along the bank');
   assert.equal(a.screen().log.at(-1), CARRY);
   assert.deepEqual(
     a.screen().view.journal.map((q) => q.state),
@@ -209,10 +209,10 @@ test('the log has story words, never a kernel code, across both endings', () => 
     input: { direction: 'west' },
   };
   a.smoke.press(locked);
-  a.tap('Talk Bram the ferryman', 'Wait until 19:00', 'Close', 'Go north');
-  a.tap('Talk Bram the ferryman', 'Carry it along the bank');
+  a.tap('Talk to Bram the ferryman', 'Wait until 19:00', 'Close', 'Go north');
+  a.tap('Talk to Bram the ferryman', 'Carry it along the bank');
   const b = fresh();
-  b.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  b.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
   const lines = [...a.screen().log, ...b.screen().log];
   assert.deepEqual(
     lines.filter((l) => CODE.test(l)),

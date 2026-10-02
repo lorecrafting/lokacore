@@ -364,7 +364,7 @@ for (const { id } of traces)
     const row = run.p.sql.prepare('SELECT binding, report, disposition FROM report').all();
     const { report_id, run_id, ...report } = JSON.parse(row[0]!.report as string);
     const release = {
-      cartridge_hash: '050cba8c964be222d47454c0a2e833dc592cfc905c8bcd09bb2def34f908b89d',
+      cartridge_hash: '747a5bd8f8630873d82b29ec8ae4af568b8766d6e45b7d4d6a963a83e596b297',
       cartridge_id: 'lantern_proof',
       cartridge_version: '0.0.1',
     };
