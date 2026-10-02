@@ -148,20 +148,27 @@ test('a hint survives a store that throws, for this session', () => {
   assert.equal(h.seen(), true);
 });
 
-// Breaks (owner decision, untimed Lantern record): branches on even hours (子 from 00:00), the
-// boundary a minute off, the day not wrapped, or a label naming the wrong animal or hours.
+// Breaks (owner decision, untimed Lantern record): branches on even hours (子 from 00:00), a
+// boundary a minute off, the day not wrapped, or a glyph, animal or hour swapped in the tables.
 test('the status line shows the double hour as its earthly branch', () => {
+  const rows: [number, string, string][] = [
+    [23, '子', 'Hour of the Rat, eleven to one'],
+    [1, '丑', 'Hour of the Ox, one to three'],
+    [3, '寅', 'Hour of the Tiger, three to five'],
+    [5, '卯', 'Hour of the Rabbit, five to seven'],
+    [7, '辰', 'Hour of the Dragon, seven to nine'],
+    [9, '巳', 'Hour of the Snake, nine to eleven'],
+    [11, '午', 'Hour of the Horse, eleven to one'],
+    [13, '未', 'Hour of the Goat, one to three'],
+    [15, '申', 'Hour of the Monkey, three to five'],
+    [17, '酉', 'Hour of the Rooster, five to seven'],
+    [19, '戌', 'Hour of the Dog, seven to nine'],
+    [21, '亥', 'Hour of the Pig, nine to eleven'],
+  ];
+  for (const [h, glyph, label] of rows) assert.deepEqual(branch(h * 3600), { glyph, label });
   const at = (h: number, m = 0) => branch(h * 3600 + m * 60).glyph;
   assert.deepEqual(
-    [at(22, 59), at(23), at(0, 59), at(1), at(6), at(30)],
-    ['亥', '子', '子', '丑', '卯', '卯'],
-  );
-  assert.deepEqual(
-    [branch(6 * 3600).label, branch(23 * 3600).label, branch(21 * 3600).label],
-    [
-      'Hour of the Rabbit, five to seven',
-      'Hour of the Rat, eleven to one',
-      'Hour of the Pig, nine to eleven',
-    ],
+    [at(22, 59), at(23), at(0, 59), at(1), at(24 + 6)],
+    ['亥', '子', '子', '丑', '卯'],
   );
 });
