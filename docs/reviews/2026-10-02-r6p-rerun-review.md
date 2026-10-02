@@ -67,3 +67,11 @@ Part 2 (pre-release-proof.md:82-88, envelope §4-5, brief):
 
 No blockers or should-fix. The 0 MV words commit is the measured build, so the gate build is the
 measured one.
+
+## Codex Sol first review (gpt-6.1-sol, head 035f444), appended verbatim by the PM
+
+APPROVE
+
+```text
+No findings at 035f444.
+```
