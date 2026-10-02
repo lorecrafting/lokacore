@@ -29,9 +29,12 @@ type Offered = GameView['exits'][number] | NonNullable<GameView['choice']>['choi
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 
-// The log line for a drag toward a closed exit.
+// The log line for a drag toward a closed exit: the reason's own message (a sentence), else its
+// code's words in a sentence.
 export const refused = (e: GameView['exits'][number], text: (key: string) => string) =>
-  `The way ${e.direction} is ${why(e, text)}.`;
+  !e.available && e.reason.message
+    ? text(e.reason.message.key)
+    : `The way ${e.direction} is ${why(e, text)}.`;
 
 // Under an open choice whose speaker is not here (the answers may also be closed for another
 // reason, a dropped lantern, so this keys on the speaker, not on the answers' not_present).

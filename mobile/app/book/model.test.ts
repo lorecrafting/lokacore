@@ -97,12 +97,23 @@ test('the ending line shows once every quest is over', () => {
   assert.equal(ended(view('resolved')), 'The story ends here. Start over is in Settings.');
 });
 
-// Breaks (notes 6, 14): a refusal line with the raw code ("exit locked"), or a title cased wrong.
+// Breaks (notes 6, 14): a refusal line with the raw code ("exit locked"), a cartridge's own reason
+// sentence wrapped in the frame ("The way east is The causeway is flooded.."), or a title cased wrong.
 test("a closed exit's log line and a capitalised title", () => {
   const west = { available: false, direction: 'west', reason: { code: 'exit_locked' } } as never;
   assert.equal(
     refused(west, (k) => k),
     'The way west is locked.',
+  );
+  const flooded = { key: 'The causeway is flooded.' };
+  const east = {
+    available: false,
+    direction: 'east',
+    reason: { code: 'exit_locked', message: flooded },
+  };
+  assert.equal(
+    refused(east as never, (k) => k),
+    'The causeway is flooded.',
   );
   assert.equal(cap('a brass lantern'), 'A brass lantern');
 });
