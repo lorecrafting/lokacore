@@ -51,6 +51,25 @@ export function traceCommand(
   }
 }
 
+/**
+ * Appends one ObservationRecord (an evaluation.budget_exceeded, 04 §5.4) to the save's observation
+ * table in its own transaction, keeping the newest OBSERVED rows. Derived, like the trace: a
+ * failure is swallowed, so it never changes a fault, a commit or a retry.
+ */
+export function observe(db: Db, record: object): void {
+  try {
+    transaction(db, () => {
+      db.runSync('INSERT INTO observation VALUES (?)', encode(record as never));
+      db.runSync(
+        'DELETE FROM observation WHERE rowid <= (SELECT max(rowid) FROM observation) - ?',
+        OBSERVED,
+      );
+    });
+  } catch {}
+}
+// ponytail: the newest by rowid span, which holds while rows are deleted only here, oldest first.
+const OBSERVED = 1000;
+
 // ponytail: rows counted by their rowid span, O(1) per entry, which holds while rows are deleted
 // only here, oldest first (no VACUUM); about 5 MB at the entry size measured in R6 S6a.
 const CAP = 5000;

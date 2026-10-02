@@ -10,7 +10,7 @@ import { step } from '../../../kernel/ts/src/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta } from './store.ts';
 import { adopt, save, settle, type Story, type Trace } from './save.ts';
-import { catchUp, traceCommand, type CommitState, type RunIds } from './trace.ts';
+import { catchUp, observe, traceCommand, type CommitState, type RunIds } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -49,7 +49,7 @@ const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
  * conflict) before anything is resolved against the current world; a NEW one is resolved, decided
  * once and committed before it is adopted. A fault discards its proposal and gets no receipt
- * (ADR-075 §4; 04 §5.2 step 7). A failed commit throws, with memory and storage unchanged. A
+ * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4). A failed commit throws, with memory and storage unchanged. A
  * COMMIT whose outcome is unknown fences every call, answered `pending`, until the store settles
  * it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
  */
@@ -95,6 +95,15 @@ const ids = (s: Story): RunIds => ({
   run_id: s.meta.run_id,
 });
 
+/** A budget fault's evaluation.budget_exceeded (04 §5.4): the run's ids, its command and revision. */
+const budget = (s: Story, command_id: string, limit: string) => ({
+  format: 'loka-obs-v1',
+  event: 'evaluation.budget_exceeded',
+  store: 'diagnostics',
+  ids: { ...ids(s), command_id, revision: s.revision },
+  data: { limit },
+});
+
 /** A new save's identity: no parent, its initial RNG, the release it pins (10 §32), its binding. */
 function first({ content_hash, fresh }: Release, host: Host): Meta {
   const { id, version, requires } = fresh.cartridge.manifest;
@@ -136,7 +145,7 @@ function invoke(s: Story, value: unknown): Reply {
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   const command = resolve(s.world, id);
-  const next =
+  const next: ReturnType<typeof step> =
     'kind' in command
       ? { world: s.world, decision: command }
       : step(s.world, command, s.revision + 1);
@@ -147,6 +156,7 @@ function invoke(s: Story, value: unknown): Reply {
   };
   if (d.kind === 'fault') {
     trace(s.revision, 'unavailable');
+    if (next.limit) observe(s.db, budget(s, command_id, next.limit));
     return { kind: 'fault', code: d.code };
   }
   // ponytail: no rule emits effects yet; the outbox (03 §16) comes with the first that does.
