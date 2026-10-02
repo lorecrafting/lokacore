@@ -28,7 +28,7 @@ const load = () =>
 test('the known answer loads with its hash, as its hand-written value', () => {
   const loaded = load();
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  assert.equal(loaded.hash, '1b5b34e7accbb0145fa2c667bf85ae8165679d8a9171788facc8fc94437fcde8');
+  assert.equal(loaded.hash, '050cba8c964be222d47454c0a2e833dc592cfc905c8bcd09bb2def34f908b89d');
   assert.deepEqual(structuredClone(loaded.cartridge), kat.value);
 });
 
@@ -75,6 +75,8 @@ for (const [choice_id, plan] of [
     w = play(w, { type: 'take', item_id: lantern }, 'taken').world;
     assert.equal(gameView(w).journal[0].state, 'active');
     w = move(w, 'west', 'west', 'south');
+    // The trace's revision 8: the lantern is held, so the landing asks for it no more.
+    assert.doesNotMatch(kat.value.text[gameView(w).place.description.key], /Bring it down/);
     const bram = here(w, 'npc') as EntityId;
     w = play(w, { type: 'talk', target_id: bram }, 'choice_opened').world;
     const continuation_id = gameView(w).choice!.continuation_id;
