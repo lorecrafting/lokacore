@@ -20,7 +20,7 @@ import {
 } from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
-type Kind = 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'wait';
+type Kind = 'character' | 'journal' | 'carrying' | 'map' | 'settings';
 type Page = { kind: Kind } | { kind: 'thing'; id: string };
 type Smoke = ReturnType<typeof openSmoke>;
 
@@ -176,7 +176,6 @@ function Body(p: {
         g={p.g}
         press={p.press}
         open={openThing}
-        openWait={p.screen.waits.length ? () => p.open({ kind: 'wait' }) : undefined}
       />
     );
   if (page.kind === 'thing') {
@@ -185,8 +184,6 @@ function Body(p: {
       <ThingPage name={t ? cap(text(t.name)) : ''} actions={p.g.on(page.id)} press={p.press} />
     );
   }
-  if (page.kind === 'wait')
-    return <ThingPage name="Wait" actions={p.screen.waits} press={p.press} />;
   if (page.kind === 'character') return <CharacterPage resources={view.resources} />;
   if (page.kind === 'map')
     return <MapPage view={view} text={text} place={p.g.place} press={p.press} walk={p.walk} />;

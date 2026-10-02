@@ -63,20 +63,6 @@ function asked(v: GameView, label: Say): Press[] {
   ];
 }
 
-// One wait per whole hour after now, kept apart from the buttons (a Wait page lists them).
-// ponytail: up to 23:00, the Lantern's claim limit (pre-release-proof.md:59); a later story needs
-// days on the clock.
-function waitsOf(v: GameView): Press[] {
-  const hour = Math.floor(v.time / 3600);
-  const wait = v.actions.some((a) => a.action_key === 'wait' && a.available);
-  return Array.from({ length: wait ? 23 - hour : 0 }, (_, i) => (hour + i + 1) * 3600).map((t) => ({
-    label: `Wait until ${clock(t)}`,
-    action_key: 'wait',
-    target_ids: [],
-    input: { until: t },
-  }));
-}
-
 // The view's available actions as buttons: place actions that need no input, each open exit as a
 // move, each entity's or held item's actions aimed at it, then the pending choice's.
 function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
@@ -210,9 +196,8 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
   return {
     screen: () => {
       const [view, token] = [gameView(story.world()), story.token()];
-      const drawn = (bs: Press[]): Button[] => bs.map((b) => ({ ...b, token }));
-      const [buttons, waits] = [drawn(buttonsOf(view, label, text)), drawn(waitsOf(view))];
-      return { view, text, buttons, waits, log, pending: !!retry, fault };
+      const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({ ...b, token }));
+      return { view, text, buttons, log, pending: !!retry, fault };
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
