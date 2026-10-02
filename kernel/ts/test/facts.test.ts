@@ -151,7 +151,6 @@ test('conditions evaluate all, any, not and fact_compare over committed facts', 
       [before, after],
       name,
     );
-  assert.throws(() => condition(a, CHARACTER, { op: 'target_present' }), /not installed/);
 });
 
 // Breaks: variants tried in another order, the last match taken, or no fallback to the base.

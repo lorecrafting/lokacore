@@ -5,7 +5,7 @@
 // cartridge, and each fact.assign a fact of it with a value of its type. Its `when` is walked
 // with every other policy (cartridge_refs.ts nodes).
 import type { Diagnostic, FactValue } from './contracts.gen.ts';
-import { step, type Obj } from './cartridge_refs.ts';
+import { step, type checkers, type Obj } from './cartridge_refs.ts';
 
 const each = (c: Obj): [Obj, string][] =>
   Object.entries((c.reactions ?? {}) as Obj).map(([ref, r]) => [
@@ -21,10 +21,7 @@ export const uses = (c: Obj) =>
     ...r.apply.map((_: Obj, i: number) => ['event', 'fact_changed', `${at}.apply[${i}].op`]),
   ]) as ['definition' | 'event', string, string][];
 
-type Checks = {
-  named: (r: Obj, kind: string, path: string) => void;
-  typedValue: (fact: Obj, v: FactValue, path: string) => void;
-};
+type Checks = ReturnType<typeof checkers>;
 
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   for (const [r, at] of each(c)) {

@@ -50,7 +50,7 @@ export function sequence(
   steps: { n: number },
 ): DeltaOp[] | undefined {
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
-  if (rule.when && !holds(then, actor, rule.when.root, steps)) return undefined;
+  if (rule.when && !holds(then, actor, rule.when.root, { steps })) return undefined;
   const set: Record<string, FactValue> = {};
   return rule.apply.map(({ fact, value: v }) => {
     const scope = scopeOf(world, actor, fact);

@@ -7,27 +7,13 @@ import { KernelError } from './error.ts';
 import type { Installed } from './cartridge.ts';
 import {
   CAPABILITY_OWNERS,
-  type CharacterId,
   type Command,
   type DecisionResult,
-  type EntityId,
   type ErrorCode,
   type Owned,
-  type WorldContextId,
 } from './contracts.gen.ts';
-import {
-  allocator,
-  refString,
-  rejected,
-  type Cartridge,
-  type Detail,
-  type Entity,
-  type Mint,
-  type Rule,
-  type World,
-} from './decision.ts';
+import { allocator, rejected, type Mint, type Rule, type World } from './decision.ts';
 import { invariants as factInvariants } from './fact.ts';
-import type { RngState } from './rng.ts';
 import { refusal } from './actions.ts';
 import * as action_recipe from './rules/action_recipe.ts';
 import * as barrier from './rules/barrier.ts';
@@ -65,6 +51,7 @@ const RULELESS = [
   'calendar',
   'reaction',
   'narration',
+  'target_resolution',
 ];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */

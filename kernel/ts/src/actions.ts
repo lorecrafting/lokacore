@@ -26,7 +26,7 @@ import {
 } from './contracts.gen.ts';
 import { key, same } from './compose.ts';
 import { bodyOf, questOf, refString, type World } from './decision.ts';
-import { MODAL, modal, talkRefused, talks } from './dialogue.ts';
+import { ALWAYS, MODAL, modal, spokenBy, talkRefused, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
 import { holds } from './policy.ts';
@@ -73,7 +73,6 @@ export function apply(set: ActionSet, op: ActionContribution['op'], c: ActionSet
   }
 }
 
-const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
   kind: 'entity',
   scopes: [scope],
@@ -187,7 +186,12 @@ export function refusal(world: World, payload: CommandPayload): ErrorCode | unde
     (perform && !recipeKeys(world).includes(payload.action)) ||
     (payload.type === 'accept_quest' && !world.cartridge.quests?.[refString(payload.quest)]);
   if (!matching.length) return unknown ? 'not_found' : 'unsupported_capability';
-  return matching.some((a) => holds(world, actor, a.policy.root)) ? undefined : 'invalid_state';
+  const p = payload as { target_id?: EntityId; item_id?: EntityId };
+  const target = (a: Offered) =>
+    a.recipe ? detailOf(world, a.recipe.target) : (p.target_id ?? p.item_id);
+  const ok = (a: Offered) =>
+    holds(world, actor, a.policy.root, { target: target(a), steps: { n: 0 } });
+  return matching.some(ok) ? undefined : 'invalid_state';
 }
 
 const recipeKeys = (world: World) => Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
@@ -253,8 +257,10 @@ export function admission(
 /**
  * The GameView lists of `actor`'s set: `listed(fits)` is each action that `fits` in presentation
  * order (highest priority first, then key), available when its policy holds and, for a recipe,
- * its admission passes, else shown with invalid_state or admission's code (00 §4.10). A recipe is listed with the place while its detail is in the actor's
- * room.
+ * its admission passes, else shown with invalid_state or admission's code (00 §4.10); a talk in
+ * step's order: invalid_state when its policy fails, not_found when its target speaks no
+ * dialogue, invalid_state when talkRefused. A recipe is listed with the place while its detail is
+ * in the actor's room.
  */
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
@@ -265,13 +271,16 @@ export function lists(world: World, actor: CharacterId) {
   const advertise = (a: Offered, id?: string): AdvertisedAction => {
     const shown = { action_key: a.key, label: a.label, target: a.target, input: a.input };
     const admitted = a.recipe && admission(world, a.recipe, actor, body!);
-    const refused = a.command === 'talk' && talkRefused(world, actor, id as EntityId | undefined);
-    const code =
-      refused || !holds(world, actor, a.policy.root)
-        ? 'invalid_state'
-        : typeof admitted === 'string'
-          ? admitted
-          : undefined;
+    // Step's order: the action's policy, then the talk rule's not_found and talkRefused.
+    const target = (a.recipe ? detailOf(world, a.recipe.target) : id) as EntityId | undefined;
+    const talk =
+      a.command === 'talk' &&
+      (spokenBy(world, target)
+        ? talkRefused(world, actor, target) && 'invalid_state'
+        : 'not_found');
+    const code = !holds(world, actor, a.policy.root, { target, steps: { n: 0 } })
+      ? 'invalid_state'
+      : talk || (typeof admitted === 'string' ? admitted : undefined);
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   };
   const listed = (fits: (t: TargetSpec) => boolean, id?: string) =>

@@ -21,7 +21,7 @@ import {
   type Diagnostic,
   type FactValue,
 } from './contracts.gen.ts';
-import { diag, step, type Obj } from './cartridge_refs.ts';
+import { diag, step, type checkers, type Obj } from './cartridge_refs.ts';
 import { same } from './compose.ts';
 import { refString } from './decision.ts';
 
@@ -51,11 +51,7 @@ export const uses = (c: Obj) =>
     ]),
   ] as ['definition' | 'event', string, string][];
 
-type Checks = {
-  named: (r: Obj, kind: string, path: string) => void;
-  typedValue: (fact: Obj, v: FactValue, path: string) => void;
-  text: (def: Obj, fields: string[], at: string) => void;
-};
+type Checks = ReturnType<typeof checkers>;
 
 export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
   const { named, text } = checks;

@@ -118,7 +118,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
 // a DefinitionRef naming a definition of `kind` in this cartridge's map of that kind; typedValue,
 // a value of this cartridge's fact that is not of its type (FACT_TYPE_MISMATCH, the FactType
 // check adopt uses; the fact's own absence is named's); text, a text key without a catalog entry.
-function checkers(c: Obj, out: Diagnostic[]) {
+export function checkers(c: Obj, out: Diagnostic[]) {
   const { id, version } = c.manifest;
   const named = (r: Obj, kind: string, path: string) => {
     const target = refString(r as DefinitionRef);

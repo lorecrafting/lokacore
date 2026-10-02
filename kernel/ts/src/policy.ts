@@ -1,25 +1,32 @@
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
-// time_window, barrier@1's barrier_state, quest@1's quest_state; 21 §3.2, §4 Policy; 06 §21): pure, over committed state, for one actor. Every other op belongs to a
-// capability this kernel does not install, so the loader rejects a cartridge that uses one
-// (CAPABILITY_NOT_INSTALLED).
-import type { CharacterId, Policy } from './contracts.gen.ts';
+// time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
+// target_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one actor and
+// the target of the action evaluated, if any.
+import type { CharacterId, EntityId, Policy } from './contracts.gen.ts';
 import { barrierState, bodyOf, questOf, refString, type World } from './decision.ts';
 import { value } from './fact.ts';
+import { present } from './target.ts';
 
 /**
- * True when the condition tree holds for `actor` in `world`; each leaf it evaluates adds one to
- * `steps.n` (04 §5.4 query_steps).
+ * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
+ * (target_present is false without one); each leaf it evaluates adds one to `ctx.steps.n`
+ * (04 §5.4 query_steps).
  */
-export function holds(world: World, actor: CharacterId, p: Policy, steps = { n: 0 }): boolean {
+export function holds(
+  world: World,
+  actor: CharacterId,
+  p: Policy,
+  ctx: { target?: EntityId; steps: { n: number } } = { steps: { n: 0 } },
+): boolean {
   switch (p.op) {
     case 'all':
-      return p.items.every((i) => holds(world, actor, i, steps));
+      return p.items.every((i) => holds(world, actor, i, ctx));
     case 'any':
-      return p.items.some((i) => holds(world, actor, i, steps));
+      return p.items.some((i) => holds(world, actor, i, ctx));
     case 'not':
-      return !holds(world, actor, p.item, steps);
+      return !holds(world, actor, p.item, ctx);
   }
-  steps.n++;
+  ctx.steps.n++;
   switch (p.op) {
     case 'fact_compare':
       return value(world, actor, p.fact) === p.equals;
@@ -34,8 +41,10 @@ export function holds(world: World, actor: CharacterId, p: Policy, steps = { n: 
       const hour = Math.floor(world.state.clock / 3600) % 24;
       return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
     }
+    case 'target_present':
+      return ctx.target !== undefined && present(world, actor, ctx.target);
     default:
-      throw new Error(`policy op ${p.op} is not installed`);
+      throw new Error(`policy op ${(p as Policy).op} is not installed`);
   }
 }
 
