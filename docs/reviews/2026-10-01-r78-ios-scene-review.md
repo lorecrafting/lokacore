@@ -89,3 +89,11 @@ The half-patched failure remains when the startup block differs from START. Repr
   still throw. Caller and export unchanged.
 
 Verdict: APPROVE.
+
+## Codex Sol fix re-check, round 2 (gpt-6.1-sol, head ca0ffe1), appended verbatim by PM
+
+APPROVE
+
+```text
+none
+```
