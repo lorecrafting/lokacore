@@ -7,6 +7,7 @@ import { test } from 'node:test';
 import type { EntityId } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
 import { resolve } from '../src/invocation.ts';
+import { attempt } from '../src/known_answers.ts';
 import { step } from '../src/world.ts';
 import { accept, after, at, chat, CID, F, PRESENT, shown, world } from './ferry_probe.ts';
 
@@ -41,4 +42,25 @@ test('admission decides the invoked action only', () => {
     ],
     ['unsupported_capability', 'invalid_state', 'invalid_state', 'accepted'],
   );
+});
+
+// Breaks: the known-answer runner (Node and Hermes) stepping without the key, so it pins bram on
+// ada as not_found (via chat) while the local authority answers unsupported_capability.
+test('the known-answer runner steps with the invoked action', () => {
+  const w = after(
+    world((c) => (c.actions[`${F}:action/chat`] = chat(PRESENT))),
+    accept,
+  );
+  const invocation = {
+    invocation_id: 'f6a7b8c9-d0e1-4f2a-8b3c-5d6e7f8a9b0c',
+    action_key: 'bram',
+    actor_id: w.character,
+    target_ids: [at(w, 'npc/ada')],
+    input: {},
+  };
+  const { result } = attempt(w, 'story/probe', invocation, 9);
+  assert.deepEqual((result as { decision: object }).decision, {
+    kind: 'rejected',
+    code: 'unsupported_capability',
+  });
 });
