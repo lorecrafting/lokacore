@@ -271,10 +271,39 @@ test('a malformed receipt response: Start over keeps the pending report', () => 
   a.sql().exec("UPDATE receipt SET response = '{' WHERE revision = 4");
   a.sql().close();
   const b = app(path);
-  assert.equal(b.c.failed()?.kind, 'save_corrupt');
+  assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
   b.c.startOver();
   assert.equal(b.c.failed(), undefined);
   assert.equal(all(b.sql(), REPORTS), reports);
+});
+
+// Breaks (SM2a: an open that fails for another reason may be intact): a narration read that fails
+// for a reason other than damage (here a real lock) offered the new game, which erases the save.
+test('a narration read that fails on a lock offers no Start over', () => {
+  const path = save();
+  const a = app(path);
+  a.talk();
+  a.leave();
+  a.sql().close();
+  const other = new DatabaseSync(path);
+  const db = adapt(new DatabaseSync(path));
+  const c = playSmoke(
+    () => ({
+      ...db,
+      getFirstSync: <T>(s: string, ...p: P) => {
+        if (s.includes("'$.narration'")) other.exec('BEGIN EXCLUSIVE');
+        return db.getFirstSync<T>(s, ...p);
+      },
+    }),
+    () => {},
+    FERRY as never,
+    { newId: randomUUID },
+  );
+  const failed = c.failed()!;
+  assert.deepEqual(
+    [failed.message, failed.replace, failed.newGame],
+    ['database is locked', false, undefined],
+  );
 });
 
 // Breaks (R6P-A02; ROADMAP SM2a; invariant player_in_one_room): a save that parses but has no
