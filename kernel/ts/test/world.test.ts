@@ -85,6 +85,18 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
     entities: [],
     inventory: [],
     journal: [],
+    // The default pools (00 §4 amendment), full: the top band (04 §15).
+    resources: ['hp', 'ma', 'mv'].map((key, i) => ({
+      resource: {
+        cartridge_id: 'ashmere_rooms',
+        cartridge_version: '0.0.1',
+        kind: 'resource',
+        key,
+      },
+      current: [20, 100, 82][i],
+      maximum: [20, 100, 82][i],
+      band: 'perfect_health',
+    })),
     time: 0,
   });
 });

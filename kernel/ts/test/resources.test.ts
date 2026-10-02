@@ -141,13 +141,15 @@ test('a move costs 1 mv and is refused at 0 mv', () => {
   rejects(tired, move('west'), 'insufficient_resource');
 });
 
-// Breaks: a move charging mv in a cartridge without the pools (resource@1 not locked).
-test('a cartridge without the pools moves for free and writes no resource', () => {
+// Breaks: a move charging mv in a cartridge without the pools (resource@1 not locked), or its
+// view carrying an empty resources list (the field is absent, 04 §15).
+test('a cartridge without the pools moves for free, writes and shows no resource', () => {
   const w = world((c) => {
     delete c.resources;
     delete c.manifest.requires.capabilities.resource;
     delete c.lock.capabilities.resource;
   }, 'cartridge_rooms_hash.json');
+  assert.equal(Object.hasOwn(gameView(w), 'resources'), false);
   assert.deepEqual(
     ops(w, move('north')).map((o: { op: string }) => o.op),
     ['entity.transfer'],
@@ -250,4 +252,58 @@ test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavail
   assert.deepEqual(gameView(run(tired, wait(3600))).exits, [
     { available: true, direction: 'west' },
   ]);
+});
+
+// Breaks: the projection reading the character instead of the body, the start value or the
+// stored row instead of the current one (resource.ts level), or another order. Road: hp 10/25
+// is p 40; mv 2/3 is p 66; hp 20/25 after two hour boundaries is p 80 (04 §15 bands).
+test('the view lists the body resources at the clock with their bands', () => {
+  const view = (w: World) =>
+    gameView(w).resources!.map((r) => [r.resource.key, r.current, r.maximum, r.band]);
+  assert.deepEqual(gameView(world()).resources![0].resource, ref('hp'));
+  assert.deepEqual(view(world()), [
+    ['hp', 10, 25, 'bleeding_freely'],
+    ['ma', 100, 100, 'perfect_health'],
+    ['mv', 3, 3, 'perfect_health'],
+  ]);
+  assert.deepEqual(view(run(world(), move('east')))[2], ['mv', 2, 3, 'several_wounds']);
+  assert.deepEqual(view(run(world(), wait(7200)))[0], ['hp', 20, 25, 'few_bruises']);
+});
+
+// Breaks: `>` for `>=` at a cut, a cut off by one row, p measured from 0 instead of the minimum
+// (-100..100 at 0 is p 50, from 0 it would be dying), and maximum = minimum dividing by zero or
+// giving the bottom row. Each row: [minimum, maximum, current, band], hand-checked.
+test('the band is the first row of 04 §15 whose cut p reaches', () => {
+  const rows = [
+    [0, 100, 100, 'perfect_health'],
+    [0, 100, 99, 'slightly_scratched'],
+    [0, 100, 90, 'slightly_scratched'],
+    [0, 100, 89, 'few_bruises'],
+    [0, 100, 80, 'few_bruises'],
+    [0, 100, 79, 'some_cuts'],
+    [0, 100, 70, 'some_cuts'],
+    [0, 100, 69, 'several_wounds'],
+    [0, 100, 60, 'several_wounds'],
+    [0, 100, 59, 'many_nasty_wounds'],
+    [0, 100, 50, 'many_nasty_wounds'],
+    [0, 100, 49, 'bleeding_freely'],
+    [0, 100, 40, 'bleeding_freely'],
+    [0, 100, 39, 'covered_in_blood'],
+    [0, 100, 30, 'covered_in_blood'],
+    [0, 100, 29, 'leaking_guts'],
+    [0, 100, 20, 'leaking_guts'],
+    [0, 100, 19, 'almost_dead'],
+    [0, 100, 10, 'almost_dead'],
+    [0, 100, 9, 'dying'],
+    [0, 100, 0, 'dying'],
+    [0, 82, 81, 'slightly_scratched'], // p 98
+    [-100, 100, 0, 'many_nasty_wounds'], // p 50
+    [5, 5, 5, 'perfect_health'],
+  ] as const;
+  for (const [minimum, maximum, start, band] of rows) {
+    const w = world((c) =>
+      Object.assign(c.resources['ashmere_road@0.0.1:resource/ma'], { minimum, maximum, start }),
+    );
+    assert.equal(gameView(w).resources![1].band, band, `${minimum}..${maximum} at ${start}`);
+  }
 });

@@ -16,6 +16,8 @@ import {
   RoomPage,
   SettingsPage,
   ThingPage,
+  bands,
+  type Pool,
 } from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
@@ -86,16 +88,24 @@ function Bottom(p: {
           openMap={() => p.open({ kind: 'map' })}
         />
       )}
-      <Status time={view.time} pending={pending} open={(kind) => p.open({ kind })} />
+      <Status
+        time={view.time}
+        resources={view.resources}
+        pending={pending}
+        open={(kind) => p.open({ kind })}
+      />
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
   );
 }
 
-// One line: the time, then the way into each page. ponytail: the time is the plain logical value;
-// no clock-face mapping is specified (07 §10 only says play_time advances by explicit actions).
+// One line: the time, then the way into each page; the character button shows the body's
+// resources coloured by band when GameView carries them (the room-view status line, an owner-
+// ruled departure). ponytail: the time is the plain logical value; no clock-face mapping is
+// specified (07 §10 only says play_time advances by explicit actions).
 function Status(p: {
   time: number;
+  resources?: readonly Pool[];
   pending: boolean;
   open: (k: 'character' | 'journal' | 'carrying' | 'settings') => void;
 }) {
@@ -114,11 +124,13 @@ function Status(p: {
         <Pressable
           key={k}
           accessibilityRole="button"
-          accessibilityLabel={k}
+          accessibilityLabel={k === 'character' && p.resources ? said(p.resources) : k}
           onPress={() => p.open(k)}
           style={{ minHeight: 44, justifyContent: 'center' }}
         >
-          <Text style={{ ...small, color: paper.accent }}>{k}</Text>
+          <Text style={{ ...small, color: paper.accent }}>
+            {k === 'character' && p.resources ? shown(p.resources) : k}
+          </Text>
         </Pressable>
       ))}
       {p.pending && (
@@ -129,6 +141,16 @@ function Status(p: {
     </View>
   );
 }
+
+// The resources as the status line says them (its label) and shows them (coloured by band).
+const said = (rs: readonly Pool[]) =>
+  `Character, ${rs.map((r) => `${r.resource.key} ${r.current} of ${r.maximum}`).join(', ')}`;
+const shown = (rs: readonly Pool[]) =>
+  rs.map((r, i) => (
+    <Text key={r.resource.key} style={{ color: bands[r.band][0] }}>
+      {`${i ? '  ' : ''}${r.resource.key} ${r.current}/${r.maximum}`}
+    </Text>
+  ));
 
 type Screen = ReturnType<Smoke['screen']>;
 
@@ -160,7 +182,7 @@ function Body(p: {
     const t = [...view.entities, ...view.inventory].find((e) => e.id === page.id);
     return <ThingPage name={t ? text(t.name) : ''} actions={p.g.on(page.id)} press={p.press} />;
   }
-  if (page.kind === 'character') return <CharacterPage />;
+  if (page.kind === 'character') return <CharacterPage resources={view.resources} />;
   if (page.kind === 'map')
     return <MapPage view={view} text={text} place={p.g.place} press={p.press} walk={p.walk} />;
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;
