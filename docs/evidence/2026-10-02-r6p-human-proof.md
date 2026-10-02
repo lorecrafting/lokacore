@@ -26,7 +26,7 @@ P = [P6b](2026-10-02-r6p-iphone11/README.md); line numbers are in those READMEs.
 | :88 known answers on the actual adapters | R:43-44 (rows 5-6), R:17-21 | linked |
 | :88 per-step diagnostics carry canonical bytes | R:42-43 | linked |
 | Carries in stage rows | Carries below | linked |
-| Docs tidy pass | the gate PR's description | listed |
+| Docs tidy pass | the [gate review](../reviews/2026-10-02-r6p-gate-review.md) | linked |
 
 ## Build played
 
@@ -53,6 +53,13 @@ naive tester.
 
 U7 is in the [ROADMAP](../ROADMAP.md) Playtest row.
 
+After the [gate review](../reviews/2026-10-02-r6p-gate-review.md)'s ruling (G-1), the owner gave their own
+explanation of the consequence (paraphrased): "carry (leading) meant I went with the party; leaving meant
+Bram's party goes out." No verdict here; the reviewer re-checks it against the consequence clause.
+
+**Owner acceptance (2026-10-02, paraphrased):** the unaided-completion clause of :84 is deferred to a
+fresh tester who has not seen the game, in the Playtest row, before the first release.
+
 ## Authoring effort (inspected, from git)
 
 Only #100, #107 and #110 touch `cartridges/lantern_proof` since the Early R7/R8 gate (bfc1b89).
@@ -62,7 +69,7 @@ Lines are JSON lines; time spent is null (not recorded).
 |---|---|---|---|
 | #100 P3 | 13 new | +290 | 2 (cartridge text changed in both) |
 | #107 Polish | 1 (`text.json`) | +3 −3 | 1 (cartridge untouched) |
-| #110 Untime | 5 (1 new: `resources.json`) | +21 −22 | 1 (commits "Untime fix 1-4"; the record has no re-review section); `resources.json` came in that round |
+| #110 Untime | 5 (1 new: `resources.json`) | +21 −22 | 1 (commits "Untime fix 1-4"; re-check in the record); `resources.json` came in that round |
 
 ## Carries (each in its [ROADMAP](../ROADMAP.md) stage row)
 
@@ -71,3 +78,29 @@ Lines are JSON lines; time spent is null (not recorded).
 - P6 rerun N-1 (authority-rejection line): Presenter split.
 - World parameters P6 (fixed seed), P6b row 14 touch-to-photon, the `kernel/ts` audit nits with the
   `target.ts:34` pointer, P5a replay without the key: R7/R8 for chapter one.
+
+## Gate passes only after the save fix
+
+The Astra audit below is FAIL. The gate passes only after the fix slice (branch `r6p-savefix`) merges. The
+owner played 64a2b12; the gate build will include those fixes, so the builds are not identical. The fixes
+touch only the load, replay and recovery paths and the log length, not what the owner touched by hand.
+R6P-A01 is fixed there; P4A-2 (index damage loses readable pending reports) is a different case and stays
+carried to R12.
+
+## Codex Astra gate audit (gpt-6-astra, 64a2b12)
+
+FAIL
+
+```text
+R6P-A01 | blocker | mobile/authority/local-story/smoke.ts:251 @64a2b12
+Finish Lantern offline, leaving one pending report; damage only the final receipt.response to '{', reopen, then confirm Start over. Narration reading raises “malformed JSON”; this catch loses the authority's newGame callback and enables whole-file deletion. The intact pending report is erased. Reproduced: reports 1→0; the authority's in-place newGame preserves that same report.
+
+R6P-A02 | blocker | mobile/authority/local-story/store.ts:114 @64a2b12
+Remove the player's containers row from an otherwise readable save, then reopen. load accepts the incomplete state and openStory returns “open”. The first screen() throws “Cannot read properties of undefined (reading 'variants')” outside the opening-error handler, leaving no corruption/recovery screen. Reproduced with the player-body row missing. Parsing JSON alone does not establish a playable save.
+
+R6P-A03 | blocker | mobile/authority/local-story/store.ts:190 @64a2b12
+Commit Scan at revision 1, then corrupt its response to the valid JSON text 'null'. Reopening succeeds; retrying the original invocation returns {kind:'saved', replay:true, revision:1, decision:null}. The receipt reader validates neither the response shape nor its integrity, so corruption is advertised as a confirmed replay instead of an integrity failure. Reproduced; violates §14's original-outcome guarantee.
+
+R6P-A04 | should-fix | mobile/authority/local-story/smoke.ts:202 @64a2b12
+Retrieve the lantern, return to Bram, and repeatedly Talk/Close without restarting. Every cycle permanently appends log lines; nothing caps or discards them. Reproduced: 100 cycles retained 316 lines; 1,000 retained 3,016. The same-room UI copies/renders the growing log on subsequent actions, so memory and rendering work grow without bound. Changing rooms merely advances the UI's starting index; retained history remains allocated.
+```
