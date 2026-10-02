@@ -144,3 +144,21 @@ not a finding.
   The `answer`/`comings` split keeps `press` under 40 lines. Nothing to delete.
 - Composes with: these are app words over existing codes. No mechanic is named. `ended` keys on the journal states,
   not on Lantern content.
+
+## Codex Sol first review (gpt-6.1-sol, at 7643b44), verbatim
+
+REQUEST CHANGES
+
+```text
+POL-1 | blocker | mobile/authority/local-story/touch.test.ts:211 | The refused west move never asserts that an explanation appears. An in-memory mutation making said() return '' for every saved rejection still passes both new polish tests: the code filter accepts missing feedback. Assert the literal refusal immediately after this press and confirm that mutation fails.
+
+POL-2 | should-fix | mobile/app/book/pages.tsx:106 | Hint-storage failures escape rendering and input handlers (also Footer.tsx:30,35). An unreadable hint database prevents the book from rendering; a failed setItemSync at pages.tsx:102 prevents Look from reaching p.press, despite a healthy story save. Expo's storage propagates real SQLite errors, verified in memory. Catch optional hint-storage failures and fall back to session memory.
+```
+
+## Fix round 1 (deda151; merge of main 94a0405): refusal line asserted; hint storage falls back to session memory; PM rulings (auto-approved under owner overnight authority, paraphrased): room-name heading after a successful move, "you are not holding it", "No one is here to answer."; note 18 carried as a footer-map bug. Sol re-check, verbatim
+
+APPROVE
+
+```text
+none
+```
