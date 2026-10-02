@@ -153,7 +153,7 @@ test("a wait runs Bram's arrival's reactions to quiescence before Maud's job", (
 // Breaks (04 §5.4, 06 §14): a cycle not stopped (the step never returns), stopped by truncating
 // the chain and committing it (it would also fault conflicting_write: two groups write bell_up),
 // or committing any part of the move, or the limit misnamed. By hand: ring at depth 1, then two
-// deliveries and two guard leaves per depth, so depth 33 comes at delivery 64 and 64 leaves, far
+// deliveries and two guard leaves per depth, so depth 33 comes at delivery 64 and 63 leaves, far
 // under deliveries (8192) and query_steps (32768): reaction_depth.
 test('entering the belfry starts a cycle that faults budget_exceeded and commits nothing', () => {
   const green = move(world(), 'north').world;
