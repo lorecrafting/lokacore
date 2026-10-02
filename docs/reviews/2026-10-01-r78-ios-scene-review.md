@@ -46,3 +46,15 @@ Checked, no finding: `mobile.yml` path filter (`plugins/**` added), decision rec
 line, lessons edit (replaces the "never commit that patch" line; the agent-device daemon line
 changes a future action), plugin size (42 lines, no abstraction to cut; no app.json key or
 upstream template does this in Expo 57, per the PR's ladder).
+
+## Codex Sol first review (gpt-6.1-sol, head dbbf122), appended verbatim by PM
+
+REQUEST CHANGES
+
+```text
+IOS-1 | should-fix | mobile/app/plugins/with-ios-scene.js:13
+Input: the template already declares ExpoReactNativeFactoryProvider but retains its window/startReactNative block, as in a partial migration. Reproduced in memory: the early return accepts it unchanged. The emitted scene manifest then causes startup from both didFinishLaunchingWithOptions and scene(_:willConnectTo:options:), creating two RN roots. Verify that legacy startup is absent before treating conformance as proof of a completed patch; otherwise transform or reject.
+
+IOS-2 | should-fix | mobile/app/plugins/with-ios-scene.js:10
+Input: template drift moves reactNativeFactory = factory inside the anchored iOS conditional. Reproduced against the bundled Expo 57.0.24 template: prebuild accepts the input and silently deletes that assignment with the entire block. The generated Swift retains a nil factory, so EXExpoAppSceneDelegate hits its fatalError at launch. Match the expected startup block precisely and reject unexpected contents instead of deleting arbitrary code through #endif.
+```
