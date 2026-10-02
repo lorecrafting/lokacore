@@ -12974,5 +12974,116 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "ResourceView",
+    "value": {},
+    "errors": [
+      {
+        "path": "/band",
+        "code": "missing_property"
+      },
+      {
+        "path": "/current",
+        "code": "missing_property"
+      },
+      {
+        "path": "/maximum",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceView",
+    "value": {
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "current": 20,
+      "maximum": 20,
+      "band": "perfect_health",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "time": 0,
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "resources": [
+        {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "current": 20,
+          "maximum": 20,
+          "band": "hale"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/resources/0/band",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "time": 0,
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "resources": {}
+    },
+    "errors": [
+      {
+        "path": "/resources",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

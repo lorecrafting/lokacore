@@ -6,6 +6,7 @@ export const paper = {
   dim: '#645c4f',
   line: '#d0c7b0',
   accent: '#7b2d20',
+  mid: '#8a5a14', // the mock's .mid: the condition bands' middle colour tier
 };
 export const fonts = {
   IMFellEnglish: require('./fonts/IMFellEnglish.ttf'),

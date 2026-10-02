@@ -106,16 +106,19 @@
     "implemented_in": "R5 S3 facts in state, fact_compare"
   },
   "resource": {
-    "spec": "21 §4 Resource, §7 Cost; 04 §5.3 Resource adjustment; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources",
+    "spec": "21 §4 Resource, §7 Cost; 04 §5.3 Resource adjustment, §15 condition bands; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources",
     "contracts": [
       "ResourceSpec",
       "RecipeCost",
       "DeltaOp",
-      "MutationTarget"
+      "MutationTarget",
+      "ResourceView",
+      "GameView"
     ],
     "modules": [
       "kernel/ts/src/resource.ts",
-      "kernel/ts/src/compose.ts"
+      "kernel/ts/src/compose.ts",
+      "kernel/ts/src/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/composition.json",
@@ -125,7 +128,7 @@
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "R5 S6b default HP/MA/MV pools, recipe costs and resource.adjust steps, 1 MV per move, hourly regeneration"
+    "implemented_in": "R5 S6b default HP/MA/MV pools, recipe costs and resource.adjust steps, 1 MV per move, hourly regeneration; G condition bands in GameView"
   },
   "containment": {
     "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12",

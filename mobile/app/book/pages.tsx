@@ -9,6 +9,23 @@ import { confirmStartOver } from '../SaveError.tsx';
 
 type Say = (key: string) => string;
 export type Thing = GameView['entities'][number];
+export type Pool = NonNullable<GameView['resources']>[number];
+
+// Each condition band's colour and hp phrase (04 §15 bands). The colour tiers by the band's cut
+// as the mock does: from 80 up none, from 40 up mid, below that accent.
+export const bands: Record<Pool['band'], [colour: string, phrase: string]> = {
+  perfect_health: [paper.fg, 'is in perfect health'],
+  slightly_scratched: [paper.fg, 'is slightly scratched'],
+  few_bruises: [paper.fg, 'has a few bruises'],
+  some_cuts: [paper.mid, 'has some cuts'],
+  several_wounds: [paper.mid, 'has several wounds'],
+  many_nasty_wounds: [paper.mid, 'has many nasty wounds'],
+  bleeding_freely: [paper.mid, 'is bleeding freely'],
+  covered_in_blood: [paper.accent, 'is covered in blood'],
+  leaking_guts: [paper.accent, 'is leaking guts'],
+  almost_dead: [paper.accent, 'is almost dead'],
+  dying: [paper.accent, 'is DYING'],
+};
 
 const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
 const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
@@ -90,11 +107,16 @@ export function ThingPage(p: { name: string; actions: Button[]; press: (b: Butto
   );
 }
 
-export function CharacterPage() {
-  // GameView carries nothing about the character yet, so nothing is shown (real data only).
+export function CharacterPage({ resources = [] }: { resources?: readonly Pool[] }) {
+  // Real data only: the body's resources when GameView carries them; the phrase on hp only.
   return (
     <Sheet title="Character">
-      <Text style={note}>Nothing is known about you yet.</Text>
+      {resources.length === 0 && <Text style={note}>Nothing is known about you yet.</Text>}
+      {resources.map(({ resource: { key }, current, maximum, band }) => (
+        <Text key={key} style={prose}>
+          {`${key}  ${current} / ${maximum}${key === 'hp' ? `, ${bands[band][1]}` : ''}`}
+        </Text>
+      ))}
     </Sheet>
   );
 }

@@ -579,7 +579,24 @@ Examples:
 - dialogue choices currently available;
 - shop/container semantic contents;
 - map-discovery state;
-- localized string IDs plus interpolation data.
+- localized string IDs plus interpolation data;
+- the viewer's body's resources, each with its current value, maximum and condition band.
+
+*Amendment 2026-10-01 (Early R7/R8 slice G, [owner decision](../decisions/owner-decision-condition-bands-2026-10-01.md)):* GameView lists the viewer's body's resources (resource@1), each with its current value (derived from the clock, 21 §4 Resource), its maximum and its condition band. The kernel computes the band; the UI never computes a threshold (00 §4.10). With p = floor(100 × (current − minimum) / (maximum − minimum)), the band is the first row of the table below whose cut p reaches (computed in integers: 100 × (current − minimum) ≥ cut × (maximum − minimum)); when maximum equals minimum it is the top row. One table serves every resource; cartridges do not declare thresholds. The scale is after LegendMUD's condition scale (tribute).
+
+| p at least | band |
+|---|---|
+| 100 | `perfect_health` |
+| 90 | `slightly_scratched` |
+| 80 | `few_bruises` |
+| 70 | `some_cuts` |
+| 60 | `several_wounds` |
+| 50 | `many_nasty_wounds` |
+| 40 | `bleeding_freely` |
+| 30 | `covered_in_blood` |
+| 20 | `leaking_guts` |
+| 10 | `almost_dead` |
+| 0 | `dying` |
 
 The portable projector returns a host-neutral **GameView** / projection model.
 

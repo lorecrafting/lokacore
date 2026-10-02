@@ -31,7 +31,7 @@ Compared against [protocol/gameview.schema.json](../../../protocol/gameview.sche
 
 | # | Need (nice to have) | For | Nearest today |
 |---|---|---|---|
-| 1 | resources as current/max with a band (`hale`, `hurt`, `badly_hurt`), so the UI never invents thresholds | the status line and Character | none |
+| 1 | resources as current/max with a condition band ([04 §15](../../spec/04-command-event-effect-protocol.md#15-portable-game-view-projection)), so the UI never invents thresholds | the status line and Character | GameView `resources` (slice G) |
 | 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | none |
 | 3 | discovered map places with grid coordinates and z, the edges between them, and which are visited | the minimap and Map page | none ("map joins with its capability") |
 | 4 | a typed distinction between a closed door and a barred way (openable or not); the player-facing `message` already tells them apart | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |

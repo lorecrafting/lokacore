@@ -401,6 +401,57 @@
         }
       ]
     },
+    "ResourceView": {
+      "description": "One of the viewer's body's resources (04 §15 as amended 2026-10-01; 21 §4 Resource): its current value at the view's time, its maximum and its condition band, which the kernel computes from the band table in 04 §15; the UI never computes a threshold (00 §4.10).",
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "current": {
+          "$ref": "resource.schema.json#/$defs/ResourceInt"
+        },
+        "maximum": {
+          "$ref": "resource.schema.json#/$defs/ResourceInt"
+        },
+        "band": {
+          "type": "string",
+          "enum": [
+            "perfect_health",
+            "slightly_scratched",
+            "few_bruises",
+            "some_cuts",
+            "several_wounds",
+            "many_nasty_wounds",
+            "bleeding_freely",
+            "covered_in_blood",
+            "leaking_guts",
+            "almost_dead",
+            "dying"
+          ]
+        }
+      },
+      "required": [
+        "resource",
+        "current",
+        "maximum",
+        "band"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "resource": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "current": 81,
+          "maximum": 82,
+          "band": "slightly_scratched"
+        }
+      ]
+    },
     "PlaceView": {
       "description": "The current place (04 §14 room).",
       "type": "object",
@@ -437,7 +488,7 @@
       ]
     },
     "GameView": {
-      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); map, equipment, shop and other surfaces join with their capabilities.",
+      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); map, equipment, shop and other surfaces join with their capabilities.",
       "type": "object",
       "properties": {
         "actor_id": {
@@ -474,6 +525,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/QuestView"
+          }
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ResourceView"
           }
         },
         "choice": {
@@ -650,7 +707,7 @@
       ]
     },
     "GameViewSnapshot": {
-      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: a new field or meaning takes a new format. projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol arrives in R6.",
+      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol arrives in R6.",
       "type": "object",
       "properties": {
         "format": {
