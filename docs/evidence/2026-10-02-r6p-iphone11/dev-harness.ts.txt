@@ -1,5 +1,5 @@
 // R6P P6 device harness (evidence only, never committed as code): one module run by the Hermes
-// app (dev-App.tsx) and by the Node runner (dev-node-expected.mjs). Each launch runs one phase.
+// app (dev-App.tsx) and by the Node runner (dev-node-expected.ts). Each launch runs one phase.
 // Every reply and state is recorded as canonical bytes; Hermes compares them with the Node bytes.
 // Literal checks (rows 7-12) are checked on both hosts against hand-written expectations.
 import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
