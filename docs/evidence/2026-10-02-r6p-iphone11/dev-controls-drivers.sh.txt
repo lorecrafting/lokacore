@@ -1,0 +1,40 @@
+#!/bin/zsh
+# Red controls for the drivers' stop paths (P6BF-1..3), with a fake `xcrun` first on PATH that
+# answers as a test case says. No device is touched; identifiers are made up.
+H=${0:a:h}; T=$(mktemp -d); fail=0
+mkdir -p $T/bin $T/tmp
+cat > $T/bin/xcrun <<'X'
+#!/bin/zsh
+echo "$*" >> $FAKE_DIR/calls
+case "$*" in
+  *"info lockState"*) echo "• passcodeRequired: false" ;;
+  *"copy from"*)
+    case $FAKE in
+      base_fail) echo "ERROR: connection lost on /Application/ABCDEF01-2345-4ABC-8DEF-0123456789AB"; exit 1 ;;
+      launch_fail) echo "ERROR: Failed to retrieve the file node for Documents/p6run-x.txt"; exit 1 ;;
+      stale) dest=${@[(i)--destination]}; print -l "P6RUN p6-1 carry2 begin build=x" "P6RUN p6-1 carry2 done records=13" > ${@[dest+1]} ;;
+    esac ;;
+  *"process launch"*) [[ $FAKE == launch_fail ]] && exit 1; echo '{"result":{"process":{"processIdentifier":42}}}' ;;
+  *"simctl get_app_container"*) echo $FAKE_DIR/simdata ;;
+  *"simctl launch"*) exit 1 ;;
+esac
+X
+chmod +x $T/bin/xcrun
+function expect { if [[ "$2" == "$3" ]]; then echo "PASS $1"; else echo "FAIL $1: got [$2] want [$3]"; fail=1; fi; }
+function run { # run <fake> <driver> -> sets out, code
+  rm -f $T/calls; rm -rf $T/out $T/tmp/*(N)
+  out=$(FAKE=$1 FAKE_DIR=$T TMPDIR=$T/tmp PATH=$T/bin:$PATH DEV=00001111-000A1B2C3D4E5F60 $H/$2 x $T/out carry2 2>&1); code=$?
+}
+run base_fail drive-phone.sh
+expect "phone: failed baseline copy stops non-zero" "$code $(print -r -- $out | grep -c 'baseline copy failed; stop')" "1 1"
+expect "phone: no launch after a failed baseline" "$(grep -c 'process launch' $T/calls)" "0"
+expect "phone: no raw file left (scratch, out)" "$(find $T/tmp $T/out -name 'run.raw' 2>/dev/null | wc -l | tr -d ' ')" "0"
+run launch_fail drive-phone.sh
+expect "phone: forced launch failure exits non-zero" "$code $(print -r -- $out | grep -c 'launch failed; stop')" "1 1"
+run stale drive-phone.sh
+expect "phone: an old begin/done pair is a timeout, non-zero" "$code $(print -r -- $out | grep -c 'TIMEOUT')" "1 1"
+expect "phone: no raw file left after the timeout" "$(find $T/tmp $T/out -name 'run.raw' | wc -l | tr -d ' ')" "0"
+expect "phone: the failing run is kept redacted" "$(cat $T/out/run.txt 2>/dev/null | wc -l | tr -d ' ')" "2"
+mkdir -p $T/simdata/Documents; run launch_fail drive-sim.sh
+expect "sim: forced launch failure exits non-zero" "$code $(print -r -- $out | grep -c 'launch failed; stop')" "1 1"
+rm -rf $T; exit $fail

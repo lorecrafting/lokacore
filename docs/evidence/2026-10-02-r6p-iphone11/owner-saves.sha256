@@ -1,7 +1,11 @@
-# sha256 of the owner's saves (names only). pre: the copy taken before the first harness install (2026-10-02, fix round 0); before/after: copies taken before the fix-round-1 harness install and after the final clean reinstall.
+# sha256 of the owner's saves (names only). pre: the copy taken before the first harness install (2026-10-02, fix round 0); before/after: copies taken before the fix-round-1 harness install and after the final clean reinstall. round2-before/round2-after: fix round 2, around its one-phase harness install.
 1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  pre/loka-save.db
 fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  pre/loka-lantern.db
 1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  before/loka-save.db
 fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  before/loka-lantern.db
 1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  after/loka-save.db
 fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  after/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round2-before/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round2-before/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round2-after/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round2-after/loka-lantern.db

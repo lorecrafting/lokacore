@@ -2,6 +2,7 @@
 # The Simulator dry run of drive-phone.sh: same phases, same completion and redaction rules.
 # Usage: DEV=<simulator> drive-sim.sh <build> <out> <phase...>
 source ${0:a:h}/common.sh
+setopt pipefail # main's failure (a stop, a timeout) is the script's exit status, through redact
 BUILD=$1; OUT=$2; shift 2; APP=com.lorecrafting.loka
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 function main {
