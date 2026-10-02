@@ -70,3 +70,20 @@ No other findings.
 
 - Device rows and red controls, including A01 giving `replace:false` on expo-sqlite. The A01 split depends on SQLite's message text, which the code comment notes is unchecked on the phone.
 - 03 §14 lists `result_digest`. Without it, a response with a valid shape but altered content still replays as saved. Adding it is a schema change, so it is a carry, not in scope here.
+
+## Fix round 1 (`9ab820d`, `baaa094`): APPROVE
+
+The check covered only the fix commits, the code each fix touched and that code's direct callers.
+
+- **F1 / A02: closed.** `reread` (`mobile/authority/local-story/smoke.ts:173-190`) builds the first GameView once at open. Any throw becomes `save_corrupt` with the in-place `newGame`. The `holds` line is gone from `store.ts`. Moving the check to `openSmoke` (`authority.ts` and `store.ts` are at the line cap) is accepted: `openSmoke` is the only caller that shows a first screen.
+  - Probe on a Lantern save at Bram's choice: each of the 9 `state_row` rows was deleted, or set to `null`, `{}`, `"x"`, `[]` or `0`.
+  - Every case either opens and survives `screen()` plus three presses, or gives `save_corrupt` with `replace:false`. No probe reached an uncaught throw.
+- **A04 (Sol): closed.** The cap moved from `press` to `screen()` (`smoke.ts:211`), so the lines Book's `refused()` pushes are trimmed on the next render.
+- **A03 tamper with a valid shape:** carried to R12 in the ROADMAP R6P row (`result_digest`, a save-schema change). The carry is accepted.
+- **Reverts:**
+  - Removing the `gameView` try at open: all 3 A02 table cases fail.
+  - Moving the cap back into `press`: the joystick "refused drags" test fails.
+  - At head, the mobile/authority and book suites are green.
+- The A02 table tests no longer check the reports, because `talk()` reaches no story point. `replace:false` still pins the in-place path. No finding.
+
+No new findings.
