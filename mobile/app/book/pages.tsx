@@ -1,9 +1,10 @@
 // The book's pages: room, a thing's page, and the Character / Journal / Carrying pages. Each is
 // only drawing; what a tap does is passed in by Book.tsx.
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import Storage from 'expo-sqlite/kv-store';
 import type { Button, GameView } from '../../authority/local-story/smoke.ts';
-import { plain, why, type group, type Pool } from './model.ts';
+import { absent, cap, ended, plain, why, type group, type Pool } from './model.ts';
 import { body, head, paper } from './paper.ts';
 import { confirmStartOver } from '../SaveError.tsx';
 
@@ -63,8 +64,14 @@ export function RoomPage(p: {
   open: (id: string) => void;
   openWait?: () => void; // none: nothing to wait for
 }) {
+  const scroll = useRef<ScrollView>(null);
   return (
-    <ScrollView contentContainerStyle={{ padding: 24 }}>
+    <ScrollView
+      ref={scroll}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ padding: 24 }}
+      onContentSizeChange={() => p.view.choice && scroll.current?.scrollToEnd()} // its answers in view
+    >
       <Title name={p.text(p.view.place.title.key)} look={p.g.look} press={p.press} />
       <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
       <Here view={p.view} text={p.text} open={p.open} />
@@ -78,23 +85,28 @@ export function RoomPage(p: {
       )}
       {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
       {p.view.choice && <Choice {...p} choice={p.view.choice} />}
+      {ended(p.view) !== '' && <Text style={{ ...note, marginTop: 12 }}>{ended(p.view)}</Text>}
     </ScrollView>
   );
 }
 
-// ponytail: session memory only, as the footer's tip: the hint shows again after the app restarts.
-let looked = false;
-
-// The place's name; a tap looks, and a first-run hint says so.
+// The place's name; a tap looks, and a first-run hint says so until the first look (kept across
+// restarts in expo-sqlite's own key-value file, not in the save).
+const LOOKED = 'hint.looked';
 function Title(p: { name: string; look?: Button; press: (b: Button) => void }) {
   const title = <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.name}</Text>;
   if (!p.look) return title;
   return (
     <>
-      <Tap label={`Look, ${p.name}`} onPress={() => ((looked = true), p.press(p.look!))}>
+      <Tap
+        label={`Look, ${p.name}`}
+        onPress={() => (Storage.setItemSync(LOOKED, '1'), p.press(p.look!))}
+      >
         {title}
       </Tap>
-      {!looked && <Text style={{ ...note, textAlign: 'center' }}>Tap the title to look</Text>}
+      {!Storage.getItemSync(LOOKED) && (
+        <Text style={{ ...note, textAlign: 'center' }}>Tap the title to look</Text>
+      )}
     </>
   );
 }
@@ -105,10 +117,8 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
     return (
       <Tap key={e.id} label={`${name}, open`} onPress={() => p.open(e.id)}>
         <Text style={prose}>
-          <Text style={{ fontWeight: '500', textDecorationLine: 'underline' }}>
-            {name.charAt(0).toUpperCase() + name.slice(1)}
-          </Text>{' '}
-          is here.
+          <Text style={{ fontWeight: '500', textDecorationLine: 'underline' }}>{cap(name)}</Text> is
+          here.
         </Text>
       </Tap>
     );
@@ -132,6 +142,7 @@ function Choice(p: {
     <View style={{ marginTop: 12 }}>
       {speaker && <Text style={note}>{p.text(speaker.name)}</Text>}
       <Text style={prose}>{p.text(p.choice.prompt.key)}</Text>
+      {absent(p.view) !== '' && <Text style={note}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);
         return b ? (
@@ -147,7 +158,10 @@ function Choice(p: {
 
 function Sheet({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <ScrollView contentContainerStyle={{ padding: 24, gap: 8 }}>
+    <ScrollView
+      contentContainerStyle={{ padding: 24, gap: 8 }}
+      showsHorizontalScrollIndicator={false}
+    >
       <Text style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
         {title}
       </Text>
@@ -226,10 +240,10 @@ export function MapPage(p: {
       <Text style={prose}>{p.text(p.view.place.title.key)}</Text>
       {p.view.exits.length === 0 && <Text style={note}>No way out is known.</Text>}
       {p.view.exits.map((e) => {
-        const name = e.direction.charAt(0).toUpperCase() + e.direction.slice(1);
+        const name = cap(e.direction);
         return e.available ? (
           <Tap key={e.direction} label={`Go ${e.direction}`} onPress={() => p.walk(e.direction)}>
-            <Text style={prose}>{name}</Text>
+            <Text style={prose}>{`Go ${e.direction}`}</Text>
           </Tap>
         ) : (
           <Text key={e.direction} style={note}>

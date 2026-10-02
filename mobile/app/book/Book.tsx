@@ -5,7 +5,7 @@ import { Pressable, SafeAreaView, Text, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import { clock, type Button, type openSmoke } from '../../authority/local-story/smoke.ts';
 import { Footer } from './Footer.tsx';
-import { group, said, type Pool } from './model.ts';
+import { cap, group, said, type Pool } from './model.ts';
 import { body, fonts, paper } from './paper.ts';
 import { confirmStartOver } from '../SaveError.tsx';
 import {
@@ -34,6 +34,7 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   const [stack, setStack] = useState<Page[]>([]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [from, setFrom] = useState(0); // the room log starts here: log length at the last place change
+  const [, redraw] = useState(0);
   if (!loaded && !fontError) return null;
 
   const screen = smoke.screen();
@@ -53,7 +54,8 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   const open = (p: Page) => go([...stack, p], 1);
   // a start over that failed shows its message in the room page's log
   const walk = (d: string) => press(g.exits.find((e) => e.direction === d)!.button);
-  const ctx = { screen, g, press, walk, open, startOver: () => (startOver(), go([], 1)) };
+  const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1)); // no page turn
+  const ctx = { screen, g, press, walk, refused, open, startOver: () => (startOver(), go([], 1)) };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={flip.turn} dir={flip.dir}>
@@ -70,6 +72,7 @@ function Bottom(p: {
   g: ReturnType<typeof group>;
   press: (b: Button) => void;
   walk: (direction: string) => void;
+  refused: (line: string) => void;
   open: (p: Page) => void;
   back?: () => void;
   startOver: () => void;
@@ -84,6 +87,7 @@ function Bottom(p: {
           exits={view.exits}
           text={text}
           go={p.walk}
+          refused={p.refused}
           openMap={() => p.open({ kind: 'map' })}
         />
       )}
@@ -177,7 +181,9 @@ function Body(p: {
     );
   if (page.kind === 'thing') {
     const t = [...view.entities, ...view.inventory].find((e) => e.id === page.id);
-    return <ThingPage name={t ? text(t.name) : ''} actions={p.g.on(page.id)} press={p.press} />;
+    return (
+      <ThingPage name={t ? cap(text(t.name)) : ''} actions={p.g.on(page.id)} press={p.press} />
+    );
   }
   if (page.kind === 'wait')
     return <ThingPage name="Wait" actions={p.screen.waits} press={p.press} />;

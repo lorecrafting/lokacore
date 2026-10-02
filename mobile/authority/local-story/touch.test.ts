@@ -23,7 +23,7 @@ const FETCH = [
   'Go north',
   'Go east',
   'Go east',
-  'take a brass lantern',
+  'Take a brass lantern',
   'Go west',
   'Go west',
   'Go south',
@@ -81,7 +81,7 @@ test('a second press from the same screen is a stale view and changes nothing', 
   assert.equal(a.revision(), revision);
   assert.equal(a.screen().view.place.title.key, 'room.landing.title');
   assert.deepEqual(a.screen().log.slice(-3), [
-    'activated',
+    'You take on the task. It is in your journal.',
     '> Go north',
     'The page had changed; here it is again.',
   ]);
@@ -180,4 +180,54 @@ test('the waits run from the next whole hour to 23:00', () => {
   assert.deepEqual([waits[0]!.input, waits[16]!.input], [{ until: 25200 }, { until: 82800 }]);
   a.tap('Wait until 23:00');
   assert.deepEqual(a.screen().waits, []);
+});
+
+// Breaks (R6P Polish notes 1, 13): a raw outcome or refusal code in the log (`moved`,
+// `choice_opened`, "You can't: exit_locked"), a take with no answer, or a look that logs its echo.
+// A code is a lower-case word or has an underscore; story text has neither.
+const CODE = /^[a-z_]+$|[a-z]_[a-z]/;
+test('the log has story words, never a kernel code, across both endings', () => {
+  const a = fresh();
+  a.tap("Offer to fetch Bram's lantern", 'Go north', 'Go east', 'Go east');
+  const lantern = a.screen().view.entities.find((e) => e.kind === 'item')!.id;
+  const on = a.screen().buttons.filter((b) => b.target_ids.includes(lantern));
+  assert.deepEqual(
+    on.map((b) => b.label),
+    ['Take a brass lantern'],
+  );
+  a.tap('Take a brass lantern');
+  assert.equal(a.screen().log.at(-1), 'Taken.');
+  const look = a.find('Look');
+  const before = [...a.screen().log];
+  a.smoke.press(look);
+  assert.deepEqual(a.screen().log, before);
+  a.tap('Go west', 'Go west', 'Go south', 'Scan');
+  const locked = {
+    label: 'Go west',
+    action_key: 'move',
+    target_ids: [],
+    input: { direction: 'west' },
+  };
+  a.smoke.press(locked);
+  a.tap('Talk Bram the ferryman', 'Wait until 19:00', 'Close', 'Go north');
+  a.tap('Talk Bram the ferryman', 'Carry it along the bank');
+  const b = fresh();
+  b.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  const lines = [...a.screen().log, ...b.screen().log];
+  assert.deepEqual(
+    lines.filter((l) => CODE.test(l)),
+    [],
+  );
+  assert.ok(lines.includes(CARRY) && lines.includes(LEAVE));
+});
+
+// Breaks (note 3): items counted as comers (a dropped lantern "arrives"), or the diff run across a
+// place change (walking away from Bram logs "Bram the ferryman leaves").
+test('an NPC who leaves while you stay is logged, and nothing else', () => {
+  const a = fresh();
+  a.tap(...FETCH, 'Go north', 'Go south', 'Drop a brass lantern', 'Wait until 19:00');
+  assert.deepEqual(
+    a.screen().log.filter((l) => / (leaves|arrives)\.$/.test(l)),
+    ['Bram the ferryman leaves.'],
+  );
 });
