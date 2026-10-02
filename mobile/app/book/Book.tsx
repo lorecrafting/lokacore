@@ -79,7 +79,7 @@ function Bottom(p: {
 }) {
   const { view, text, pending, fault } = p.screen;
   return (
-    <View style={{ borderTopWidth: 1, borderColor: paper.line, padding: 8 }}>
+    <View style={{ padding: 8 }}>
       {p.back ? (
         <Back onPress={p.back} />
       ) : (
