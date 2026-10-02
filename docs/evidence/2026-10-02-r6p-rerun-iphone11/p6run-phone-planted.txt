@@ -1,0 +1,35 @@
+P6RUN p6-1790970291176-n0d3d40c516849a03 ka begin build=rerun-planted hermes={"Bytecode Version":98,"Static Hermes":true,"Builtins Frozen":false,"VM Experiments":0,"Build":"Release","GC":"hades (concurrent)","OSS Release Version":"250829098.0.17","Debugger Enabled":false,"CommonJS Modules":"None"}
+P6RUN p6-1790970291176-n0d3d40c516849a03 ka CHECK lantern known answer hash PASS "9b0969438f5ddad877c88506ffe295c5084e3014d607ef0ba24c922ee5db2821"
+P6RUN p6-1790970291176-n0d3d40c516849a03 ka CHECK lantern known answer value PASS "canonical"
+P6RUN p6-1790970291176-n0d3d40c516849a03 ka CHECK known answers no mismatch PASS ["[]","[]","[]","[]"]
+P6RUN p6-1790970291176-n0d3d40c516849a03 ka done records=4 mismatches=0 checks_failed=0
+P6RUN p6-1790970295318-nc09060ca86498722 sim begin build=rerun-planted hermes={"Bytecode Version":98,"Static Hermes":true,"Builtins Frozen":false,"VM Experiments":0,"Build":"Release","GC":"hades (concurrent)","OSS Release Version":"250829098.0.17","Debugger Enabled":false,"CommonJS Modules":"None"}
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 1 start bytes PASS 1
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 2 start bytes PASS 2
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 3 start bytes PASS 3
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 4 start bytes PASS 4
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 5 start bytes PASS 5
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 6 start bytes PASS 6
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 7 start bytes PASS 7
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 8 start bytes PASS 8
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 9 start bytes PASS 9
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 10 start bytes PASS 10
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 11 start bytes PASS 11
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 12 start bytes PASS 12
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 13 start bytes PASS 13
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 14 start bytes PASS 14
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 15 start bytes PASS 15
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 16 start bytes PASS 16
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 17 start bytes PASS 17
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 18 start bytes PASS 18
+P6RUN p6-1790970295318-nc09060ca86498722 sim CHECK seed 19 start bytes PASS 19
+P6RUN p6-1790970295318-nc09060ca86498722 sim done records=1530 mismatches=0 checks_failed=0
+P6RUN p6-1790970299633-n95064955e2b348dc carry1 begin build=rerun-planted hermes={"Bytecode Version":98,"Static Hermes":true,"Builtins Frozen":false,"VM Experiments":0,"Build":"Release","GC":"hades (concurrent)","OSS Release Version":"250829098.0.17","Debugger Enabled":false,"CommonJS Modules":"None"}
+P6RUN p6-1790970299633-n95064955e2b348dc carry1 HOLD
+P6RUN p6-1790970302977-n2512c2d719fc2115 carry2 begin build=rerun-planted hermes={"Bytecode Version":98,"Static Hermes":true,"Builtins Frozen":false,"VM Experiments":0,"Build":"Release","GC":"hades (concurrent)","OSS Release Version":"250829098.0.17","Debugger Enabled":false,"CommonJS Modules":"None"}
+P6RUN p6-1790970302977-n2512c2d719fc2115 carry2 CHECK continuous after kill PASS {"n":5,"r":5}
+P6RUN p6-1790970302977-n2512c2d719fc2115 carry2 MISMATCH lantern-carry[7] state
+expected {"clock":31600,"containers":{"0f5f2329-bcff-82f4-948a-3d22a75fb068":"3d4829ad-9e43-81ef-bc10-66b1b267e157","3d4829ad-9e43-81ef-bc10-66b1b267e157":"91fde0fc-dd14-846f-826e-245e45d16ec7","6a70d262-b6ea-8b64-9809-ec7f79d1521e":"91fde0fc-dd14-846f-826e-245e45d16ec7"},"quests":{"1ee68a64-e3ec-878a-bb77-5e3d8443d57d":{"quest":{"cartridge_id":"lantern_proof","cartridge_version":"0.0.1","key":"lantern","kind":"quest"},"scope":{"character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9","kind":"player"},"state":"active"}},"resources":{"{\"entity_id\":\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern_proof\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}}":{"at":21600,"value":10},"{\"entity_id\":\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern_proof\",\"cartridge_version\":\"0.0.1\",\"key\":\"ma\",\"kind\":\"resource\"}}":{"at":21600,"value":100},"{\"entity_id\":\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern_proof\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}":{"at":21600,"value":94}},"rng":[1,2,3,4]}
+actual   {"clock":21600,"containers":{"0f5f2329-bcff-82f4-948a-3d22a75fb068":"3d4829ad-9e43-81ef-bc10-66b1b267e157","3d4829ad-9e43-81ef-bc10-66b1b267e157":"91fde0fc-dd14-846f-826e-245e45d16ec7","6a70d262-b6ea-8b64-9809-ec7f79d1521e":"91fde0fc-dd14-846f-826e-245e45d16ec7"},"quests":{"1ee68a64-e3ec-878a-bb77-5e3d8443d57d":{"quest":{"cartridge_id":"lantern_proof","cartridge_version":"0.0.1","key":"lantern","kind":"quest"},"scope":{"character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9","kind":"player"},"state":"active"}},"resources":{"{\"entity_id\":\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern_proof\",\"cartridge_version\":\"0.0.1\",\"key\":\"hp\",\"kind\":\"resource\"}}":{"at":21600,"value":10},"{\"entity_id\":\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern_proof\",\"cartridge_version\":\"0.0.1\",\"key\":\"ma\",\"kind\":\"resource\"}}":{"at":21600,"value":100},"{\"entity_id\":\"3d4829ad-9e43-81ef-bc10-66b1b267e157\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern_proof\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}":{"at":21600,"value":94}},"rng":[1,2,3,4]}
+P6RUN p6-1790970302977-n2512c2d719fc2115 carry2 CHECK ending saved PASS {"n":10,"r":10}
+P6RUN p6-1790970302977-n2512c2d719fc2115 carry2 done records=13 mismatches=1 checks_failed=0

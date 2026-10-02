@@ -1,0 +1,95 @@
+// R6P P6 Node runner (evidence only): writes the sim sample and the expected bytes (node:sqlite),
+// then replays every phase against them on Node as a self-check. Run from mobile/app:
+// node p6/node-run.ts <N seeds>
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { encode } from '../../../kernel/ts/src/canonical.ts';
+import { simulate } from '../../../kernel/ts/test/sim.ts';
+import { fixtures, PHASES, runPhase, type Env, type SimSample } from './harness.ts';
+
+const fx = (f: string) => JSON.parse(readFileSync(new URL(`../../../${f}`, import.meta.url), 'utf8'));
+fixtures({
+  items: fx('protocol/fixtures/cartridge_items_hash.json'),
+  dusk: fx('protocol/fixtures/cartridge_dusk_hash.json'),
+  lantern: fx('protocol/fixtures/cartridge_lantern_hash.json'),
+  cases: fx('kernel/ts/test/invocation_cases.json'),
+  traces: fx('docs/spec/conformance/lantern-traces.json'),
+});
+
+function nodeEnv(emit: (l: string) => void): Env & { closeAll(): void } {
+  const dir = mkdtempSync(join(tmpdir(), 'p6-'));
+  const open = new Map<string, DatabaseSync>();
+  const close = (name: string) => {
+    open.get(name)?.close();
+    open.delete(name);
+  };
+  return {
+    open(name) {
+      const sql = new DatabaseSync(join(dir, name));
+      open.set(name, sql);
+      return {
+        execSync: (s) => void sql.exec(s),
+        runSync: (s, ...p) => sql.prepare(s).run(...p),
+        getFirstSync: <T>(s: string, ...p: (string | number | null)[]) =>
+          (sql.prepare(s).get(...p) ?? null) as T | null,
+        getAllSync: <T>(s: string, ...p: (string | number | null)[]) =>
+          sql.prepare(s).all(...p) as T[],
+        isInTransactionSync: () => sql.isTransaction,
+      };
+    },
+    close,
+    read: (name) => new Uint8Array(readFileSync(join(dir, name))),
+    write: (name, b) => writeFileSync(join(dir, name), b),
+    remove: (name) =>
+      [name, `${name}-journal`].forEach((f) => rmSync(join(dir, f), { force: true })),
+    hold: (_, name) => close(name), // the kill: SQLite rolls back an open transaction on close
+    emit,
+    closeAll: () => [...open.keys()].forEach(close),
+  };
+}
+
+function sample(n: number): SimSample {
+  const out: SimSample = { kats: {}, seeds: [] };
+  for (let seed = 1; seed <= n; seed++) {
+    const o = simulate(seed);
+    if (o.failure) throw new Error(`seed ${seed} fails: ${JSON.stringify(o.failure)}`);
+    const a = o.loaded.artifact;
+    const canonical = a.slice('{"cartridge":'.length, a.lastIndexOf(',"content_hash"'));
+    out.kats[o.loaded.hash] = { canonical, sha256: o.loaded.hash };
+    out.seeds.push({
+      seed,
+      cartridge: o.loaded.hash,
+      context: o.start.context,
+      rng: o.start.state.rng as number[], // begin()'s draw; a drain changes only resources
+      ...(o.drained && { resources: o.start.state.resources as never }),
+      start: encode(o.start.state as never),
+      commands: o.commands as never,
+    });
+  }
+  return out;
+}
+
+function all(sims: SimSample, expected?: Record<string, string>) {
+  const lines: string[] = [];
+  const env = nodeEnv((l) => lines.push(l));
+  const got: Record<string, string> = {};
+  for (const phase of PHASES) {
+    Object.assign(got, runPhase(env, phase, sims, expected));
+    env.closeAll(); // the process ends
+  }
+  return { got, lines };
+}
+
+const n = Number(process.argv[2]);
+const sims = sample(n);
+const first = all(sims);
+const second = all(sims, first.got);
+const data = `export const SIM = ${JSON.stringify(JSON.stringify(sims))};\nexport const EXPECTED = ${JSON.stringify(JSON.stringify(first.got))};\n`;
+writeFileSync(new URL('./data.ts', import.meta.url), data);
+writeFileSync(new URL('./node-expected.json', import.meta.url), JSON.stringify(first.got, null, 0));
+const bad = second.lines.filter((l) => /MISMATCH|FAIL/.test(l));
+console.log(second.lines.filter((l) => / done | CHECK /.test(l) && !/start bytes/.test(l)).join("\n"));
+console.log(`N=${n} data.ts bytes=${Buffer.byteLength(data)} self-check failures=${bad.length}`);
+for (const l of bad) console.log(l.slice(0, 400));
