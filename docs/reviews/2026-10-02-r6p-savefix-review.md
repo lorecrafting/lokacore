@@ -116,3 +116,33 @@ The check covered only the evidence commit: `docs/evidence/2026-10-02-r6p-savefi
   - The record states that no backup and no byte-identity check was possible, and that the final launch shows a new save (`clean-launch.png`: Ferry Landing, a fresh game).
 
 No findings.
+
+## Codex Sol first review (gpt-6.1-sol, head 4a9486c), appended verbatim by the PM
+
+CHANGES REQUESTED
+
+```text
+Exact scenarios verified: A01 closed (pending report preserved); A02 missing-body case closed; A03 null-response case closed; A04 Talk/Close bounded to 202 lines after 1,000 cycles.
+
+R6P-A02 | blocker | mobile/authority/local-story/store.ts:119 @4a9486c
+Partial closure. Fetch the lantern, Talk to Bram, then UPDATE state_row SET value='null' WHERE section='choices'. Reopening returns a game with failed() undefined; its first screen() throws “Cannot read properties of null (reading 'status')”. player_in_one_room passes. The save-error screen is still bypassed for damaged rows used by projection.
+
+R6P-A03 | blocker | mobile/authority/local-story/authority.ts:176 @4a9486c
+Partial closure. Commit Scan at revision 1, change only its stored response.outcome from 'scanned' to 'looked', reopen, and retry the original invocation. DecisionResult validation passes; the reply is saved/replay:true/revision:1 with outcome 'looked'. Shape validation leaves the original-outcome integrity failure open.
+Returning conflict for an invalid response safely refuses replay without reexecution. Neither 03 §14 nor 04 §15 mandates a different corruption-error kind; schema-valid damage must also fail closed to preserve §14’s guarantee.
+
+R6P-A04 | should-fix | mobile/app/book/Book.tsx:57 @4a9486c
+Partial closure. Repeatedly drag toward the locked west exit without issuing another action. Footer calls refused(), which appends directly and bypasses smoke.ts:208’s cap. Reproduced: 1,000 gestures retain 1,000 lines, all joined/rendered on redraw. The room-change cut works.
+
+Classification check: narrowing corrupt() preserves matching for NOTADB and SQLite structural “malformed” errors; malformed receipt JSON now receives the report-preserving reset. No newly introduced classification regression found.
+
+Validation: real SQLite in-memory probes; Book/Footer callbacks with native UI stubs; typecheck and 14 existing book tests passed. File-backed tests were not rerun in the read-only checkout.
+```
+
+PM ruling on Sol A03 (schema-valid tamper): CARRIED to R12 (03 §14 result_digest, a save-schema change), per the ROADMAP R6P row.
+
+## Codex Sol fix re-check (gpt-6.1-sol, head baaa094), verbatim
+
+APPROVE
+
+No findings.
