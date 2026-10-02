@@ -42,9 +42,9 @@ R6P needs the constitutional contracts, the minimal compiler/local authority/SQL
 
 ## Concrete proof: The Ferryman's Lantern
 
-Use a separate pre-release cartridge ID and save lineage, with four connected places (landing, green, reed bank, lantern shelter), Bram, one lantern, one offered quest, one schedule, and one consequential choice. This is a proof fixture, not a revision to Ashmere's chapter-one map or canon.
+Use a separate pre-release cartridge ID and save lineage, with four connected places (landing, green, reed bank, lantern shelter), Bram, one lantern, one offered quest, and one consequential choice. This is a proof fixture, not a revision to Ashmere's chapter-one map or canon.
 
-The player talks to Bram, accepts a current-possession objective, retrieves the lantern (or already has it), returns to talk, and chooses whether to carry it along the bank or leave it with Bram's search party. The quest remains active until that choice resolves it. Both choices require current lantern custody and Bram's presence; carrying is a declared terminal commitment, not proof of a later unmodeled journey. Both outcomes visibly alter a typed fact, a description, and available dialogue. Bram's schedule provides one time-dependent interaction without a population/commerce framework. A simple barrier can exercise an unavailable action. The proof uses real, short, readable prose and touch actions, not only a debug command prompt.
+The player talks to Bram, accepts a current-possession objective, retrieves the lantern (or already has it), returns to talk, and chooses whether to carry it along the bank or leave it with Bram's search party. The quest remains active until that choice resolves it. Both choices require current lantern custody and Bram's presence; carrying is a declared terminal commitment, not proof of a later unmodeled journey. Both outcomes visibly alter a typed fact, a description, and available dialogue. A simple barrier can exercise an unavailable action. The proof uses real, short, readable prose and touch actions, not only a debug command prompt.
 
 Illustrative opening text (replace through ordinary content review):
 
@@ -56,11 +56,11 @@ No new general scripting, dream-space runtime, combat, economy, or party system 
 
 [Lantern traces](conformance/lantern-traces.json) define prepared four-place examples and full per-step projected semantic state/outcome expectations. These are retained explicit expected values reviewed during the amendment, not a candidate-generated oracle or compiled production cartridge. This assistant authored and self-reviewed them; genuinely independent oracle approval remains PREP-02. The separate two-room Tiny case retains its strict acquisition event and failed-roll semantics.
 
-Ordinary proof actions cost zero logical time; explicit `wait` advances it. Bram is at landing from 06:00 to 19:00 and at green otherwise. This bounded fixture starts at 06:00 and admits waits only through 23:00; it does not claim full multi-day scheduler support. Landing connects north to green, green east to reed bank, reed bank east to lantern shelter, with reciprocal routes. The lantern starts at the shelter. A deliberately blocked west exit at landing advertises unavailable feedback without another room.
+The fixture starts at 06:00 on the game clock; no proof action advances it. Bram stays at the landing; the proof has no schedule and no wait ([owner decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md)). Landing connects north to green, green east to reed bank, reed bank east to lantern shelter, with reciprocal routes. The lantern starts at the shelter. A deliberately blocked west exit at landing advertises unavailable feedback without another room.
 
 Both paths: accept → travel to shelter → take → return → talk → choose. `carry` retains custody and sets `search_plan=player_led`; `leave` transfers to Bram and sets `search_plan=party_led`. Each atomically resolves the quest/choice and stores stable required narration plus a **proof-only** terminal story point. This is not an account-authorized production onboarding grant.
 
-Adverse paths: acquire before acceptance (state credit); drop after opening choice (custody rejection); wait until Bram moves (presence rejection with close/return path); retry consumed choice after a stale view (receipt replay); alter choice under same ID (integrity conflict); conflict/budget fault (no partial proposal); rollback/unknown COMMIT/after-commit display interruption (durable reconciliation). Local account/report binding is tested with the fake adapter, never with invented authentication evidence.
+Adverse paths: acquire before acceptance (state credit); drop after opening choice (custody rejection); walk away from Bram (presence rejection with close/return path); retry consumed choice after a stale view (receipt replay); alter choice under same ID (integrity conflict); conflict/budget fault (no partial proposal); rollback/unknown COMMIT/after-commit display interruption (durable reconciliation). Local account/report binding is tested with the fake adapter, never with invented authentication evidence.
 
 P4 must integrate the shared operation/reaction evaluator: the deliberately small Python Lantern model is only a specification example and cannot be copied as a special FerrymanEngine. P6 compares actual adapter bytes (the TypeScript host adapters on Node and iOS Hermes, [ADR-074](../decisions/adr-074-ts-first-proposal.md); Android Hermes waits for the first free product gate, [envelope §4](r1-acceptance-envelope.md#4-physical-devices-and-reproducible-setup), [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)), narrative continuity and human comprehension against the frozen examples.
 
@@ -70,8 +70,8 @@ P4 must integrate the shared operation/reaction evaluator: the deliberately smal
 |---|---|---|
 | P1 Identity/outcome adapter | R0/R1/R2 + constitutional contracts | Stable intent/command identity; failure/rejection distinction; exact fixture results on selected host paths |
 | P2 Atomic local authority | P1 | SQLite attempt + receipt + RNG commit; definite rollback and uncertain-COMMIT recovery; serialized admission |
-| P3 Compiled proof content | Minimal R4 + P1 | Four-place immutable artifact; validated references, choices, quest activation, schedule and capability lock |
-| P4 Narrative/world interaction | P2/P3 + selected early R7/R8 slices | Quest/fact/reaction in one proposal; one durable choice and schedule; no pre-commit effects |
+| P3 Compiled proof content | Minimal R4 + P1 | Four-place immutable artifact; validated references, choices, quest activation and capability lock |
+| P4 Narrative/world interaction | P2/P3 + selected early R7/R8 slices | Quest/fact/reaction in one proposal; one durable choice; no pre-commit effects |
 | P5 Touch-first mobile path | P4 + R1/R2 mobile integration | GameView render, ActionInvocation input, clear unavailable-action feedback, readable current state |
 | P6 Adversarial/device proof | P5 | Per-boundary crash/retry tests, airplane-mode resume, numeric/state parity and actual human device feedback |
 
