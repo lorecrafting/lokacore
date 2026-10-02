@@ -1,0 +1,52 @@
+// R6P P6 row 14 proxy (evidence only): the touch-start time of the latest touch, the first
+// requestAnimationFrame after a press's reply renders, and a rAF-gap monitor (stalls > 100 ms),
+// appended to Documents/p6-ui.txt. True touch-to-photon latency is not measured.
+import { File, Paths } from 'expo/node_modules/expo-file-system';
+
+const out = new File(Paths.document, 'p6-ui.txt');
+const log = (line: string) => {
+  if (!out.exists) out.create();
+  out.write(`${line}\n`, { append: true });
+};
+let touched = 0;
+let pressed = false;
+let handled = 0; // the press handler's start: excludes how long the touch was held
+export const touchStart = () => void (touched = performance.now());
+export const pressStart = () => void (handled = performance.now());
+export const pressDone = () => void (pressed = true);
+/** After a render: the first frame after a press's reply, as touch-start to that frame. */
+export const rendered = () => {
+  if (!pressed) return;
+  pressed = false;
+  const [t, h] = [touched, handled];
+  requestAnimationFrame(() => {
+    const now = performance.now();
+    log(`FEEDBACK ${(now - t).toFixed(1)} HANDLED ${(now - h).toFixed(1)}`);
+  });
+};
+let last = 0;
+const frame = (now: number) => {
+  if (last && now - last > 100) log(`STALL ${(now - last).toFixed(1)} at ${now.toFixed(0)}`);
+  last = now;
+  requestAnimationFrame(frame);
+};
+requestAnimationFrame(frame);
+log(`START ${Date.now()}`);
+// The rows 13/14 rebuild carry (review, row 5): numeric-vectors.json rng_steps replayed on
+// Hermes from initial_rng against the fixture literals, raw and state bytes per step.
+import { encode } from '../../../kernel/ts/src/canonical.ts';
+import { next } from '../../../kernel/ts/src/rng.ts';
+import vectors from '../../../docs/spec/conformance/numeric-vectors.json';
+{
+  let s = vectors.initial_rng as number[];
+  let bad = 0;
+  for (const [i, want] of vectors.rng_steps.entries()) {
+    const [raw, after] = next(s);
+    s = after as number[];
+    const [w, h] = [encode(want as never), encode({ raw, state: s } as never)];
+    if (w !== h) bad++;
+    log(`RNG step ${i} ${w === h ? 'PASS' : 'FAIL'} expected ${w} actual ${h}`);
+  }
+  const hp = (globalThis as { HermesInternal?: { getRuntimeProperties?: () => object } }).HermesInternal;
+  log(`RNG done mismatches=${bad} hermes=${JSON.stringify(hp?.getRuntimeProperties?.() ?? null)}`);
+}

@@ -1,0 +1,9 @@
+n warm = 150
+decision_ms    p50   0.717  p95   1.858  p99   2.089  max   2.143
+e2e_ms         p50   7.052  p95   9.702  p99  10.459  max  18.268
+projection_ms  p50   0.405  p95   0.611  p99   0.820  max   0.838
+commit_ms      p50   1.971  p95   2.809  p99   3.591  max  10.739
+sink_ms        p50   1.472  p95   1.629  p99   1.830  max   2.449
+cold {'open_new': 7.46, 'restore': 2.99}
+cold {'open_new': 7.37, 'restore': 2.85}
+cold {'open_new': 7.22, 'restore': 2.63}

@@ -1,0 +1,12 @@
+• passcodeRequired: false
+ka pid=6479 -> P6RUN p6-1790954854485 ka done records=4 mismatches=0 checks_failed=0
+• passcodeRequired: false
+sim pid=6480 -> P6RUN p6-1790954858542 sim done records=1530 mismatches=0 checks_failed=0
+• passcodeRequired: false
+carry1 pid=6483 -> P6RUN p6-1790954862747 carry1 HOLD
+ERROR: Failed to retrieve the file node for Documents/SQLite/p6-carry1.db (com.apple.dt.CoreDeviceError error 7000 (0x1B58))
+ERROR: Failed to retrieve the file node for Documents/SQLite/p6-carry1.db-journal (com.apple.dt.CoreDeviceError error 7000 (0x1B58))
+64 .
+128 ..
+• passcodeRequired: false
+carry2 pid=6485 -> P6RUN p6-1790954866126 carry2 done records=13 mismatches=1 checks_failed=0

@@ -1,0 +1,11 @@
+PASS phone: missing, then an old launch's done pair: timeout non-zero
+PASS phone: no raw file left after the timeout
+PASS phone: the failing run is kept redacted
+PASS phone: no identifier in the output
+PASS phone: this launch's done line: exit 0
+PASS phone: attempt 1's done line after a lost launch response: retry times out non-zero
+PASS phone: attempt 1 did write its done line (the control is not vacuous)
+PASS sim: attempt 1's done line after a lost launch response: retry times out non-zero
+PASS sim: attempt 1 did write its done line (the control is not vacuous)
+PASS phone: forced launch failure exits non-zero
+PASS sim: forced launch failure exits non-zero
