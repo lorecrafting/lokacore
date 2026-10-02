@@ -104,13 +104,17 @@ test('target_present holds for a target in reach and never without one', () => {
   }
 });
 
-// Breaks: admission evaluating the action's policy without its target (an alias or recipe whose
-// policy is target_present refused invalid_state by step though the GameView lists it).
-test('the target reaches admission for a talk alias and a recipe', () => {
+// Breaks: admission evaluating the action's policy without its target (an alias, a recipe or a
+// take whose policy is target_present refused invalid_state by step though the GameView lists
+// it), notably a Command that names its target item_id rather than target_id.
+test('the target reaches admission for a talk alias, a recipe and a take', () => {
   const w = after(
     world((c) => {
       c.actions[`${F}:action/chat`] = chat(PRESENT);
       c.recipes[`${F}:recipe/coil_rope`].policy.root = PRESENT;
+      // Overrides the engine take (ALWAYS), so only this policy admits a take.
+      c.actions[`${F}:action/take`] = { ...chat(PRESENT), key: 'take', command: 'take' };
+      c.actions[`${F}:action/take`].target.scopes = ['room_contents'];
     }),
     accept,
   );
@@ -127,6 +131,11 @@ test('the target reaches admission for a talk alias and a recipe', () => {
   assert.deepEqual(
     [coil?.available, stepped(w, { type: 'perform', action: 'coil_rope' })],
     [true, 'accepted'],
+  );
+  const lantern = at(w, 'item/lantern');
+  assert.deepEqual(
+    [shown(w, 'take', lantern), stepped(w, { type: 'take', item_id: lantern })],
+    ['available', 'accepted'],
   );
 });
 
@@ -145,6 +154,8 @@ test('every talk path gives the same code in the GameView and in step', () => {
   );
   const pending = after(active, { type: 'talk', target_id: at(active, 'npc/bram') });
   const plain = after(world(), accept);
+  // Bram's dialogue's own policy is target_present (its talk's and talkRefused's).
+  const own = world((c) => (c.dialogues[`${F}:dialogue/bram`].policy.root = PRESENT));
   const rows: [string, World, string, string, string, string][] = [
     ["Bram's talk, policy holding", active, 'bram', 'bram', 'available', 'accepted'],
     ["Bram's talk, policy failing", before, 'bram', 'bram', 'invalid_state', 'invalid_state'],
@@ -160,6 +171,14 @@ test('every talk path gives the same code in the GameView and in step', () => {
     ],
     ["Bram's talk, a choice pending", pending, 'bram', 'bram', 'invalid_state', 'invalid_state'],
     ['chat, a choice pending', pending, 'chat', 'bram', 'invalid_state', 'invalid_state'],
+    [
+      "Bram's talk, the dialogue's policy target_present",
+      own,
+      'bram',
+      'bram',
+      'available',
+      'accepted',
+    ],
     ["Bram's talk on ada", plain, 'bram', 'ada', 'not listed', 'unsupported_capability'],
   ];
   for (const [name, w, key, npc, view, code] of rows) {

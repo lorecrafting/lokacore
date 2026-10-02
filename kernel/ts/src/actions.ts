@@ -257,8 +257,10 @@ export function admission(
 /**
  * The GameView lists of `actor`'s set: `listed(fits)` is each action that `fits` in presentation
  * order (highest priority first, then key), available when its policy holds and, for a recipe,
- * its admission passes, else shown with invalid_state or admission's code (00 §4.10). A recipe is listed with the place while its detail is in the actor's
- * room.
+ * its admission passes, else shown with invalid_state or admission's code (00 §4.10); a talk in
+ * step's order: invalid_state when its policy fails, not_found when its target speaks no
+ * dialogue, invalid_state when talkRefused. A recipe is listed with the place while its detail is
+ * in the actor's room.
  */
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
