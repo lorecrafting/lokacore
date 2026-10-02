@@ -52,9 +52,9 @@ Hard-won lessons for `mobile/` and physical-device runs.
   `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save; for a
   fresh start, uninstall and reinstall the app.
 - The walk on a fresh dev build (items cartridge, ferry_landing): `react-native dismiss-overlay`
-  first (agent-device flags the dev warning overlay as covering part of the app), then `press 'label="Map"' --settle` and
-  `press 'label="Go north"' --settle`. Map opens with the first-run tip still shown, so "Got
-  it" need not be pressed. A selector with spaces is one shell argument, quotes inside.
+  first (agent-device flags the dev warning overlay as covering part of the app), then
+  `press 'label="Got it"' --settle` (the map tip), `press 'label="Map"' --settle` and
+  `press 'label="Go north"' --settle`. A selector with spaces is one shell argument, quotes inside.
 - `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
   edit that starts the app on that state; such shots are static and prove layout only,
   not navigation or gestures.

@@ -270,7 +270,7 @@ test('the view lists the body resources at the clock with their bands', () => {
   assert.deepEqual(view(run(world(), wait(7200)))[0], ['hp', 20, 25, 'few_bruises']);
 });
 
-// Breaks: `>` for `>=` at a cut, a cut off by one row, p measured from 0 instead of the minimum
+// Breaks: `>` for `>=` at a cut, a cut off by one row, p rounded up instead of floored, p measured from 0 instead of the minimum
 // (-100..100 at 0 is p 50, from 0 it would be dying), and maximum = minimum dividing by zero or
 // giving the bottom row. Each row: [minimum, maximum, current, band], hand-checked.
 test('the band is the first row of 04 §15 whose cut p reaches', () => {
@@ -297,6 +297,7 @@ test('the band is the first row of 04 §15 whose cut p reaches', () => {
     [0, 100, 9, 'dying'],
     [0, 100, 0, 'dying'],
     [0, 82, 81, 'slightly_scratched'], // p 98
+    [0, 82, 57, 'several_wounds'], // p 69.5: floor, not round or ceil
     [-100, 100, 0, 'many_nasty_wounds'], // p 50
     [5, 5, 5, 'perfect_health'],
   ] as const;
