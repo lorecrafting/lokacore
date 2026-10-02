@@ -99,7 +99,7 @@ Owner-approved ([record](decisions/owner-decision-r6p-plan-2026-10-01.md)), in t
 | P5a — keyed admission | Step admission keeps the invoked `action_key` (the R6P T carry) |
 | P5b — touch UI | The Lantern on the book UI by touch (one save per story), the band in the status line's accessibility label, an agent-device walk in review |
 | P6a — latency producer | The local authority's `kernel.decision_latency` producer on the observation sink (no device needed) |
-| P6b — device proof | iPhone 11 evidence ([pre-release-proof](spec/pre-release-proof.md)): the phone timing, Node/Hermes byte comparison, device faults, failed-roll replay; DONE in the rows 13/14 rebuild ([review](reviews/2026-10-02-r6p-p6b-review.md)): `numeric-vectors.json` `rng_steps` replayed on Hermes against the fixture literals, 0 mismatches |
+| P6b — device proof | iPhone 11 evidence ([pre-release-proof](spec/pre-release-proof.md)): the phone timing, Node/Hermes byte comparison, device faults, failed-roll replay; DONE in the rows 13/14 rebuild ([review](reviews/2026-10-02-r6p-p6b-review.md)): `numeric-vectors.json` `rng_steps` replayed on Hermes against the fixture literals, 0 mismatches; CARRIED from row 14 (partial: the handler-to-frame proxy is not envelope §5's touch-to-visible-feedback): true touch-to-visible-feedback is judged at Gate R6P by the owner playing by touch (the gate record notes any felt lag), and a measured touch-to-photon (for example external slow-motion video) to the chapter-one device row |
 | Gate R6P | Human proof by touch and the gate review |
 
 43 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 9 R6P). Estimates and re-estimates are in [the archive](ROADMAP-archive.md).
