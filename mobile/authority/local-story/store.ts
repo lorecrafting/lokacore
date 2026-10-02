@@ -8,7 +8,7 @@ import { target } from '../../../kernel/ts/src/compose.ts';
 import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
-import { holds, row } from '../../../kernel/ts/src/world.ts';
+import { row } from '../../../kernel/ts/src/world.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
 export type Db = {
@@ -116,7 +116,6 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
-    if (!holds('player_in_one_room', world)) return undefined; // playable: the body in a room
     return { world, revision: h.revision, meta: { ...m, parent, seed, pin } as Meta };
   } catch (e) {
     if (e instanceof SyntaxError) return undefined;
@@ -126,10 +125,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
 
 // ponytail: SQLite's own messages for SQLITE_NOTADB and SQLITE_CORRUPT, as node:sqlite reports
 // them; expo-sqlite's wording is checked on the phone (S6b), its error codes if it differs.
-/**
- * True when SQLite reports the file is not a database or a page of it corrupt (OFF-07); not its
- * "malformed JSON", a damaged value in an intact file.
- */
+/** True when SQLite reports the file is not a database or a page of it corrupt, not bad JSON (OFF-07). */
 export const corrupt = (e: unknown) => /file is not a database|malformed(?! JSON)/.test(String(e));
 
 /**

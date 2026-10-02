@@ -166,17 +166,26 @@ function invocationOf(b: Button, n: number, actor: string) {
 }
 
 // The log's start: the last committed narration again, so a reopen (a crash before display too)
-// shows it (06 §43). A corrupt read throws, so the save does not open (and offers start over): a
-// corrupt file untyped (replaced), a damaged receipt in an intact file with the new game in place.
-type Reread = { narration: () => NarrationRecord | undefined; newGame: () => { kind: string } };
-function reread(story: Reread, text: Say): string[] {
+// shows it (06 §43). The save does not open (and offers start over) on a corrupt file (untyped:
+// replaced), or, as save_corrupt with the new game in place (the file is fine), a damaged receipt
+// or a world whose first screen cannot be built, whatever row's shape stops it (ROADMAP SM2a).
+// ponytail: later screens' reads are not checked; typed row validation is R12's.
+function reread(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>, text: Say) {
+  const refusal = (e: unknown) =>
+    Object.assign(new Error((e as Error).message), {
+      cause: { kind: 'save_corrupt', newGame: story.newGame },
+    });
+  try {
+    gameView(story.world());
+  } catch (e) {
+    throw refusal(e);
+  }
   try {
     const last = story.narration();
     return last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
   } catch (e) {
     if (!/malformed JSON/.test(String(e))) throw e; // a full disk or I/O: the save may be intact
-    const cause = { kind: 'save_corrupt', newGame: story.newGame };
-    throw Object.assign(new Error((e as Error).message), { cause });
+    throw refusal(e);
   }
 }
 
@@ -199,13 +208,13 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
   const log = reread(story, text);
   return {
     screen: () => {
+      log.splice(0, log.length - 200); // ponytail: the last 200 lines, Book's too (presenter split)
       const [view, token] = [gameView(story.world()), story.token()];
       const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({ ...b, token }));
       return { view, text, buttons, log, pending: !!retry, fault };
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
-      log.splice(0, log.length - 200); // ponytail: keeps the last 200 lines; the presenter split owns the log
       const was = gameView(story.world()); // the view before, for who came or went
       retry ??= { label: b.label, invocation: invocationOf(b, ++sent, story.world().character) };
       log.push(`> ${retry.label}`);
