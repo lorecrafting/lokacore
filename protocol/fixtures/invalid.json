@@ -4885,7 +4885,7 @@
     ]
   },
   {
-    "contract": "StoryBeatReport",
+    "contract": "StoryPointReport",
     "value": {
       "report_id": "11111111-2222-4333-8444-555555555555",
       "run_id": "11111111-2222-4333-8444-555555555555",
@@ -4894,7 +4894,7 @@
         "cartridge_version": "0.1.0",
         "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       },
-      "story_beat": "prologue_completed",
+      "story_point": "prologue_completed",
       "outcome": "player_led",
       "observed_revision": 0,
       "account_id": "11111111-2222-4333-8444-555555555555",
@@ -4926,7 +4926,7 @@
           "cartridge_version": "0.1.0",
           "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         },
-        "story_beat": "prologue_completed",
+        "story_point": "prologue_completed",
         "outcome": "player_led",
         "observed_revision": 1
       },
@@ -4940,7 +4940,7 @@
     ]
   },
   {
-    "contract": "StoryBeatAcceptance",
+    "contract": "StoryPointAcceptance",
     "value": {
       "report_id": "11111111-2222-4333-8444-555555555555",
       "account_id": "11111111-2222-4333-8444-555555555555",
@@ -4950,7 +4950,7 @@
         "cartridge_version": "0.1.0",
         "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       },
-      "story_beat": "m",
+      "story_point": "m",
       "outcome": "o",
       "evidence_class": "device_attested",
       "policy_revision": 0,
@@ -5551,7 +5551,7 @@
     ]
   },
   {
-    "contract": "StoryBeatReport",
+    "contract": "StoryPointReport",
     "value": {},
     "errors": [
       {
@@ -5575,7 +5575,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/story_beat",
+        "path": "/story_point",
         "code": "missing_property"
       }
     ]
@@ -5595,7 +5595,7 @@
     ]
   },
   {
-    "contract": "StoryBeatAcceptance",
+    "contract": "StoryPointAcceptance",
     "value": {},
     "errors": [
       {
@@ -5631,13 +5631,13 @@
         "code": "missing_property"
       },
       {
-        "path": "/story_beat",
+        "path": "/story_point",
         "code": "missing_property"
       }
     ]
   },
   {
-    "contract": "QualifyingStoryBeat",
+    "contract": "QualifyingStoryPoint",
     "value": {},
     "errors": [
       {
@@ -5649,7 +5649,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/story_beat",
+        "path": "/story_point",
         "code": "missing_property"
       }
     ]
@@ -5763,7 +5763,7 @@
     ]
   },
   {
-    "contract": "StoryBeatReportId",
+    "contract": "StoryPointReportId",
     "value": "7A7A7A7A-1111-4222-8333-444444444444",
     "errors": [
       {
@@ -5819,7 +5819,7 @@
           "alternatives": [
             {
               "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-              "story_beat": "m",
+              "story_point": "m",
               "outcome": "o"
             }
           ]

@@ -1540,9 +1540,9 @@ Story app closes or Realm player disconnects mid-dream.
 
 Resume restores the correct participant/SceneInstance state or follows the declared abandonment/restart policy without duplicating dream consequences.
 
-### QUESTSCENE-01 — Quest story beat starts scene
+### QUESTSCENE-01 — Quest story point starts scene
 
-A quest objective reaches a named story beat that starts one SceneSequence.
+A quest objective reaches a named story point that starts one SceneSequence.
 
 Duplicate delivery/retry does not start a second scene. Scene completion emits a typed event that advances the intended objective/outcome.
 
@@ -1584,7 +1584,7 @@ Cartridge Lab can trace:
 ActionInvocation
  -> Command
  -> DomainEvents
- -> quest objective/story beat
+ -> quest objective/story point
  -> SceneSequence beat/choice
  -> quest outcome
  -> world consequences
@@ -1834,11 +1834,11 @@ The first free public build offers accounts, recovery/deletion and completion sy
 
 ### ACCOUNT-02 — Atomic completion and report capture
 
-For both chapter-one endings, crash before/during/after the terminal dawn commit. Either the outcome and story beat/pending report are all absent, or all durable. Credits display is not the trigger. A restored backup requeues safely. Test real local transactions; model atomic assignment is insufficient.
+For both chapter-one endings, crash before/during/after the terminal dawn commit. Either the outcome and story point/pending report are all absent, or all durable. Credits display is not the trigger. A restored backup requeues safely. Test real local transactions; model atomic assignment is insufficient.
 
 ### ACCOUNT-03 — Duplicate reports and lost acknowledgement
 
-Repeat the same authenticated report after server acceptance loses its response. Replay its stable receipt and credit once. Changed canonical payload under the same ID conflicts; a new ID for the same bound run/story beat also cannot credit twice. Conflicting terminal outcomes are visible conflicts.
+Repeat the same authenticated report after server acceptance loses its response. Replay its stable receipt and credit once. Changed canonical payload under the same ID conflicts; a new ID for the same bound run/story point also cannot credit twice. Conflicting terminal outcomes are visible conflicts.
 
 ### ACCOUNT-04 — Authenticated binding and account switching
 
@@ -1850,11 +1850,11 @@ Accept completion on one run/device, then receive older starts/checkpoints from 
 
 ### ACCOUNT-06 — Onboarding-only evidence
 
-A known approved offline completion may satisfy an onboarding prerequisite. Unknown release/story beat/outcome, arbitrary unlock flags, oversized/unknown fields, caller-selected server evidence and currency/XP/purchase payloads fail. An offline report cannot satisfy a requirement restricted to stronger evidence.
+A known approved offline completion may satisfy an onboarding prerequisite. Unknown release/story point/outcome, arbitrary unlock flags, oversized/unknown fields, caller-selected server evidence and currency/XP/purchase payloads fail. An offline report cannot satisfy a requirement restricted to stronger evidence.
 
 ### ACCOUNT-07 — Equivalent prologues and account-wide admission
 
-Approved old/new prologue release story beats can satisfy one stable requirement. Both intended endings qualify without side-quest completion. The same account need not repeat onboarding for each Realm character. An unapproved R6P proof or arbitrary content-declared requirement grants nothing.
+Approved old/new prologue release story points can satisfy one stable requirement. Both intended endings qualify without side-quest completion. The same account need not repeat onboarding for each Realm character. An unapproved R6P proof or arbitrary content-declared requirement grants nothing.
 
 ### ACCOUNT-08 — Realm entry is server-owned
 
@@ -1874,7 +1874,7 @@ Explicitly withdraw a record through an authorized correction. Retry its old rep
 
 ### ACCOUNT-12 — Launch scope cannot be deferred to paid or Realm phases
 
-Before public free Story release require R12A real authenticated sync/storage/lifecycle/device evidence. R13 reuses its database/accounts; R14/R15 add admission. Pure Lab and R6P do not require production identity, but both test local story beat/retry behavior. No account gameplay StateScope is introduced.
+Before public free Story release require R12A real authenticated sync/storage/lifecycle/device evidence. R13 reuses its database/accounts; R14/R15 add admission. Pure Lab and R6P do not require production identity, but both test local story point/retry behavior. No account gameplay StateScope is introduced.
 
 ## Readiness closure: initial composition and run lifetime
 
@@ -1902,7 +1902,7 @@ Unknown operation/policy/event/scope fails closed. Declaring the schema of an en
 
 ### COMPOSE-06 — Lantern choice recovery
 
-Run both frozen four-place traces. Test early pickup, dropping the item, Bram moving, closing a stale interaction, duplicate/altered choice IDs and stale NEW views. Crash before commit, after commit before memory, and before narrative display. Recover one coherent narration/story beat without repeating transfer or resurrecting a consumed choice. General evaluator integration must match the hand-authored cases; a special story-specific Python model is not P4/P6 completion. Evidence: model examples now; real compiler/SQLite/mobile/human proof at R6P.
+Run both frozen four-place traces. Test early pickup, dropping the item, Bram moving, closing a stale interaction, duplicate/altered choice IDs and stale NEW views. Crash before commit, after commit before memory, and before narrative display. Recover one coherent narration/story point without repeating transfer or resurrecting a consumed choice. General evaluator integration must match the hand-authored cases; a special story-specific Python model is not P4/P6 completion. Evidence: model examples now; real compiler/SQLite/mobile/human proof at R6P.
 
 ### RUN-01 — Reading and absence do not advance default Story time
 
@@ -1922,9 +1922,9 @@ Inject failure before/after migration staging, validation and atomic head adopti
 
 Export contains no tokens or purchase grant. Import malformed/oversized/unknown-version/cross-account payloads in isolation; no live head changes before validation. A valid checksum is not honest-play evidence. A blank device lacking the cartridge receives a dependency error rather than a false offline-restore promise. Evidence: real import/security tests before first public Story release at R12.
 
-### RUN-05 — Forked story beats retain provenance
+### RUN-05 — Forked story points retain provenance
 
-Restore a bookmark with already accepted or pending story beat history. Preserve the original occurrence/report/run/account identity for inherited history; genuinely new post-fork occurrences use the new run. Do not regrant, rebind, resurrect deleted accounts/withdrawn eligibility or let report order choose the campaign branch. Extend ACCOUNT-01–12 with actual restore/fork integration at R6/R12A; existing account-model passes alone are insufficient.
+Restore a bookmark with already accepted or pending story point history. Preserve the original occurrence/report/run/account identity for inherited history; genuinely new post-fork occurrences use the new run. Do not regrant, rebind, resurrect deleted accounts/withdrawn eligibility or let report order choose the campaign branch. Extend ACCOUNT-01–12 with actual restore/fork integration at R6/R12A; existing account-model passes alone are insufficient.
 
 *Amendment 2026-09-30 ([owner decision](../decisions/owner-decision-one-save-2026-09-30.md)):* the restore is of an imported export or a backup, not a bookmark (10 §31 as amended).
 

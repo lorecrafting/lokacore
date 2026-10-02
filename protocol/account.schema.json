@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Account, run and admission contracts",
-  "description": "Account/run binding, story beat reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).",
+  "description": "Account/run binding, story point reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).",
   "$defs": {
     "AccountId": {
       "description": "A platform account (23 §2, §5): server-owned, never reused. Lowercase hyphenated UUID, any version.",
@@ -27,8 +27,8 @@
         "6f6f6f6f-1111-4222-8333-444444444444"
       ]
     },
-    "StoryBeatReportId": {
-      "description": "One story beat occurrence's report, stable across retry and restore (23 §4, §11). Lowercase hyphenated UUID, any version.",
+    "StoryPointReportId": {
+      "description": "One story point occurrence's report, stable across retry and restore (23 §4, §11). Lowercase hyphenated UUID, any version.",
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
       "examples": [
@@ -84,12 +84,12 @@
         }
       ]
     },
-    "StoryBeatReport": {
-      "description": "The payload of one story beat report (23 §5 'Local story beat/report'): story beat key, occurrence id, run and exact release, outcome and the observed game revision. It names no account (authentication supplies it) and no evidence class (only the server assigns one, 23 §6).",
+    "StoryPointReport": {
+      "description": "The payload of one story point report (23 §5 'Local story point/report'): story point key, occurrence id, run and exact release, outcome and the observed game revision. It names no account (authentication supplies it) and no evidence class (only the server assigns one, 23 §6).",
       "type": "object",
       "properties": {
         "report_id": {
-          "$ref": "#/$defs/StoryBeatReportId"
+          "$ref": "#/$defs/StoryPointReportId"
         },
         "run_id": {
           "$ref": "#/$defs/StoryRunId"
@@ -97,7 +97,7 @@
         "release": {
           "$ref": "manifest.schema.json#/$defs/CartridgeRelease"
         },
-        "story_beat": {
+        "story_point": {
           "$ref": "action.schema.json#/$defs/Key"
         },
         "outcome": {
@@ -112,7 +112,7 @@
         "report_id",
         "run_id",
         "release",
-        "story_beat",
+        "story_point",
         "outcome",
         "observed_revision"
       ],
@@ -126,7 +126,7 @@
             "cartridge_version": "0.1.0",
             "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           },
-          "story_beat": "prologue_completed",
+          "story_point": "prologue_completed",
           "outcome": "player_led",
           "observed_revision": 17
         }
@@ -149,7 +149,7 @@
       "type": "object",
       "properties": {
         "report": {
-          "$ref": "#/$defs/StoryBeatReport"
+          "$ref": "#/$defs/StoryPointReport"
         },
         "account_id": {
           "$ref": "#/$defs/AccountId"
@@ -173,7 +173,7 @@
               "cartridge_version": "0.1.0",
               "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
             },
-            "story_beat": "prologue_completed",
+            "story_point": "prologue_completed",
             "outcome": "player_led",
             "observed_revision": 17
           },
@@ -183,7 +183,7 @@
       ]
     },
     "EvidenceClass": {
-      "description": "How a story beat was evidenced (23 §6). A client cannot select or upgrade it.",
+      "description": "How a story point was evidenced (23 §6). A client cannot select or upgrade it.",
       "enum": [
         "offline_client_report",
         "server_replayed_trace",
@@ -193,12 +193,12 @@
         "offline_client_report"
       ]
     },
-    "StoryBeatAcceptance": {
-      "description": "The platform's durable acceptance record (23 §5 'Platform acceptance'): authenticated account, canonical payload digest (hash of the StoryBeatReport), recognized release and story beat, evidence class, acceptance-policy revision and result. integrity_conflict: the report id was reused with a different payload; outcome_conflict: another outcome for the same story beat in the same run (23 §5). The server receipt time is host metadata whose format is fixed with the platform API (R12A).",
+    "StoryPointAcceptance": {
+      "description": "The platform's durable acceptance record (23 §5 'Platform acceptance'): authenticated account, canonical payload digest (hash of the StoryPointReport), recognized release and story point, evidence class, acceptance-policy revision and result. integrity_conflict: the report id was reused with a different payload; outcome_conflict: another outcome for the same story point in the same run (23 §5). The server receipt time is host metadata whose format is fixed with the platform API (R12A).",
       "type": "object",
       "properties": {
         "report_id": {
-          "$ref": "#/$defs/StoryBeatReportId"
+          "$ref": "#/$defs/StoryPointReportId"
         },
         "account_id": {
           "$ref": "#/$defs/AccountId"
@@ -209,7 +209,7 @@
         "release": {
           "$ref": "manifest.schema.json#/$defs/CartridgeRelease"
         },
-        "story_beat": {
+        "story_point": {
           "$ref": "action.schema.json#/$defs/Key"
         },
         "outcome": {
@@ -236,7 +236,7 @@
         "account_id",
         "payload_digest",
         "release",
-        "story_beat",
+        "story_point",
         "outcome",
         "evidence_class",
         "policy_revision",
@@ -253,7 +253,7 @@
             "cartridge_version": "0.1.0",
             "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           },
-          "story_beat": "prologue_completed",
+          "story_point": "prologue_completed",
           "outcome": "player_led",
           "evidence_class": "offline_client_report",
           "policy_revision": 1,
@@ -269,14 +269,14 @@
         "onboarding.loka_fundamentals@1"
       ]
     },
-    "QualifyingStoryBeat": {
-      "description": "One approved (release hash, story beat, outcome) that satisfies a requirement (23 §7).",
+    "QualifyingStoryPoint": {
+      "description": "One approved (release hash, story point, outcome) that satisfies a requirement (23 §7).",
       "type": "object",
       "properties": {
         "cartridge_hash": {
           "$ref": "manifest.schema.json#/$defs/ContentHash"
         },
-        "story_beat": {
+        "story_point": {
           "$ref": "action.schema.json#/$defs/Key"
         },
         "outcome": {
@@ -285,20 +285,20 @@
       },
       "required": [
         "cartridge_hash",
-        "story_beat",
+        "story_point",
         "outcome"
       ],
       "additionalProperties": false,
       "examples": [
         {
           "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-          "story_beat": "prologue_completed",
+          "story_point": "prologue_completed",
           "outcome": "player_led"
         }
       ]
     },
     "AdmissionRequirement": {
-      "description": "A requirement and its explicit alternative qualifying story beats, at least one (23 §7).",
+      "description": "A requirement and its explicit alternative qualifying story points, at least one (23 §7).",
       "type": "object",
       "properties": {
         "id": {
@@ -307,7 +307,7 @@
         "alternatives": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/QualifyingStoryBeat"
+            "$ref": "#/$defs/QualifyingStoryPoint"
           },
           "minItems": 1
         }
@@ -323,7 +323,7 @@
           "alternatives": [
             {
               "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-              "story_beat": "prologue_completed",
+              "story_point": "prologue_completed",
               "outcome": "player_led"
             }
           ]
@@ -388,7 +388,7 @@
               "alternatives": [
                 {
                   "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-                  "story_beat": "prologue_completed",
+                  "story_point": "prologue_completed",
                   "outcome": "player_led"
                 }
               ]

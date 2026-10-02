@@ -1,11 +1,14 @@
-// Delayed delivery of the save's story beat reports to the progress platform (23 §§4-5; 03 §26).
+// Delayed delivery of the save's story point reports to the progress platform (23 §§4-5; 03 §26).
 import { encode, hash } from '../../../kernel/ts/src/canonical.ts';
-import type { StoryBeatAcceptance, StoryBeatReport } from '../../../kernel/ts/src/contracts.gen.ts';
+import type {
+  StoryPointAcceptance,
+  StoryPointReport,
+} from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { reconcile, transaction, type Db } from './store.ts';
 
 /** The platform's answer to one report for `account` (23 §5); rejects when it is unreachable. */
-export type Submit = (report: StoryBeatReport, account: string) => Promise<unknown>;
+export type Submit = (report: StoryPointReport, account: string) => Promise<unknown>;
 
 /**
  * Delivers up to `limit` pending reports, least tried first, each for its run's binding (23 §5:
@@ -28,8 +31,8 @@ export async function deliver(db: Db, submit: Submit, limit: number) {
     limit,
   );
   for (const r of rows) {
-    const report = JSON.parse(r.report) as StoryBeatReport;
-    let a: StoryBeatAcceptance;
+    const report = JSON.parse(r.report) as StoryPointReport;
+    let a: StoryPointAcceptance;
     try {
       a = answer(await submit(report, r.binding), report, r.binding);
     } catch (e) {
@@ -47,14 +50,14 @@ export async function deliver(db: Db, submit: Submit, limit: number) {
   }
 }
 
-/** `a` if it is a StoryBeatAcceptance of `report` for `account`; throws otherwise. */
-function answer(a: unknown, report: StoryBeatReport, account: string) {
+/** `a` if it is a StoryPointAcceptance of `report` for `account`; throws otherwise. */
+function answer(a: unknown, report: StoryPointReport, account: string) {
   const fail = new Error(`not an acceptance of report ${report.report_id}`);
-  if (validate('StoryBeatAcceptance', a).length) throw fail;
+  if (validate('StoryPointAcceptance', a).length) throw fail;
   const { payload_digest, evidence_class, policy_revision, result, ...about } =
-    a as StoryBeatAcceptance;
-  const { report_id, release, story_beat, outcome } = report;
-  if (encode(about) !== encode({ report_id, account_id: account, release, story_beat, outcome }))
+    a as StoryPointAcceptance;
+  const { report_id, release, story_point, outcome } = report;
+  if (encode(about) !== encode({ report_id, account_id: account, release, story_point, outcome }))
     throw fail;
-  return a as StoryBeatAcceptance;
+  return a as StoryPointAcceptance;
 }

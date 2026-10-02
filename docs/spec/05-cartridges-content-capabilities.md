@@ -35,7 +35,7 @@ Follow definitions, compilation, versioning and immutable releases. Deployment/e
 - [23. Cartridge ports and extension points](#23-cartridge-ports-and-extension-points)
 - [24. Realm-native cartridges and portable Story reuse](#24-realm-native-cartridges-and-portable-story-reuse)
 - [25. Composable world-primitive contract](#25-composable-world-primitive-contract)
-- [27. Cartridge completion story beats](#27-cartridge-completion-story-beats)
+- [27. Cartridge completion story points](#27-cartridge-completion-story-points)
 - [28. Operation ownership and recipe expansion](#28-operation-ownership-and-recipe-expansion)
 
 </details>
@@ -697,11 +697,11 @@ Where two room faces represent one logical door/gate/bridge, they SHOULD referen
 
 The compiler should reject contradictory duplicated mutable barrier definitions unless the author explicitly declares independent/asymmetric semantics.
 
-## 27. Cartridge completion story beats
+## 27. Cartridge completion story points
 
-A source manifest may declare versioned story beat keys with rule-owned triggers and allowed outcomes. Chapter one's `prologue_completed` covers either intended ending after the durable terminal scene consequence, not a client credits-screen event. The compiler validates declarations and their narrative-capability dependencies when the R3/R7 schema freezes. Story beat events use the normal typed decision/commit pipeline.
+A source manifest may declare versioned story point keys with rule-owned triggers and allowed outcomes. Chapter one's `prologue_completed` covers either intended ending after the durable terminal scene consequence, not a client credits-screen event. The compiler validates declarations and their narrative-capability dependencies when the R3/R7 schema freezes. Story point events use the normal typed decision/commit pipeline.
 
-A cartridge declaration does not grant an account entitlement or authorize Realm admission. An independently administered platform mapping selects approved exact release/story beat/outcome combinations for onboarding requirements. See [document 23 sections 3 and 7](23-accounts-progress-admission.md#3-declare-completion-once-independently-of-the-platform-unlock).
+A cartridge declaration does not grant an account entitlement or authorize Realm admission. An independently administered platform mapping selects approved exact release/story point/outcome combinations for onboarding requirements. See [document 23 sections 3 and 7](23-accounts-progress-admission.md#3-declare-completion-once-independently-of-the-platform-unlock).
 
 ## 28. Operation ownership and recipe expansion
 
