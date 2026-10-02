@@ -87,3 +87,14 @@ Current reactions emit fact changes; current jobs emit NPC movement events. Neit
 Validation: 58 focused tests, typecheck, and two additional in-memory fault/rollback probes passed. All eight planted mutants failed tests, covering both original defects, lifecycle capture, the budget boundary, and ordering. Expected outcomes are hand-written. No over-engineering finding.
 
 Full-suite verification was limited by read-only `EPERM` failures when tests attempted temporary-file and simulator-report writes. No files edited.
+## Fix round 1: `a92fc7d` (re-check scoped to that commit)
+
+Verdict: **APPROVE**
+
+- N1 is fixed. `proposal.ts:250-252`: `react` now returns `join`'s fault, the same way the job
+  path does. The "no test" disposition holds. A reaction sequence joins with `evs = []`, so
+  `earns` is `quests && [].some(...)`, which is false. `before` and `after` are then both
+  `p.world`, and `join` always returns `undefined`. Neither the fault branch nor its absence
+  can be observed today, so no mutant could be killed.
+- The rewrapped `join` comment at `:183-187` keeps its meaning, including the ponytail limit.
+- N2 is carried by the PM.
