@@ -54,6 +54,7 @@ const NAMES: Record<string, string> = {
   ...Object.fromEntries(Object.entries(fresh.roomIds!).map(([r, id]) => [id, r.split('/')[1]!])),
 };
 const CHOICE = 'proof-choice:talk';
+const ADA = '00000000-0000-4000-8000-0000000000ad'; // the account a run is bound to
 const CODES: Record<string, string> = {
   carry: 'resolved_carry',
   leave: 'resolved_leave',
@@ -89,18 +90,25 @@ const adapt = (sql: DatabaseSync, tap: Tap = (_, run) => run()) => ({
 });
 
 /**
- * A process on the save at `path`. Its armed `fault`: before_commit fails the receipt write
- * (definite); commit_pending loses COMMIT unrun and jams every ROLLBACK while `held`, so the
- * outcome stays unknown until the test settles it; after_commit_before_memory SIGKILLs the
- * process right after the real COMMIT.
+ * A process on the save at `path`. Its armed `fault`, the frozen case it realizes:
+ * - before_commit (choice-rollback): the receipt write fails, a definite failure; the real
+ *   SQLITE_FULL path is local_story.test.ts:221-229.
+ * - commit_pending (choice-unknown-commit-absent and -committed): COMMIT is held unrun and every
+ *   ROLLBACK jams while `held`, so the outcome stays unknown; `settle` then has SQLite execute
+ *   that COMMIT on this connection, or not, and the authority never sees it succeed. Storage
+ *   must stay at revision 9 until `settle` (the cases' `durable`).
+ * - ack_lost (no frozen case: the unknown COMMIT as it happens): SQLite executes COMMIT, then the
+ *   connection is lost before the authority sees success.
+ * - after_commit_before_memory (commit-before-display): SIGKILL right after the real COMMIT.
  */
+const INJECTED = 'injected write failure';
 function processOn(path: string, binding?: () => string | null) {
   const sql = new DatabaseSync(path);
   const p = { sql, held: false, fault: undefined as string | undefined };
   const tap: Tap = (s, run) => {
     if (p.fault === 'before_commit' && s.startsWith('INSERT INTO receipt')) {
       p.fault = undefined;
-      throw new Error('disk I/O error');
+      throw new Error(INJECTED);
     }
     if (p.held && s === 'ROLLBACK') throw new Error('ROLLBACK failed');
     if (s !== 'COMMIT' || !p.fault) return run();
@@ -109,6 +117,11 @@ function processOn(path: string, binding?: () => string | null) {
       throw new Error('COMMIT acknowledgement lost');
     }
     run();
+    if (p.fault === 'ack_lost') {
+      p.fault = undefined;
+      p.sql.close();
+      throw new Error('connection lost');
+    }
     return process.kill(process.pid, 'SIGKILL');
   };
   const host = { kernel_version, newId: randomUUID, ...(binding && { binding }) };
@@ -218,6 +231,18 @@ function durable(run: Run) {
     ro.close();
   }
 }
+/** The binding of each report row in the save, read on a read-only connection. */
+function bindings(run: Run) {
+  const ro = new DatabaseSync(run.path, { readOnly: true });
+  try {
+    return ro
+      .prepare('SELECT binding FROM report')
+      .all()
+      .map((r) => r.binding);
+  } finally {
+    ro.close();
+  }
+}
 const same = (what: string, actual: unknown, expected: unknown) =>
   assert.equal(encode(actual as Json), encode(expected as Json), what);
 
@@ -232,7 +257,7 @@ function act(run: Run, step: Step) {
   }
   if (step.op === 'recover') {
     if (p.held) return said(p, p.story.invoke(run.last)); // fenced: no restart settles it yet
-    p.sql.close();
+    if (p.sql.isOpen) p.sql.close();
     run.p = processOn(run.path);
     return at('recovered', 'recovered', revision(run.p));
   }
@@ -248,7 +273,8 @@ function act(run: Run, step: Step) {
   p.fault = step.options?.fault;
   try {
     return said(p, p.story.invoke(i));
-  } catch {
+  } catch (e) {
+    if ((e as Error).message !== INJECTED) throw e;
     return at('retryable', 'rolled_back');
   } finally {
     run.continuation ??= gameView(p.story.world()).choice?.continuation_id;
@@ -267,7 +293,7 @@ if (process.argv[2] === 'kill') {
 }
 
 /** A new save at its initial state, its run bound to `binding`. */
-function begin(binding?: () => string | null): Run {
+function begin(binding = () => ADA as string | null): Run {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-lantern-')), 'save.db');
   const run: Run = { path, p: processOn(path, binding) };
   same('initial state', memory(run), initial_state);
@@ -281,6 +307,10 @@ function play(run: Run, steps: Step[], label: string) {
     same(`${what} state`, memory(run), step.state);
     const saved = step.durable ?? step.state;
     same(`${what} durable`, durable(run), saved);
+    // 23 §§4-5, §11: one report per story point reached, bound to the run's account; none
+    // survives a rollback, and a retry or recovery adds none.
+    const sp = (saved as { story_point: object | null }).story_point;
+    same(`${what} reports`, bindings(run), sp ? [ADA] : []);
     // 06 §43: the latest committed narration is the save's, whatever memory holds.
     const shown = run.p.story.narration();
     same(
@@ -292,9 +322,9 @@ function play(run: Run, steps: Step[], label: string) {
 }
 const trace = (id: string) => traces.find((t: { id: string }) => t.id === id).steps as Step[];
 
-/** The fake platform: one acceptance per report id; it loses its first reply. */
-function platform() {
-  const f = { kept: new Map<string, object>(), lose: true, calls: [] as string[] };
+/** The fake platform: one acceptance per report id; it loses its first reply if `lose`. */
+function platform(lose = true) {
+  const f = { kept: new Map<string, object>(), lose, calls: [] as string[] };
   const submit = async (report: StoryPointReport, account: string) => {
     f.calls.push(account);
     const { report_id, release, story_point, outcome } = report;
@@ -320,7 +350,6 @@ function platform() {
 // RNG or revision), memory or the save drifting from either; the run's report bound to the
 // account signed in at delivery rather than at its start (23 §§4-5, §11), a wrong report payload,
 // or a lost platform reply accepted twice (23 §11).
-const ADA = '00000000-0000-4000-8000-0000000000ad';
 for (const { id } of traces)
   test(`${id} plays as its frozen trace; its story point reaches the run's account once`, async () => {
     let who: string | null = ADA;
@@ -375,8 +404,32 @@ test("an old run's view token is stale after a new game, at the same revision", 
 // killed COMMIT lost on restart; a read changing time, RNG or state; a stale view accepted or a
 // replay refused as stale; a blocked exit accepted.
 for (const c of CASES)
-  test(`adverse ${c.id}`, () => {
+  test(`adverse ${c.id}`, async () => {
     const run = begin();
     for (const step of trace(c.prefix.trace).slice(c.prefix.from, c.prefix.to)) act(run, step);
     play(run, c.steps, c.id);
+    await delivered(run, (c.steps.at(-1)!.state as { story_point: object | null }).story_point);
   });
+
+/** Delivers the save's reports: one acceptance, to the run's account, if a story point was reached. */
+async function delivered(run: Run, reached: object | null) {
+  const f = platform(false);
+  await deliver(adapt(run.p.sql), f.submit, 10);
+  assert.deepEqual([f.calls, f.kept.size], reached ? [[ADA], 1] : [[], 0]);
+}
+
+// Breaks (03 §15; 23 §11): a COMMIT that SQLite executed but whose acknowledgement was lost
+// presumed failed, so recovery decides the choice again (a second narration, a second report)
+// instead of finding its receipt. Expected: choice-unknown-commit-committed's recover and replay.
+test('a choice committed with its acknowledgement lost recovers to its receipt, reported once', async () => {
+  const run = begin();
+  for (const step of trace('lantern-carry').slice(0, 9)) act(run, step);
+  const [resolve, , , , ...after] = CASES.find(
+    (c) => c.id === 'choice-unknown-commit-committed',
+  )!.steps;
+  const lost = { ...resolve!, options: { fault: 'ack_lost' } };
+  same('lost', act(run, lost), result('retryable', 'commit_pending', 9));
+  assert.deepEqual(run.p.story.invoke(run.last), { kind: 'pending' }); // fenced
+  play(run, after, 'after the lost acknowledgement');
+  await delivered(run, {});
+});
