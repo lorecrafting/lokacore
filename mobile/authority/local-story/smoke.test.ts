@@ -488,3 +488,17 @@ test(
     assert.deepEqual(dump(process.env.LOKA_DEVICE_DB!), dump(gateRun(GATE_KILLS).path));
   },
 );
+
+// Breaks (R6P-A04): every press appends to the log for as long as the process lives, so memory and
+// each redraw grow without bound in one room.
+test('the log stops growing in one room, its last line the latest answer', () => {
+  const p = processOn(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'));
+  const cycles = (n: number) => {
+    for (let i = 0; i < n; i++) ['Take a leather satchel', 'Drop a leather satchel'].map(p.press);
+    return p.now().log;
+  };
+  const once = cycles(150).length;
+  const log = cycles(150);
+  assert.equal(log.length, once);
+  assert.deepEqual(log.slice(-2), ['> Drop a leather satchel', 'Dropped.']);
+});
