@@ -817,9 +817,9 @@ Normative implementation docs should be physically separated from historical rev
 
 **Status:** Accepted product direction by owner, 2026-09-22; implementation and R0 evidence pending.
 
-The first public Story release includes accounts and durable account-level completion tracking. Local milestone/pending-report capture is atomic with gameplay; later authenticated synchronization records evidence-labeled platform acceptance. Installed Story play does not require a live login or network. Account is not a new gameplay scope.
+The first public Story release includes accounts and durable account-level completion tracking. Local story point/pending-report capture is atomic with gameplay; later authenticated synchronization records evidence-labeled platform acceptance. Installed Story play does not require a live login or network. Account is not a new gameplay scope.
 
-Designated offline-client reports can satisfy account-wide prologue prerequisites under server-owned admission policy. They do not prove human comprehension and cannot grant currency, inventory, statistics, purchase entitlement or competitive Realm rewards. Requirement IDs are stable and map to approved release/milestone alternatives; a client cannot grant itself access. Both intended completed endings qualify by default.
+Designated offline-client reports can satisfy account-wide prologue prerequisites under server-owned admission policy. They do not prove human comprehension and cannot grant currency, inventory, statistics, purchase entitlement or competitive Realm rewards. Requirement IDs are stable and map to approved release/story point alternatives; a client cannot grant itself access. Both intended completed endings qualify by default.
 
 R12A brings the minimal account/platform database and progress API before the first free public release. R13 extends it with commerce; R14/R15 enforce actual Realm admission. R6P uses a fake sync adapter, not production identity. See [document 23](23-accounts-progress-admission.md) and ACCOUNT-01–12 for binding, deletion, idempotency and multi-device semantics. Mandatory sign-in before first acquisition versus guest-first UX is not decided by this ADR; after acquisition, installed offline play remains guaranteed under its entitlement policy.
 

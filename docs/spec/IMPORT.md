@@ -122,6 +122,17 @@ The table below describes the files as imported. Later amendments are in git his
   - Note only, text unchanged: 16 ADR-066 entry. Retained unchanged: 10 §16's garbage
     collection condition and 10 §32's package retention (their bookmark clauses are vacuous)
     and 23 §11's fork provenance (forks still come from import or backup).
+- 2026-10-01, [owner decision](../decisions/owner-decision-story-point-2026-10-01.md)
+  (paraphrased): the story-sense "milestone" is renamed "story point" in every document, and
+  23 §3's event `story.milestone_reached` becomes `story_point_reached`. A pure rename: no rule
+  changes. INDEX §3 gains row 40 (story point). The trace field `milestone` becomes `story_point` (shape unchanged) in
+  [conformance/adverse-cases.json](conformance/adverse-cases.json) (SHA-256 now
+  `c8100a5d6554c5ca9279b64ca25e27a69f24109884fb986bab6db5e67ce503f3`, pinned by the
+  portable ABI tests) and [conformance/lantern-traces.json](conformance/lantern-traces.json)
+  (now `6059753bee0b35bbe8cb7c87cc2db34320feef7455aa015427db9007488c76a0`); 03 §9 renames
+  its platform tables `story_point_reports` and `story_point_acceptances`; headings 03 §26,
+  05 §27, 06 §43, 06 "Stages and story points", 15 QUESTSCENE-01 and RUN-05 change and so do
+  their anchors. The project-plan sense (R milestones, milestone gates) is unchanged.
 
 ## Link rewrites (the only byte changes at import)
 

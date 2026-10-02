@@ -17,7 +17,7 @@ defmodule Loka.Core.PortableAbiTest do
            )
   @adverse fixture.(
              "docs/spec/conformance/adverse-cases.json",
-             "1b699cf2ce71181a2b09a596ed2253c06caa435aad4b5eb8a8ea9601fbadf5b1"
+             "c8100a5d6554c5ca9279b64ca25e27a69f24109884fb986bab6db5e67ce503f3"
            )
 
   test "numeric-vectors: rng_steps from initial_rng" do

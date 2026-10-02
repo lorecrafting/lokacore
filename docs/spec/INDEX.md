@@ -105,6 +105,7 @@ world-event/system trigger /
 | 37 | **execution profile** | how a deployment is hosted: `offline_private` (chapter one), `online_private`, `party`, `shared_area` | README §2; 07 §3 |
 | 38 | **Builder target** | authoring constraint set: `story` (chapter one), `realm`, `promote` | 08 §2 |
 | 39 | **certificate** | Lab evidence bound to one frozen artifact hash for one profile; chapter one's gates are 09 §1a | 09 §21, §25 |
+| 40 | **story point** | cartridge-declared story-progress point (e.g. `prologue_completed`) reached by a rule-owned trigger; emits the `story_point_reached` DomainEvent and a durable pending report; not a scene beat (row 25) | 23 §3; 03 §26; 05 §27 |
 
 ## 4. Invariants
 

@@ -77,7 +77,7 @@ Responsibilities:
 - offline local authority;
 - local SQLite saves;
 - campaigns/sequels/expansions;
-- first-release accounts and account-level Story milestone synchronization;
+- first-release accounts and account-level story point synchronization;
 - optional cloud-save backup, separate from progress tracking;
 - portable GameView rendering.
 
@@ -955,7 +955,7 @@ Recommended evolution:
 
 ### Stage 1
 
-Offline private storypacks with first-release accounts and durable Story milestone tracking (R12A). Installed play remains offline.
+Offline private storypacks with first-release accounts and durable story point tracking (R12A). Installed play remains offline.
 
 ### Stage 2
 
@@ -989,4 +989,4 @@ At no stage is the original cartridge investment discarded.
 
 ## 31. Prologue-to-Realm journey
 
-[Document 23](23-accounts-progress-admission.md) requires account-level prologue progress from the first public Story release. Offline completion is recorded locally and synchronized later. The platform labels accepted reports with their real evidence source and maps approved milestones to account-wide onboarding requirements. Realm checks those requirements on the server. This narrow admission policy is not permission to import offline items, gold, levels or competitive rewards. Account-service outages and expired login sessions cannot disable installed local play.
+[Document 23](23-accounts-progress-admission.md) requires account-level prologue progress from the first public Story release. Offline completion is recorded locally and synchronized later. The platform labels accepted reports with their real evidence source and maps approved story points to account-wide onboarding requirements. Realm checks those requirements on the server. This narrow admission policy is not permission to import offline items, gold, levels or competitive rewards. Account-service outages and expired login sessions cannot disable installed local play.
