@@ -9,10 +9,10 @@ import { encode } from '../src/canonical.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
 import { read } from './read.ts';
 
-export const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
+const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 export const CID = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a91';
 export const F = 'ashmere_ferry@0.0.1';
-export const ref = (kind: string, key: string) =>
+const ref = (kind: string, key: string) =>
   ({ cartridge_id: 'ashmere_ferry', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 export const PRESENT = { op: 'target_present' } as const;
 export const chat = (root: object) => ({
@@ -48,7 +48,7 @@ export const world = (edit: (c: any) => void = () => {}): World => {
   return newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], [1, 2, 3, 4]);
 };
 export const at = (w: World, key: string) => w.entityIds[`${F}:${key}`] as EntityId;
-export const command = (w: World, payload: object) =>
+const command = (w: World, payload: object) =>
   ({
     id: CID,
     world_context_id: CONTEXT,
