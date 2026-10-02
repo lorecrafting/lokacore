@@ -3,7 +3,7 @@
 // the controller draws real ones). Literal answers, not computed from the code under test.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { absent, cap, ended, group, plain, refused, said, type Pool } from './model.ts';
+import { absent, cap, ended, group, hint, plain, refused, said, type Pool } from './model.ts';
 
 const b = (label: string, action_key: string, target_ids: string[] = [], input = {}) => ({
   label,
@@ -85,6 +85,8 @@ test('the absent-speaker line shows only when the speaker is not here', () => {
   const view = (ids: string[]) => ({ entities: ids.map((id) => ({ id })), choice }) as never;
   assert.equal(absent(view([])), 'They are not here to answer. Find them, or close this.');
   assert.equal(absent(view(['bram'])), '');
+  const speakerless = { entities: [], choice: { choices: choice.choices } } as never;
+  assert.equal(absent(speakerless), 'No one is here to answer.');
 });
 
 // Breaks (PM item: note 4's line): an ending shown before every quest is over, or with no quest.
@@ -116,4 +118,21 @@ test("a closed exit's log line and a capitalised title", () => {
     'The causeway is flooded.',
   );
   assert.equal(cap('a brass lantern'), 'A brass lantern');
+});
+
+// Breaks (review POL-2): a hint store that throws (an unreadable key-value file) takes the book or
+// the Look tap down with it, instead of the hint falling back to this session's memory.
+test('a hint survives a store that throws, for this session', () => {
+  const broken = {
+    getItemSync: (): string | null => {
+      throw new Error('disk I/O error');
+    },
+    setItemSync: () => {
+      throw new Error('disk I/O error');
+    },
+  };
+  const h = hint(broken, 'hint.looked');
+  assert.equal(h.seen(), false);
+  h.see();
+  assert.equal(h.seen(), true);
 });

@@ -37,11 +37,14 @@ export const refused = (e: GameView['exits'][number], text: (key: string) => str
     : `The way ${e.direction} is ${why(e, text)}.`;
 
 // Under an open choice whose speaker is not here (the answers may also be closed for another
-// reason, a dropped lantern, so this keys on the speaker, not on the answers' not_present).
+// reason, a dropped lantern, so this keys on the speaker, not on the answers' not_present). A
+// choice with no speaker: no one answers it.
 export const absent = (v: GameView) =>
-  v.choice && !v.entities.some((e) => e.id === v.choice!.speaker_id)
-    ? 'They are not here to answer. Find them, or close this.'
-    : '';
+  !v.choice || v.entities.some((e) => e.id === v.choice!.speaker_id)
+    ? ''
+    : v.choice.speaker_id
+      ? 'They are not here to answer. Find them, or close this.'
+      : 'No one is here to answer.';
 
 // Under the log once every quest in the journal is over (the Lantern's ending). ponytail: a
 // chapter's real end comes from the story, not from its quests (an OWNER item: an ending page).
@@ -59,3 +62,25 @@ export type Pool = NonNullable<GameView['resources']>[number];
 const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
 export const said = (rs: readonly Pool[]) =>
   `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${r.band.replaceAll('_', ' ')}` : amount(r))).join(', ')}`;
+
+// A first-run hint's "seen" flag in a key-value store (expo-sqlite/kv-store: its own file, not the
+// save). A store that throws falls back to this session's memory: a hint never stops the book.
+type Store = { getItemSync(key: string): string | null; setItemSync(key: string, v: string): void };
+export function hint(store: Store, key: string) {
+  let seen = false;
+  return {
+    seen: () => {
+      try {
+        return seen || store.getItemSync(key) !== null;
+      } catch {
+        return seen;
+      }
+    },
+    see: () => {
+      seen = true;
+      try {
+        store.setItemSync(key, '1');
+      } catch {} // ponytail: the next launch shows the hint again
+    },
+  };
+}

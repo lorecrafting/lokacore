@@ -26,14 +26,14 @@ type Smoke = ReturnType<typeof openSmoke>;
 
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
-// Pressing turns to a fresh room page with the answer in the log; the log restarts on a place
-// change, not on the tapped button (a pending retry may run another action). A press that threw
-// shows its fault with Start over.
+// Pressing turns to a fresh room page with the answer in the log; the log restarts at the new
+// place's heading on a place change, not on the tapped button (a pending retry may run another
+// action). A press that threw shows its fault with Start over.
 export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: () => void }) {
   const [loaded, fontError] = useFonts(fonts);
   const [stack, setStack] = useState<Page[]>([]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
-  const [from, setFrom] = useState(0); // the room log starts here: log length at the last place change
+  const [from, setFrom] = useState(0); // the room log starts here: the new place's heading line
   const [, redraw] = useState(0);
   if (!loaded && !fontError) return null;
 
@@ -45,9 +45,9 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
   const press = (b: Button) => {
-    const [placeId, logLength] = [view.place.id, screen.log.length];
+    const placeId = view.place.id;
     smoke.press(b);
-    if (smoke.screen().view.place.id !== placeId) setFrom(logLength);
+    if (smoke.screen().view.place.id !== placeId) setFrom(smoke.screen().log.length - 1); // smoke's heading
     go([], 1);
   };
   const page = stack.at(-1);

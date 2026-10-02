@@ -20,6 +20,6 @@ const REASON: Record<string, string> = {
   invalid_state: 'not now',
   not_present: 'not here',
   not_found: 'not here',
-  not_owned: 'not yours',
+  not_owned: 'you are not holding it',
 };
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');

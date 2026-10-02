@@ -11,6 +11,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openSmoke, playSmoke } from './smoke.ts';
+import { reason } from './words.ts';
 
 const LANTERN = read('protocol/fixtures/cartridge_lantern_hash.json') as never;
 const CARRY = 'You keep the lantern. Bram nods once and points you down the bank.';
@@ -209,6 +210,7 @@ test('the log has story words, never a kernel code, across both endings', () => 
     input: { direction: 'west' },
   };
   a.smoke.press(locked);
+  assert.equal(a.screen().log.at(-1), "You can't do that: locked.");
   a.tap('Talk to Bram the ferryman', 'Wait until 19:00', 'Close', 'Go north');
   a.tap('Talk to Bram the ferryman', 'Carry it along the bank');
   const b = fresh();
@@ -230,4 +232,25 @@ test('an NPC who leaves while you stay is logged, and nothing else', () => {
     a.screen().log.filter((l) => / (leaves|arrives)\.$/.test(l)),
     ['Bram the ferryman leaves.'],
   );
+});
+
+// Breaks (note 2, review F-2): a refusal code the Lantern reaches with no words, so a closed
+// answer reads "…: not present" or a refusal "…: invalid state". Each code is reached for real.
+test('closed answers and a stale answer give their reason in words, not their code', () => {
+  const a = fresh();
+  const spaced = (code: string) => code.replaceAll('_', ' ');
+  const closed = () =>
+    a.screen().view.choice!.choices.map((o) => (o.available ? '' : o.reason.code));
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Drop a brass lantern');
+  const reached = closed();
+  const { continuation_id } = a.screen().view.choice!;
+  a.tap('Take a brass lantern', 'Wait until 19:00');
+  reached.push(...closed());
+  assert.deepEqual(reached, ['not_owned', 'not_owned', 'not_present', 'not_present']);
+  for (const code of reached) assert.notEqual(reason(code), spaced(code));
+  a.tap('Close');
+  const input = { choice_id: 'carry', continuation_id };
+  a.smoke.press({ label: 'Carry', action_key: 'choose', target_ids: [], input });
+  assert.match(a.screen().log.at(-1)!, /^You can't do that: /);
+  assert.ok(!a.screen().log.at(-1)!.includes(spaced('invalid_state')));
 });

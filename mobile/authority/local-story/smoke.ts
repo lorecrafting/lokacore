@@ -116,7 +116,8 @@ function said(r: Reply, text: Say): string {
   return d.narration?.map((t) => text(t.key)).join(' ') || (OUTCOME[d.outcome!] ?? '');
 }
 
-// The log after a press's echo: its answer if it has words, then who came or went. A look is a
+// The log after a press's echo: its answer if it has words, then the new place's name or who came
+// or went. A look is a
 // read: its fresh page is the answer, so its echo goes too. ponytail: a look that settles a shown
 // pending leaves that pending line above (the status line's "save not confirmed" still clears).
 function answer(log: string[], reply: Reply, text: Say, comings: string[]) {
@@ -128,10 +129,10 @@ function answer(log: string[], reply: Reply, text: Say, comings: string[]) {
   log.push(...comings);
 }
 
-// The NPCs that left or arrived while the player stayed put. ponytail: inferred from the view (a
-// schedule move has no narration yet); kernel narration of schedule moves replaces these lines.
+// After a move, the new place's name: its room log's heading. Else the NPCs that left or arrived
+// while the player stayed put. ponytail: inferred from the view; kernel schedule narration replaces it.
 function comings(was: GameView, now: GameView, text: Say): string[] {
-  if (was.place.id !== now.place.id) return [];
+  if (was.place.id !== now.place.id) return [text(now.place.title.key)];
   const gone = (a: GameView, b: GameView) =>
     a.entities.filter((e) => e.kind === 'npc' && !b.entities.some((f) => f.id === e.id));
   return [

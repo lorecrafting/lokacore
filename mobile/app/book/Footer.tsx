@@ -7,7 +7,7 @@ import Storage from 'expo-sqlite/kv-store';
 import type { GameView } from '../../authority/local-story/smoke.ts';
 import { gesture, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
-import { refused, why } from './model.ts';
+import { hint, refused, why } from './model.ts';
 import { body, paper } from './paper.ts';
 
 type Props = {
@@ -19,20 +19,19 @@ type Props = {
 };
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 const rule = { flex: 1, height: 1, backgroundColor: paper.line };
-// The tip shows until the first walk or map tap (kept across restarts in expo-sqlite's own
-// key-value file, not in the save).
-const LEARNED = 'hint.learned';
+// The tip shows until the first walk or map tap.
+const learned = hint(Storage, 'hint.learned');
 
 // A walk goes by the props it was offered on (`at`: a drag's start), never newer ones (04 §16).
 export function Footer(p: Props) {
   const [lit, setLit] = useState<string | null>(null);
   const [note, setNote] = useState(''); // a closed exit's reason, kept after release until the next press
-  const [tip, setTip] = useState(() => !Storage.getItemSync(LEARNED));
+  const [tip, setTip] = useState(() => !learned.seen());
   const zoom = useRef(new Animated.Value(0)).current;
   const knob = useRef(new Animated.ValueXY()).current;
   const now = useRef(p);
   now.current = p;
-  const learn = () => (Storage.setItemSync(LEARNED, '1'), setTip(false)); // a walk, or a map tap
+  const learn = () => (learned.see(), setTip(false)); // a walk, or a map tap
   const walk = (d: string | null, at: Props) => {
     const e = at.exits.find((x) => x.direction === d);
     if (e?.available) (at.go(e.direction), learn());

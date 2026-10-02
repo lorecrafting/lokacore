@@ -4,7 +4,7 @@ import { useRef, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import Storage from 'expo-sqlite/kv-store';
 import type { Button, GameView } from '../../authority/local-story/smoke.ts';
-import { absent, cap, ended, plain, why, type group, type Pool } from './model.ts';
+import { absent, cap, ended, hint, plain, why, type group, type Pool } from './model.ts';
 import { body, head, paper } from './paper.ts';
 import { confirmStartOver } from '../SaveError.tsx';
 
@@ -89,21 +89,17 @@ export function RoomPage(p: {
   );
 }
 
-// The place's name; a tap looks, and a first-run hint says so until the first look (kept across
-// restarts in expo-sqlite's own key-value file, not in the save).
-const LOOKED = 'hint.looked';
+// The place's name; a tap looks, and a first-run hint says so until the first look.
+const looked = hint(Storage, 'hint.looked');
 function Title(p: { name: string; look?: Button; press: (b: Button) => void }) {
   const title = <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.name}</Text>;
   if (!p.look) return title;
   return (
     <>
-      <Tap
-        label={`Look, ${p.name}`}
-        onPress={() => (Storage.setItemSync(LOOKED, '1'), p.press(p.look!))}
-      >
+      <Tap label={`Look, ${p.name}`} onPress={() => (looked.see(), p.press(p.look!))}>
         {title}
       </Tap>
-      {!Storage.getItemSync(LOOKED) && (
+      {!looked.seen() && (
         <Text style={{ ...note, textAlign: 'center' }}>Tap the title to look</Text>
       )}
     </>

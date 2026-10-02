@@ -74,7 +74,7 @@ test('a scripted session survives a restart and plays on', () => {
   assert.deepEqual(b.now().log, []);
   assert.ok(b.now().buttons.includes('Drop a leather satchel'));
   b.press('Go south');
-  assert.deepEqual(b.now().log, ['> Go south']);
+  assert.deepEqual(b.now().log, ['> Go south', 'Ferry Landing']);
   assert.equal(b.now().place, 'Ferry Landing');
 });
 
@@ -90,7 +90,7 @@ test('an invalid press before a save does not make the next id collide after a r
   a.sql.close();
   const b = processOn(path);
   b.press('Go north');
-  assert.deepEqual(b.now().log, ['> Go north']);
+  assert.deepEqual(b.now().log, ['> Go north', 'Village Green']);
 });
 
 // Breaks (03 §15): a press whose COMMIT outcome is unknown shown as a success (the satchel carried,
@@ -147,7 +147,7 @@ test('a pending press is retried with its own id and replays what committed', ()
   p.press('Go north');
   assert.equal(p.now().pending, true);
   p.press('Take a leather satchel'); // another button: still retries the north
-  assert.deepEqual(p.now().log.slice(-2), [PENDING, '> Go north']);
+  assert.deepEqual(p.now().log.slice(-3), [PENDING, '> Go north', 'Village Green']);
   assert.equal(p.now().pending, false);
   assert.equal(p.now().place, 'Village Green');
   assert.deepEqual(p.now().carrying, []);
@@ -175,7 +175,7 @@ test('a same-scope receipt from another allocator does not move the id counter',
   a.sql.close();
   const b = processOn(path);
   b.press('Go south');
-  assert.deepEqual(b.now().log, ['> Go south']);
+  assert.deepEqual(b.now().log, ['> Go south', 'Ferry Landing']);
 });
 
 // Breaks: a throw shown as "not saved" with the retry cleared (a read error can follow a durable
@@ -193,7 +193,7 @@ test('a failed write is not claimed unsaved; the next press retries it', () => {
   assert.equal(one('SELECT revision FROM head'), 0);
   p.sql.exec('PRAGMA max_page_count = 1000000');
   p.press('Scan');
-  assert.deepEqual(p.now().log.slice(2), ['> Go north']);
+  assert.deepEqual(p.now().log.slice(2), ['> Go north', 'Village Green']);
   assert.equal(p.now().place, 'Village Green');
   assert.equal(p.now().pending, false);
   assert.equal(p.now().fault, undefined); // a stale fault would keep offering start over
@@ -237,7 +237,7 @@ test('a confirmed reply that fails to format propagates and still ends the attem
   assert.throws(() => p.press('Scan'), TypeError); // settles, replays the receipt, cannot format it
   assert.equal(p.now().pending, false);
   p.press('Go north');
-  assert.deepEqual(p.now().log.slice(-2), ['> Scan', '> Go north']);
+  assert.deepEqual(p.now().log.slice(-3), ['> Scan', '> Go north', 'Village Green']);
 });
 
 // The app's save file under playSmoke, as App.tsx wires it: `remove` closes the handle and deletes
@@ -300,7 +300,7 @@ test('start over replaces a file that does not open with a fresh game', () => {
     assert.equal(a.c.failed(), undefined, path);
     assert.equal(a.now().place, 'Ferry Landing');
     a.press('Go north');
-    assert.deepEqual(a.now().log, ['> Go north']);
+    assert.deepEqual(a.now().log, ['> Go north', 'Village Green']);
     assert.equal(readFileSync(path!).subarray(0, 16).toString('latin1'), 'SQLite format 3\0');
   }
 });
@@ -334,7 +334,7 @@ test('a damaged receipt index fails the open with start over, which gives a fres
   assert.equal(b.now().place, 'Ferry Landing');
   assert.deepEqual(b.now().carrying, []);
   b.press('Go north');
-  assert.deepEqual(b.now().log, ['> Go north']);
+  assert.deepEqual(b.now().log, ['> Go north', 'Village Green']);
 });
 
 // Breaks (10 §32; saves.test.ts): start over of a newer app's save, destroying it instead of
@@ -391,9 +391,10 @@ test('a start over that fails during play keeps the game and its retry', () => {
   assert.equal(a.c.failed(), undefined); // a cached failure would outlive the play's recovery
   a.sql().exec('PRAGMA query_only = 0');
   a.press('Scan');
-  assert.deepEqual(a.now().log.slice(-2), [
+  assert.deepEqual(a.now().log.slice(-3), [
     '(start over: attempt to write a readonly database)',
     '> Go north',
+    'Village Green',
   ]);
 });
 
