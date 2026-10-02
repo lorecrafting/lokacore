@@ -1,0 +1,13 @@
+{
+  "title": "room.shelter.title",
+  "description": "room.shelter.description",
+  "exits": {
+    "west": {
+      "to": "reed_bank"
+    },
+    "east": {
+      "to": "landing",
+      "barrier": "old_gate"
+    }
+  }
+}
