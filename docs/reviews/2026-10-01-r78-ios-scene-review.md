@@ -78,3 +78,14 @@ REQUEST CHANGES
 IOS-1 | should-fix | mobile/app/plugins/with-ios-scene.js:21
 The half-patched failure remains when the startup block differs from START. Reproduced against the bundled Expo 57.0.24 template through the real Expo mods: add provider conformance, then change window-line indentation, use CRLF, or insert a statement inside the startup block. Each input returns unchanged with factory.startReactNative still present. The emitted scene manifest enables scene startup too, preserving the double-start failure. Absence of the exact literal is not proof that legacy startup is absent; reject residual startup before returning as already patched.
 ```
+## Fix round 2 re-check (Claude reviewer, scoped to `ca0ffe1`)
+- IOS-1 (codex Sol round 1) fixed, `with-ios-scene.js:20`: "already patched" now needs the
+  conformance and no `startReactNative` anywhere; any other conformant file reaches the template
+  check, which it fails on `CLASS`, and throws. Planted conformant files with a leftover block
+  whose indent changed, CRLF endings, or an inserted statement all throw. My round-1 half-patched
+  plant used the exact block, so it did not cover this; Sol's finding was correct.
+- Unchanged: template output byte-identical to `dbbf122`; patch(patch(x)) == patch(x); the round-1
+  plants (half-patched, factory moved into block, block removed without conformance, class changed)
+  still throw. Caller and export unchanged.
+
+Verdict: APPROVE.
