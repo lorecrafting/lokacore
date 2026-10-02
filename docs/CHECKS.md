@@ -53,4 +53,5 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
   on pull requests that touch `mobile/` or `kernel/`. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds and 10,000 fresh sequences in `npm test` on every fast CI run
-  (r1-acceptance-envelope.md §3); the Hermes replay sample comes at R6P (ADR-074).
+  (r1-acceptance-envelope.md §3); its Hermes replay sample (seeds 1-19) ran on the iPhone 11 in
+  [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074).

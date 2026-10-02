@@ -1,0 +1,29 @@
+// R6P P6 row 14 proxy (evidence only): the touch-start time of the latest touch, the first
+// requestAnimationFrame after a press's reply renders, and a rAF-gap monitor (stalls > 100 ms),
+// appended to Documents/p6-ui.txt. True touch-to-photon latency is not measured.
+import { File, Paths } from 'expo/node_modules/expo-file-system';
+
+const out = new File(Paths.document, 'p6-ui.txt');
+const log = (line: string) => {
+  if (!out.exists) out.create();
+  out.write(`${line}\n`, { append: true });
+};
+let touched = 0;
+let pressed = false;
+export const touchStart = () => void (touched = performance.now());
+export const pressDone = () => void (pressed = true);
+/** After a render: the first frame after a press's reply, as touch-start to that frame. */
+export const rendered = () => {
+  if (!pressed) return;
+  pressed = false;
+  const t = touched;
+  requestAnimationFrame(() => log(`FEEDBACK ${(performance.now() - t).toFixed(1)}`));
+};
+let last = 0;
+const frame = (now: number) => {
+  if (last && now - last > 100) log(`STALL ${(now - last).toFixed(1)} at ${now.toFixed(0)}`);
+  last = now;
+  requestAnimationFrame(frame);
+};
+requestAnimationFrame(frame);
+log(`START ${Date.now()}`);

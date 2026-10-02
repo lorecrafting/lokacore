@@ -1,0 +1,23 @@
+#!/bin/zsh
+# Runs every harness phase on the iOS Simulator (dry run): launch, wait (bounded) for the phase's
+# done or HOLD line, copy the held save before the kill, kill, next. Usage: drive-sim.sh <sim> <build> <out>
+SIM=$1; BUILD=$2; OUT=$3; APP=com.lorecrafting.loka
+export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+DATA=$(xcrun simctl get_app_container $SIM $APP data)
+RUNF=$DATA/Documents/p6run-$BUILD.txt
+for phase in ka sim carry1 carry2 leave1 leave2 lost dusk before corrupt hold1 hold1b hold2 hold2b hold3 hold3b time1 time2 time3; do
+  for t in 1 2 3; do pid=$(xcrun simctl launch $SIM $APP 2>/dev/null | awk '{print $2}'); [[ -n $pid ]] && break; sleep 2; done
+  got=""
+  for i in {1..120}; do
+    if grep -q -E " $phase (done|HOLD|ERROR)" $RUNF 2>/dev/null; then got=$(grep -E " $phase (done|HOLD|ERROR)" $RUNF | tail -1); break; fi
+    sleep 1
+  done
+  echo "$phase pid=$pid -> ${got:-TIMEOUT}"; [[ -z $got ]] && { kill -9 $pid; exit 1; }
+  case $got in *HOLD*)
+    mkdir -p $OUT/$phase
+    cp $DATA/Documents/SQLite/p6-$phase.db* $OUT/$phase/ 2>/dev/null
+    ls -la $OUT/$phase | awk '{print $5, $9}' | tail -n +2 ;;
+  esac
+  kill -9 $pid 2>/dev/null; sleep 1
+done
+cp $RUNF $OUT/

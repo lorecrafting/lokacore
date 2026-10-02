@@ -1,0 +1,541 @@
+// R6P P6 device harness (evidence only, never committed as code): one module run by the Hermes
+// app (dev-App.tsx) and by the Node runner (dev-node-expected.mjs). Each launch runs one phase.
+// Every reply and state is recorded as canonical bytes; Hermes compares them with the Node bytes.
+// Literal checks (rows 7-12) are checked on both hosts against hand-written expectations.
+import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
+import { refString, type World } from '../../../kernel/ts/src/decision.ts';
+import {
+  gameView,
+  INSTALLED,
+  loadCartridge,
+  newWorld,
+  step,
+} from '../../../kernel/ts/src/index.ts';
+import type { Cartridge } from '../../../kernel/ts/src/index.ts';
+import { run as known } from '../../../kernel/ts/src/known_answers.ts';
+import { openStory, type Reply } from '../../authority/local-story/authority.ts';
+import type { Db } from '../../authority/local-story/store.ts';
+
+// The fixtures, as each host imports JSON: items, dusk and Lantern known answers,
+// kernel/ts/test/invocation_cases.json and docs/spec/conformance/lantern-traces.json.
+type Kat = { canonical: string; sha256: string; value?: unknown };
+export type Fixtures = { items: Kat; dusk: Kat; lantern: Kat; cases: any; traces: any };
+let [items, duskKat, lanternKat, cases, dusk_cases, traces] = [] as any[];
+export function fixtures(f: Fixtures) {
+  [items, duskKat, lanternKat, traces] = [f.items, f.dusk, f.lantern, f.traces];
+  [cases, dusk_cases] = [f.cases.cases, f.cases.dusk_cases];
+}
+
+/** What a host supplies: SQLite files by name, their bytes, and the kill boundary. */
+export type Env = {
+  open(name: string): Db;
+  close(name: string): void; // closes the connection open on `name`
+  read(name: string): Uint8Array;
+  write(name: string, bytes: Uint8Array): void;
+  remove(name: string): void; // the file and any -journal, if present
+  /** Phone: writes the marker and busy-waits for the kill (never returns). Node: closes `name`. */
+  hold(tag: string, name: string): void;
+  emit(line: string): void;
+  /** The phone's clock (ms) for the timing phases; none on Node (no latency rows). */
+  latency?: { host: 'hermes_ios'; now: () => number };
+};
+export type SimSample = { kats: Record<string, { canonical: string; sha256: string }>; seeds: Sim[] };
+type Sim = {
+  seed: number;
+  cartridge: string; // content hash, a key of kats
+  context: string;
+  rng: number[];
+  resources?: Json;
+  start: string;
+  commands: Json[];
+};
+
+export const PHASES = [
+  'ka',
+  'sim',
+  'carry1',
+  'carry2',
+  'leave1',
+  'leave2',
+  'lost',
+  'dusk',
+  'before',
+  'corrupt',
+  'hold1',
+  'hold1b',
+  'hold2',
+  'hold2b',
+  'hold3',
+  'hold3b',
+  'time1',
+  'time2',
+  'time3',
+] as const;
+export type Phase = (typeof PHASES)[number];
+
+const INJECTED = 'injected write failure';
+const hex = (n: number, w: number) => n.toString(16).padStart(w, '0');
+const cartridgeOf = (kat: { canonical: string; sha256: string }) => {
+  const artifact = `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`;
+  const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
+  if (!loaded.ok) throw new Error('load ' + JSON.stringify(loaded));
+  return loaded as { ok: true; cartridge: Cartridge; hash: string };
+};
+const LANTERN_CTX = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
+const lanternFresh = () =>
+  newWorld(cartridgeOf(lanternKat).cartridge, LANTERN_CTX as never, [1, 2, 3, 4] as never);
+const duskFresh = () =>
+  newWorld(
+    cartridgeOf(duskKat).cartridge,
+    '4f235135-716e-40d5-b482-2548ec87b3a8' as never,
+    [3276051125, 2904915174, 936708709, 1251201158] as never,
+  );
+const def = (kind: string, key: string) =>
+  refString({ cartridge_id: 'lantern_proof', cartridge_version: '0.0.1', kind, key } as never);
+
+/**
+ * Runs `phase`. With `expected` (the Node bytes), each record is compared and a mismatch emitted
+ * with both byte strings; without, the records are returned (the Node run that writes them).
+ */
+export function runPhase(env: Env, phase: Phase, sims: SimSample, expected?: Record<string, string>) {
+  const p = PHASES.indexOf(phase);
+  const got: Record<string, string> = {};
+  let [records, mismatches, failed] = [0, 0, 0];
+  const say = (s: string) => env.emit(`${phase} ${s}`);
+  const rec = (label: string, v: unknown) => {
+    const bytes = typeof v === 'string' ? v : encode(v as Json);
+    got[`${phase}/${label}`] = bytes;
+    records++;
+    const want = expected?.[`${phase}/${label}`];
+    if (!expected || want === bytes) return;
+    mismatches++;
+    say(`MISMATCH ${label}\nexpected ${want}\nactual   ${bytes}`);
+  };
+  const check = (label: string, ok: boolean, detail: unknown) => {
+    if (!ok) failed++;
+    say(`CHECK ${label} ${ok ? 'PASS' : 'FAIL'} ${encode(detail as Json)}`);
+  };
+  let [ids, inv] = [0, 0];
+  const newId = () => `00000000-0000-4000-a${hex(p, 3)}-${hex(++ids, 12)}`;
+  const nextInv = () => `00000000-0000-4000-8${hex(p, 3)}-${hex(++inv, 12)}`;
+  // A save `name` on the Lantern (or dusk), its Db wrapped: `arm` places the fault of rows 7-9.
+  const times: [string, number][] = [];
+  const arm = { mode: undefined as undefined | 'mid' | 'after' | 'receipt', killed: false };
+  const open = (name: string, fresh: World, kat: { sha256: string }) => {
+    const db = env.open(name);
+    // Timing: each transaction from BEGIN to COMMIT, as the game commit (it writes the receipt)
+    // or the sink write (it writes an observation), so persistence is timed apart.
+    const tx = { at: 0, kind: '' };
+    const now = () => env.latency?.now() ?? 0;
+    const dead = () => {
+      if (arm.killed) throw new Error('killed');
+    };
+    const w: Db = {
+      execSync(s) {
+        dead();
+        if (s === 'COMMIT' && arm.mode === 'mid')
+          return void ((arm.killed = true), env.hold(phase, name), dead());
+        if (s === 'BEGIN IMMEDIATE') [tx.at, tx.kind] = [now(), ''];
+        db.execSync(s);
+        if (s === 'COMMIT' && tx.kind) times.push([tx.kind, now() - tx.at]);
+        if (s === 'COMMIT' && arm.mode === 'after')
+          return void ((arm.killed = true), env.hold(phase, name), dead());
+      },
+      runSync(s, ...a) {
+        dead();
+        if (arm.mode === 'receipt' && s.startsWith('INSERT INTO receipt')) {
+          arm.mode = undefined;
+          throw new Error(INJECTED);
+        }
+        if (s.startsWith('INSERT INTO receipt')) tx.kind = 'commit';
+        if (s.startsWith('INSERT INTO observation')) tx.kind = 'sink';
+        return db.runSync(s, ...a);
+      },
+      getFirstSync: (s, ...a) => (dead(), db.getFirstSync(s, ...a)),
+      getAllSync: (s, ...a) => (dead(), db.getAllSync(s, ...a)),
+      isInTransactionSync: () => (dead(), db.isInTransactionSync()),
+    };
+    const o = openStory(w, [{ content_hash: kat.sha256, fresh }], {
+      kernel_version: 'p6',
+      newId,
+      ...(env.latency && { latency: env.latency }),
+    });
+    if (o.kind !== 'open') throw new Error(`${name} did not open: ${encode(o as never)}`);
+    return { story: o, db: w };
+  };
+  type S = ReturnType<typeof open>;
+  const saved = (s: S) =>
+    s.db.getFirstSync<{ r: number; n: number }>(
+      'SELECT (SELECT revision FROM head) AS r, (SELECT count(*) FROM receipt) AS n',
+    )!;
+  const state = (s: S) => encode(s.story.world().state as never);
+  const reply = (r: Reply) => r as unknown as Json;
+  const send = (s: S, label: string, i: object) => {
+    const r = s.story.invoke(i);
+    rec(`${label} reply`, reply(r));
+    rec(`${label} state`, state(s));
+    return r;
+  };
+  // Lantern trace requests as invocations, as lantern.test.ts maps them (ROADMAP R6P row).
+  const fresh = lanternFresh();
+  const [BRAM, LANTERN] = [
+    fresh.entityIds[def('npc', 'bram')]!,
+    fresh.entityIds[def('item', 'lantern')]!,
+  ];
+  const lanternInv = (
+    s: S,
+    r: { action: string; input?: Record<string, Json> },
+    id = nextInv(),
+  ) => {
+    const input: Record<string, Json> = { ...r.input };
+    // The open choice's continuation, or, once it is resolved, the one the receipt of `id` holds.
+    if (input.continuation_id)
+      input.continuation_id =
+        gameView(s.story.world()).choice?.continuation_id ??
+        s.db.getFirstSync<{ c: string }>(
+          "SELECT command ->> '$.payload.continuation_id' AS c FROM receipt WHERE invocation_id = ?",
+          id,
+        )!.c;
+    if (r.action === 'wait') input.until = (input.until as number) * 3600;
+    const [action_key, target_ids] = (
+      {
+        activate: ['lantern', []],
+        talk: ['bram', [BRAM]],
+        take: ['take', [LANTERN]],
+        drop: ['drop', [LANTERN]],
+      } as Record<string, [string, string[]]>
+    )[r.action] ?? [r.action, []];
+    return { invocation_id: id, action_key, actor_id: fresh.character, target_ids, input };
+  };
+  const trace = (id: string) =>
+    (traces.traces as { id: string; steps: { request: { action: string; input?: never } }[] }[])
+      .find((t) => t.id === id)!
+      .steps.map((x) => x.request);
+  const lantern = (name: string) => open(name, fresh, lanternKat);
+  const play = (s: S, path: string, from: number, to: number, tag = '') => {
+    for (const [n, r] of trace(path).slice(from, to).entries())
+      send(s, `${tag}${path}[${from + n}]`, lanternInv(s, r));
+  };
+  const CARRY = { action: 'choose', input: { choice_id: 'carry', continuation_id: 'x' } as never };
+  const heldId = (q: number) => `00000000-0000-4000-8fff-${hex(q, 12)}`;
+
+  switch (phase) {
+    case 'ka': {
+      const w = (kat: never, seed: number[]) =>
+        newWorld(cartridgeOf(kat).cartridge, LANTERN_CTX as never, seed as never);
+      for (const c of cases as never[])
+        rec(`items ${(c as { name: string }).name}`, known(w(items as never, [1, 2, 3, 4]), [c]));
+      for (const c of dusk_cases as never[])
+        rec(
+          `dusk ${(c as { name: string }).name}`,
+          known(w(duskKat as never, [27274249, 25704967, 31982592, 12605441]), [c]),
+        );
+      const l = cartridgeOf(lanternKat);
+      check(
+        'lantern known answer hash',
+        l.hash === '050cba8c964be222d47454c0a2e833dc592cfc905c8bcd09bb2def34f908b89d',
+        l.hash,
+      );
+      check(
+        'lantern known answer value',
+        encode(l.cartridge as never) === encode(lanternKat.value as never),
+        'canonical',
+      );
+      check(
+        'known answers no mismatch',
+        Object.values(got).every((m) => m === '[]'),
+        Object.values(got),
+      );
+      break;
+    }
+    case 'sim': {
+      for (const x of sims.seeds) {
+        let world = newWorld(
+          cartridgeOf(sims.kats[x.cartridge]!).cartridge,
+          x.context as never,
+          x.rng as never,
+        );
+        if (x.resources)
+          world = { ...world, state: { ...world.state, resources: x.resources as never } };
+        check(`seed ${x.seed} start bytes`, encode(world.state as never) === x.start, x.seed);
+        for (const [n, c] of x.commands.entries()) {
+          const r = step(world, c as never, n + 1);
+          world = r.world;
+          rec(`seed ${x.seed} [${n}] decision`, encode(r.decision as never));
+          rec(`seed ${x.seed} [${n}] state`, encode(world.state as never));
+        }
+      }
+      break;
+    }
+    case 'carry1':
+    case 'leave1': {
+      const path = phase === 'carry1' ? 'lantern-carry' : 'lantern-leave';
+      env.remove(`p6-${path}.db`);
+      const s = lantern(`p6-${path}.db`);
+      play(s, path, 0, 5);
+      rec('saved', saved(s));
+      env.hold(phase, `p6-${path}.db`); // a kill mid-path, between steps 4 and 5
+      break;
+    }
+    case 'carry2':
+    case 'leave2': {
+      const path = phase === 'carry2' ? 'lantern-carry' : 'lantern-leave';
+      const s = lantern(`p6-${path}.db`);
+      rec('reopened', saved(s));
+      check('continuous after kill', encode(saved(s) as never) === '{"n":5,"r":5}', saved(s));
+      rec('reopened state', state(s));
+      play(s, path, 5, 10);
+      rec('saved', saved(s));
+      check('ending saved', encode(saved(s) as never) === '{"n":10,"r":10}', saved(s));
+      break;
+    }
+    case 'lost': {
+      env.remove('p6-lost.db');
+      const s = lantern('p6-lost.db');
+      play(s, 'lantern-carry', 0, 9);
+      const i = lanternInv(s, CARRY);
+      const lost = s.story.invoke(i); // the reply is discarded
+      rec('lost reply', reply(lost));
+      send(s, 'then wait', lanternInv(s, { action: 'wait', input: { until: 19 } as never }));
+      const before = saved(s);
+      const again = send(s, 'resent', i);
+      check('resent replays', again.kind === 'saved' && again.replay, again);
+      check(
+        'resent decision is the lost one',
+        encode((again as never as { decision: Json }).decision) ===
+          encode((lost as never as { decision: Json }).decision),
+        'decision',
+      );
+      check(
+        'resent revision unchanged',
+        encode(saved(s) as never) === encode(before as never),
+        saved(s),
+      );
+      const fresh2 = send(s, 'new id', { ...i, invocation_id: nextInv() });
+      check(
+        'new id refused',
+        fresh2.kind === 'saved' && (fresh2.decision as { kind: string }).kind === 'rejected',
+        fresh2,
+      );
+      break;
+    }
+    case 'dusk': {
+      env.remove('p6-dusk.db');
+      const dw = duskFresh();
+      const s = open('p6-dusk.db', dw, duskKat);
+      const d = (action_key: string, target_ids: string[] = [], input = {}) => ({
+        invocation_id: nextInv(),
+        action_key,
+        actor_id: dw.character,
+        target_ids,
+        input,
+      });
+      const BELL = '13908b18-53c2-84d8-b609-8d8c248913c5';
+      for (const [k, x] of [
+        d('look'),
+        d('ring_bell', [BELL]),
+        d('wait', [], { until: 21660 }),
+        d('ring_bell', [BELL]),
+      ].entries())
+        send(s, `prior ${k}`, x);
+      const pick = d('pick_lock', ['299cc3fe-ba39-8c02-8a3b-ff68ec341e4c']);
+      const r = send(s, 'pick_lock', pick) as {
+        decision: { outcome: string; events: { payload: { type: string } }[] };
+      };
+      const failedChecks = (x: typeof r) =>
+        x.decision.events.filter((e) => e.payload.type === 'check_failed').length;
+      check('outcome failure', r.decision.outcome === 'failure', r.decision.outcome);
+      check('one check_failed', failedChecks(r) === 1, failedChecks(r));
+      const rng = encode(s.story.world().state.rng as never);
+      check('rng_state literal', rng === '[619855573,1505027126,3194508496,3043166013]', rng);
+      const n = saved(s);
+      const dup = send(s, 'duplicate', pick) as typeof r & Reply;
+      check('duplicate replays', dup.kind === 'saved' && dup.replay, dup.kind);
+      check(
+        'rng unchanged',
+        encode(s.story.world().state.rng as never) === rng,
+        s.story.world().state.rng,
+      );
+      check(
+        'no second check_failed, receipts unchanged',
+        encode(saved(s) as never) === encode(n as never),
+        saved(s),
+      );
+      const anew = send(s, 'new id', { ...pick, invocation_id: nextInv() });
+      check('new id advances rng', encode(s.story.world().state.rng as never) !== rng, {
+        kind: anew.kind,
+        rng: s.story.world().state.rng,
+      });
+      break;
+    }
+    case 'before': {
+      env.remove('p6-before.db');
+      const s = lantern('p6-before.db');
+      play(s, 'lantern-carry', 0, 9);
+      const rows = () =>
+        encode(s.db.getAllSync('SELECT * FROM state_row ORDER BY section, key') as never);
+      const [m0, d0, r0] = [state(s), saved(s), rows()];
+      const i = lanternInv(s, CARRY);
+      arm.mode = 'receipt';
+      let thrown = '';
+      try {
+        s.story.invoke(i);
+      } catch (e) {
+        thrown = (e as Error).message;
+      }
+      check('failed receipt write: rolled_back', thrown === INJECTED, thrown);
+      check('memory unchanged', state(s) === m0, 'state');
+      check(
+        'storage unchanged',
+        encode(saved(s) as never) === encode(d0 as never) && rows() === r0,
+        saved(s),
+      );
+      check('no transaction open', !s.db.isInTransactionSync(), true);
+      const r = send(s, 'retry', i);
+      check('retry commits once', r.kind === 'saved' && !r.replay && r.revision === 10, r.kind);
+      break;
+    }
+    case 'corrupt': {
+      for (const table of ['state_row', 'head', 'receipt']) {
+        const [bad, good] = [`p6-corrupt-${table}.db`, `p6-intact-${table}.db`];
+        env.remove(bad);
+        env.remove(good);
+        const s = lantern(bad);
+        play(s, 'lantern-carry', 0, 5, `${table} `);
+        const at = (q: string) => Number(Object.values(s.db.getFirstSync<object>(q)!)[0]);
+        const [root, size] = [
+          at(`SELECT rootpage FROM sqlite_master WHERE name = '${table}'`),
+          at('PRAGMA page_size'),
+        ];
+        env.close(bad);
+        const bytes = env.read(bad);
+        env.write(good, bytes.slice()); // the undamaged copy
+        bytes[(root - 1) * size] = 0xff; // S6a's recipe: the root page's b-tree type byte
+        env.write(bad, bytes);
+        const o = openStory(env.open(bad), [{ content_hash: lanternKat.sha256, fresh }], {
+          kernel_version: 'p6',
+          newId,
+        });
+        check(`${table} damaged: save_corrupt`, o.kind === 'save_corrupt', o.kind);
+        const ok = openStory(env.open(good), [{ content_hash: lanternKat.sha256, fresh }], {
+          kernel_version: 'p6',
+          newId,
+        });
+        check(`${table} undamaged copy opens`, ok.kind === 'open', ok.kind);
+        env.close(bad);
+        env.close(good);
+      }
+      break;
+    }
+    case 'hold1':
+    case 'hold2':
+    case 'hold3': {
+      const name = `p6-${phase}.db`;
+      env.remove(name);
+      const s = lantern(name);
+      const mode = s.db.getFirstSync<{ journal_mode: string }>('PRAGMA journal_mode')!.journal_mode;
+      check('journal_mode is a rollback journal', mode === 'delete', mode);
+      play(s, 'lantern-carry', 0, 9);
+      const i = lanternInv(s, CARRY, heldId(p)); // a fixed id: the next phase retries it
+      rec('before hold', saved(s));
+      // Hold 1: a one-page cache spills the transaction's pages into the db file before COMMIT,
+      // so the kill leaves the db file changed and a synced (hot) -journal, not a zeroed one.
+      if (phase === 'hold1') s.db.execSync('PRAGMA cache_size = 1');
+      arm.mode = phase === 'hold1' ? 'mid' : phase === 'hold2' ? 'after' : undefined;
+      const r = s.story.invoke(i); // holds 1 and 2 never return on the phone
+      if (arm.killed) break; // Node: the kill
+      rec('reply', reply(r));
+      env.hold(phase, name); // hold 3: after the reply, before display
+      break;
+    }
+    case 'hold1b':
+    case 'hold2b':
+    case 'hold3b': {
+      const q = p - 1; // the held phase
+      const name = `p6-${PHASES[q]}.db`;
+      const s = lantern(name);
+      const i = lanternInv(s, CARRY, heldId(q));
+      const after = saved(s);
+      const has = s.db.getFirstSync<{ n: number }>(
+        'SELECT count(*) AS n FROM receipt WHERE invocation_id = ?',
+        i.invocation_id,
+      )!.n;
+      rec('reopened', { ...after, held: has });
+      if (phase === 'hold1b') {
+        check(
+          'revision is the last committed, no receipt for the held command',
+          encode({ ...after, held: has } as never) === '{"held":0,"n":9,"r":9}',
+          { ...after, held: has },
+        );
+        const r = send(s, 'retry', i);
+        check('retry commits once', r.kind === 'saved' && !r.replay && r.revision === 10, r.kind);
+        const again = send(s, 'retry again', i);
+        check('then replays', again.kind === 'saved' && again.replay, again.kind);
+      } else if (phase === 'hold2b') {
+        check(
+          'committed once',
+          encode({ ...after, held: has } as never) === '{"held":1,"n":10,"r":10}',
+          { ...after, held: has },
+        );
+        const r = send(s, 'retry', i);
+        check('retry replays', r.kind === 'saved' && r.replay && r.revision === 10, r.kind);
+      } else {
+        const shown = s.story.narration();
+        rec('narration()', shown as never);
+        const lines = s.db.getFirstSync<{ x: string }>(
+          "SELECT response -> '$.narration' AS x FROM receipt WHERE invocation_id = ?",
+          i.invocation_id,
+        )!.x;
+        check(
+          "reopen shows the held reply's narration",
+          encode(shown!.lines as never) === encode(JSON.parse(lines)),
+          shown,
+        );
+      }
+      break;
+    }
+    case 'time1':
+    case 'time2':
+    case 'time3': {
+      // Cold: the process's first open of a new save, then the restore of a played one.
+      const now = () => env.latency?.now() ?? 0;
+      const ms = (f: () => unknown) => {
+        const t = now();
+        f();
+        return now() - t;
+      };
+      const cold: Record<string, number> = {};
+      env.remove('p6-time-new.db');
+      cold.open_new = ms(() => lantern('p6-time-new.db'));
+      cold.restore = ms(() => lantern('p6-lantern-carry.db')); // revision 10, from carry2
+      say(`TIMING cold ${JSON.stringify(cold)}`);
+      // Warm: each path three times on a new save; the first run of the launch is the warm-up.
+      for (const [k, path] of ['lantern-carry', 'lantern-leave', 'lantern-carry', 'lantern-leave', 'lantern-carry', 'lantern-leave'].entries()) {
+        const name = `p6-time-${k}.db`;
+        env.remove(name);
+        const s = lantern(name);
+        times.length = 0;
+        const rows: number[][] = [];
+        for (const r of trace(path)) {
+          const i = lanternInv(s, r);
+          const t = now();
+          const reply = s.story.invoke(i);
+          const t1 = now();
+          gameView(s.story.world());
+          const t2 = now();
+          if (reply.kind !== 'saved' || reply.replay) throw new Error(`timing: ${reply.kind}`);
+          const by = (kind: string) => times.filter((x) => x[0] === kind).reduce((a, x) => a + x[1], 0);
+          rows.push([t2 - t, t2 - t1, by('commit'), by('sink')]);
+          times.length = 0;
+        }
+        const us = s.db
+          .getAllSync<{ r: string }>("SELECT record AS r FROM observation WHERE record LIKE '%decision_latency%' ORDER BY rowid")
+          .map((x) => JSON.parse(x.r).data.value as number);
+        say(`TIMING warm ${JSON.stringify({ run: k, path, warmup: k === 0, decision_us: us, e2e_projection_commit_sink_ms: rows })}`);
+      }
+      break;
+    }
+  }
+  say(`done records=${records} mismatches=${mismatches} checks_failed=${failed}`);
+  return got;
+}

@@ -1,0 +1,62 @@
+diff --git a/mobile/app/App.tsx b/mobile/app/App.tsx
+index 36d4002..d3149aa 100644
+--- a/mobile/app/App.tsx
++++ b/mobile/app/App.tsx
+@@ -8,6 +8,8 @@ import { playSmoke } from '../authority/local-story/smoke';
+ import Book from './book/Book.tsx';
+ import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';
+ import { SaveError } from './SaveError';
++import { View } from 'react-native';
++import { touchStart } from './p6/ui';
+ 
+ // Opened once per process, kept on globalThis so a Fast Refresh does not open a second handle
+ // (mobile lessons: a second handle on the same file crashes). A new file name: a save from before
+@@ -17,7 +19,7 @@ import { SaveError } from './SaveError';
+ // empty file rather than replaying it, so nothing else needs deleting.
+ // The build ships one playable story, the Lantern, in its own file (one save per story); the items
+ // story's loka-save.db stays on the phone untouched. ponytail: no story picker until a second story.
+-const NAME = 'loka-lantern.db';
++const NAME = 'p6-ui.db'; // P6 UI build: never the owner's save
+ let db: SQLiteDatabase | undefined;
+ const g = globalThis as { loka_smoke?: ReturnType<typeof playSmoke> };
+ const smoke = (g.loka_smoke ??= playSmoke(
+@@ -46,5 +48,9 @@ export default function App() {
+   };
+   const game = smoke.game();
+   if (!game) return <SaveError failed={smoke.failed()!} startOver={startOver} />;
+-  return <Book key={starts} smoke={game} startOver={startOver} />;
++  return (
++    <View style={{ flex: 1 }} onStartShouldSetResponderCapture={() => (touchStart(), false)}>
++      <Book key={starts} smoke={game} startOver={startOver} />
++    </View>
++  );
+ }
+diff --git a/mobile/app/book/Book.tsx b/mobile/app/book/Book.tsx
+index bb57435..a554239 100644
+--- a/mobile/app/book/Book.tsx
++++ b/mobile/app/book/Book.tsx
+@@ -1,6 +1,7 @@
+ // The book: the room page, the pages opened from it, the status line and the footer, over the
+ // smoke controller (smoke.ts). Real data only: it draws what GameView projects and nothing else.
+-import { useState } from 'react';
++import { useEffect, useState } from 'react';
++import { pressDone, rendered } from '../p6/ui';
+ import { Pressable, SafeAreaView, Text, View } from 'react-native';
+ import { useFonts } from 'expo-font';
+ import { clock, type Button, type openSmoke } from '../../authority/local-story/smoke.ts';
+@@ -34,6 +35,7 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
+   const [stack, setStack] = useState<Page[]>([]);
+   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
+   const [from, setFrom] = useState(0); // the room log starts here: log length at the last place change
++  useEffect(rendered);
+   if (!loaded && !fontError) return null;
+ 
+   const screen = smoke.screen();
+@@ -46,6 +48,7 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
+   const press = (b: Button) => {
+     const [placeId, logLength] = [view.place.id, screen.log.length];
+     smoke.press(b);
++    pressDone();
+     if (smoke.screen().view.place.id !== placeId) setFrom(logLength);
+     go([], 1);
+   };

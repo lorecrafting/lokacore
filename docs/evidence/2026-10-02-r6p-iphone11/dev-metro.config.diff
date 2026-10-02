@@ -1,0 +1,12 @@
+diff --git a/mobile/app/metro.config.js b/mobile/app/metro.config.js
+index 4c24628..21022bd 100644
+--- a/mobile/app/metro.config.js
++++ b/mobile/app/metro.config.js
+@@ -7,5 +7,7 @@ config.watchFolders = [
+   path.resolve(__dirname, '..'),
+   path.resolve(__dirname, '../../kernel/ts/src'),
+   path.resolve(__dirname, '../../protocol/fixtures'),
++  path.resolve(__dirname, '../../kernel/ts/test'),
++  path.resolve(__dirname, '../../docs/spec/conformance'),
+ ];
+ module.exports = config;
