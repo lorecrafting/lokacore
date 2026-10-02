@@ -69,3 +69,12 @@ Plugin driven directly on the pristine Expo 57.0.24 template AppDelegate (genera
 - Direct caller (`withAppDelegate` callback, export shape) unchanged.
 
 Verdict: APPROVE.
+
+## Codex Sol fix re-check, round 1 (gpt-6.1-sol, head 8c20ecf), appended verbatim by PM
+
+REQUEST CHANGES
+
+```text
+IOS-1 | should-fix | mobile/app/plugins/with-ios-scene.js:21
+The half-patched failure remains when the startup block differs from START. Reproduced against the bundled Expo 57.0.24 template through the real Expo mods: add provider conformance, then change window-line indentation, use CRLF, or insert a statement inside the startup block. Each input returns unchanged with factory.startReactNative still present. The emitted scene manifest enables scene startup too, preserving the double-start failure. Absence of the exact literal is not proof that legacy startup is absent; reject residual startup before returning as already patched.
+```
