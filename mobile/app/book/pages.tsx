@@ -68,7 +68,6 @@ export function RoomPage(p: {
   return (
     <ScrollView
       ref={scroll}
-      showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ padding: 24 }}
       onContentSizeChange={() => p.view.choice && scroll.current?.scrollToEnd()} // its answers in view
     >
@@ -158,10 +157,7 @@ function Choice(p: {
 
 function Sheet({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <ScrollView
-      contentContainerStyle={{ padding: 24, gap: 8 }}
-      showsHorizontalScrollIndicator={false}
-    >
+    <ScrollView contentContainerStyle={{ padding: 24, gap: 8 }}>
       <Text style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
         {title}
       </Text>
