@@ -1,26 +1,19 @@
-import { compose, overBudget, type Fault, type Limit } from './compose.ts';
+import { compose, counts, over, type Fault, type Limit } from './compose.ts';
 import type { DeltaOp } from './contracts.gen.ts';
 import { row, type State, type World } from './decision.ts';
 
 // The state after composing `ops` over the world's state, the fact defaults, the declared
 // capacities, the resource specs and the barriers' initial states, or composition's fault. Only
 // written sections join the state, so a world that never sets a fact, resource, cooldown,
-// barrier or job keeps its earlier state hash. A budget fault names its limit (compose overBudget).
+// barrier or job keeps its earlier state hash. A budget fault names its limit (compose counts).
 export function apply(
   world: World,
   ops: readonly DeltaOp[],
 ): { state: State } | { fault: Fault; limit?: Limit } {
-  const base = {
-    ...world.state,
-    fact_defaults: world.factDefaults,
-    capacities: world.capacities,
-    resource_specs: world.resourceSpecs,
-    barrier_initial: world.barrierInitial,
-  } as unknown as Parameters<typeof compose>[0];
-  const result = compose(base, { ops });
+  const result = compose(base(world), { ops });
   if ('fault' in result)
     return result.fault.code === 'budget_exceeded'
-      ? { ...result, limit: overBudget(base, ops)! }
+      ? { ...result, limit: over(counts(base(world), ops))! }
       : result;
   // ponytail: copies each written section per call (O(rows)); persistent maps when big.
   const written: Record<string, Record<string, unknown>> = {};
@@ -34,3 +27,14 @@ export function apply(
   }
   return { state: { ...world.state, ...written, clock } as State };
 }
+
+/** What compose reads for `world`: its state, the fact defaults, capacities, resource specs and
+ * the barriers' initial states. */
+export const base = (world: World) =>
+  ({
+    ...world.state,
+    fact_defaults: world.factDefaults,
+    capacities: world.capacities,
+    resource_specs: world.resourceSpecs,
+    barrier_initial: world.barrierInitial,
+  }) as unknown as Parameters<typeof compose>[0];

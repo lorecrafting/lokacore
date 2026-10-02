@@ -4,21 +4,25 @@
 // controls, each a kernel planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { test } from 'node:test';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { after, test } from 'node:test';
 import type { AdvertisedAction, Command, DecisionResult } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
 import { gameView, step } from '../src/world.ts';
 import { check } from '../src/invariants.ts';
 import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
-import { ROOT } from '../play/obs.ts';
 
 const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = read(
   'kernel/ts/test/sim_seeds.json',
 );
 const seeds = SEEDS.seeds.map((s) => s.seed);
 const FRESH = 10_000;
+// Observation records of this run (playbacks' game traces included) go to its own directory.
+const OBS = (process.env.LOKA_OBS_DIR = mkdtempSync(join(tmpdir(), 'loka-obs-')));
+after(() => rmSync(OBS, { recursive: true, force: true }));
 // Outcomes the demo cartridges give; the generator must reach each one (a new one may join).
 const REACHED = [
   'accepted',
@@ -83,12 +87,9 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
   const lengths = Array<number>(8).fill(0);
   const [codes, seen] = [new Set<string>(), new Set<string>()]; // outcomes; cartridges, types
   let steps = 0;
-  const faulted = new Set<string>(); // the fresh sequences' budget_exceeded command ids
   for (const seed of [...seeds, ...Array.from({ length: FRESH }, (_, i) => first + i)]) {
     const o = simulate(seed);
     if (o.failure) assert.fail(report(o));
-    if (seed >= first)
-      o.codes.forEach((c, i) => c === 'fault budget_exceeded' && faulted.add(o.commands[i]!.id));
     lengths[(o.commands.length - 1) >> 3]! += 1;
     steps += o.commands.length;
     for (const c of o.codes) codes.add(c);
@@ -102,16 +103,8 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
   );
   const missing = [...PICKED, ...UNKNOWN].filter((x) => !seen.has(x));
   assert.deepEqual([...REACHED.filter((c) => !codes.has(c)), ...missing], [], 'never reached');
-  const dir = `${ROOT}tmp/obs/diagnostics`;
-  const lines = (existsSync(dir) ? readdirSync(dir) : []).flatMap((f) =>
-    readFileSync(`${dir}/${f}`, 'utf8').trim().split('\n'),
-  );
-  const ids = lines.filter(Boolean).map((l) => JSON.parse(l).ids?.command_id);
-  assert.deepEqual(
-    ids.filter((id) => faulted.has(id)),
-    [],
-    'recorded without a run',
-  );
+  // budget_exceeded is among REACHED, yet no diagnostics record was written (this run's own dir).
+  assert.equal(existsSync(`${OBS}/diagnostics`), false, 'recorded without a run');
 });
 
 // Breaks: a generator change after which a regression seed no longer issues the command type it

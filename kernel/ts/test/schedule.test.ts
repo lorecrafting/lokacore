@@ -256,8 +256,9 @@ test('an advance over a job budget faults whole, in a wait and in a recipe', () 
   assert.equal(performed.world, late);
 });
 
-// Breaks: a job budget fault not naming its limit, another fault naming one, or limits over at one
-// check named in compose's call-site order (due_jobs_per_advance first), not 04 §5.4's. A root of
+// Breaks: a job budget fault not naming its limit, another fault naming one, or limits over at the
+// end of a proposal named in check order (compose's job limits, due_jobs_per_advance first, then
+// events), not 04 §5.4's. A root of
 // job.complete ops (one per job) or one job.schedule over `n` pending jobs; pending counts the
 // state's pending jobs plus those scheduled minus those completed.
 test('a root over a job budget names its limit, pending_jobs before due_jobs_per_advance', () => {
@@ -269,8 +270,8 @@ test('a root over a job budget names its limit, pending_jobs before due_jobs_per
     state: { ...w.state, jobs: Object.fromEntries(ids(n).map((i) => [i, job(H(19))])) },
   });
   const SET = { id: CMD, payload: { actor_id: w.character } } as never;
-  const adopted = (w: World, ops: object[]) => {
-    const root = admit('schedule', accepted(w, 'x', ops as never, []) as never);
+  const adopted = (w: World, ops: object[], events: object[] = []) => {
+    const root = admit('action_recipe', accepted(w, 'x', ops as never, events as never) as never);
     return adopt(w, root, SET, allocator(w, SET), 0);
   };
   const limit = (w: World, ops: object[]) => adopted(w, ops).limit;
@@ -281,6 +282,9 @@ test('a root over a job budget names its limit, pending_jobs before due_jobs_per
   assert.equal(limit(at(1024), [schedule]), 'pending_jobs'); // 1025 pending
   assert.equal(limit(at(1025), complete(1025)), 'due_jobs_per_advance'); // 0 pending, 1025 due
   assert.equal(limit(at(2050), complete(1025)), 'pending_jobs'); // 1025 pending, 1025 due
+  const custom = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ position: i + 1, payload: { type: 'custom_event' } }));
+  assert.equal(adopted(at(1024), [schedule], custom(4097)).limit, 'events'); // before pending_jobs
   const missing = adopted(at(0), complete(1)); // no such job: precondition_failed
   assert.deepEqual([missing.decision.kind, 'limit' in missing], ['fault', false]);
 });

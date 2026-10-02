@@ -36,7 +36,10 @@ export function decide(r: Run, command: Command, measured = true) {
   const ids = { ...r.ids, command_id: command.id, revision: r.revision };
   if (limit && measured) {
     const record = { format: 'loka-obs-v1', event: 'evaluation.budget_exceeded', ids };
-    append('diagnostics', r.ids.run_id, line({ ...record, store: 'diagnostics', data: { limit } }));
+    const text = line({ ...record, store: 'diagnostics', data: { limit } }); // invalid: throws
+    try {
+      append('diagnostics', r.ids.run_id, text);
+    } catch {} // 04 §5.4: a failed write never changes the decision
   }
   r.world = world;
   r.ordinal += 1;

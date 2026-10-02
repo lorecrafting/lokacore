@@ -4,14 +4,16 @@
 // budget_exceeded at admission's query_steps. Expected records are hand-written literals.
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
-import { test } from 'node:test';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { after, test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/canonical.ts';
 import { validate } from '../src/validate.ts';
 import { INSTALLED, newWorld } from '../src/world.ts';
-import { line, ROOT } from '../play/obs.ts';
+import { line } from '../play/obs.ts';
 import { decide } from '../play/run.ts';
 import { read } from './read.ts';
 
@@ -19,6 +21,8 @@ const G = 'ashmere_green@0.0.1';
 const CID = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
 const HASH = 'fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2';
 const KERNEL = `loka-kernel@${'0123456789'.repeat(4)}`;
+const OBS = (process.env.LOKA_OBS_DIR = mkdtempSync(join(tmpdir(), 'loka-obs-'))); // this run's
+after(() => rmSync(OBS, { recursive: true, force: true }));
 
 const world = (): World => {
   const c = structuredClone(read('protocol/fixtures/cartridge_green_hash.json').value);
@@ -46,14 +50,18 @@ const world = (): World => {
 // Breaks: no record of a budget fault, one with the wrong ids (not the run's plus the command and
 // the revision it was decided against) or limit, a second one from a replay (measured false), or
 // a producer whose invalid record is written instead of failing the run.
-test('a budget fault in a run is one valid diagnostics record of its limit', () => {
+const run = () => {
   const w = world();
   const run_id = randomUUID(); // this test's own file
   const ids = { content_hash: HASH, kernel_version: KERNEL, seed: [1, 2, 3, 4], run_id };
   const r = { ids, world: w, ordinal: 0, revision: 3 };
   const move = { type: 'move', direction: 'north', actor_id: w.character };
   const command = { id: CID, world_context_id: w.context, payload: move } as Command;
-  const path = `${ROOT}tmp/obs/diagnostics/${run_id}.jsonl`;
+  return { r, ids, command, path: `${OBS}/diagnostics/${run_id}.jsonl` };
+};
+
+test('a budget fault in a run is one valid diagnostics record of its limit', () => {
+  const { r, ids, command, path } = run();
   assert.equal(decide(r, command, false).decision.kind, 'fault');
   assert.equal(existsSync(path), false);
   decide(r, command);
@@ -74,4 +82,13 @@ test('a budget fault in a run is one valid diagnostics record of its limit', () 
   assert.deepEqual(validate('ObservationRecord', record), []);
   for (const data of [{ limit: 'steps' }, { limit: 'query_steps', rule: 'r' }])
     assert.throws(() => line({ ...record, data }), /invalid observation record/);
+});
+
+// Breaks (04 §5.4: observation failure cannot change the fault or the retry outcome): a failed
+// diagnostics write thrown out of decide, which would end the simulator's playback. Red control:
+// without decide's catch this test throws. The record's file is a directory, so the write fails.
+test('a failed diagnostics write leaves the budget fault, and the run goes on', () => {
+  const { r, command, path } = run();
+  mkdirSync(path, { recursive: true });
+  for (let i = 0; i < 2; i++) assert.equal(decide(r, command).decision.kind, 'fault');
 });

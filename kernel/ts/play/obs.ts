@@ -3,6 +3,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { homedir, hostname, tmpdir, userInfo } from 'node:os';
+import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { encode, type Json } from '../src/canonical.ts';
 import { KERNEL_ID } from '../src/index.ts';
@@ -27,14 +28,15 @@ export function line(record: unknown): string {
 }
 
 /**
- * Appends lines to tmp/obs/<store>/<name>.jsonl, or replaces the file with flag 'w'; returns
- * its repository-relative path.
+ * Appends lines to <obs>/<store>/<name>.jsonl, or replaces the file with flag 'w'; returns its
+ * path relative to the repository. <obs> is LOKA_OBS_DIR when set (a test's own directory), else
+ * tmp/obs.
  */
 export function append(store: string, name: string, text: string, flag = 'a'): string {
-  mkdirSync(`${ROOT}tmp/obs/${store}`, { recursive: true });
-  const rel = `tmp/obs/${store}/${name}.jsonl`;
-  writeFileSync(ROOT + rel, text, { flag });
-  return rel;
+  const dir = `${process.env.LOKA_OBS_DIR ?? `${ROOT}tmp/obs`}/${store}`;
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(`${dir}/${name}.jsonl`, text, { flag });
+  return relative(ROOT, `${dir}/${name}.jsonl`);
 }
 
 // Host identifiers no record may carry (AGENTS.md; ADR-075 §6), longest first so a path is

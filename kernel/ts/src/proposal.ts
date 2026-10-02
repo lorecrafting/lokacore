@@ -2,8 +2,8 @@
 // proposal (the root sequence, its due jobs and every reaction delivery in one FIFO causal
 // order), composition and adoption. world.ts routes each command here.
 import { encode } from './canonical.ts';
-import { apply } from './apply.ts';
-import { over, target, type Limit } from './compose.ts';
+import { apply, base } from './apply.ts';
+import { counts, over, target, type Limit } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
   type CommandId,
@@ -32,12 +32,12 @@ type Corr = DomainEvent['correlation_id'];
  * Proposes an admitted decision whole (propose) and composes its delta over the state, the fact
  * defaults and the declared capacities, adopting its containment, fact and clock changes; only
  * admit() makes an Admitted. A fact.assign whose fact, scope kind or value its FactSpec does not
- * allow faults precondition_failed (03 §7; 04 §5.1). A result over the events or output_bytes
- * limit faults budget_exceeded (04 §5.4); every budget fault names its limit in `limit`, which no
- * other result has. `steps` is the decision's query_steps count so far. A fault discards the
- * whole proposal. Each continuation a choice.open of it creates is stamped with `revision`, the
- * one its commit will take (04 §5.3: the expected revision a choice.resolve must match), in the
- * state whose rows the host commits.
+ * allow faults precondition_failed (03 §7; 04 §5.1). A result over compose's, the events or the
+ * output_bytes limit faults budget_exceeded (04 §5.4); every budget fault names its limit in
+ * `limit`, which no other result has. `steps` is the decision's query_steps count so far. A fault
+ * discards the whole proposal. Each continuation a choice.open of it creates is stamped with
+ * `revision`, the one its commit will take (04 §5.3: the expected revision a choice.resolve must
+ * match), in the state whose rows the host commits.
  */
 export function adopt(
   world: World,
@@ -53,13 +53,15 @@ export function adopt(
   const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
   if (bad)
     return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
-  const applied = apply(world, out.delta.ops);
-  if ('fault' in applied) return faulted(applied.fault, world, applied.limit);
+  // Every limit of the whole proposal in one call, so a tie names the first in 04 §5.4 order.
   const spent = over({
+    ...counts(base(world), out.delta.ops),
     events: out.events.length,
     output_bytes: utf8(encode(out as never)).length,
   });
   if (spent) return faulted(BUDGET, world, spent);
+  const applied = apply(world, out.delta.ops);
+  if ('fault' in applied) return faulted(applied.fault, world, applied.limit);
   let choices = applied.state.choices;
   for (const o of out.delta.ops)
     if (o.op === 'choice.open') {
@@ -124,8 +126,8 @@ const faulted = (decision: DecisionResult, world: World, limit?: Limit): Stepped
  * IdSource of the root or job that began the chain. A delivery past the deliveries,
  * reaction_depth or query_steps limit (compose.ts over) faults budget_exceeded: a cycle ends
  * there, never truncated (adopt checks the events limit on the whole proposal). `steps` already
- * counts the root's admission and rule policy leaves (world.ts decideWith); a root past
- * query_steps faults before it joins. A budget fault returns its limit beside the decision.
+ * counts the root's admission and rule policy leaves (world.ts decideWith checks them). A budget
+ * fault returns its limit beside the decision.
  * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
  * (rules/schedule.ts), and a stale entry it refuses rejects the whole advance instead of being
  * skipped as ineligible. Nothing in schedule@1 or reaction@1 cancels, reschedules or completes
@@ -154,10 +156,7 @@ export function propose(
     applied: 0,
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
-  p.limit = over({ query_steps: steps.n });
-  const failed = p.limit
-    ? BUDGET
-    : (join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root));
+  const failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   return { decision: { ...root, delta: { ops: p.ops }, events: p.events } };
 }

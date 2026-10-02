@@ -93,7 +93,7 @@ export function current(row: Stored | undefined, spec: ResourceSpec, now: number
 export function compose(state: State, delta: StateDelta): Result {
   const { ops } = delta;
   if (typeof state.clock !== 'number') return fault('precondition_failed', { kind: 'clock' });
-  if (overBudget(state, ops)) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
+  if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
   const ctx: Ctx = { state, horizon, overlay: new Map() };
@@ -110,18 +110,19 @@ export function compose(state: State, delta: StateDelta): Result {
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
 
-export function overBudget(state: State, ops: readonly DeltaOp[]): Limit | undefined {
+/** `ops`' operation and job counts over `state`, the composition-profile limits compose checks. */
+export function counts(state: State, ops: readonly DeltaOp[]) {
   const count = (name: string) => ops.filter((o) => o.op === name).length;
   const jobs = Object.values(section(state, 'jobs'));
   const pending = jobs.filter((j) => get(j, 'status') === 'pending').length;
   const created = count('job.schedule');
   const due = count('job.complete');
-  return over({
+  return {
     operations: ops.length,
     created_jobs: created,
     due_jobs_per_advance: due,
     pending_jobs: pending + created - due,
-  });
+  };
 }
 
 export type Limit = keyof typeof LIMITS;

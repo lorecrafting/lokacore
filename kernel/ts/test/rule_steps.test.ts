@@ -41,10 +41,10 @@ const outcome = (w: World, payload: object, k = 1) => {
 };
 
 // Breaks: barrier@1's key check not counted (world.ts not passing the counter to the rule, or
-// barrier.ts not passing it to holds). The iron key is in the body; unlock overridden by an
-// action of n leaves: n + 1 steps.
+// barrier.ts not passing it to holds), or a rule rejection past the limit answered with its code.
+// Unlock overridden by an action of n leaves: n + 1 steps, the key held or not.
 test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed query_steps', () => {
-  const unlock = (n: number) => {
+  const unlock = (n: number, held = true) => {
     const w = world('gate', (c) => {
       c.actions['ashmere_gate@0.0.1:action/unlock'] = {
         key: 'unlock',
@@ -58,7 +58,7 @@ test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed quer
       };
     });
     const key = w.entityIds['ashmere_gate@0.0.1:item/iron_key']!;
-    const containers = { ...w.state.containers, [key]: w.body };
+    const containers = { ...w.state.containers, ...(held && { [key]: w.body }) };
     return outcome(
       { ...w, state: { ...w.state, containers } },
       { type: 'unlock', direction: 'east' },
@@ -66,6 +66,8 @@ test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed quer
   };
   assert.equal(unlock(32767), 'accepted');
   assert.equal(unlock(32768), 'query_steps');
+  assert.equal(unlock(32767, false), 'rejected'); // not_owned, within the limit
+  assert.equal(unlock(32768, false), 'query_steps'); // a rule rejection past it faults (04 §5.4)
 });
 
 // Breaks: quest@1's objective read at activation not counted (quest.ts holdsNow). The offer's

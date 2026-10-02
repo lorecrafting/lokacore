@@ -259,10 +259,11 @@ const slowMove =
   };
 const FAULT = { kind: 'fault', code: 'budget_exceeded' };
 
-// Breaks (04 §5.4 query_steps, one budget across the root and its descendants): the action policy
-// admission evaluates not counted, or no check before the root joins (a root that triggers no
-// reaction never reaches the delivery check), or a refusal turned into budget_exceeded (PM
-// default: only an accepted rule result's count is compared). 32769 leaves are about 1.3 MB.
+// Breaks (04 §5.4 query_steps, one budget across the root and its descendants; "exhaustion
+// returns a typed evaluation fault"): the action policy admission evaluates not counted, no check
+// on the root (one that triggers no reaction never reaches the delivery check), or an admission
+// past the limit answered with its refusal (32768 true leaves then one false one: 32769
+// evaluated). 32769 leaves are about 1.3 MB.
 test('a move whose action policy evaluates more than 32768 leaves exceeds query_steps', () => {
   assert.equal(move(belfry(0, {}, slowMove(32768)), 'north').decision.kind, 'accepted');
   const w = belfry(0, {}, slowMove(32769));
@@ -270,8 +271,7 @@ test('a move whose action policy evaluates more than 32768 leaves exceeds query_
   assert.deepEqual([s.decision, s.limit], [FAULT, 'query_steps']);
   assert.equal(s.world, w);
   const refused = move(belfry(0, {}, slowMove(32768, [leaf(true)])), 'north'); // bell_up false
-  const invalid = { kind: 'rejected', error: { code: 'invalid_state' } };
-  assert.deepEqual([refused.decision, 'limit' in refused], [invalid, false]);
+  assert.deepEqual([refused.decision, refused.limit], [FAULT, 'query_steps']);
 });
 
 // Breaks: the counter reset between the root and its reactions (each part alone fits): 16384
