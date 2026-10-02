@@ -3,13 +3,13 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { Button, GameView } from '../../authority/local-story/smoke.ts';
-import { plain, why } from './model.ts';
+import { plain, why, type group, type Pool } from './model.ts';
 import { body, head, paper } from './paper.ts';
 import { confirmStartOver } from '../SaveError.tsx';
 
 type Say = (key: string) => string;
+type Grouped = ReturnType<typeof group>;
 export type Thing = GameView['entities'][number];
-export type Pool = NonNullable<GameView['resources']>[number];
 
 // Each condition band's colour and hp phrase (04 §15 bands). The colour tiers by the band's cut
 // as the mock does: from 80 up none, from 40 up mid, below that accent.
@@ -44,42 +44,104 @@ function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
   );
 }
 
+function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
+  return (
+    <Tap label={b.label} onPress={() => press(b)}>
+      <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>
+    </Tap>
+  );
+}
+
+// The place: its title (a tap looks), description, who and what is here, its own actions (an
+// offered quest among them) and Wait, the log, then the pending choice under it.
 export function RoomPage(p: {
   view: GameView;
   text: Say;
   log: string[];
-  look?: Button;
+  g: Grouped;
   press: (b: Button) => void;
   open: (id: string) => void;
+  openWait?: () => void; // none: nothing to wait for
 }) {
-  const title = (
-    <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.text(p.view.place.title.key)}</Text>
-  );
   return (
     <ScrollView contentContainerStyle={{ padding: 24 }}>
-      {p.look ? (
-        <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.look!)}>
-          {title}
-        </Tap>
-      ) : (
-        title
-      )}
+      <Title name={p.text(p.view.place.title.key)} look={p.g.look} press={p.press} />
       <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
-      {p.view.entities.map((e) => {
-        const name = p.text(e.name);
-        return (
-          <Tap key={e.id} label={`${name}, open`} onPress={() => p.open(e.id)}>
-            <Text style={prose}>
-              <Text style={{ fontWeight: '500', textDecorationLine: 'underline' }}>
-                {name.charAt(0).toUpperCase() + name.slice(1)}
-              </Text>{' '}
-              is here.
-            </Text>
-          </Tap>
+      <Here view={p.view} text={p.text} open={p.open} />
+      {p.g.place.map((b) => (
+        <Act key={b.label} b={b} press={p.press} />
+      ))}
+      {p.openWait && (
+        <Tap label="Wait" onPress={p.openWait}>
+          <Text style={{ ...prose, color: paper.accent }}>Wait</Text>
+        </Tap>
+      )}
+      {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
+      {p.view.choice && <Choice {...p} choice={p.view.choice} />}
+    </ScrollView>
+  );
+}
+
+// ponytail: session memory only, as the footer's tip: the hint shows again after the app restarts.
+let looked = false;
+
+// The place's name; a tap looks, and a first-run hint says so.
+function Title(p: { name: string; look?: Button; press: (b: Button) => void }) {
+  const title = <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.name}</Text>;
+  if (!p.look) return title;
+  return (
+    <>
+      <Tap label={`Look, ${p.name}`} onPress={() => ((looked = true), p.press(p.look!))}>
+        {title}
+      </Tap>
+      {!looked && <Text style={{ ...note, textAlign: 'center' }}>Tap the title to look</Text>}
+    </>
+  );
+}
+
+function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
+  return p.view.entities.map((e) => {
+    const name = p.text(e.name);
+    return (
+      <Tap key={e.id} label={`${name}, open`} onPress={() => p.open(e.id)}>
+        <Text style={prose}>
+          <Text style={{ fontWeight: '500', textDecorationLine: 'underline' }}>
+            {name.charAt(0).toUpperCase() + name.slice(1)}
+          </Text>{' '}
+          is here.
+        </Text>
+      </Tap>
+    );
+  });
+}
+
+// The pending choice (06 §43): its speaker if here, the prompt, each answer (an unavailable one
+// with its reason, not pressable) and Close. It blocks nothing: the footer and Wait stay usable.
+function Choice(p: {
+  view: GameView;
+  choice: NonNullable<GameView['choice']>;
+  text: Say;
+  g: Grouped;
+  press: (b: Button) => void;
+}) {
+  const speaker = p.view.entities.find((e) => e.id === p.choice.speaker_id);
+  const answer = (id: string) =>
+    p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
+  const close = p.g.choice.find((b) => b.action_key === 'close_choice');
+  return (
+    <View style={{ marginTop: 12 }}>
+      {speaker && <Text style={note}>{p.text(speaker.name)}</Text>}
+      <Text style={prose}>{p.text(p.choice.prompt.key)}</Text>
+      {p.choice.choices.map((o) => {
+        const b = answer(o.choice_id);
+        return b ? (
+          <Act key={o.choice_id} b={b} press={p.press} />
+        ) : (
+          <Text key={o.choice_id} style={note}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
         );
       })}
-      {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
-    </ScrollView>
+      {close && <Act b={close} press={p.press} />}
+    </View>
   );
 }
 
@@ -99,9 +161,7 @@ export function ThingPage(p: { name: string; actions: Button[]; press: (b: Butto
     <Sheet title={p.name}>
       {p.actions.length === 0 && <Text style={note}>Nothing to do here.</Text>}
       {p.actions.map((b) => (
-        <Tap key={b.label} label={b.label} onPress={() => p.press(b)}>
-          <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>
-        </Tap>
+        <Act key={b.label} b={b} press={p.press} />
       ))}
     </Sheet>
   );
@@ -178,9 +238,7 @@ export function MapPage(p: {
         );
       })}
       {p.place.map((b) => (
-        <Tap key={b.label} label={b.label} onPress={() => p.press(b)}>
-          <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>
-        </Tap>
+        <Act key={b.label} b={b} press={p.press} />
       ))}
     </Sheet>
   );

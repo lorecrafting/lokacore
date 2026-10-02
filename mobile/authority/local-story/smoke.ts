@@ -1,7 +1,7 @@
 // The phone smoke screen's logic (R6 SM, wiring proof for the UI slice): a bundled cartridge played
 // through the real local authority, plain so any view can replace the React one. It exposes the
 // current GameView, its text, the offered actions as buttons and a log; it adds no mechanics.
-import type { GameView, Key } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { GameView, Key, NarrationRecord } from '../../../kernel/ts/src/contracts.gen.ts';
 import {
   gameView,
   INSTALLED,
@@ -14,8 +14,17 @@ import { openStory, type Reply } from './authority.ts';
 import { corrupt, type Db } from './store.ts';
 
 export type { GameView };
-/** A tappable action: its text and the invocation it sends (id and actor are added on press). */
-export type Button = { label: string; action_key: string; target_ids: string[]; input: object };
+/**
+ * A tappable action: its text and the invocation it sends (id and actor are added on press), with
+ * the view freshness token of the screen it was drawn from (04 §16), never the token at the press.
+ */
+export type Button = {
+  label: string;
+  action_key: string;
+  target_ids: string[];
+  input: object;
+  token?: string; // none: no freshness check (a test's hand-made button)
+};
 /** A cartridge fixture: its canonical JSON text and content hash. */
 export type Bundled = { canonical: string; sha256: string };
 
@@ -28,10 +37,46 @@ const KERNEL_VERSION = `${KERNEL_ID}@${'0'.repeat(40)}-dirty`;
 const ID_PREFIX = '00000000-0000-4000-8000-';
 
 type Say = (key: string) => string;
+type Press = Omit<Button, 'token'>;
+
+/** Logical time as the clock shows it, HH:MM (ROADMAP R6P mapping: the hour is time / 3600). */
+export const clock = (t: number) =>
+  `${String(Math.floor(t / 3600)).padStart(2, '0')}:${String(Math.floor(t / 60) % 60).padStart(2, '0')}`;
+
+// The pending choice's available answers and its Close (06 §43: never a trap).
+function asked(v: GameView, label: Say): Press[] {
+  const c = v.choice;
+  const answer = (o: { choice_id: string; label: string }) => ({
+    label: label(o.label),
+    action_key: 'choose',
+    target_ids: [],
+    input: { choice_id: o.choice_id, continuation_id: c!.continuation_id },
+  });
+  return [
+    ...(c?.choices.filter((o) => o.available) ?? []).map(answer),
+    ...(c?.closable
+      ? [{ label: 'Close', action_key: 'close_choice', target_ids: [], input: {} }]
+      : []),
+  ];
+}
+
+// One wait per whole hour after now, kept apart from the buttons (a Wait page lists them).
+// ponytail: up to 23:00, the Lantern's claim limit (pre-release-proof.md:59); a later story needs
+// days on the clock.
+function waitsOf(v: GameView): Press[] {
+  const hour = Math.floor(v.time / 3600);
+  const wait = v.actions.some((a) => a.action_key === 'wait' && a.available);
+  return Array.from({ length: wait ? 23 - hour : 0 }, (_, i) => (hour + i + 1) * 3600).map((t) => ({
+    label: `Wait until ${clock(t)}`,
+    action_key: 'wait',
+    target_ids: [],
+    input: { until: t },
+  }));
+}
 
 // The view's available actions as buttons: place actions that need no input, each open exit as a
-// move, and each entity's or held item's actions aimed at it.
-function buttonsOf(v: GameView, label: Say, text: Say): Button[] {
+// move, each entity's or held item's actions aimed at it, then the pending choice's.
+function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const button = (a: { action_key: string; label: string }, name: string, id?: string) => ({
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
@@ -52,18 +97,27 @@ function buttonsOf(v: GameView, label: Say, text: Say): Button[] {
       input: { direction: e.direction },
     })),
     ...held,
+    ...asked(v, label),
   ];
 }
 
 // What one press answers: the narration or outcome of an accepted command, else the refusal.
 function said(r: Reply, text: Say): string {
   if (r.kind === 'pending') return '(pending: not confirmed saved; press any button to retry it)';
+  if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
   if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision as { kind: string; outcome?: string; narration?: { key: string }[] };
   if (d.kind === 'rejected')
     return `You can't: ${(r.decision as { error: { code: string } }).error.code}`;
   return d.narration?.map((t) => text(t.key)).join(' ') || d.outcome!;
 }
+
+// A text key's words, and an action label's. ponytail: the cartridge has no text for action labels
+// yet, so a label shows the key's last word.
+const sayers = (c: Cartridge): { text: Say; label: Say } => ({
+  text: (key) => c.text[key as Key] ?? key,
+  label: (key) => c.text[key as Key] ?? key.replace(/^actions?\./, '').replaceAll('_', ' '),
+});
 
 function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
@@ -91,7 +145,21 @@ function invocationOf(b: Button, n: number, actor: string) {
     actor_id: actor,
     target_ids: b.target_ids,
     input: b.input,
+    ...(b.token && { view_freshness_token: b.token }),
   };
+}
+
+// The log's start: the last committed narration again, so a reopen (a crash before display too)
+// shows it (06 §43). Its read may use a receipt index the open does not: a damaged one is said, and
+// play goes on to the press that finds it and offers start over (as before this read).
+function reread(story: { narration: () => NarrationRecord | undefined }, text: Say): string[] {
+  try {
+    const last = story.narration();
+    return last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
+  } catch (e) {
+    if (!corrupt(e)) throw e;
+    return [`(the last narration could not be read: ${(e as Error).message})`];
+  }
 }
 
 /**
@@ -109,15 +177,14 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
   let retry: { label: string; invocation: object } | undefined;
   let fault: string | undefined; // the last press's throw, shown with start over beside the retry
   let sent = lastId(db);
-  const log: string[] = [];
-  const text: Say = (key) => cartridge.text[key as Key] ?? key;
-  // ponytail: the cartridge has no text for action labels yet, so show the key's last word.
-  const label: Say = (key) =>
-    cartridge.text[key as Key] ?? key.replace(/^actions?\./, '').replaceAll('_', ' ');
+  const { text, label } = sayers(cartridge);
+  const log = reread(story, text);
   return {
     screen: () => {
-      const view = gameView(story.world());
-      return { view, text, buttons: buttonsOf(view, label, text), log, pending: !!retry, fault };
+      const [view, token] = [gameView(story.world()), story.token()];
+      const drawn = (bs: Press[]): Button[] => bs.map((b) => ({ ...b, token }));
+      const [buttons, waits] = [drawn(buttonsOf(view, label, text)), drawn(waitsOf(view))];
+      return { view, text, buttons, waits, log, pending: !!retry, fault };
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
@@ -163,11 +230,11 @@ export type Failed = {
  * fails otherwise keeps the game being played and says so in its log; one whose outcome is
  * unknown does not (its next press would settle the new game, then apply to it).
  */
-export function playSmoke(open: () => Db, remove: () => void, items: Bundled, newId: () => string) {
+export function playSmoke(open: () => Db, remove: () => void, story: Bundled, newId: () => string) {
   const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
   const reopen = () => {
     try {
-      s.game = openSmoke((s.db ??= open()), items, newId);
+      s.game = openSmoke((s.db ??= open()), story, newId);
       s.failed = undefined;
     } catch (e) {
       const { message, cause } = e as Error;

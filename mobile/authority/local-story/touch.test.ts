@@ -1,0 +1,162 @@
+// The Lantern by touch (R6P P5b; pre-release-proof.md:55-61, 06 §43, 04 §16): the smoke controller
+// over the compiled Lantern (protocol/fixtures/cartridge_lantern_hash.json) on Node with real SQLite
+// (node:sqlite), one connection per simulated process. Expected values are literals from the
+// cartridge text (cartridges/lantern_proof/text.json) and the fixture's day: 06:00 to Bram's 19:00.
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
+import { test } from 'node:test';
+import { read } from '../../../kernel/ts/test/read.ts';
+import { openSmoke } from './smoke.ts';
+
+const LANTERN = read('protocol/fixtures/cartridge_lantern_hash.json') as never;
+const CARRY = 'You keep the lantern. Bram nods once and points you down the bank.';
+const LEAVE = 'You hand Bram the lantern. He lifts it toward the reeds and calls the others in.';
+const PLAIN_LANDING =
+  'A slick wooden landing runs out into the reeds. The ferry rocks at its rope. An old gate stands in the west fence.';
+// Accept the quest, fetch the lantern from the shelter by the green and the reed bank, come back.
+const FETCH = [
+  "Offer to fetch Bram's lantern",
+  'Go north',
+  'Go east',
+  'Go east',
+  'take a brass lantern',
+  'Go west',
+  'Go west',
+  'Go south',
+];
+
+type P = (string | number | null)[];
+const processOn = (path: string) => {
+  const sql = new DatabaseSync(path);
+  const db = {
+    execSync: (s: string) => void sql.exec(s),
+    isInTransactionSync: () => sql.isTransaction,
+    runSync: (s: string, ...p: P) => sql.prepare(s).run(...p),
+    getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T | null,
+    getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
+  };
+  const smoke = openSmoke(db, LANTERN, randomUUID);
+  const screen = () => smoke.screen();
+  const find = (label: string, from = screen()) =>
+    [...from.buttons, ...from.waits].find((b) => b.label === label) ?? assert.fail(label);
+  const tap = (...labels: string[]) => labels.forEach((l) => smoke.press(find(l)));
+  const revision = () => sql.prepare('SELECT revision FROM head').get()!.revision;
+  return { sql, smoke, screen, find, tap, revision };
+};
+const fresh = () => processOn(join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db'));
+
+// Breaks: a choose button whose input lacks the continuation (or names the choice wrong), so the
+// press is refused; or a choice drawn without its Close (a trap, 06 §43).
+test('talk by day offers one button per choice and Close; carry narrates', () => {
+  const a = fresh();
+  a.tap(...FETCH, 'Talk Bram the ferryman');
+  const { view, buttons } = a.screen();
+  const continuation_id = view.choice!.continuation_id;
+  assert.deepEqual(
+    buttons
+      .filter((b) => ['choose', 'close_choice'].includes(b.action_key))
+      .map((b) => [b.label, b.input]),
+    [
+      ['Carry it along the bank', { choice_id: 'carry', continuation_id }],
+      ['Leave it with the search party', { choice_id: 'leave', continuation_id }],
+      ['Close', {}],
+    ],
+  );
+  a.tap('Carry it along the bank');
+  assert.equal(a.screen().log.at(-1), CARRY);
+});
+
+// Breaks (04 §16): a token read when the button is pressed rather than when its screen was drawn
+// (it then always matches), or a stale reply logged as a refusal code.
+test('a second press from the same screen is a stale view and changes nothing', () => {
+  const a = fresh();
+  const drawn = a.screen();
+  a.smoke.press(a.find("Offer to fetch Bram's lantern", drawn));
+  const revision = a.revision();
+  a.smoke.press(a.find('Go north', drawn));
+  assert.equal(a.revision(), revision);
+  assert.equal(a.screen().view.place.title.key, 'room.landing.title');
+  assert.deepEqual(a.screen().log.slice(-3), [
+    'activated',
+    '> Go north',
+    'The page had changed; here it is again.',
+  ]);
+  a.tap('Go north'); // the redrawn screen's buttons are current
+  assert.equal(a.screen().view.place.title.key, 'room.green.title');
+});
+
+// Breaks (06 §43, 06:1404): a reopen whose log starts empty, so a crash right after the choice
+// loses its narration; or one that shows a narration in a game that has none.
+test('a reopen shows the last committed narration first; a fresh game none', () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
+  const a = processOn(path);
+  assert.deepEqual(a.screen().log, []);
+  a.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  a.sql.close();
+  assert.deepEqual(processOn(path).screen().log, [LEAVE]);
+});
+
+// Breaks (06 §43, :1402): a choice that blocks Wait, a Close that changes the outcome (sets the
+// plan or ends the quest), or a closed talk that cannot be opened again where Bram is.
+test('Bram gone at night: the choices say why, Close leaves the quest open, the green resolves it', () => {
+  const a = fresh();
+  a.tap(...FETCH, 'Talk Bram the ferryman', 'Wait until 19:00');
+  assert.deepEqual(
+    a.screen().view.choice!.choices.map((o) => [o.choice_id, o.available || o.reason.code]),
+    [
+      ['carry', 'not_present'],
+      ['leave', 'not_present'],
+    ],
+  );
+  assert.ok(!a.screen().buttons.some((b) => b.action_key === 'choose'));
+  a.tap('Close');
+  const { view, text } = a.screen();
+  assert.equal(view.choice, undefined);
+  assert.deepEqual(
+    view.journal.map((q) => q.state),
+    ['active'],
+  );
+  assert.equal(text(view.place.description.key), PLAIN_LANDING); // search_plan unset
+  a.tap('Go north', 'Talk Bram the ferryman', 'Carry it along the bank');
+  assert.equal(a.screen().log.at(-1), CARRY);
+  assert.deepEqual(
+    a.screen().view.journal.map((q) => q.state),
+    ['resolved'],
+  );
+});
+
+// Breaks: an hour missing or off by one (a wait to now, or past the 23:00 cap), or waits offered
+// after the last hour.
+test('the waits run from the next whole hour to 23:00', () => {
+  const a = fresh();
+  const waits = a.screen().waits;
+  assert.deepEqual(
+    waits.map((b) => b.label),
+    [
+      'Wait until 07:00',
+      'Wait until 08:00',
+      'Wait until 09:00',
+      'Wait until 10:00',
+      'Wait until 11:00',
+      'Wait until 12:00',
+      'Wait until 13:00',
+      'Wait until 14:00',
+      'Wait until 15:00',
+      'Wait until 16:00',
+      'Wait until 17:00',
+      'Wait until 18:00',
+      'Wait until 19:00',
+      'Wait until 20:00',
+      'Wait until 21:00',
+      'Wait until 22:00',
+      'Wait until 23:00',
+    ],
+  );
+  assert.deepEqual([waits[0]!.input, waits[16]!.input], [{ until: 25200 }, { until: 82800 }]);
+  a.tap('Wait until 23:00');
+  assert.deepEqual(a.screen().waits, []);
+});

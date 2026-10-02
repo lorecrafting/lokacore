@@ -3,7 +3,7 @@
 // the controller draws real ones). Literal answers, not computed from the code under test.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { group, plain } from './model.ts';
+import { group, plain, said, type Pool } from './model.ts';
 
 const b = (label: string, action_key: string, target_ids: string[] = [], input = {}) => ({
   label,
@@ -45,5 +45,34 @@ test('a touch link is shown as its label', () => {
   assert.equal(
     plain('A [mooring post](mooring_post) leans by a [reed](reed_bed) in the current.'),
     'A mooring post leans by a reed in the current.',
+  );
+});
+
+// Breaks: a pending choice's answers or its Close also filed as place actions, so the room page
+// draws them twice (once under the choice, once among the place's actions).
+test("a choice's answers and Close are their own group, not place actions", () => {
+  const g = group([
+    b("Offer to fetch Bram's lantern", 'lantern'),
+    b('Carry it along the bank', 'choose', [], { choice_id: 'carry', continuation_id: 'c-1' }),
+    b('Close', 'close_choice'),
+  ]);
+  assert.deepEqual(
+    g.choice.map((x) => x.label),
+    ['Carry it along the bank', 'Close'],
+  );
+  assert.deepEqual(
+    g.place.map((x) => x.label),
+    ["Offer to fetch Bram's lantern"],
+  );
+});
+
+// Breaks: the status line's character label without the hp band, or with a band on ma too (the
+// owner's bands decision: the phrase on hp only). Two pools as GameView carries them.
+test('the character label says the hp band and no other', () => {
+  const pool = (key: string, current: number, maximum: number, band: Pool['band']) =>
+    ({ resource: { key }, current, maximum, band }) as Pool;
+  assert.equal(
+    said([pool('hp', 20, 20, 'perfect_health'), pool('ma', 100, 100, 'perfect_health')]),
+    'Character, hp 20 of 20, perfect health, ma 100 of 100',
   );
 });
