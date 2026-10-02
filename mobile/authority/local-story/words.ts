@@ -21,5 +21,8 @@ const REASON: Record<string, string> = {
   not_present: 'not here',
   not_found: 'not here',
   not_owned: 'you are not holding it',
+  insufficient_resource: 'too exhausted',
 };
+// A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
+export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
