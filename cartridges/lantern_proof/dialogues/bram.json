@@ -1,0 +1,51 @@
+{
+  "npc": "bram",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "lantern",
+      "state": "active"
+    }
+  },
+  "prompt": "dialogue.bram.prompt",
+  "roles": {
+    "bram": {
+      "role": "npc",
+      "npc": "bram"
+    },
+    "lantern": {
+      "role": "item",
+      "item": "lantern"
+    }
+  },
+  "quest": "lantern",
+  "choices": {
+    "carry": {
+      "label": "dialogue.bram.carry",
+      "narration": "proof.carry",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "search_plan",
+          "value": "player_led"
+        }
+      ]
+    },
+    "leave": {
+      "label": "dialogue.bram.leave",
+      "narration": "proof.leave",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "search_plan",
+          "value": "party_led"
+        }
+      ],
+      "hand_over": {
+        "item": "lantern",
+        "to": "bram"
+      }
+    }
+  }
+}

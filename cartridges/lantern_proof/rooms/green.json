@@ -1,0 +1,12 @@
+{
+  "title": "room.green.title",
+  "description": "room.green.description",
+  "exits": {
+    "south": {
+      "to": "landing"
+    },
+    "east": {
+      "to": "reed_bank"
+    }
+  }
+}

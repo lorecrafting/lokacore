@@ -36,7 +36,7 @@ lists only what a file adds to that.
 | `dialogue.schema.json` | dialogues (DialogueDefinition: speaker, talk policy, prompt, bound roles, choices with fact.assign consequences and an optional hand-over, the quest a choice resolves), owned by dialogue | 06 §17, §18, §33, §43; 04 §5.3 | `cartridge_ferry_hash.json` |
 | `reaction.schema.json` | reaction rules (ReactionRule: trigger, when, fact.assign consequences), owned by reaction | 21 §3.4, §11; 06 §14; 04 §5.2-§5.4 | `cartridge_green_hash.json` |
 | `manifest.schema.json` | cartridge, deployment, campaign manifests | 05 §3, §20, §22; 07 §15; 01 A5 | |
-| `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text; its Calendar, owned by calendar), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5; 21 §4 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_ferry_hash.json` (calendar), `cartridge_loader.json` (loader corpus, TypeScript) |
+| `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text; its Calendar, owned by calendar), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5; 21 §4 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_ferry_hash.json` (calendar), `cartridge_lantern_hash.json` (the pre-release proof cartridge), `cartridge_loader.json` (loader corpus, TypeScript) |
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |
 | **Host, platform, verification** | | | |
 | `account.schema.json` | account/run binding, story point reports, admission | 23 §2-§7, §11; 03 §25-§27 | |

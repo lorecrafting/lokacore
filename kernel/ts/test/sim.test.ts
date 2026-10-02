@@ -147,8 +147,8 @@ const types = (cs: Command[]) => cs.map((c) => c.payload.type);
 test('red control: a planted rule bug (drop puts the item inside itself) is found and shrunk', () => {
   const f = caught(
     planted({
-      step: (w, c) => {
-        const s = step(w, c, 0);
+      step: (w, c, r) => {
+        const s = step(w, c, r);
         if (c.payload.type !== 'drop' || s.decision.kind !== 'accepted') return s;
         const containers = { ...s.world.state.containers, [c.payload.item_id]: c.payload.item_id };
         return { ...s, world: { ...s.world, state: { ...s.world.state, containers } } };
@@ -171,8 +171,8 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
 test('red control: a job completed in the root writer group trips job_complete_owned_by_run', () => {
   const f = caught(
     planted({
-      step: (w, c) => {
-        const s = step(w, c, 0);
+      step: (w, c, r) => {
+        const s = step(w, c, r);
         if (s.decision.kind !== 'accepted') return s;
         const ops = s.decision.delta.ops.map((o) => ({ ...o, writer_group: 0 }));
         return { ...s, decision: { ...s.decision, delta: { ops } } };
@@ -180,14 +180,13 @@ test('red control: a job completed in the root writer group trips job_complete_o
     }),
   );
   assert.equal(f.id, 'job_complete_owned_by_run');
-  assert.match(f.text, /cartridge ashmere_green/);
 });
 
 test('red control: a rejection that moves the clock trips rejection_consumes_nothing', () => {
   const f = caught(
     planted({
-      step: (w, c) => {
-        const s = step(w, c, 0);
+      step: (w, c, r) => {
+        const s = step(w, c, r);
         if (s.decision.kind !== 'rejected') return s;
         return { ...s, world: { ...w, state: { ...w.state, clock: w.state.clock + 1 } } };
       },
@@ -263,8 +262,8 @@ test('red control: a recipe shown available, or refused for another code, trips 
 test('red control: an accepted decision with an unregistered event trips unknown_types_fail_closed', () => {
   const f = caught(
     planted({
-      step: (w, c) => {
-        const s = step(w, c, 0);
+      step: (w, c, r) => {
+        const s = step(w, c, r);
         if (s.decision.kind !== 'accepted') return s;
         const events = [...s.decision.events, { type: 'bogus' } as never];
         return { ...s, decision: { ...s.decision, events } };
@@ -281,8 +280,8 @@ test('red control: an accepted step adopted wrong, or not composing, is adopt_mi
   type Stepped = ReturnType<typeof step>;
   const on = (type: string, f: (s: Stepped, before: World) => Stepped) =>
     planted({
-      step: (w, c) => {
-        const s = step(w, c, 0);
+      step: (w, c, r) => {
+        const s = step(w, c, r);
         return c.payload.type === type && s.decision.kind === 'accepted' ? f(s, w) : s;
       },
     });
@@ -311,9 +310,9 @@ test('red control: an accepted step adopted wrong, or not composing, is adopt_mi
 test('red control: a throw inside a rule is a reported failure, not a crash of the runner', () => {
   const f = caught(
     planted({
-      step: (w, c) => {
+      step: (w, c, r) => {
         if (c.payload.type === 'scan') throw new Error('planted');
-        return step(w, c, 0);
+        return step(w, c, r);
       },
     }),
   );

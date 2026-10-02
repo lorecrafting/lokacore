@@ -1,0 +1,48 @@
+{
+  "title": "room.landing.title",
+  "description": "room.landing.description",
+  "exits": {
+    "north": {
+      "to": "green"
+    },
+    "west": {
+      "to": "shelter",
+      "barrier": "old_gate"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "search_plan",
+          "equals": "player_led"
+        }
+      },
+      "description": "room.landing.player_led"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "search_plan",
+          "equals": "party_led"
+        }
+      },
+      "description": "room.landing.party_led"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "time_window",
+          "from": 6,
+          "to": 19
+        }
+      },
+      "description": "room.landing.day"
+    }
+  ]
+}

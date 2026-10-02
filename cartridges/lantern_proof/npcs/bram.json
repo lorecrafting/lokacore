@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "bram",
+    "ferryman"
+  ],
+  "short": "npc.bram.short",
+  "room_line": "npc.bram.room",
+  "description": "npc.bram.description",
+  "room": "landing",
+  "daily_schedule": {
+    "6": "landing",
+    "19": "green"
+  }
+}
