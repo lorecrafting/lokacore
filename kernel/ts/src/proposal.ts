@@ -182,10 +182,9 @@ function now(p: P): World | Admitted {
 
 // One explicit sequence joins: its ops, then its events with its fact_changed placed, numbered
 // after the events before them and queued at `depth`, each with the quest instances it earns at
-// its position (04 §5.2 step 5), or the fault composing the proposal so far. An instance is active
-// at a position when it was active before the sequence or a quest_activated at an earlier position
-// activated it, and no quest_resolved at an earlier position resolved it. ponytail: an exit with
-// no event (to objectives_complete) counts at the sequence's end only; it is charged, then skipped.
+// its position (04 §5.2 step 5), or the fault composing the proposal so far: active before the
+// sequence or by an earlier quest_activated, and not ended by an earlier quest_resolved. ponytail:
+// an exit with no event (to objectives_complete) counts at the sequence's end; charged, skipped.
 function join(
   p: P,
   own: readonly DeltaOp[],
@@ -248,7 +247,9 @@ function react(p: P): Admitted | undefined {
         return BUDGET;
       if (!own) continue;
       p.group++;
-      join(p, own, [], cause(p, next.cause.logical_time, next.cause.id), depth, next.mint);
+      const base = cause(p, next.cause.logical_time, next.cause.id);
+      const failed = join(p, own, [], base, depth, next.mint);
+      if (failed) return failed;
     }
   }
 }
