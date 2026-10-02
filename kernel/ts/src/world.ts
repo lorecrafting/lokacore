@@ -11,6 +11,7 @@ import {
   type Command,
   type DecisionResult,
   type ErrorCode,
+  type Key,
   type Owned,
 } from './contracts.gen.ts';
 import { allocator, rejected, type Mint, type Rule, type Steps, type World } from './decision.ts';
@@ -70,12 +71,19 @@ export const INSTALLED: Installed = {
  * of the capability that owns its type (capability_registry.json), rejecting it with
  * unsupported_capability when that capability is not in the lock or has no rule here.
  */
-export function step(world: World, command: Command, revision: number): Stepped {
+export function step(
+  world: World,
+  command: Command,
+  revision: number,
+  // ponytail: a host trace stores the Command, not this key, so a replay re-decides unkeyed and
+  // a keyed refusal (stricter) can differ there; none does while no two actions match one Command.
+  action?: Key,
+): Stepped {
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
     return { decision: rejected('unsupported_capability'), world };
-  return decideWith(world, command, owner, rule, revision);
+  return decideWith(world, command, owner, rule, revision, action);
 }
 
 type AnyRule = (w: World, c: Command, mint: Mint, steps: Steps) => DecisionResult;
@@ -96,6 +104,7 @@ function decideWith(
   owner: string,
   rule: AnyRule,
   revision: number,
+  action?: Key,
 ): Stepped {
   const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
   if (command.id === NIL) return reject('permission_denied');
@@ -103,7 +112,7 @@ function decideWith(
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
   const steps = { n: 0 }; // one query_steps count: admission, the rule and the proposal (04 §5.4)
-  const refused = refusal(world, command.payload, steps);
+  const refused = refusal(world, command.payload, steps, action);
   const mint = allocator(world, command);
   try {
     const decided = refused ?? admit(owner, rule(world, command, mint, steps));
