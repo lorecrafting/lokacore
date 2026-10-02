@@ -1,4 +1,4 @@
-// size: allow 590, dialogue@1's rule and loader checks, story points included, share the ferry harness
+// size: allow 608, dialogue@1's rule and loader checks, story points included, share the ferry harness
 // dialogue@1 (Early R7/R8 D1, D2; 06 §17, §33, §37, §43; 04 §5.3; 23 §3): talk, choose and
 // close_choice, the pending choice in the GameView, the opened_revision stamp, the story point a
 // choice reaches, and the loader's dialogue and story point checks.
@@ -337,6 +337,29 @@ test('carry keeps the lantern, sets player_led and resolves with outcome carry',
   });
   assert.equal(w.state.containers[LANTERN], BODY);
   assert.equal(quest(w), 'resolved');
+});
+
+// Breaks (23 §3, Decision 8): the story point's outcome taken from the choice id rather than its
+// declared key, or emitted before choice_resolved when no fact change re-sorts the events.
+test('a story point reports its declared outcome key, after choice_resolved', () => {
+  const w = world((c) => {
+    delete bram(c).choices.carry.sequence;
+    const { outcomes } = point(c);
+    outcomes.kept = outcomes.carry;
+    delete outcomes.carry;
+  });
+  const t = ok(ok(ok(w, accept, 1, ACCEPT).world, take, 2, TAKE).world, talk, 3, TALK).world;
+  const { decision } = ok(t, choose('carry'), 4);
+  assert.deepEqual(events(decision), [
+    [1, 'quest_resolved'],
+    [2, 'choice_resolved'],
+    [3, 'story_point_reached'],
+  ]);
+  assert.deepEqual(decision.events[2]!.payload, {
+    type: 'story_point_reached',
+    story_point: ref('story_point', 'lantern_resolved'),
+    outcome: 'kept',
+  });
 });
 
 // Breaks (23 §3): a trigger matched on the choice alone, so a like-named choice of another

@@ -15,16 +15,20 @@
 // choice's fact.assign steps (fact.ts assigned), the quest's transitions and quest_resolved, the
 // choice.resolve at the revision its continuation was opened at, and choice_resolved; one
 // narration line, its participants the actor's body and every bound role, read from the row
-// (06 §43: never re-resolved by name); last, if a story point's outcome names this dialogue and
-// choice, its story_point_reached (23 §3). close_choice: the actor's pending continuation (the
-// ActionSet fills it) closes, nothing else changes (06 §37, §43); else invalid_state.
+// (06 §43: never re-resolved by name); after choice_resolved, if a story point's outcome names
+// this dialogue and choice, its story_point_reached (23 §3). close_choice: the actor's pending
+// continuation (the ActionSet fills it) closes, nothing else changes (06 §37, §43); else
+// invalid_state.
 import type { DialogueChoice, EntityId } from '../contracts.gen.ts';
+import { same } from '../compose.ts';
 import {
   accepted,
   bodyOf,
+  entries,
   event,
   has,
   rejected,
+  values,
   type ChoiceRow,
   type Mint,
   type Rule,
@@ -36,7 +40,6 @@ import {
   choiceIds,
   continuationId,
   definition,
-  reachedBy,
   spokenBy,
   talkRefused,
 } from '../dialogue.ts';
@@ -106,9 +109,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   const at = run.position + quest.length + 1;
   const resolvedChoice = event(world, command, mint, at, chosen);
   // Minted after choice_resolved, so the earlier ids stay put.
-  const reached = reachedBy(world, row.source, choice_id).map((payload) =>
-    event(world, command, mint, at + 1, payload),
-  );
+  const reached = storyPoints(world, command, mint, row, at + 1);
   const participants = row.roles.reduce((o, r) => ({ ...o, [r.role]: r.entity_id }), {
     actor: body,
   });
@@ -142,4 +143,25 @@ function handOver(
   } as const;
   const acquired = { type: 'item_acquired', item_id, holder_id } as const;
   return { ops: [op], events: [event(world, command, mint, 1, acquired)] };
+}
+
+// The story_point_reached of the story point outcome whose trigger is this row's dialogue and
+// choice (23 §3; the loader allows at most one).
+function storyPoints(
+  world: World,
+  command: Command<'choose'>,
+  mint: Mint,
+  row: ChoiceRow,
+  at: number,
+) {
+  const { choice_id } = command.payload;
+  return values(world.cartridge.story_points ?? {}).flatMap(({ key, outcomes }) =>
+    entries(outcomes)
+      .filter(([, t]) => same(t.dialogue, row.source) && t.choice === choice_id)
+      .map(([outcome]) => {
+        const story_point = { ...row.source, kind: 'story_point', key };
+        const payload = { type: 'story_point_reached', story_point, outcome } as const;
+        return event(world, command, mint, at, payload);
+      }),
+  );
 }

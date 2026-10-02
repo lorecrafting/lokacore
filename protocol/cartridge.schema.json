@@ -685,7 +685,7 @@
       ]
     },
     "StoryPointDefinition": {
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a loader check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached last in that decision). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
+      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a loader check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is story_points/<key>.json, its dialogue a short reference.",
       "type": "object",
       "properties": {
         "key": {

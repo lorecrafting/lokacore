@@ -182,8 +182,9 @@ function invoke(s: Story, value: unknown): Reply {
 /**
  * The pending reports of the story points an accepted decision reaches, its story_point_reached
  * events (23 §§3-5; 03 §26), each with its id allocated once here and committed with the
- * decision, its run, lineage, release and the run's binding. A receipt replay never comes here, so it adds no second report. A report
- * that is not a StoryPointReport (a bad host id) throws before anything is stored.
+ * decision, its run, lineage, release and the run's binding. A receipt replay never comes here,
+ * so it adds no second report. A report that is not a StoryPointReport (a bad host id) throws
+ * before anything is stored.
  */
 function reached(s: Story, d: DecisionResult, observed_revision: number): Captured[] {
   if (d.kind !== 'accepted') return [];
