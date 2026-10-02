@@ -55,11 +55,10 @@ const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
  * written: a newer format (`unsupported_save_format`, checked first; the player updates the app,
  * 10 §§31-32), and, offering only the player's new game (settled as any; reopen once `replaced`),
  * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
- * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
- * conflict) before anything is resolved against the current world; a NEW one with a host view
+ * another actor's gets no receipt; a known invocation replays its receipt (altered intent, or a
+ * response that is not a DecisionResult, is a conflict) before anything is resolved against the current world; a NEW one with a host view
  * token (`view:<run>:<revision>`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
- * metadata, 03 §14); else it is resolved, decided
- * once and committed before it is adopted. A fault discards its proposal and gets no receipt
+ * metadata, 03 §14); else it is resolved, decided once and committed before it is adopted. A fault discards its proposal and gets no receipt
  * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4).
  * A failed commit throws, with memory and storage unchanged. A COMMIT whose outcome is unknown
  * fences every call, answered `pending`, until the store settles it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
@@ -174,7 +173,8 @@ function invoke(s: Story, value: unknown): Reply {
   // ponytail: one digest version; a receipt of another fails closed until a second exists.
   const same = old?.intent_digest_version === INTENT_DIGEST_VERSION;
   if (old) {
-    if (!same || old.intent_digest !== intent_digest) return { kind: 'conflict' };
+    const intact = !validate('DecisionResult', old.response).length; // never decided again
+    if (!same || !intact || old.intent_digest !== intent_digest) return { kind: 'conflict' };
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   if (stale(s, i.view_freshness_token)) return { kind: 'stale_view' };

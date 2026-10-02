@@ -255,3 +255,88 @@ test('an older save reopens with its narration and keeps its report on Start ove
   assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
   assert.equal(all(p.sql, 'SELECT * FROM report'), before[2]);
 });
+
+const REPORTS = 'SELECT * FROM report';
+
+// Breaks (R6P-A01; 23 §11; S6a): SQLite's "malformed JSON" (a damaged receipt in an intact file)
+// classified as a corrupt file, or the open's refusal dropped, so Start over deletes the file and
+// the pending report with it instead of the authority's new game in place.
+test('a malformed receipt response: Start over keeps the pending report', () => {
+  const path = save();
+  const a = app(path);
+  a.talk();
+  a.leave();
+  const reports = all(a.sql(), REPORTS);
+  assert.match(reports, /"disposition":"pending"/);
+  a.sql().exec("UPDATE receipt SET response = '{' WHERE revision = 4");
+  a.sql().close();
+  const b = app(path);
+  assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
+  b.c.startOver();
+  assert.equal(b.c.failed(), undefined);
+  assert.equal(all(b.sql(), REPORTS), reports);
+});
+
+// Breaks (SM2a: an open that fails for another reason may be intact): a narration read that fails
+// for a reason other than damage (here a real lock) offered the new game, which erases the save.
+test('a narration read that fails on a lock offers no Start over', () => {
+  const path = save();
+  const a = app(path);
+  a.talk();
+  a.leave();
+  a.sql().close();
+  const other = new DatabaseSync(path);
+  const db = adapt(new DatabaseSync(path));
+  const c = playSmoke(
+    () => ({
+      ...db,
+      getFirstSync: <T>(s: string, ...p: P) => {
+        if (s.includes("'$.narration'")) other.exec('BEGIN EXCLUSIVE');
+        return db.getFirstSync<T>(s, ...p);
+      },
+    }),
+    () => {},
+    FERRY as never,
+    { newId: randomUUID },
+  );
+  const failed = c.failed()!;
+  assert.deepEqual(
+    [failed.message, failed.replace, failed.newGame],
+    ['database is locked', false, undefined],
+  );
+});
+
+// Breaks (R6P-A02; ROADMAP SM2a): a save whose rows parse but cannot be shown (no place for the
+// body, a null choice, a resource without its fields) opens, and the first screen throws outside
+// the save-error screen; or its Start over replaces the intact file instead of the new game.
+for (const [what, damage] of [
+  ['no body row', `DELETE FROM state_row WHERE section = 'containers' AND key = '${BODY}'`],
+  ['a null choice', "UPDATE state_row SET value = 'null' WHERE section = 'choices'"],
+  ['an empty resource', "UPDATE state_row SET value = '{}' WHERE section = 'resources'"],
+])
+  test(`a save with ${what}: save_corrupt, Start over repairs it in place`, () => {
+    const path = save();
+    const a = app(path);
+    a.talk();
+    a.sql().exec(damage!);
+    a.sql().close();
+    const b = app(path);
+    assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
+    b.c.startOver();
+    assert.equal(b.c.failed(), undefined);
+    assert.equal(b.screen().view.place.title.key, 'room.ferry_landing.title');
+  });
+
+// Breaks (R6P-A03; 03 §14 original outcome): a receipt whose response is not a DecisionResult
+// replayed as {kind: 'saved', replay: true, decision: null}, or taken as no receipt (decided again).
+test('a receipt response that is not a decision replays as a conflict', () => {
+  const path = save();
+  const a = processOn(path);
+  assert.deepEqual(saved(send(a, 1, 'coil_rope')), [false, 1]);
+  a.sql.exec("UPDATE receipt SET response = 'null'");
+  a.sql.close();
+  const b = processOn(path);
+  const receipts = all(b.sql, RECEIPTS);
+  assert.deepEqual(send(b, 1, 'coil_rope'), { kind: 'conflict' });
+  assert.equal(all(b.sql, RECEIPTS), receipts);
+});

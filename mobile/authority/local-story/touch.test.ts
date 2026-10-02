@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openSmoke, playSmoke } from './smoke.ts';
+import { openSmoke } from './smoke.ts';
 import { absent } from '../../app/book/model.ts';
 import { reason } from './words.ts';
 
@@ -103,27 +103,6 @@ test('a reopen shows the last committed narration first; a fresh game none', () 
   a.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
   a.sql.close();
   assert.deepEqual(processOn(path).screen().log, [LEAVE]);
-});
-
-// Breaks (03 §15, OFF-07): a reopen that swallows a corrupt narration receipt (SQLite's "malformed
-// JSON") and plays on over it, so the damage is never shown and no start over is offered.
-test('a corrupt narration receipt fails the reopen, with start over offered', () => {
-  const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
-  const a = processOn(path);
-  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
-  a.sql.exec(
-    "UPDATE receipt SET response = '{' WHERE revision = (SELECT max(revision) FROM receipt)",
-  );
-  a.sql.close();
-  const c = playSmoke(
-    () => adapt(new DatabaseSync(path)),
-    () => {},
-    LANTERN,
-    { newId: randomUUID },
-  );
-  assert.equal(c.game(), undefined);
-  assert.match(c.failed()!.message, /malformed JSON/);
-  assert.equal(c.failed()!.replace, true);
 });
 
 // Breaks (06 §43, :1402): a choice that blocks walking away, answers open without Bram, a Close

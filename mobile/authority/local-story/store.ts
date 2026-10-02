@@ -125,8 +125,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
 
 // ponytail: SQLite's own messages for SQLITE_NOTADB and SQLITE_CORRUPT, as node:sqlite reports
 // them; expo-sqlite's wording is checked on the phone (S6b), its error codes if it differs.
-/** True when SQLite reports the file is not a database or a page of it corrupt (OFF-07). */
-export const corrupt = (e: unknown) => /file is not a database|malformed/.test(String(e));
+/** True when SQLite reports the file is not a database or a page of it corrupt, not bad JSON (OFF-07). */
+export const corrupt = (e: unknown) => /file is not a database|malformed(?! JSON)/.test(String(e));
 
 /**
  * Makes the save `fresh` at revision 0 under the identity `meta`, with no receipts, in one

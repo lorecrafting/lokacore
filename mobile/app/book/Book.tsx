@@ -33,7 +33,6 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   const [loaded, fontError] = useFonts(fonts);
   const [stack, setStack] = useState<Page[]>([]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
-  const [from, setFrom] = useState(0); // the room log starts here: the new place's heading line
   const [, redraw] = useState(0);
   if (!loaded && !fontError) return null;
 
@@ -47,7 +46,8 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   const press = (b: Button) => {
     const placeId = view.place.id;
     smoke.press(b);
-    if (smoke.screen().view.place.id !== placeId) setFrom(smoke.screen().log.length - 1); // smoke's heading
+    const { log } = smoke.screen(); // a new place's room log starts at its heading, smoke's last line
+    if (smoke.screen().view.place.id !== placeId) log.splice(0, log.length - 1);
     go([], 1);
   };
   const page = stack.at(-1);
@@ -59,7 +59,7 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={flip.turn} dir={flip.dir}>
-        <Body {...ctx} page={page} from={from} />
+        <Body {...ctx} page={page} />
       </Turn>
       <Bottom {...ctx} back={page && (() => go(stack.slice(0, -1), -1))} />
     </SafeAreaView>
@@ -79,7 +79,7 @@ function Bottom(p: {
 }) {
   const { view, text, pending, fault } = p.screen;
   return (
-    <View style={{ borderTopWidth: 1, borderColor: paper.line, padding: 8 }}>
+    <View style={{ padding: 8 }}>
       {p.back ? (
         <Back onPress={p.back} />
       ) : (
@@ -160,7 +160,6 @@ function Body(p: {
   page?: Page;
   screen: Screen;
   g: ReturnType<typeof group>;
-  from: number;
   press: (b: Button) => void;
   walk: (direction: string) => void;
   open: (p: Page) => void;
@@ -170,16 +169,7 @@ function Body(p: {
   const { page } = p;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
   if (!page)
-    return (
-      <RoomPage
-        view={view}
-        text={text}
-        log={log.slice(p.from)}
-        g={p.g}
-        press={p.press}
-        open={openThing}
-      />
-    );
+    return <RoomPage view={view} text={text} log={log} g={p.g} press={p.press} open={openThing} />;
   if (page.kind === 'thing') {
     const t = [...view.entities, ...view.inventory].find((e) => e.id === page.id);
     return (

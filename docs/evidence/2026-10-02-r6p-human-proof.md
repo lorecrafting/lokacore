@@ -79,13 +79,17 @@ Lines are JSON lines; time spent is null (not recorded).
 - World parameters P6 (fixed seed), P6b row 14 touch-to-photon, the `kernel/ts` audit nits with the
   `target.ts:34` pointer, P5a replay without the key: R7/R8 for chapter one.
 
-## Gate passes only after the save fix
+## The save fix (#116) and the build the owner played
 
-The Astra audit below is FAIL. The gate passes only after the fix slice (branch `r6p-savefix`) merges. The
-owner played 64a2b12; the gate build will include those fixes, so the builds are not identical. The fixes
-touch only the load, replay and recovery paths and the log length, not what the owner touched by hand.
-R6P-A01 is fixed there; P4A-2 (index damage loses readable pending reports) is a different case and stays
-carried to R12.
+The Astra audit below is FAIL; #116 (branch `r6p-savefix`, [review](../reviews/2026-10-02-r6p-savefix-review.md))
+fixed R6P-A01, A02 and A04 and carried A03's content-tamper case to R12, before this gate merged. The owner
+played 64a2b12; the gate build includes #116 (and #115), so the builds differ. #116 changes code the owner's
+play ran: the load path at open (A02; the G3 airplane resume reopens through it) and the log the owner reads
+(A04 caps it at 200 lines); A01 changes only the damaged-receipt path, which no play reaches. #116 reran every
+automated device row on the iPhone 11 at d37b268 ([evidence](2026-10-02-r6p-savefix-iphone11/README.md)): 0
+mismatches, red controls red. The owner has not replayed by touch on the #116 build; the owner did confirm
+on it that a bottom-edge drag no longer triggers iOS (#115, paraphrased). P4A-2 (index damage loses readable
+pending reports) is a different case and stays carried to R12.
 
 ## Codex Astra gate audit (gpt-6-astra, 64a2b12)
 

@@ -40,7 +40,7 @@ test('stair nodes are reached by dragging out to them, only when the exit exists
 // than those the drag began on, so a redraw during the drag turns it into a press on the new screen
 // and commits. The Lantern on real SQLite; Book's walk presses that screen's move button.
 const LANTERN = '../../../protocol/fixtures/cartridge_lantern_hash.json';
-test('a drag begun before a redraw walks on its own screen: stale_view, no commit', () => {
+function lantern() {
   type P = (string | number | null)[];
   const sql = new DatabaseSync(':memory:');
   const smoke = openSmoke(
@@ -54,6 +54,10 @@ test('a drag begun before a redraw walks on its own screen: stale_view, no commi
     JSON.parse(readFileSync(new URL(LANTERN, import.meta.url), 'utf8')),
     randomUUID,
   );
+  return { sql, smoke };
+}
+test('a drag begun before a redraw walks on its own screen: stale_view, no commit', () => {
+  const { sql, smoke } = lantern();
   const props = (s = smoke.screen()) => ({
     exits: s.view.exits,
     go: (d: string) =>
@@ -77,4 +81,15 @@ test('a drag begun before a redraw walks on its own screen: stale_view, no commi
   g.onPanResponderRelease();
   assert.equal(smoke.screen().log.at(-1), 'The page had changed; here it is again.');
   assert.equal(sql.prepare('SELECT revision FROM head').get()!.revision, 1);
+});
+
+// Breaks (R6P-A04): the line of a drag toward a closed exit (Book's refused pushes it onto the
+// smoke's log) outside the log's cap, so such drags grow the log without bound.
+test('refused drags do not grow the log without bound', () => {
+  const { smoke } = lantern();
+  const drags = () => {
+    for (let i = 0; i < 300; i++) smoke.screen().log.push("You can't go that way.");
+    return smoke.screen().log.length;
+  };
+  assert.equal(drags(), drags());
 });

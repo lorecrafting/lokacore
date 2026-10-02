@@ -1,0 +1,8 @@
+Planted red-control build (BUILD = 'savefix-planted'), applied on top of the harness build:
+1. mobile/app/p6/data.ts: in the expected bytes of carry2/lantern-carry[7] state, "clock":21600 -> "clock":31600.
+2. mobile/authority/local-story/smoke.ts, in reread's narration catch, A01 reverted:
+-    if (!/malformed JSON/.test(String(e))) throw e; // a full disk or I/O: the save may be intact
++    throw e; // PLANTED red control: A01 reverted
++    if (!/malformed JSON/.test(String(e))) throw e; // a full disk or I/O: the save may be intact
+Mutant build (BUILD = 'savefix-mutant'): ../2026-10-02-r6p-rerun-iphone11/dev-mutant.diff (rotl(s3, 11) -> 12).
+Both reverted afterwards; `git diff d37b268 -- kernel mobile` was empty before the clean build.
