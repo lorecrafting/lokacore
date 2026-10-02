@@ -254,3 +254,19 @@ Sol now does most cross-vendor reviews, and fix re-checks always. Reword it to "
 - The new record's reason is accurate: D2's Astra first review was APPROVE WITH NOTES, with one
   wording fix; G's was APPROVE, with none.
 - Simplicity: the diff adds one record, and every other change replaces text. Nothing to delete.
+
+## Codex Astra gate review (verbatim, 2ec9815)
+
+**CHANGES REQUIRED — PR #95, head `2ec9815`**
+
+- **G1 — blocker — `docs/ROADMAP.md:54`:** #96’s activation-then-acquisition carry has no stage landing row. `quest_delivery.test.ts:139` explicitly expects `conflicting_write`; `2026-10-01-r78-qfix-review.md:37–43` carries its resolution to chapter-one content. **Fix:** add it to “R7/R8 for chapter one,” including the required reviewed widening of 04 §5.3 before enabling that composition. Include #96 and its review in the closure record at line 52.
+
+- **G2 — blocker — `docs/ROADMAP.md:54`:** #96’s untested overlay branch also lacks a stage landing row. The review’s lines 60 and 69–71 document the surviving `before = p.world` mutant; line 100 confirms PM carry. Current code uses `now(p)` at `proposal.ts:197`, but current jobs cannot exercise the distinction. **Fix:** assign the regression to the first slice allowing jobs to emit acquisitions, explicitly in a stage row.
+
+- **G3 — nit — `docs/features.json:379`:** The manually listed `kernel/ts/src/rules/dialogue.ts` duplicates the generator-derived module, appearing twice in `features.gen.md`. This misses the brief’s duplicate-entry tidy check. **Fix:** remove the manual entry and regenerate.
+
+Other scoped deliverables have literal/fixture evidence or named stage deferrals. The original brief’s carries are present. WORKFLOW, its decision record, and the size rule agree with the settlement. Both original proposal blockers are fixed; no additional kernel defect found in the reviewed paths.
+
+Validation: 114 focused tests passed; 13 transcripts/104 decisions replayed byte-identically; 10,000 fresh simulations plus two regression seeds passed. Typecheck, docs links, feature generation and TS size checks passed. Full disk/device and `check_all.sh` verification were not rerun. No files edited.
+
+Size watchlist: `cartridge_refs.ts` 315/315; `lib/loka/core/compose.ex` 313/315; `lib/loka/content/checks.ex` 312/315; local-story `authority.ts` 307/310; play `main.ts` 315/315. After #96, `proposal.ts` is also 300/300.
