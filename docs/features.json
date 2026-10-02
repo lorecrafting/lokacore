@@ -376,7 +376,6 @@
       "MutationTarget"
     ],
     "modules": [
-      "kernel/ts/src/rules/dialogue.ts",
       "kernel/ts/src/dialogue.ts",
       "kernel/ts/src/actions.ts",
       "kernel/ts/src/proposal.ts",

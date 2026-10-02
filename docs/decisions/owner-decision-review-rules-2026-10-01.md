@@ -5,7 +5,8 @@ smoothed, not quoted. No checker can verify it against the chat.
 
 Supersedes in part the [2026-09-30 review-flow decisions](owner-decisions-review-flow-2026-09-30.md)
 ("Astra for hard reviews (escalate freely)") and the escalation ladder's "codex Astra for a
-hard review" in the [autonomy decision](owner-decision-autonomy-2026-09-30.md) (now Sol).
+hard review" in the [autonomy decision](owner-decision-autonomy-2026-09-30.md) (now Sol), and Fable as a
+rare backstop in both (now only a codex stand-in).
 
 ## Astra scope
 
@@ -20,9 +21,10 @@ every fix re-check.
 
 ## Fable as stand-in
 
-Owner (paraphrased): if codex is out of quota, a Fable subagent stands in for it on a kernel
-or contract-freeze slice's head, never on fix re-reviews. This is an exception to "Fable
-rarely", the rare backstop of the [2026-09-30 decisions](owner-decisions-review-flow-2026-09-30.md).
+Owner (paraphrased): Fable is used only if codex is out of quota: a Fable subagent then stands
+in for it on a kernel or contract-freeze slice's head, never on fix re-reviews. Fable's rare
+backstop role of the [2026-09-30 decisions](owner-decisions-review-flow-2026-09-30.md) and the
+ladder's Fable rung end.
 
 ## Opus drafts, the PM decides
 

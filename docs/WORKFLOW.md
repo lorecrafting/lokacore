@@ -10,11 +10,10 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](decisions/owner-decision-sonnet-developers-2026-09-30.md)) | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable rarely (see below) | independent review, review record |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable only as codex stand-in (see below) | independent review, review record |
 
 **Models** ([owner decision](decisions/owner-decisions-review-flow-2026-09-30.md)): a slice is
-reviewed once, with a narrow fix check, by a reviewer on the highest Opus; the PM passes
-`model: "fable"` only as a rare backstop for very complex work (it spends Claude Code tokens).
+reviewed once, with a narrow fix check, by a reviewer on the highest Opus.
 **Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
 our own independent review, never instead of it: the PM may add it to any slice beyond
 docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only; `-m` Astra on gate reviews and on changes to
@@ -23,8 +22,8 @@ docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only;
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
 answer verbatim to the review record, and adds its findings to the fix list.
-If codex is out of quota, a Fable subagent stands in for it on a kernel or contract-freeze
-slice's head (an exception to "Fable rarely"), never on fix re-reviews
+Fable is used only if codex is out of quota: a Fable subagent stands in for it on a kernel or
+contract-freeze slice's head, never on fix re-reviews
 ([owner decision](decisions/owner-decision-review-rules-2026-10-01.md)).
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
@@ -32,8 +31,7 @@ Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
 **Keep going.** Once the owner has approved the slice plan, the PM runs steps 2 to 7 to the
 merge without asking permission at each step, and settles judgment calls itself. When a
-decision is hard, escalate in order: the `advisor` tool; then a higher model by hand (a
-Fable subagent, or codex Sol for a hard review); only if both fail to settle it, or it is
+decision is hard, escalate in order: the `advisor` tool; then codex Sol by hand; only if both fail to settle it, or it is
 critical, stop for the owner ([owner decision](decisions/owner-decision-autonomy-2026-09-30.md)).
 A ladder answer is advice to the PM: it never changes a reviewer's finding or verdict and is
 never the owner's OK. Critical means what [AGENTS.md](../AGENTS.md) and the owner decisions

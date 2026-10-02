@@ -28,8 +28,9 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs` (red control
   `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
   1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree
-  a split would be worse. An existing allowance is never raised: a slice that would push a
-  file past its cap splits the file instead.
+  a split would be worse. Source files: a file at its limit (300 lines, or its existing
+  `size: allow`) splits instead of growing; no new `size: allow` is added to a source file and
+  an existing one is never raised. Test files keep the escape hatch.
 - `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
 - `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
