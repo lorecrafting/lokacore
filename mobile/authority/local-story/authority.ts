@@ -1,4 +1,3 @@
-// size: allow 310, one authority on one connection: open, invoke, settle and new game share Story
 // The local Story authority (07 §§8-9; 03 §§14-15; ADR-072; 10 §§31-32): the world in memory,
 // one SQLite save, and 03 §14's admission order. invoke is synchronous on one connection, so
 // commands run one at a time, as WorldInstance serializes them online (07 §8).
@@ -8,9 +7,10 @@ import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
-import { commit, corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
-import type { Captured, Db, Meta, Receipt } from './store.ts';
-import { catchUp, traceCommand, type CommitState, type RunIds } from './trace.ts';
+import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
+import type { Captured, Db, Meta } from './store.ts';
+import { adopt, save, settle, type Story, type Trace } from './save.ts';
+import { catchUp, observe, traceCommand, type CommitState, type RunIds } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -49,9 +49,9 @@ const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
  * conflict) before anything is resolved against the current world; a NEW one is resolved, decided
  * once and committed before it is adopted. A fault discards its proposal and gets no receipt
- * (ADR-075 §4; 04 §5.2 step 7). A failed commit throws, with memory and storage unchanged. A
- * COMMIT whose outcome is unknown fences every call, answered `pending`, until the store settles
- * it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
+ * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4).
+ * A failed commit throws, with memory and storage unchanged. A COMMIT whose outcome is unknown
+ * fences every call, answered `pending`, until the store settles it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
  */
 export function openStory(db: Db, releases: readonly [Release, ...Release[]], host: Host) {
   const { fresh } = releases[0]; // meta stays undefined until a save is loaded or replaced
@@ -87,29 +87,21 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
   };
 }
 
-type Trace = (at: number, ...states: CommitState[]) => void;
-type Story = {
-  readonly db: Db;
-  readonly releases: readonly [Release, ...Release[]];
-  fresh: World; // the open save's release
-  readonly host: Host;
-  world: World;
-  revision: number;
-  meta: Meta; // undefined only on a corrupt save, until its new game is adopted
-  // The fence of a new game whose COMMIT outcome is unknown, and its run.
-  game?: { fence: () => undefined; run_id: string } | undefined;
-  behind: boolean; // the trace misses a committed entry or its header; catch up before the next
-  // Settles the attempt whose COMMIT outcome is unknown, throwing while it still is; no decision
-  // runs until it has.
-  fence?: (() => Receipt | undefined) | undefined;
-};
-
 const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
 const ids = (s: Story): RunIds => ({
   content_hash: s.meta.pin.content_hash,
   kernel_version: s.host.kernel_version,
   seed: s.meta.seed as number[],
   run_id: s.meta.run_id,
+});
+
+/** A budget fault's evaluation.budget_exceeded (04 §5.4): the run's ids, its command and revision. */
+const budget = (s: Story, command_id: string, limit: string) => ({
+  format: 'loka-obs-v1',
+  event: 'evaluation.budget_exceeded',
+  store: 'diagnostics',
+  ids: { ...ids(s), command_id, revision: s.revision },
+  data: { limit },
 });
 
 /** A new save's identity: no parent, its initial RNG, the release it pins (10 §32), its binding. */
@@ -153,7 +145,7 @@ function invoke(s: Story, value: unknown): Reply {
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   const command = resolve(s.world, id);
-  const next =
+  const next: ReturnType<typeof step> =
     'kind' in command
       ? { world: s.world, decision: command }
       : step(s.world, command, s.revision + 1);
@@ -164,6 +156,7 @@ function invoke(s: Story, value: unknown): Reply {
   };
   if (d.kind === 'fault') {
     trace(s.revision, 'unavailable');
+    if (next.limit) observe(s.db, budget(s, command_id, next.limit));
     return { kind: 'fault', code: d.code };
   }
   // ponytail: no rule emits effects yet; the outbox (03 §16) comes with the first that does.
@@ -198,60 +191,6 @@ function reached(s: Story, d: DecisionResult, observed_revision: number): Captur
     if (validate('StoryPointReport', report).length) throw new Error('not a StoryPointReport');
     return [{ lineage_id, binding, report: report as never }];
   });
-}
-
-/** Commits a NEW attempt's decision, then adopts it; the reply never claims an unknown save. */
-function save(
-  s: Story,
-  next: { world: World; decision: DecisionResult },
-  trace: Trace,
-  reports: Captured[],
-  r: Receipt,
-): Reply {
-  const at = r.revision;
-  let committed: boolean;
-  try {
-    committed = commit(s.db, next.world, next.decision, r, reports);
-  } catch (e) {
-    trace(at, 'failed');
-    throw e;
-  }
-  if (committed) {
-    [s.world, s.revision] = [next.world, at];
-    trace(at, 'committed');
-    return { kind: 'saved', replay: false, revision: at, decision: r.response };
-  }
-  s.fence = () => {
-    const got = reconcile(s.db, () => receipt(s.db, r.scope, r.invocation_id));
-    if (got) adopt(s);
-    // Traced once settled, with its follow-up; a process that dies while fenced traces neither.
-    trace(at, 'unknown', got ? 'committed' : 'failed');
-    return got;
-  };
-  let settled: Receipt | undefined;
-  try {
-    settled = settle(s);
-  } catch {
-    return { kind: 'pending' };
-  }
-  if (!settled) throw new Error('COMMIT failed; nothing was saved');
-  return { kind: 'saved', replay: false, revision: settled.revision, decision: settled.response };
-}
-
-/** The fenced attempt's receipt once settled from the store, undefined if not committed. */
-function settle(s: Story): Receipt | undefined {
-  const r = s.fence!(); // throws while still unknown
-  s.fence = undefined;
-  return r;
-}
-
-/** Memory takes the saved head, identity and world, after a commit it did not write itself. */
-function adopt(s: Story) {
-  const saved = load(s.db, s.fresh, () => {
-    throw new Error('no save');
-  });
-  if (!saved) throw new Error('save corrupt');
-  Object.assign(s, saved);
 }
 
 /**

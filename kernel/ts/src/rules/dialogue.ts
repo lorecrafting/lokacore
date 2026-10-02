@@ -32,6 +32,7 @@ import {
   type ChoiceRow,
   type Mint,
   type Rule,
+  type Steps,
   type World,
 } from '../decision.ts';
 import {
@@ -50,23 +51,23 @@ type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
   readonly payload: Extract<Parameters<Rule<'dialogue'>>[1]['payload'], { type: T }>;
 };
 
-export const decide: Rule<'dialogue'> = (world, command, mint) => {
+export const decide: Rule<'dialogue'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
-  if (p.type === 'talk') return talk(world, { ...command, payload: p }, mint);
+  if (p.type === 'talk') return talk(world, { ...command, payload: p }, mint, steps);
   const choices = world.state.choices ?? {};
   const row = has(choices, p.continuation_id) ? choices[p.continuation_id] : undefined;
   if (!row || row.status !== 'pending' || row.actor_id !== p.actor_id)
     return rejected('invalid_state');
-  if (p.type === 'choose') return choose(world, { ...command, payload: p }, mint, row);
+  if (p.type === 'choose') return choose(world, { ...command, payload: p }, mint, row, steps);
   const op = { op: 'choice.close', writer_group: 0, continuation_id: p.continuation_id } as const;
   return accepted(world, 'choice_closed', [op], []);
 };
 
-function talk(world: World, command: Command<'talk'>, mint: Mint) {
+function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) {
   const p = command.payload;
   const d = spokenBy(world, p.target_id);
   if (!d) return rejected('not_found');
-  if (talkRefused(world, p.actor_id, p.target_id)) return rejected('invalid_state');
+  if (talkRefused(world, p.actor_id, p.target_id, steps)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const op = {
@@ -83,14 +84,14 @@ function talk(world: World, command: Command<'talk'>, mint: Mint) {
   return accepted(world, 'choice_opened', [op], [event(world, command, mint, 1, opened)]);
 }
 
-function choose(world: World, command: Command<'choose'>, mint: Mint, row: ChoiceRow) {
+function choose(world: World, command: Command<'choose'>, mint: Mint, row: ChoiceRow, used: Steps) {
   const { actor_id, choice_id, continuation_id } = command.payload;
   if (!row.choice_ids.includes(choice_id)) return rejected('invalid_state');
   const code = blocked(world, row);
   if (code) return rejected(code);
   const d = definition(world, row.source);
   const option = d.choices[choice_id]!;
-  const resolved = d.quest && resolution(world, actor_id, d.quest, choice_id, 0);
+  const resolved = d.quest && resolution(world, actor_id, d.quest, choice_id, 0, used);
   if (typeof resolved === 'string') return rejected(resolved);
   const body = bodyOf(world, actor_id)!;
   const given = handOver(world, command, mint, row, option, body);

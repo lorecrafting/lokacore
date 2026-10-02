@@ -152,7 +152,7 @@ const command = (r: Run, parsed: { type: string }): Command =>
 // Decides one command, prints what the player sees, the state hash and the step time, and
 // returns its game_trace line; the latency metric goes to operations.
 function turn(r: Run, cmd: Command, measured = true): string {
-  const { trace, latency, decision } = decide(r, cmd);
+  const { trace, latency, decision } = decide(r, cmd, measured);
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
   const p = cmd.payload as { type: string; target_id?: EntityId; item_id?: EntityId };
   const name = (id?: string) => say(cartridge, r.world.entities[id!]?.short ?? '');

@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS receipt (scope TEXT NOT NULL, invocation_id TEXT NOT 
   response TEXT NOT NULL, PRIMARY KEY (scope, invocation_id), UNIQUE (scope, command_id)) STRICT;
 CREATE TABLE IF NOT EXISTS trace (ordinal INTEGER NOT NULL, command_id TEXT,
   commit_state TEXT, record TEXT NOT NULL) STRICT;
+CREATE TABLE IF NOT EXISTS observation (record TEXT NOT NULL) STRICT;
 CREATE TABLE IF NOT EXISTS save (one INTEGER PRIMARY KEY CHECK (one = 1), format TEXT NOT NULL,
   lineage_id TEXT NOT NULL, run_id TEXT NOT NULL, parent TEXT NOT NULL, seed TEXT NOT NULL,
   pin TEXT NOT NULL, binding TEXT) STRICT;
@@ -98,7 +99,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   }
   // Half a save (rows or receipts without their table too): never taken for a new one, unwritten.
   if (!head || !save || !['state_row', 'receipt'].every(table)) return undefined;
-  db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report)
+  db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report, observation)
   // ponytail: a corrupt receipt page fails here, at open, only on the path to its first row.
   db.getFirstSync('SELECT * FROM receipt LIMIT 1'); // the table, not its index
   type Head = { revision?: number; clock?: number; rng?: string };

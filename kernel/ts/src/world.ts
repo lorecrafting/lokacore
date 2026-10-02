@@ -3,6 +3,7 @@
 // (lint/rules/ts-rule-module-*.yml); this module routes each command to the rule of the
 // capability that owns it (capability_registry.json); proposal.ts proposes, composes and adopts
 // its result.
+import { over } from './compose.ts';
 import { KernelError } from './error.ts';
 import type { Installed } from './cartridge.ts';
 import {
@@ -12,7 +13,7 @@ import {
   type ErrorCode,
   type Owned,
 } from './contracts.gen.ts';
-import { allocator, rejected, type Mint, type Rule, type World } from './decision.ts';
+import { allocator, rejected, type Mint, type Rule, type Steps, type World } from './decision.ts';
 import { invariants as factInvariants } from './fact.ts';
 import { refusal } from './actions.ts';
 import * as action_recipe from './rules/action_recipe.ts';
@@ -77,7 +78,7 @@ export function step(world: World, command: Command, revision: number): Stepped 
   return decideWith(world, command, owner, rule, revision);
 }
 
-type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
+type AnyRule = (w: World, c: Command, mint: Mint, steps: Steps) => DecisionResult;
 
 /**
  * The admission boundary around one rule call. Before the rule: the nil CommandId is reserved
@@ -86,7 +87,8 @@ type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
  * the actor's ActionSet does not offer or offers unavailable (actions.ts refusal; 04 §19, ACT-09).
  * A KernelError thrown while deciding is an evaluator_error fault with the world unchanged. After it: admit() checks the
  * result, then its proposal (proposal.ts, quest deliveries included) composes or faults before the
- * changes are adopted.
+ * changes are adopted. One query_steps counter spans admission, the rule and the proposal; past
+ * the limit after admission and the rule, the decision faults budget_exceeded, even a refusal.
  */
 function decideWith(
   world: World,
@@ -100,11 +102,16 @@ function decideWith(
   if (command.world_context_id !== world.context) return reject('not_found');
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
-  const refused = refusal(world, command.payload);
-  if (refused) return reject(refused);
+  const steps = { n: 0 }; // one query_steps count: admission, the rule and the proposal (04 §5.4)
+  const refused = refusal(world, command.payload, steps);
   const mint = allocator(world, command);
   try {
-    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint, revision);
+    const decided = refused ?? admit(owner, rule(world, command, mint, steps));
+    // 04 §5.4: an evaluation past query_steps faults, whatever admission or the rule answered.
+    const limit = over({ query_steps: steps.n });
+    if (limit) return { decision: { kind: 'fault', code: 'budget_exceeded' }, world, limit };
+    if (typeof decided === 'string') return reject(decided);
+    return adopt(world, decided, command as Actor, mint, revision, steps);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
     if (!(e instanceof KernelError)) throw e;

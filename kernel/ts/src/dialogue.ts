@@ -18,7 +18,14 @@ import type {
   VersionedPolicy,
 } from './contracts.gen.ts';
 import { same } from './compose.ts';
-import { bodyOf, refString, type ChoiceRow, type Mint, type World } from './decision.ts';
+import {
+  bodyOf,
+  refString,
+  type ChoiceRow,
+  type Mint,
+  type Steps,
+  type World,
+} from './decision.ts';
 import { holds } from './policy.ts';
 import { cmp } from './validate.ts';
 
@@ -102,11 +109,16 @@ export const spokenBy = (world: World, target: EntityId | undefined) =>
  * Whether `target`'s dialogue refuses `actor`'s talk now, its policy failing or the actor having a
  * pending choice (one per actor): the talk rule's check after admission, and the GameView's for
  * every talk listed on the target, since a cartridge action with command talk (an alias) is
- * admitted on its own policy.
+ * admitted on its own policy. Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
-export function talkRefused(world: World, actor: CharacterId, target: EntityId | undefined) {
+export function talkRefused(
+  world: World,
+  actor: CharacterId,
+  target: EntityId | undefined,
+  steps: Steps = { n: 0 },
+) {
   const d = spokenBy(world, target);
-  const ctx = { target, steps: { n: 0 } };
+  const ctx = { target, steps };
   return d !== undefined && (!holds(world, actor, d.policy.root, ctx) || !!pending(world, actor));
 }
 

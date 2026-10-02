@@ -195,7 +195,10 @@ export type Rule<C extends keyof Owned> = (
     readonly payload: Extract<CommandPayload, { type: Owned[C]['command'] }>;
   },
   mint: Mint,
+  steps?: Steps, // the decision's query_steps counter (04 §5.4), for a rule that reads a policy
 ) => Decision<Owned[C]['event'] | Composed<C>>;
+/** A decision's count of evaluated policy leaves (04 §5.4 query_steps), shared by all its parts. */
+export type Steps = { n: number };
 
 /** The six compass directions, in RoomDefinition exits order (room.schema.json). */
 export const COMPASS: readonly Key[] = Object.keys(

@@ -152,11 +152,14 @@ test("a wait runs Bram's arrival's reactions to quiescence before Maud's job", (
 
 // Breaks (04 §5.4, 06 §14): a cycle not stopped (the step never returns), stopped by truncating
 // the chain and committing it (it would also fault conflicting_write: two groups write bell_up),
-// or committing any part of the move.
+// or committing any part of the move, or the limit misnamed. By hand: ring at depth 1, then two
+// deliveries and two guard leaves per depth, so depth 33 comes at delivery 64 and 63 leaves, far
+// under deliveries (8192) and query_steps (32768): reaction_depth.
 test('entering the belfry starts a cycle that faults budget_exceeded and commits nothing', () => {
   const green = move(world(), 'north').world;
   const s = move(green, 'east');
   assert.deepEqual(s.decision, { kind: 'fault', code: 'budget_exceeded' });
+  assert.equal(s.limit, 'reaction_depth');
   assert.equal(s.world, green);
 });
 
@@ -188,12 +191,14 @@ test('a chain of 32 deliveries commits; one of 33 exceeds reaction_depth', () =>
   ] as const) {
     const s = move(move(chain(n), 'north').world, 'east');
     assert.equal(s.decision.kind, kind, `${n}`);
+    assert.equal(s.limit, kind === 'fault' ? 'reaction_depth' : undefined);
+    assert.equal('limit' in s, kind === 'fault'); // absent, not undefined, when accepted
   }
 });
 
 // A world whose reactions are only `n` rules on entering the belfry, each with an empty apply
-// (no operation or event) and `rest`; policy@1 locked for an `all`.
-const belfry = (n: number, rest: object = {}) =>
+// (no operation or event) and `rest`; policy@1 locked for an `all`; then `more`'s edit.
+const belfry = (n: number, rest: object = {}, more = (_: any) => {}) =>
   world((c) => {
     c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;
     c.reactions = {};
@@ -204,8 +209,13 @@ const belfry = (n: number, rest: object = {}) =>
         apply: [],
         ...rest,
       };
+    more(c);
   });
-const enter = (w: World) => move(move(w, 'north').world, 'east').decision.kind;
+// The move into the belfry: accepted, or the limit its budget fault names.
+const enter = (w: World) => {
+  const s = move(move(w, 'north').world, 'east');
+  return s.limit ?? s.decision.kind;
+};
 const leaf = (equals: boolean) => ({ op: 'fact_compare', fact: ref('fact', 'bell_up'), equals });
 
 // Breaks (04 §5.2, §5.4: a delivery is each rule an event triggers, its guard evaluated at
@@ -215,22 +225,95 @@ test('8193 deliveries of one event exceed deliveries, whether their `when` holds
   const never = { when: { policy_version: 1, root: leaf(true) } }; // bell_up is false
   for (const rest of [{}, never]) {
     assert.equal(enter(belfry(8192, rest)), 'accepted');
-    assert.equal(enter(belfry(8193, rest)), 'fault');
+    assert.equal(enter(belfry(8193, rest)), 'deliveries');
   }
 });
 
+const TRUE = { op: 'time_window', from: 0, to: 12 }; // true at 06:00
+const all = (n: number) => ({
+  when: { policy_version: 1, root: { op: 'all', items: Array(n).fill(TRUE) } },
+});
+
 // Breaks (04 §5.4 query_steps): reaction guards not counted, or an off-by-one limit. 1024 guards
-// of 32 leaves evaluate exactly 32768; of 33, 33792. Each leaf is true at 06:00 and small, so the
-// artifact stays under 4 MiB.
+// of 32 leaves evaluate exactly 32768; of 33, 33792. Each leaf is small, so the artifact stays
+// under 4 MiB.
 test('reaction guards past 32768 policy leaves exceed query_steps', () => {
-  const all = (n: number) => ({
-    when: {
-      policy_version: 1,
-      root: { op: 'all', items: Array(n).fill({ op: 'time_window', from: 0, to: 12 }) },
-    },
-  });
   assert.equal(enter(belfry(1024, all(32))), 'accepted');
-  assert.equal(enter(belfry(1024, all(33))), 'fault');
+  assert.equal(enter(belfry(1024, all(33))), 'query_steps');
+});
+
+// The move action overridden by one whose policy is `all` of `n` TRUE leaves, then `tail`.
+const slowMove =
+  (n: number, tail: object[] = []) =>
+  (c: any) => {
+    c.actions[`${G}:action/move`] = {
+      key: 'move',
+      label: 'room.belfry.title',
+      accessibility: 'room.belfry.title',
+      target: { kind: 'none' },
+      command: 'move',
+      priority: 0,
+      input: ['direction'],
+      policy: { policy_version: 1, root: { op: 'all', items: [...Array(n).fill(TRUE), ...tail] } },
+    };
+  };
+const FAULT = { kind: 'fault', code: 'budget_exceeded' };
+
+// Breaks (04 §5.4 query_steps, one budget across the root and its descendants; "exhaustion
+// returns a typed evaluation fault"): the action policy admission evaluates not counted, no check
+// on the root (one that triggers no reaction never reaches the delivery check), or an admission
+// past the limit answered with its refusal (32768 true leaves then one false one: 32769
+// evaluated). 32769 leaves are about 1.3 MB.
+test('a move whose action policy evaluates more than 32768 leaves exceeds query_steps', () => {
+  assert.equal(move(belfry(0, {}, slowMove(32768)), 'north').decision.kind, 'accepted');
+  const w = belfry(0, {}, slowMove(32769));
+  const s = move(w, 'north');
+  assert.deepEqual([s.decision, s.limit], [FAULT, 'query_steps']);
+  assert.equal(s.world, w);
+  const refused = move(belfry(0, {}, slowMove(32768, [leaf(true)])), 'north'); // bell_up false
+  assert.deepEqual([refused.decision, refused.limit], [FAULT, 'query_steps']);
+});
+
+// Breaks: the counter reset between the root and its reactions (each part alone fits): 16384
+// root leaves plus 1024 guards of 17 leaves (17408) is 33792.
+test('a root and its reactions share one query_steps budget', () => {
+  assert.equal(enter(belfry(0, {}, slowMove(16384))), 'accepted');
+  assert.equal(enter(belfry(1024, all(17))), 'accepted');
+  assert.equal(enter(belfry(1024, all(17), slowMove(16384))), 'query_steps');
+});
+
+// Breaks: the limit lost when the proposal so far faults (proposal.ts now(), composed at the first
+// reaction's delivery before adopt composes the whole), or an operations fault misnamed. A root of
+// 4097 one-second advances entering the belfry, one rule there.
+test('a root over the operations limit names it, found at its first delivery', () => {
+  const w = belfry(1);
+  const SET = { id: CMD, payload: { actor_id: w.character } } as never;
+  const t = w.state.clock;
+  const ops = Array.from({ length: 4097 }, (_, i) => ({
+    op: 'time.advance',
+    writer_group: 0,
+    from: t + i,
+    to: t + i + 1,
+  }));
+  const room_id = w.roomIds[`${G}:room/belfry`];
+  const entered = [
+    { position: 1, payload: { type: 'entity_entered_room', entity_id: BODY, room_id } },
+  ];
+  const root = admit('movement', accepted(w, 'x', ops as never, entered as never) as never);
+  assert.equal(adopt(w, root, SET, allocator(w, SET), 0).limit, 'operations');
+});
+
+// Breaks: limits over at one check named in call-site order (deliveries first), not 04 §5.4's.
+// 24576 steps already spent, so delivery 8193 of a 1-leaf guard brings query_steps to 32769.
+test('deliveries and query_steps over at one check name query_steps', () => {
+  const w = belfry(8193, { when: { policy_version: 1, root: leaf(true) } }); // bell_up false
+  const SET = { id: CMD, payload: { actor_id: w.character } } as never;
+  const room_id = w.roomIds[`${G}:room/belfry`];
+  const entered = [
+    { position: 1, payload: { type: 'entity_entered_room', entity_id: BODY, room_id } },
+  ];
+  const root = admit('movement', accepted(w, 'x', [], entered as never) as never);
+  assert.equal(adopt(w, root, SET, allocator(w, SET), 0, { n: 24576 }).limit, 'query_steps');
 });
 
 // Breaks (04 §5.4: over-limit work discards the whole advance): a job-root reaction overflow
@@ -239,6 +322,7 @@ test("a chain past reaction_depth from Bram's 19:00 arrival discards the whole w
   const w = chain(33, 'village_green');
   const s = step(w, cmd(w, { type: 'wait', until: H(19) + 1800 }), 0);
   assert.deepEqual(s.decision, { kind: 'fault', code: 'budget_exceeded' });
+  assert.equal(s.limit, 'reaction_depth');
   assert.equal(s.world, w);
 });
 
@@ -263,6 +347,7 @@ test('4097 events exceed the events budget; 4096 commit', () => {
       0,
     );
     assert.equal(r.decision.kind, kind, `${n}`);
+    assert.equal(r.limit, kind === 'fault' ? 'events' : undefined);
   }
 });
 

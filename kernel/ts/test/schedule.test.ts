@@ -15,7 +15,8 @@ import { test } from 'node:test';
 import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { decode, encode } from '../src/canonical.ts';
-import { newWorld, step } from '../src/world.ts';
+import { accepted, allocator } from '../src/decision.ts';
+import { admit, adopt, newWorld, step } from '../src/world.ts';
 import { validate } from '../src/validate.ts';
 import { read } from './read.ts';
 
@@ -247,12 +248,45 @@ test('an advance over a job budget faults whole, in a wait and in a recipe', () 
   const crowded = { ...w, state: { ...w.state, jobs: many } };
   const budget = { kind: 'fault', code: 'budget_exceeded' };
   const waited = wait(crowded, H(20));
-  assert.deepEqual(waited.decision, budget);
+  assert.deepEqual([waited.decision, waited.limit], [budget, 'created_jobs']);
   assert.equal(waited.world, crowded);
   const late = { ...crowded, state: { ...crowded.state, clock: H(18) + 1800 } };
   const performed = step(late, cmd(late, { type: 'perform', action: 'coil_rope' }), 0);
-  assert.deepEqual(performed.decision, budget);
+  assert.deepEqual([performed.decision, performed.limit], [budget, 'created_jobs']);
   assert.equal(performed.world, late);
+});
+
+// Breaks: a job budget fault not naming its limit, another fault naming one, or limits over at the
+// end of a proposal named in check order (compose's job limits, due_jobs_per_advance first, then
+// events), not 04 §5.4's. A root of
+// job.complete ops (one per job) or one job.schedule over `n` pending jobs; pending counts the
+// state's pending jobs plus those scheduled minus those completed.
+test('a root over a job budget names its limit, pending_jobs before due_jobs_per_advance', () => {
+  const w = world();
+  const ids = (n: number) =>
+    Array.from({ length: n }, (_, i) => `00000000-0000-8000-8000-${String(i).padStart(12, '0')}`);
+  const at = (n: number) => ({
+    ...w,
+    state: { ...w.state, jobs: Object.fromEntries(ids(n).map((i) => [i, job(H(19))])) },
+  });
+  const SET = { id: CMD, payload: { actor_id: w.character } } as never;
+  const adopted = (w: World, ops: object[], events: object[] = []) => {
+    const root = admit('action_recipe', accepted(w, 'x', ops as never, events as never) as never);
+    return adopt(w, root, SET, allocator(w, SET), 0);
+  };
+  const limit = (w: World, ops: object[]) => adopted(w, ops).limit;
+  const complete = (n: number) =>
+    ids(n).map((job_id) => ({ op: 'job.complete', writer_group: 0, job_id }));
+  const NEW = '00000000-0000-8000-8000-ffffffffffff';
+  const schedule = { op: 'job.schedule', writer_group: 0, job_id: NEW, job: BRAM, due_time: H(20) };
+  assert.equal(limit(at(1024), [schedule]), 'pending_jobs'); // 1025 pending
+  assert.equal(limit(at(1025), complete(1025)), 'due_jobs_per_advance'); // 0 pending, 1025 due
+  assert.equal(limit(at(2050), complete(1025)), 'pending_jobs'); // 1025 pending, 1025 due
+  const custom = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ position: i + 1, payload: { type: 'custom_event' } }));
+  assert.equal(adopted(at(1024), [schedule], custom(4097)).limit, 'events'); // before pending_jobs
+  const missing = adopted(at(0), complete(1)); // no such job: precondition_failed
+  assert.deepEqual([missing.decision.kind, 'limit' in missing], ['fault', false]);
 });
 
 const fails = (

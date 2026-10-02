@@ -109,3 +109,10 @@ test('ambiguous candidates at 1024 and 1025', () => {
     { path: '/candidate_ids', code: 'too_many_items' },
   ]);
 });
+
+// Breaks: a limit the kernel can name (any composition-profile limit, 04 §5.4) missing from
+// BudgetExceeded, so recording it throws in dev and CI.
+test('every composition-profile limit is a valid BudgetExceeded', () => {
+  for (const limit of Object.keys(read('docs/spec/conformance/composition-profile.json').limits))
+    assert.deepEqual(validate('BudgetExceeded', { limit }), [], limit);
+});

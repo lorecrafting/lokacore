@@ -385,6 +385,7 @@ Cartridge, deployment and campaign manifests and their version fields (05 §3, �
 The one observation record format, its stores and correlation ids, and the game-trace entry (11 §11-§15; ADR-075, docs/decisions/adr-075-observability-proposal.md). Observation is never authority.
 
 - **AgentWork**: One agent's work on one pull request: its role, model (opus, fable, astra, ...), instance (1, 2, ... among that role's agents on the pull request, so (pull_request, role, instance) is unique), the tokens it used (a required Measure; unknown when not reported, never 0) and the pull request's disposition (merged or closed), which is not a judgment of the agent's work. Evidence for analysis, never an acceptance authority.
+- **BudgetExceeded**: The composition-profile limit a decision with genuine ReplayIds exhausted, its result the fault budget_exceeded (04 §5.4): exactly one key of conformance/composition-profile.json limits, the first in that order when several run out at one check. Non-authoritative: never read back as decision input or kept as game state (04 §5.5). 04 §5.5's source and causal values join later as optional fields (ADR-075 §7).
 - **BuildIds**: The correlation ids of a content diagnostic: the source revision; input_digest, the SHA-256 of the input the producer read (the compiler: the canonical JSON object mapping each source file's cartridge-relative path to the SHA-256 of its bytes; the loader: the artifact file's bytes; the known answer arrives with the first producer), which exists even when the input does not parse; and content_hash only once an artifact's cartridge hash exists, never a stand-in for it.
 - **CommitOutcome**: What happened to the command's commit (04 §5.1; 03 §14, §15): committed at revision (the revision after; a rejection receipt does not advance it) with the committed events in order and the effect ids; failed (definitively rolled back) with its cause: injected (by the run's fault schedule) or storage_error (the store reported failure; host detail goes to operations); unknown (the outcome could not be observed; reconciled under 03 §15, never presumed rolled back) with its cause: injected or no_outcome (no answer from the store: crash, kill, lost acknowledgement); or unavailable (not_applicable: nothing was committed, such as a fault or a rejection without a receipt). Failed and unknown carry no events or effects: proposed events never leave a failed commit (04 §5.1). The allowed decision and commit pairs: ADR-075 §4.
   - `committed`
@@ -411,6 +412,7 @@ The one observation record format, its stores and correlation ids, and the game-
   - `content.diagnostic`
   - `simulation.invariant_failed`
   - `target.unresolved`
+  - `evaluation.budget_exceeded`
   - `kernel.decision_latency`
   - `agent.work`
 - **ObservationStore**: The store a record belongs to (ADR-075 §2): game_trace (per-command decisions, host-independent, 11 §15), diagnostics (things to fix: 08 §6 diagnostics and simulator failures), operations (host timings, 11 §13), dev_evidence (agent work cost and outcome).

@@ -93,7 +93,7 @@ export function current(row: Stored | undefined, spec: ResourceSpec, now: number
 export function compose(state: State, delta: StateDelta): Result {
   const { ops } = delta;
   if (typeof state.clock !== 'number') return fault('precondition_failed', { kind: 'clock' });
-  if (overBudget(state, ops)) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
+  if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
   const ctx: Ctx = { state, horizon, overlay: new Map() };
@@ -110,27 +110,36 @@ export function compose(state: State, delta: StateDelta): Result {
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
 
-function overBudget(state: State, ops: readonly DeltaOp[]): boolean {
+/** `ops`' operation and job counts over `state`, the composition-profile limits compose checks. */
+export function counts(state: State, ops: readonly DeltaOp[]) {
   const count = (name: string) => ops.filter((o) => o.op === name).length;
   const jobs = Object.values(section(state, 'jobs'));
   const pending = jobs.filter((j) => get(j, 'status') === 'pending').length;
   const created = count('job.schedule');
   const due = count('job.complete');
-  return over({
+  return {
     operations: ops.length,
     created_jobs: created,
     due_jobs_per_advance: due,
     pending_jobs: pending + created - due,
-  });
+  };
 }
 
+export type Limit = keyof typeof LIMITS;
+// The composition profile's limits in 04 §5.4 order (LIMITS is sorted by key).
+export const LIMIT_ORDER = (
+  'operations query_steps events deliveries reaction_depth selector_cardinality created_jobs ' +
+  'pending_jobs due_jobs_per_advance scene_auto_advances output_bytes'
+).split(' ') as Limit[];
+
 /**
- * True when a count passes its composition-profile limit (04 §5.4: one aggregate budget across
- * the root and all its descendants): compose's operation and job counts, and the events, reaction
- * deliveries, reaction depth and reaction guards' query steps proposal.ts counts across a decision.
+ * The first limit, in 04 §5.4 order, a count passes (04 §5.4: one aggregate budget across the
+ * root and all its descendants), or undefined: compose's operation and job counts, and the
+ * events, output bytes, reaction deliveries, reaction depth and query steps proposal.ts counts
+ * across a decision.
  */
-export const over = (counts: Partial<Record<keyof typeof LIMITS, number>>): boolean =>
-  Object.entries(counts).some(([k, n]) => n! > LIMITS[k as keyof typeof LIMITS]);
+export const over = (counts: Partial<Record<Limit, number>>): Limit | undefined =>
+  LIMIT_ORDER.find((k) => counts[k]! > LIMITS[k]);
 
 const fault = (code: ErrorCode, t: MutationTarget): Result => ({
   fault: { kind: 'fault', code, target: t },

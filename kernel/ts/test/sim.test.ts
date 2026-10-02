@@ -4,7 +4,10 @@
 // controls, each a kernel planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { test } from 'node:test';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { after, test } from 'node:test';
 import type { AdvertisedAction, Command, DecisionResult } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
 import { gameView, step } from '../src/world.ts';
@@ -17,6 +20,9 @@ const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = re
 );
 const seeds = SEEDS.seeds.map((s) => s.seed);
 const FRESH = 10_000;
+// Observation records of this run (playbacks' game traces included) go to its own directory.
+const OBS = (process.env.LOKA_OBS_DIR = mkdtempSync(join(tmpdir(), 'loka-obs-')));
+after(() => rmSync(OBS, { recursive: true, force: true }));
 // Outcomes the demo cartridges give; the generator must reach each one (a new one may join).
 const REACHED = [
   'accepted',
@@ -73,7 +79,8 @@ test('every registered invariant is checked per step, or says why not', () => {
 
 // Breaks: any kernel change that throws out of step or breaks a registered invariant on a
 // generated sequence; a generator that stops reaching a refusal code, a cartridge or an
-// unregistered command type.
+// unregistered command type; or a budget_exceeded record from a fresh sequence, which has no run
+// and so no genuine ReplayIds (04 §5.4: only its playback through loka play's decide emits).
 test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`, (t) => {
   assert.equal(SEEDS.generator, GENERATOR, 'sim_seeds.json is of another generator: re-curate it');
   const first = Date.now(); // the fresh seeds, printed so a failure can be rerun
@@ -96,6 +103,8 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
   );
   const missing = [...PICKED, ...UNKNOWN].filter((x) => !seen.has(x));
   assert.deepEqual([...REACHED.filter((c) => !codes.has(c)), ...missing], [], 'never reached');
+  // budget_exceeded is among REACHED, yet no diagnostics record was written (this run's own dir).
+  assert.equal(existsSync(`${OBS}/diagnostics`), false, 'recorded without a run');
 });
 
 // Breaks: a generator change after which a regression seed no longer issues the command type it

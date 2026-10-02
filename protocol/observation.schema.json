@@ -961,6 +961,39 @@
         }
       ]
     },
+    "BudgetExceeded": {
+      "description": "The composition-profile limit a decision with genuine ReplayIds exhausted, its result the fault budget_exceeded (04 §5.4): exactly one key of conformance/composition-profile.json limits, the first in that order when several run out at one check. Non-authoritative: never read back as decision input or kept as game state (04 §5.5). 04 §5.5's source and causal values join later as optional fields (ADR-075 §7).",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "enum": [
+            "operations",
+            "query_steps",
+            "events",
+            "deliveries",
+            "reaction_depth",
+            "selector_cardinality",
+            "created_jobs",
+            "pending_jobs",
+            "due_jobs_per_advance",
+            "scene_auto_advances",
+            "output_bytes"
+          ]
+        }
+      },
+      "required": [
+        "limit"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "limit": "query_steps"
+        },
+        {
+          "limit": "output_bytes"
+        }
+      ]
+    },
     "AgentWork": {
       "description": "One agent's work on one pull request: its role, model (opus, fable, astra, ...), instance (1, 2, ... among that role's agents on the pull request, so (pull_request, role, instance) is unique), the tokens it used (a required Measure; unknown when not reported, never 0) and the pull request's disposition (merged or closed), which is not a judgment of the agent's work. Evidence for analysis, never an acceptance authority.",
       "type": "object",
@@ -1152,6 +1185,36 @@
             },
             "data": {
               "$ref": "#/$defs/TargetUnresolved"
+            }
+          },
+          "required": [
+            "format",
+            "event",
+            "store",
+            "ids",
+            "data"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "format": {
+              "$ref": "#/$defs/ObservationFormat"
+            },
+            "event": {
+              "const": "evaluation.budget_exceeded"
+            },
+            "store": {
+              "enum": [
+                "diagnostics"
+              ]
+            },
+            "ids": {
+              "$ref": "#/$defs/ReplayIds"
+            },
+            "data": {
+              "$ref": "#/$defs/BudgetExceeded"
             }
           },
           "required": [
@@ -1479,6 +1542,27 @@
               }
             ],
             "after_ordinal": 0
+          }
+        },
+        {
+          "format": "loka-obs-v1",
+          "event": "evaluation.budget_exceeded",
+          "store": "diagnostics",
+          "ids": {
+            "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+            "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+            "seed": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+            "command_id": "e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b",
+            "revision": 7
+          },
+          "data": {
+            "limit": "query_steps"
           }
         }
       ]

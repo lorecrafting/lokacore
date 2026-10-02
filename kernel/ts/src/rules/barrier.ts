@@ -28,7 +28,7 @@ const MOVES: Readonly<Record<string, [BarrierState, BarrierState, string]>> = {
   unlock: ['locked', 'closed', 'unlocked'],
 };
 
-export const decide: Rule<'barrier'> = (world, command, mint) => {
+export const decide: Rule<'barrier'> = (world, command, mint, steps = { n: 0 }) => {
   const { type, direction, actor_id } = command.payload;
   if (!COMPASS.includes(direction)) return rejected('invalid_target');
   const body = bodyOf(world, actor_id);
@@ -43,7 +43,7 @@ export const decide: Rule<'barrier'> = (world, command, mint) => {
     return rejected(type === 'open' && from === 'locked' ? 'exit_locked' : 'invalid_state');
   const item = world.cartridge.barriers![refString(barrier)].key_item;
   const keyed = type === 'lock' || type === 'unlock';
-  if (keyed && !(item && holds(world, actor_id, { op: 'has_item', item })))
+  if (keyed && !(item && holds(world, actor_id, { op: 'has_item', item }, { steps })))
     return rejected('not_owned');
   const op = { op: 'barrier.transition', writer_group: 0, barrier, from, to } as const;
   const changed = { type: 'barrier_changed', barrier, from, to } as const;

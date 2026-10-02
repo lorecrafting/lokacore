@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { encode, type Json } from '../src/canonical.ts';
-import { compose, key, type State } from '../src/compose.ts';
+import { compose, key, LIMIT_ORDER, type State } from '../src/compose.ts';
 import { check } from '../src/invariants.ts';
 import { read } from './read.ts';
 
@@ -219,6 +219,12 @@ const over = (s: object, ops: object[]) =>
 const changes = (s: object, ops: object[]) =>
   (compose({ ...s, clock: 6 } as State, { ops } as never) as { changes: { value: Json }[] })
     .changes;
+
+// Breaks: the 04 §5.4 order a tie is named in (compose.ts over) drifting from the composition
+// profile's limits: a limit missing, misspelt (never checked) or moved.
+test('limits are named in the composition profile order', () => {
+  assert.deepEqual(LIMIT_ORDER, Object.keys(limits));
+});
 
 test('composition-profile budgets: at the limit composes with the expected changes, one over faults', () => {
   const advance = (n: number) =>
