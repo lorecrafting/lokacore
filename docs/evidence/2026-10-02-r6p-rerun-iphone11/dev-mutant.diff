@@ -1,0 +1,13 @@
+diff --git a/kernel/ts/src/rng.ts b/kernel/ts/src/rng.ts
+index 28e5e3e..04278cc 100644
+--- a/kernel/ts/src/rng.ts
++++ b/kernel/ts/src/rng.ts
+@@ -30,7 +30,7 @@ function step([s0, s1, s2, s3]: RngState): [number, RngState] {
+   s3 = (s3 ^ s1) >>> 0;
+   s1 = (s1 ^ s2) >>> 0;
+   s0 = (s0 ^ s3) >>> 0;
+-  return [raw, [s0, s1, (s2 ^ t) >>> 0, rotl(s3, 11)]];
++  return [raw, [s0, s1, (s2 ^ t) >>> 0, rotl(s3, 12)]];
+ }
+ 
+ export const next = (state: RngState): [number, RngState] => step(checked(state));

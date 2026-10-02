@@ -1,0 +1,27 @@
+• passcodeRequired: false
+ka pid=10083 nonce 4703248940cdc2b3 -> P6RUN p6-1790970373380-n4703248940cdc2b3 ka done records=4 mismatches=0 checks_failed=0
+• passcodeRequired: false
+n=4703248940cdc2b3
+sim pid=10085 nonce 14321ee04ae679cd -> P6RUN p6-1790970377550-n14321ee04ae679cd sim done records=1530 mismatches=0 checks_failed=0
+• passcodeRequired: false
+n=14321ee04ae679cd
+carry1 pid=10087 nonce 203e86be125000f4 -> P6RUN p6-1790970381860-n203e86be125000f4 carry1 HOLD
+ERROR: Failed to retrieve the file node for Documents/SQLite/p6-carry1.db (com.apple.dt.CoreDeviceError error 7000 (0x1B58))
+ERROR: Failed to retrieve the file node for Documents/SQLite/p6-carry1.db-journal (com.apple.dt.CoreDeviceError error 7000 (0x1B58))
+• passcodeRequired: false
+n=203e86be125000f4
+carry2 pid=10088 nonce 31df3b933fac1a48 -> P6RUN p6-1790970385272-n31df3b933fac1a48 carry2 done records=13 mismatches=0 checks_failed=0
+• passcodeRequired: false
+n=31df3b933fac1a48
+leave1 pid=10090 nonce 0433c2e069f1ada0 -> P6RUN p6-1790970388289-n0433c2e069f1ada0 leave1 HOLD
+ERROR: Failed to retrieve the file node for Documents/SQLite/p6-leave1.db (com.apple.dt.CoreDeviceError error 7000 (0x1B58))
+ERROR: Failed to retrieve the file node for Documents/SQLite/p6-leave1.db-journal (com.apple.dt.CoreDeviceError error 7000 (0x1B58))
+• passcodeRequired: false
+n=0433c2e069f1ada0
+leave2 pid=10092 nonce 9133f0b7739a8f67 -> P6RUN p6-1790970391707-n9133f0b7739a8f67 leave2 done records=13 mismatches=0 checks_failed=0
+• passcodeRequired: false
+n=9133f0b7739a8f67
+lost pid=10093 nonce 1eeecf9d28b59154 -> P6RUN p6-1790970394676-n1eeecf9d28b59154 lost done records=25 mismatches=0 checks_failed=0
+• passcodeRequired: false
+n=1eeecf9d28b59154
+dusk pid=10095 nonce 7890e219667b3202 -> P6RUN p6-1790970397690-n7890e219667b3202 dusk done records=14 mismatches=6 checks_failed=1

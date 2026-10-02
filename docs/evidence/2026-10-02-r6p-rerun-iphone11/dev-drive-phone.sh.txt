@@ -1,0 +1,42 @@
+#!/bin/zsh
+# Runs harness phases on the phone over the cable: launch with a fresh nonce, poll the run file
+# (bounded, about 120 s) for this launch's done/HOLD/ERROR line, copy the held save BEFORE the
+# kill, kill, next. Usage: DEV=<device> drive-phone.sh <build> <out> <phase...>
+source ${0:a:h}/common.sh
+setopt pipefail # main's failure (a stop, a timeout) is the script's exit status, through redact
+BUILD=$1; OUT=$2; shift 2; APP=com.lorecrafting.loka
+export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+function pull { rm -f $2; xcrun devicectl device copy from --device $DEV --domain-type appDataContainer --domain-identifier $APP --source $1 --destination $2 -q 2>&1; }
+function main {
+  mkdir -p $OUT
+  # The raw polling copy lives outside OUT and is removed on every exit, a failing one too; only
+  # its redacted copy, run.txt, is retained.
+  local tmp=$(mktemp -d)
+  trap "[[ -f $tmp/run.raw ]] && redact < $tmp/run.raw > $OUT/run.txt; rm -rf $tmp" EXIT
+  local run=$tmp/run.raw
+  for phase in "$@"; do
+    xcrun devicectl device info lockState --device $DEV 2>&1 | grep passcodeRequired
+    local n pid="" got=""
+    for t in 1 2 3; do
+      n=$(nonce) # fresh per attempt: a lost launch response never lends its nonce to a retry
+      pid=$(xcrun devicectl device process launch --device $DEV --terminate-existing --json-output - $APP -p6nonce $n 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["process"]["processIdentifier"])' 2>/dev/null)
+      [[ -n $pid ]] && break; sleep 3
+    done
+    [[ -z $pid ]] && { echo "$phase launch failed; stop"; return 1; }
+    for i in {1..40}; do
+      pull Documents/p6run-$BUILD.txt $run > /dev/null
+      got=$(done_line $run $n $phase) && [[ -n $got ]] && break
+      sleep 1
+    done
+    echo "$phase pid=$pid nonce $n -> ${got:-TIMEOUT}"
+    [[ -z $got ]] && { echo "timeout; stop (app left running)"; return 1; }
+    case $got in *HOLD*)
+      mkdir -p $OUT/$phase
+      for f in p6-$phase.db p6-$phase.db-journal; do pull Documents/SQLite/$f $OUT/$phase/$f; done
+      ls -la $OUT/$phase | awk 'NR>3 {print $5, $9}' ;;
+    esac
+    xcrun devicectl device process terminate --device $DEV --pid $pid --kill -q 2>&1
+    sleep 2
+  done
+}
+main "$@" 2>&1 | redact

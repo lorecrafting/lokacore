@@ -14,6 +14,7 @@ import {
   refused,
   said,
   type Pool,
+  why,
 } from './model.ts';
 
 const b = (label: string, action_key: string, target_ids: string[] = [], input = {}) => ({
@@ -129,6 +130,20 @@ test("a closed exit's log line and a capitalised title", () => {
     'The causeway is flooded.',
   );
   assert.equal(cap('a brass lantern'), 'A brass lantern');
+});
+
+// Breaks (owner note, 0 MV): a move refused for want of MV logs its raw code ("The way north is
+// insufficient resource.") or wraps its own sentence in the frame; the exit's note shows the code.
+test('a move refused at 0 MV says the body is too exhausted', () => {
+  const north = { available: false, direction: 'north', reason: { code: 'insufficient_resource' } };
+  assert.equal(
+    refused(north as never, (k) => k),
+    'You are too exhausted.',
+  );
+  assert.equal(
+    why(north as never, (k) => k),
+    'too exhausted',
+  );
 });
 
 // Breaks (review POL-2): a hint store that throws (an unreadable key-value file) takes the book or

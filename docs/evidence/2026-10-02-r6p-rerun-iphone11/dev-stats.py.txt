@@ -1,0 +1,19 @@
+import json,sys,re
+cold=[];w={'decision_ms':[],'e2e_ms':[],'projection_ms':[],'commit_ms':[],'sink_ms':[]};warm_n=0
+for l in open(sys.argv[1]):
+    m=re.search(r' TIMING (cold|warm) (.*)$',l)
+    if not m: continue
+    d=json.loads(m.group(2))
+    if m.group(1)=='cold': cold.append(d); continue
+    if d['warmup']: continue
+    w['decision_ms']+= [x/1000 for x in d['decision_us']]
+    for r in d['e2e_projection_commit_sink_ms']:
+        for k,v in zip(['e2e_ms','projection_ms','commit_ms','sink_ms'],r): w[k].append(v)
+def pct(xs,p):
+    xs=sorted(xs); i=max(0,min(len(xs)-1,int(round(p/100*len(xs)+0.5))-1)); return xs[i]
+print('n warm =',len(w['decision_ms']))
+for k,xs in w.items(): print(f"{k:14} p50 {pct(xs,50):7.3f}  p95 {pct(xs,95):7.3f}  p99 {pct(xs,99):7.3f}  max {max(xs):7.3f}")
+by={}
+for c in cold:
+    for k,v in c.items(): by.setdefault(k,[]).append(round(v,2))
+for k,v in by.items(): print(f"{k:16} {v}")

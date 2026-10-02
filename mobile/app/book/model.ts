@@ -2,7 +2,7 @@
 // the exits (a move button carries input.direction), the pending choice's answers and Close, other
 // place actions, and a thing's own actions.
 import type { Button, GameView } from '../../authority/local-story/smoke.ts';
-import { reason } from '../../authority/local-story/words.ts';
+import { reason, SENTENCE } from '../../authority/local-story/words.ts';
 
 export type Exit = { direction: string; button: Button };
 
@@ -29,12 +29,14 @@ type Offered = GameView['exits'][number] | NonNullable<GameView['choice']>['choi
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 
-// The log line for a drag toward a closed exit: the reason's own message (a sentence), else its
-// code's words in a sentence.
+// The log line for a drag toward a closed exit: the reason's own message (a sentence), else the
+// code's own sentence (words.ts), else its code's words in a sentence.
 export const refused = (e: GameView['exits'][number], text: (key: string) => string) =>
-  !e.available && e.reason.message
-    ? text(e.reason.message.key)
-    : `The way ${e.direction} is ${why(e, text)}.`;
+  e.available
+    ? ''
+    : e.reason.message
+      ? text(e.reason.message.key)
+      : (SENTENCE[e.reason.code] ?? `The way ${e.direction} is ${why(e, text)}.`);
 
 // Under an open choice whose speaker is not here (the answers may also be closed for another
 // reason, a dropped lantern, so this keys on the speaker, not on the answers' not_present). A
