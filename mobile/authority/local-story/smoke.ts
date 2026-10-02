@@ -230,11 +230,11 @@ export type Failed = {
  * fails otherwise keeps the game being played and says so in its log; one whose outcome is
  * unknown does not (its next press would settle the new game, then apply to it).
  */
-export function playSmoke(open: () => Db, remove: () => void, story: Bundled, newId: () => string) {
+export function playSmoke(open: () => Db, remove: () => void, items: Bundled, newId: () => string) {
   const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
   const reopen = () => {
     try {
-      s.game = openSmoke((s.db ??= open()), story, newId);
+      s.game = openSmoke((s.db ??= open()), items, newId);
       s.failed = undefined;
     } catch (e) {
       const { message, cause } = e as Error;
