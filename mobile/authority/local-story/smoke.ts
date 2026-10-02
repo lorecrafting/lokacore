@@ -174,7 +174,7 @@ function reread(story: Reread, text: Say): string[] {
     const last = story.narration();
     return last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
   } catch (e) {
-    if (corrupt(e)) throw e;
+    if (!/malformed JSON/.test(String(e))) throw e; // a full disk or I/O: the save may be intact
     const cause = { kind: 'save_corrupt', newGame: story.newGame };
     throw Object.assign(new Error((e as Error).message), { cause });
   }
@@ -205,6 +205,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
+      log.splice(0, log.length - 200); // ponytail: keeps the last 200 lines; the presenter split owns the log
       const was = gameView(story.world()); // the view before, for who came or went
       retry ??= { label: b.label, invocation: invocationOf(b, ++sent, story.world().character) };
       log.push(`> ${retry.label}`);
@@ -220,7 +221,6 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
       fault = undefined;
       if (reply.kind !== 'pending') retry = undefined; // before said(): it may throw
       answer(log, reply, text, comings(was, gameView(story.world()), text));
-      log.splice(0, log.length - 200); // ponytail: keeps the last 200 lines; the presenter split owns the log
     },
     newGame: story.newGame,
   };
