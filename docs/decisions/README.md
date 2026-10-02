@@ -76,7 +76,8 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [SM2 scope: the book-style UI over the smoke controller in three slices, real GameView data only, fonts and a simple page turn](owner-decision-sm2-scope-2026-10-01.md).
 - Owner decision: [Early R7/R8 plan: slices Q, S, R, N, D in order, R5 deferrals moved to R7/R8 for chapter one, GameView slice G for resources only](owner-decision-early-r7r8-plan-2026-10-01.md).
 - Owner decision: [narrow slice N: recipe narration pins its participants' EntityIds at commit; PM rulings on the committed and authored shapes](owner-decision-narrow-n-2026-10-01.md).
-- Owner decision: [split slice D into D1 (dialogue) and D2 (the milestone carry); scene@1 narrowed out, the durable choice is dialogue@1's continuation row](owner-decision-split-d-2026-10-01.md).
+- Owner decision: [split slice D into D1 (dialogue) and D2 (the story point carry); scene@1 narrowed out, the durable choice is dialogue@1's continuation row](owner-decision-split-d-2026-10-01.md).
 - Owner decision: [agent-device (Callstack, open source) on the iOS Simulator in UI-slice reviews from slice G; fix the iOS 27 simulator crash first](owner-decision-agent-device-2026-10-01.md).
 - Owner decision: [the story-sense "milestone" becomes "story point"; the 23 §3 event is `story_point_reached`](owner-decision-story-point-2026-10-01.md).
 - Owner decision: [condition bands for resources, after LegendMUD's condition scale (tribute); one table in 04 §15, computed by the kernel](owner-decision-condition-bands-2026-10-01.md).
+- Owner decision: [review rules: codex Astra only on gate reviews and `proposal.ts` changes, Sol otherwise and on fix re-checks; Fable as codex stand-in; Opus drafts briefs; the PM's persistent worktree](owner-decision-review-rules-2026-10-01.md).

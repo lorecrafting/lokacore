@@ -1,5 +1,8 @@
 # Owner decisions: codex cross-vendor reviews, Fable back but rare — 2026-09-30
 
+Superseded in part (Astra for hard reviews; Sol on every other review and fix re-check) by the
+[2026-10-01 review rules](owner-decision-review-rules-2026-10-01.md).
+
 Relayed verbatim by the PM (Claude Code) from the owner's chat. No checker can verify these
 quotes against the chat.
 
