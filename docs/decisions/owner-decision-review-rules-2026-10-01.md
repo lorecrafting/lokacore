@@ -3,8 +3,9 @@
 Relayed by the PM (Claude Code) from the owner's chat, **(paraphrased)**: the wording is
 smoothed, not quoted. No checker can verify it against the chat.
 
-Supersedes in part the [2026-09-30 review-flow decisions](owner-decisions-review-flow-2026-09-30.md):
-"Astra for hard reviews (escalate freely)".
+Supersedes in part the [2026-09-30 review-flow decisions](owner-decisions-review-flow-2026-09-30.md)
+("Astra for hard reviews (escalate freely)") and the escalation ladder's "codex Astra for a
+hard review" in the [autonomy decision](owner-decision-autonomy-2026-09-30.md) (now Sol).
 
 ## Astra scope
 
@@ -21,7 +22,7 @@ every fix re-check.
 
 Owner (paraphrased): if codex is out of quota, a Fable subagent stands in for it on a kernel
 or contract-freeze slice's head, never on fix re-reviews. This is an exception to "Fable
-rarely"; Fable stays a rare backstop otherwise.
+rarely", the rare backstop of the [2026-09-30 decisions](owner-decisions-review-flow-2026-09-30.md).
 
 ## Opus drafts, the PM decides
 
