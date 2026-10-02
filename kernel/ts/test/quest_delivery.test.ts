@@ -1,6 +1,6 @@
 // quest@1 delivery in the proposal (Early R7/R8 D1, carry a; 04 §5.2 steps 5-6; 06 §5, §43): a
-// queued event delivers to the quest instances it earned at its emission position (active there),
-// at its FIFO position, each its own writer group, only to those still active in the proposal so far.
+// queued event delivers to the quest instances active at its emission position, at its FIFO
+// position, each its own writer group, only to those still active in the proposal so far.
 // Worlds are the errand known answer (protocol/fixtures/cartridge_errand_hash.json, quest lantern
 // made strict, post_activation_event) with an instance fact and one reaction added, re-hashed
 // with node:crypto over their canonical bytes. Writer groups and op order are hand-derived from

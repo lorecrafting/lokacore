@@ -165,14 +165,12 @@ export function propose(world: World, root: Admitted, command: Actor, mint: Mint
     applied: 0,
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
-  return (
-    join(p, root.delta.ops, root.events, base, 0, mint) ??
-    react(p) ??
-    jobs(p, root) ?? { ...root, delta: { ops: p.ops }, events: p.events }
-  );
+  const failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
+  return failed ?? { ...root, delta: { ops: p.ops }, events: p.events };
 }
 
-// The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read it), or its fault.
+// The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
+// it), or its fault.
 function now(p: P): World | Admitted {
   if (p.applied < p.ops.length) {
     const r = apply(p.at, p.ops.slice(p.applied));

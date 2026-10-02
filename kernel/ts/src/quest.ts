@@ -35,12 +35,13 @@ export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef)
 
 /**
  * The instances `active` at event `e`'s causal position (04 §5.2 step 5: eligibility at emission;
- * proposal.ts join) whose post_activation_event objective `e` meets (06 §5; 04 §5.2 steps 5-6), with
- * their rows read in `world`: an item_acquired of the objective's item whose holder is the body of
- * the instance's actor. A give to someone else is not the actor's acquisition. In stable semantic
- * order (04 §5.2 step 6): by quest DefinitionRefString, then instance id, never the order the rows
- * were stored or restored in. ponytail: scans every instance per event (06 §7 allows a simple scan
- * for a private cartridge); index active instances by event type and target when worlds grow.
+ * proposal.ts join) whose post_activation_event objective `e` meets (06 §5; 04 §5.2 steps 5-6),
+ * with their rows read in `world`: an item_acquired of the objective's item whose holder is the
+ * body of the instance's actor. A give to someone else is not the actor's acquisition. In stable
+ * semantic order (04 §5.2 step 6): by quest DefinitionRefString, then instance id, never the order
+ * the rows were stored or restored in. ponytail: scans every instance per event (06 §7 allows a
+ * simple scan for a private cartridge); index active instances by event type and target when
+ * worlds grow.
  */
 export function earned(
   world: World,
