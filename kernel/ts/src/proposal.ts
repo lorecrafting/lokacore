@@ -11,6 +11,7 @@ import {
   type DeltaOp,
   type DomainEvent,
   type JobId,
+  type QuestInstanceId,
 } from './contracts.gen.ts';
 import { allocator, COMPOSES, event, row, type Mint, type State, type World } from './decision.ts';
 import { factChanged, typedFact, type Base } from './fact.ts';
@@ -92,7 +93,7 @@ export function apply(world: World, ops: readonly DeltaOp[]): { state: State } |
   return { state: { ...world.state, ...written, clock } as State };
 }
 
-type Queued = { cause: DomainEvent; depth: number; mint: Mint };
+type Queued = { cause: DomainEvent; depth: number; mint: Mint; earns: QuestInstanceId[] };
 // A proposal being built: its ops and events so far, the queue of events awaiting their
 // deliveries, the last writer group and delivery count, and `at`, the world with ops[0, applied).
 type P = {
@@ -130,9 +131,9 @@ const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * has nothing to drain.
  *
  * The deliveries of each queued event, at its FIFO position (04 §5.2 steps 5-6): first each quest
- * instance it earns (quest.ts earned: active before this decision) that is still active in the
- * proposal so far, one quest.transition to objectives_complete as its own writer group, counted
- * toward the deliveries budget; then each rule it triggers, in rule-key order, at
+ * instance it earned when placed (join; quest.ts earned), counted toward the deliveries budget,
+ * then, when still active in the proposal so far, one quest.transition to objectives_complete as
+ * its own writer group; then each rule it triggers, in rule-key order, at
  * one more than its cause's reaction depth (a root's or job's events are at 0). Each counts
  * toward the deliveries budget and its `when`'s policy leaves toward query_steps, read on the
  * proposal so far at the event's logical time; only one whose `when` holds runs, as its own
@@ -164,11 +165,12 @@ export function propose(world: World, root: Admitted, command: Actor, mint: Mint
     applied: 0,
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
-  join(p, root.delta.ops, root.events, base, 0, mint);
-  return react(p) ?? jobs(p, root) ?? { ...root, delta: { ops: p.ops }, events: p.events };
+  const failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
+  return failed ?? { ...root, delta: { ops: p.ops }, events: p.events };
 }
 
-// The proposal so far, composed lazily (only a job or a delivery reads it), or its fault.
+// The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
+// it), or its fault.
 function now(p: P): World | Admitted {
   if (p.applied < p.ops.length) {
     const r = apply(p.at, p.ops.slice(p.applied));
@@ -179,7 +181,10 @@ function now(p: P): World | Admitted {
 }
 
 // One explicit sequence joins: its ops, then its events with its fact_changed placed, numbered
-// after the events before them and queued at `depth`.
+// after the events before them and queued at `depth`, each with the quest instances it earns at
+// its position (04 §5.2 step 5), or the fault composing the proposal so far: active before the
+// sequence or by an earlier quest_activated, and not ended by an earlier quest_resolved. ponytail:
+// an exit with no event (to objectives_complete) counts at the sequence's end; charged, skipped.
 function join(
   p: P,
   own: readonly DeltaOp[],
@@ -187,13 +192,24 @@ function join(
   base: Base,
   depth: number,
   m: Mint,
-) {
+): Admitted | undefined {
+  const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
+  const before = earns ? now(p) : p.world;
+  if (!('cartridge' in before)) return before;
   p.ops.push(...own);
+  const after = earns ? now(p) : p.world;
+  if (!('cartridge' in after)) return after;
+  const quests = earns ? Object.entries(before.state.quests ?? {}) : [];
+  const active = new Map(quests.map(([i, q]) => [i, q.state === 'active']));
   const assigns = own.filter((o) => o.op === 'fact.assign') as Assign[];
   for (const e of factChanged(base, m, assigns, evs)) {
     const placed = { ...e, position: p.events.length + 1, correlation_id: base.correlation_id };
+    const x = placed.payload;
+    if (x.type === 'quest_activated' || x.type === 'quest_resolved')
+      active.set(x.instance_id, x.type === 'quest_activated');
     p.events.push(placed);
-    p.queue.push({ cause: placed, depth, mint: m });
+    const at = earns ? earned(after, x, (i) => active.get(i) === true) : [];
+    p.queue.push({ cause: placed, depth, mint: m, earns: at });
   }
 }
 
@@ -208,12 +224,11 @@ const cause = (p: P, logical_time: number, id: string) => ({
 // The queue's deliveries to quiescence, or the fault that ends them.
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
-    const earns = earned(p.world, next.cause.payload);
-    for (const instance_id of earns) {
+    for (const instance_id of next.earns) {
+      if (over({ deliveries: ++p.deliveries })) return BUDGET;
       const at = now(p);
       if (!('cartridge' in at)) return at;
       if (at.state.quests![instance_id]!.state !== 'active') continue;
-      if (over({ deliveries: ++p.deliveries })) return BUDGET;
       const writer_group = ++p.group;
       p.ops.push({
         op: 'quest.transition',
@@ -232,7 +247,9 @@ function react(p: P): Admitted | undefined {
         return BUDGET;
       if (!own) continue;
       p.group++;
-      join(p, own, [], cause(p, next.cause.logical_time, next.cause.id), depth, next.mint);
+      const base = cause(p, next.cause.logical_time, next.cause.id);
+      const failed = join(p, own, [], base, depth, next.mint);
+      if (failed) return failed;
     }
   }
 }
@@ -256,8 +273,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if (ran.kind !== 'accepted') return ran;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: p.group + 1 }));
     p.group++;
-    join(p, own, ran.events, cause(p, due_time, run.id), 0, m);
-    const failed = react(p);
+    const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }
 }
