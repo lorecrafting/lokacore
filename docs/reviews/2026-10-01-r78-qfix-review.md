@@ -98,3 +98,19 @@ Verdict: **APPROVE**
   can be observed today, so no mutant could be killed.
 - The rewrapped `join` comment at `:183-187` keeps its meaning, including the ponytail limit.
 - N2 is carried by the PM.
+
+## Codex Sol fix round 1 re-check (verbatim, a92fc7d)
+
+```text
+APPROVE — a92fc7d
+
+Findings: none.
+
+kernel/ts/src/proposal.ts:249-251 propagates join’s fault through react → propose → adopt, preserving whole-proposal rollback and the original world. It matches the job path.
+
+Verified the no-test rationale: reaction joins pass [], sequence returns only fact.assign operations, and factChanged generates only fact_changed events. No acquisition can currently reach this fault branch.
+
+Current behavior is unchanged; the remaining diff only edits a comment. proposal.ts is exactly 300 lines. No broken caller or unnecessary complexity found.
+
+Validation: 25 focused reaction/quest tests and the full TypeScript typecheck passed. No files edited.
+```
