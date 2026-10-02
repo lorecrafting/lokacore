@@ -68,6 +68,8 @@ export function observe(db: Db, record: object): void {
   } catch {}
 }
 // ponytail: the newest by rowid span, which holds while rows are deleted only here, oldest first.
+// One cap for every store: per-command kernel.decision_latency rows evict older
+// evaluation.budget_exceeded rows; a per-store cap when diagnostics upload.
 const OBSERVED = 1000;
 
 // ponytail: rows counted by their rowid span, O(1) per entry, which holds while rows are deleted

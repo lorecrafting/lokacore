@@ -10,7 +10,7 @@ import {
   newWorld,
 } from '../../../kernel/ts/src/index.ts';
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
-import { openStory, type Reply } from './authority.ts';
+import { openStory, type Host, type Reply } from './authority.ts';
 import { corrupt, type Db } from './store.ts';
 
 export type { GameView };
@@ -37,6 +37,8 @@ const KERNEL_VERSION = `${KERNEL_ID}@${'0'.repeat(40)}-dirty`;
 const ID_PREFIX = '00000000-0000-4000-8000-';
 
 type Say = (key: string) => string;
+type Latency = Host['latency'];
+type HostPart = Pick<Host, 'newId' | 'latency'>; // its ids and its clock
 type Press = Omit<Button, 'token'>;
 
 /** Logical time as the clock shows it, HH:MM (ROADMAP R6P mapping: the hour is time / 3600). */
@@ -161,10 +163,10 @@ function reread(story: { narration: () => NarrationRecord | undefined }, text: S
  * bundled cartridge; open `db` once per process. A save that does not open throws, its refusal
  * (kind and newGame) as the error's cause.
  */
-export function openSmoke(db: Db, bundled: Bundled, newId: () => string) {
+export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency?: Latency) {
   const cartridge = cartridgeOf(bundled);
   const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
-  const host = { kernel_version: KERNEL_VERSION, newId };
+  const host = { kernel_version: KERNEL_VERSION, newId, latency };
   const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
   if (story.kind !== 'open') throw Object.assign(new Error(story.kind), { cause: story });
   // The unconfirmed attempt, resent unchanged (same id, same intent) until it settles (03 §§14-15).
@@ -224,11 +226,11 @@ export type Failed = {
  * fails otherwise keeps the game being played and says so in its log; one whose outcome is
  * unknown does not (its next press would settle the new game, then apply to it).
  */
-export function playSmoke(open: () => Db, remove: () => void, items: Bundled, newId: () => string) {
+export function playSmoke(open: () => Db, remove: () => void, items: Bundled, host: HostPart) {
   const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
   const reopen = () => {
     try {
-      s.game = openSmoke((s.db ??= open()), items, newId);
+      s.game = openSmoke((s.db ??= open()), items, host.newId, host.latency);
       s.failed = undefined;
     } catch (e) {
       const { message, cause } = e as Error;

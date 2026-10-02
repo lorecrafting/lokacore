@@ -16,7 +16,7 @@ import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { INSTALLED } from '../../../kernel/ts/src/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openStory } from './authority.ts';
+import { openStory, type Host } from './authority.ts';
 import { observe } from './trace.ts';
 
 const G = 'ashmere_green@0.0.1';
@@ -46,19 +46,23 @@ const release = (() => {
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-r6pb-')), 'save.db');
 
-/** A process on the save at `path`: one connection, expo-sqlite's sync names. */
-function processOn(path: string) {
+/**
+ * A process on the save at `path`: one connection, expo-sqlite's sync names, each statement first
+ * passed to `tap` (which may throw it unrun), the host's optional latency clock, its release `r`.
+ */
+function processOn(path: string, latency?: Host['latency'], tap = (_: string) => {}, r = release) {
   const sql = new DatabaseSync(path);
   type P = (string | number | null)[];
   const db = {
-    execSync: (s: string) => void sql.exec(s),
-    runSync: (s: string, ...p: P) => sql.prepare(s).run(...p),
-    getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T,
-    getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
+    execSync: (s: string) => void (tap(s), sql.exec(s)),
+    runSync: (s: string, ...p: P) => (tap(s), sql.prepare(s).run(...p)),
+    getFirstSync: <T>(s: string, ...p: P) => (tap(s), sql.prepare(s).get(...p) ?? null) as T,
+    getAllSync: <T>(s: string, ...p: P) => (tap(s), sql.prepare(s).all(...p)) as T[],
     isInTransactionSync: () => sql.isTransaction,
   };
   let n = 0;
-  const opened = openStory(db, [release], { kernel_version: KERNEL, newId: () => id(++n) });
+  const host = { kernel_version: KERNEL, newId: () => id(++n), latency };
+  const opened = openStory(db, [r], host);
   const story = opened as Extract<typeof opened, { kind: 'open' }>;
   const all = (q: string) => JSON.stringify(sql.prepare(q).all());
   const send = (k: number, action_key: string, input = {}) =>
@@ -137,4 +141,84 @@ test('an older save gains the sink untouched, and the sink keeps the newest 1000
   const count = p.sql.prepare('SELECT count(*) AS n FROM observation').get()!.n;
   const oldest = p.sql.prepare('SELECT record FROM observation ORDER BY rowid LIMIT 1').get()!;
   assert.deepEqual([count, oldest.record], [1000, '{"n":2}']);
+});
+
+// Breaks (11 §13; R6P P6a): no record of a NEW decision (accepted, rejected by resolve, or a
+// fault), a timer that misses resolve or step, or one that also spans storage (the receipt
+// lookup, COMMIT), a record on a receipt replay, or ids not the run's and the command's. The fake
+// clock: 1.5 ms per reading, 7 ms per SQL statement, and, the first time the world is read from
+// within each since the last reading, 0.25 ms in resolve and 0.5 ms in step (a frame named so on
+// the stack). So resolve+step is 2250 µs and a resolve-time rejection 1750 µs.
+test('each NEW decision, accepted, rejected or fault, is one kernel.decision_latency', () => {
+  let t = 0;
+  const seen = new Set<string>();
+  const cost = { resolve: 0.25, step: 0.5 } as const;
+  const fresh = new Proxy(release.fresh, {
+    get(world, key) {
+      for (const [phase, ms] of Object.entries(cost)) {
+        if (seen.has(phase) || !new Error().stack!.includes(` at ${phase} (`)) continue;
+        seen.add(phase);
+        t += ms;
+      }
+      return Reflect.get(world, key);
+    },
+  });
+  const now = () => (seen.clear(), (t += 1.5));
+  const p = processOn(save(), { host: 'hermes_ios', now }, () => void (t += 7), {
+    ...release,
+    fresh,
+  });
+  assert.equal(p.send(1, 'fly').kind, 'saved'); // no such action: rejected by resolve
+  assert.deepEqual(p.send(2, 'move', north), FAULT);
+  assert.equal(p.send(3, 'look').kind, 'saved');
+  assert.equal(p.send(3, 'look').kind, 'saved'); // its replay
+  const one = (q: string) => p.sql.prepare(q).get()!.command_id as string;
+  const timed = p.sql
+    .prepare(
+      "SELECT record FROM observation WHERE record ->> '$.event' = 'kernel.decision_latency'",
+    )
+    .all()
+    .map((r) => JSON.parse(r.record as string));
+  const expected = [
+    [one(`SELECT command_id FROM receipt WHERE invocation_id = '${id(101)}'`), 1750],
+    [one('SELECT command_id FROM trace WHERE ordinal = 1'), 2250],
+    [one('SELECT command_id FROM trace WHERE ordinal = 2'), 2250],
+  ].map(([command_id, value]) => ({
+    format: 'loka-obs-v1',
+    event: 'kernel.decision_latency',
+    store: 'operations',
+    ids: { kernel_version: KERNEL, host: 'hermes_ios', run_id: id(2), command_id },
+    data: { state: 'observed', value },
+  }));
+  assert.deepEqual(timed, expected);
+  for (const record of timed) assert.deepEqual(validate('ObservationRecord', record), []);
+});
+
+// Breaks (03 §15; P4b commit_pending, then settle committed): a record written on the pending
+// reply. Its transaction ROLLBACKs the attempt left open behind the fence, so the later COMMIT
+// finds none. Only the authority's two ROLLBACKs jam here (P4b's harness jams all, so a write
+// there could not roll it back and that harness cannot see this break).
+test('a clock changes no reply or durable state when a COMMIT is held, then committed', () => {
+  const play = (latency?: Host['latency']) => {
+    let [held, jams] = [false, 0];
+    const p = processOn(save(), latency, (s) => {
+      if (held && s === 'COMMIT') {
+        [held, jams] = [false, 2];
+        throw new Error('COMMIT acknowledgement lost'); // unrun: the transaction stays open
+      }
+      if (jams && s === 'ROLLBACK') {
+        jams -= 1;
+        throw new Error('ROLLBACK failed');
+      }
+    });
+    held = true;
+    const replies = [p.send(1, 'look')];
+    p.sql.exec('COMMIT');
+    replies.push(p.send(1, 'look'));
+    const timed = p.sql.prepare('SELECT count(*) AS n FROM observation').get()!.n;
+    return { replies, durable: STORED.map(p.all), timed };
+  };
+  const plain = play();
+  assert.deepEqual(plain.replies[0], { kind: 'pending' });
+  assert.deepEqual(play({ host: 'hermes_ios', now: () => 0 }), plain);
 });
