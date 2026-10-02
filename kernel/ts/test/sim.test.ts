@@ -4,6 +4,7 @@
 // controls, each a kernel planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import type { AdvertisedAction, Command, DecisionResult } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
@@ -11,6 +12,7 @@ import { gameView, step } from '../src/world.ts';
 import { check } from '../src/invariants.ts';
 import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
+import { ROOT } from '../play/obs.ts';
 
 const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = read(
   'kernel/ts/test/sim_seeds.json',
@@ -73,16 +75,20 @@ test('every registered invariant is checked per step, or says why not', () => {
 
 // Breaks: any kernel change that throws out of step or breaks a registered invariant on a
 // generated sequence; a generator that stops reaching a refusal code, a cartridge or an
-// unregistered command type.
+// unregistered command type; or a budget_exceeded record from a fresh sequence, which has no run
+// and so no genuine ReplayIds (04 §5.4: only its playback through loka play's decide emits).
 test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`, (t) => {
   assert.equal(SEEDS.generator, GENERATOR, 'sim_seeds.json is of another generator: re-curate it');
   const first = Date.now(); // the fresh seeds, printed so a failure can be rerun
   const lengths = Array<number>(8).fill(0);
   const [codes, seen] = [new Set<string>(), new Set<string>()]; // outcomes; cartridges, types
   let steps = 0;
+  const faulted = new Set<string>(); // the fresh sequences' budget_exceeded command ids
   for (const seed of [...seeds, ...Array.from({ length: FRESH }, (_, i) => first + i)]) {
     const o = simulate(seed);
     if (o.failure) assert.fail(report(o));
+    if (seed >= first)
+      o.codes.forEach((c, i) => c === 'fault budget_exceeded' && faulted.add(o.commands[i]!.id));
     lengths[(o.commands.length - 1) >> 3]! += 1;
     steps += o.commands.length;
     for (const c of o.codes) codes.add(c);
@@ -96,6 +102,16 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
   );
   const missing = [...PICKED, ...UNKNOWN].filter((x) => !seen.has(x));
   assert.deepEqual([...REACHED.filter((c) => !codes.has(c)), ...missing], [], 'never reached');
+  const dir = `${ROOT}tmp/obs/diagnostics`;
+  const lines = (existsSync(dir) ? readdirSync(dir) : []).flatMap((f) =>
+    readFileSync(`${dir}/${f}`, 'utf8').trim().split('\n'),
+  );
+  const ids = lines.filter(Boolean).map((l) => JSON.parse(l).ids?.command_id);
+  assert.deepEqual(
+    ids.filter((id) => faulted.has(id)),
+    [],
+    'recorded without a run',
+  );
 });
 
 // Breaks: a generator change after which a regression seed no longer issues the command type it

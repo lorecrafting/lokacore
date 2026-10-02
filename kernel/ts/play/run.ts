@@ -25,13 +25,19 @@ export type Run = {
 /**
  * Decides `command` against the run and advances it. Accepted: committed at the next revision
  * with its events; rejected (no receipt before R6) and fault: commit unavailable, not_applicable.
- * RNG draws are not collected yet (unavailable, not_collected).
+ * RNG draws are not collected yet (unavailable, not_collected). A budget fault's limit goes to
+ * diagnostics as evaluation.budget_exceeded (04 §5.4) when `measured`, so a replay, whose ids
+ * repeat the run's, adds none.
  */
-export function decide(r: Run, command: Command) {
+export function decide(r: Run, command: Command, measured = true) {
   const t0 = performance.now();
-  const { decision, world } = step(r.world, command, r.revision + 1);
+  const { decision, world, limit } = step(r.world, command, r.revision + 1);
   const micros = Math.round((performance.now() - t0) * 1000);
   const ids = { ...r.ids, command_id: command.id, revision: r.revision };
+  if (limit && measured) {
+    const record = { format: 'loka-obs-v1', event: 'evaluation.budget_exceeded', ids };
+    append('diagnostics', r.ids.run_id, line({ ...record, store: 'diagnostics', data: { limit } }));
+  }
   r.world = world;
   r.ordinal += 1;
   const [traced, commit] = outcome(decision, r);
