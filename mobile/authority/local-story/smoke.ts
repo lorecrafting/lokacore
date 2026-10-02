@@ -117,12 +117,13 @@ function said(r: Reply, text: Say): string {
 }
 
 // The log after a press's echo: its answer if it has words, then who came or went. A look is a
-// read: its fresh page is the answer, so its echo goes too, unless it settles a shown pending.
-function answer(log: string[], reply: Reply, text: Say, comings: string[], resent: boolean) {
+// read: its fresh page is the answer, so its echo goes too. ponytail: a look that settles a shown
+// pending leaves that pending line above (the status line's "save not confirmed" still clears).
+function answer(log: string[], reply: Reply, text: Say, comings: string[]) {
   const line = said(reply, text);
   const read =
     reply.kind === 'saved' && (reply.decision as { outcome?: string }).outcome === 'looked';
-  if (read && !resent) log.pop();
+  if (read) log.pop();
   else if (line) log.push(line);
   log.push(...comings);
 }
@@ -214,7 +215,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
-      const [resent, was] = [!!retry, gameView(story.world())]; // a retry; the view before
+      const was = gameView(story.world()); // the view before, for who came or went
       retry ??= { label: b.label, invocation: invocationOf(b, ++sent, story.world().character) };
       log.push(`> ${retry.label}`);
       let reply: Reply;
@@ -228,7 +229,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
       }
       fault = undefined;
       if (reply.kind !== 'pending') retry = undefined; // before said(): it may throw
-      answer(log, reply, text, comings(was, gameView(story.world()), text), resent);
+      answer(log, reply, text, comings(was, gameView(story.world()), text));
     },
     newGame: story.newGame,
   };
