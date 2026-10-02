@@ -114,7 +114,7 @@ test('a corrupt narration receipt fails the reopen, with start over offered', ()
     () => adapt(new DatabaseSync(path)),
     () => {},
     LANTERN,
-    randomUUID,
+    { newId: randomUUID },
   );
   assert.equal(c.game(), undefined);
   assert.match(c.failed()!.message, /malformed JSON/);

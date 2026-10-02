@@ -260,7 +260,7 @@ const app = (path: string, fail?: 'open' | 'remove', tap?: Parameters<typeof ada
       rmSync(path);
     },
     ITEMS,
-    randomUUID,
+    { newId: randomUUID },
   );
   const now = () => screenOf(c.game()!).now();
   const press = (l: string) => screenOf(c.game()!).press(l);

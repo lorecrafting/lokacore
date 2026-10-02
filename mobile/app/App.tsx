@@ -28,8 +28,8 @@ const smoke = (g.loka_smoke ??= playSmoke(
     deleteDatabaseSync(NAME);
   },
   lantern,
-  randomUUID,
-  { host: 'hermes_ios', now: () => performance.now() }, // each decision's kernel.decision_latency
+  // Each NEW decision's kernel.decision_latency (11 §13), on the iPhone (Android descoped).
+  { newId: randomUUID, latency: { host: 'hermes_ios', now: () => performance.now() } },
 ));
 
 export default function App() {

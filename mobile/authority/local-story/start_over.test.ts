@@ -50,7 +50,7 @@ function app(path: string) {
       rmSync(path);
     },
     FERRY as never,
-    randomUUID,
+    { newId: randomUUID },
   );
   const screen = () => c.game()!.screen();
   const press = (b: Button) => c.game()!.press(b);

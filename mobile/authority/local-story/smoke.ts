@@ -38,6 +38,7 @@ const ID_PREFIX = '00000000-0000-4000-8000-';
 
 type Say = (key: string) => string;
 type Latency = Host['latency'];
+type Ids = Pick<Host, 'newId' | 'latency'>;
 type Press = Omit<Button, 'token'>;
 
 /** Logical time as the clock shows it, HH:MM (ROADMAP R6P mapping: the hour is time / 3600). */
@@ -225,17 +226,11 @@ export type Failed = {
  * fails otherwise keeps the game being played and says so in its log; one whose outcome is
  * unknown does not (its next press would settle the new game, then apply to it).
  */
-export function playSmoke(
-  open: () => Db,
-  remove: () => void,
-  items: Bundled,
-  newId: () => string,
-  latency?: Latency,
-) {
+export function playSmoke(open: () => Db, remove: () => void, items: Bundled, host: Ids) {
   const s: { db?: Db; game?: ReturnType<typeof openSmoke>; failed?: Failed } = {};
   const reopen = () => {
     try {
-      s.game = openSmoke((s.db ??= open()), items, newId, latency);
+      s.game = openSmoke((s.db ??= open()), items, host.newId, host.latency);
       s.failed = undefined;
     } catch (e) {
       const { message, cause } = e as Error;
