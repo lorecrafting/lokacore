@@ -25,6 +25,7 @@ export type Reply =
   | { kind: 'conflict' }
   | { kind: 'fault'; code: ErrorCode }
   | { kind: 'pending' } // COMMIT outcome unknown: retry the same invocation later (03 §§14-15)
+  | { kind: 'stale_view' } // a NEW invocation made against an older view (04 §16): no receipt
   | Saved;
 
 /** An installed release (10 §16); the app bundles them newest first and downloads none (PREP-03). */
@@ -52,7 +53,9 @@ const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
  * 10 §§31-32), and, offering only the player's new game (settled as any; reopen once `replaced`),
  * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
- * conflict) before anything is resolved against the current world; a NEW one is resolved, decided
+ * conflict) before anything is resolved against the current world; a NEW one with a host view
+ * token (`view:<run>:<revision>`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
+ * metadata, 03 §14); else it is resolved, decided
  * once and committed before it is adopted. A fault discards its proposal and gets no receipt
  * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4).
  * A failed commit throws, with memory and storage unchanged. A COMMIT whose outcome is unknown
@@ -90,6 +93,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     invoke: (value: unknown) => invoke(s, value),
     newGame: () => newGame(s),
     narration: () => narration(s),
+    token: () => token(s), // the view freshness token of the world() now shown
   };
 }
 
@@ -110,6 +114,9 @@ function narration(s: Story): NarrationRecord | undefined {
     : undefined;
 }
 
+// The run is in it, so an old run's token is never current again after newGame.
+const token = (s: Story) => `view:${s.meta.run_id}:${s.revision}`;
+const stale = (s: Story, view?: string) => !!view?.startsWith('view:') && view !== token(s);
 const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
 const ids = (s: Story): RunIds => ({
   content_hash: s.meta.pin.content_hash,
@@ -167,6 +174,7 @@ function invoke(s: Story, value: unknown): Reply {
     if (!same || old.intent_digest !== intent_digest) return { kind: 'conflict' };
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
+  if (stale(s, i.view_freshness_token)) return { kind: 'stale_view' };
   const command = resolve(s.world, id);
   const next: ReturnType<typeof step> =
     'kind' in command
