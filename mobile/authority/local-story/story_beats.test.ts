@@ -1,6 +1,6 @@
-// Milestone capture and delayed delivery (03 §26; 23 §§3-5, §11; pre-release-proof P2/P6) on Node
+// Story beat capture and delayed delivery (03 §26; 23 §§3-5, §11; pre-release-proof P2/P6) on Node
 // with real SQLite (node:sqlite) in the phone's rollback journal (no WAL), one connection per
-// simulated process, as local_story.test.ts. The milestone is the bell known answer's ring_bell
+// simulated process, as local_story.test.ts. The story beat is the bell known answer's ring_bell
 // recipe emitting the custom event bell_rung (protocol/fixtures/cartridge_bell_hash.json;
 // kernel/ts/test/checks.test.ts for its ids). The platform is a fake (the network is external): it
 // keeps one acceptance per report id. Expected values are hand-written literals, never from the
@@ -14,7 +14,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { encode, hash } from '../../../kernel/ts/src/canonical.ts';
 import type {
-  MilestoneReport,
+  StoryBeatReport,
   RngState,
   WorldContextId,
 } from '../../../kernel/ts/src/contracts.gen.ts';
@@ -63,9 +63,9 @@ const tolled = (() => {
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
 const BELL = '953a909b-3a29-8c5c-9e3f-4105b9a47c4b';
 const HASH = '99e59f482cc655fdc4db353b90963cceb78ad23157239cec41d27410bfabe1ed'; // the fixture's
-const MILESTONES = new Map([
-  ['bell_rung', { milestone: 'bell_heard', outcome: 'rung' }],
-  ['bell_tolled', { milestone: 'bell_tolled', outcome: 'tolled' }],
+const STORY_BEATS = new Map([
+  ['bell_rung', { story_beat: 'bell_heard', outcome: 'rung' }],
+  ['bell_tolled', { story_beat: 'bell_tolled', outcome: 'tolled' }],
 ]);
 const [A, B, C] = ['a', 'b', 'c'].map((x) => `${x.repeat(8)}-1111-4222-8333-444444444444`);
 /** The n-th id a test's allocator hands out. */
@@ -81,7 +81,7 @@ type Options = {
   newId?: () => string;
   tap?: Tap;
   binding?: () => string | null;
-  milestones?: typeof MILESTONES;
+  story_beats?: typeof STORY_BEATS;
   on?: typeof bell;
 };
 /** A process on the save at `path`: one connection, expo-sqlite's sync names, `tap` faults. */
@@ -97,9 +97,9 @@ function processOn(path: string, { newId = none, tap = (_, run) => run(), ...o }
   };
   const { fresh, hash } = o.on ?? bell;
   const host = { kernel_version: `loka-kernel@${'0'.repeat(40)}`, newId };
-  const milestones = o.milestones ?? MILESTONES;
+  const story_beats = o.story_beats ?? STORY_BEATS;
   const binding = o.binding ?? (() => A);
-  const opened = openStory(db, [{ content_hash: hash, fresh }], { ...host, milestones, binding });
+  const opened = openStory(db, [{ content_hash: hash, fresh }], { ...host, story_beats, binding });
   assert.equal(opened.kind, 'open');
   const story = opened as Extract<typeof opened, { kind: 'open' }>;
   const all = (q: string) =>
@@ -125,17 +125,17 @@ const REPORTS = 'SELECT report_id, lineage_id, binding, report, disposition FROM
 const count = (p: ReturnType<typeof processOn>, t: string) =>
   p.all(`SELECT count(*) FROM ${t}`)[0]![0];
 const sha256 = (text: string) => createHash('sha256').update(text).digest('hex');
-/** The canonical MilestoneReport of the bell rung at revision 1 in run `run`, report `report`. */
+/** The canonical StoryBeatReport of the bell rung at revision 1 in run `run`, report `report`. */
 const payload = (report: string, run: string) =>
-  `{"milestone":"bell_heard","observed_revision":1,"outcome":"rung","release":{"cartridge_hash":"${HASH}","cartridge_id":"ashmere_bell","cartridge_version":"0.0.1"},"report_id":"${report}","run_id":"${run}"}`;
+  `{"observed_revision":1,"outcome":"rung","release":{"cartridge_hash":"${HASH}","cartridge_id":"ashmere_bell","cartridge_version":"0.0.1"},"report_id":"${report}","run_id":"${run}","story_beat":"bell_heard"}`;
 
 /** The fake platform: one acceptance per report id, its `result`; `lose` drops the next reply. */
 function platform(result = 'accepted') {
   const kept = new Map<string, object>();
   const f = { kept, result, lose: false, offline: false, calls: [] as [string, string][] };
-  const submit = async (report: MilestoneReport, account: string) => {
+  const submit = async (report: StoryBeatReport, account: string) => {
     if (f.offline) throw new Error('offline');
-    const { report_id, release, milestone, outcome } = report;
+    const { report_id, release, story_beat, outcome } = report;
     f.calls.push([report_id, account]);
     if (!kept.has(report_id)) {
       const payload_digest = createHash('sha256')
@@ -146,7 +146,7 @@ function platform(result = 'accepted') {
         policy_revision: 1,
         result: f.result,
       };
-      const head = { report_id, account_id: account, payload_digest, release, milestone, outcome };
+      const head = { report_id, account_id: account, payload_digest, release, story_beat, outcome };
       kept.set(report_id, { ...head, ...rest });
     }
     if (f.lose) {
@@ -158,12 +158,12 @@ function platform(result = 'accepted') {
   return Object.assign(f, { submit });
 }
 
-// Breaks (23 §§4-5, 03 §26; pins 1, 3, 8): no report for a committed custom_event milestone; a
+// Breaks (23 §§4-5, 03 §26; pins 1, 3, 8): no report for a committed custom_event story beat; a
 // report missing its run, release, outcome or revision; its id minted again on restart, replay or
 // delivery (newId is `none` after the capture); a receipt replay adding a second report; the
-// binding read when the milestone is reached or at delivery instead of the run's (bound at the
+// binding read when the story beat is reached or at delivery instead of the run's (bound at the
 // start, 23 §§4-5, §11); an offline completion lost by a restart.
-test('a milestone reached offline is captured once, survives restart, and is delivered', async () => {
+test('a story beat reached offline is captured once, survives restart, and is delivered', async () => {
   const path = save();
   let who: string | null = A;
   const a = processOn(path, { newId: ids(), binding: () => who });
@@ -172,7 +172,7 @@ test('a milestone reached offline is captured once, survives restart, and is del
   who = C;
   const pending = [id(3), id(1), A, payload(id(3), id(2)), 'pending'];
   assert.deepEqual(a.all(REPORTS), [pending]);
-  assert.deepEqual(validate('MilestoneReport', JSON.parse(payload(id(3), id(2)))), []);
+  assert.deepEqual(validate('StoryBeatReport', JSON.parse(payload(id(3), id(2)))), []);
   a.sql.close();
   const b = processOn(path, { binding: () => who });
   assert.deepEqual(saved(b.story.invoke(ring())), [true, 1]);
@@ -183,8 +183,8 @@ test('a milestone reached offline is captured once, survives restart, and is del
   assert.deepEqual(b.all(REPORTS), [[...pending.slice(0, 4), 'accepted']]);
 });
 
-// Breaks (23 §§4-5, §11; 10 §31 as amended; A-R1): the binding read per milestone, so one run's
-// two milestones, reached either side of a profile switch, go to two accounts; a new game's run not
+// Breaks (23 §§4-5, §11; 10 §31 as amended; A-R1): the binding read per story beat, so one run's
+// two story beats, reached either side of a profile switch, go to two accounts; a new game's run not
 // bound to the profile signed in when it starts.
 test('a run is bound once, when it starts; each of its reports carries that binding', async () => {
   let who: string | null = A;
@@ -205,12 +205,12 @@ test('a run is bound once, when it starts; each of its reports carries that bind
   ]);
 });
 
-// Breaks (N-1): a report that is not a MilestoneReport (here an outcome that is no Key) stored,
+// Breaks (N-1): a report that is not a StoryBeatReport (here an outcome that is no Key) stored,
 // or the gameplay committed without it.
-test('a milestone whose report is malformed is not committed', () => {
-  const milestones = new Map([['bell_rung', { milestone: 'bell_heard', outcome: 'Rung!' }]]);
-  const p = processOn(save(), { newId: ids(), milestones });
-  assert.throws(() => p.story.invoke(ring()), /not a MilestoneReport/);
+test('a story beat whose report is malformed is not committed', () => {
+  const story_beats = new Map([['bell_rung', { story_beat: 'bell_heard', outcome: 'Rung!' }]]);
+  const p = processOn(save(), { newId: ids(), story_beats });
+  assert.throws(() => p.story.invoke(ring()), /not a StoryBeatReport/);
   assert.deepEqual([count(p, 'receipt'), count(p, 'report')], [0, 0]);
 });
 
@@ -224,8 +224,10 @@ test('a pending report leaves the canonical state hash unchanged', () => {
   const expected = createHash('sha256').update(rung).digest('hex');
   for (const off of [false, true]) {
     const path = save();
-    const milestones = off ? new Map([['bell_tolled', MILESTONES.get('bell_tolled')!]]) : undefined;
-    processOn(path, { newId: ids(), ...(milestones && { milestones }) }).story.invoke(ring());
+    const story_beats = off
+      ? new Map([['bell_tolled', STORY_BEATS.get('bell_tolled')!]])
+      : undefined;
+    processOn(path, { newId: ids(), ...(story_beats && { story_beats }) }).story.invoke(ring());
     const b = processOn(path);
     assert.equal(count(b, 'report'), off ? 0 : 1);
     assert.equal(hash(b.story.world().state as never), expected);
@@ -324,7 +326,7 @@ test('a lost reply is retried and reads back the one acceptance', async () => {
   assert.equal(fake.kept.size, 1);
   const stored = JSON.parse(p.all('SELECT acceptance FROM report')[0]![0] as string);
   assert.equal(stored.payload_digest, sha256(payload(id(3), id(2))));
-  assert.deepEqual(validate('MilestoneAcceptance', stored), []);
+  assert.deepEqual(validate('StoryBeatAcceptance', stored), []);
   assert.deepEqual(stored, fake.kept.get(id(3)));
 });
 
@@ -336,7 +338,7 @@ test('an acceptance of another payload needs attention', async () => {
   const other = sha256(
     payload(id(3), id(2)).replace('"observed_revision":1', '"observed_revision":2'),
   );
-  const answer = async (r: MilestoneReport, a: string) => ({
+  const answer = async (r: StoryBeatReport, a: string) => ({
     ...(await fake.submit(r, a)),
     payload_digest: other,
   });
@@ -369,7 +371,7 @@ test('an acknowledgement that does not commit stops the batch; the next call res
 test('a report that always fails does not hold back the rest', async () => {
   const p = reports(A, C);
   const fake = platform();
-  const failing = async (r: MilestoneReport, a: string) =>
+  const failing = async (r: StoryBeatReport, a: string) =>
     r.report_id === id(3) ? assert.fail('refused') : fake.submit(r, a);
   await assert.rejects(deliver(p.db, failing, 10), /refused/);
   await assert.rejects(deliver(p.db, failing, 10), /refused/);
@@ -401,7 +403,7 @@ test('delivery is bounded, persists each disposition and drops nothing', async (
   fake.result = 'accepted';
   // An acceptance with a result outside the schema, of another account, of another outcome.
   for (const wrong of [{ result: 'credited' }, { account_id: B }, { outcome: 'tolled' }]) {
-    const answer = async (r: MilestoneReport, a: string) => ({
+    const answer = async (r: StoryBeatReport, a: string) => ({
       ...(await fake.submit(r, a)),
       ...wrong,
     });

@@ -27,17 +27,17 @@ export type Release = { content_hash: string; fresh: World };
 
 /**
  * What the host supplies besides the releases: the build's kernel version (ADR-075 RunIds) and a
- * fresh random UUID per call, for each new save's lineage and run ids and each milestone report's
- * id. `milestones` maps a `custom_event` key to the milestone and outcome its commit reaches (none
+ * fresh random UUID per call, for each new save's lineage and run ids and each story beat report's
+ * id. `story_beats` maps a `custom_event` key to the story beat and outcome its commit reaches (none
  * by default); `binding` is the signed-in account/profile, read once when a run starts, which
  * binds it (23 §§4-5, §11; null, the default: a guest).
  */
 export type Host = {
   kernel_version: string;
   newId: () => string;
-  // ponytail: stands in for the cartridge's own milestone declaration and the typed
-  // story.milestone_reached event (23 §3), which freeze with the R7 feature schema.
-  milestones?: ReadonlyMap<string, { milestone: string; outcome: string }>;
+  // ponytail: stands in for the cartridge's own story beat declaration and the typed
+  // story_beat_reached event (23 §3), which freeze with the R7 feature schema.
+  story_beats?: ReadonlyMap<string, { story_beat: string; outcome: string }>;
   binding?: () => string | null;
 };
 const SAVE_VERSION = 1;
@@ -184,21 +184,21 @@ function invoke(s: Story, value: unknown): Reply {
 }
 
 /**
- * The pending reports of the milestones an accepted decision reaches (23 §§4-5; 03 §26), each
+ * The pending reports of the story beats an accepted decision reaches (23 §§4-5; 03 §26), each
  * with its id allocated once here and committed with the decision, its run, lineage, release and
  * the run's binding. A receipt replay never comes here, so it adds no second report. A report
- * that is not a MilestoneReport (a bad host key) throws before anything is stored.
+ * that is not a StoryBeatReport (a bad host key) throws before anything is stored.
  */
 function reached(s: Story, d: DecisionResult, observed_revision: number): Captured[] {
   if (d.kind !== 'accepted') return [];
   const { cartridge_id, cartridge_version, content_hash } = s.meta.pin;
   const release = { cartridge_id, cartridge_version, cartridge_hash: content_hash } as never;
   return d.events.flatMap(({ payload: p }) => {
-    const m = p.type === 'custom_event' ? s.host.milestones?.get(p.event.key) : undefined;
+    const m = p.type === 'custom_event' ? s.host.story_beats?.get(p.event.key) : undefined;
     if (!m) return [];
     const { lineage_id, run_id, binding } = s.meta;
     const report = { report_id: s.host.newId(), run_id, release, observed_revision, ...m };
-    if (validate('MilestoneReport', report).length) throw new Error('not a MilestoneReport');
+    if (validate('StoryBeatReport', report).length) throw new Error('not a StoryBeatReport');
     return [{ lineage_id, binding, report: report as never }];
   });
 }

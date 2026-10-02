@@ -18,7 +18,7 @@
       4
     ],
     "narration": [],
-    "milestone": null
+    "story_beat": null
   },
   "traces": [
     {
@@ -52,7 +52,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -86,7 +86,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -120,7 +120,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -154,7 +154,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -185,7 +185,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -219,7 +219,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -253,7 +253,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -287,7 +287,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -318,7 +318,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -363,7 +363,7 @@
                 }
               }
             ],
-            "milestone": {
+            "story_beat": {
               "key": "proof.terminal",
               "occurrence": "proof-choice:talk",
               "outcome": "carry"
@@ -403,7 +403,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -437,7 +437,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -471,7 +471,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -505,7 +505,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -536,7 +536,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -570,7 +570,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -604,7 +604,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -638,7 +638,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -669,7 +669,7 @@
               4
             ],
             "narration": [],
-            "milestone": null
+            "story_beat": null
           }
         },
         {
@@ -714,7 +714,7 @@
                 }
               }
             ],
-            "milestone": {
+            "story_beat": {
               "key": "proof.terminal",
               "occurrence": "proof-choice:talk",
               "outcome": "leave"

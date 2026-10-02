@@ -77,25 +77,25 @@ responsibilities, which are never capabilities (05 §6). No fixtures: none bound
 
 ## Account, run and admission contracts (`protocol/account.schema.json`)
 
-Account/run binding, Story milestone reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).
+Account/run binding, story beat reports and acceptances, and Realm admission (23 §2-§7, §11; 03 §25-§27). Host and platform records, never portable gameplay inputs: no StateScope here, and none of this enters the canonical gameplay hash (03 §26; 23 §2).
 
 - **AccountId**: A platform account (23 §2, §5): server-owned, never reused. Lowercase hyphenated UUID, any version.
 - **AdmissionPolicy**: A deployment's versioned admission policy (23 §5, §7): a conjunction of requirements, at least one. Ungated is its own explicit kind, never an empty list.
   - `gated`: Every requirement must be met.
   - `ungated`: Intentionally no requirement.
-- **AdmissionRequirement**: A requirement and its explicit alternative qualifying milestones, at least one (23 §7).
+- **AdmissionRequirement**: A requirement and its explicit alternative qualifying story beats, at least one (23 §7).
 - **AdmissionResult**: A server admission decision (23 §7): eligible, or the missing requirements, with the policy and progress versions it was evaluated at.
   - `eligible`
   - `missing_requirements`
-- **EvidenceClass**: How a milestone was evidenced (23 §6). A client cannot select or upgrade it.
+- **EvidenceClass**: How a story beat was evidenced (23 §6). A client cannot select or upgrade it.
 - **LocalProfileId**: A local profile on a device (23 §2), distinct from AccountId and CharacterId. Lowercase hyphenated UUID, any version.
-- **MilestoneAcceptance**: The platform's durable acceptance record (23 §5 'Platform acceptance'): authenticated account, canonical payload digest (hash of the MilestoneReport), recognized release and milestone, evidence class, acceptance-policy revision and result. integrity_conflict: the report id was reused with a different payload; outcome_conflict: another outcome for the same milestone in the same run (23 §5). The server receipt time is host metadata whose format is fixed with the platform API (R12A).
-- **MilestoneReport**: The payload of one milestone report (23 §5 'Local milestone/report'): milestone key, occurrence id, run and exact release, outcome and the observed game revision. It names no account (authentication supplies it) and no evidence class (only the server assigns one, 23 §6).
-- **MilestoneReportId**: One milestone occurrence's report, stable across retry and restore (23 §4, §11). Lowercase hyphenated UUID, any version.
-- **QualifyingMilestone**: One approved (release hash, milestone, outcome) that satisfies a requirement (23 §7).
+- **QualifyingStoryBeat**: One approved (release hash, story beat, outcome) that satisfies a requirement (23 §7).
 - **QueuedReport**: A report in the local queue (23 §4, §5): account_id is the binding recorded when queued, verified on upload and never rebound to another account (absent for an unbound guest run).
 - **ReportDisposition**: A queued report's delivery state (23 §4). A report is never dropped after a retry limit.
 - **RequirementId**: A stable admission requirement id, namespace.name@version (23 §7: onboarding.loka_fundamentals@1); each segment lowercase snake_case, at most 64 characters.
+- **StoryBeatAcceptance**: The platform's durable acceptance record (23 §5 'Platform acceptance'): authenticated account, canonical payload digest (hash of the StoryBeatReport), recognized release and story beat, evidence class, acceptance-policy revision and result. integrity_conflict: the report id was reused with a different payload; outcome_conflict: another outcome for the same story beat in the same run (23 §5). The server receipt time is host metadata whose format is fixed with the platform API (R12A).
+- **StoryBeatReport**: The payload of one story beat report (23 §5 'Local story beat/report'): story beat key, occurrence id, run and exact release, outcome and the observed game revision. It names no account (authentication supplies it) and no evidence class (only the server assigns one, 23 §6).
+- **StoryBeatReportId**: One story beat occurrence's report, stable across retry and restore (23 §4, §11). Lowercase hyphenated UUID, any version.
 - **StoryRun**: A Story run and its binding (23 §5, §11; 03 §25): the exact cartridge release, the local profile, and the account once bound (host-side, outside portable semantics, 23 §4). parent_run_id is the run a restore or fork branched from; alone it is not full restore provenance: the parent snapshot/ancestor revision (23 §11; 03 §25) belongs to the R6 save-header contract. The server enforces that an account binding and release never change after registration (23 §5).
 - **StoryRunId**: A Story run/save lineage (23 §5; 03 §25). A semantic restore or fork is a new run (23 §11). Lowercase hyphenated UUID, any version.
 

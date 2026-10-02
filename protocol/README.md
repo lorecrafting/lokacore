@@ -39,7 +39,7 @@ lists only what a file adds to that.
 | `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text; its Calendar, owned by calendar), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5; 21 §4 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_ferry_hash.json` (calendar), `cartridge_loader.json` (loader corpus, TypeScript) |
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |
 | **Host, platform, verification** | | | |
-| `account.schema.json` | account/run binding, milestone reports, admission | 23 §2-§7, §11; 03 §25-§27 | |
+| `account.schema.json` | account/run binding, story beat reports, admission | 23 §2-§7, §11; 03 §25-§27 | |
 | `observation.schema.json`, `event_registry.json` | the observation record envelope, stores, correlation ids, game-trace entry, and the registered event names | 11 §11-§15; 08 §6; 09 §2, §7; [ADR-075](../docs/decisions/adr-075-observability-proposal.md) | `delta_digest.json`, `input_digest.json` |
 | (no schema) | the invocation-intent digest a receipt stores (`residency.json` receipts; TypeScript only) | 03 §14 | `intent_digest.json` |
 | `invariant.schema.json`, `invariants.json` | registered invariants, checked by id | [roadmap](../docs/ROADMAP.md) | `composition.json` |

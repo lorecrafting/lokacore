@@ -364,4 +364,4 @@ If the last answer is yes, prefer the pure module.
 
 ## 14. Early platform service is not early Realm simulation
 
-R12A introduces the account lifecycle and Story progress service before the first public Story release, reusing the `loka_platform` boundary and PostgreSQL. R13 adds commerce to that foundation; R14 later adds WorldInstance gameplay hosting. Authentication, accepted account milestones and Realm admission policy never execute inside the portable rules kernel. Account/profile binding is host metadata. See [document 23](23-accounts-progress-admission.md).
+R12A introduces the account lifecycle and Story progress service before the first public Story release, reusing the `loka_platform` boundary and PostgreSQL. R13 adds commerce to that foundation; R14 later adds WorldInstance gameplay hosting. Authentication, accepted account story beats and Realm admission policy never execute inside the portable rules kernel. Account/profile binding is host metadata. See [document 23](23-accounts-progress-admission.md).

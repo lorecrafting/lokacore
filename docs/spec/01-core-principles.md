@@ -88,7 +88,7 @@ The active authority resolves currently available actions. In Story Mode that au
 
 ### P5. Launch accounts do not make Story gameplay online
 
-The first public Story release provides accounts and durable account-level completion tracking. Installed Story play remains local and usable without a live account session. The platform accepts designated offline milestone reports for onboarding eligibility only; they cannot import competitive Realm progression or purchase entitlement. See [23 — Accounts, Story Progress, and Realm Admission](23-accounts-progress-admission.md). This product principle does not add an account gameplay StateScope.
+The first public Story release provides accounts and durable account-level completion tracking. Installed Story play remains local and usable without a live account session. The platform accepts designated offline story beat reports for onboarding eligibility only; they cannot import competitive Realm progression or purchase entitlement. See [23 — Accounts, Story Progress, and Realm Admission](23-accounts-progress-admission.md). This product principle does not add an account gameplay StateScope.
 
 ## 2. Architecture principles
 

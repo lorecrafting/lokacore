@@ -298,7 +298,7 @@ These are foundational enough that later features must build on them rather than
 - portable-rules ABI/serialization contract selected by R1;
 - canonical serialization/hash/IdSource/RNG/numeric rules;
 - diagnostic/error registry;
-- account/run binding, Story milestone reports/acceptances and admission requirement envelopes (document 23), separate from gameplay StateScope.
+- account/run binding, story beat reports/acceptances and admission requirement envelopes (document 23), separate from gameplay StateScope.
 
 ### R3B — Versioned feature envelopes
 
@@ -423,7 +423,7 @@ Make a tiny world fully playable offline.
 - app kill/recovery;
 - play-time/real-elapsed reconciliation;
 - installed cartridge manager;
-- durable Story milestone + pending-report capture with local game commit; persistent account/profile binding outside portable hashes; fake synchronization adapter for R6P.
+- durable story beat + pending-report capture with local game commit; persistent account/profile binding outside portable hashes; fake synchronization adapter for R6P.
 
 ### Gate R6
 
@@ -469,7 +469,7 @@ Chapter one includes quest operators actually used by `00a` (including escort an
 - minimal portable InstancePlan for precompiled room-subgraph/private Story spaces under LocalInstanceAuthority, including entry/exit, reconnect/save, teardown and explicit exports;
 - text-cutscene beats, choices, checkpoints, and action-control modes;
 - player-scoped dream/vision compositions over current-world, overlay, or InstancePlan space with explicit exported consequences;
-- quest milestone/scene hooks and scene outcome objectives;
+- quest story beat/scene hooks and scene outcome objectives;
 - event-chain bounds;
 - branch/world-consequence trace output;
 - the R7-phase capabilities pulled by `00-first-cartridge-design.md` §12 and registered in document 21 §28: positions, stances, learn-by-doing skills, spell-word combination, collection log, adjacent-room targeting, ghost-mode death, pose, and the protect/survive/race objective operators.
@@ -644,7 +644,7 @@ The cartridge MUST still prove that quests and living-world systems interact thr
 
 Full applicable `offline_private` certification on the hosts that run the rules ([ADR-074](../decisions/adr-074-ts-first-proposal.md)) plus a **developer-harness physical-device smoke** using the minimal Expo/native integration established by R1/R2/R6. Polished non-developer product-shell acceptance belongs to R12.
 
-Its two intended endings emit the declared durable `prologue_completed` milestone after the final dawn consequence. Local pending-report capture is part of crash/retry evidence; the public account service is R12A.
+Its two intended endings emit the declared durable `prologue_completed` story beat after the final dawn consequence. Local pending-report capture is part of crash/retry evidence; the public account service is R12A.
 
 The cartridge should be authored primarily through source files/compiler/Lab at this stage. Record every repetitive, confusing, or error-prone authoring operation as evidence for the Builder API rather than prematurely generalizing it.
 
@@ -686,7 +686,7 @@ Can overlap late R10. R12A may start in parallel with R6/content work; it is req
 
 ### R12A — Launch accounts and Story progress
 
-Build the minimal `loka_platform` service and PostgreSQL dev/test/runtime infrastructure for account creation/sign-in, recovery/deletion, authenticated run binding and milestone submission/readback, evidence-labeled acceptance and administrative last-reported progress. Persist local pending reports at R6; implement the real adapter here.
+Build the minimal `loka_platform` service and PostgreSQL dev/test/runtime infrastructure for account creation/sign-in, recovery/deletion, authenticated run binding and story beat submission/readback, evidence-labeled acceptance and administrative last-reported progress. Persist local pending reports at R6; implement the real adapter here.
 
 Gate: real-service tests cover offline completion followed by reconnect, duplicate/lost acknowledgements, multi-device non-regression, account switching/guest claiming if supported, account deletion versus in-flight submissions, and new-device progress readback without pretending to restore a full save. Both chapter-one endings qualify. Actual authentication/storage/mobile evidence is required by [document 23](23-accounts-progress-admission.md), not just Python model tests.
 
@@ -742,7 +742,7 @@ Run the same cartridge rules online under OTP.
 ### Build
 
 - Session→existing R12A Account→Character;
-- server-side onboarding admission from accepted prologue milestones under versioned deployment policy, never a client flag or save import (document 23);
+- server-side onboarding admission from accepted prologue story beats under versioned deployment policy, never a client flag or save import (document 23);
 - InstanceRegistry/Supervisor;
 - WorldInstance;
 - R1-selected portable-rules adapter/implementation;

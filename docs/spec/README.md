@@ -408,7 +408,7 @@ This organization is intended to make the architecture **harder to misimplement*
 
 ## 13. Launch identity and the prologue journey
 
-Read [23 — Accounts, Story Progress, and Realm Admission](23-accounts-progress-admission.md) alongside mobile/state/security contracts. Accounts and milestone tracking arrive at the first public Story release, including the free chapter. Installed local gameplay survives offline/auth outages; accepted low-stakes reports satisfy explicitly mapped account onboarding prerequisites, never Realm currency/items/stats or purchase entitlement. R12A is a subdivision of R12; all existing top-level R IDs and the full first-chapter scope remain unchanged.
+Read [23 — Accounts, Story Progress, and Realm Admission](23-accounts-progress-admission.md) alongside mobile/state/security contracts. Accounts and story beat tracking arrive at the first public Story release, including the free chapter. Installed local gameplay survives offline/auth outages; accepted low-stakes reports satisfy explicitly mapped account onboarding prerequisites, never Realm currency/items/stats or purchase entitlement. R12A is a subdivision of R12; all existing top-level R IDs and the full first-chapter scope remain unchanged.
 
 ## 14. Implementation-readiness amendment
 

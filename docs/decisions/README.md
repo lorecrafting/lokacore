@@ -77,3 +77,4 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [Early R7/R8 plan: slices Q, S, R, N, D in order, R5 deferrals moved to R7/R8 for chapter one, GameView slice G for resources only](owner-decision-early-r7r8-plan-2026-10-01.md).
 - Owner decision: [narrow slice N: recipe narration pins its participants' EntityIds at commit; PM rulings on the committed and authored shapes](owner-decision-narrow-n-2026-10-01.md).
 - Owner decision: [split slice D into D1 (dialogue) and D2 (the milestone carry); scene@1 narrowed out, the durable choice is dialogue@1's continuation row](owner-decision-split-d-2026-10-01.md).
+- Owner decision: [the story-sense "milestone" becomes "story beat"; the 23 §3 event is `story_beat_reached`](owner-decision-story-beat-2026-10-01.md).

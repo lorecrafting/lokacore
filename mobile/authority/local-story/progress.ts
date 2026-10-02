@@ -1,11 +1,11 @@
-// Delayed delivery of the save's milestone reports to the progress platform (23 §§4-5; 03 §26).
+// Delayed delivery of the save's story beat reports to the progress platform (23 §§4-5; 03 §26).
 import { encode, hash } from '../../../kernel/ts/src/canonical.ts';
-import type { MilestoneAcceptance, MilestoneReport } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { StoryBeatAcceptance, StoryBeatReport } from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { reconcile, transaction, type Db } from './store.ts';
 
 /** The platform's answer to one report for `account` (23 §5); rejects when it is unreachable. */
-export type Submit = (report: MilestoneReport, account: string) => Promise<unknown>;
+export type Submit = (report: StoryBeatReport, account: string) => Promise<unknown>;
 
 /**
  * Delivers up to `limit` pending reports, least tried first, each for its run's binding (23 §5:
@@ -28,8 +28,8 @@ export async function deliver(db: Db, submit: Submit, limit: number) {
     limit,
   );
   for (const r of rows) {
-    const report = JSON.parse(r.report) as MilestoneReport;
-    let a: MilestoneAcceptance;
+    const report = JSON.parse(r.report) as StoryBeatReport;
+    let a: StoryBeatAcceptance;
     try {
       a = answer(await submit(report, r.binding), report, r.binding);
     } catch (e) {
@@ -47,14 +47,14 @@ export async function deliver(db: Db, submit: Submit, limit: number) {
   }
 }
 
-/** `a` if it is a MilestoneAcceptance of `report` for `account`; throws otherwise. */
-function answer(a: unknown, report: MilestoneReport, account: string) {
+/** `a` if it is a StoryBeatAcceptance of `report` for `account`; throws otherwise. */
+function answer(a: unknown, report: StoryBeatReport, account: string) {
   const fail = new Error(`not an acceptance of report ${report.report_id}`);
-  if (validate('MilestoneAcceptance', a).length) throw fail;
+  if (validate('StoryBeatAcceptance', a).length) throw fail;
   const { payload_digest, evidence_class, policy_revision, result, ...about } =
-    a as MilestoneAcceptance;
-  const { report_id, release, milestone, outcome } = report;
-  if (encode(about) !== encode({ report_id, account_id: account, release, milestone, outcome }))
+    a as StoryBeatAcceptance;
+  const { report_id, release, story_beat, outcome } = report;
+  if (encode(about) !== encode({ report_id, account_id: account, release, story_beat, outcome }))
     throw fail;
-  return a as MilestoneAcceptance;
+  return a as StoryBeatAcceptance;
 }

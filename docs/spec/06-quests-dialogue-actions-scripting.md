@@ -52,7 +52,7 @@ Quests/actions: sections 1-22. Custom events/scenes: 30-38 and 41-42. LokaScript
 - [40. Multiplayer scene semantics](#40-multiplayer-scene-semantics)
 - [41. Journal, reveal, hints, and story readability](#41-journal-reveal-hints-and-story-readability)
 - [42. Narrative robustness and certification](#42-narrative-robustness-and-certification)
-- [43. Terminal milestones are game facts, not account writes](#43-terminal-milestones-are-game-facts-not-account-writes)
+- [43. Terminal story beats are game facts, not account writes](#43-terminal-story-beats-are-game-facts-not-account-writes)
 - [43. Initial objective, choice and narration contracts](#43-initial-objective-choice-and-narration-contracts)
 
 </details>
@@ -1019,9 +1019,9 @@ The quest owns its own objective/branch/lifecycle state and observes the world. 
 
 This allows the quest to feel like the thread making the world/story alive without giving it generic component/database write access.
 
-### Stages and milestones
+### Stages and story beats
 
-Long quests may define named **stages/milestones** as authoring structure over the objective graph.
+Long quests may define named **stages/story beats** as authoring structure over the objective graph.
 
 A stage may:
 
@@ -1030,9 +1030,9 @@ A stage may:
 - start a SceneSequence;
 - reveal content;
 - change active hints;
-- emit a milestone DomainEvent.
+- emit a story beat DomainEvent.
 
-Stage/milestone is not automatically another persisted QuestInstance lifecycle dimension. Where possible it compiles to ordinary objective/branch state plus named milestone events.
+Stage/story beat is not automatically another persisted QuestInstance lifecycle dimension. Where possible it compiles to ordinary objective/branch state plus named story beat events.
 
 ### Storyline/arc grouping
 
@@ -1247,7 +1247,7 @@ Skipping presentation MUST NOT skip required authoritative consequences unless t
 A quest may reference scenes at explicit hooks such as:
 
 - activation;
-- milestone/stage entry;
+- story beat/stage entry;
 - objective completion;
 - branch choice;
 - failure;
@@ -1379,7 +1379,7 @@ The Cartridge Lab SHOULD show a unified narrative trace:
 ActionInvocation
  -> Command
  -> DomainEvents
- -> quest objective/milestone
+ -> quest objective/story beat
  -> SceneSequence beat
  -> choice
  -> scene outcome
@@ -1391,9 +1391,9 @@ ActionInvocation
 
 This makes complex authored story behavior explainable and reproducible rather than opaque script execution.
 
-## 43. Terminal milestones are game facts, not account writes
+## 43. Terminal story beats are game facts, not account writes
 
-Quest/scene terminal consequences may reach a declared cartridge milestone through registered narrative operations. Both intended chapter-one endings reach `prologue_completed` after the final `dawn_on_the_green` consequence. Rules cannot upload reports, inspect account authentication, or directly grant Realm access. The local authority adapter commits the pending synchronization record atomically with the milestone; [document 23](23-accounts-progress-admission.md) owns account association and platform acceptance. Readable completion feedback must survive a crash before credits or final narration is displayed.
+Quest/scene terminal consequences may reach a declared cartridge story beat through registered narrative operations. Both intended chapter-one endings reach `prologue_completed` after the final `dawn_on_the_green` consequence. Rules cannot upload reports, inspect account authentication, or directly grant Realm access. The local authority adapter commits the pending synchronization record atomically with the story beat; [document 23](23-accounts-progress-admission.md) owns account association and platform acceptance. Readable completion feedback must survive a crash before credits or final narration is displayed.
 
 ## 43. Initial objective, choice and narration contracts
 

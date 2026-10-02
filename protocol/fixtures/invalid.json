@@ -4885,7 +4885,7 @@
     ]
   },
   {
-    "contract": "MilestoneReport",
+    "contract": "StoryBeatReport",
     "value": {
       "report_id": "11111111-2222-4333-8444-555555555555",
       "run_id": "11111111-2222-4333-8444-555555555555",
@@ -4894,7 +4894,7 @@
         "cartridge_version": "0.1.0",
         "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       },
-      "milestone": "prologue_completed",
+      "story_beat": "prologue_completed",
       "outcome": "player_led",
       "observed_revision": 0,
       "account_id": "11111111-2222-4333-8444-555555555555",
@@ -4926,7 +4926,7 @@
           "cartridge_version": "0.1.0",
           "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         },
-        "milestone": "prologue_completed",
+        "story_beat": "prologue_completed",
         "outcome": "player_led",
         "observed_revision": 1
       },
@@ -4940,7 +4940,7 @@
     ]
   },
   {
-    "contract": "MilestoneAcceptance",
+    "contract": "StoryBeatAcceptance",
     "value": {
       "report_id": "11111111-2222-4333-8444-555555555555",
       "account_id": "11111111-2222-4333-8444-555555555555",
@@ -4950,7 +4950,7 @@
         "cartridge_version": "0.1.0",
         "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
       },
-      "milestone": "m",
+      "story_beat": "m",
       "outcome": "o",
       "evidence_class": "device_attested",
       "policy_revision": 0,
@@ -5551,13 +5551,9 @@
     ]
   },
   {
-    "contract": "MilestoneReport",
+    "contract": "StoryBeatReport",
     "value": {},
     "errors": [
-      {
-        "path": "/milestone",
-        "code": "missing_property"
-      },
       {
         "path": "/observed_revision",
         "code": "missing_property"
@@ -5577,6 +5573,10 @@
       {
         "path": "/run_id",
         "code": "missing_property"
+      },
+      {
+        "path": "/story_beat",
+        "code": "missing_property"
       }
     ]
   },
@@ -5595,7 +5595,7 @@
     ]
   },
   {
-    "contract": "MilestoneAcceptance",
+    "contract": "StoryBeatAcceptance",
     "value": {},
     "errors": [
       {
@@ -5604,10 +5604,6 @@
       },
       {
         "path": "/evidence_class",
-        "code": "missing_property"
-      },
-      {
-        "path": "/milestone",
         "code": "missing_property"
       },
       {
@@ -5633,11 +5629,15 @@
       {
         "path": "/result",
         "code": "missing_property"
+      },
+      {
+        "path": "/story_beat",
+        "code": "missing_property"
       }
     ]
   },
   {
-    "contract": "QualifyingMilestone",
+    "contract": "QualifyingStoryBeat",
     "value": {},
     "errors": [
       {
@@ -5645,11 +5645,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/milestone",
+        "path": "/outcome",
         "code": "missing_property"
       },
       {
-        "path": "/outcome",
+        "path": "/story_beat",
         "code": "missing_property"
       }
     ]
@@ -5763,7 +5763,7 @@
     ]
   },
   {
-    "contract": "MilestoneReportId",
+    "contract": "StoryBeatReportId",
     "value": "7A7A7A7A-1111-4222-8333-444444444444",
     "errors": [
       {
@@ -5819,7 +5819,7 @@
           "alternatives": [
             {
               "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-              "milestone": "m",
+              "story_beat": "m",
               "outcome": "o"
             }
           ]
