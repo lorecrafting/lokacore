@@ -35,11 +35,15 @@ TypeScript authority) now and `RemoteRealmSession` (Phoenix transport to the BEA
 Today `mobile/app` imports the TypeScript authority's `smoke.ts` directly, so the presenter split
 slice also:
 
-- defines the `GameSession` the renderer uses, with only protocol types in it (the generated
-  `GameView`, `ActionInvocation`, narration records and error codes from `protocol/`);
+- defines the `GameSession` the renderer uses: the generated protocol types (`GameView`,
+  `ActionInvocation`, narration records, error codes from `protocol/`) plus the session's own
+  lifecycle and reply types (a save that does not open and Start over; the `stale_view`, `conflict`
+  and `pending` replies), which name no engine internals;
 - makes the local authority one implementation of it, and leaves the remote one to the Realm work;
-- adds a check that `mobile/app` imports nothing from `kernel/` or `mobile/authority/` except the
-  session and the generated protocol types.
+  the app shell picks the session and hands the local one its bundled cartridge;
+- adds a check that the renderer imports nothing from `kernel/`, `mobile/authority/` or
+  `protocol/fixtures/` except the session and the generated protocol types.
 
-Words for outcome and refusal codes live in the presenter and key on the registered codes, so the
-same words serve both engines.
+Words for refusal codes live in the presenter and key on the registered error codes, so the same
+words serve both engines. Outcome codes are cartridge and rule keys with no registry; a code with no
+words shows no answer line (R6P Polish), so an unknown one is quiet, not wrong.
