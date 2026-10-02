@@ -579,7 +579,7 @@ Examples:
 - dialogue choices currently available;
 - shop/container semantic contents;
 - map-discovery state;
-- localized string IDs plus interpolation data.
+- localized string IDs plus interpolation data;
 - the viewer's body's resources, each with its current value, maximum and condition band.
 
 *Amendment 2026-10-01 (Early R7/R8 slice G, [owner decision](../decisions/owner-decision-condition-bands-2026-10-01.md)):* GameView lists the viewer's body's resources (resource@1), each with its current value (derived from the clock, 21 §4 Resource), its maximum and its condition band. The kernel computes the band; the UI never computes a threshold (00 §4.10). With p = floor(100 × (current − minimum) / (maximum − minimum)), the band is the first row of the table below whose cut p reaches (computed in integers: 100 × (current − minimum) ≥ cut × (maximum − minimum)); when maximum equals minimum it is the top row. One table serves every resource; cartridges do not declare thresholds. The scale is after LegendMUD's condition scale (tribute).
