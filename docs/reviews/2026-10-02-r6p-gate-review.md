@@ -82,3 +82,30 @@
 
 Accept or reject G-1's deferral of unaided completion and consequence to a tester without exposure.
 Optionally restate the consequence of each ending in your own words.
+
+## Fix round 1 re-check (head `49074d7`)
+
+- **G-1, fixed.** ROADMAP:53's DEFERRED, NOT PASSED list now names unaided completion. The Playtest row
+  (:58) carries it once as its landing: a fresh tester before the first release. The owner's
+  acceptance is recorded, paraphrased, at gate record :55-56.
+- **Consequence clause, met with a recorded limit.** The owner's own words ("carry (leading) meant I
+  went with the party; leaving meant Bram's party goes out") name who leads the search in each
+  ending, which matches `search_plan` `player_led` / `party_led`. Limits: they do not mention who
+  holds the lantern, and the owner gave them after the earlier Landing prompt.
+- **G-2, G-3, N-1, fixed.** The R6P row links this review; gate record :65 says "re-check in the
+  record"; checklist :29 links this review.
+- **S-1 should-fix, gate record "Gate passes only after the save fix"**:
+  - **The base claim is wrong.** "The fixes touch only the load, replay and recovery paths …, not what
+    the owner touched by hand" contradicts itself. The owner's G3 resume (reopen after a kill) runs
+    `store.ts` load, which R6P-A02's fix changes. A04 caps the log the owner reads.
+  - **It asserts facts not yet true.** "R6P-A01 is fixed there" is stated as done. `origin/r6p-savefix`
+    does not exist yet, so neither claim can be checked.
+  - **Failure:** the gate merges stating the human proof covers the gate build's paths, when the
+    resume path changed after the play.
+  - **Fix:** say the gate build differs from 64a2b12 in the load path G3 exercised and in the log
+    length. Let the r6p-savefix review state which device rows it reruns on the new hash, or record
+    that it reruns none, as a limit. Write "R6P-A01 is to be fixed there".
+- The rest of that section is accurate. The audit is FAIL with three blockers and one should-fix.
+  P4A-2 is a different case from A01 and stays with R12.
+
+**Verdict: PASS WITH NOTES once `r6p-savefix` merges with its review and S-1 is fixed; FAIL until then.**
