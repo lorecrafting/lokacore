@@ -138,7 +138,7 @@ The table below describes the files as imported. Later amendments are in git his
   clock stays at 06:00. Amended: [pre-release-proof](pre-release-proof.md) (:45, :47, :59, :63
   and the P3 and P4 rows), [14 Gate R6P](14-implementation-plan.md) and the
   [R-MILESTONES](R-MILESTONES.md) R6P row. In [conformance/adverse-cases.json](conformance/adverse-cases.json)
-  ( 2, SHA-256 now
+  (`fixture_version` 2, SHA-256 now
   `4b8f5a28085e8e55aa1556d534dd79d02544bebf4df02d610162d30c2b359526`, pinned by the
   portable ABI tests) four `lantern` cases are rewritten by hand: moved-bram-rejects-new-choice
   and moved-bram-keeps-receipt become walked-away-rejects-new-choice and walked-away-keeps-receipt

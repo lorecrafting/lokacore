@@ -386,7 +386,7 @@ test('close changes no outcome; a second talk opens another occurrence', () => {
   assert.equal(gameView(ok(w, talk, 5, TALK2).world).choice?.continuation_id, C2);
 });
 
-// Breaks (adverse-cases.json drop-after-choice-opened, moved-bram-rejects-new-choice): choose
+// Breaks (adverse-cases.json drop-after-choice-opened, walked-away-rejects-new-choice): choose
 // trusting the historical acquisition or Bram's place at talk time, either check missing, or the
 // player trapped in the choice.
 test('a stale choice revalidates custody and presence; close still works', () => {
