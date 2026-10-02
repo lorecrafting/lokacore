@@ -62,3 +62,5 @@ Hard-won lessons for `mobile/` and physical-device runs.
 - `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
   edit that starts the app on that state; such shots are static and prove layout only,
   not navigation or gestures.
+- An agent-device `scroll` can start its pan on the footer's map joystick and walk the
+  character (R6P Polish note 5). Scroll the page with `gesture pan` from a point in the text.

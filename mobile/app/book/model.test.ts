@@ -3,7 +3,7 @@
 // the controller draws real ones). Literal answers, not computed from the code under test.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { group, plain, said, type Pool } from './model.ts';
+import { absent, cap, ended, group, hint, plain, refused, said, type Pool } from './model.ts';
 
 const b = (label: string, action_key: string, target_ids: string[] = [], input = {}) => ({
   label,
@@ -75,4 +75,64 @@ test('the character label says the hp band and no other', () => {
     said([pool('hp', 20, 20, 'perfect_health'), pool('ma', 100, 100, 'perfect_health')]),
     'Character, hp 20 of 20, perfect health, ma 100 of 100',
   );
+});
+
+// Breaks (notes 2, 17): the line keyed on the answers' not_present (a dropped lantern closes them
+// while Bram is still here), or missing when the speaker has gone.
+test('the absent-speaker line shows only when the speaker is not here', () => {
+  const no = { available: false, reason: { code: 'not_present' } };
+  const choice = { speaker_id: 'bram', choices: [{ choice_id: 'carry', ...no }] };
+  const view = (ids: string[]) => ({ entities: ids.map((id) => ({ id })), choice }) as never;
+  assert.equal(absent(view([])), 'They are not here to answer. Find them, or close this.');
+  assert.equal(absent(view(['bram'])), '');
+  const speakerless = { entities: [], choice: { choices: choice.choices } } as never;
+  assert.equal(absent(speakerless), 'No one is here to answer.');
+});
+
+// Breaks (PM item: note 4's line): an ending shown before every quest is over, or with no quest.
+test('the ending line shows once every quest is over', () => {
+  const view = (...states: string[]) => ({ journal: states.map((state) => ({ state })) }) as never;
+  assert.deepEqual(
+    [ended(view()), ended(view('active')), ended(view('resolved', 'active'))],
+    ['', '', ''],
+  );
+  assert.equal(ended(view('resolved')), 'The story ends here. Start over is in Settings.');
+});
+
+// Breaks (notes 6, 14): a refusal line with the raw code ("exit locked"), a cartridge's own reason
+// sentence wrapped in the frame ("The way east is The causeway is flooded.."), or a title cased wrong.
+test("a closed exit's log line and a capitalised title", () => {
+  const west = { available: false, direction: 'west', reason: { code: 'exit_locked' } } as never;
+  assert.equal(
+    refused(west, (k) => k),
+    'The way west is locked.',
+  );
+  const flooded = { key: 'The causeway is flooded.' };
+  const east = {
+    available: false,
+    direction: 'east',
+    reason: { code: 'exit_locked', message: flooded },
+  };
+  assert.equal(
+    refused(east as never, (k) => k),
+    'The causeway is flooded.',
+  );
+  assert.equal(cap('a brass lantern'), 'A brass lantern');
+});
+
+// Breaks (review POL-2): a hint store that throws (an unreadable key-value file) takes the book or
+// the Look tap down with it, instead of the hint falling back to this session's memory.
+test('a hint survives a store that throws, for this session', () => {
+  const broken = {
+    getItemSync: (): string | null => {
+      throw new Error('disk I/O error');
+    },
+    setItemSync: () => {
+      throw new Error('disk I/O error');
+    },
+  };
+  const h = hint(broken, 'hint.looked');
+  assert.equal(h.seen(), false);
+  h.see();
+  assert.equal(h.seen(), true);
 });
