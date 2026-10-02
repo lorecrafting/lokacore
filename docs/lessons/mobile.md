@@ -56,7 +56,7 @@ Hard-won lessons for `mobile/` and physical-device runs.
   `press 'label="Got it"' --settle` (the map tip),
   `press "label=\"Offer to fetch Bram's lantern\"" --settle`, `press 'label="Map"' --settle` and
   `press 'label="Go north"' --settle`; Talk is on
-  Bram's page (`press 'label="Bram the ferryman, open"'`), the choice's answers, Close and Wait on
+  Bram's page (`press 'label="Bram the ferryman, open"'`), the choice's answers and Close on
   the room page. A selector with spaces is one shell argument, quotes inside. `scroll` does not
   move the book's pages (it reports no shift); a raw `swipe 200 600 200 250` does.
 - `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
