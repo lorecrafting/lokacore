@@ -8,7 +8,7 @@ import { target } from '../../../kernel/ts/src/compose.ts';
 import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
-import { row } from '../../../kernel/ts/src/world.ts';
+import { holds, row } from '../../../kernel/ts/src/world.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
 export type Db = {
@@ -116,6 +116,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
+    if (!holds('player_in_one_room', world)) return undefined; // playable: the body in a room
     return { world, revision: h.revision, meta: { ...m, parent, seed, pin } as Meta };
   } catch (e) {
     if (e instanceof SyntaxError) return undefined;

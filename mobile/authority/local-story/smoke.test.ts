@@ -224,9 +224,8 @@ test('a read error after a durable commit does not commit the press twice', () =
   assert.equal(p.now().pending, false);
 });
 
-// Breaks (03 §14; R6P-A03): a stored receipt that is not a DecisionResult (malformed narration)
-// replayed as saved, or its conflict leaving pending set, so every later button retries the
-// confirmed "scan" instead of its own action.
+// Breaks (03 §14; R6P-A03): a receipt that is not a DecisionResult replayed as saved, or its
+// conflict leaving pending set, so every later button retries the confirmed "scan".
 test('a confirmed receipt that is not a decision is a conflict and ends the attempt', () => {
   const { p, arm } = lostAck();
   arm();
@@ -489,16 +488,13 @@ test(
   },
 );
 
-// Breaks (R6P-A04): every press appends to the log for as long as the process lives, so memory and
-// each redraw grow without bound in one room.
+// Breaks (R6P-A04): a log that keeps every press while the process lives (memory, redraws).
 test('the log stops growing in one room, its last line the latest answer', () => {
   const p = processOn(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'));
-  const cycles = (n: number) => {
-    for (let i = 0; i < n; i++) ['Take a leather satchel', 'Drop a leather satchel'].map(p.press);
+  const cycles = () => {
+    for (let i = 0; i < 150; i++) ['Take a leather satchel', 'Drop a leather satchel'].map(p.press);
     return p.now().log;
   };
-  const once = cycles(150).length;
-  const log = cycles(150);
-  assert.equal(log.length, once);
-  assert.deepEqual(log.slice(-2), ['> Drop a leather satchel', 'Dropped.']);
+  const [once, log] = [cycles().length, cycles()];
+  assert.deepEqual([log.length, ...log.slice(-2)], [once, '> Drop a leather satchel', 'Dropped.']);
 });

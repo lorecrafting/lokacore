@@ -166,10 +166,18 @@ function invocationOf(b: Button, n: number, actor: string) {
 }
 
 // The log's start: the last committed narration again, so a reopen (a crash before display too)
-// shows it (06 §43). A corrupt read throws, so the save does not open (and offers start over).
-function reread(story: { narration: () => NarrationRecord | undefined }, text: Say): string[] {
-  const last = story.narration();
-  return last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
+// shows it (06 §43). A corrupt read throws, so the save does not open (and offers start over): a
+// corrupt file untyped (replaced), a damaged receipt in an intact file with the new game in place.
+type Reread = { narration: () => NarrationRecord | undefined; newGame: () => { kind: string } };
+function reread(story: Reread, text: Say): string[] {
+  try {
+    const last = story.narration();
+    return last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
+  } catch (e) {
+    if (corrupt(e)) throw e;
+    const cause = { kind: 'save_corrupt', newGame: story.newGame };
+    throw Object.assign(new Error((e as Error).message), { cause });
+  }
 }
 
 /**
@@ -188,15 +196,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
   let fault: string | undefined; // the last press's throw, shown with start over beside the retry
   let sent = lastId(db);
   const { text, label } = sayers(cartridge);
-  let log: string[];
-  try {
-    log = reread(story, text);
-  } catch (e) {
-    if (corrupt(e)) throw e; // the file: replaced
-    // A damaged receipt in an intact file: the authority's new game repairs it in place.
-    const cause = { kind: 'save_corrupt', newGame: story.newGame };
-    throw Object.assign(new Error((e as Error).message), { cause });
-  }
+  const log = reread(story, text);
   return {
     screen: () => {
       const [view, token] = [gameView(story.world()), story.token()];

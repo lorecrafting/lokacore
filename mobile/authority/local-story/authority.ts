@@ -13,7 +13,7 @@ import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import type { Identified } from '../../../kernel/ts/src/invocation.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
-import { holds, step } from '../../../kernel/ts/src/world.ts';
+import { step } from '../../../kernel/ts/src/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta } from './store.ts';
 import { adopt, save, settle, type Story, type Trace } from './save.ts';
@@ -55,11 +55,10 @@ const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
  * written: a newer format (`unsupported_save_format`, checked first; the player updates the app,
  * 10 §§31-32), and, offering only the player's new game (settled as any; reopen once `replaced`),
  * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
- * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
- * conflict) before anything is resolved against the current world; a NEW one with a host view
+ * another actor's gets no receipt; a known invocation replays its receipt (altered intent, or a
+ * response that is not a DecisionResult, is a conflict) before anything is resolved against the current world; a NEW one with a host view
  * token (`view:<run>:<revision>`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
- * metadata, 03 §14); else it is resolved, decided
- * once and committed before it is adopted. A fault discards its proposal and gets no receipt
+ * metadata, 03 §14); else it is resolved, decided once and committed before it is adopted. A fault discards its proposal and gets no receipt
  * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4).
  * A failed commit throws, with memory and storage unchanged. A COMMIT whose outcome is unknown
  * fences every call, answered `pending`, until the store settles it (03 §15). Each command's game-trace entry follows its commit. `newGame`: below.
@@ -82,9 +81,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     if (!release)
       return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
     const loaded = load(db, release.fresh, () => first(release, host));
-    // Playable needs the body in a room (registered invariant player_in_one_room; ROADMAP SM2a).
-    if (!loaded || !holds('player_in_one_room', loaded.world))
-      return refuse({ kind: 'save_corrupt' as const });
+    if (!loaded) return refuse({ kind: 'save_corrupt' as const });
     Object.assign(s, { fresh: release.fresh, ...loaded });
   } catch (e) {
     if (!corrupt(e)) throw e;
@@ -176,13 +173,8 @@ function invoke(s: Story, value: unknown): Reply {
   // ponytail: one digest version; a receipt of another fails closed until a second exists.
   const same = old?.intent_digest_version === INTENT_DIGEST_VERSION;
   if (old) {
-    // A response that is not a DecisionResult fails integrity: never replayed, never decided again.
-    if (
-      !same ||
-      old.intent_digest !== intent_digest ||
-      validate('DecisionResult', old.response).length
-    )
-      return { kind: 'conflict' };
+    const intact = !validate('DecisionResult', old.response).length; // never decided again
+    if (!same || !intact || old.intent_digest !== intent_digest) return { kind: 'conflict' };
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   if (stale(s, i.view_freshness_token)) return { kind: 'stale_view' };
