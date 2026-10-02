@@ -96,7 +96,8 @@ missing.
 
 **O-1: the note 18 dot is the footer map's own "you" dot, not a scroll indicator.** It is shown by
 `mobile/app/book/MapDrawing.tsx:143-144`. It has the same size and ink colour. Whenever the stray dot shows,
-the joystick centre has no dot (r14, r17, r20, r27). Whenever the centre dot shows, there is no stray dot (r01-r13).
+the joystick centre has no dot (r17, r20, r27). Whenever the centre dot shows, there is no stray dot (r02-r07,
+r09-r11). In r14 the centre dot is missing and no stray dot is in view.
 Journal → Back remounts the Footer and puts the dot back at the junction (r22). The whole drawing is also offset
 about 11 pt right, so the cause is likely the joystick's transforms (a native-driven `scale` with a JS-driven
 `knob` translate) after page turns. I did not confirm this. It is reproduced after Talk in both endings: over
@@ -125,6 +126,7 @@ holds more than the record and the index line (brief row 9).
 | (h) terminate + relaunch | both hints stay gone. The narration and the ending line come back | r23 |
 | leave ending (2nd game) | leave narration + ending line. No ending line on the fresh game | r27 |
 | refused choice | answers greyed with their reason (r16, r17, r25a) | |
+| note 17: talk, then walk north without Close | the log shows only "> Go north". There is no speaker label. The prompt (it names Bram) and "They are not here to answer…" show, the answers read "…: not here", and Close is in view. A player can tell who "They" are. Pass | r28 |
 | (i) dot over settings | **reproduced** (O-1) | r17, r20, r27 |
 | (j) note 5 | start in the text (y 440): stayed at Ferry Landing. Start 20 pt above the joystick top (y 689): stayed. Start on the joystick centre: walked to Village Green. **NOT-A-BUG** confirmed | r04, r05, r06 |
 
