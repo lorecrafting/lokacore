@@ -270,3 +270,23 @@ Other scoped deliverables have literal/fixture evidence or named stage deferrals
 Validation: 114 focused tests passed; 13 transcripts/104 decisions replayed byte-identically; 10,000 fresh simulations plus two regression seeds passed. Typecheck, docs links, feature generation and TS size checks passed. Full disk/device and `check_all.sh` verification were not rerun. No files edited.
 
 Size watchlist: `cartridge_refs.ts` 315/315; `lib/loka/core/compose.ex` 313/315; `lib/loka/content/checks.ex` 312/315; local-story `authority.ts` 307/310; play `main.ts` 315/315. After #96, `proposal.ts` is also 300/300.
+## Re-check: fix round 1, `03c704f`
+
+**PASS.** The Early R7/R8 gate passes. This check covers only `03c704f`, which is docs only.
+
+- CI is green on the PR at this commit (elixir, lint, typescript).
+- This is the only re-check: the owner ruled that a docs-only round gets no Sol re-check.
+
+| Item | Disposition at `03c704f` |
+|---|---|
+| E1 | Resolved. The R6P row (`ROADMAP.md:53`) carries the GameViewSnapshot "arrives in R6" text. It lands with the slice that builds acknowledgement, as a schema description change. |
+| E2 | Resolved. The closure at `:52` names #96, links the Q-fix review, and links this record. |
+| E3 | Resolved. Fable is now limited to standing in when codex is out of quota, everywhere it appears: <ul><li>WORKFLOW `:13` and `:25` say "only as codex stand-in";</li><li>the backstop sentence is gone;</li><li>the ladder (`:34`) reads "the `advisor` tool; then codex Sol";</li><li>the record's Fable section says "only", and says the backstop and the ladder's Fable rung end;</li><li>the 09-30 and autonomy records each carry a "Superseded in part" line naming the Fable change.</li></ul> `git grep Fable` over WORKFLOW, `.claude/agents` and AGENTS finds only `:13` and `:25`. |
+| E4 | Resolved, per the PM ruling. `CHECKS.md:31-33` reads: source files never get a new or raised `size: allow` and split at their limit (300, or an existing allowance); test files keep the hatch. That leaves one reading. |
+| N1 | Resolved. `reviews/README.md:5` names codex Astra or Sol per the workflow. |
+| Astra G1 | Resolved. The chapter-one row (`:54`) carries the activate-then-acquire `conflicting_write`. Its resolution is named: a reviewed amendment of 04 §5.3 plus the compose change in both kernels, in one slice, before any content composes it. |
+| Astra G2 | Resolved. `:54` carries the untested `before = now(p)` branch to the first slice that lets a job emit an acquisition. |
+| Astra G3 | Resolved. The manual `rules/dialogue.ts` entry is gone from `features.json`. `features.gen.md` lists the module once, and CI's generation check is green. |
+| Leaning record | Fine, on four counts: <ul><li>`owner-leaning-realm-separation-2026-10-01.md` is marked **(paraphrased)** and **Status: LEANING**, "not a decision".</li><li>It says the spec does not change until ADR-074's trigger, when the owner chooses a route (ADR-074 §5).</li><li>The commit touches no file under `docs/spec`.</li><li>`git grep` finds it linked only from `docs/decisions/README.md:84`, apart from this record.</li></ul> |
+
+No new findings.
