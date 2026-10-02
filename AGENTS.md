@@ -37,6 +37,11 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   rest-point snapshots; a full checkpoint exists only for export/backup.
 - **Databases (ADR-006, reconfirmed 2026-09-24):** PostgreSQL online, SQLite offline on
   the phone. Server code uses Ecto with Ecto-managed migrations.
+- **Mechanics vs numbers ([owner decision](docs/decisions/owner-decision-world-parameters-2026-10-02.md)):**
+  the engine owns mechanics; cartridges own numbers and world settings (costs, durations,
+  rates, odds, maximums, default stats, calendar lengths, thresholds). Never add a world value
+  as an engine or presenter literal; [World parameters](docs/world-parameters.md) lists the
+  ones still to move. Safety budgets and protocol constants stay in the engine.
 - **Distribution (PREP-03):** the first release bundles its chapter in the app;
   downloadable story content waits for a pre-launch store-policy review.
 

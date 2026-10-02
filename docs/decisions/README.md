@@ -82,6 +82,7 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [condition bands for resources, after LegendMUD's condition scale (tribute); one table in 04 §15, computed by the kernel](owner-decision-condition-bands-2026-10-01.md).
 - Owner decision: [review rules: codex Astra only on gate reviews and `proposal.ts` changes, Sol otherwise and on fix re-checks; Fable as codex stand-in; Opus drafts briefs; the PM's persistent worktree](owner-decision-review-rules-2026-10-01.md).
 - Owner decision: [R6P plan: six slices and the gate; `selector_cardinality` to chapter one; Opus developers on every R6P slice; the owner tests for now](owner-decision-r6p-plan-2026-10-01.md).
+- Owner decision: [the engine owns mechanics, cartridges own numbers and world settings](owner-decision-world-parameters-2026-10-02.md).
 - Owner decision: [docs compaction after Gate R6P, written by Fable: a thin current-system doc set, history to `docs/archive/`](owner-decision-docs-compaction-2026-10-02.md).
 - Owner decision: [engine output is structured; each presenter owns its layout and wording; a presenter-split slice after Gate R6P](owner-decision-presenter-split-2026-10-02.md).
 - Owner decision (paraphrased): [the Lantern has no wait and no schedule; the game clock stays; the later time model's target rate is LegendMUD's tick](owner-decision-untimed-lantern-2026-10-02.md).
