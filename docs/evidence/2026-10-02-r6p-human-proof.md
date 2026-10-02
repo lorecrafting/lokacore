@@ -1,12 +1,12 @@
 # R6P human proof: the owner plays the Lantern by touch (2026-10-02)
 
 The record for [pre-release-proof](../spec/pre-release-proof.md#evidence-required-to-finish-r6p)
-:84. It holds no verdict; the Gate R6P reviewers rule on it. Owner words are paraphrased by the PM
-and marked (paraphrased). The device rows are in the [P6 rerun](2026-10-02-r6p-rerun-iphone11/README.md).
+:84. It holds no verdict; the Gate R6P reviewers rule on it. The device rows are in the [P6 rerun](2026-10-02-r6p-rerun-iphone11/README.md).
 
 ## Build played
 
-- **PM-recorded:** the owner played a clean Release build of `main` 64a2b12 on the iPhone 11.
+- **PM-recorded:** the owner played a clean Release build of `main` 64a2b12. The device for this
+  play is not recorded (null).
 - **Inspected:** `git diff --exit-code 73927a1 64a2b12 -- kernel lib mobile protocol cartridges`
   exits 0 (empty), so the code, protocol and cartridges are those of the measured build 73927a1.
   Cartridge content hash `9b0969438f5ddad877c88506ffe295c5084e3014d607ef0ba24c922ee5db2821`.
@@ -18,25 +18,13 @@ play they read the R6P plan, the Lantern text in reviews and the UX notes, and p
 builds on the iPhone (the P5b install; P6b rows 13 and 14 on an instrumented build). They are not a
 naive tester.
 
-## Play, in order (owner words paraphrased)
+## Play: the PM's notes, copied exactly (owner words paraphrased)
 
-- **G1, both choice paths by touch.** The owner played the leave path by touch and reported they
-  could not find the lantern (paraphrased). The PM then sent the full route (Landing north to Green,
-  east to Reed Bank, east to Lantern Shelter, tap [brass lantern] to take, walk back west, west,
-  south) and said that the gate does not open by touch. The owner then wrote they had found the
-  lantern, gave it to Bram and completed the story (paraphrased); it is unknown whether they used the
-  route. After the PM asked, the owner played carry after Start over: "it worked" (paraphrased).
-  Confusing interaction: the lantern is hard to find.
-- **G3, quit at a choice, airplane resume, consequence.** The PM gave a step-by-step procedure (Start
-  over, play to Bram's choice, airplane mode on, swipe the app away, reopen). Owner: the choice was
-  still there and they could finish from it (paraphrased). The PM asked "what each ending changed, for
-  example what the Landing says"; the owner read back the Landing text: carry gives "The ferry rocks
-  at its rope. The search party will wait on Bram" (`room.landing.player_led`); leave gives "...The
-  search party will go out with Bram and the lantern" (`room.landing.party_led`). The owner gave no
-  explanation of the consequence beyond that text.
-- **G2, touch feel (P6b row 14 carry), when asked (paraphrased):** taps and drags responded right
-  away; no lag, no missed taps. But sometimes a joystick drag up or down moved the whole app into a
-  sliding mode (a gesture conflict, U7 in the [ROADMAP](../ROADMAP.md) Playtest row).
+- G1. Sequence (record exactly; no verdict on pre-release-proof:84, the reviewers judge it): owner played leave by touch, reported they could not find the lantern; PM then sent the full route (Landing north -> Green, east -> Reed Bank, east -> Lantern Shelter, tap [brass lantern] to take, walk back west, west, south) and that the gate does not open by touch; owner then wrote they had found the lantern, gave it to Bram and completed the story (unknown whether they used the route). Then, after PM asked, owner played carry after Start over: "it worked" (paraphrased). Confusing interaction: the lantern hard to find.
+- G3. Sequence (record exactly): PM gave a step-by-step procedure (Start over, play to Bram's choice, airplane mode on, swipe the app away, reopen); owner: the choice was still there and they could finish from it (paraphrased). PM asked "what each ending changed, for example what the Landing says"; owner read back the Landing text: carry -> "The ferry rocks at its rope. The search party will wait on Bram" (room.landing.player_led); leave -> "...The search party will go out with Bram and the lantern" (room.landing.party_led). Owner gave no explanation of the consequence beyond that text.
+- G2. Touch feel (P6b row 14 carry), owner when asked (paraphrased): taps and drags responded right away; no lag, no missed taps. But sometimes a joystick drag up or down moved the whole app into a sliding mode (gesture conflict; see U7).
+
+U7 is in the [ROADMAP](../ROADMAP.md) Playtest row.
 
 ## Authoring effort (inspected, from git)
 
