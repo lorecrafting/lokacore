@@ -87,3 +87,32 @@ The check covered only the fix commits, the code each fix touched and that code'
 - The A02 table tests no longer check the reports, because `talk()` reaches no story point. `replace:false` still pins the in-place path. No finding.
 
 No new findings.
+
+## Device evidence (`756ca25`): APPROVE
+
+The check covered only the evidence commit: `docs/evidence/2026-10-02-r6p-savefix-iphone11/` and its one ROADMAP link.
+
+- **Node bytes anchored at d37b268: reproduced.**
+  - In a worktree at d37b268, with `dev-harness.ts.txt` as `p6/harness.ts` and the rerun's `dev-node-expected.ts.txt` as `p6/node-run.ts`, `node p6/node-run.ts 19` gives "self-check failures=0".
+  - Its `node-expected.json` is byte-identical to `node-expected.json.gz` decompressed.
+  - `git diff d37b268 756ca25 -- mobile kernel protocol` is empty, so the evidence describes the reviewed code.
+- **Rows: each proves its claim.**
+  - `run-savefix/run.txt`: `ka` through `hold3b`, all `mismatches=0 checks_failed=0`.
+  - The records add up to 4+1530+13+13+25+14+20+40+5+3+2 = 1,669, as the README says.
+  - Row 12: the damaged `state_row`, `head` and `receipt` copies each give `save_corrupt`, and each undamaged copy opens.
+  - Row 7, checked again with `sqlite3`: the journal's magic is `d9d505f920a163d7`. With the journal the save reads revision 9 with 9 receipts. The db alone reads revision 10 with 9 receipts.
+- **A01 on expo-sqlite (my open item): closed.**
+  - `badjson: save_corrupt, replace false PASS`. Expo's message is "FunctionCallException: Calling the 'finalizeSync' function has failed … SQLiteErrorException: Error code 1: malformed JSON", so both regexes match as intended on the phone.
+  - "start over in place opens PASS".
+- **Red controls: really red.**
+  - Planted: `carry2 mismatches=1`, and `badjson … FAIL {"kind":null,…}` with A01 reverted. That result is no Start over at all, which is the pre-fix behaviour.
+  - Mutant: `dusk mismatches=6 checks_failed=1`, `rng_state literal FAIL`.
+  - The planted run's timeout and its resume from `leave2` are recorded.
+- **Hashes:** `shasum -a 256 -c SHA256SUMS` passes for all 21 files, and the list matches the folder exactly.
+- **Redaction:** no host paths, UDID, ECID or team id found. The UUIDs present are the cartridge's entity ids and the run's random ids.
+- **Owner saves:** the skip is recorded honestly.
+  - The deletion is labeled owner-reported.
+  - The missing app and the failed container copy are labeled device-reported.
+  - The record states that no backup and no byte-identity check was possible, and that the final launch shows a new save (`clean-launch.png`: Ferry Landing, a fresh game).
+
+No findings.
