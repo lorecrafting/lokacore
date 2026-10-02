@@ -12,7 +12,7 @@ import {
   type ErrorCode,
   type Owned,
 } from './contracts.gen.ts';
-import { allocator, rejected, type Mint, type Rule, type World } from './decision.ts';
+import { allocator, rejected, type Mint, type Rule, type Steps, type World } from './decision.ts';
 import { invariants as factInvariants } from './fact.ts';
 import { refusal } from './actions.ts';
 import * as action_recipe from './rules/action_recipe.ts';
@@ -77,7 +77,7 @@ export function step(world: World, command: Command, revision: number): Stepped 
   return decideWith(world, command, owner, rule, revision);
 }
 
-type AnyRule = (w: World, c: Command, mint: Mint) => DecisionResult;
+type AnyRule = (w: World, c: Command, mint: Mint, steps: Steps) => DecisionResult;
 
 /**
  * The admission boundary around one rule call. Before the rule: the nil CommandId is reserved
@@ -100,11 +100,13 @@ function decideWith(
   if (command.world_context_id !== world.context) return reject('not_found');
   if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
     return reject('not_found');
-  const refused = refusal(world, command.payload);
+  const steps = { n: 0 }; // one query_steps count: admission, the rule and the proposal (04 §5.4)
+  const refused = refusal(world, command.payload, steps);
   if (refused) return reject(refused);
   const mint = allocator(world, command);
   try {
-    return adopt(world, admit(owner, rule(world, command, mint)), command as Actor, mint, revision);
+    const admitted = admit(owner, rule(world, command, mint, steps));
+    return adopt(world, admitted, command as Actor, mint, revision, steps);
   } catch (e) {
     // 04 §5.2 step 7: a numeric-profile error is a typed fault; any other throw is a bug.
     if (!(e instanceof KernelError)) throw e;

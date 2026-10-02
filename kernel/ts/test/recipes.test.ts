@@ -298,6 +298,7 @@ test('the output budget counts the fact_changed events adopt adds', () => {
   assert.ok(Buffer.byteLength(JSON.stringify(under)) < 1048576); // the rule's own result fits
   const r = adopt(w, admit('fact', under as never), SET, allocator(w, SET), 0);
   assert.deepEqual(r.decision, { kind: 'fault', code: 'budget_exceeded' });
+  assert.equal(r.limit, 'output_bytes');
   assert.equal(r.world, w);
   const small = adopt(
     w,

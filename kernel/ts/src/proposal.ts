@@ -3,10 +3,9 @@
 // order), composition and adoption. world.ts routes each command here.
 import { encode } from './canonical.ts';
 import { apply } from './apply.ts';
-import { over, target } from './compose.ts';
+import { over, target, type Limit } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
-  LIMITS,
   type CommandId,
   type DecisionResult,
   type DeltaOp,
@@ -14,7 +13,7 @@ import {
   type JobId,
   type QuestInstanceId,
 } from './contracts.gen.ts';
-import { allocator, COMPOSES, event, type Mint, type World } from './decision.ts';
+import { allocator, COMPOSES, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, typedFact, type Base } from './fact.ts';
 import { jobCommandId } from './id_source.ts';
 import { earned } from './quest.ts';
@@ -23,7 +22,8 @@ import * as schedule from './rules/schedule.ts';
 import { utf8 } from './sha256.ts';
 import { cmp } from './validate.ts';
 
-export type Stepped = { decision: DecisionResult; world: World };
+// limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
+export type Stepped = { decision: DecisionResult; world: World; limit?: Limit };
 export type Actor = Parameters<typeof event>[1];
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 type Corr = DomainEvent['correlation_id'];
@@ -33,9 +33,11 @@ type Corr = DomainEvent['correlation_id'];
  * defaults and the declared capacities, adopting its containment, fact and clock changes; only
  * admit() makes an Admitted. A fact.assign whose fact, scope kind or value its FactSpec does not
  * allow faults precondition_failed (03 §7; 04 §5.1). A result over the events or output_bytes
- * limit faults budget_exceeded (04 §5.4). A fault discards the whole proposal. Each continuation a
- * choice.open of it creates is stamped with `revision`, the one its commit will take (04 §5.3:
- * the expected revision a choice.resolve must match), in the state whose rows the host commits.
+ * limit faults budget_exceeded (04 §5.4); every budget fault names its limit in `limit`, which no
+ * other result has. `steps` is the decision's query_steps count so far. A fault discards the
+ * whole proposal. Each continuation a choice.open of it creates is stamped with `revision`, the
+ * one its commit will take (04 §5.3: the expected revision a choice.resolve must match), in the
+ * state whose rows the host commits.
  */
 export function adopt(
   world: World,
@@ -43,20 +45,21 @@ export function adopt(
   command: Actor,
   mint: Mint,
   revision: number,
+  steps: Steps = { n: 0 },
 ): Stepped {
-  const out = propose(world, decision, command, mint);
-  if (out.kind !== 'accepted') return { decision: out, world };
+  const { decision: out, limit } = propose(world, decision, command, mint, steps);
+  if (out.kind !== 'accepted') return faulted(out, world, limit);
   const assigns = out.delta.ops.filter((o) => o.op === 'fact.assign') as Assign[];
   const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
   if (bad)
     return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
   const applied = apply(world, out.delta.ops);
-  if ('fault' in applied) return { decision: applied.fault, world };
-  if (
-    over({ events: out.events.length }) ||
-    utf8(encode(out as never)).length > LIMITS.output_bytes!
-  )
-    return { decision: { kind: 'fault', code: 'budget_exceeded' }, world };
+  if ('fault' in applied) return faulted(applied.fault, world, applied.limit);
+  const spent = over({
+    events: out.events.length,
+    output_bytes: utf8(encode(out as never)).length,
+  });
+  if (spent) return faulted(BUDGET, world, spent);
   let choices = applied.state.choices;
   for (const o of out.delta.ops)
     if (o.op === 'choice.open') {
@@ -78,11 +81,17 @@ type P = {
   queue: Queued[];
   group: number;
   deliveries: number;
-  steps: { n: number };
+  steps: Steps;
   at: World;
   applied: number;
+  limit?: Limit | undefined; // set only just before a budget fault returns
 };
 const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
+const faulted = (decision: DecisionResult, world: World, limit?: Limit): Stepped => ({
+  decision,
+  world,
+  ...(limit && { limit }),
+});
 
 /**
  * The whole proposal of an admitted root decision (04 §5.2 steps 4-6, §5.4), each explicit
@@ -114,17 +123,23 @@ const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * writer group, its fact_changed caused by that event at its logical time, its ids from the
  * IdSource of the root or job that began the chain. A delivery past the deliveries,
  * reaction_depth or query_steps limit (compose.ts over) faults budget_exceeded: a cycle ends
- * there, never truncated (adopt checks the events limit on the whole proposal). ponytail: only
- * reaction guards count query_steps; root and action policies join when their callers pass
- * holds() a counter.
+ * there, never truncated (adopt checks the events limit on the whole proposal). `steps` already
+ * counts the root's admission and rule policy leaves (world.ts decideWith); a root past
+ * query_steps faults before it joins. A budget fault returns its limit beside the decision.
  * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
  * (rules/schedule.ts), and a stale entry it refuses rejects the whole advance instead of being
  * skipped as ineligible. Nothing in schedule@1 or reaction@1 cancels, reschedules or completes
  * another job, so no entry goes stale yet; the first operation that can turns that refusal into a
  * skip and adds the generation to the comparison.
  */
-export function propose(world: World, root: Admitted, command: Actor, mint: Mint): Admitted {
-  if (root.kind !== 'accepted') return root;
+export function propose(
+  world: World,
+  root: Admitted,
+  command: Actor,
+  mint: Mint,
+  steps: Steps,
+): { decision: Admitted; limit?: Limit } {
+  if (root.kind !== 'accepted') return { decision: root };
   const group = Math.max(0, ...root.delta.ops.map((o) => o.writer_group));
   const p: P = {
     world,
@@ -134,13 +149,17 @@ export function propose(world: World, root: Admitted, command: Actor, mint: Mint
     queue: [],
     group,
     deliveries: group,
-    steps: { n: 0 },
+    steps,
     at: world,
     applied: 0,
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
-  const failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
-  return failed ?? { ...root, delta: { ops: p.ops }, events: p.events };
+  p.limit = over({ query_steps: steps.n });
+  const failed = p.limit
+    ? BUDGET
+    : (join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root));
+  if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
+  return { decision: { ...root, delta: { ops: p.ops }, events: p.events } };
 }
 
 // The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
@@ -148,7 +167,10 @@ export function propose(world: World, root: Admitted, command: Actor, mint: Mint
 function now(p: P): World | Admitted {
   if (p.applied < p.ops.length) {
     const r = apply(p.at, p.ops.slice(p.applied));
-    if ('fault' in r) return r.fault as Admitted;
+    if ('fault' in r) {
+      p.limit = r.limit;
+      return r.fault as Admitted;
+    }
     [p.at, p.applied] = [{ ...p.world, state: r.state }, p.ops.length];
   }
   return p.at;
@@ -199,7 +221,7 @@ const cause = (p: P, logical_time: number, id: string) => ({
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     for (const instance_id of next.earns) {
-      if (over({ deliveries: ++p.deliveries })) return BUDGET;
+      if ((p.limit = over({ deliveries: ++p.deliveries }))) return BUDGET;
       const at = now(p);
       if (!('cartridge' in at)) return at;
       if (at.state.quests![instance_id]!.state !== 'active') continue;
@@ -217,8 +239,8 @@ function react(p: P): Admitted | undefined {
       if (!('cartridge' in at)) return at;
       const own = sequence(at, p.command.payload.actor_id, rule, next.cause, p.group + 1, p.steps);
       const depth = next.depth + 1;
-      if (over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n }))
-        return BUDGET;
+      p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
+      if (p.limit) return BUDGET;
       if (!own) continue;
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);

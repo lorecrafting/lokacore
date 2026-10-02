@@ -8,12 +8,14 @@
 import { accepted, event, type Rule } from '../decision.ts';
 import { holdsNow, instanceId } from '../quest.ts';
 
-export const decide: Rule<'quest'> = (world, command, mint) => {
+export const decide: Rule<'quest'> = (world, command, mint, steps = { n: 0 }) => {
   const { quest, actor_id } = command.payload;
   const instance_id = instanceId(mint);
   const scope = { kind: 'player', character_id: actor_id } as const;
   const op = { op: 'quest.activate', writer_group: 0, quest, scope, instance_id } as const;
   const activated = { type: 'quest_activated', quest, instance_id } as const;
-  const outcome = holdsNow(world, actor_id, quest) ? 'activated_with_possession' : 'activated';
+  const outcome = holdsNow(world, actor_id, quest, steps)
+    ? 'activated_with_possession'
+    : 'activated';
   return accepted(world, outcome, [op], [event(world, command, mint, 1, activated)]);
 };

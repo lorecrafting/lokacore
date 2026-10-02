@@ -12,7 +12,8 @@ import type {
   QuestDefinition,
   QuestInstanceId,
 } from './contracts.gen.ts';
-import { bodyOf, questOf, refString, type Mint, type QuestRow, type World } from './decision.ts';
+import { bodyOf, questOf, refString } from './decision.ts';
+import type { Mint, QuestRow, Steps, World } from './decision.ts';
 import { holds } from './policy.ts';
 import { cmp } from './validate.ts';
 
@@ -26,11 +27,11 @@ export const instanceId = (mint: Mint) => mint() as QuestInstanceId;
 /**
  * True when `actor`'s current_state objective of `quest` holds now (06 §43: evaluated on the
  * state at hand, never stored); false for a post_activation_event objective, which only an
- * event meets (earned).
+ * event meets (earned). Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
-export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef): boolean {
+export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef, steps: Steps) {
   const o = definition(world, quest).objective;
-  return o.evidence === 'current_state' && holds(world, actor, o.policy.root);
+  return o.evidence === 'current_state' && holds(world, actor, o.policy.root, { steps });
 }
 
 /**
@@ -85,11 +86,12 @@ export function resolution(
   quest: DefinitionRef,
   outcome: Key,
   writer_group: number,
+  steps: Steps = { n: 0 },
 ): { ops: DeltaOp[]; payload: Resolved } | ErrorCode {
   const found = questOf(world, actor, quest);
   if (!found || !['active', 'objectives_complete'].includes(found[1].state)) return 'invalid_state';
   const [instance_id, { state }] = found;
-  if (state === 'active' && !holdsNow(world, actor, quest)) return 'quest_requirement';
+  if (state === 'active' && !holdsNow(world, actor, quest, steps)) return 'quest_requirement';
   const step = { op: 'quest.transition', writer_group, instance_id } as const;
   const ops: DeltaOp[] = [
     ...(state === 'active'

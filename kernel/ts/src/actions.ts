@@ -17,7 +17,6 @@ import {
   type ContinuationId,
   type DefinitionRef,
   type EntityId,
-  type ErrorCode,
   type Key,
   type RecipeTarget,
   type TargetSpec,
@@ -25,7 +24,7 @@ import {
   type VersionedPolicy,
 } from './contracts.gen.ts';
 import { key, same } from './compose.ts';
-import { bodyOf, questOf, refString, type World } from './decision.ts';
+import { bodyOf, questOf, refString, type Steps, type World } from './decision.ts';
 import { ALWAYS, MODAL, modal, spokenBy, talkRefused, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
@@ -173,10 +172,10 @@ export const detailOf = (world: World, t: RecipeTarget): EntityId =>
  * Why `actor` may not issue `payload` now, if it may not (04 §19; ACT-09): no action of its set
  * resolves to that Command and accepts its target and input (unsupported_capability), or for
  * perform a key that names no recipe of the cartridge or for accept_quest a quest it does not
- * declare (not_found), or none that does is
- * available, its policy failing (invalid_state).
+ * declare (not_found), or none that does is available, its policy failing (invalid_state). Each
+ * policy leaf it evaluates adds one to the decision's `steps` (04 §5.4 query_steps).
  */
-export function refusal(world: World, payload: CommandPayload): ErrorCode | undefined {
+export function refusal(world: World, payload: CommandPayload, steps: Steps) {
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;
   const matching = Object.values(resolved(world, actor)).filter((a) =>
@@ -189,8 +188,7 @@ export function refusal(world: World, payload: CommandPayload): ErrorCode | unde
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const target = (a: Offered) =>
     a.recipe ? detailOf(world, a.recipe.target) : (p.target_id ?? p.item_id);
-  const ok = (a: Offered) =>
-    holds(world, actor, a.policy.root, { target: target(a), steps: { n: 0 } });
+  const ok = (a: Offered) => holds(world, actor, a.policy.root, { target: target(a), steps });
   return matching.some(ok) ? undefined : 'invalid_state';
 }
 

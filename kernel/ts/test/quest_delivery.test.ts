@@ -102,7 +102,8 @@ function root(w: World, ops: object[], events: [number, object][]) {
     effects: [],
     rng: w.state.rng,
   };
-  return adopt(w, d as never, cmd(w, {}) as never, () => CMD2, 0).decision as any;
+  const s = adopt(w, d as never, cmd(w, {}) as never, () => CMD2, 0);
+  return (s.limit ? { ...s.decision, limit: s.limit } : s.decision) as any; // a fault's limit
 }
 const acquired = (w: World) => ({ type: 'item_acquired', item_id: lantern(w), holder_id: w.body });
 const groups = (d: any) => d.delta.ops.map((o: any) => [o.op, o.writer_group]);
@@ -194,7 +195,7 @@ test('a quest delivery counts toward the deliveries budget', () => {
   const flags = Array.from({ length: 1024 }, (_, i) => [i + 1, changed] as [number, object]);
   assert.equal(root(w, [], flags).kind, 'accepted');
   const over = root(w, [handed(w)], [...flags, [1025, acquired(w)]]);
-  assert.deepEqual([over.kind, over.code], ['fault', 'budget_exceeded']);
+  assert.deepEqual([over.kind, over.code, over.limit], ['fault', 'budget_exceeded', 'deliveries']);
 });
 
 // Breaks (04 §5.2 step 5, §5.4): a delivery charged only when its instance is still active, or
@@ -227,5 +228,5 @@ test('every delivery eligible at emission counts toward the deliveries budget', 
   const at = root(w, resolve, [[1, resolved_], ...acq(2, 1024)]);
   assert.equal(at.kind, 'accepted', JSON.stringify(at.code));
   const over = root(w, resolve, [[1, acquired(w)], [2, resolved_], ...acq(3, 1023)]);
-  assert.deepEqual([over.kind, over.code], ['fault', 'budget_exceeded']);
+  assert.deepEqual([over.kind, over.code, over.limit], ['fault', 'budget_exceeded', 'deliveries']);
 });
