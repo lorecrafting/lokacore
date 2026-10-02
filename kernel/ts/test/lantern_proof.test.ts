@@ -28,7 +28,7 @@ const load = () =>
 test('the known answer loads with its hash, as its hand-written value', () => {
   const loaded = load();
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  assert.equal(loaded.hash, '747a5bd8f8630873d82b29ec8ae4af568b8766d6e45b7d4d6a963a83e596b297');
+  assert.equal(loaded.hash, '7076b5269bedc9a01f1bc939b976ded8fb7536620d903cad2cd212e41a76ec9f');
   assert.deepEqual(structuredClone(loaded.cartridge), kat.value);
 });
 
@@ -113,10 +113,9 @@ for (const [choice_id, plan] of [
     );
   });
 
-// Breaks: the gate unlocked or missing, the start time or Bram's evening hour wrong, or the
-// landing's text placing Bram there after he has gone (the catalog text is the fixture's).
-test('at 06:00 the west gate is locked; at 19:00 Bram is on the green', () => {
-  let w = world();
+// Breaks: the gate unlocked or missing, or the start time wrong.
+test('at 06:00 the west gate is locked', () => {
+  const w = world();
   assert.equal(w.state.clock, 6 * 3600);
   assert.deepEqual(
     gameView(w).exits.find((e) => e.direction === 'west'),
@@ -126,9 +125,4 @@ test('at 06:00 the west gate is locked; at 19:00 Bram is on the green', () => {
     kind: 'rejected',
     error: { code: 'not_owned' },
   });
-  assert.ok(here(w, 'npc'));
-  w = play(w, { type: 'wait', until: 19 * 3600 }, 'waited').world;
-  assert.equal(here(w, 'npc'), undefined);
-  assert.doesNotMatch(kat.value.text[gameView(w).place.description.key], /Bram/);
-  assert.ok(here(move(w, 'north'), 'npc'));
 });

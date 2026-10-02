@@ -8,7 +8,7 @@ ID, V = "lantern_proof", "0.0.1"
 def ref(kind, key): return {"cartridge_id": ID, "cartridge_version": V, "kind": kind, "key": key}
 def k(kind, key): return f"{ID}@{V}:{kind}/{key}"
 P = lambda root: {"policy_version": 1, "root": root}
-caps = {"movement":1,"description_variant":1,"containment":1,"barrier":1,"policy":1,"behavior":1,
+caps = {"movement":1,"description_variant":1,"containment":1,"barrier":1,"policy":1,
         "calendar":1,"fact":1,"quest":1,"dialogue":1,"resource":1,"schedule":1}
 def room(key, exits, variants=None):
     r = {"title": f"room.{key}.title", "description": f"room.{key}.description", "exits": exits, "key": key}
@@ -32,16 +32,14 @@ value = {
  "policies": {}, "actions": {},
  "rooms": {
    k("room","landing"): room("landing", {"north": {"to": ref("room","green")}, "west": gate("shelter")},
-                             [plan("player_led"), plan("party_led"),
-                              {"when": P({"op":"time_window","from":6,"to":19}), "description": "room.landing.day"}]),
+                             [plan("player_led"), plan("party_led")]),
    k("room","green"): room("green", {"south": {"to": ref("room","landing")}, "east": {"to": ref("room","reed_bank")}}),
    k("room","reed_bank"): room("reed_bank", {"west": {"to": ref("room","green")}, "east": {"to": ref("room","shelter")}}),
    k("room","shelter"): room("shelter", {"west": {"to": ref("room","reed_bank")}, "east": gate("landing")})},
  "barriers": {k("barrier","old_gate"): {"keywords": ["gate","old_gate"], "short": "barrier.old_gate.short",
    "initial": "locked", "key_item": ref("item","lantern"), "key": "old_gate"}},
  "npcs": {k("npc","bram"): {"keywords": ["bram","ferryman"], "short": "npc.bram.short", "room_line": "npc.bram.room",
-   "description": "npc.bram.description", "room": ref("room","landing"),
-   "daily_schedule": {"6": ref("room","landing"), "19": ref("room","green")}, "key": "bram"}},
+   "description": "npc.bram.description", "room": ref("room","landing"), "key": "bram"}},
  "items": {k("item","lantern"): {"keywords": ["lantern","brass_lantern"], "short": "item.lantern.short",
    "room_line": "item.lantern.room", "description": "item.lantern.description",
    "location": {"in": "room", "room": ref("room","shelter")}, "key": "lantern"}},
@@ -76,8 +74,8 @@ DESC = ("Known answer for the loka-cartridge-v2 content hash of cartridges/lante
  "and save lineage; four rooms (landing north to green, green east to reed bank, reed bank east to shelter, each reciprocal) and "
  "the blocked west exit, the barrier old_gate between landing (west) and shelter (east), locked, key_item the lantern "
  "(room.schema.json BarrierDefinition; PM ruling 1, docs/decisions/pm-decision-lantern-proof-content-2026-10-01.md); landing's "
- "description variants on search_plan (player_led, party_led), then Bram's opening while he is there (time_window 6 to 19), else neutral prose; calendar@1 starting at 06:00 and Bram's daily schedule "
- "(landing from hour 6, green from hour 19); the lantern at the shelter; the quest lantern (offered, current_state has_item "
+ "description variants on search_plan (player_led, party_led), else Bram's opening; calendar@1 starting at 06:00 and Bram at "
+ "the landing with no schedule (owner decision, docs/decisions/owner-decision-untimed-lantern-2026-10-02.md); the lantern at the shelter; the quest lantern (offered, current_state has_item "
  "objective); the player fact search_plan; Bram's dialogue (talk while the quest is active, roles bram and lantern, carry "
  "setting player_led with narration proof.carry, leave setting party_led, handing the lantern to Bram, narration proof.leave); "
  "the story point proof_terminal (outcomes carry and leave, Bram's dialogue choice of that name). Assembled by hand from the "
