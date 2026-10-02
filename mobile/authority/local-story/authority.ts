@@ -10,6 +10,7 @@ import type {
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
+import type { Identified } from '../../../kernel/ts/src/invocation.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
@@ -175,11 +176,7 @@ function invoke(s: Story, value: unknown): Reply {
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   if (stale(s, i.view_freshness_token)) return { kind: 'stale_view' };
-  const command = resolve(s.world, id);
-  const next: ReturnType<typeof step> =
-    'kind' in command
-      ? { world: s.world, decision: command }
-      : step(s.world, command, s.revision + 1, i.action_key);
+  const { command, next } = decided(s, id);
   const d = next.decision;
   // A rejection before a Command existed has no trace entry: TraceEntry needs the Command.
   const trace: Trace = (at, ...states) => {
@@ -201,6 +198,16 @@ function invoke(s: Story, value: unknown): Reply {
     revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
     response: d as never,
   });
+}
+
+/** A NEW invocation resolved against the world and, once a Command, decided (03 §14). */
+function decided(s: Story, id: Identified) {
+  const command = resolve(s.world, id);
+  const next: ReturnType<typeof step> =
+    'kind' in command
+      ? { world: s.world, decision: command }
+      : step(s.world, command, s.revision + 1, id.invocation.action_key);
+  return { command, next };
 }
 
 /**
