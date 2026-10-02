@@ -16,8 +16,9 @@ function main {
   local run=$tmp/run.raw
   for phase in "$@"; do
     xcrun devicectl device info lockState --device $DEV 2>&1 | grep passcodeRequired
-    local n=$(nonce) pid="" got=""
+    local n pid="" got=""
     for t in 1 2 3; do
+      n=$(nonce) # fresh per attempt: a lost launch response never lends its nonce to a retry
       pid=$(xcrun devicectl device process launch --device $DEV --terminate-existing --json-output - $APP -p6nonce $n 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["process"]["processIdentifier"])' 2>/dev/null)
       [[ -n $pid ]] && break; sleep 3
     done

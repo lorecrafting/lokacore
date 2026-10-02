@@ -10,8 +10,8 @@ function main {
   local data=$(xcrun simctl get_app_container $DEV $APP data)
   local run=$data/Documents/p6run-$BUILD.txt
   for phase in "$@"; do
-    local n=$(nonce) pid="" got=""
-    for t in 1 2 3; do pid=$(xcrun simctl launch $DEV $APP -p6nonce $n 2>/dev/null | awk '{print $2}'); [[ -n $pid ]] && break; sleep 2; done
+    local n pid="" got=""
+    for t in 1 2 3; do n=$(nonce); pid=$(xcrun simctl launch $DEV $APP -p6nonce $n 2>/dev/null | awk '{print $2}'); [[ -n $pid ]] && break; sleep 2; done
     [[ -z $pid ]] && { echo "$phase launch failed; stop"; return 1; }
     for i in {1..120}; do got=$(done_line $run $n $phase) && [[ -n $got ]] && break; sleep 1; done
     echo "$phase pid=$pid nonce $n -> ${got:-TIMEOUT}"
