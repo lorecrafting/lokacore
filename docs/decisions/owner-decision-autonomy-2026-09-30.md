@@ -1,5 +1,8 @@
 # Owner decision: autonomous PM, escalation ladder — 2026-09-30
 
+Superseded in part (the ladder's Fable and codex Astra rungs; now codex Sol) by the
+[2026-10-01 review rules](owner-decision-review-rules-2026-10-01.md).
+
 Relayed by the PM (Claude Code) from the owner's chat, **(paraphrased)** at the owner's
 request: the wording is smoothed, not quoted. No checker can verify it against the chat.
 

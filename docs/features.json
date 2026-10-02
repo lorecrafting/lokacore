@@ -128,7 +128,7 @@
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "R5 S6b default HP/MA/MV pools, recipe costs and resource.adjust steps, 1 MV per move, hourly regeneration; G condition bands in GameView"
+    "implemented_in": "R5 S6b default HP/MA/MV pools, recipe costs and resource.adjust steps, 1 MV per move, hourly regeneration; Early R7/R8 G condition bands in GameView"
   },
   "containment": {
     "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12",
@@ -376,7 +376,6 @@
       "MutationTarget"
     ],
     "modules": [
-      "kernel/ts/src/rules/dialogue.ts",
       "kernel/ts/src/dialogue.ts",
       "kernel/ts/src/actions.ts",
       "kernel/ts/src/proposal.ts",

@@ -10,27 +10,28 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](decisions/owner-decision-sonnet-developers-2026-09-30.md)) | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable rarely (see below) | independent review, review record |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable only as codex stand-in (see below) | independent review, review record |
 
 **Models** ([owner decision](decisions/owner-decisions-review-flow-2026-09-30.md)): a slice is
-reviewed once, with a narrow fix check, by a reviewer on the highest Opus; the PM passes
-`model: "fable"` only as a rare backstop for very complex work (it spends Claude Code tokens).
+reviewed once, with a narrow fix check, by a reviewer on the highest Opus.
 **Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
 our own independent review, never instead of it: the PM may add it to any slice beyond
-docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only, `-m` Sol by
-default, Astra for hard reviews (escalate freely)) with the
+docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only; `-m` Astra on gate reviews and on changes to
+`kernel/ts/src/proposal.ts`, Sol for every other review and every fix re-check;
+[owner decision](decisions/owner-decision-review-rules-2026-10-01.md)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
 answer verbatim to the review record, and adds its findings to the fix list.
-If codex is out of quota, a Fable subagent stands in for it on a kernel or contract-freeze slice's head (an exception to "Fable rarely"), never on fix re-reviews; and the PM has an Opus subagent draft briefs and stage slice plans so the PM session stays thin, the PM deciding (owner, 2026-10-01, paraphrased).
+Fable is used only if codex is out of quota: a Fable subagent stands in for it on a kernel or
+contract-freeze slice's head, never on fix re-reviews
+([owner decision](decisions/owner-decision-review-rules-2026-10-01.md)).
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
 
 ## Loop
 
 **Keep going.** Once the owner has approved the slice plan, the PM runs steps 2 to 7 to the
 merge without asking permission at each step, and settles judgment calls itself. When a
-decision is hard, escalate in order: the `advisor` tool; then a higher model by hand (a
-Fable subagent, or codex Astra for a hard review); only if both fail to settle it, or it is
+decision is hard, escalate in order: the `advisor` tool; then codex Sol by hand; only if both fail to settle it, or it is
 critical, stop for the owner ([owner decision](decisions/owner-decision-autonomy-2026-09-30.md)).
 A ladder answer is advice to the PM: it never changes a reviewer's finding or verdict and is
 never the owner's OK. Critical means what [AGENTS.md](../AGENTS.md) and the owner decisions
@@ -41,7 +42,8 @@ Report at the end of the slice, not at every step.
 1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its spec sections;
    keep [the roadmap](ROADMAP.md) current.
    Get the owner's OK on the plan and on any decision that is theirs.
-2. **Brief (PM).** Name the branch; do not check it out (the developer does, in its own
+2. **Brief (PM).** An Opus subagent drafts briefs and stage slice plans so the PM session
+   stays thin; the PM decides ([owner decision](decisions/owner-decision-review-rules-2026-10-01.md)). Name the branch; do not check it out (the developer does, in its own
    worktree). Spawn `developer` (pass `model: "opus"` for a kernel or contract-freeze slice) with a self-contained brief: goal,
    spec sections (the clause for each behavior), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
@@ -69,7 +71,7 @@ Report at the end of the slice, not at every step.
    findings (every call re-reads the whole context, so a large one makes each fix call the
    most expensive of the slice). One message per round: batch every request for that round,
    and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
-   resolved by the PM in a throwaway worktree (merge, never rebase) without waking the
+   resolved by the PM in `../lokacore-pm` (merge, never rebase) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
    developer runs `git pull --rebase` first (the review record is on the branch), never
@@ -111,8 +113,11 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 
 ## Git hygiene
 
-- Every developer works in its own worktree on its own branch; the main checkout stays
-  with the PM. Developer worktrees sit beside the repository (`../lokacore-<slice>`), outside
+- Every developer works in its own worktree on its own branch. The PM works in one
+  persistent worktree, `../lokacore-pm`, moved with `git checkout --detach <sha>` and never
+  removed; it holds the PM's commits and is codex's read-only checkout. The main checkout is
+  not used for slice work ([owner decision](decisions/owner-decision-review-rules-2026-10-01.md)).
+  Developer worktrees sit beside the repository (`../lokacore-<slice>`), outside
   the tree the checks scan, and are removed after merge. The reviewer mutates code only in a throwaway detached worktree
   (`git worktree add --detach`) and removes it before finishing.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
@@ -120,7 +125,8 @@ now enforced by a check, a doc turning into a catch-all. Findings are fixed in t
 - The reviewer commits only its record, in a detached worktree at `origin/<branch>`,
   pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
 - A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
-  first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`.
+  first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`. The PM's worktree
+  does this once, then `npm ci` only on a lockfile change.
 - CI failure: rerun the job once. An identical second failure is not a flake. A failure in code
   the diff does not touch means check for a stale base (update the branch from `main` with a merge, never a rebase
   or force-push) before anything else.
