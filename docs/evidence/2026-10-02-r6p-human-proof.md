@@ -1,7 +1,32 @@
-# R6P human proof: the owner plays the Lantern by touch (2026-10-02)
+# Gate R6P record: checklist, human proof, carries (2026-10-02)
 
-The record for [pre-release-proof](../spec/pre-release-proof.md#evidence-required-to-finish-r6p)
-:84. It holds no verdict; the Gate R6P reviewers rule on it. The device rows are in the [P6 rerun](2026-10-02-r6p-rerun-iphone11/README.md).
+The slim gate record ([owner decision](../decisions/owner-decision-slim-gates-2026-10-02.md)) for
+[pre-release-proof](../spec/pre-release-proof.md#evidence-required-to-finish-r6p) :82-88. It holds
+no verdict; the gate reviewer rules. R = the [P6 rerun](2026-10-02-r6p-rerun-iphone11/README.md),
+P = [P6b](2026-10-02-r6p-iphone11/README.md); line numbers are in those READMEs.
+
+## Checklist
+
+| Spec item | Proof | Status |
+|---|---|---|
+| :84 each choice path by touch | G1 below | recorded; reviewer rules |
+| :84 explain its consequence | G3 below | recorded; reviewer rules |
+| :84 quit at a choice, airplane resume, no developer instructions | G3 below; P:51 (row 13) is not this (old hash `050cba8c`, cable kill, not at a choice) | recorded; reviewer rules |
+| :84 confusing interactions | G1 below; P:55-58 are agent Simulator runs, excluded | recorded; reviewer rules |
+| :84 authoring effort | below (inspected) | recorded |
+| Tester's exposure ([r6p plan](../decisions/owner-decision-r6p-plan-2026-10-01.md)) | Tester below | recorded |
+| :86 build and cartridge hash, OS, device | R:15-33 | linked |
+| :86 conformance profile | R:33, P:32-33: null (none exists) | reviewer rules |
+| :86 both path transcripts, save/restore | R:42 (row 4), planted control | linked |
+| :86 latency | R:40 (row 2) | linked |
+| :86 input responsiveness | P:52 (row 14, handler-to-frame proxy only); G2 below | partial; touch-to-photon carried |
+| :86 failures before/after commit, narrative boundary | R:45-47 (rows 7-9) | linked |
+| :86 lost response replays after the choice is gone | R:48 (row 10) | linked |
+| :86 no reroll on duplicate | R:49 (row 11); P:107-109 | linked |
+| :88 known answers on the actual adapters | R:43-44 (rows 5-6), R:17-21 | linked |
+| :88 per-step diagnostics carry canonical bytes | R:42-43 | linked |
+| Carries in stage rows | Carries below | linked |
+| Docs tidy pass | the gate PR's description | listed |
 
 ## Build played
 
@@ -36,3 +61,11 @@ Lines are JSON lines; time spent is null (not recorded).
 | #100 P3 | 13 new | +290 | 2 (cartridge text changed in both) |
 | #107 Polish | 1 (`text.json`) | +3 −3 | 1 (cartridge untouched) |
 | #110 Untime | 5 (1 new: `resources.json`) | +21 −22 | 1 (commits "Untime fix 1-4"; the record has no re-review section); `resources.json` came in that round |
+
+## Carries (each in its [ROADMAP](../ROADMAP.md) stage row)
+
+- UI batch from this play, U7 first (a bug), U1-U6, U8, save-error flush left, Polish O-1: Playtest and tune.
+- M1, quest from dialogue: its own row ([record](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
+- P6 rerun N-1 (authority-rejection line): Presenter split.
+- World parameters P6 (fixed seed), P6b row 14 touch-to-photon, the `kernel/ts` audit nits with the
+  `target.ts:34` pointer, P5a replay without the key: R7/R8 for chapter one.
