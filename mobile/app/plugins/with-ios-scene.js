@@ -17,9 +17,8 @@ const START = `
 `;
 
 function patchAppDelegate(src) {
-  const hasStart = src.includes(START);
-  if (src.includes(PROVIDER) && !hasStart) return src;
-  if (!src.includes(CLASS) || !hasStart) {
+  if (src.includes(PROVIDER) && !src.includes('startReactNative')) return src;
+  if (!src.includes(CLASS) || !src.includes(START)) {
     throw new Error(
       'with-ios-scene: AppDelegate.swift no longer matches the Expo 57 template; update the plugin',
     );
