@@ -87,12 +87,12 @@ Optionally restate the consequence of each ending in your own words.
 
 - **G-1, fixed.** ROADMAP:53's DEFERRED, NOT PASSED list now names unaided completion. The Playtest row
   (:58) carries it once as its landing: a fresh tester before the first release. The owner's
-  acceptance is recorded, paraphrased, at gate record :55-56.
+  acceptance is recorded, paraphrased, at gate record :60.
 - **Consequence clause, met with a recorded limit.** The owner's own words ("carry (leading) meant I
   went with the party; leaving meant Bram's party goes out") name who leads the search in each
   ending, which matches `search_plan` `player_led` / `party_led`. Limits: they do not mention who
   holds the lantern, and the owner gave them after the earlier Landing prompt.
-- **G-2, G-3, N-1, fixed.** The R6P row links this review; gate record :65 says "re-check in the
+- **G-2, G-3, N-1, fixed.** The R6P row links this review; gate record :72 (was :65) says "re-check in the
   record"; checklist :29 links this review.
 - **S-1 should-fix, gate record "Gate passes only after the save fix"**:
   - **The base claim is wrong.** "The fixes touch only the load, replay and recovery paths …, not what
