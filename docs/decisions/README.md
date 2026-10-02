@@ -81,4 +81,5 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [the story-sense "milestone" becomes "story point"; the 23 §3 event is `story_point_reached`](owner-decision-story-point-2026-10-01.md).
 - Owner decision: [condition bands for resources, after LegendMUD's condition scale (tribute); one table in 04 §15, computed by the kernel](owner-decision-condition-bands-2026-10-01.md).
 - Owner decision: [review rules: codex Astra only on gate reviews and `proposal.ts` changes, Sol otherwise and on fix re-checks; Fable as codex stand-in; Opus drafts briefs; the PM's persistent worktree](owner-decision-review-rules-2026-10-01.md).
+- Owner decision: [R6P plan: six slices and the gate; `selector_cardinality` to chapter one; Opus developers on every R6P slice; the owner tests for now](owner-decision-r6p-plan-2026-10-01.md).
 - Owner leaning, not a decision: [Realm separation, a middle path on ADR-074 §5 route (a): shared foundation, separate rules, new keys for online behaviour](owner-leaning-realm-separation-2026-10-01.md).
