@@ -18,7 +18,9 @@ drive-phone-mutant.log: OK
 drive-phone-planted.log: OK
 drive-phone-r1.log: OK
 drive-phone-r2.log: OK
+drive-phone-r3.log: OK
 drive-sim-r1.log: OK
+drive-sim-r3.log: OK
 hold1-before-relaunch/p6-hold1.db: OK
 hold1-before-relaunch/p6-hold1.db-journal: OK
 node-expected.json.gz: OK
@@ -28,6 +30,7 @@ p6run-phone-mutant.txt: OK
 p6run-phone-planted.txt: OK
 p6run-phone-r1.txt: OK
 p6run-phone-r2.txt: OK
+p6run-phone-r3.txt: OK
 p6run-sim-main.txt: OK
 p6run-sim-r1.txt: OK
 p6run-sim-run1-ddfc464.txt: OK

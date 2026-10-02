@@ -1,7 +1,7 @@
 // R6P P6 device harness entry (evidence only, kept as dev-App.tsx.txt; never committed as App.tsx).
 // Each launch runs the next phase of p6/harness.ts on expo-sqlite and appends its lines to
 // Documents/p6run-<BUILD>.txt (Release drops console.log). It opens only p6-*.db files.
-import { Text, View } from 'react-native';
+import { Settings, Text, View } from 'react-native';
 import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 import { File, Paths } from 'expo/node_modules/expo-file-system';
 import { fixtures, PHASES, runPhase, type Env } from './p6/harness';
@@ -12,8 +12,11 @@ import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';
 import cases from '../../kernel/ts/test/invocation_cases.json';
 import traces from '../../docs/spec/conformance/lantern-traces.json';
 
-const BUILD = 'r1'; // fix round 1 (the first run used 'main') // a red-control build sets its own name, so it starts again at phase 1
-const RUN = `p6-${Date.now()}`;
+const BUILD = 'r3'; // the P6BG-1 run (earlier runs: 'main', 'r1', 'r2'); a red-control build sets its own name
+// The driver's per-launch nonce, passed as the launch argument `-p6nonce <n>` (iOS puts it in
+// NSUserDefaults' argument domain, which Settings reads). Every line carries it, so the driver
+// counts only this launch's lines.
+const RUN = `p6-${Date.now()}-n${String(Settings.get('p6nonce') ?? 'none')}`;
 const doc = (name: string) => new File(Paths.document, name);
 const sqlite = (name: string) => new File(Paths.document, 'SQLite', name);
 const out = doc(`p6run-${BUILD}.txt`);

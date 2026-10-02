@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Runs harness phases on the phone over the cable: note the run file's length, launch, poll it
+# Runs harness phases on the phone over the cable: launch with a fresh nonce, poll the run file
 # (bounded, about 120 s) for this launch's done/HOLD/ERROR line, copy the held save BEFORE the
 # kill, kill, next. Usage: DEV=<device> drive-phone.sh <build> <out> <phase...>
 source ${0:a:h}/common.sh
@@ -7,14 +7,6 @@ setopt pipefail # main's failure (a stop, a timeout) is the script's exit status
 BUILD=$1; OUT=$2; shift 2; APP=com.lorecrafting.loka
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 function pull { rm -f $2; xcrun devicectl device copy from --device $DEV --domain-type appDataContainer --domain-identifier $APP --source $1 --destination $2 -q 2>&1; }
-# The baseline: the run file's length before a launch. A copy that fails for any reason but the
-# file not existing yet (a new build's first launch) is untrusted: stop rather than count from 0.
-function baseline {
-  local err
-  err=$(pull Documents/p6run-$BUILD.txt $1) && { lines $1; return 0; }
-  [[ $err == *"Failed to retrieve the file node"* ]] && { echo 0; return 0; }
-  return 1
-}
 function main {
   mkdir -p $OUT
   # The raw polling copy lives outside OUT and is removed on every exit, a failing one too; only
@@ -24,19 +16,18 @@ function main {
   local run=$tmp/run.raw
   for phase in "$@"; do
     xcrun devicectl device info lockState --device $DEV 2>&1 | grep passcodeRequired
-    local n0 pid="" got=""
-    n0=$(baseline $run) || { echo "$phase baseline copy failed; stop"; return 1; }
+    local n=$(nonce) pid="" got=""
     for t in 1 2 3; do
-      pid=$(xcrun devicectl device process launch --device $DEV --terminate-existing $APP --json-output - 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["process"]["processIdentifier"])' 2>/dev/null)
+      pid=$(xcrun devicectl device process launch --device $DEV --terminate-existing --json-output - $APP -p6nonce $n 2>/dev/null | python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["process"]["processIdentifier"])' 2>/dev/null)
       [[ -n $pid ]] && break; sleep 3
     done
     [[ -z $pid ]] && { echo "$phase launch failed; stop"; return 1; }
     for i in {1..40}; do
       pull Documents/p6run-$BUILD.txt $run > /dev/null
-      got=$(done_line $run $n0 $phase) && [[ -n $got ]] && break
+      got=$(done_line $run $n $phase) && [[ -n $got ]] && break
       sleep 1
     done
-    echo "$phase pid=$pid after line $n0 -> ${got:-TIMEOUT}"
+    echo "$phase pid=$pid nonce $n -> ${got:-TIMEOUT}"
     [[ -z $got ]] && { echo "timeout; stop (app left running)"; return 1; }
     case $got in *HOLD*)
       mkdir -p $OUT/$phase
