@@ -35,15 +35,12 @@ export function normalize(text: string): string[] {
  */
 export function resolve(world: World, actor: CharacterId, text: string): TargetResolution {
   const phrase = normalize(text).join('_');
-  const body = bodyOf(world, actor);
-  const here = body && world.state.containers[body];
-  const named = (words: readonly string[]) => words.includes(phrase);
+  const near = (id: string, words: readonly string[]) =>
+    words.includes(phrase) && present(world, actor, id);
   // ponytail: scans every detail and entity of the world per lookup; index by room when it shows.
   const ids = [
-    ...Object.entries(world.details).filter(([, d]) => d.room === here && named(d.aliases)),
-    ...Object.entries(world.entities).filter(
-      ([id, e]) => [here, body].includes(world.state.containers[id]) && named(e.keywords),
-    ),
+    ...Object.entries(world.details).filter(([id, d]) => near(id, d.aliases)),
+    ...Object.entries(world.entities).filter(([id, e]) => near(id, e.keywords)),
   ]
     .map(([id]) => id as EntityId)
     .sort(cmp);
@@ -52,6 +49,18 @@ export function resolve(world: World, actor: CharacterId, text: string): TargetR
   if (ids.length > LIMITS.selector_cardinality)
     throw new Error(`${ids.length} candidates exceed selector_cardinality`);
   return { kind: 'ambiguous', candidate_ids: ids };
+}
+
+/**
+ * Whether `id` is in reach of `actor` (resolve's scopes; target_resolution@1's target_present): a
+ * detail of its room, or an entity in its room or held directly by its body.
+ */
+export function present(world: World, actor: CharacterId, id: string): boolean {
+  const body = bodyOf(world, actor);
+  if (body === undefined) return false;
+  const here = world.state.containers[body];
+  const d = world.details[id];
+  return d ? d.room === here : [here, body].includes(world.state.containers[id]);
 }
 
 /**

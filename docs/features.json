@@ -62,11 +62,16 @@
       "TargetResolution"
     ],
     "modules": [
-      "kernel/ts/src/target.ts"
+      "kernel/ts/src/target.ts",
+      "kernel/ts/src/policy.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_hash.json"
     ],
     "invariants": [
       "target_candidates_ordered"
-    ]
+    ],
+    "implemented_in": "R6P T"
   },
   "policy": {
     "spec": "21 §3.2, §4 Policy; 06 §21",

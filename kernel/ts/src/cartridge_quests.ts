@@ -4,12 +4,9 @@
 // offer label have catalog entries, and a post_activation_event objective names an item of this
 // cartridge. Its policies are walked with every other policy (cartridge_refs.ts nodes).
 import { CAPABILITY_OWNERS, type Diagnostic } from './contracts.gen.ts';
-import { diag, step, type Obj } from './cartridge_refs.ts';
+import { diag, step, type checkers, type Obj } from './cartridge_refs.ts';
 
-type Checks = {
-  named: (r: Obj, kind: string, path: string) => void;
-  text: (def: Obj, fields: string[], at: string) => void;
-};
+type Checks = ReturnType<typeof checkers>;
 
 export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
   const taken = new Set([

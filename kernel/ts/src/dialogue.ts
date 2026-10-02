@@ -106,7 +106,8 @@ export const spokenBy = (world: World, target: EntityId | undefined) =>
  */
 export function talkRefused(world: World, actor: CharacterId, target: EntityId | undefined) {
   const d = spokenBy(world, target);
-  return d !== undefined && (!holds(world, actor, d.policy.root) || !!pending(world, actor));
+  const ctx = { target, steps: { n: 0 } };
+  return d !== undefined && (!holds(world, actor, d.policy.root, ctx) || !!pending(world, actor));
 }
 
 /**
@@ -124,7 +125,7 @@ export function talks(world: World, actor: CharacterId): [string, Offered][] {
   });
 }
 
-const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
+export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 /** The commands that answer a pending choice: its view is the PendingChoice, never a list. */
 export const MODAL: readonly string[] = ['choose', 'close_choice'];
 
