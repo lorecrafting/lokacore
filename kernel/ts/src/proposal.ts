@@ -2,7 +2,8 @@
 // proposal (the root sequence, its due jobs and every reaction delivery in one FIFO causal
 // order), composition and adoption. world.ts routes each command here.
 import { encode } from './canonical.ts';
-import { compose, over, target, type Fault } from './compose.ts';
+import { apply } from './apply.ts';
+import { over, target } from './compose.ts';
 import {
   CAPABILITY_OWNERS,
   LIMITS,
@@ -13,7 +14,7 @@ import {
   type JobId,
   type QuestInstanceId,
 } from './contracts.gen.ts';
-import { allocator, COMPOSES, event, row, type Mint, type State, type World } from './decision.ts';
+import { allocator, COMPOSES, event, type Mint, type World } from './decision.ts';
 import { factChanged, typedFact, type Base } from './fact.ts';
 import { jobCommandId } from './id_source.ts';
 import { earned } from './quest.ts';
@@ -64,33 +65,6 @@ export function adopt(
     }
   const state = { ...applied.state, ...(choices && { choices }), rng: out.rng } as World['state'];
   return { decision: out, world: { ...world, state } };
-}
-
-// The state after composing `ops` over the world's state, the fact defaults, the declared
-// capacities, the resource specs and the barriers' initial states, or composition's fault. Only
-// written sections join the state, so a world that never sets a fact, resource, cooldown,
-// barrier or job keeps its earlier state hash.
-export function apply(world: World, ops: readonly DeltaOp[]): { state: State } | { fault: Fault } {
-  const base = {
-    ...world.state,
-    fact_defaults: world.factDefaults,
-    capacities: world.capacities,
-    resource_specs: world.resourceSpecs,
-    barrier_initial: world.barrierInitial,
-  };
-  const result = compose(base as unknown as Parameters<typeof compose>[0], { ops });
-  if ('fault' in result) return result;
-  // ponytail: copies each written section per call (O(rows)); persistent maps when big.
-  const written: Record<string, Record<string, unknown>> = {};
-  let clock = world.state.clock;
-  for (const { target, value } of result.changes) {
-    if (target.kind === 'clock') clock = value as number;
-    const [name, at] = row(target) ?? [];
-    if (!name) continue;
-    written[name] ??= { ...world.state[name] };
-    written[name][at!] = value;
-  }
-  return { state: { ...world.state, ...written, clock } as State };
 }
 
 type Queued = { cause: DomainEvent; depth: number; mint: Mint; earns: QuestInstanceId[] };
