@@ -707,7 +707,7 @@
       ]
     },
     "GameViewSnapshot": {
-      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol arrives in R6.",
+      "description": "An authoritative GameView snapshot (04 §16). format versions the envelope: an optional field added to the view keeps the tag; a field made required, removed or reinterpreted takes a new one (the CompiledCartridge ruling, R5 S1 F3/A7). projection_sequence orders this client stream's projection messages; a gap means resync from a fresh snapshot. view_freshness_token is opaque, echoed in ActionInvocation (same 1-128 character limit) for staleness diagnosis. Neither equals an authority revision (04 §16). Incremental projection messages are added with the Realm transport. narration holds committed narration records the client has not yet acknowledged, oldest first; the acknowledgement protocol is deferred to the Realm transport.",
       "type": "object",
       "properties": {
         "format": {

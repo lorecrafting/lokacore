@@ -2,7 +2,12 @@
 // one SQLite save, and 03 §14's admission order. invoke is synchronous on one connection, so
 // commands run one at a time, as WorldInstance serializes them online (07 §8).
 import type { Json } from '../../../kernel/ts/src/canonical.ts';
-import type { Command, DecisionResult, ErrorCode } from '../../../kernel/ts/src/contracts.gen.ts';
+import type {
+  Command,
+  DecisionResult,
+  ErrorCode,
+  NarrationRecord,
+} from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
@@ -84,7 +89,25 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     world: () => s.world,
     invoke: (value: unknown) => invoke(s, value),
     newGame: () => newGame(s),
+    narration: () => narration(s),
   };
+}
+
+/**
+ * The latest committed narration in this story's receipts, shown again on reopen after a crash
+ * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
+ * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
+ */
+function narration(s: Story): NarrationRecord | undefined {
+  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
+  const r = s.db.getFirstSync<{ command_id: string; lines: string }>(
+    `SELECT command_id, response -> '$.narration' AS lines FROM receipt WHERE scope = ?
+     AND json_array_length(response, '$.narration') > 0 ORDER BY revision DESC LIMIT 1`,
+    scope(s),
+  );
+  return r
+    ? ({ command_id: r.command_id, lines: JSON.parse(r.lines) } as NarrationRecord)
+    : undefined;
 }
 
 const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
