@@ -224,20 +224,20 @@ test('a read error after a durable commit does not commit the press twice', () =
   assert.equal(p.now().pending, false);
 });
 
-// Breaks: the retry cleared only after said() succeeds, so a confirmed reply that cannot be
-// formatted (a TypeError: malformed narration in the stored receipt) leaves pending set and every
-// later button retrying the confirmed "scan" instead of its own action.
-test('a confirmed reply that fails to format propagates and still ends the attempt', () => {
+// Breaks (03 §14; R6P-A03): a stored receipt that is not a DecisionResult (malformed narration)
+// replayed as saved, or its conflict leaving pending set, so every later button retries the
+// confirmed "scan" instead of its own action.
+test('a confirmed receipt that is not a decision is a conflict and ends the attempt', () => {
   const { p, arm } = lostAck();
   arm();
   p.press('Scan'); // committed, ack lost, first reconcile read fails: pending
   p.sql.exec(
     `UPDATE receipt SET response = '{"kind":"accepted","narration":5,"outcome":"scanned"}'`,
   );
-  assert.throws(() => p.press('Scan'), TypeError); // settles, replays the receipt, cannot format it
+  p.press('Scan'); // settles, finds the receipt, which is not a decision
   assert.equal(p.now().pending, false);
   p.press('Go north');
-  assert.deepEqual(p.now().log.slice(-3), ['> Scan', '> Go north', 'Village Green']);
+  assert.deepEqual(p.now().log.slice(-3), ['(conflict)', '> Go north', 'Village Green']);
 });
 
 // The app's save file under playSmoke, as App.tsx wires it: `remove` closes the handle and deletes

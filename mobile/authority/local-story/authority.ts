@@ -13,7 +13,7 @@ import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import type { Identified } from '../../../kernel/ts/src/invocation.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
-import { step } from '../../../kernel/ts/src/world.ts';
+import { holds, step } from '../../../kernel/ts/src/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta } from './store.ts';
 import { adopt, save, settle, type Story, type Trace } from './save.ts';
@@ -82,7 +82,9 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     if (!release)
       return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
     const loaded = load(db, release.fresh, () => first(release, host));
-    if (!loaded) return refuse({ kind: 'save_corrupt' as const });
+    // Playable needs the body in a room (registered invariant player_in_one_room; ROADMAP SM2a).
+    if (!loaded || !holds('player_in_one_room', loaded.world))
+      return refuse({ kind: 'save_corrupt' as const });
     Object.assign(s, { fresh: release.fresh, ...loaded });
   } catch (e) {
     if (!corrupt(e)) throw e;
@@ -174,7 +176,13 @@ function invoke(s: Story, value: unknown): Reply {
   // ponytail: one digest version; a receipt of another fails closed until a second exists.
   const same = old?.intent_digest_version === INTENT_DIGEST_VERSION;
   if (old) {
-    if (!same || old.intent_digest !== intent_digest) return { kind: 'conflict' };
+    // A response that is not a DecisionResult fails integrity: never replayed, never decided again.
+    if (
+      !same ||
+      old.intent_digest !== intent_digest ||
+      validate('DecisionResult', old.response).length
+    )
+      return { kind: 'conflict' };
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
   if (stale(s, i.view_freshness_token)) return { kind: 'stale_view' };

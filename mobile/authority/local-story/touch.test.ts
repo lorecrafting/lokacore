@@ -106,7 +106,8 @@ test('a reopen shows the last committed narration first; a fresh game none', () 
 });
 
 // Breaks (03 §15, OFF-07): a reopen that swallows a corrupt narration receipt (SQLite's "malformed
-// JSON") and plays on over it, so the damage is never shown and no start over is offered.
+// JSON") and plays on over it, so the damage is never shown and no start over is offered; or one
+// that takes the damaged value for a corrupt file, to be replaced (R6P-A01).
 test('a corrupt narration receipt fails the reopen, with start over offered', () => {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
   const a = processOn(path);
@@ -123,7 +124,8 @@ test('a corrupt narration receipt fails the reopen, with start over offered', ()
   );
   assert.equal(c.game(), undefined);
   assert.match(c.failed()!.message, /malformed JSON/);
-  assert.equal(c.failed()!.replace, true);
+  assert.deepEqual([c.failed()!.kind, c.failed()!.replace], ['save_corrupt', false]);
+  assert.ok(c.failed()!.newGame);
 });
 
 // Breaks (06 §43, :1402): a choice that blocks walking away, answers open without Bram, a Close

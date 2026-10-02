@@ -188,7 +188,15 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
   let fault: string | undefined; // the last press's throw, shown with start over beside the retry
   let sent = lastId(db);
   const { text, label } = sayers(cartridge);
-  const log = reread(story, text);
+  let log: string[];
+  try {
+    log = reread(story, text);
+  } catch (e) {
+    if (corrupt(e)) throw e; // the file: replaced
+    // A damaged receipt in an intact file: the authority's new game repairs it in place.
+    const cause = { kind: 'save_corrupt', newGame: story.newGame };
+    throw Object.assign(new Error((e as Error).message), { cause });
+  }
   return {
     screen: () => {
       const [view, token] = [gameView(story.world()), story.token()];
@@ -212,6 +220,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
       fault = undefined;
       if (reply.kind !== 'pending') retry = undefined; // before said(): it may throw
       answer(log, reply, text, comings(was, gameView(story.world()), text));
+      log.splice(0, log.length - 200); // ponytail: keeps the last 200 lines; the presenter split owns the log
     },
     newGame: story.newGame,
   };
