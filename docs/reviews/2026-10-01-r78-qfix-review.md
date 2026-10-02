@@ -71,3 +71,19 @@ is never wrongly credited, because the current-state skip still applies.
    test when a job can emit an acquisition.
 
 Open items: the activation-then-acquisition fault (PM ruling, carried).
+
+## Codex Astra first review (verbatim, 9575a00)
+
+**APPROVE — PR #96, head 9575a00**
+
+Findings: none.
+
+Eligibility is captured at emission for both activation/acquisition orders. Every captured delivery is charged before the inactive-instance skip: 8,192 succeeds; 8,193 faults. FIFO ordering and canonical quest ordering remain deterministic.
+
+The activation-then-acquisition case correctly reaches the agreed `conflicting_write` outcome. Newly reachable early-composition faults propagate through root and job callers without changing the input world.
+
+Current reactions emit fact changes; current jobs emit NPC movement events. Neither can produce acquisition/activation sequences. Their existing ordering and shared-budget paths pass; the reaction caller’s ignored `join` return cannot currently hide a fault.
+
+Validation: 58 focused tests, typecheck, and two additional in-memory fault/rollback probes passed. All eight planted mutants failed tests, covering both original defects, lifecycle capture, the budget boundary, and ordering. Expected outcomes are hand-written. No over-engineering finding.
+
+Full-suite verification was limited by read-only `EPERM` failures when tests attempted temporary-file and simulator-report writes. No files edited.
