@@ -109,3 +109,22 @@ Optionally restate the consequence of each ending in your own words.
   P4A-2 is a different case from A01 and stays with R12.
 
 **Verdict: PASS WITH NOTES once `r6p-savefix` merges with its review and S-1 is fixed; FAIL until then.**
+
+## Fix round 2 re-check (head `ca58031`, main with #116 87a1246 merged in)
+
+- **S-1, fixed.** The gate record section "The save fix (#116) and the build the owner played" names
+  the owner-run code #116 changed: the A02 load at open, which G3's resume runs, and the A04 log cap
+  at 200 lines (`smoke.ts:211`). It says the owner has not replayed by touch on the #116 build
+  (recorded limit). It cites the #116 device rerun at d37b268 (savefix evidence README:3-4, 0
+  mismatches). All three claims match the code and the evidence.
+- **ROADMAP R6P row:** the "passes only after" sentence is gone. The savefix DONE clause and the
+  #115 note match the savefix review (:125, the A01, A02, A03-null and A04 cases closed). The A03
+  valid-shape tamper is CARRIED to R12 in the row, the same pattern as P4A-2; the ROADMAP has no
+  R12 stage row (precedent: the SM2 row).
+- **Note, not blocking.** Gate record "fixed R6P-A01, A02 and A04 and carried A03's content-tamper
+  case" leaves out that A03's reported null-response case was fixed. The ROADMAP row states it
+  correctly.
+
+**Final verdict: PASS WITH NOTES.** Open limits: the owner did not replay by touch on the #116 build;
+unaided completion is deferred to a fresh tester (Playtest row); touch-to-photon and A03's tamper case
+are carried.
