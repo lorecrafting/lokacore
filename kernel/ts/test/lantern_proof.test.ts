@@ -2,7 +2,8 @@
 // R6P P3): its known answer (protocol/fixtures/cartridge_lantern_hash.json, Python) loads on the
 // installed kernel, and both endings play as the frozen traces say
 // (docs/spec/conformance/lantern-traces.json: lantern-carry, lantern-leave). Ids come from the
-// GameView, as a player reads them; codes are the traces', or the brief's where the trace has none.
+// GameView, as a player reads them; codes are the traces' under the brief's projection (choose's
+// resolved_carry is outcome carry, story point proof.terminal is Key proof_terminal).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Command, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
@@ -27,7 +28,7 @@ const load = () =>
 test('the known answer loads with its hash, as its hand-written value', () => {
   const loaded = load();
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  assert.equal(loaded.hash, '7bbecc326bcbfdf9e335bb08e5295b56e8a234b3c283eb3be16902741862a168');
+  assert.equal(loaded.hash, '3859042e3fd322ca7f7f924a67c7cf8af1c38c60edbe9a692ab34f6b17215581');
   assert.deepEqual(structuredClone(loaded.cartridge), kat.value);
 });
 
@@ -82,6 +83,8 @@ for (const [choice_id, plan] of [
     assert.equal(value(w, w.character, ref('fact', 'search_plan')), plan);
     assert.equal(w.state.containers[lantern], choice_id === 'carry' ? w.body : bram);
     assert.equal(gameView(w).journal[0].state, 'resolved');
+    assert.equal(w.state.clock, 6 * 3600); // ordinary actions cost no time
+    assert.equal(w.state.containers[bram], gameView(w).place.id);
     assert.deepEqual(
       s.decision.kind === 'accepted' &&
         s.decision.events
