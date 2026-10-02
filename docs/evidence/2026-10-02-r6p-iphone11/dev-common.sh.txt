@@ -1,0 +1,17 @@
+# Shared by drive-phone.sh and drive-sim.sh (sourced). Identifiers come from the caller's
+# environment (DEV, P6_TEAM), never from this file.
+# Every line a driver prints or retains passes through redact: home, scratch paths, the device,
+# the team, uppercase UUIDs (CoreDevice ids, simulator and container ids) and the device's name.
+function redact {
+  sed -E "s#$HOME#<home>#g; s#(/private)?/(tmp|var/folders)/[^ :]*#<scratch>#g; s#${DEV:-<no-device>}#<device>#g; s#${P6_TEAM:-<no-team>}#<team>#g; s#[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}#<uuid>#g; s#0000[0-9]{4}-[0-9A-F]{16}#<device>#g; s#([A-Z][^ ]* )*[A-Z][^ ]*[’']s iPhone#<device-name>#g"
+}
+# done_line <log> <lines-before> <phase>: the phase's done/HOLD/ERROR line, only from a run that
+# began after line <lines-before> (this launch), matched on that run's P6RUN id. A retained log or
+# done marker from an earlier run never counts.
+function done_line {
+  local new run
+  new=$(tail -n +$(( $2 + 1 )) $1 2>/dev/null)
+  run=$(print -r -- $new | grep -E "^P6RUN [^ ]+ $3 begin" | tail -1 | awk '{print $2}')
+  [[ -n $run ]] && print -r -- $new | grep -E "^P6RUN $run $3 (done|HOLD|ERROR)" | tail -1
+}
+function lines { [[ -f $1 ]] && wc -l < $1 | tr -d ' ' || echo 0; }

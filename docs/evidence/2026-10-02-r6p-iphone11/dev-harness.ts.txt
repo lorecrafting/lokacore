@@ -1,5 +1,5 @@
 // R6P P6 device harness (evidence only, never committed as code): one module run by the Hermes
-// app (dev-App.tsx) and by the Node runner (dev-node-expected.ts). Each launch runs one phase.
+// app (dev-App.tsx) and by the Node runner (dev-node-expected.mjs). Each launch runs one phase.
 // Every reply and state is recorded as canonical bytes; Hermes compares them with the Node bytes.
 // Literal checks (rows 7-12) are checked on both hosts against hand-written expectations.
 import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
@@ -70,6 +70,9 @@ export const PHASES = [
   'time1',
   'time2',
   'time3',
+  'time4',
+  'time5',
+  'time6',
 ] as const;
 export type Phase = (typeof PHASES)[number];
 
@@ -496,8 +499,12 @@ export function runPhase(env: Env, phase: Phase, sims: SimSample, expected?: Rec
     }
     case 'time1':
     case 'time2':
-    case 'time3': {
-      // Cold: the process's first open of a new save, then the restore of a played one.
+    case 'time3':
+    case 'time4':
+    case 'time5':
+    case 'time6': {
+      // Cold: the process's first open, of a new save (time1-3) or of the played save carry2 left
+      // at revision 10 (time4-6, the cold restore); the other open follows it, not cold.
       const now = () => env.latency?.now() ?? 0;
       const ms = (f: () => unknown) => {
         const t = now();
@@ -506,8 +513,12 @@ export function runPhase(env: Env, phase: Phase, sims: SimSample, expected?: Rec
       };
       const cold: Record<string, number> = {};
       env.remove('p6-time-new.db');
-      cold.open_new = ms(() => lantern('p6-time-new.db'));
-      cold.restore = ms(() => lantern('p6-lantern-carry.db')); // revision 10, from carry2
+      const restoreFirst = p >= PHASES.indexOf('time4');
+      const order = restoreFirst ? ['restore', 'open_new'] : ['open_new', 'restore'];
+      for (const k of order)
+        cold[k === order[0] ? `${k}_cold` : `${k}_second`] = ms(() =>
+          lantern(k === 'restore' ? 'p6-lantern-carry.db' : 'p6-time-new.db'),
+        );
       say(`TIMING cold ${JSON.stringify(cold)}`);
       // Warm: each path three times on a new save; the first run of the launch is the warm-up.
       for (const [k, path] of ['lantern-carry', 'lantern-leave', 'lantern-carry', 'lantern-leave', 'lantern-carry', 'lantern-leave'].entries()) {

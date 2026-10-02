@@ -12,7 +12,7 @@ import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';
 import cases from '../../kernel/ts/test/invocation_cases.json';
 import traces from '../../docs/spec/conformance/lantern-traces.json';
 
-const BUILD = 'main'; // a red-control build sets its own name, so it starts again at phase 1
+const BUILD = 'r1'; // fix round 1 (the first run used 'main') // a red-control build sets its own name, so it starts again at phase 1
 const RUN = `p6-${Date.now()}`;
 const doc = (name: string) => new File(Paths.document, name);
 const sqlite = (name: string) => new File(Paths.document, 'SQLite', name);
@@ -21,11 +21,15 @@ const emit = (line: string) => {
   if (!out.exists) out.create();
   out.write(`P6RUN ${RUN} ${line}\n`, { append: true });
 };
+// Every file the harness touches is its own (p6-*); never the owner's saves.
+const guard = (name: string) => {
+  if (!name.startsWith('p6-')) throw new Error('not a harness file');
+  return name;
+};
 const handles = new Map<string, SQLiteDatabase>();
 const env: Env = {
   open(name) {
-    if (!name.startsWith('p6-')) throw new Error('not a harness file'); // never the owner's saves
-    const db = openDatabaseSync(name);
+    const db = openDatabaseSync(guard(name));
     handles.set(name, db);
     return db;
   },
@@ -33,14 +37,15 @@ const env: Env = {
     handles.get(name)?.closeSync();
     handles.delete(name);
   },
-  read: (name) => sqlite(name).bytesSync(),
+  read: (name) => sqlite(guard(name)).bytesSync(),
   write(name, bytes) {
+    guard(name);
     const f = sqlite(name);
     if (!f.exists) f.create();
     f.write(bytes);
   },
   remove(name) {
-    if (!name.startsWith('p6-')) throw new Error('not a harness file');
+    guard(name);
     if (sqlite(name).exists) deleteDatabaseSync(name);
     if (sqlite(`${name}-journal`).exists) sqlite(`${name}-journal`).delete();
   },

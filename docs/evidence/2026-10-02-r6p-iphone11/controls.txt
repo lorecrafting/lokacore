@@ -1,0 +1,6 @@
+PASS retained log, no new run: not done
+PASS old rule counts the retained log (the defect)
+PASS old run id after the mark: not done
+PASS this run began, not finished: not done
+PASS this run finished: done
+PASS redact every identifier kind, keep lowercase game ids

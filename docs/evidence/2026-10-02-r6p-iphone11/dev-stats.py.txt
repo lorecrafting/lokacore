@@ -13,4 +13,7 @@ def pct(xs,p):
     xs=sorted(xs); i=max(0,min(len(xs)-1,int(round(p/100*len(xs)+0.5))-1)); return xs[i]
 print('n warm =',len(w['decision_ms']))
 for k,xs in w.items(): print(f"{k:14} p50 {pct(xs,50):7.3f}  p95 {pct(xs,95):7.3f}  p99 {pct(xs,99):7.3f}  max {max(xs):7.3f}")
-for c in cold: print('cold', {k: round(v,2) for k,v in c.items()})
+by={}
+for c in cold:
+    for k,v in c.items(): by.setdefault(k,[]).append(round(v,2))
+for k,v in by.items(): print(f"{k:16} {v}")

@@ -37,7 +37,7 @@ through the driver's `redact` (`dev-drive-phone.sh.txt`).
 | # | Row | Result | Proof |
 |---|---|---|---|
 | 1 | Latency producer (Node) | P6a, #105 | Not in this PR. |
-| 2 | Phone timing | **pass, reported** | 150 warm NEW decisions: per launch, 6 runs of 10 decisions alternating carry and leave, the first run a warm-up and excluded (5 timed runs × 10 × 3 launches). Decision (the P6a sink rows): p50 0.72, p95 1.86, p99 2.09 ms. The envelope §5 Tiny row (2/5/10) is given for information only; the Lantern is Tiny-sized. End to end (admission + decision + commit + trace + sink + GameView projection): p50 7.05, p95 9.70, p99 10.46, max 18.27 ms. Timed apart: game commit p50 1.97 / p99 3.59 ms; sink write p50 1.47 / p99 1.83 ms; projection p50 0.41 / p99 0.82 ms. Cold, the launch's first open (a new save): 7.46 / 7.37 / 7.22 ms. Restore of a played save, the launch's second open (modules already loaded, so not cold): 2.99 / 2.85 / 2.63 ms. [timing-phone.txt](timing-phone.txt); raw lines are `TIMING` in [p6run-phone-main.txt](p6run-phone-main.txt). |
+| 2 | Phone timing | **pass, reported** | Fix round 1 run (`r1`, [p6run-phone-r1.txt](p6run-phone-r1.txt), [timing-phone-r1.txt](timing-phone-r1.txt)): 300 warm NEW decisions, 6 launches; per launch 6 runs of 10 decisions alternating carry and leave, the first a warm-up and excluded. Decision (the P6a sink rows): p50 0.71, p95 1.86, p99 1.92 ms. The envelope §5 Tiny row (2/5/10) is for information only; the Lantern is Tiny-sized. End to end (admission + decision + commit + trace + sink + GameView projection): p50 6.83, p95 9.50, p99 10.04, max 10.63 ms. Timed apart: game commit p50 1.86 / p99 2.91 ms; sink write p50 1.38 / p99 1.97 ms; projection p50 0.39 / p99 0.84 ms. **Cold**, each the first open in a fresh process (killed and relaunched): a new save (time1-3) 7.36 / 7.73 / 7.62 ms; a restore of the played save carry2 left at revision 10 (time4-6) 3.32 / 3.55 / 3.55 ms. Second opens in the same process (not cold): restore 3.35 / 2.65 / 2.66, new 5.93 / 6.47 / 6.30 ms. The first run's figures ([timing-phone.txt](timing-phone.txt), [p6run-phone-main.txt](p6run-phone-main.txt), 150 decisions) agree; its restore was a second open, not cold (review P6B-1, F-2). |
 | 3 | Build facts | **pass** | Above. |
 | 4 | Both paths, save/restore | **pass** | carry and leave through `openStory` on expo-sqlite, killed after step 4 (`carry1`/`leave1` HOLD, `devicectl … terminate --kill`). After relaunch: revision 5 and 5 receipts, then steps 5-9 to revision 10 and 10 receipts. Every reply and state equals the Node bytes. Red control (planted): one byte of the bundled expected value of `carry2/lantern-carry[7] state` flipped (`"clock":21600` to `31600`). Result: `carry2 … mismatches=1` at exactly that step, with both byte strings ([p6run-phone-planted.txt](p6run-phone-planted.txt)). |
 | 5 | Node/Hermes bytes + sim sample | **pass** | 0 mismatches over 1,530 sim records (seeds 1-19, the largest N whose bundled data stays ≤ 2,000,000 bytes: 1,985,509) and every Lantern record. Each seed's start state bytes match. Red control (on-device mutant, [dev-mutant.diff](dev-mutant.diff), `rotl(s3, 11)` → `12` in `rng.ts`): `dusk … mismatches=6 checks_failed=1`, `rng_state` `[…,1791364731]` against `[…,3043166013]`, with the bytes ([p6run-phone-mutant.txt](p6run-phone-mutant.txt)). **Finding:** the mutant left all 19 sim seeds green. The known answers (`ka`) also stayed green. Neither the sampled sequences nor the known answers draw the RNG, so RNG parity on Hermes rests on the dusk row. |
@@ -50,18 +50,18 @@ through the driver's `redact` (`dev-drive-phone.sh.txt`).
 | 12 | SQLITE_CORRUPT on the phone | **pass** | S6a's recipe, byte 0 of the root page set to `0xff`, on `state_row`, `head` and `receipt` of `p6-corrupt-*.db`. Each gives `openStory` → `save_corrupt`, so expo-sqlite's text matched `corrupt()`. Red control: an undamaged copy of each opens. |
 | 13 | Airplane-mode resume | **owner-pending** | agent-device could not drive the phone (below), so the Control Center toggle was not possible. |
 | 14 | Input responsiveness | **owner-pending** | A temporary instrumented UI build ([dev-ui.diff](dev-ui.diff), [dev-ui.ts.txt](dev-ui.ts.txt): touch start → the first frame after the reply renders, plus a monitor for frame gaps over 100 ms) is ready. Taps on the phone need agent-device or the owner. A Simulator walk produced 28 feedback samples; a Simulator is not physical evidence (envelope §4), so they are not reported. True touch-to-photon latency: null. |
-| 15 | Hashes, redaction, failing runs kept | **pass** | `SHA256SUMS` and `SHA256SUMS.verify`; the folder is `-whitespace`; the planted and mutant runs and the first Simulator run (driver out of step after a failed launch, run on ddfc464) are kept. |
+| 15 | Hashes, redaction, failing runs kept | **pass** | `SHA256SUMS` and `SHA256SUMS.verify`; the folder is `-whitespace`; the planted and mutant runs and the first Simulator run (driver out of step after a failed launch, run on ddfc464) are kept. Fix round 1 (review P6B-2, P6B-3): both drivers count a phase done only from a run that began after the run file's length at launch, matched on that run's `P6RUN` id, so a retained log or done marker never counts; every printed and retained line passes `redact` (home, scratch paths, device, team, uppercase UUIDs such as container and simulator ids, the device's name), shared in [dev-common.sh.txt](dev-common.sh.txt). Red controls on made-up input ([dev-controls.sh.txt](dev-controls.sh.txt), [controls.txt](controls.txt)): an unchanged retained log is not done (the old rule counted it); each identifier kind is redacted. Removing the UUID rule, or reading the whole log instead of the lines after the mark, fails them. |
 
 **agent-device on the phone (inspected):** tried 3 times. Every time the phone showed "Enter
 iPhone Passcode for XCTest — Enable UI Automation", and the runner's snapshot timed out. This is
 an owner item. The Lantern touch walk and the UX notes ran on the Simulator instead:
 [ux-notes.md](ux-notes.md) (18 notes).
 
-**Owner saves (inspected):** the harness opens only `p6-*.db` (its `open` throws on other
-names), and the UI build's bundle contains no `loka-lantern.db` string. Before the clean
-reinstall and after it, `loka-save.db` and `loka-lantern.db` on the phone hashed `1710b653…` and
-`fb0b9878…`. These equal the copy taken before the first install. The final install is a clean
-Release build of a559ffd (this PR changes only docs). It was not launched. The harness's `p6-*`
+**Owner saves (inspected):** the harness touches only `p6-*` files (`open`, `remove`, `read` and
+`write` throw on other names), and the UI build's bundle contains no `loka-lantern.db` string. The
+full hashes are in [owner-saves.sha256](owner-saves.sha256): the copy before the first install,
+and the copies before the fix-round-1 install and after the final reinstall, all equal. The final
+install is a clean Release build of a559ffd (this PR changes only docs). It was not launched. The harness's `p6-*`
 files stay in the app's Documents; the app never opens them.
 
 ## Runbook
@@ -83,9 +83,10 @@ Faults come from a `Db` wrapper in the harness. No production module changed.
    [node-expected.json.gz](node-expected.json.gz), `gzip -dc`). Then it replays every phase on Node
    against the bytes: 0 failures.
 4. `npx expo prebuild --platform ios --no-install`, `pod install`, then a Release `xcodebuild`
-   (free team, automatic signing). Simulator first: `dev-drive-sim.sh.txt <sim> main <out>`
-   ([p6run-sim-main.txt](p6run-sim-main.txt), a dry run and not evidence). Then the phone:
-   `devicectl device install app`, and `dev-drive-phone.sh.txt <device> main <out> <phases…>`.
+   (free team, automatic signing). Simulator first: `DEV=<sim> dev-drive-sim.sh.txt <build> <out> <phases…>`
+   ([p6run-sim-r1.txt](p6run-sim-r1.txt), a dry run and not evidence). Then the phone:
+   `devicectl device install app`, and `DEV=<device> dev-drive-phone.sh.txt <build> <out> <phases…>`
+   (both source `dev-common.sh.txt` as `common.sh`; the first run used an earlier driver without the run-id rule).
    The driver launches each phase and polls the run file (bounded: 40 polls, about 120 s). On HOLD
    it copies `p6-<phase>.db` and `-journal` before the kill, then kills with
    `devicectl device process terminate --kill`. The `ERROR: Failed to retrieve …` lines are the copy of names
@@ -102,5 +103,9 @@ then spills its pages into the db file, so the kill leaves a synced (hot) journa
 file. Without the spill (the first Simulator dry run) the journal header stayed zeroed and the db
 file unchanged, which SQLite does not count as hot. **PM default, stated plainly:** this held
 transaction stands in for "a kill during COMMIT". A kill inside SQLite's own fsync cannot be aimed.
+
+**Carry (review, row 5): RNG parity.** Neither the 19 sim seeds nor the known answers draw the RNG,
+so RNG parity on Hermes rests on the dusk row. The rebuild for rows 13 and 14 replays
+`numeric-vectors.json` `rng_steps` on Hermes against the fixture literals.
 
 Hashes: `SHA256SUMS`, verified in `SHA256SUMS.verify`.
