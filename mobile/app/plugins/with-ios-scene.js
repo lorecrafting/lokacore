@@ -5,18 +5,26 @@ const { withAppDelegate, withInfoPlist } = require('expo/config-plugins');
 
 const CLASS = 'class AppDelegate: ExpoAppDelegate {';
 const PROVIDER = 'class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {';
-// The template's own window + startReactNative; the scene delegate does this instead.
-const WINDOW =
-  /\n#if os\(iOS\) \|\| os\(tvOS\)\n {4}window = UIWindow\(frame: UIScreen\.main\.bounds\)\n[\s\S]*?\n#endif\n/;
+// The template's own window + startReactNative, matched exactly; the scene delegate does this instead.
+const START = `
+#if os(iOS) || os(tvOS)
+    window = UIWindow(frame: UIScreen.main.bounds)
+    factory.startReactNative(
+      withModuleName: "main",
+      in: window,
+      launchOptions: launchOptions)
+#endif
+`;
 
 function patchAppDelegate(src) {
-  if (src.includes(PROVIDER)) return src;
-  if (!src.includes(CLASS) || !WINDOW.test(src)) {
+  const hasStart = src.includes(START);
+  if (src.includes(PROVIDER) && !hasStart) return src;
+  if (!src.includes(CLASS) || !hasStart) {
     throw new Error(
       'with-ios-scene: AppDelegate.swift no longer matches the Expo 57 template; update the plugin',
     );
   }
-  return src.replace(CLASS, PROVIDER).replace(WINDOW, '');
+  return src.replace(CLASS, PROVIDER).replace(START, '');
 }
 
 module.exports = (config) =>
