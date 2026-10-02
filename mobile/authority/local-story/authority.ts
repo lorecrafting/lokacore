@@ -54,7 +54,7 @@ const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
  * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent is a
  * conflict) before anything is resolved against the current world; a NEW one with a host view
- * token (`view:N`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
+ * token (`view:<run>:<revision>`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
  * metadata, 03 §14); else it is resolved, decided
  * once and committed before it is adopted. A fault discards its proposal and gets no receipt
  * (ADR-075 §4; 04 §5.2 step 7); a budget fault's limit is observed (trace.ts observe, 04 §5.4).
@@ -114,7 +114,8 @@ function narration(s: Story): NarrationRecord | undefined {
     : undefined;
 }
 
-const token = (s: Story) => `view:${s.revision}`;
+// The run is in it, so an old run's token is never current again after newGame.
+const token = (s: Story) => `view:${s.meta.run_id}:${s.revision}`;
 const stale = (s: Story, view?: string) => !!view?.startsWith('view:') && view !== token(s);
 const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
 const ids = (s: Story): RunIds => ({

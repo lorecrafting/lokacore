@@ -116,7 +116,7 @@ function processOn(path: string, binding?: () => string | null) {
   assert.equal(o.kind, 'open');
   return Object.assign(p, { story: o as Extract<typeof o, { kind: 'open' }> });
 }
-const revision = (p: Proc) => Number(p.story.token().slice('view:'.length));
+const revision = (p: Proc) => Number(p.story.token().split(':')[2]);
 
 /** A request as the ActionInvocation its GameView action makes; ids hashed from the fixture's. */
 function invocation(run: Run, r: Request) {
@@ -131,7 +131,9 @@ function invocation(run: Run, r: Request) {
     take: ['take', [LANTERN]],
     drop: ['drop', [LANTERN]],
   }[r.action] ?? [r.action, []];
-  const token = r.view && { view_freshness_token: r.view };
+  // The fixture's view:N is the host token of revision N of the current run.
+  const run_id = run.p.story.token().split(':')[1];
+  const token = r.view && { view_freshness_token: r.view.replace(':', `:${run_id}:`) };
   return { invocation_id: id, action_key, actor_id: fresh.character, target_ids, input, ...token };
 }
 
@@ -348,6 +350,23 @@ for (const { id } of traces)
       ],
     );
   });
+
+// Breaks (04 §16): a view token naming no run, so after a new game an old run's token is current
+// again once the new run reaches its revision, and a command made against that old view is decided.
+test("an old run's view token is stale after a new game, at the same revision", () => {
+  const run = begin();
+  act(run, { request: { id: 'accept', action: 'activate' } } as Step);
+  const old = run.p.story.token();
+  assert.deepEqual(run.p.story.newGame(), { kind: 'replaced' });
+  act(run, { request: { id: 'accept', action: 'activate' } } as Step);
+  assert.equal(revision(run.p), 1);
+  const north = { id: 'north', action: 'move', input: { direction: 'north' } };
+  const i = { ...invocation(run, north), view_freshness_token: old };
+  assert.deepEqual(run.p.story.invoke(i), { kind: 'stale_view' });
+  const now = { ...i, view_freshness_token: run.p.story.token() };
+  const moved = { kind: 'accepted', code: 'moved', revision: 2, delivery: 'new' };
+  assert.deepEqual(said(run.p, run.p.story.invoke(now)), moved);
+});
 
 // Breaks (adverse-cases.json `lantern`; 03 §§14-15, 04 §16, 06 §43): early possession not
 // credited; a choice resolved without its item or NPC present; the due-job drain skipped on wait;
