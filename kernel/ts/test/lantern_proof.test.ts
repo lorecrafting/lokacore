@@ -28,7 +28,7 @@ const load = () =>
 test('the known answer loads with its hash, as its hand-written value', () => {
   const loaded = load();
   assert.ok(loaded.ok, JSON.stringify(loaded));
-  assert.equal(loaded.hash, '3859042e3fd322ca7f7f924a67c7cf8af1c38c60edbe9a692ab34f6b17215581');
+  assert.equal(loaded.hash, '1b5b34e7accbb0145fa2c667bf85ae8165679d8a9171788facc8fc94437fcde8');
   assert.deepEqual(structuredClone(loaded.cartridge), kat.value);
 });
 
@@ -63,7 +63,7 @@ for (const [choice_id, plan] of [
   ['leave', 'party_led'],
 ] as const)
   // Breaks: a wrong exit, start time, role, fact value, hand-over, quest resolution, story point
-  // or landing variant, or Bram's talk still offered after the ending.
+  // landing variant or narration (key or bindings), or Bram's talk still offered after the ending.
   test(`the ${choice_id} ending plays as its trace`, () => {
     let w = play(
       world(),
@@ -99,6 +99,9 @@ for (const [choice_id, plan] of [
       ],
     );
     assert.equal(gameView(w).place.description.key, `room.landing.${plan}`);
+    assert.deepEqual(s.decision.kind === 'accepted' && s.decision.narration, [
+      { key: `proof.${choice_id}`, participants: { actor: w.body, bram, lantern } },
+    ]);
     assert.deepEqual(
       gameView(w)
         .entities.find((e) => e.id === bram)!
@@ -108,7 +111,8 @@ for (const [choice_id, plan] of [
     );
   });
 
-// Breaks: the gate unlocked or missing, the start time or Bram's evening hour wrong.
+// Breaks: the gate unlocked or missing, the start time or Bram's evening hour wrong, or the
+// landing's text placing Bram there after he has gone (the catalog text is the fixture's).
 test('at 06:00 the west gate is locked; at 19:00 Bram is on the green', () => {
   let w = world();
   assert.equal(w.state.clock, 6 * 3600);
@@ -123,5 +127,6 @@ test('at 06:00 the west gate is locked; at 19:00 Bram is on the green', () => {
   assert.ok(here(w, 'npc'));
   w = play(w, { type: 'wait', until: 19 * 3600 }, 'waited').world;
   assert.equal(here(w, 'npc'), undefined);
+  assert.doesNotMatch(kat.value.text[gameView(w).place.description.key], /Bram/);
   assert.ok(here(move(w, 'north'), 'npc'));
 });

@@ -20,7 +20,8 @@
       "calendar": 1,
       "fact": 1,
       "quest": 1,
-      "dialogue": 1
+      "dialogue": 1,
+      "schedule": 1
     },
     "client_features": []
   },

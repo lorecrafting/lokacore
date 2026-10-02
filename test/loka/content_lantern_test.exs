@@ -1,7 +1,8 @@
 defmodule Loka.ContentLanternTest do
   # The pre-release proof cartridge The Ferryman's Lantern (pre-release-proof.md, Concrete proof;
-  # R6P P3). The known answer is protocol/fixtures/cartridge_lantern_hash.json (Python, written by
-  # hand before the compiler ran); the walk of both endings is kernel/ts/test/lantern_proof.test.ts.
+  # R6P P3). The known answer is protocol/fixtures/cartridge_lantern_hash.json, written by
+  # test/loka/cartridge_lantern_hash.py (by hand, before the compiler ran); the walk of both
+  # endings is kernel/ts/test/lantern_proof.test.ts.
   use ExUnit.Case, async: true
 
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_lantern_hash.json"))
