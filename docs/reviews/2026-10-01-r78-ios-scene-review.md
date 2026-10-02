@@ -58,3 +58,14 @@ Input: the template already declares ExpoReactNativeFactoryProvider but retains 
 IOS-2 | should-fix | mobile/app/plugins/with-ios-scene.js:10
 Input: template drift moves reactNativeFactory = factory inside the anchored iOS conditional. Reproduced against the bundled Expo 57.0.24 template: prebuild accepts the input and silently deletes that assignment with the entire block. The generated Swift retains a nil factory, so EXExpoAppSceneDelegate hits its fatalError at launch. Match the expected startup block precisely and reject unexpected contents instead of deleting arbitrary code through #endif.
 ```
+## Fix round 1 re-check (Claude reviewer, scoped to `8c20ecf`)
+Plugin driven directly on the pristine Expo 57.0.24 template AppDelegate (generated without the plugin).
+- N1 / IOS-1 fixed, `with-ios-scene.js:20-21`: early return only when the conformance is present
+  and the start block absent. Planted half-patched file (conformance added, block kept) throws.
+- IOS-2 fixed, `with-ios-scene.js:9-17`: the start block is an exact literal; no wildcard deletion
+  remains. Planted `reactNativeFactory = factory` moved inside the block throws; block removed
+  without the conformance throws; class line changed throws.
+- Output on the template is byte-identical to the `dbbf122` output; patch(patch(x)) == patch(x).
+- Direct caller (`withAppDelegate` callback, export shape) unchanged.
+
+Verdict: APPROVE.
