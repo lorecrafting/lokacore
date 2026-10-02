@@ -57,7 +57,7 @@ function app(path: string) {
   const tap = (label: string) => press(screen().buttons.find((b) => b.label === label)!);
   /** Plays from a fresh game to Bram's choice. */
   const talk = () =>
-    ["Offer to fetch Bram's lantern", 'take a brass lantern', 'Talk Bram the ferryman'].map(tap);
+    ["Offer to fetch Bram's lantern", 'Take a brass lantern', 'Talk Bram the ferryman'].map(tap);
   // The smoke buttons never list `choose` (GameView omits the modal answers): built by hand.
   const leave = () => {
     const { continuation_id } = screen().view.choice!;

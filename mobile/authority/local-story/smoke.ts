@@ -12,6 +12,7 @@ import {
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import { openStory, type Host, type Reply } from './authority.ts';
 import { corrupt, type Db } from './store.ts';
+import { OUTCOME, reason } from './words.ts';
 
 export type { GameView };
 /**
@@ -103,22 +104,53 @@ function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   ];
 }
 
-// What one press answers: the narration or outcome of an accepted command, else the refusal.
+// What one press answers: the narration or the outcome's words (words.ts; none: '') of an accepted
+// command, else the refusal in words. Never a raw outcome code.
 function said(r: Reply, text: Say): string {
   if (r.kind === 'pending') return '(pending: not confirmed saved; press any button to retry it)';
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
   if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision as { kind: string; outcome?: string; narration?: { key: string }[] };
   if (d.kind === 'rejected')
-    return `You can't: ${(r.decision as { error: { code: string } }).error.code}`;
-  return d.narration?.map((t) => text(t.key)).join(' ') || d.outcome!;
+    return `You can't do that: ${reason((r.decision as { error: { code: string } }).error.code)}.`;
+  return d.narration?.map((t) => text(t.key)).join(' ') || (OUTCOME[d.outcome!] ?? '');
 }
 
-// A text key's words, and an action label's. ponytail: the cartridge has no text for action labels
-// yet, so a label shows the key's last word.
+// The log after a press's echo: its answer if it has words, then the new place's name or who came
+// or went. A look is a
+// read: its fresh page is the answer, so its echo goes too. ponytail: a look that settles a shown
+// pending leaves that pending line above (the status line's "save not confirmed" still clears).
+function answer(log: string[], reply: Reply, text: Say, comings: string[]) {
+  const line = said(reply, text);
+  const read =
+    reply.kind === 'saved' && (reply.decision as { outcome?: string }).outcome === 'looked';
+  if (read) log.pop();
+  else if (line) log.push(line);
+  log.push(...comings);
+}
+
+// After a move, the new place's name: its room log's heading. Else the NPCs that left or arrived
+// while the player stayed put. ponytail: inferred from the view; kernel schedule narration replaces it.
+function comings(was: GameView, now: GameView, text: Say): string[] {
+  if (was.place.id !== now.place.id) return [text(now.place.title.key)];
+  const gone = (a: GameView, b: GameView) =>
+    a.entities.filter((e) => e.kind === 'npc' && !b.entities.some((f) => f.id === e.id));
+  return [
+    ...gone(was, now).map((e) => `${text(e.name)} leaves.`),
+    ...gone(now, was).map((e) => `${text(e.name)} arrives.`),
+  ];
+}
+
+// A text key's words, and an action label's. ponytail: the cartridge has no text for most action
+// labels yet, so a label shows the key's last word, capitalised as the texted labels are.
 const sayers = (c: Cartridge): { text: Say; label: Say } => ({
   text: (key) => c.text[key as Key] ?? key,
-  label: (key) => c.text[key as Key] ?? key.replace(/^actions?\./, '').replaceAll('_', ' '),
+  label: (key) =>
+    c.text[key as Key] ??
+    key
+      .replace(/^actions?\./, '')
+      .replaceAll('_', ' ')
+      .replace(/^./, (a) => a.toUpperCase()),
 });
 
 function cartridgeOf(bundled: Bundled): Cartridge {
@@ -184,6 +216,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
     },
     press(b: Button): void {
       // While unconfirmed any press retries that attempt, whatever button it was.
+      const was = gameView(story.world()); // the view before, for who came or went
       retry ??= { label: b.label, invocation: invocationOf(b, ++sent, story.world().character) };
       log.push(`> ${retry.label}`);
       let reply: Reply;
@@ -197,7 +230,7 @@ export function openSmoke(db: Db, bundled: Bundled, newId: () => string, latency
       }
       fault = undefined;
       if (reply.kind !== 'pending') retry = undefined; // before said(): it may throw
-      log.push(said(reply, text));
+      answer(log, reply, text, comings(was, gameView(story.world()), text));
     },
     newGame: story.newGame,
   };

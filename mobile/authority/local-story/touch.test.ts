@@ -11,6 +11,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openSmoke, playSmoke } from './smoke.ts';
+import { reason } from './words.ts';
 
 const LANTERN = read('protocol/fixtures/cartridge_lantern_hash.json') as never;
 const CARRY = 'You keep the lantern. Bram nods once and points you down the bank.';
@@ -23,7 +24,7 @@ const FETCH = [
   'Go north',
   'Go east',
   'Go east',
-  'take a brass lantern',
+  'Take a brass lantern',
   'Go west',
   'Go west',
   'Go south',
@@ -53,7 +54,7 @@ const fresh = () => processOn(join(mkdtempSync(join(tmpdir(), 'loka-touch-')), '
 // press is refused; or a choice drawn without its Close (a trap, 06 §43).
 test('talk by day offers one button per choice and Close; carry narrates', () => {
   const a = fresh();
-  a.tap(...FETCH, 'Talk Bram the ferryman');
+  a.tap(...FETCH, 'Talk to Bram the ferryman');
   const { view, buttons } = a.screen();
   const continuation_id = view.choice!.continuation_id;
   assert.deepEqual(
@@ -81,7 +82,7 @@ test('a second press from the same screen is a stale view and changes nothing', 
   assert.equal(a.revision(), revision);
   assert.equal(a.screen().view.place.title.key, 'room.landing.title');
   assert.deepEqual(a.screen().log.slice(-3), [
-    'activated',
+    'You take on the task. It is in your journal.',
     '> Go north',
     'The page had changed; here it is again.',
   ]);
@@ -95,7 +96,7 @@ test('a reopen shows the last committed narration first; a fresh game none', () 
   const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
   const a = processOn(path);
   assert.deepEqual(a.screen().log, []);
-  a.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
   a.sql.close();
   assert.deepEqual(processOn(path).screen().log, [LEAVE]);
 });
@@ -105,7 +106,7 @@ test('a reopen shows the last committed narration first; a fresh game none', () 
 test('a corrupt narration receipt fails the reopen, with start over offered', () => {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
   const a = processOn(path);
-  a.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
   a.sql.exec(
     "UPDATE receipt SET response = '{' WHERE revision = (SELECT max(revision) FROM receipt)",
   );
@@ -125,7 +126,7 @@ test('a corrupt narration receipt fails the reopen, with start over offered', ()
 // plan or ends the quest), or a closed talk that cannot be opened again where Bram is.
 test('Bram gone at night: the choices say why, Close leaves the quest open, the green resolves it', () => {
   const a = fresh();
-  a.tap(...FETCH, 'Talk Bram the ferryman', 'Wait until 19:00');
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Wait until 19:00');
   assert.deepEqual(
     a.screen().view.choice!.choices.map((o) => [o.choice_id, o.available || o.reason.code]),
     [
@@ -142,7 +143,7 @@ test('Bram gone at night: the choices say why, Close leaves the quest open, the 
     ['active'],
   );
   assert.equal(text(view.place.description.key), PLAIN_LANDING); // search_plan unset
-  a.tap('Go north', 'Talk Bram the ferryman', 'Carry it along the bank');
+  a.tap('Go north', 'Talk to Bram the ferryman', 'Carry it along the bank');
   assert.equal(a.screen().log.at(-1), CARRY);
   assert.deepEqual(
     a.screen().view.journal.map((q) => q.state),
@@ -180,4 +181,76 @@ test('the waits run from the next whole hour to 23:00', () => {
   assert.deepEqual([waits[0]!.input, waits[16]!.input], [{ until: 25200 }, { until: 82800 }]);
   a.tap('Wait until 23:00');
   assert.deepEqual(a.screen().waits, []);
+});
+
+// Breaks (R6P Polish notes 1, 13): a raw outcome or refusal code in the log (`moved`,
+// `choice_opened`, "You can't: exit_locked"), a take with no answer, or a look that logs its echo.
+// A code is a lower-case word or has an underscore; story text has neither.
+const CODE = /^[a-z_]+$|[a-z]_[a-z]/;
+test('the log has story words, never a kernel code, across both endings', () => {
+  const a = fresh();
+  a.tap("Offer to fetch Bram's lantern", 'Go north', 'Go east', 'Go east');
+  const lantern = a.screen().view.entities.find((e) => e.kind === 'item')!.id;
+  const on = a.screen().buttons.filter((b) => b.target_ids.includes(lantern));
+  assert.deepEqual(
+    on.map((b) => b.label),
+    ['Take a brass lantern'],
+  );
+  a.tap('Take a brass lantern');
+  assert.equal(a.screen().log.at(-1), 'Taken.');
+  const look = a.find('Look');
+  const before = [...a.screen().log];
+  a.smoke.press(look);
+  assert.deepEqual(a.screen().log, before);
+  a.tap('Go west', 'Go west', 'Go south', 'Scan');
+  const locked = {
+    label: 'Go west',
+    action_key: 'move',
+    target_ids: [],
+    input: { direction: 'west' },
+  };
+  a.smoke.press(locked);
+  assert.equal(a.screen().log.at(-1), "You can't do that: locked.");
+  a.tap('Talk to Bram the ferryman', 'Wait until 19:00', 'Close', 'Go north');
+  a.tap('Talk to Bram the ferryman', 'Carry it along the bank');
+  const b = fresh();
+  b.tap(...FETCH, 'Talk to Bram the ferryman', 'Leave it with the search party');
+  const lines = [...a.screen().log, ...b.screen().log];
+  assert.deepEqual(
+    lines.filter((l) => CODE.test(l)),
+    [],
+  );
+  assert.ok(lines.includes(CARRY) && lines.includes(LEAVE));
+});
+
+// Breaks (note 3): items counted as comers (a dropped lantern "arrives"), or the diff run across a
+// place change (walking away from Bram logs "Bram the ferryman leaves").
+test('an NPC who leaves while you stay is logged, and nothing else', () => {
+  const a = fresh();
+  a.tap(...FETCH, 'Go north', 'Go south', 'Drop a brass lantern', 'Wait until 19:00');
+  assert.deepEqual(
+    a.screen().log.filter((l) => / (leaves|arrives)\.$/.test(l)),
+    ['Bram the ferryman leaves.'],
+  );
+});
+
+// Breaks (note 2, review F-2): a refusal code the Lantern reaches with no words, so a closed
+// answer reads "…: not present" or a refusal "…: invalid state". Each code is reached for real.
+test('closed answers and a stale answer give their reason in words, not their code', () => {
+  const a = fresh();
+  const spaced = (code: string) => code.replaceAll('_', ' ');
+  const closed = () =>
+    a.screen().view.choice!.choices.map((o) => (o.available ? '' : o.reason.code));
+  a.tap(...FETCH, 'Talk to Bram the ferryman', 'Drop a brass lantern');
+  const reached = closed();
+  const { continuation_id } = a.screen().view.choice!;
+  a.tap('Take a brass lantern', 'Wait until 19:00');
+  reached.push(...closed());
+  assert.deepEqual(reached, ['not_owned', 'not_owned', 'not_present', 'not_present']);
+  for (const code of reached) assert.notEqual(reason(code), spaced(code));
+  a.tap('Close');
+  const input = { choice_id: 'carry', continuation_id };
+  a.smoke.press({ label: 'Carry', action_key: 'choose', target_ids: [], input });
+  assert.match(a.screen().log.at(-1)!, /^You can't do that: /);
+  assert.ok(!a.screen().log.at(-1)!.includes(spaced('invalid_state')));
 });

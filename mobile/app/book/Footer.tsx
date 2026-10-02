@@ -3,39 +3,42 @@
 // to the middle to cancel; a tap opens the Map page. RN Animated and PanResponder only.
 import { useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from 'react-native';
+import Storage from 'expo-sqlite/kv-store';
 import type { GameView } from '../../authority/local-story/smoke.ts';
 import { gesture, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
-import { why } from './model.ts';
+import { hint, refused, why } from './model.ts';
 import { body, paper } from './paper.ts';
 
 type Props = {
   exits: readonly GameView['exits'][number][];
   text: (key: string) => string;
   go: (direction: string) => void; // walks to an open exit
+  refused: (line: string) => void; // a drag toward a closed exit: its line for the log
   openMap: () => void;
 };
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 const rule = { flex: 1, height: 1, backgroundColor: paper.line };
-// ponytail: session memory only: the tip shows again after the app restarts.
-let learned = false;
+// The tip shows until the first walk or map tap.
+const learned = hint(Storage, 'hint.learned');
 
 // A walk goes by the props it was offered on (`at`: a drag's start), never newer ones (04 §16).
 export function Footer(p: Props) {
   const [lit, setLit] = useState<string | null>(null);
   const [note, setNote] = useState(''); // a closed exit's reason, kept after release until the next press
-  const [tip, setTip] = useState(!learned);
+  const [tip, setTip] = useState(() => !learned.seen());
   const zoom = useRef(new Animated.Value(0)).current;
   const knob = useRef(new Animated.ValueXY()).current;
   const now = useRef(p);
   now.current = p;
-  const learn = () => ((learned = true), setTip(false)); // a walk or a tap that opens the map
+  const learn = () => (learned.see(), setTip(false)); // a walk, or a map tap
   const walk = (d: string | null, at: Props) => {
     const e = at.exits.find((x) => x.direction === d);
     if (e?.available) (at.go(e.direction), learn());
     else if (e) {
       const reason = why(e, at.text); // a screen reader hears it too
       (setNote(`${e.direction}: ${reason}`), AccessibilityInfo.announceForAccessibility(reason));
+      at.refused(refused(e, at.text));
     }
   };
   const openMap = () => (now.current.openMap(), learn());
