@@ -24,6 +24,11 @@ drive-sim-r3.log: OK
 hold1-before-relaunch/p6-hold1.db: OK
 hold1-before-relaunch/p6-hold1.db-journal: OK
 node-expected.json.gz: OK
+owner-rows/p6-ui-session1.txt: OK
+owner-rows/p6-ui-session2.txt: OK
+owner-rows/row13-after-relaunch.jpg: OK
+owner-rows/row13-before-kill.jpg: OK
+owner-rows/row13-saves.txt: OK
 owner-saves.sha256: OK
 p6run-phone-main.txt: OK
 p6run-phone-mutant.txt: OK

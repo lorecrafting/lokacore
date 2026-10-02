@@ -32,7 +32,7 @@ index 36d4002..d3149aa 100644
 +  );
  }
 diff --git a/mobile/app/book/Book.tsx b/mobile/app/book/Book.tsx
-index bb57435..a554239 100644
+index bb57435..83dde19 100644
 --- a/mobile/app/book/Book.tsx
 +++ b/mobile/app/book/Book.tsx
 @@ -1,6 +1,7 @@
@@ -40,7 +40,7 @@ index bb57435..a554239 100644
  // smoke controller (smoke.ts). Real data only: it draws what GameView projects and nothing else.
 -import { useState } from 'react';
 +import { useEffect, useState } from 'react';
-+import { pressDone, rendered } from '../p6/ui';
++import { pressDone, pressStart, rendered } from '../p6/ui';
  import { Pressable, SafeAreaView, Text, View } from 'react-native';
  import { useFonts } from 'expo-font';
  import { clock, type Button, type openSmoke } from '../../authority/local-story/smoke.ts';
@@ -52,11 +52,25 @@ index bb57435..a554239 100644
    if (!loaded && !fontError) return null;
  
    const screen = smoke.screen();
-@@ -46,6 +48,7 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
+@@ -44,8 +46,10 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
+     setFlip((f) => ({ turn: f.turn + 1, dir }));
+   };
    const press = (b: Button) => {
++    pressStart();
      const [placeId, logLength] = [view.place.id, screen.log.length];
      smoke.press(b);
 +    pressDone();
      if (smoke.screen().view.place.id !== placeId) setFrom(logLength);
      go([], 1);
    };
+diff --git a/mobile/app/metro.config.js b/mobile/app/metro.config.js
+index 4c24628..0ffcc46 100644
+--- a/mobile/app/metro.config.js
++++ b/mobile/app/metro.config.js
+@@ -7,5 +7,6 @@ config.watchFolders = [
+   path.resolve(__dirname, '..'),
+   path.resolve(__dirname, '../../kernel/ts/src'),
+   path.resolve(__dirname, '../../protocol/fixtures'),
++  path.resolve(__dirname, '../../docs/spec/conformance'),
+ ];
+ module.exports = config;
