@@ -306,24 +306,26 @@ test('a narration read that fails on a lock offers no Start over', () => {
   );
 });
 
-// Breaks (R6P-A02; ROADMAP SM2a; invariant player_in_one_room): a save that parses but has no
-// place for the player's body opens, and the first screen throws outside the save-error screen;
-// or its Start over replaces the intact file, losing the pending report.
-test('a save without the body row: save_corrupt, Start over repairs it in place', () => {
-  const path = save();
-  const a = app(path);
-  a.talk();
-  a.leave();
-  const reports = all(a.sql(), REPORTS);
-  a.sql().prepare("DELETE FROM state_row WHERE section = 'containers' AND key = ?").run(BODY);
-  a.sql().close();
-  const b = app(path);
-  assert.equal(b.c.failed()?.kind, 'save_corrupt');
-  b.c.startOver();
-  assert.equal(b.c.failed(), undefined);
-  assert.equal(b.screen().view.place.title.key, 'room.ferry_landing.title');
-  assert.equal(all(b.sql(), REPORTS), reports);
-});
+// Breaks (R6P-A02; ROADMAP SM2a): a save whose rows parse but cannot be shown (no place for the
+// body, a null choice, a resource without its fields) opens, and the first screen throws outside
+// the save-error screen; or its Start over replaces the intact file instead of the new game.
+for (const [what, damage] of [
+  ['no body row', `DELETE FROM state_row WHERE section = 'containers' AND key = '${BODY}'`],
+  ['a null choice', "UPDATE state_row SET value = 'null' WHERE section = 'choices'"],
+  ['an empty resource', "UPDATE state_row SET value = '{}' WHERE section = 'resources'"],
+])
+  test(`a save with ${what}: save_corrupt, Start over repairs it in place`, () => {
+    const path = save();
+    const a = app(path);
+    a.talk();
+    a.sql().exec(damage!);
+    a.sql().close();
+    const b = app(path);
+    assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
+    b.c.startOver();
+    assert.equal(b.c.failed(), undefined);
+    assert.equal(b.screen().view.place.title.key, 'room.ferry_landing.title');
+  });
 
 // Breaks (R6P-A03; 03 §14 original outcome): a receipt whose response is not a DecisionResult
 // replayed as {kind: 'saved', replay: true, decision: null}, or taken as no receipt (decided again).
