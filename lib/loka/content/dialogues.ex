@@ -11,10 +11,15 @@ defmodule Loka.Content.Dialogues do
   (DUPLICATE_DEFINITION); it has a choice (SCHEMA_VIOLATION too_few_items: the subset has no
   minProperties); each hand_over gives an item role to an npc role (else UNRESOLVED_REFERENCE);
   each fact.assign names a fact with a value of its type. Its policy tree is checked with every
-  other (`conditions/1`, `Loka.Content.Checks`).
+  other (`conditions/1`, `Loka.Content.Checks`). Each story point (cartridge.schema.json
+  StoryPointDefinition; 23 §3) requires dialogue@1 (by its story_point_reached) and has an
+  outcome (SCHEMA_VIOLATION too_few_items); each outcome's trigger names a dialogue of this
+  cartridge and one of its choices (UNRESOLVED_REFERENCE), a site no other outcome names
+  (DUPLICATE_DEFINITION), in a dialogue that resolves a quest, so its choice is made once
+  (OUTCOME_MISMATCH).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
-  import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6]
+  import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
 
   @doc "Each schema-valid dialogue's policy root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
@@ -41,7 +46,50 @@ defmodule Loka.Content.Dialogues do
       events: {caps, owners(registry, ["events"])}
     }
 
-    Enum.flat_map(all(defs), &dialogue(&1, ctx))
+    Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++ story_points(defs, ctx)
+  end
+
+  defp story_points(defs, ctx) do
+    points = for {_, {rel, [], p}} <- defs["story_point"], do: {rel, p}
+    sites = Enum.frequencies(for {_, p} <- points, {_, t} <- p["outcomes"], do: t)
+    Enum.flat_map(points, &story_point(&1, sites, ctx))
+  end
+
+  defp story_point({rel, p}, sites, ctx) do
+    empty = %{"error" => "too_few_items"}
+
+    none =
+      for true <- [p["outcomes"] == %{}],
+          do: diag("SCHEMA_VIOLATION", at(rel, ["outcomes"]), empty)
+
+    owned(at(rel, []), "story_point_reached", ctx.events) ++
+      none ++
+      Enum.flat_map(p["outcomes"], fn {o, t} ->
+        trigger(rel, ["outcomes", o], t, sites[t], ctx)
+      end)
+  end
+
+  # One outcome's trigger: a dialogue of this cartridge with a quest, one of its choices, and a
+  # site no other outcome names.
+  defp trigger(rel, steps, t, n, ctx) do
+    dup = if n > 1, do: [diag("DUPLICATE_DEFINITION", at(rel, steps))], else: []
+
+    dup ++
+      reference(rel, steps, "dialogue", t, ctx.m, ctx.defs) ++
+      case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
+        {_, _, d} ->
+          for {true, diag} <- [
+                {not is_map_key(d["choices"], t["choice"]),
+                 diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["choice"]), %{
+                   "target" => t["choice"]
+                 })},
+                {not is_map_key(d, "quest"), diag("OUTCOME_MISMATCH", at(rel, steps))}
+              ],
+              do: diag
+
+        _ ->
+          []
+      end
   end
 
   # The speakers of more than one dialogue.

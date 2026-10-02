@@ -305,6 +305,27 @@
           "additionalProperties": false
         },
         {
+          "description": "A story point the cartridge declares (cartridge.schema.json StoryPointDefinition) reached with one of its outcomes (23 §3), following choice_resolved in the root sequence of the decision that reached it; the host commits its pending report with that decision (23 §4, 03 §26).",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "story_point_reached"
+            },
+            "story_point": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "type",
+            "story_point",
+            "outcome"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "A fact changed from old to new (03 §7). subject_id is present exactly when the fact.assign that changed it had one.",
           "type": "object",
           "properties": {
@@ -487,6 +508,16 @@
           "type": "choice_resolved",
           "continuation_id": "44444444-5555-8666-8777-888888888888",
           "choice_id": "leave"
+        },
+        {
+          "type": "story_point_reached",
+          "story_point": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "story_point",
+            "key": "proof_terminal"
+          },
+          "outcome": "leave"
         },
         {
           "type": "fact_changed",

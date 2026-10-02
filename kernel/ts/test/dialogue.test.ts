@@ -1,5 +1,7 @@
-// dialogue@1 (Early R7/R8 D1; 06 §17, §33, §37, §43; 04 §5.3): talk, choose and close_choice, the
-// pending choice in the GameView, the opened_revision stamp, and the loader's dialogue checks.
+// size: allow 608, dialogue@1's rule and loader checks, story points included, share the ferry harness
+// dialogue@1 (Early R7/R8 D1, D2; 06 §17, §33, §37, §43; 04 §5.3; 23 §3): talk, choose and
+// close_choice, the pending choice in the GameView, the opened_revision stamp, the story point a
+// choice reaches, and the loader's dialogue and story point checks.
 // Worlds are the ferry known answer (protocol/fixtures/cartridge_ferry_hash.json: 06:00, the
 // player, Bram and the lantern at the landing; Bram to the green at 19:00; quest lantern with a
 // current_state has_item objective; Bram's dialogue, talk while the quest is active, roles bram
@@ -235,7 +237,8 @@ test("a room contribution may subtract a dialogue's talk", () => {
 });
 
 // Breaks: a consequence, the hand-over, the quest or the choice applied apart (21 §20, 04 §5.3),
-// resolution read after the transfer (quest_requirement), or narration re-resolved by name.
+// resolution read after the transfer (quest_requirement), or narration re-resolved by name; the
+// story point (23 §3) missing, of another outcome, or not last (its id minted before another's).
 test('leave hands the lantern to Bram, sets party_led and resolves quest and choice at once', () => {
   const { decision: d, world: w } = ok(talked(), choose('leave'), 4);
   const decision = JSON.parse(JSON.stringify(d)); // plain objects, as the literals below
@@ -272,9 +275,22 @@ test('leave hands the lantern to Bram, sets party_led and resolves quest and cho
     [2, 'fact_changed'],
     [3, 'quest_resolved'],
     [4, 'choice_resolved'],
+    [5, 'story_point_reached'],
   ]);
+  // IdSource ordinals under OTHER in Python hashlib: the rule mints 0-3 in emission order (the
+  // story point last), then the host its fact_changed (fact.ts factChanged), 4.
   assert.deepEqual(
-    [0, 2, 3].map((i) => decision.events[i]!.payload),
+    decision.events.map((e: { id: string }) => e.id),
+    [
+      '4fa65c39-f532-826c-ad99-19fc63e103cd',
+      '904c0c14-d8a7-8010-afd3-8ac607a3e5a1',
+      '6fa10ef7-a7f3-872b-ad50-6b1193bf75d5',
+      '0d013d13-0a92-89c3-965c-75d8ea4c4f08',
+      '7084fb06-0d81-8d3f-81c2-62fd46f06db2',
+    ],
+  );
+  assert.deepEqual(
+    [0, 2, 3, 4].map((i) => decision.events[i]!.payload),
     [
       { type: 'item_acquired', item_id: LANTERN, holder_id: BRAM },
       {
@@ -284,6 +300,11 @@ test('leave hands the lantern to Bram, sets party_led and resolves quest and cho
         outcome: 'leave',
       },
       { type: 'choice_resolved', continuation_id: C, choice_id: 'leave' },
+      {
+        type: 'story_point_reached',
+        story_point: ref('story_point', 'lantern_resolved'),
+        outcome: 'leave',
+      },
     ],
   );
   assert.deepEqual(decision.narration, [
@@ -296,6 +317,7 @@ test('leave hands the lantern to Bram, sets party_led and resolves quest and cho
   assert.equal(gameView(w).choice, undefined);
 });
 
+// Breaks: the story point's outcome taken from the first declared outcome, not the choice's.
 test('carry keeps the lantern, sets player_led and resolves with outcome carry', () => {
   const { decision, world: w } = ok(talked(), choose('carry'), 4);
   assert.equal(decision.outcome, 'carry');
@@ -308,17 +330,57 @@ test('carry keeps the lantern, sets player_led and resolves with outcome carry',
       ['choice.resolve', ''],
     ],
   );
+  assert.deepEqual(decision.events.at(-1)!.payload, {
+    type: 'story_point_reached',
+    story_point: ref('story_point', 'lantern_resolved'),
+    outcome: 'carry',
+  });
   assert.equal(w.state.containers[LANTERN], BODY);
   assert.equal(quest(w), 'resolved');
 });
 
-// Breaks (06 §37, §43): close mutating the outcome, or a re-talk reusing the closed occurrence.
+// Breaks (23 §3, Decision 8): the story point's outcome taken from the choice id rather than its
+// declared key, or emitted before choice_resolved when no fact change re-sorts the events.
+test('a story point reports its declared outcome key, after choice_resolved', () => {
+  const w = world((c) => {
+    delete bram(c).choices.carry.sequence;
+    const { outcomes } = point(c);
+    outcomes.kept = outcomes.carry;
+    delete outcomes.carry;
+  });
+  const t = ok(ok(ok(w, accept, 1, ACCEPT).world, take, 2, TAKE).world, talk, 3, TALK).world;
+  const { decision } = ok(t, choose('carry'), 4);
+  assert.deepEqual(events(decision), [
+    [1, 'quest_resolved'],
+    [2, 'choice_resolved'],
+    [3, 'story_point_reached'],
+  ]);
+  assert.deepEqual(decision.events[2]!.payload, {
+    type: 'story_point_reached',
+    story_point: ref('story_point', 'lantern_resolved'),
+    outcome: 'kept',
+  });
+});
+
+// Breaks (23 §3): a trigger matched on the choice alone, so a like-named choice of another
+// dialogue reaches the story point (the world is built past the loader, which needs the dialogue).
+test('a choice reaches only a story point naming its own dialogue', () => {
+  const w = talked();
+  const trigger = { dialogue: ref('dialogue', 'other'), choice: 'leave' };
+  const story_points = { [`${F}:story_point/x`]: { key: 'x', outcomes: { leave: trigger } } };
+  const other = { ...w, cartridge: { ...w.cartridge, story_points } } as unknown as World;
+  assert.deepEqual(events(ok(other, choose('leave'), 4).decision).at(-1), [4, 'choice_resolved']);
+});
+
+// Breaks (06 §37, §43): close mutating the outcome or reaching a story point, or a re-talk
+// reusing the closed occurrence.
 test('close changes no outcome; a second talk opens another occurrence', () => {
   const { decision, world: w } = ok(talked(), close(), 4);
   assert.equal(decision.outcome, 'choice_closed');
   assert.deepEqual(decision.delta.ops, [
     { op: 'choice.close', writer_group: 0, continuation_id: C },
   ]);
+  assert.deepEqual(decision.events, []);
   assert.equal(quest(w), 'active');
   assert.equal(ok(w, talk, 5, TALK2).decision.delta.ops[0]!.op, 'choice.open');
   assert.equal(gameView(ok(w, talk, 5, TALK2).world).choice?.continuation_id, C2);
@@ -492,6 +554,54 @@ test('the loader checks dialogue references, roles, texts, facts, keys and the l
     },
     'UNDECLARED_CAPABILITY',
     D,
+    { capability: 'dialogue' },
+    ['dialogue@1'],
+  );
+});
+
+const P = `.cartridge.story_points["${F}:story_point/lantern_resolved"]`;
+const point = (c: any) => c.story_points[`${F}:story_point/lantern_resolved`];
+
+// Breaks (23 §3: the loader admitting what the compiler rejects, test/loka/content_ferry_test.exs):
+// a trigger naming no dialogue or a choice it lacks, one choice feeding two outcomes (it would
+// emit twice), a dialogue without a quest (its choice repeatable), a story point with no outcome,
+// a story point loaded without dialogue@1, its event's owner, in the lock, or keyed apart from
+// its key (the map's kind story_point has an underscore).
+test('the loader checks story point triggers, outcomes, keys and the lock', () => {
+  fails((c) => (point(c).key = 'other'), 'ARTIFACT_DEFINITION_KEY_MISMATCH', P, {
+    field: 'key',
+    declared: 'lantern_resolved',
+    expected: 'other',
+  });
+  fails(
+    (c) => (point(c).outcomes.carry.dialogue = ref('dialogue', 'missing')),
+    'UNRESOLVED_REFERENCE',
+    `${P}.outcomes.carry.dialogue`,
+    { target: `${F}:dialogue/missing` },
+  );
+  fails(
+    (c) => (point(c).outcomes.carry.choice = 'wave'),
+    'UNRESOLVED_REFERENCE',
+    `${P}.outcomes.carry.choice`,
+    { target: 'wave' },
+  );
+  fails(
+    (c) => (point(c).outcomes.leave.choice = 'carry'),
+    'DUPLICATE_DEFINITION',
+    `${P}.outcomes.carry`,
+  );
+  fails((c) => delete bram(c).quest, 'OUTCOME_MISMATCH', `${P}.outcomes.carry`);
+  fails((c) => (point(c).outcomes = {}), 'SCHEMA_VIOLATION', `${P}.outcomes`, {
+    error: 'too_few_items',
+  });
+  fails(
+    (c) => {
+      delete c.dialogues;
+      delete c.manifest.requires.capabilities.dialogue;
+      delete c.lock.capabilities.dialogue;
+    },
+    'UNDECLARED_CAPABILITY',
+    P,
     { capability: 'dialogue' },
     ['dialogue@1'],
   );

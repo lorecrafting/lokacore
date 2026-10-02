@@ -360,12 +360,13 @@
     "implemented_in": "Early R7/R8 N a recipe narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   },
   "dialogue": {
-    "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14",
+    "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3",
     "contracts": [
       "DialogueDefinition",
       "DialogueRole",
       "DialogueChoice",
       "PendingChoice",
+      "StoryPointDefinition",
       "CommandPayload",
       "EventPayload",
       "DeltaOp",
@@ -387,6 +388,6 @@
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration"
+    "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report"
   }
 }

@@ -46,10 +46,13 @@ defmodule Loka.Content.Compiler do
       Dialogues.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
   end
 
-  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, an
+  # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, story points, an
   # entry, a calendar, a text catalog or resources.json (CompiledCartridge).
   defp v2(defs, {entry, calendar}, text, resources) do
-    if Enum.any?(~w(room item npc recipe barrier quest reaction dialogue), &(defs[&1] != %{})) or
+    if Enum.any?(
+         ~w(room item npc recipe barrier quest reaction dialogue story_point),
+         &(defs[&1] != %{})
+       ) or
          entry != nil or
          calendar != nil or text != nil or resources != [],
        do: {entry, text || %{}}
@@ -112,7 +115,8 @@ defmodule Loka.Content.Compiler do
     {"barrier", :barrier, "BarrierDefinition"},
     {"quest", :quest, "QuestDefinition"},
     {"reaction", :reaction, "ReactionRule"},
-    {"dialogue", :dialogue, "DialogueDefinition"}
+    {"dialogue", :dialogue, "DialogueDefinition"},
+    {"story_point", :story_point, "StoryPointDefinition"}
   ]
 
   defp definitions(files, m) do
@@ -264,24 +268,16 @@ defmodule Loka.Content.Compiler do
     }
   end
 
-  # items, npcs, recipes, barriers, quests, reactions and dialogues are optional maps (CompiledCartridge): absent when empty. The
+  # items, npcs, recipes, barriers, quests, reactions, dialogues and story points are optional maps (CompiledCartridge): absent when empty. The
   # default pools are always there, with resource@1 (Resources).
   defp cartridge(m, defs, {entry, text}) do
     m = Resources.requires(m)
 
     optional =
-      for {k, map} <- [
-            {"item", "items"},
-            {"npc", "npcs"},
-            {"recipe", "recipes"},
-            {"barrier", "barriers"},
-            {"quest", "quests"},
-            {"reaction", "reactions"},
-            {"dialogue", "dialogues"}
-          ],
+      for k <- ~w(item npc recipe barrier quest reaction dialogue story_point),
           defs[k] != %{},
           into: %{},
-          do: {map, keyed(m, k, defs)}
+          do: {k <> "s", keyed(m, k, defs)}
 
     cartridge(m, defs, nil)
     |> Map.merge(%{"format" => "loka-cartridge-v2", "rooms" => keyed(m, "room", defs)})

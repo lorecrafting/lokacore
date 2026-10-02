@@ -9,6 +9,7 @@ defmodule Loka.ContentFerryTest do
   @moduletag :tmp_dir
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_ferry_hash.json"))
   @src "cartridges/ashmere_ferry"
+  @point "story_points/lantern_resolved.json"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
   # ashmere_ferry's source with `files` merged over it (a nil file removed).
@@ -257,8 +258,10 @@ defmodule Loka.ContentFerryTest do
        }, d("UNDECLARED_CAPABILITY", at, %{"capability" => "dialogue"}, ["dialogue@1"])}
     ]
 
+    # Story points, which name bram, have their own test below.
     for {{files, diag}, n} <- Enum.with_index(cases) do
-      assert compile(Path.join(dir, "#{n}"), files) == {:error, [diag]}, inspect(diag)
+      assert compile(Path.join(dir, "#{n}"), Map.put(files, @point, nil)) == {:error, [diag]},
+             inspect(diag)
     end
 
     assert compile(Path.join(dir, "two"), dialogue(& &1, "dialogues/bram_two.json")) ==
@@ -267,5 +270,43 @@ defmodule Loka.ContentFerryTest do
                 d("DUPLICATE_DEFINITION", "dialogues/bram.npc", %{}),
                 d("DUPLICATE_DEFINITION", "dialogues/bram_two.npc", %{})
               ]}
+  end
+
+  # Breaks (23 §3: the compiler validates its trigger, outcome coverage and capability
+  # dependencies): the compiler admitting what the loader rejects (kernel/ts/test/dialogue.test.ts):
+  # a trigger naming no dialogue or a choice it lacks, one choice feeding two outcomes, a dialogue
+  # without a quest (its choice repeatable), a story point with no outcome, dialogue@1 not required.
+  test "the compiler checks story point triggers, outcomes and the lock", %{tmp_dir: dir} do
+    at = "story_points/lantern_resolved"
+    point = &%{@point => update_in(src(@point), ["outcomes"], &1)}
+    carry = &point.(fn o -> put_in(o, ["carry", &1], &2) end)
+    each = fn code -> for o <- ~w(carry leave), do: d(code, "#{at}.outcomes.#{o}", %{}) end
+    m = src("cartridge.json")
+
+    cases = [
+      {carry.("dialogue", "missing"),
+       [
+         d("UNRESOLVED_REFERENCE", at <> ".outcomes.carry.dialogue", %{
+           "target" => "ashmere_ferry@0.0.1:dialogue/missing"
+         })
+       ]},
+      {carry.("choice", "wave"),
+       [d("UNRESOLVED_REFERENCE", at <> ".outcomes.carry.choice", %{"target" => "wave"})]},
+      {point.(&put_in(&1, ~w(leave choice), "carry")), each.("DUPLICATE_DEFINITION")},
+      {dialogue(&Map.delete(&1, "quest")), each.("OUTCOME_MISMATCH")},
+      {point.(fn _ -> %{} end),
+       [d("SCHEMA_VIOLATION", at <> ".outcomes", %{"error" => "too_few_items"})]},
+      {%{
+         "cartridge.json" => update_in(m, ~w(requires capabilities), &Map.delete(&1, "dialogue"))
+       },
+       for(
+         p <- ["dialogues/bram", at],
+         do: d("UNDECLARED_CAPABILITY", p, %{"capability" => "dialogue"}, ["dialogue@1"])
+       )}
+    ]
+
+    for {{files, diags}, n} <- Enum.with_index(cases) do
+      assert compile(Path.join(dir, "#{n}"), files) == {:error, diags}, inspect(diags)
+    end
   end
 end

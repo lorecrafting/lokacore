@@ -289,7 +289,8 @@ export function questOf(
   ) as [QuestInstanceId, QuestRow] | undefined;
 }
 
-/** Own-key test and values for rule modules, which may not name Object (ts-rule-module-pure). */
+/** Own-key test, values and entries for rule modules, which may not name Object (ts-rule-module-pure). */
 export const has = (o: object, key: string): boolean => Object.hasOwn(o, key);
 export const values = <T>(o: Readonly<Record<string, T>>): T[] => Object.values(o);
 export const keys = (o: object): string[] => Object.keys(o);
+export const entries = <T>(o: Readonly<Record<string, T>>) => Object.entries(o) as [Key, T][];
