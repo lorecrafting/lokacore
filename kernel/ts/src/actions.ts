@@ -173,13 +173,16 @@ export const detailOf = (world: World, t: RecipeTarget): EntityId =>
  * resolves to that Command and accepts its target and input (unsupported_capability), or for
  * perform a key that names no recipe of the cartridge or for accept_quest a quest it does not
  * declare (not_found), or none that does is available, its policy failing (invalid_state). Each
- * policy leaf it evaluates adds one to the decision's `steps` (04 §5.4 query_steps).
+ * policy leaf it evaluates adds one to the decision's `steps` (04 §5.4 query_steps). Given the
+ * invoked `action`, only that action of the set is matched.
  */
-export function refusal(world: World, payload: CommandPayload, steps: Steps) {
+export function refusal(world: World, payload: CommandPayload, steps: Steps, action?: Key) {
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;
-  const matching = Object.values(resolved(world, actor)).filter((a) =>
-    perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload),
+  const matching = Object.values(resolved(world, actor)).filter(
+    (a) =>
+      (action === undefined || a.key === action) &&
+      (perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload)),
   );
   const unknown =
     (perform && !recipeKeys(world).includes(payload.action)) ||

@@ -22,7 +22,10 @@ export function attempt(world: World, scope: string, value: unknown, revision: n
   if (id.kind !== 'identified') return { world, result: id as Json };
   const { command_id } = id;
   const command = resolve(world, id);
-  const s = 'kind' in command ? { world, decision: command } : step(world, command, revision);
+  const s =
+    'kind' in command
+      ? { world, decision: command }
+      : step(world, command, revision, id.invocation.action_key);
   const d = s.decision;
   const decision =
     d.kind === 'accepted'

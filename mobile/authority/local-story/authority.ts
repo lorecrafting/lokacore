@@ -179,7 +179,7 @@ function invoke(s: Story, value: unknown): Reply {
   const next: ReturnType<typeof step> =
     'kind' in command
       ? { world: s.world, decision: command }
-      : step(s.world, command, s.revision + 1);
+      : step(s.world, command, s.revision + 1, i.action_key);
   const d = next.decision;
   // A rejection before a Command existed has no trace entry: TraceEntry needs the Command.
   const trace: Trace = (at, ...states) => {
