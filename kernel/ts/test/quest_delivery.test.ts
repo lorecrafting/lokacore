@@ -1,6 +1,6 @@
 // quest@1 delivery in the proposal (Early R7/R8 D1, carry a; 04 §5.2 steps 5-6; 06 §5, §43): a
-// queued event delivers to the quest instances it earns at its FIFO position, each its own writer
-// group, only to instances active before the decision and still active in the proposal so far.
+// queued event delivers to the quest instances it earned at its emission position (active there),
+// at its FIFO position, each its own writer group, only to those still active in the proposal so far.
 // Worlds are the errand known answer (protocol/fixtures/cartridge_errand_hash.json, quest lantern
 // made strict, post_activation_event) with an instance fact and one reaction added, re-hashed
 // with node:crypto over their canonical bytes. Writer groups and op order are hand-derived from
@@ -107,10 +107,11 @@ function root(w: World, ops: object[], events: [number, object][]) {
 const acquired = (w: World) => ({ type: 'item_acquired', item_id: lantern(w), holder_id: w.body });
 const groups = (d: any) => d.delta.ops.map((o: any) => [o.op, o.writer_group]);
 
-// Breaks: quest delivery folded at the root again (its group before the reaction's), delivery
-// crediting an instance this decision activated (the p.world half dropped), or delivery moving an
-// instance the root already resolved (the now half dropped: conflicting_write).
-test('quest delivery runs in FIFO order after the root, only to instances active before and now', () => {
+// Breaks: quest delivery folded at the root again (its group before the reaction's), eligibility
+// read before the decision (the acquisition at 2 of an instance activated at 1 not delivered),
+// an acquisition before the activation in the same sequence credited, or delivery moving an
+// instance the root already resolved (conflicting_write).
+test('quest delivery runs in FIFO order, to instances active at emission and still active', () => {
   const accepted = step(reacting(), cmd(reacting(), { type: 'accept_quest', quest: QUEST }), 1);
   const w = accepted.world;
   const fifo = root(w, [{ ...flag, expected: false, value: true }, handed(w)], [[2, acquired(w)]]);
@@ -133,7 +134,22 @@ test('quest delivery runs in FIFO order after the root, only to instances active
       [2, acquired(fresh)],
     ],
   );
-  assert.deepEqual(groups(both), [
+  // Delivered, its transition (group 1) conflicts with the root's activation (group 0) of the same
+  // row (compose: one writer group per target). Open question to the PM: fault, or widen the rule.
+  assert.deepEqual(both, {
+    kind: 'fault',
+    code: 'conflicting_write',
+    target: { kind: 'quest', instance_id: ID },
+  });
+  const early = root(
+    fresh,
+    [activate, handed(fresh)],
+    [
+      [1, acquired(fresh)],
+      [2, activated],
+    ],
+  );
+  assert.deepEqual(groups(early), [
     ['quest.activate', 0],
     ['entity.transfer', 0],
   ]);
@@ -178,5 +194,38 @@ test('a quest delivery counts toward the deliveries budget', () => {
   const flags = Array.from({ length: 1024 }, (_, i) => [i + 1, changed] as [number, object]);
   assert.equal(root(w, [], flags).kind, 'accepted');
   const over = root(w, [handed(w)], [...flags, [1025, acquired(w)]]);
+  assert.deepEqual([over.kind, over.code], ['fault', 'budget_exceeded']);
+});
+
+// Breaks (04 §5.2 step 5, §5.4): a delivery charged only when its instance is still active, or
+// eligibility read after the root's ops instead of at the event's position. Nine strict quests
+// active; the root resolves the lantern's. Resolved at 1, then 1024 acquisitions: 8 × 1024 = 8192
+// deliveries, the limit. An acquisition at 1 (all nine eligible), resolved at 2, then 1023 more:
+// 9 + 8 × 1023 = 8193, over it.
+test('every delivery eligible at emission counts toward the deliveries budget', () => {
+  const w0 = reacting((c) => {
+    for (let i = 1; i < 9; i++) c.quests[`${E}:quest/q${i}`] = { ...quest(c), key: `q${i}` };
+  });
+  const keys = ['lantern', ...Array.from({ length: 8 }, (_, i) => `q${i + 1}`)];
+  const w = keys.reduce((w, key, i) => {
+    const accept = {
+      ...cmd(w, { type: 'accept_quest', quest: ref('quest', key) }),
+      id: `${CMD.slice(0, -1)}${i}`,
+    };
+    return step(w, accept as Command, i + 1).world;
+  }, w0);
+  assert.equal(Object.values(w.state.quests!).filter((q) => q.state === 'active').length, 9);
+  const id = Object.keys(w.state.quests!).find((i) => w.state.quests![i]!.quest.key === 'lantern');
+  const t = { op: 'quest.transition', writer_group: 0, instance_id: id };
+  const resolve = [
+    { ...t, from: 'active', to: 'objectives_complete' },
+    { ...t, from: 'objectives_complete', to: 'resolved', outcome: 'carry' },
+  ];
+  const resolved_ = { type: 'quest_resolved', quest: QUEST, instance_id: id, outcome: 'carry' };
+  const acq = (from: number, n: number) =>
+    Array.from({ length: n }, (_, i) => [from + i, acquired(w)] as [number, object]);
+  const at = root(w, resolve, [[1, resolved_], ...acq(2, 1024)]);
+  assert.equal(at.kind, 'accepted', JSON.stringify(at.code));
+  const over = root(w, resolve, [[1, acquired(w)], [2, resolved_], ...acq(3, 1023)]);
   assert.deepEqual([over.kind, over.code], ['fault', 'budget_exceeded']);
 });
