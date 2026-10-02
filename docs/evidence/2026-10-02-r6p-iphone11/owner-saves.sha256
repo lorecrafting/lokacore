@@ -1,0 +1,19 @@
+# sha256 of the owner's saves (names only). pre: the copy taken before the first harness install (2026-10-02, fix round 0); before/after: copies taken before the fix-round-1 harness install and after the final clean reinstall. round2-before/round2-after: fix round 2, around its one-phase harness install. round3-before/round3-after: the P6BG-1 one-phase install. round4-before/round4-after: the owner rows 13/14 run.
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  pre/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  pre/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  before/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  before/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  after/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  after/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round2-before/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round2-before/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round2-after/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round2-after/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round3-before/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round3-before/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round3-after/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round3-after/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round4-before/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round4-before/loka-lantern.db
+1710b6536c1caca38fdfa899ff71691dd436b36e9dd6e0bedb9ce813527a2a20  round4-after/loka-save.db
+fb0b987829fb5b5bc94d0cb20b45f3f8af2a0e58d399442f9589b2d608dd023f  round4-after/loka-lantern.db

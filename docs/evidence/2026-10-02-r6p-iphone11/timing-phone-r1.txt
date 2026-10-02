@@ -1,0 +1,10 @@
+n warm = 300
+decision_ms    p50   0.710  p95   1.858  p99   1.918  max   2.000
+e2e_ms         p50   6.832  p95   9.499  p99  10.039  max  10.626
+projection_ms  p50   0.392  p95   0.566  p99   0.836  max   0.895
+commit_ms      p50   1.863  p95   2.680  p99   2.908  max   3.312
+sink_ms        p50   1.383  p95   1.605  p99   1.970  max   2.081
+open_new_cold    [7.36, 7.73, 7.62]
+restore_second   [3.35, 2.65, 2.66]
+restore_cold     [3.32, 3.55, 3.55]
+open_new_second  [5.93, 6.47, 6.3]

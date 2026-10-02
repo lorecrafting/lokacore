@@ -1,0 +1,6 @@
+PASS a retained log of another launch: not done
+PASS old rule counts the retained log (the defect)
+PASS this launch began, not finished: not done
+PASS this launch, another phase: not done
+PASS this launch finished: done
+PASS redact every identifier kind, keep lowercase game ids

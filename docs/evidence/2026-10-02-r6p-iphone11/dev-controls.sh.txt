@@ -1,0 +1,22 @@
+#!/bin/zsh
+# Red controls for the drivers' rules (common.sh), on controlled input with made-up identifiers.
+source ${0:a:h}/common.sh
+T=$(mktemp -d); fail=0
+function expect { if [[ "$2" == "$3" ]]; then echo "PASS $1"; else echo "FAIL $1: got [$2] want [$3]"; fail=1; fi; }
+# 1. Completion: only the launch given the nonce counts; any other line never does.
+print -l "P6RUN p6-1-nold carry2 begin build=main" "P6RUN p6-1-nold carry2 done records=13" "P6RUN p6-2 carry2 done records=13" > $T/run.txt
+expect "a retained log of another launch: not done" "$(done_line $T/run.txt beef01 carry2)" ""
+# The rule before this fix (any line naming the phase) counts that same retained log as done:
+expect "old rule counts the retained log (the defect)" "$(grep -c -E " carry2 (done|HOLD|ERROR)" $T/run.txt)" "2"
+print -l "P6RUN p6-3-nbeef01 carry2 begin build=main" >> $T/run.txt
+expect "this launch began, not finished: not done" "$(done_line $T/run.txt beef01 carry2)" ""
+print -l "P6RUN p6-3-nbeef01 carry1 done records=13" >> $T/run.txt
+expect "this launch, another phase: not done" "$(done_line $T/run.txt beef01 carry2)" ""
+print -l "P6RUN p6-3-nbeef01 carry2 done records=13" >> $T/run.txt
+expect "this launch finished: done" "$(done_line $T/run.txt beef01 carry2)" "P6RUN p6-3-nbeef01 carry2 done records=13"
+# 2. Redaction: each identifier kind is replaced (DEV and P6_TEAM made up here).
+DEV=00001111-000A1B2C3D4E5F60 P6_TEAM=ABCDE12345
+in="$HOME/x /private/tmp/claude-1/s/f.db /tmp/a.txt /var/folders/ab/T/x ERROR: Failed to retrieve Documents/SQLite/p6-carry1.db on 00001111-000A1B2C3D4E5F60 team ABCDE12345 container /Application/ABCDEF01-2345-4ABC-8DEF-0123456789AB/Documents sim FEDCBA98-7654-4321-8FED-CBA987654321 Jo Doe’s iPhone entity 0f5f2329-bcff-82f4-948a-3d22a75fb068"
+want="<home>/x <scratch> <scratch> <scratch> ERROR: Failed to retrieve Documents/SQLite/p6-carry1.db on <device> team <team> container /Application/<uuid>/Documents sim <uuid> <device-name> entity 0f5f2329-bcff-82f4-948a-3d22a75fb068"
+expect "redact every identifier kind, keep lowercase game ids" "$(print -r -- $in | redact)" "$want"
+rm -rf $T; exit $fail
