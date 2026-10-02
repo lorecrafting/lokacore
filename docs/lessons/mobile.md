@@ -45,10 +45,12 @@ Hard-won lessons for `mobile/` and physical-device runs.
   wrong function.
 
 **iOS simulator**
-- The iOS 27 simulator runtime refuses to launch the Expo 57 template app until the
-  prebuilt, gitignored `ios/` is patched locally to adopt the UIScene lifecycle; never
-  commit that patch. Physical-device Release builds of the unpatched template launched
-  (Gate R6).
+- iOS 27 crashes at launch (SIGTRAP, `NoSceneLifecycleAdoption`) unless the app adopts the
+  UIScene lifecycle. Expo 57 ships the scene delegate but its template does not wire it;
+  `mobile/app/plugins/with-ios-scene.js` does, at every prebuild. Never hand-patch `ios/`.
+- agent-device: its daemon keeps the environment it first started with; after setting
+  `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save; for a
+  fresh start, uninstall and reinstall the app.
 - `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
   edit that starts the app on that state; such shots are static and prove layout only,
   not navigation or gestures.
