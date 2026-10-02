@@ -95,9 +95,11 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
 
 /**
  * The latest committed narration in this story's receipts, shown again on reopen after a crash
- * before display (06 §43): read from storage, never memory; no acknowledgement is stored.
+ * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
+ * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
  */
 function narration(s: Story): NarrationRecord | undefined {
+  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
   const r = s.db.getFirstSync<{ command_id: string; lines: string }>(
     `SELECT command_id, response -> '$.narration' AS lines FROM receipt WHERE scope = ?
      AND json_array_length(response, '$.narration') > 0 ORDER BY revision DESC LIMIT 1`,

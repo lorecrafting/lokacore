@@ -174,7 +174,7 @@ const latest = (sql: DatabaseSync) => ({
 });
 
 // Breaks (06 §43; PM D2): the oldest narration instead of the latest, one read from memory
-// (none after a reopen), a replay that decides again or adds a receipt, or a narration kept
+// (none after a reopen), one read inside an open transaction, a replay that decides again or adds a receipt, or a narration kept
 // after a new game deleted the receipts.
 test('the latest committed narration is read again on reopen, from the receipts', () => {
   const path = save();
@@ -183,6 +183,9 @@ test('the latest committed narration is read again on reopen, from the receipts'
   a.sql.close();
   const b = processOn(path);
   assert.deepEqual(b.story.narration(), latest(b.sql));
+  b.sql.exec('BEGIN'); // as after a failed ROLLBACK: what it reads may be uncommitted
+  assert.equal(b.story.narration(), undefined);
+  b.sql.exec('ROLLBACK');
   const receipts = all(b.sql, RECEIPTS);
   assert.deepEqual(saved(send(b, 5, 'choose', [], input)), [true, 5]);
   assert.deepEqual(b.story.narration(), latest(b.sql));
