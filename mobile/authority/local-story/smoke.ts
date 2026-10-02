@@ -150,16 +150,10 @@ function invocationOf(b: Button, n: number, actor: string) {
 }
 
 // The log's start: the last committed narration again, so a reopen (a crash before display too)
-// shows it (06 §43). Its read may use a receipt index the open does not: a damaged one is said, and
-// play goes on to the press that finds it and offers start over (as before this read).
+// shows it (06 §43). A corrupt read throws, so the save does not open (and offers start over).
 function reread(story: { narration: () => NarrationRecord | undefined }, text: Say): string[] {
-  try {
-    const last = story.narration();
-    return last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
-  } catch (e) {
-    if (!corrupt(e)) throw e;
-    return [`(the last narration could not be read: ${(e as Error).message})`];
-  }
+  const last = story.narration();
+  return last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
 }
 
 /**

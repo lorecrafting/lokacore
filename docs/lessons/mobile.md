@@ -53,8 +53,9 @@ Hard-won lessons for `mobile/` and physical-device runs.
   fresh start, uninstall and reinstall the app.
 - The walk on a fresh dev build (the Lantern, Ferry Landing): `react-native dismiss-overlay`
   first (agent-device flags the dev warning overlay as covering part of the app), then
-  `press 'label="Got it"' --settle` (the map tip), `press 'label="Offer to fetch Bram's lantern"'
-  --settle`, `press 'label="Map"' --settle` and `press 'label="Go north"' --settle`; Talk is on
+  `press 'label="Got it"' --settle` (the map tip),
+  `press "label=\"Offer to fetch Bram's lantern\"" --settle`, `press 'label="Map"' --settle` and
+  `press 'label="Go north"' --settle`; Talk is on
   Bram's page (`press 'label="Bram the ferryman, open"'`), the choice's answers, Close and Wait on
   the room page. A selector with spaces is one shell argument, quotes inside. `scroll` does not
   move the book's pages (it reports no shift); a raw `swipe 200 600 200 250` does.

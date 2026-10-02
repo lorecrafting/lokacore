@@ -18,3 +18,55 @@ export function pick(dx: number, dy: number, exits: string[]): string | null {
   const d = Object.keys(ANGLE)[Math.round(degrees / 90) % 4];
   return exits.includes(d) ? d : null;
 }
+
+const TAP_MS = 500;
+/** What the footer's gesture drives: the props now, the walk and the drawing (Footer.tsx). */
+export type Ui<P> = {
+  now: { current: P };
+  walk: (direction: string | null, at: P) => void; // at: the props the drag began on
+  openMap: () => void;
+  setLit: (d: string | null) => void;
+  setNote: (s: string) => void;
+  zoom: (to: 0 | 1) => void;
+  knob: (x: number, y: number) => void;
+};
+
+/**
+ * The footer map's drag as PanResponder callbacks. Distances are in map units (drag px / ZOOM); a
+ * drag under 2.5 units is still a tap. A release walks on the props the drag began on, so a redraw
+ * meanwhile answers stale_view (04 §16) instead of pressing the new screen's button.
+ */
+export function gesture<P extends { exits: readonly { direction: string }[] }>(u: Ui<P>) {
+  const reset = () => (u.setLit(null), u.knob(0, 0), u.zoom(0));
+  let d = { t: 0, moved: false, pick: null as string | null, at: u.now.current };
+  return {
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderTerminationRequest: () => false,
+    onPanResponderGrant: () => {
+      d = { t: Date.now(), moved: false, pick: null, at: u.now.current };
+      u.setNote('');
+      u.zoom(1);
+    },
+    onPanResponderMove: (_: unknown, g: { dx: number; dy: number }) => {
+      const [dx, dy] = [g.dx / ZOOM, g.dy / ZOOM];
+      d.moved ||= Math.hypot(dx, dy) > 2.5;
+      if (!d.moved) return;
+      d.pick = pick(
+        dx,
+        dy,
+        d.at.exits.map((e) => e.direction),
+      );
+      u.setLit(d.pick);
+      const stair = d.pick && STAIR[d.pick];
+      const k = Math.min(1, 17 / (Math.hypot(dx, dy) || 1)); // the dot stays inside the map
+      if (stair) u.knob(stair[0] * ZOOM, stair[1] * ZOOM);
+      else u.knob(dx * k * ZOOM, dy * k * ZOOM);
+    },
+    onPanResponderRelease: () => {
+      if (!d.moved && Date.now() - d.t < TAP_MS) u.openMap();
+      else u.walk(d.pick, d.at);
+      reset();
+    },
+    onPanResponderTerminate: reset, // a stolen gesture walks nowhere
+  };
+}

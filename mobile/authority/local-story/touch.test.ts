@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openSmoke } from './smoke.ts';
+import { openSmoke, playSmoke } from './smoke.ts';
 
 const LANTERN = read('protocol/fixtures/cartridge_lantern_hash.json') as never;
 const CARRY = 'You keep the lantern. Bram nods once and points you down the bank.';
@@ -30,16 +30,16 @@ const FETCH = [
 ];
 
 type P = (string | number | null)[];
+const adapt = (sql: DatabaseSync) => ({
+  execSync: (s: string) => void sql.exec(s),
+  isInTransactionSync: () => sql.isTransaction,
+  runSync: (s: string, ...p: P) => sql.prepare(s).run(...p),
+  getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T | null,
+  getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
+});
 const processOn = (path: string) => {
   const sql = new DatabaseSync(path);
-  const db = {
-    execSync: (s: string) => void sql.exec(s),
-    isInTransactionSync: () => sql.isTransaction,
-    runSync: (s: string, ...p: P) => sql.prepare(s).run(...p),
-    getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T | null,
-    getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
-  };
-  const smoke = openSmoke(db, LANTERN, randomUUID);
+  const smoke = openSmoke(adapt(sql), LANTERN, randomUUID);
   const screen = () => smoke.screen();
   const find = (label: string, from = screen()) =>
     [...from.buttons, ...from.waits].find((b) => b.label === label) ?? assert.fail(label);
@@ -98,6 +98,27 @@ test('a reopen shows the last committed narration first; a fresh game none', () 
   a.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
   a.sql.close();
   assert.deepEqual(processOn(path).screen().log, [LEAVE]);
+});
+
+// Breaks (03 §15, OFF-07): a reopen that swallows a corrupt narration receipt (SQLite's "malformed
+// JSON") and plays on over it, so the damage is never shown and no start over is offered.
+test('a corrupt narration receipt fails the reopen, with start over offered', () => {
+  const path = join(mkdtempSync(join(tmpdir(), 'loka-touch-')), 'save.db');
+  const a = processOn(path);
+  a.tap(...FETCH, 'Talk Bram the ferryman', 'Leave it with the search party');
+  a.sql.exec(
+    "UPDATE receipt SET response = '{' WHERE revision = (SELECT max(revision) FROM receipt)",
+  );
+  a.sql.close();
+  const c = playSmoke(
+    () => adapt(new DatabaseSync(path)),
+    () => {},
+    LANTERN,
+    randomUUID,
+  );
+  assert.equal(c.game(), undefined);
+  assert.match(c.failed()!.message, /malformed JSON/);
+  assert.equal(c.failed()!.replace, true);
 });
 
 // Breaks (06 §43, :1402): a choice that blocks Wait, a Close that changes the outcome (sets the
