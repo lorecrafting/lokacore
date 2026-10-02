@@ -1,10 +1,10 @@
 // Story point capture and delayed delivery (03 §26; 23 §§3-5, §11; pre-release-proof P2/P6) on Node
 // with real SQLite (node:sqlite) in the phone's rollback journal (no WAL), one connection per
-// simulated process, as local_story.test.ts. The story point is the bell known answer's ring_bell
-// recipe emitting the custom event bell_rung (protocol/fixtures/cartridge_bell_hash.json;
-// kernel/ts/test/checks.test.ts for its ids). The platform is a fake (the network is external): it
-// keeps one acceptance per report id. Expected values are hand-written literals, never from the
-// code under test.
+// simulated process, as local_story.test.ts. The story point is the ferry known answer's
+// lantern_resolved, reached by choosing at Bram's dialogue (protocol/fixtures/cartridge_ferry_hash.json;
+// ids from local_story.test.ts, Python hashlib). The platform is a fake (the network is
+// external): it keeps one acceptance per report id. Expected values are hand-written literals,
+// never from the code under test.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
@@ -22,10 +22,10 @@ import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { INSTALLED } from '../../../kernel/ts/src/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openStory } from './authority.ts';
+import { openStory, type Saved } from './authority.ts';
 import { deliver } from './progress.ts';
 
-const kat = read('protocol/fixtures/cartridge_bell_hash.json');
+const kat = read('protocol/fixtures/cartridge_ferry_hash.json');
 /** The cartridge whose canonical text is `canonical`, fresh, with its content hash. */
 const story = (canonical: string, hash: string) => {
   const artifact = `{"cartridge":${canonical},"content_hash":"${hash}"}`;
@@ -35,38 +35,18 @@ const story = (canonical: string, hash: string) => {
   const rng = [1, 2, 3, 4] as unknown as RngState;
   return { fresh: newWorld(loaded.cartridge as Cartridge, context, rng), hash };
 };
-const bell = story(kat.canonical, kat.sha256);
-const sorted = (v: any): any =>
-  Array.isArray(v)
-    ? v.map(sorted)
-    : v && typeof v === 'object'
-      ? Object.fromEntries(
-          Object.keys(v)
-            .sort()
-            .map((k) => [k, sorted(v[k])]),
-        )
-      : v;
-// The bell plus toll_bell, a second recipe on the bell that only emits bell_tolled, re-hashed with
-// node:crypto over sorted-key JSON.stringify (as kernel/ts/test/checks.test.ts).
-const tolled = (() => {
+const ferry = story(kat.canonical, kat.sha256);
+// The ferry without its story point, re-hashed with node:crypto.
+const undeclared = (() => {
   const c = structuredClone(kat.value);
-  const ring = c.recipes['ashmere_bell@0.0.1:recipe/ring_bell'];
-  const success = {
-    ...ring.outcomes.success,
-    sequence: [{ op: 'event.emit', event: 'bell_tolled' }],
-  };
-  const toll = { ...ring, key: 'toll_bell', aliases: ['toll'], outcomes: { success } };
-  c.recipes['ashmere_bell@0.0.1:recipe/toll_bell'] = toll;
-  const text = JSON.stringify(sorted(c));
+  delete c.story_points;
+  const text = encode(c);
   return story(text, createHash('sha256').update(text).digest('hex'));
 })();
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
-const BELL = '953a909b-3a29-8c5c-9e3f-4105b9a47c4b';
-const HASH = '99e59f482cc655fdc4db353b90963cceb78ad23157239cec41d27410bfabe1ed'; // the fixture's
-const STORY_POINTS = new Map([
-  ['bell_rung', { story_point: 'bell_heard', outcome: 'rung' }],
-  ['bell_tolled', { story_point: 'bell_tolled', outcome: 'tolled' }],
-]);
+const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
+const LANTERN = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
+const HASH = '7a7381f7e810bb6bf3ab15c83429da497db0011d50b7f447a7329fab4f59ba5f'; // the fixture's
 const [A, B, C] = ['a', 'b', 'c'].map((x) => `${x.repeat(8)}-1111-4222-8333-444444444444`);
 /** The n-th id a test's allocator hands out. */
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -81,8 +61,7 @@ type Options = {
   newId?: () => string;
   tap?: Tap;
   binding?: () => string | null;
-  story_points?: typeof STORY_POINTS;
-  on?: typeof bell;
+  on?: typeof ferry;
 };
 /** A process on the save at `path`: one connection, expo-sqlite's sync names, `tap` faults. */
 function processOn(path: string, { newId = none, tap = (_, run) => run(), ...o }: Options = {}) {
@@ -95,11 +74,10 @@ function processOn(path: string, { newId = none, tap = (_, run) => run(), ...o }
     getAllSync: <T>(s: string, ...p: P) => tap(s, () => sql.prepare(s).all(...p)) as T[],
     isInTransactionSync: () => sql.isTransaction,
   };
-  const { fresh, hash } = o.on ?? bell;
+  const { fresh, hash } = o.on ?? ferry;
   const host = { kernel_version: `loka-kernel@${'0'.repeat(40)}`, newId };
-  const story_points = o.story_points ?? STORY_POINTS;
   const binding = o.binding ?? (() => A);
-  const opened = openStory(db, [{ content_hash: hash, fresh }], { ...host, story_points, binding });
+  const opened = openStory(db, [{ content_hash: hash, fresh }], { ...host, binding });
   assert.equal(opened.kind, 'open');
   const story = opened as Extract<typeof opened, { kind: 'open' }>;
   const all = (q: string) =>
@@ -110,13 +88,27 @@ function processOn(path: string, { newId = none, tap = (_, run) => run(), ...o }
   return { sql, db, story, all };
 }
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-s5-')), 'save.db');
-const ring = (n = 1, action_key = 'ring_bell') => ({
-  invocation_id: `00000000-0000-4000-8000-00000000000${n}`,
+const invocation = (n: number, action_key: string, target_ids: string[], input = {}) => ({
+  invocation_id: `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`,
   action_key,
   actor_id: ACTOR,
-  target_ids: [BELL],
-  input: {},
+  target_ids,
+  input,
 });
+/**
+ * Accepts the lantern quest, takes the lantern and talks to Bram (revisions 1-3, invocations
+ * 1-3), then returns the choose of leave (invocation 4), which reaches the story point at
+ * revision 4: invoke it to reach it.
+ */
+function talked(p: ReturnType<typeof processOn>) {
+  p.story.invoke(invocation(1, 'lantern', []));
+  p.story.invoke(invocation(2, 'take', [LANTERN]));
+  const talk = p.story.invoke(invocation(3, 'bram', [BRAM])) as Saved;
+  const [op] = (talk.decision as { delta: { ops: { continuation_id: string }[] } }).delta.ops;
+  return invocation(4, 'choose', [], { choice_id: 'leave', continuation_id: op!.continuation_id });
+}
+/** Reaches the story point in `p`'s current run; returns its reply. */
+const reach = (p: ReturnType<typeof processOn>) => p.story.invoke(talked(p));
 const saved = (r: unknown) => [
   (r as { replay: boolean }).replay,
   (r as { revision: number }).revision,
@@ -125,9 +117,9 @@ const REPORTS = 'SELECT report_id, lineage_id, binding, report, disposition FROM
 const count = (p: ReturnType<typeof processOn>, t: string) =>
   p.all(`SELECT count(*) FROM ${t}`)[0]![0];
 const sha256 = (text: string) => createHash('sha256').update(text).digest('hex');
-/** The canonical StoryPointReport of the bell rung at revision 1 in run `run`, report `report`. */
+/** The canonical StoryPointReport of leave chosen at revision 4 in run `run`, report `report`. */
 const payload = (report: string, run: string) =>
-  `{"observed_revision":1,"outcome":"rung","release":{"cartridge_hash":"${HASH}","cartridge_id":"ashmere_bell","cartridge_version":"0.0.1"},"report_id":"${report}","run_id":"${run}","story_point":"bell_heard"}`;
+  `{"observed_revision":4,"outcome":"leave","release":{"cartridge_hash":"${HASH}","cartridge_id":"ashmere_ferry","cartridge_version":"0.0.1"},"report_id":"${report}","run_id":"${run}","story_point":"lantern_resolved"}`;
 
 /** The fake platform: one acceptance per report id, its `result`; `lose` drops the next reply. */
 function platform(result = 'accepted') {
@@ -165,7 +157,7 @@ function platform(result = 'accepted') {
   return Object.assign(f, { submit });
 }
 
-// Breaks (23 §§4-5, 03 §26; pins 1, 3, 8): no report for a committed custom_event story point; a
+// Breaks (23 §§3-5, 03 §26; pins 1, 3, 8): no report for a committed story_point_reached; a
 // report missing its run, release, outcome or revision; its id minted again on restart, replay or
 // delivery (newId is `none` after the capture); a receipt replay adding a second report; the
 // binding read when the story point is reached or at delivery instead of the run's (bound at the
@@ -175,14 +167,15 @@ test('a story point reached offline is captured once, survives restart, and is d
   let who: string | null = A;
   const a = processOn(path, { newId: ids(), binding: () => who });
   who = B;
-  assert.deepEqual(saved(a.story.invoke(ring())), [false, 1]);
+  const leave = talked(a);
+  assert.deepEqual(saved(a.story.invoke(leave)), [false, 4]);
   who = C;
   const pending = [id(3), id(1), A, payload(id(3), id(2)), 'pending'];
   assert.deepEqual(a.all(REPORTS), [pending]);
   assert.deepEqual(validate('StoryPointReport', JSON.parse(payload(id(3), id(2)))), []);
   a.sql.close();
   const b = processOn(path, { binding: () => who });
-  assert.deepEqual(saved(b.story.invoke(ring())), [true, 1]);
+  assert.deepEqual(saved(b.story.invoke(leave)), [true, 4]);
   assert.deepEqual(b.all(REPORTS), [pending]);
   const fake = platform();
   await deliver(b.db, fake.submit, 10);
@@ -190,53 +183,72 @@ test('a story point reached offline is captured once, survives restart, and is d
   assert.deepEqual(b.all(REPORTS), [[...pending.slice(0, 4), 'accepted']]);
 });
 
-// Breaks (23 §§4-5, §11; 10 §31 as amended; A-R1): the binding read per story point, so one run's
-// two story points, reached either side of a profile switch, go to two accounts; a new game's run not
-// bound to the profile signed in when it starts.
+// Breaks (23 §§4-5, §11; 10 §31 as amended; A-R1): the binding read when the story point is
+// reached, so a report reached after a profile switch goes to the new account; a new game's run
+// not bound to the profile signed in when it starts. (One story point per run: a dialogue
+// trigger resolves a quest, so it is reached once.)
 test('a run is bound once, when it starts; each of its reports carries that binding', async () => {
   let who: string | null = A;
-  const p = processOn(save(), { newId: ids(), binding: () => who, on: tolled });
+  const p = processOn(save(), { newId: ids(), binding: () => who });
   who = B;
-  assert.deepEqual(saved(p.story.invoke(ring(1, 'toll_bell'))), [false, 1]);
+  assert.deepEqual(saved(reach(p)), [false, 4]);
   who = C;
-  assert.deepEqual(saved(p.story.invoke(ring(2))), [false, 2]);
   assert.deepEqual(p.story.newGame(), { kind: 'replaced' });
   who = null;
-  p.story.invoke(ring(1));
+  assert.deepEqual(saved(reach(p)), [false, 4]);
   const fake = platform();
   await deliver(p.db, fake.submit, 10);
   assert.deepEqual(fake.calls, [
     [id(3), A],
-    [id(4), A],
-    [id(7), C],
+    [id(6), C],
   ]);
 });
 
-// Breaks (N-1): a report that is not a StoryPointReport (here an outcome that is no Key) stored,
-// or the gameplay committed without it.
+// Breaks (N-1): a report that is not a StoryPointReport (here a host report id that is no UUID)
+// stored, or the gameplay committed without it.
 test('a story point whose report is malformed is not committed', () => {
-  const story_points = new Map([['bell_rung', { story_point: 'bell_heard', outcome: 'Rung!' }]]);
-  const p = processOn(save(), { newId: ids(), story_points });
-  assert.throws(() => p.story.invoke(ring()), /not a StoryPointReport/);
-  assert.deepEqual([count(p, 'receipt'), count(p, 'report')], [0, 0]);
+  let n = 0;
+  const p = processOn(save(), { newId: () => (++n === 3 ? 'x' : id(n)) });
+  const leave = talked(p);
+  assert.throws(() => p.story.invoke(leave), /not a StoryPointReport/);
+  assert.deepEqual([count(p, 'receipt'), count(p, 'report')], [3, 0]);
+  assert.deepEqual(p.all('SELECT revision FROM head'), [[3]]);
 });
 
+// The canonical state after leave (hand-written): the resolved choice (its id IdSource ordinal 0
+// of the talk's CommandId, Python hashlib, under lineage id(1)), the lantern with Bram, both at
+// the landing (FERRY, rooms in ref order), search_plan party_led, Bram's job J0 (local_story.test.ts),
+// the resolved quest (ordinal 0 of the accept's CommandId), the body's resources at their starts
+// and the clock and RNG unchanged.
+const F = '{"cartridge_id":"ashmere_ferry","cartridge_version":"0.0.1"';
+const [BODY, FERRY] = [
+  '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  '1a7c3699-2844-8a55-b29f-eac079c7bf50',
+];
+const actor = `{"character_id":"${ACTOR}","kind":"player"}`;
+const fact = JSON.stringify(
+  `{"fact":${F},"key":"search_plan","kind":"fact"},"kind":"fact","scope":${actor}}`,
+);
+const pool = (k: string, value: number) =>
+  `${JSON.stringify(`{"entity_id":"${BODY}","kind":"resource","resource":${F},"key":"${k}","kind":"resource"}}`)}:{"at":21600,"value":${value}}`;
+const left =
+  `{"choices":{"deebda55-a096-81d4-8dc7-c3da0be03df3":{"actor_id":"${ACTOR}","beat":"bram","choice_id":"leave","choice_ids":["carry","leave"],"opened_revision":3,` +
+  `"roles":[{"entity_id":"${BRAM}","role":"bram"},{"entity_id":"${LANTERN}","role":"lantern"}],"source":${F},"key":"bram","kind":"dialogue"},"status":"resolved"}},` +
+  `"clock":21600,"containers":{"${BODY}":"${FERRY}","${LANTERN}":"${BRAM}","${BRAM}":"${FERRY}"},"facts":{${fact}:"party_led"},` +
+  `"jobs":{"0f5f2329-bcff-82f4-948a-3d22a75fb068":{"due_time":68400,"job":${F},"key":"bram","kind":"npc"},"status":"pending"}},` +
+  `"quests":{"29951759-b12b-8e58-8c87-0ef0ba49ec00":{"outcome":"leave","quest":${F},"key":"lantern","kind":"quest"},"scope":${actor},"state":"resolved"}},` +
+  `"resources":{${pool('hp', 20)},${pool('ma', 100)},${pool('mv', 82)}},"rng":[1,2,3,4]}`;
+
 // Breaks (23 §4, 03 §26; pin 4): a report or binding stored in state_row (or otherwise loaded into
-// the world), changing the canonical state hash; a report for an event key the host did not map. Expected: sha256 of the hand-written state after
-// the ring (the bell's fact set; clock and RNG unchanged).
+// the world), changing the canonical state hash; a report for a cartridge that declares no story
+// point. Expected: sha256 of the hand-written state after leave (below).
 test('a pending report leaves the canonical state hash unchanged', () => {
-  // The fact's row key is its MutationTarget (the bell's fact, instance scope), canonical JSON.
-  const fact = `{"fact":{"cartridge_id":"ashmere_bell","cartridge_version":"0.0.1","key":"chapel_bell_rung","kind":"fact"},"kind":"fact","scope":{"kind":"instance","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"}}`;
-  const rung = `{"clock":0,"containers":{"3d4829ad-9e43-81ef-bc10-66b1b267e157":"1a7c3699-2844-8a55-b29f-eac079c7bf50"},"facts":{${JSON.stringify(fact)}:true},"rng":[1,2,3,4]}`;
-  const expected = createHash('sha256').update(rung).digest('hex');
-  for (const off of [false, true]) {
+  const expected = createHash('sha256').update(left).digest('hex');
+  for (const on of [ferry, undeclared]) {
     const path = save();
-    const story_points = off
-      ? new Map([['bell_tolled', STORY_POINTS.get('bell_tolled')!]])
-      : undefined;
-    processOn(path, { newId: ids(), ...(story_points && { story_points }) }).story.invoke(ring());
-    const b = processOn(path);
-    assert.equal(count(b, 'report'), off ? 0 : 1);
+    reach(processOn(path, { newId: ids(), on }));
+    const b = processOn(path, { on });
+    assert.equal(count(b, 'report'), on === ferry ? 1 : 0);
     assert.equal(hash(b.story.world().state as never), expected);
   }
 });
@@ -271,17 +283,19 @@ const lostAck = () => {
 test('a report commits with its gameplay result or not at all', () => {
   for (const table of ['receipt', 'report']) {
     const p = processOn(save(), { newId: ids() });
+    const leave = talked(p);
     p.sql.exec(failCommit(`INSERT ON ${table}`));
-    assert.throws(() => p.story.invoke(ring()), /nothing was saved/, table);
-    assert.deepEqual(p.all('SELECT revision FROM head'), [[0]], table);
-    assert.deepEqual([count(p, 'receipt'), count(p, 'report')], [0, 0], table);
+    assert.throws(() => p.story.invoke(leave), /nothing was saved/, table);
+    assert.deepEqual(p.all('SELECT revision FROM head'), [[3]], table);
+    assert.deepEqual([count(p, 'receipt'), count(p, 'report')], [3, 0], table);
   }
   const { tap, arm } = lostAck();
   const p = processOn(save(), { newId: ids(), tap });
+  const leave = talked(p);
   arm();
-  assert.deepEqual(p.story.invoke(ring()), { kind: 'pending' });
-  assert.deepEqual(saved(p.story.invoke(ring())), [true, 1]);
-  assert.deepEqual(saved(p.story.invoke(ring())), [true, 1]);
+  assert.deepEqual(p.story.invoke(leave), { kind: 'pending' });
+  assert.deepEqual(saved(p.story.invoke(leave)), [true, 4]);
+  assert.deepEqual(saved(p.story.invoke(leave)), [true, 4]);
   assert.deepEqual(p.all('SELECT report_id FROM report'), [[id(3)]]);
 });
 
@@ -290,7 +304,7 @@ test('a report commits with its gameplay result or not at all', () => {
 test('a new game keeps a pending report, delivered under its original run', async () => {
   const path = save();
   const a = processOn(path, { newId: ids() });
-  a.story.invoke(ring());
+  reach(a);
   assert.deepEqual(a.story.newGame(), { kind: 'replaced' });
   a.sql.close();
   const b = processOn(path);
@@ -311,7 +325,7 @@ function reports(...bindings: (string | null)[]) {
   let run = 0;
   const p = processOn(save(), { newId: ids(), binding: () => bindings[run] ?? null });
   for (run = 0; run < bindings.length;) {
-    p.story.invoke(ring());
+    reach(p);
     run++;
     p.story.newGame();
   }
@@ -338,12 +352,12 @@ test('a lost reply is retried and reads back the one acceptance', async () => {
 });
 
 // Breaks (A-R3): an acceptance whose fields match but whose payload digest is of another payload
-// (here the report observed at revision 2) recorded as accepted.
+// (here the report observed at revision 3) recorded as accepted.
 test('an acceptance of another payload needs attention', async () => {
   const p = reports(A);
   const fake = platform();
   const other = sha256(
-    payload(id(3), id(2)).replace('"observed_revision":1', '"observed_revision":2'),
+    payload(id(3), id(2)).replace('"observed_revision":4', '"observed_revision":3'),
   );
   const answer = async (r: StoryPointReport, a: string) => ({
     ...(await fake.submit(r, a)),
@@ -409,7 +423,7 @@ test('delivery is bounded, persists each disposition and drops nothing', async (
   await deliver(p.db, fake.submit, 1);
   fake.result = 'accepted';
   // An acceptance with a result outside the schema, of another account, of another outcome.
-  for (const wrong of [{ result: 'credited' }, { account_id: B }, { outcome: 'tolled' }]) {
+  for (const wrong of [{ result: 'credited' }, { account_id: B }, { outcome: 'carry' }]) {
     const answer = async (r: StoryPointReport, a: string) => ({
       ...(await fake.submit(r, a)),
       ...wrong,

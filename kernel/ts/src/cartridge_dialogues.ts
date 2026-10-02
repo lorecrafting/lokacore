@@ -1,7 +1,8 @@
 // The loader's dialogue checks (dialogue@1; dialogue.schema.json DialogueDefinition; 06 §8
 // references exist, §17, §33), twin of lib/loka/content/dialogues.ex: what each dialogue uses, for
-// the lock stage (cartridge.ts): its own kind and each fact.assign's fact_changed; and its
-// references: its key is no registered command's, action's, recipe's or quest's
+// the lock stage (cartridge.ts): its own kind and each fact.assign's fact_changed (and each story
+// point its story_point_reached); and its references: its key is no registered command's,
+// action's, recipe's or quest's
 // (DUPLICATE_DEFINITION: its talk is an ActionSet identity), its speaker no other dialogue's
 // (DUPLICATE_DEFINITION at npc: a talk names only its target, so one dialogue per NPC), its
 // prompt, labels and narrations have catalog entries, its speaker, roles and quest name an NPC,
@@ -9,7 +10,11 @@
 // (the actor is always a participant: DUPLICATE_DEFINITION), it has a choice (the subset has no
 // minProperties: SCHEMA_VIOLATION too_few_items), each hand_over gives an item role to an npc
 // role, and each fact.assign names a fact of it with a value of its type. Its policy is walked
-// with every other policy (cartridge_refs.ts nodes).
+// with every other policy (cartridge_refs.ts nodes). Each story point (cartridge.schema.json
+// StoryPointDefinition; 23 §3) has an outcome (SCHEMA_VIOLATION too_few_items), and each
+// outcome's trigger names a dialogue of this cartridge and one of its choices, a site no other
+// outcome names (DUPLICATE_DEFINITION), in a dialogue that resolves a quest, so its choice is
+// made once (OUTCOME_MISMATCH).
 import {
   CAPABILITY_OWNERS,
   type DefinitionRef,
@@ -26,18 +31,25 @@ const each = (c: Obj): [Obj, string][] =>
     `.cartridge.dialogues${step(ref)}`,
   ]);
 
-/** Each owner reference of each dialogue: [registry field, name, path]. */
+/** Each owner reference of each dialogue and story point: [registry field, name, path]. */
 export const uses = (c: Obj) =>
-  each(c).flatMap(([d, at]) => [
-    ['definition', 'dialogue', at],
-    ...Object.entries(d.choices as Obj).flatMap(([id, o]) =>
-      (o.sequence ?? []).map((_: Obj, i: number) => [
-        'event',
-        'fact_changed',
-        `${at}.choices${step(id)}.sequence[${i}].op`,
-      ]),
-    ),
-  ]) as ['definition' | 'event', string, string][];
+  [
+    ...each(c).flatMap(([d, at]) => [
+      ['definition', 'dialogue', at],
+      ...Object.entries(d.choices as Obj).flatMap(([id, o]) =>
+        (o.sequence ?? []).map((_: Obj, i: number) => [
+          'event',
+          'fact_changed',
+          `${at}.choices${step(id)}.sequence[${i}].op`,
+        ]),
+      ),
+    ]),
+    ...Object.keys((c.story_points ?? {}) as Obj).map((ref) => [
+      'event',
+      'story_point_reached',
+      `.cartridge.story_points${step(ref)}`,
+    ]),
+  ] as ['definition' | 'event', string, string][];
 
 type Checks = {
   named: (r: Obj, kind: string, path: string) => void;
@@ -74,6 +86,29 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
       out.push(diag('SCHEMA_VIOLATION', `${at}.choices`, { error: 'too_few_items' }));
     for (const [id, o] of Object.entries(d.choices as Obj))
       out.push(...choice(o, `${at}.choices${step(id)}`, roles, checks));
+  }
+  return [...out, ...storyPoints(c, named)];
+}
+
+function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  const site = (t: Obj) => `${refString(t.dialogue as DefinitionRef)} ${t.choice}`;
+  const all = Object.entries((c.story_points ?? {}) as Obj);
+  const sites = all.flatMap(([, p]) => Object.values(p.outcomes as Obj).map(site));
+  for (const [ref, p] of all) {
+    const at = `.cartridge.story_points${step(ref)}`;
+    if (!Object.keys(p.outcomes).length)
+      out.push(diag('SCHEMA_VIOLATION', `${at}.outcomes`, { error: 'too_few_items' }));
+    for (const [name, t] of Object.entries(p.outcomes as Obj)) {
+      const path = `${at}.outcomes${step(name)}`;
+      named(t.dialogue, 'dialogue', `${path}.dialogue`);
+      if (sites.filter((s) => s === site(t)).length > 1)
+        out.push(diag('DUPLICATE_DEFINITION', path));
+      const d = (c.dialogues ?? {})[refString(t.dialogue as DefinitionRef)];
+      if (d && !Object.hasOwn(d.choices, t.choice))
+        out.push(diag('UNRESOLVED_REFERENCE', `${path}.choice`, { target: t.choice }));
+      if (d && !d.quest) out.push(diag('OUTCOME_MISMATCH', path));
+    }
   }
   return out;
 }

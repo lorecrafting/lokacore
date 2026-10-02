@@ -1,8 +1,8 @@
-// dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
-// (rules/dialogue.ts), admission (actions.ts) and the GameView (view.ts) share: a dialogue's
-// definition, its talk's bound roles, the actor's pending choice, and why a choice of it cannot be
-// made now. A choice's durable occurrence is a row of State.choices (decision.ts ChoiceRow), keyed
-// by the ContinuationId its talk minted.
+// dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3; 23 §3): what the dialogue
+// rule (rules/dialogue.ts), admission (actions.ts) and the GameView (view.ts) share: a dialogue's
+// definition, its talk's bound roles, the actor's pending choice, why a choice of it cannot be
+// made now, and the story points a choice reaches. A choice's durable occurrence is a row of
+// State.choices (decision.ts ChoiceRow), keyed by the ContinuationId its talk minted.
 import type { ActionSet, Offered } from './actions.ts';
 import type {
   ActionInputParameter,
@@ -43,6 +43,21 @@ export const bind = (world: World, d: DialogueDefinition): RoleBinding[] =>
 
 /** The ids of `d`'s choices, in key order. */
 export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
+
+/**
+ * The story_point_reached payloads choosing `choice_id` of the dialogue `source` gives (23 §3):
+ * each story point outcome whose trigger names both (the loader allows at most one).
+ */
+export const reachedBy = (world: World, source: DefinitionRef, choice_id: Key) =>
+  Object.values(world.cartridge.story_points ?? {}).flatMap(({ key, outcomes }) =>
+    Object.entries(outcomes)
+      .filter(([, t]) => same(t.dialogue, source) && t.choice === choice_id)
+      .map(([outcome]) => ({
+        type: 'story_point_reached' as const,
+        story_point: { ...source, kind: 'story_point', key },
+        outcome: outcome as Key,
+      })),
+  );
 
 /** `actor`'s pending choice, if it has one (at most one: talk refuses a second). */
 export const pending = (world: World, actor: CharacterId) =>

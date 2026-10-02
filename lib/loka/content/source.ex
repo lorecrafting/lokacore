@@ -22,7 +22,8 @@ defmodule Loka.Content.Source do
              | :barrier
              | :quest
              | :reaction
-             | :dialogue, String.t()}
+             | :dialogue
+             | :story_point, String.t()}
 
   @doc """
   Every `.json` regular file under `dir` (dot files included) as `{relative path, kind,
@@ -99,7 +100,8 @@ defmodule Loka.Content.Source do
     "barriers" => :barrier,
     "quests" => :quest,
     "reactions" => :reaction,
-    "dialogues" => :dialogue
+    "dialogues" => :dialogue,
+    "story_points" => :story_point
   }
 
   defp classify(rel) do

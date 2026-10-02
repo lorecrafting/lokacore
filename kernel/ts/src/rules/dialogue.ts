@@ -15,7 +15,8 @@
 // choice's fact.assign steps (fact.ts assigned), the quest's transitions and quest_resolved, the
 // choice.resolve at the revision its continuation was opened at, and choice_resolved; one
 // narration line, its participants the actor's body and every bound role, read from the row
-// (06 §43: never re-resolved by name). close_choice: the actor's pending continuation (the
+// (06 §43: never re-resolved by name); last, if a story point's outcome names this dialogue and
+// choice, its story_point_reached (23 §3). close_choice: the actor's pending continuation (the
 // ActionSet fills it) closes, nothing else changes (06 §37, §43); else invalid_state.
 import type { DialogueChoice, EntityId } from '../contracts.gen.ts';
 import {
@@ -35,6 +36,7 @@ import {
   choiceIds,
   continuationId,
   definition,
+  reachedBy,
   spokenBy,
   talkRefused,
 } from '../dialogue.ts';
@@ -101,6 +103,12 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
     expected_revision,
   } as const;
   const chosen = { type: 'choice_resolved', continuation_id, choice_id } as const;
+  const at = run.position + quest.length + 1;
+  const resolvedChoice = event(world, command, mint, at, chosen);
+  // Minted after choice_resolved, so the earlier ids stay put.
+  const reached = reachedBy(world, row.source, choice_id).map((payload) =>
+    event(world, command, mint, at + 1, payload),
+  );
   const participants = row.roles.reduce((o, r) => ({ ...o, [r.role]: r.entity_id }), {
     actor: body,
   });
@@ -108,11 +116,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
     world,
     choice_id,
     [...run.ops, ...(resolved ? resolved.ops : []), op],
-    [
-      ...given.events,
-      ...quest,
-      event(world, command, mint, run.position + quest.length + 1, chosen),
-    ],
+    [...given.events, ...quest, resolvedChoice, ...reached],
     [{ key: option.narration, participants }],
   );
 }

@@ -120,9 +120,10 @@ function keyStage(c: Obj): Diagnostic[] {
     'quests',
     'reactions',
     'dialogues',
+    'story_points',
   ]) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
-      const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z]+\/(.*)$/)!;
+      const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z_]+\/(.*)$/)!;
       const expected: [string, string, unknown][] = [
         ['cartridge_id', id, c.manifest.id],
         ['cartridge_version', version, c.manifest.version],
@@ -149,8 +150,9 @@ function keyStage(c: Obj): Diagnostic[] {
 // of any outcome (by the event it produces: fact_changed for fact.assign, custom_event for
 // event.emit; a resource.adjust, like a cost, through the resource it names), quest (by its
 // quest_activated), daily schedule (also by the run_job that runs it, schedule@1's), reaction
-// (also by its trigger's event and each fact.assign's fact_changed) and dialogue (also by each
-// fact.assign's fact_changed) the cartridge uses has its owner in the lock.
+// (also by its trigger's event and each fact.assign's fact_changed), dialogue (also by each
+// fact.assign's fact_changed) and story point (by its story_point_reached) the cartridge uses has
+// its owner in the lock.
 function lockStage(c: Obj): Diagnostic[] {
   const locked: Obj = c.lock.capabilities;
   const out = mismatched(locked, c.manifest.requires.capabilities);

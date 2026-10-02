@@ -12803,5 +12803,176 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "contract": "StoryPointDefinition",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/outcomes",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "StoryPointDefinition",
+    "value": {
+      "key": "Bad",
+      "outcomes": {
+        "Bad": {
+          "dialogue": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "dialogue",
+            "key": "bram"
+          },
+          "choice": "carry"
+        },
+        "a": {
+          "x": 1
+        },
+        "b": {
+          "dialogue": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "dialogue",
+            "key": "bram"
+          },
+          "choice": "Bad"
+        },
+        "c": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/outcomes/Bad",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/outcomes/a/choice",
+        "code": "missing_property"
+      },
+      {
+        "path": "/outcomes/a/dialogue",
+        "code": "missing_property"
+      },
+      {
+        "path": "/outcomes/a/x",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/outcomes/b/choice",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/outcomes/c",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "story_points": {
+        "c@1.0.0:quest/x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policies",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/story_points/c@1.0.0:quest~1x",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/story_points/c@1.0.0:quest~1x",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "story_point_reached"
+    },
+    "errors": [
+      {
+        "path": "/outcome",
+        "code": "missing_property"
+      },
+      {
+        "path": "/story_point",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "story_point_reached",
+      "story_point": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "story_point",
+        "key": "bram"
+      },
+      "outcome": "Bad",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/outcome",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

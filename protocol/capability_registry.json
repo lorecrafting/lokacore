@@ -200,7 +200,8 @@
     ],
     "events": [
       "choice_opened",
-      "choice_resolved"
+      "choice_resolved",
+      "story_point_reached"
     ],
     "definitions": [
       "dialogue"
