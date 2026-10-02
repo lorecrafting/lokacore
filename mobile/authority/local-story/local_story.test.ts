@@ -624,7 +624,7 @@ test('a talk committed, then a restart: the stored choice carries its revision a
   assert.deepEqual([outcome(chose).outcome, chose.revision], ['leave', 4]);
 });
 
-// Breaks (06 §43, 03 §14; adverse-cases.json moved-bram-keeps-receipt, altered-choice): a retried
+// Breaks (06 §43, 03 §14; adverse-cases.json walked-away-keeps-receipt, altered-choice): a retried
 // committed choice deciding again after Bram left (not_present) instead of replaying its receipt,
 // another choice under the same invocation id accepted, or the receipt lost on restart.
 test('a committed choice replays from its receipt after Bram leaves and after a restart', () => {

@@ -133,6 +133,18 @@ The table below describes the files as imported. Later amendments are in git his
   its platform tables `story_point_reports` and `story_point_acceptances`; headings 03 §26,
   05 §27, 06 §43, 06 "Stages and story points", 15 QUESTSCENE-01 and RUN-05 change and so do
   their anchors. The project-plan sense (R milestones, milestone gates) is unchanged.
+- 2026-10-02, [owner decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md)
+  (paraphrased): the Lantern has no wait and no schedule; Bram stays at the landing and the game
+  clock stays at 06:00. Amended: [pre-release-proof](pre-release-proof.md) (:45, :47, :59, :63
+  and the P3 and P4 rows), [14 Gate R6P](14-implementation-plan.md) and the
+  [R-MILESTONES](R-MILESTONES.md) R6P row. In [conformance/adverse-cases.json](conformance/adverse-cases.json)
+  (`fixture_version` 2, SHA-256 now
+  `4b8f5a28085e8e55aa1556d534dd79d02544bebf4df02d610162d30c2b359526`, pinned by the
+  portable ABI tests) four `lantern` cases are rewritten by hand: moved-bram-rejects-new-choice
+  and moved-bram-keeps-receipt become walked-away-rejects-new-choice and walked-away-keeps-receipt
+  (a move north replaces the wait), and the fenced `other` call of choice-unknown-commit-absent
+  and -committed is a move north. [conformance/lantern-traces.json](conformance/lantern-traces.json)
+  is unchanged (no wait step; `clock` 6 and `bram_room` landing throughout).
 
 ## Link rewrites (the only byte changes at import)
 

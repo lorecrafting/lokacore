@@ -7,7 +7,7 @@ defmodule Loka.ContentLanternTest do
 
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_lantern_hash.json"))
 
-  # Breaks: a room, the gate, the schedule, the quest, the dialogue, the story point or the text
+  # Breaks: a room, the gate, the quest, the dialogue, the story point or the text
   # dropped or reshaped in the artifact, or a warning on content the PR claims compiles cleanly.
   test "lantern_proof compiles to its Python known answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})

@@ -440,7 +440,7 @@ Airplane mode:
 
 Implement [pre-release-proof.md](pre-release-proof.md) using the minimum R3–R6 foundation and the selected early R7/R8 slices. R6P does **not** depend on the entirety of R7/R8 or R9; minimal conformance and fault checks accompany each slice from the start. The phase numbers group capabilities, not a mandate to build each group wholesale before feedback.
 
-Gate: a coherent four-place experience with real prose, a consequential choice, a schedule, touch input, atomic local saves, retry/restart safety and device evidence. Keep the resulting regression corpus green as the full chapter is built. A Python contract-model pass is not this gate. No production v3 code is added to legacy Lokacore.
+Gate: a coherent four-place experience with real prose, a consequential choice ([no schedule](../decisions/owner-decision-untimed-lantern-2026-10-02.md)), touch input, atomic local saves, retry/restart safety and device evidence. Keep the resulting regression corpus green as the full chapter is built. A Python contract-model pass is not this gate. No production v3 code is added to legacy Lokacore.
 
 ## R7 — Quest, dialogue, and scenes
 

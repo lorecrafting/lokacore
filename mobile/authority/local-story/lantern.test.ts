@@ -137,7 +137,6 @@ function invocation(run: Run, r: Request) {
   const id = `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
   const input = { ...r.input };
   if (input.continuation_id === CHOICE) input.continuation_id = run.continuation!;
-  if (r.action === 'wait') input.until = (input.until as number) * 3600;
   const [action_key, target_ids] = {
     activate: ['lantern', []],
     talk: ['bram', [BRAM]],
@@ -364,7 +363,7 @@ for (const { id } of traces)
     const row = run.p.sql.prepare('SELECT binding, report, disposition FROM report').all();
     const { report_id, run_id, ...report } = JSON.parse(row[0]!.report as string);
     const release = {
-      cartridge_hash: '747a5bd8f8630873d82b29ec8ae4af568b8766d6e45b7d4d6a963a83e596b297',
+      cartridge_hash: '9b0969438f5ddad877c88506ffe295c5084e3014d607ef0ba24c922ee5db2821',
       cartridge_id: 'lantern_proof',
       cartridge_version: '0.0.1',
     };
@@ -398,7 +397,7 @@ test("an old run's view token is stale after a new game, at the same revision", 
 });
 
 // Breaks (adverse-cases.json `lantern`; 03 §§14-15, 04 §16, 06 §43): early possession not
-// credited; a choice resolved without its item or NPC present; the due-job drain skipped on wait;
+// credited; a choice resolved without its item or NPC present;
 // a replay deciding again (narration twice, a conflict, RNG drawn); altered intent replayed; a
 // fault's consequences kept, a pending COMMIT presumed either way, a call decided while fenced, a
 // killed COMMIT lost on restart; a read changing time, RNG or state; a stale view accepted or a

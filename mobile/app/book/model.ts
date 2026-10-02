@@ -63,6 +63,17 @@ const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
 export const said = (rs: readonly Pool[]) =>
   `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${r.band.replaceAll('_', ' ')}` : amount(r))).join(', ')}`;
 
+// The status line's time: the double hour's earthly branch, 子 from 23:00 to 01:00, then one
+// per two hours, with English words for VoiceOver (owner decision, untimed Lantern record). The
+// clock is logical seconds; the day's sexagenary name waits for a later status pane.
+const ANIMALS = 'Rat Ox Tiger Rabbit Dragon Snake Horse Goat Monkey Rooster Dog Pig'.split(' ');
+const STARTS = ['eleven', 'one', 'three', 'five', 'seven', 'nine'];
+export const branch = (t: number) => {
+  const i = Math.floor(((Math.floor(t / 3600) + 1) % 24) / 2);
+  const label = `Hour of the ${ANIMALS[i]}, ${STARTS[i % 6]} to ${STARTS[(i + 1) % 6]}`;
+  return { glyph: '子丑寅卯辰巳午未申酉戌亥'[i]!, label };
+};
+
 // A first-run hint's "seen" flag in a key-value store (expo-sqlite/kv-store: its own file, not the
 // save). A store that throws falls back to this session's memory: a hint never stops the book.
 type Store = { getItemSync(key: string): string | null; setItemSync(key: string, v: string): void };

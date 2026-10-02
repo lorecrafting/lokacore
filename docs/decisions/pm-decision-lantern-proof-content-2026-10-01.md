@@ -19,6 +19,7 @@ built as `cartridges/lantern_proof/` with the known answer `protocol/fixtures/ca
    the quest being active.
 3. **"Waits only through 23:00" is the fixture's claim limit, not an authored rule.** Why: `wait`
    is an engine verb and the kernel schedules daily; nothing is authored for it.
+   Superseded 2026-10-02: the Lantern has no wait ([owner decision](owner-decision-untimed-lantern-2026-10-02.md)).
 4. **Bram's talk policy stays "quest active"**, with no lantern requirement. Custody and presence
    are checked at `choose` through the dialogue's roles. Why: this matches the spec's "both
    choices require current lantern custody and Bram's presence" at the choice, and the ferry
