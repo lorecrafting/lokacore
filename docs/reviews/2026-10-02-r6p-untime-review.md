@@ -84,3 +84,25 @@ already there (AGENTS.md allows table rows with literal answers).
 6. `bin/check_all.sh` at `15226fe`: exit 0.
 
 Over-engineering: none found; the diff is mostly deletion.
+
+## Fix round 1 and re-check (appended by the PM at the gate, 2026-10-02; missing at the #110 merge)
+
+Fix commits: 467056a (A1, Sol U2), 59cca1c (A2, Sol U1), 15629d1 (N1), 864e6e2 (owner decision: Lantern starting stats). No Opus re-check of these fixes was recorded before the merge (PM process gap); the Gate R6P reviewer checks them. Merged on the Sol re-check below.
+
+### Codex Sol first review (gpt-6.1-sol), verbatim
+
+VERDICT: APPROVE WITH NOTES
+
+```text
+U1 / low / mobile/app/book/model.test.ts:153 / The test checks only two of the twelve double-hour transitions; a wrong glyph or VoiceOver label at another boundary could pass. / Add literal expected glyphs and labels at all twelve boundaries.
+
+U2 / low / docs/spec/pre-release-proof.md:41 / “Narrative/schedule slices” can suggest that scheduled Lantern behavior remains part of the R6P gate. / Clarify that schedule@1 remains an engine dependency, while the Lantern has no wait or NPC schedule.
+```
+
+### Codex Sol fix re-check (gpt-6.1-sol), verbatim
+
+VERDICT: APPROVE — all specified fixes are closed. The Python known answer matches the fixture, and all active hash pins match. Focused tests passed; the local-authority suite could not create temporary SQLite files in this read-only sandbox.
+
+```text
+No findings.
+```

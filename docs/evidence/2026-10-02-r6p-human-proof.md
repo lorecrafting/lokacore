@@ -31,7 +31,9 @@ P = [P6b](2026-10-02-r6p-iphone11/README.md); line numbers are in those READMEs.
 ## Build played
 
 - **PM-recorded:** the owner played a clean Release build of `main` 64a2b12. The device for this
-  play is not recorded (null).
+  play is the iPhone 11 (iPhone12,1), iOS 26.6.2, the wired phone of the rerun (device-reported by
+  `devicectl` at the install; the owner deleted the earlier app first, so the play started from a fresh
+  install).
 - **Inspected:** `git diff --exit-code 73927a1 64a2b12 -- kernel lib mobile protocol cartridges`
   exits 0 (empty), so the code, protocol and cartridges are those of the measured build 73927a1.
   Cartridge content hash `9b0969438f5ddad877c88506ffe295c5084e3014d607ef0ba24c922ee5db2821`.
