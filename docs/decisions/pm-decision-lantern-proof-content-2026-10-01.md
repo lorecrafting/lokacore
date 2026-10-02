@@ -23,3 +23,7 @@ built as `cartridges/lantern_proof/` with the known answer `protocol/fixtures/ca
    are checked at `choose` through the dialogue's roles. Why: this matches the spec's "both
    choices require current lantern custody and Bram's presence" at the choice, and the ferry
    cartridge's shape.
+
+**Q-1 (from the P3 review, flagged to the owner).** Holding the lantern, the player can unlock the
+west gate, so after `carry` the west exit is no longer blocked. This is harmless: the frozen cases
+only move west before unlocking (`exit_locked`), so they are unaffected. It follows from ruling 1.
