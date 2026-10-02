@@ -30,6 +30,12 @@
     "description": "A player's lookup that matched no target or several, so no Command was built (21 §7; 04 §18; owner request, R5 S2): diagnostics because it is a thing to fix in content, never game_trace (not a decision, not a replay input). Producer: loka play (R5 S2); the simulator and the Lab later."
   },
   {
+    "name": "evaluation.budget_exceeded",
+    "store": "diagnostics",
+    "kind": "event",
+    "description": "The limit a replayable decision exhausted when it faulted budget_exceeded (04 §5.4): correlated by the decision's ReplayIds, never a DomainEvent, Effect or fault field, and failing to record it never changes the fault, commit or retry outcome. Producers: loka play, the simulator through its playback in loka play's decide (R6P B), and the local authority's save (R6P B)."
+  },
+  {
     "name": "kernel.decision_latency",
     "store": "operations",
     "kind": "metric",

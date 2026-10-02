@@ -7667,6 +7667,76 @@
   {
     "contract": "ObservationRecord",
     "value": {
+      "event": "evaluation.budget_exceeded"
+    },
+    "errors": [
+      {
+        "path": "/data",
+        "code": "missing_property"
+      },
+      {
+        "path": "/format",
+        "code": "missing_property"
+      },
+      {
+        "path": "/ids",
+        "code": "missing_property"
+      },
+      {
+        "path": "/store",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ObservationRecord",
+    "value": {
+      "format": "loka-obs-v1",
+      "event": "evaluation.budget_exceeded",
+      "store": "game_trace",
+      "ids": {
+        "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
+        "kernel_version": "loka-kernel@175f041c2e3a4b5d6e7f8091a2b3c4d5e6f70812",
+        "seed": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "run_id": "6f6f6f6f-1111-4222-8333-444444444444"
+      },
+      "data": {
+        "limit": "query_steps",
+        "position": 1
+      },
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/data/position",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/ids/command_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/ids/revision",
+        "code": "missing_property"
+      },
+      {
+        "path": "/store",
+        "code": "not_in_enum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ObservationRecord",
+    "value": {
       "event": "kernel.decision_latency"
     },
     "errors": [
@@ -9051,6 +9121,51 @@
       {
         "path": "/words",
         "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "BudgetExceeded",
+    "value": {},
+    "errors": [
+      {
+        "path": "/limit",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "BudgetExceeded",
+    "value": {
+      "limit": "steps"
+    },
+    "errors": [
+      {
+        "path": "/limit",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "BudgetExceeded",
+    "value": {
+      "limit": "query_steps",
+      "rule": "r"
+    },
+    "errors": [
+      {
+        "path": "/rule",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "BudgetExceeded",
+    "value": "query_steps",
+    "errors": [
+      {
+        "path": "",
+        "code": "invalid_type"
       }
     ]
   },
