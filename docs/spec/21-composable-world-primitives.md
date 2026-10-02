@@ -716,7 +716,7 @@ Reaction rules may observe:
 - service completion;
 - scheduled/logical-time boundary DomainEvents;
 - population transitions;
-- scene/quest milestones.
+- scene/quest story points.
 
 A wall clock or hidden timer never fires a reaction directly; temporal triggers enter authority through the normal scheduler/command/event semantics.
 
@@ -1105,7 +1105,7 @@ A **SceneSequence** is a reusable, recoverable orchestration primitive for:
 - travel interludes;
 - scripted reveals;
 - tutorial moments;
-- quest milestones.
+- quest story points.
 
 SceneSequence may also use durable named SceneRoleBindings resolved inside its SceneSpace,
 as specified in document 06. Scene beats should target semantic roles/bound runtime

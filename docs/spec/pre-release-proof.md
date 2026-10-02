@@ -58,7 +58,7 @@ No new general scripting, dream-space runtime, combat, economy, or party system 
 
 Ordinary proof actions cost zero logical time; explicit `wait` advances it. Bram is at landing from 06:00 to 19:00 and at green otherwise. This bounded fixture starts at 06:00 and admits waits only through 23:00; it does not claim full multi-day scheduler support. Landing connects north to green, green east to reed bank, reed bank east to lantern shelter, with reciprocal routes. The lantern starts at the shelter. A deliberately blocked west exit at landing advertises unavailable feedback without another room.
 
-Both paths: accept → travel to shelter → take → return → talk → choose. `carry` retains custody and sets `search_plan=player_led`; `leave` transfers to Bram and sets `search_plan=party_led`. Each atomically resolves the quest/choice and stores stable required narration plus a **proof-only** terminal milestone. This is not an account-authorized production onboarding grant.
+Both paths: accept → travel to shelter → take → return → talk → choose. `carry` retains custody and sets `search_plan=player_led`; `leave` transfers to Bram and sets `search_plan=party_led`. Each atomically resolves the quest/choice and stores stable required narration plus a **proof-only** terminal story point. This is not an account-authorized production onboarding grant.
 
 Adverse paths: acquire before acceptance (state credit); drop after opening choice (custody rejection); wait until Bram moves (presence rejection with close/return path); retry consumed choice after a stale view (receipt replay); alter choice under same ID (integrity conflict); conflict/budget fault (no partial proposal); rollback/unknown COMMIT/after-commit display interruption (durable reconciliation). Local account/report binding is tested with the fake adapter, never with invented authentication evidence.
 
@@ -75,7 +75,7 @@ P4 must integrate the shared operation/reaction evaluator: the deliberately smal
 | P5 Touch-first mobile path | P4 + R1/R2 mobile integration | GameView render, ActionInvocation input, clear unavailable-action feedback, readable current state |
 | P6 Adversarial/device proof | P5 | Per-boundary crash/retry tests, airplane-mode resume, numeric/state parity and actual human device feedback |
 
-P2/P6 also exercise atomic milestone capture, offline completion and delayed authenticated synchronization through a fake progress adapter, including duplicate delivery and account switching. Production authentication/PostgreSQL/API work belongs to R12A before the public release; it does not block R6P.
+P2/P6 also exercise atomic story point capture, offline completion and delayed authenticated synchronization through a fake progress adapter, including duplicate delivery and account switching. Production authentication/PostgreSQL/API work belongs to R12A before the public release; it does not block R6P.
 
 P1/P2 do not authorize the legacy repository to grow a production engine. The dependency graph is imported with the accepted packet into the fresh implementation repository.
 

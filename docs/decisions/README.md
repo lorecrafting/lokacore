@@ -78,3 +78,4 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [narrow slice N: recipe narration pins its participants' EntityIds at commit; PM rulings on the committed and authored shapes](owner-decision-narrow-n-2026-10-01.md).
 - Owner decision: [split slice D into D1 (dialogue) and D2 (the milestone carry); scene@1 narrowed out, the durable choice is dialogue@1's continuation row](owner-decision-split-d-2026-10-01.md).
 - Owner decision: [agent-device (Callstack, open source) on the iOS Simulator in UI-slice reviews from slice G; fix the iOS 27 simulator crash first](owner-decision-agent-device-2026-10-01.md).
+- Owner decision: [the story-sense "milestone" becomes "story point"; the 23 §3 event is `story_point_reached`](owner-decision-story-point-2026-10-01.md).

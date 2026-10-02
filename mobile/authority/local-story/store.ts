@@ -5,7 +5,7 @@
 // lessons).
 import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
 import { target } from '../../../kernel/ts/src/compose.ts';
-import type { DecisionResult, MilestoneReport } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { row } from '../../../kernel/ts/src/world.ts';
@@ -188,16 +188,16 @@ export function receipt(db: Db, scope: string, invocation_id: string): Receipt |
 }
 
 /**
- * A milestone report captured with its gameplay commit (23 §§4-5; 03 §26): the payload, the
+ * A story point report captured with its gameplay commit (23 §§4-5; 03 §26): the payload, the
  * originating lineage and its run's account/profile binding (null: a guest). A
  * host record outside `state_row`, so never in the canonical state, and kept by a new game
  * (23 §11).
  */
-export type Captured = { report: MilestoneReport; lineage_id: string; binding: string | null };
+export type Captured = { report: StoryPointReport; lineage_id: string; binding: string | null };
 
 /**
  * Commits one decision in one transaction (03 §15): for an accepted one the rows its delta
- * wrote, the revision, clock and RNG of `next`, and its pending milestone reports; always the
+ * wrote, the revision, clock and RNG of `next`, and its pending story point reports; always the
  * receipt. Throws, with nothing written, on a definite failure; false when the outcome is
  * unknown (`transaction`; then `reconcile`). The caller adopts `next` only after this returns
  * true.

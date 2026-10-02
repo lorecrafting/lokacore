@@ -55,7 +55,7 @@ The app has two strict gameplay modes:
 
 ### Story Mode
 
-Offline-first cartridge play. Uses `LocalStorySession`, the portable-kernel bridge, local SQLite, save slots, cartridge library, campaigns, and offline entitlement proof. First-release accounts and durable Story milestone synchronization are a separate host/platform feature under [document 23](23-accounts-progress-admission.md); no active login is required for installed offline play.
+Offline-first cartridge play. Uses `LocalStorySession`, the portable-kernel bridge, local SQLite, save slots, cartridge library, campaigns, and offline entitlement proof. First-release accounts and durable story point synchronization are a separate host/platform feature under [document 23](23-accounts-progress-admission.md); no active login is required for installed offline play.
 
 ### Realm Mode
 
@@ -378,9 +378,9 @@ Later, an online-private cartridge mode may intentionally use the authoritative 
 
 ## 19. Narrative continuity
 
-Account-level Story completion tracking is required in the first public Story release. It uses authenticated, retry-safe milestone submissions and accepted platform records as specified in [document 23](23-accounts-progress-admission.md). Optional richer memories such as ending details, journal/lore or cosmetics are separate product policies.
+Account-level Story completion tracking is required in the first public Story release. It uses authenticated, retry-safe story point submissions and accepted platform records as specified in [document 23](23-accounts-progress-admission.md). Optional richer memories such as ending details, journal/lore or cosmetics are separate product policies.
 
-Locally asserted milestones may satisfy explicitly designated onboarding requirements only. They do not prove honest device state or human comprehension and cannot grant competitive Realm value.
+Locally asserted story points may satisfy explicitly designated onboarding requirements only. They do not prove honest device state or human comprehension and cannot grant competitive Realm value.
 
 ## 20. Release environments
 
@@ -547,11 +547,11 @@ Default rules:
 - editable Story save contents never grant authoritative Realm gold, items, levels, or competitive progression; designated account onboarding unlocks are separately authorized under document 23;
 - owning a Story cartridge MAY unlock a Realm adventure, cosmetic, badge, or account feature only through an explicit server-side product rule—not because Realm reads the local save.
 
-A user uses the same Loka identity for accepted Story milestones and later Realm admission. Full-save backup and purchases remain separate features. Pending reports stay bound to their originating account/profile; signing into another account cannot relabel them. Guest claiming, when offered, is explicit. See document 23 for deletion, multi-device and admission behavior.
+A user uses the same Loka identity for accepted story points and later Realm admission. Full-save backup and purchases remain separate features. Pending reports stay bound to their originating account/profile; signing into another account cannot relabel them. Guest claiming, when offered, is explicit. See document 23 for deletion, multi-device and admission behavior.
 
 ## 30. First-public-release account gate
 
-R12A delivers authentication/recovery/deletion, platform persistence, run binding, milestone acceptance/readback, pending/synced player feedback and a minimal administrative progress view. Test offline finish then reconnect, duplicate delivery, stale reports, account switching, deleted credentials and new-device readback. Unknown offline activity is not reported as failure to finish. Full-save restore is not implied by a completed-account badge.
+R12A delivers authentication/recovery/deletion, platform persistence, run binding, story point acceptance/readback, pending/synced player feedback and a minimal administrative progress view. Test offline finish then reconnect, duplicate delivery, stale reports, account switching, deleted credentials and new-device readback. Unknown offline activity is not reported as failure to finish. Full-save restore is not implied by a completed-account badge.
 
 R6P uses a fake progress adapter and is not delayed by production identity. The free public release must pass R12A; paid purchase infrastructure remains R13; authoritative Realm admission is R14/R15. Exact requirements and trust limits are in [document 23](23-accounts-progress-admission.md).
 
@@ -565,7 +565,7 @@ Provide one current autosaved position and **three named manual bookmarks per pl
 
 *Amendment 2026-09-30 ([owner decision](../decisions/owner-decision-one-save-2026-09-30.md), paraphrased):* one autosaved current position **per story**; there are no manual bookmarks, so the three named bookmarks above and restoring one are dropped. Starting a **new game** replaces that save only after the player explicitly confirms: the fresh world under a new run/branch identity with no causal parent. The recovery checkpoints and the pre-migration recovery copy above stand. An older branch restored from an import or backup (§33) still creates a new run/branch identity and causal parent.
 
-Restoring an older semantic branch creates a new run/branch identity and causal parent. Same-state crash recovery, receipt replay and redelivery are not new branches. Restore the saved RNG; neither unlimited undo, ironman anti-reload nor a cloud branch editor is required. Account binding and inherited milestone delivery provenance follow 23 §11, not the currently signed-in profile.
+Restoring an older semantic branch creates a new run/branch identity and causal parent. Same-state crash recovery, receipt replay and redelivery are not new branches. Restore the saved RNG; neither unlimited undo, ironman anti-reload nor a cloud branch editor is required. Account binding and inherited story point delivery provenance follow 23 §11, not the currently signed-in profile.
 
 ## 32. Content pins, upgrades and continuity
 
@@ -580,15 +580,15 @@ Active runs pin exact immutable cartridge release and capability lock plus save/
 | Breaking capability version | Retain required execution or certify migration before shipping the breaking app. Do not retain every whole historical executable indefinitely. |
 | Missing required package | Preserve the current working state; report missing dependency rather than adopting an unusable restored/migrated head. |
 
-Launch with one public semantic major and released-save fixtures including mid-quest, pending choice/job, RNG and queued milestone states. Prefer data migrations plus limited compatibility readers over accumulating whole engine binaries. Current semantics plus a temporary predecessor path is a maintenance goal, not permission to strand unmigrated players. Block a breaking release when its support path is incomplete.
+Launch with one public semantic major and released-save fixtures including mid-quest, pending choice/job, RNG and queued story point states. Prefer data migrations plus limited compatibility readers over accumulating whole engine binaries. Current semantics plus a temporary predecessor path is a maintenance goal, not permission to strand unmigrated players. Block a breaking release when its support path is incomplete.
 
-Completion-at-least-once is account-wide. The canonical branch chosen for continuing a campaign is separate from the last ending uploaded. Carry only declared versioned campaign exports into later chapters, not arbitrary old entities; Realm has separate authoritative characters/economy. Both intended chapter-one endings qualify for onboarding. The proof's terminal milestone is not a production prologue.
+Completion-at-least-once is account-wide. The canonical branch chosen for continuing a campaign is separate from the last ending uploaded. Carry only declared versioned campaign exports into later chapters, not arbitrary old entities; Realm has separate authoritative characters/economy. Both intended chapter-one endings qualify for onboarding. The proof's terminal story point is not a production prologue.
 
 Publish support/end-of-service policy before paid launch without promising perpetual new-device compatibility or store re-download availability. A service sunset must not add a login dependency to installed offline play within the supported environment.
 
 ## 33. Recovery and optional backup scope
 
-Account recovery, purchase recovery, completion recovery and exact-save recovery are separate promises. **Manual versioned export/import is required by the first public Story release (R12).** Production cloud-save backup remains an optional later feature, not an R1/R6P dependency or a new R13 hard gate. Mandatory R12A milestone synchronization is unchanged.
+Account recovery, purchase recovery, completion recovery and exact-save recovery are separate promises. **Manual versioned export/import is required by the first public Story release (R12).** Production cloud-save backup remains an optional later feature, not an R1/R6P dependency or a new R13 hard gate. Mandatory R12A story point synchronization is unchanged.
 
 Export includes the versioned snapshot, exact dependency manifest, run/branch lineage and report provenance; never tokens or a fabricated entitlement. Treat import as hostile input: bound bytes/collections, reject unknown or malformed versions/references, validate isolation and compatibility before head adoption. A checksum detects corruption, not honest play. A blank new device needs both the save and its compatible app/packages; acquisition may require network before offline restoration is possible.
 
