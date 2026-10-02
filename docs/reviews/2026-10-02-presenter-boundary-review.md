@@ -30,3 +30,14 @@ From [07 §The session boundary](../spec/07-offline-storypacks-to-mmo.md#the-ses
 ## Question
 
 - Q1 `mobile/app/App.tsx:9` imports the Lantern cartridge from `protocol/fixtures`. Loading a cartridge is local-authority work. Under Realm the server supplies it. Should the import check (or the session) cover this import, or is `protocol/` exempt by design?
+
+## Fix round 1: `c78364c`, verdict APPROVE
+
+I re-checked only the fix hunks.
+
+- S1: fixed. `docs/ROADMAP.md:55` now has one clause that links to the addendum. The addendum is the only place that states the import rule.
+- S2: fixed. The registry claim now covers refusal codes only (`error_registry.json`). The addendum now says outcome codes have no registry. An unknown outcome code shows no answer line. This is a stated known limit, which is acceptable because no spec requires an outcome registry.
+- S3: fixed. The session may hold its own lifecycle and reply types (a save that does not open, Start over, and `stale_view`, `conflict` and `pending`) if they name no engine internals. This matches `Failed` in `smoke.ts:225` and the reply kinds.
+- Q1: resolved. The check covers the renderer and now includes `protocol/fixtures/`. The app shell picks the session and gives the local session its bundled cartridge. This is consistent with 07, where the app selects one authority.
+
+No new findings.
