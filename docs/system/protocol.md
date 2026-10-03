@@ -53,8 +53,8 @@ storage half):
    pinned by `protocol/fixtures/intent_digest.json`). Neither failure gets a receipt.
 2. **Receipt lookup**: a known `(scope, invocation_id)` replays its stored outcome; an altered
    intent is a conflict ([save.md](save.md#receipts)).
-3. **Freshness**: a NEW invocation whose `view_freshness_token` is not the current one is
-   `stale_view`, no receipt.
+3. **Freshness**: a NEW invocation with a stale `view:` token is `stale_view`, no receipt
+   ([save.md](save.md#replies)).
 4. **Resolve** (`invocation.ts:73`): the action key must be in the actor's current ActionSet,
    else `unsupported_capability`; its `target_ids` fill the Command's slots in order (`:57`:
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);

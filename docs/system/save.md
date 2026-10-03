@@ -16,10 +16,11 @@ release's fresh world at revision 0 as a new save. Refusals, nothing written:
 | Reply | When | New game offered |
 |---|---|---|
 | `unsupported_save_format` | the `save` row's format is `loka-save-vN` with N above 1 (a newer app's; checked first) | no: the player updates the app |
-| `save_corrupt` | SQLite says the file is not a database or a page is malformed; the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports survive |
+| `save_corrupt` | the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports and the trace survive |
+| `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:129`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The smoke controller adds two `save_corrupt` causes after a story opens: a receipt response that is not a DecisionResult, or a world whose first screen cannot be built (`smoke.ts:173`). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The smoke controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`smoke.ts:179`), or a receipt response in the story's scope that is not valid JSON (`:187`). A valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
@@ -38,8 +39,8 @@ Lantern traces and the 11 adverse cases).
 
 `Reply` (`authority.ts:25`): `invalid`, `unauthorized`, `conflict`, `fault {code}`,
 `pending` (a COMMIT whose outcome is unknown; retry the same invocation), `stale_view` (a NEW
-invocation with a `view_freshness_token` that is not the current `view:<run_id>:<revision>`,
-`:120`), or `saved {replay, revision, decision}`. A failed commit throws with memory and
+invocation whose `view_freshness_token` starts with `view:` and is not the current
+`view:<run_id>:<revision>`, `:121`; any other token is not checked), or `saved {replay, revision, decision}`. A failed commit throws with memory and
 storage unchanged.
 
 ## Commit, fence, reconcile
@@ -78,8 +79,12 @@ R6 reference).
 `newGame` (`authority.ts:274`): after settling any fenced attempt, one transaction replaces
 the save with the fresh world at revision 0 under a new lineage and run (no parent) pinned to
 the newest release, drops every receipt (old invocation ids are new again) and recreates the
-`save` and `head` tables whatever shape a corrupt save left them in; `report` rows stay, unless
-the report table is corrupt (`store.ts:137`). Memory adopts only after the commit; an unknown
+`save` and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace
+stay. If SQLite reports the file, or the report table or its index, corrupt, `replace` throws
+(`store.ts:137`) and the host's Start over deletes the whole file (`smoke.ts:292`), so pending
+reports and the trace are lost (`start_over.test.ts` "a corrupt … page: Start over gives a working
+save", "an intact report table survives Start over in place"; index-only damage is carried to R12,
+[ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an unknown
 COMMIT fences like an invocation's. The host confirms with the player first.
 
 ## Narration on reopen
