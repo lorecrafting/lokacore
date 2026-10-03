@@ -164,7 +164,7 @@ named by its keywords through `doors` (`:71`). A Command carries only ids, never
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:36`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:38`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
 barrier) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
@@ -181,10 +181,11 @@ has an instance of, with state and title); `time` (the logical clock); the pendi
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:107`, `:126`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:114`, `:133`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/action_lists.ts:25`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes, and for the door verbs: one listed on its exit is never refused with a code the view
-predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:14`, `:32`).
+recipes, and for the door verbs, matched by the Command each listed action resolves to (a cartridge
+alias included): one listed on its exit is never refused with a code the view
+predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:16`, `:42`).

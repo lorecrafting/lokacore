@@ -72,6 +72,22 @@ test('an unknown constructor action is safe to compare with admission', () => {
   assert.equal(check('gameview_agrees_with_admission', { view, command, decision }), true);
 });
 
+// Breaks: the door clause matching a listed action by its key instead of the Command type it
+// resolves to, so a cartridge alias (unbar resolving to open) that step accepts trips the check,
+// and the same alias refused for a door code passes it (Sol R1).
+test('a door verb listed under an alias key agrees with admission through its command', () => {
+  const unbar = { action_key: 'unbar', available: true };
+  const view = { exits: [{ direction: 'north', door: { actions: [unbar] } }] };
+  const command = { payload: { type: 'open', direction: 'north' } };
+  const resolves = { unbar: 'open' };
+  const accepted = { kind: 'accepted' };
+  const refused = { kind: 'rejected', error: { code: 'invalid_state' } };
+  const agrees = (decision: object) =>
+    check('gameview_agrees_with_admission', { view, command, decision, resolves });
+  assert.equal(agrees(accepted), true);
+  assert.equal(agrees(refused), false);
+});
+
 // Breaks: an invariant registered with no per-step check and no stated reason.
 test('every registered invariant is checked per step, or says why not', () => {
   const ids = read('protocol/invariants.json').map((i: { id: string }) => i.id);

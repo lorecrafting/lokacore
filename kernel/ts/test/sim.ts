@@ -18,6 +18,7 @@ import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '
 import { check } from '../src/invariants.ts';
 import { resolved } from '../src/actions.ts';
 import { resourceRef } from '../src/resource.ts';
+import { MOVES } from '../src/rules/barrier.ts';
 import { next, type RngState } from '../src/rng.ts';
 import { utf8 } from '../src/sha256.ts';
 import { resolve } from '../src/target.ts';
@@ -234,6 +235,9 @@ function violated(
     command,
     decision,
     view,
+    resolves: Object.fromEntries(
+      Object.values(resolved(before, before.character)).map((a) => [a.key, a.command]),
+    ),
   };
   const ids = CHECKED.step.filter((i) => i !== 'target_candidates_ordered');
   return (
@@ -313,7 +317,7 @@ function offered(world: World, g: Gen): Payload {
     return [{ type: o.command }];
   });
   for (const o of Object.values(set))
-    if (['open', 'close', 'lock', 'unlock'].includes(o.command))
+    if (Object.hasOwn(MOVES, o.command))
       options.push(...exits.map((direction) => ({ type: o.command, direction })));
   for (const e of [...view.entities, ...view.inventory])
     for (const a of e.actions)

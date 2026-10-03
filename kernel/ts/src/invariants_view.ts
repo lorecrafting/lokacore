@@ -1,6 +1,8 @@
 // The GameView invariant of invariants.ts (registered in protocol/invariants.json): a STEP check
-// of the actor's view before a command against the decision on it.
+// of the actor's view before a command against the decision on it; `resolves` maps each action key
+// of the actor's set to the Command type it resolves to (actions.ts resolved).
 import type { AdvertisedAction, ExitView, GameView } from './contracts.gen.ts';
+import { MOVES } from './rules/barrier.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in invariants.ts.
 type Any = any;
@@ -9,14 +11,22 @@ type Any = any;
 // (04 §15, §19): available is never refused with a code the view shows for that entry;
 // unavailable is never accepted, and a refusal with such a code is the view's code. A door verb
 // (04 §15 as amended by c1-doors) is listed on its exit's door only when admission and the barrier
-// rule accept it: listed, it is never refused with a code they give (not_found aside: a foreign
+// rule accept it, under any key that resolves to it: listed, it is never refused with a code they give (not_found aside: a foreign
 // actor's or world's command is the envelope's); not listed, it is never accepted.
-export const gameview_agrees_with_admission = ({ view, command, decision }: Any): boolean => {
+export const gameview_agrees_with_admission = ({
+  view,
+  command,
+  decision,
+  resolves,
+}: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type; // own keys only: an action may be keyed `constructor`
   if (DOOR_VERBS.includes(type)) {
     const exit = view.exits.find((e: ExitView) => e.direction === command.payload.direction);
-    const listed = exit?.door?.actions.some((a: AdvertisedAction) => a.action_key === type);
+    const listed = exit?.door?.actions.some(
+      (a: AdvertisedAction) =>
+        Object.hasOwn(resolves, a.action_key) && resolves[a.action_key] === type,
+    );
     return listed ? !DOOR_CODES.includes(code) : decision.kind !== 'accepted';
   }
   const entry = advertised(view, command.payload);
@@ -34,7 +44,7 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
 };
 
-const DOOR_VERBS = ['open', 'close', 'lock', 'unlock'];
+const DOOR_VERBS = Object.keys(MOVES);
 const DOOR_CODES = [
   'unsupported_capability',
   'invalid_target',
