@@ -84,7 +84,8 @@ references (`kernel/ts/src/cartridge_refs.ts:153` and the `cartridge_*.ts` twins
 compiler's checks), and the installed kernel (`cartridge.ts:226`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
-Compiled artifacts load in TypeScript with identical bytes, hash and lock
+An item's `slot` is a definition part owned by `equipment` (`UNDECLARED_CAPABILITY` when the
+lock lacks it), in both the compiler and the loader. Compiled artifacts load in TypeScript with identical bytes, hash and lock
 (`test/loka/cartridge_cross_kernel_test.exs:113`); the loader corpus is
 `protocol/fixtures/cartridge_loader.json`.
 
@@ -97,11 +98,11 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 `INSTALLED` (`kernel/ts/src/world.ts:61`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
-`dialogue` (`:32`); without a command, so without a rule, `fact`, `policy`,
+`dialogue`, `equipment` (`:32`); without a command, so without a rule, `fact`, `policy`,
 `inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
 `target_resolution`, `attributes` (`:46`). The [feature map](../features.gen.md) is the authority for what
 each one implements and where; `bin/features.exs --check` fails when a rule module exists
-without its row. The 18 registered capabilities it marks `not yet` may be named by a
+without its row. The 17 registered capabilities it marks `not yet` may be named by a
 cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.
 
 ## Text

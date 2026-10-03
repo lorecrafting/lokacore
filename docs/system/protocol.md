@@ -134,7 +134,7 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 An actor's actions (`kernel/ts/src/actions.ts:145`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS`, `:83`: look, move, scan, take, drop, give, wait, open,
-close, lock, unlock, each with its target kind and input; policy always true), then the
+close, lock, unlock, wear, remove, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
@@ -143,6 +143,10 @@ contribution removes. A recipe's admission adds `cooldown` and `insufficient_res
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
 The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
 the GameView lists them only on the exits they act on, never with the place's actions.
+`wear` and `remove` (equipment@1) take an `inventory` item target in the set, and admission is
+unchanged (an engine verb's rule checks its own target); the GameView lists `wear` on a held
+item and `remove` on a worn one only when admission and equipment@1's check accept it now, all
+available, and never `drop`, `give` or `wear` on a worn item (c1-equipment).
 
 ## Policy
 
@@ -175,7 +179,10 @@ whose barrier does not bar the way carries `sight` (the destination room id and 
 NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
 (04 §15 as amended by c1-doors); `actions` of the place, without the door verbs;
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
-actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
+actions it accepts (NPCs first, then DefinitionRefString order); `equipment`, one entry per slot
+holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
+accepts (only those resolving to `remove`), absent when the world has no holder
+([equipment@1](mechanics.md#equipment1-kerneltssrcrulesequipmentts)); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
 `resources`, each with current, maximum, a condition band key and its tone (`normal`, `warning`
@@ -187,6 +194,6 @@ first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/action_lists.ts:25`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes, and for the door verbs, matched by the Command each listed action resolves to (a cartridge
-alias included): one listed on its exit is never refused with a code the view
-predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:16`, `:42`).
+recipes, and for the door verbs and `wear`/`remove`, matched by the Command each listed action
+resolves to (a cartridge alias included): one listed on its exit or item is never refused with a
+code the view predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:16`, `:42`).

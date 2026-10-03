@@ -10,7 +10,10 @@ Which capability owns which command, event and policy op: `CAPABILITY_OWNERS`
 
 `newWorld(cartridge, context, seed)` (`kernel/ts/src/fresh.ts:25`) mints ids under the nil
 CommandId in a fixed order: the player's CharacterId, its body, each room (DefinitionRefString
-order), each room's details, each NPC, each item, then one job per NPC with a daily schedule.
+order), each room's details, each NPC, each item, then one job per NPC with a daily schedule,
+then one slot holder per distinct `slot` some item declares, in slot-key order (UTF-8 bytes;
+[equipment@1](#equipment1-kerneltssrcrulesequipmentts)). A holder is an entity inside the
+body with capacity 1; it is not in `entities`, so no command targets it and no view lists it.
 The body starts in `entry`, each NPC in its room, each item at its location; the clock is
 `calendar.start` or 0 (`:39`); each scheduled NPC's first job is due at its schedule's first
 hour strictly after the start; facts hold their defaults; a world starting after time 0 stores
@@ -52,6 +55,26 @@ not held `not_owned`; recipient missing `not_found`, not an NPC `invalid_target`
 accepted `given`, `item_acquired` with the NPC as holder. Composition re-checks custody, cycles
 and capacity. Policy leaf `has_item`; invariants `one_container_per_item`,
 `containment_acyclic` (`:67`, `:74`).
+A worn item ([equipment@1](#equipment1-kerneltssrcrulesequipmentts)) is in a slot holder,
+not directly in the body: `drop` and `give` of it are `not_owned`, `take` is `not_present`
+(the rule is unchanged; remove it first).
+
+## equipment@1 (`kernel/ts/src/rules/equipment.ts`)
+
+An item may declare one `slot` (`SlotKey`: `head`, `neck`, `body`, `cloak`, `arms`, `hands`,
+`waist`, `legs`, `feet`, `wield`, `off_hand`, `light`). Worn means inside the body's holder for
+that slot ([A fresh world](#a-fresh-world)); wearing and removing reuse `entity.transfer`, with
+no new op and no event. The actor's holders are those whose container is its body.
+`wear {item_id}`: no entity `not_found`, not an item `invalid_target`, already in one of the
+actor's holders `invalid_state`, not directly in the body `not_owned`, no `slot` or no holder
+for it `invalid_target`, the holder occupied `invalid_state`; accepted `worn`, one transfer
+body → holder. `remove {item_id}`: no entity `not_found`, not an item `invalid_target`, directly
+in the body `invalid_state` (not worn), anywhere but one of the actor's holders `not_owned`;
+accepted `removed`, one transfer holder → body. These checks are one read-only function the
+rule and the GameView share. Composition re-checks custody, cycles and the holder's capacity.
+`has_item` climbs containers, so a worn item still counts. Finger slots, slot compatibility
+and dual wield, granted modifiers and affects, curses and no-remove items are LATER
+([ROADMAP](../ROADMAP.md)).
 
 ## description_variant@1 and inspectable_detail@1 (`rules/description_variant.ts`)
 
