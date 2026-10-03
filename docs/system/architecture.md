@@ -15,7 +15,7 @@ local authority; the online Realm authority (BEAM, Phoenix transport) is not bui
 | `kernel/ts/src/` | the TypeScript kernel: foundation twins plus every story rule | built |
 | `kernel/ts/play/` | `loka play`, a MUD-style terminal over the kernel on Node | built |
 | `kernel/ts/test/` | kernel tests, the deterministic simulator (`sim.ts`), differential peers the Elixir tests call | built |
-| `mobile/authority/local-story/` | the local Story authority: admission, receipts, the SQLite save, recovery, the trace, story point delivery, the smoke controller | built |
+| `mobile/authority/local-story/` | the local Story authority: admission, receipts, the SQLite save, recovery, the trace, story point delivery, the session controller | built |
 | `mobile/app/` | the Expo shell (`App.tsx`) and the book-style touch UI (`book/`) | built |
 | `mobile/authority/remote-realm/`, `mobile/features/*`, `mobile/packages/*` | Realm transport, Story and Realm UX, shared packages: `export {}` stubs that pin the import rules | empty |
 | `protocol/` | the frozen contracts, registries and fixtures both kernels validate against ([map](../../protocol/README.md)) | frozen |
@@ -83,8 +83,8 @@ Elixir host adapter for a `portable_capability` without a declared differential 
 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared
 packages never import an authority or a feature; Story and Realm code never import each other.
-The app shell imports the local authority's smoke controller directly today
-(`mobile/app/App.tsx:23`); the `GameSession` boundary is the presenter split's work
+The app shell imports the local authority's session controller
+(`localSession`, `mobile/app/App.tsx:29`); the `GameSession` boundary is the presenter split's work
 ([owner rule](owner-rules.md#architecture-and-engine)).
 
 ## Hosts
@@ -94,8 +94,8 @@ The app shell imports the local authority's smoke controller directly today
   re-decides the trace's Commands and requires a byte-identical transcript (`:2`, `:287`).
 - **The phone app** (`mobile/app/App.tsx`): bundles the Lantern known answer
   (`protocol/fixtures/cartridge_lantern_hash.json`), opens one expo-sqlite file per story
-  (`loka-lantern.db`, `:20`), plays through `playSmoke` with the device clock for latency
-  (`:23`), and draws the book UI or the save-error screen.
+  (`loka-lantern.db`, `:26`), plays through `localSession` with the device clock for latency
+  (`:39`), and draws the book UI or the save-error screen.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus 10,000 fresh sequences run in every `npm test`

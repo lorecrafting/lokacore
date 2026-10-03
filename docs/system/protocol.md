@@ -49,7 +49,7 @@ storage half):
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
    `unsupported_capability`. Admission (`:101`): the nil CommandId is `permission_denied`
    (`:110`), another world or actor `not_found`, and the ActionSet must offer an action that
-   resolves to this Command and accepts its target and input (`actions.ts:179`:
+   resolves to this Command and accepts its target and input (`actions.ts:180`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `decision.ts:179`) does not own
@@ -57,7 +57,7 @@ storage half):
 6. **Propose** (`proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
-   (`quest.ts:47`), then each ReactionRule it triggers runs as its own writer group when its
+   (`quest.ts:74`), then each ReactionRule it triggers runs as its own writer group when its
    `when` holds (`reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
    (`proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
@@ -132,7 +132,7 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/actions.ts:146`) are, in order: the engine verbs of the
+An actor's actions (`kernel/ts/src/actions.ts:147`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS`, `:85`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
@@ -169,9 +169,9 @@ barrier) or `insufficient_resource` (the body cannot pay a move); `actions` of t
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
-(prompt, speaker id, closable, each option available or blocked, `dialogue.ts:78`); and
+(prompt, speaker id, closable, each option available or blocked, `dialogue.ts:79`); and
 `resources`, each with current, maximum and a condition band from one fixed table of 11 bands
 by percentage of the range, `perfect_health` at 100 down to `dying` at 0 (`view.ts:80`, `:97`).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`actions.ts:266`). Invariant `gameview_agrees_with_admission` holds this for exits and
+(`actions.ts:267`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes (`invariants.ts:264`, `:278`).
