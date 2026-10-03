@@ -81,4 +81,4 @@ Repo-wide grep for `3600|86400|% 24` (excluding node_modules, tests, docs, fixtu
 | P7 | kernel/ts/play/text.ts:224-231 (`loka play` CLI) | `clock()` "day N, HH:MM" from 86400/3600/24/60 | calendar (W5/W6) |
 | P8 | kernel/ts/play/text.ts:99-103; play/main.ts:99 | `wait [hours]` 1..24, converted with `* 3600` | calendar units_per_hour / hours_per_day; `world.wait.max` (W16) |
 | P9 | kernel/ts/play/text.ts:239-246 | status line lists exactly `hp`, `ma`, `mv` (other pools never shown) | iterate `world.resourceSpecs` (as view.ts does) |
-| P6 | session.ts:23-24, :83 | fixed RNG seed `[1,2,3,4]` and world context for every new game | not a cartridge value: host must draw seed per lineage ([ROADMAP](ROADMAP.md), R7/R8 for chapter one row); listed because it fixes every luck roll of every new game |
+| P6 | DONE | the fixed RNG seed `[1,2,3,4]` and world context of every new game: the host draws both per lineage ([#129](https://github.com/lorecrafting/lokacore/pull/129)) | not a cartridge value |
