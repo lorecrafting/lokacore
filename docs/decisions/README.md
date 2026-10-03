@@ -86,5 +86,7 @@ text. This directory also holds the owner's decisions retained verbatim, or mark
 - Owner decision: [docs compaction after Gate R6P, written by Fable: a thin current-system doc set, history to `docs/archive/`](owner-decision-docs-compaction-2026-10-02.md).
 - Owner decision: [engine output is structured; each presenter owns its layout and wording; a presenter-split slice after Gate R6P](owner-decision-presenter-split-2026-10-02.md).
 - Owner decision (paraphrased): [the Lantern has no wait and no schedule; the game clock stays; the later time model's target rate is LegendMUD's tick](owner-decision-untimed-lantern-2026-10-02.md).
+- Owner decision (paraphrased): [Bram's quest starts from a dialogue choice, not a place action; a normal slice after Gate R6P](owner-decision-quest-from-dialogue-2026-10-02.md).
+- Owner decision (paraphrased): [slimmer gates: the owner's play, one Astra audit of the riskiest code, a short checklist with one reviewer](owner-decision-slim-gates-2026-10-02.md).
 - PM decision, auto-approved under owner overnight authority: [Lantern proof content: a locked west gate, dialogue change as Bram's talk ending, 23:00 as a claim limit, talk policy quest-active](pm-decision-lantern-proof-content-2026-10-01.md). Ruling 3 superseded 2026-10-02 by the [untimed Lantern](owner-decision-untimed-lantern-2026-10-02.md).
 - Owner leaning, not a decision: [Realm separation, a middle path on ADR-074 §5 route (a): shared foundation, separate rules, new keys for online behaviour](owner-leaning-realm-separation-2026-10-01.md).
