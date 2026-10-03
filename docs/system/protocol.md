@@ -221,4 +221,4 @@ the observation supplies it: an available matching place action is never refused
 `invalid_state`, and an unavailable or absent one is never accepted. Without an action key,
 any available place action resolving to that command qualifies. An available exit's move is
 never refused `invalid_state`; a
-`take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:29`, `:79`).
+`take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:29`, `:76`).

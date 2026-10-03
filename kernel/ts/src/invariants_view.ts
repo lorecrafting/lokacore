@@ -35,8 +35,9 @@ export const gameview_agrees_with_admission = ({
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type; // own keys only: an action may be keyed `constructor`
-  const equip = (a: AdvertisedAction) =>
-    Object.hasOwn(resolves, a.action_key) && EQUIP_VERBS.includes(resolves[a.action_key]);
+  const commandOf = (a: AdvertisedAction) =>
+    Object.hasOwn(resolves, a.action_key) ? resolves[a.action_key] : undefined;
+  const equip = (a: AdvertisedAction) => EQUIP_VERBS.includes(commandOf(a));
   if (view.actions?.some(equip)) return false; // a targetless wear or remove is never accepted
   if (DOOR_VERBS.includes(type) || EQUIP_VERBS.includes(type)) {
     const { direction, target_id, item_id } = command.payload;
@@ -47,10 +48,7 @@ export const gameview_agrees_with_admission = ({
         : direction !== undefined
           ? view.exits.find((e: ExitView) => e.direction === direction)?.door?.actions
           : entityView(view, target_id)?.actions;
-    const listed = actions?.some(
-      (a: AdvertisedAction) =>
-        Object.hasOwn(resolves, a.action_key) && resolves[a.action_key] === type,
-    );
+    const listed = actions?.some((a: AdvertisedAction) => commandOf(a) === type);
     return listed ? !VERB_CODES.includes(code) : decision.kind !== 'accepted';
   }
   if (Object.hasOwn(POSITION_VERBS, type)) {
@@ -58,8 +56,7 @@ export const gameview_agrees_with_admission = ({
       (a: AdvertisedAction) =>
         (action_key === undefined || a.action_key === action_key) &&
         a.available &&
-        Object.hasOwn(resolves, a.action_key) &&
-        resolves[a.action_key] === type,
+        commandOf(a) === type,
     );
     return listed ? code !== 'invalid_state' : decision.kind !== 'accepted';
   }
