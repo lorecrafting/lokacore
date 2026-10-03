@@ -1,0 +1,92 @@
+2,3c2,3
+< // (P6 rerun on the untimed Lantern: the known-answer hash is 9b096943…, and `lost` walks away
+< // instead of waiting, as #110's adverse cases do.)
+---
+> // (M1 rerun: the known-answer hash is 806508c7…; the quest is accepted as Bram's offer dialogue
+> // choice, so every Lantern step index and revision moves up by one.)
+19c19
+< import { playSmoke } from '../../authority/local-story/smoke.ts';
+---
+> import { localSession } from '../../authority/local-story/session.ts';
+204a205,208
+>     // A talk is the talk Bram's GameView offers now (bram_offer before the quest, then bram).
+>     const talk = gameView(s.story.world())
+>       .entities.find((e) => e.id === BRAM)
+>       ?.actions.find((a) => a.label === 'action.talk' && a.available)?.action_key;
+207,208c211
+<         activate: ['lantern', []],
+<         talk: ['bram', [BRAM]],
+---
+>         talk: [talk, [BRAM]],
+241c244
+<         l.hash === '9b0969438f5ddad877c88506ffe295c5084e3014d607ef0ba24c922ee5db2821',
+---
+>         l.hash === '806508c7d82223575e74873b7e60ffd61705e675cf0989d0f864e916de6b9e84',
+280c283
+<       play(s, path, 0, 5);
+---
+>       play(s, path, 0, 6);
+282c285
+<       env.hold(phase, `p6-${path}.db`); // a kill mid-path, between steps 4 and 5
+---
+>       env.hold(phase, `p6-${path}.db`); // a kill mid-path, between steps 5 and 6
+290c293
+<       check('continuous after kill', encode(saved(s) as never) === '{"n":5,"r":5}', saved(s));
+---
+>       check('continuous after kill', encode(saved(s) as never) === '{"n":6,"r":6}', saved(s));
+292c295
+<       play(s, path, 5, 10);
+---
+>       play(s, path, 6, 11);
+294c297
+<       check('ending saved', encode(saved(s) as never) === '{"n":10,"r":10}', saved(s));
+---
+>       check('ending saved', encode(saved(s) as never) === '{"n":11,"r":11}', saved(s));
+300c303
+<       play(s, 'lantern-carry', 0, 9);
+---
+>       play(s, 'lantern-carry', 0, 10);
+379c382
+<       play(s, 'lantern-carry', 0, 9);
+---
+>       play(s, 'lantern-carry', 0, 10);
+400c403
+<       check('retry commits once', r.kind === 'saved' && !r.replay && r.revision === 10, r.kind);
+---
+>       check('retry commits once', r.kind === 'saved' && !r.replay && r.revision === 11, r.kind);
+409c412
+<         play(s, 'lantern-carry', 0, 5, `${table} `);
+---
+>         play(s, 'lantern-carry', 0, 6, `${table} `);
+438c441
+<       play(s, 'lantern-carry', 0, 5, 'badjson ');
+---
+>       play(s, 'lantern-carry', 0, 6, 'badjson ');
+441c444
+<       const c = playSmoke(() => env.open(bad), () => env.remove(bad), lanternKat, { newId });
+---
+>       const c = localSession(() => env.open(bad), () => env.remove(bad), lanternKat, { newId });
+457c460
+<       play(s, 'lantern-carry', 0, 9);
+---
+>       play(s, 'lantern-carry', 0, 10);
+486c489
+<           encode({ ...after, held: has } as never) === '{"held":0,"n":9,"r":9}',
+---
+>           encode({ ...after, held: has } as never) === '{"held":0,"n":10,"r":10}',
+490c493
+<         check('retry commits once', r.kind === 'saved' && !r.replay && r.revision === 10, r.kind);
+---
+>         check('retry commits once', r.kind === 'saved' && !r.replay && r.revision === 11, r.kind);
+496c499
+<           encode({ ...after, held: has } as never) === '{"held":1,"n":10,"r":10}',
+---
+>           encode({ ...after, held: has } as never) === '{"held":1,"n":11,"r":11}',
+500c503
+<         check('retry replays', r.kind === 'saved' && r.replay && r.revision === 10, r.kind);
+---
+>         check('retry replays', r.kind === 'saved' && r.replay && r.revision === 11, r.kind);
+523c526
+<       // at revision 10 (time4-6, the cold restore); the other open follows it, not cold.
+---
+>       // at revision 11 (time4-6, the cold restore); the other open follows it, not cold.

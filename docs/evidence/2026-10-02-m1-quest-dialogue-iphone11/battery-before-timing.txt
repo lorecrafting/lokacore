@@ -1,0 +1,19 @@
+2026-10-03T02:25:25Z
+BatteryCurrentCapacity: 100
+BatteryIsCharging: false
+ExternalChargeCapable: false
+ExternalConnected: true
+FullyCharged: true
+GasGaugeCapability: true
+HasBattery: true
+		<key>CurrentCapacity</key>
+		<integer>100</integer>
+--
+		<key>ExternalConnected</key>
+		<true/>
+--
+		<key>IsCharging</key>
+		<false/>
+--
+		<key>Temperature</key>
+		<integer>3179</integer>

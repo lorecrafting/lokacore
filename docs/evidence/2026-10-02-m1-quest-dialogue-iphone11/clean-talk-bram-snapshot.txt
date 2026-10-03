@@ -1,0 +1,23 @@
+Page: com.lorecrafting.loka
+App: com.lorecrafting.loka
+Snapshot: 19 visible nodes
+@e1 [application] "Loka"
+@e2 [scroll-area] "Look, Ferry Landing" [scrollable]
+  [content below scroll-area hidden]
+@e3 [other] "Look, Ferry Landing"
+@e4 [button] "Look, Ferry Landing"
+@e5 [text] "Tap the title to look"
+@e6 [text] "Bram steadies the ferry with his boot. Across the water, someone's lantern swings once between the reeds and goes dark. An old gate stands in the west fence."
+@e7 [button] "Bram the ferryman, open"
+@e8 [button] "Scan"
+@e9 [text] "> Talk to Bram the ferryman"
+@e10 [text] "Bram the ferryman"
+@e11 [text] "Bram keeps his eyes on the reeds. "My lantern's out at the shelter past the reed bank, and I can't leave the ferry. The search party won't go out without it.""
+@e12 [button] "Offer to fetch Bram's lantern"
+@e13 [button] "Close"
+@e14 [button] "Map"
+@e15 [button] "Character, hp 10 of 10, perfect health, ma 100 of 100, mv 100 of 100"
+@e16 [button] "journal"
+@e17 [button] "carrying"
+@e18 [text] "Hour of the Rabbit, five to seven"
+@e19 [button] "settings"
