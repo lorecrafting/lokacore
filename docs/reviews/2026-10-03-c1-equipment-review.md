@@ -123,3 +123,15 @@ No blocker or should-fix.
 ## Codex Sol review
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (63e866f), verbatim
+
+CHANGES REQUESTED
+
+```text
+C1E-01 | blocker | kernel/ts/src/actions.ts:232
+Override remove with a valid ActionDefinition using command=remove, target=entity/inventory, and an always-true policy. Take and wear the cap. Inventory admission requires at===body, excluding the slot holder: GameView hides remove, and its invocation returns unsupported_capability. The cap cannot be removed through this override. Inventory-scoped remove aliases fail identically.
+
+C1E-02 | should-fix | kernel/ts/src/action_lists.ts:55
+A loader-valid alias dress with command=wear, target=none, empty input, and an always-true policy appears in GameView.actions as available. Invoking that advertised action without targets returns unsupported_capability because wear requires item_id. The place-action branch bypasses equipment legality filtering, violating the requirement to advertise wear/remove only when legal.
+```
