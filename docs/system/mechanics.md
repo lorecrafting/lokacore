@@ -16,7 +16,8 @@ then one slot holder per distinct `slot` some item declares, in slot-key order (
 body with capacity 1; it is not in `entities`, so no command targets it and no view lists it.
 The body starts in `entry`, each NPC in its room, each item at its location; the clock is
 `calendar.start` or 0 (`:40`); each scheduled NPC's first job is due at its schedule's first
-hour strictly after the start; facts hold their defaults; a world starting after time 0 stores
+hour strictly after the start; facts hold their defaults, with no record until the first change
+(so the [position](#position1-kerneltssrcrulespositionts) fact adds nothing to a fresh state); a world starting after time 0 stores
 the body's resources at their start values. One body per world; rules read the actor from the
 command and its body from `bodyOf` (`decision.ts:159`).
 
@@ -24,7 +25,8 @@ command and its body from `bodyOf` (`decision.ts:159`).
 
 `move {direction}`: a direction outside the six compass directions is `invalid_target`
 (`:31`); no exit here, `not_found`; an exit through a closed or locked barrier, `exit_closed`
-or `exit_locked` (`passage`, `:59`); the move costs the body the cartridge's
+or `exit_locked` (`passage`, `:59`); under [position@1](#position1-kerneltssrcrulespositionts), an
+actor not standing, `invalid_state` (`rules/position.ts` `standing`); the move costs the body the cartridge's
 `world.movement.cost {resource, amount}`, else (the engine default) 1 mv when the cartridge
 declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:70`).
 Per-exit and terrain costs are later (00 §11 chapter three). Accepted
@@ -89,6 +91,22 @@ rule and the GameView share. Composition re-checks custody, cycles and the holde
 `has_item` climbs containers, so a worn item still counts. Finger slots, slot compatibility
 and dual wield, granted modifiers and affects, curses and no-remove items are LATER
 ([ROADMAP](../ROADMAP.md)).
+
+## position@1 (`kernel/ts/src/rules/position.ts`)
+
+The actor's position is the engine fact `position` (enum `standing`, `sitting`, `resting`,
+`sleeping`, default `standing`, scope player), which the compiler adds when the lock holds
+`position` ([cartridge.md](cartridge.md#compiler)). `stand`, `sit`, `rest`, `sleep` (no
+target): the command's position equal to the current one is `invalid_state`; else accepted
+`stood`, `sat`, `rested` or `slept`, one `fact.assign` at the actor's player scope with
+`expected` the current position and no event from the rule (the host adds `fact_changed`).
+Every change between two positions is legal (twelve), and every verb but `move` works in any
+position ([movement@1](#movement1-kerneltssrcrulesmovementts)). Content may read the fact
+(`fact_compare`, a reaction's `on.fact`) but never write it (`RESERVED_FACT`). The GameView
+shows `position` and lists the verbs but the current position's with the place's actions
+([protocol.md](protocol.md#gameview)). No position changes regeneration (00 §4.2 as amended
+2026-10-03). Sleeping that cannot act, waking on damage, double damage and `meditating` are
+LATER ([ROADMAP](../ROADMAP.md)).
 
 ## description_variant@1 and inspectable_detail@1 (`rules/description_variant.ts`)
 

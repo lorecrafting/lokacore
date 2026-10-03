@@ -134,7 +134,7 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 An actor's actions (`kernel/ts/src/actions.ts:149`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS`, `:84`: look, move, scan, take, drop, give, wait, open,
-close, lock, unlock, wear, remove, each with its target kind and input; policy always true), then the
+close, lock, unlock, wear, remove, stand, sit, rest, sleep, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
@@ -152,6 +152,9 @@ also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:23
 item and `remove` on a worn one only when admission and equipment@1's check accept it now, all
 available, never `drop`, `give` or `wear` on a worn item, and never either with the place's
 actions (a targetless one is never accepted: its Command needs `item_id`) (c1-equipment).
+`stand`, `sit`, `rest` and `sleep` (position@1) take no target; the GameView lists them with the
+place's actions, except every action resolving to the current position's verb (a cartridge
+alias included), which step would refuse `invalid_state` (c1-position).
 
 ## Policy
 
@@ -177,12 +180,15 @@ named by its keywords through `doors` (`:72`). A Command carries only ids, never
 `gameView` (`kernel/ts/src/view.ts:42`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
-barrier) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
+barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
+fare) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
 carries `door` (the barrier's short name, its state and the door verbs the actor may use on it
 now: those admission and barrier@1's check accept, all available), also when passable; an exit
 whose barrier does not bar the way carries `sight` (the destination room id and title and the
 NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
-(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`;
+(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`,
+nor the current position's verb; `position`, the actor's position, present exactly when the
+cartridge locks `position@1` (04 §15 as amended by c1-position);
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); an item with a barrier also
 carries its `state` and the container verbs admission and barrier@1's check accept now, all
@@ -210,4 +216,7 @@ recipes, and for the door and container verbs and `wear`/`remove`, matched by th
 listed action resolves to (a cartridge alias included): one listed on its exit or item (a nested
 one in `contents` included) is never refused with a code the view predicts (`not_present`
 among them), one not listed is never accepted, and none of `wear`/`remove` is a place action; a
+position verb (`stand`, `sit`, `rest`, `sleep`) some listed, available place action resolves to is never
+refused `invalid_state`, and one none resolves to is never accepted; an available exit's move is never
+refused `invalid_state`; a
 `take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:26`, `:62`).

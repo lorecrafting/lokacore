@@ -330,6 +330,8 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Timed world events | cave-in at the mine on day 6; storm on day 9; Lantern Night after the main story | WorldEventPlan | R8 |
 | Cooldowns | bash 3 rounds, spell words 1 hour, bounty daily | derived cooldown | R5 |
 
+*Amendment 2026-10-03 (chapter-one slice c1-position; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 7, triage 5):* the position bonuses to regeneration are LATER, with the time model that decides how a rest is spent (trigger: the time model, chapter two); under `position@1` every position regenerates at the pool's own `gain`.
+
 ### 4.3 Character and progression
 
 | Mechanic | In this game | Primitive | Phase |
@@ -351,6 +353,8 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Difficulty and ironman | normal / hard / ironman (permadeath) chosen at start | creation facts + death policy | R7 |
 
 *Amendment 2026-10-03 (chapter-one slice c1-attributes; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 3, triage 9):* the six stats are `attributes@1` definitions, each with its starting value, in the cartridge's `attributes.json`: the keys and the numbers are content, and the engine declares no default stats. Until a mechanic writes them, every actor's value of an attribute is its `start` (no saved attribute state). Training is chapter three (§11); ancestry modifiers (§2) are LATER, trigger: the first content that offers an ancestry choice, which also decides where a per-character value is stored. 06 §21 `stat_compare` reads them.
+
+*Amendment 2026-10-03 (chapter-one slice c1-position; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 7):* "Positions" is `position@1`: standing, sitting, resting and sleeping are the values of an engine fact the compiler adds (scope player, default standing), which only its rule writes; `stand`, `sit`, `rest` and `sleep` change it, every change is legal, and only `move` needs standing ([mechanics](../../system/mechanics.md#position1-kerneltssrcrulespositionts)). `meditating` (room-view need #2) is LATER (trigger: the first content that reads it, with spell words). Sleeping NPCs and double damage stay with combat (§4.5).
 
 ### 4.4 Items, inventory, equipment
 
