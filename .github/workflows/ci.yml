@@ -44,6 +44,7 @@ jobs:
       - run: elixir bin/check_size.exs
       - run: elixir bin/red_controls.exs
       - run: elixir bin/check_docs.exs
+      - run: bin/docs_red_controls.sh
 
   lint:
     runs-on: ubuntu-latest

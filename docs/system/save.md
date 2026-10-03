@@ -22,7 +22,7 @@ a new save: with a random source, under a world context and RNG seed drawn for t
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:129`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`session.ts:54`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:59`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`mobile/authority/local-story/session.ts:55`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:60`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
@@ -100,7 +100,7 @@ parent) pinned to it, with its own drawn world context and seed as in a new save
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
 (`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
 the file, or the report table or its index, corrupt, `replace` throws (`store.ts:137`) and the
-host's Start over deletes the whole file (`session.ts:153`), so pending reports and the trace are
+host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:154`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
 to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
