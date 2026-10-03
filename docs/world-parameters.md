@@ -63,22 +63,22 @@ From docs/archive/spec/00-first-cartridge-design.md: terrain cost table and "ave
 - **Encoding/hash/id**: canonical.ts:10-20 (SAFE 2^53-1, MAX_DEPTH 128, surrogates), lib/loka/core/canonical.ex:10, :161; sha256.ts (all); id_source.ts:34-43 (UUIDv8); rng.ts / rng.ex (xoshiro constants); `INTENT_DIGEST_VERSION`.
 - **Schema sizes**: aliases/keywords/variants 16, recipe sequence 16, costs 8, room details 64, actions 64, narration lines 64, entity capacity max 1024, target_ids 8, ResourceInt 32-bit bounds, ARTIFACT_MAX_BYTES 4 MiB; checks.ex:24 `@enclosing 3` (nesting depth bookkeeping).
 - **Mechanism tables**: COMPASS (decision.ts:204, from room.schema), barrier `MOVES` transitions (rules/barrier.ts:24-29), check order (target, cooldown, costs, check), target `normalize` stop-words (target.ts).
-- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:214 `*1000` (µs); smoke.ts:35-38 ID_PREFIX, KERNEL_VERSION.
+- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:214 `*1000` (µs); session.ts:27-28 KERNEL_VERSION, ID_PREFIX.
 - **UI layout/animation**: joystick.ts (ZOOM 2.6, CANCEL 6, TAP_MS 500, STAIR), MapDrawing.tsx, Footer.tsx, Turn.tsx, Book.tsx, pages.tsx sizes, paper.ts colours.
 - **Test-only**: all `*.test.ts` seeds and fixtures (faults.test.ts SEEDS, saves.test.ts SEED, etc.).
 
 ## 3. Presenters baking world values
 
-Repo-wide grep for `3600|86400|% 24` (excluding node_modules, tests, docs, fixtures) found only the kernel/Elixir rows above, mobile `smoke.ts`, and the `loka play` CLI (`kernel/ts/play`).
+Repo-wide grep for `3600|86400|% 24` (excluding node_modules, tests, docs, fixtures) found only the kernel/Elixir rows above, mobile `model.ts`, and the `loka play` CLI (`kernel/ts/play`).
 
 | id | path:line | baked value | should come from |
 |---|---|---|---|
-| P1 | mobile/authority/local-story/smoke.ts:46-47 (shown at mobile/app/book/Book.tsx:124) | `clock()` = HH:MM with 3600 s/hour, 60 min, no day wrap or day number (t >= 86400 shows "24:00", "25:00") | cartridge calendar (W5/W6) via GameView, ideally a `time_label` text key/bindings |
-| P2 | smoke.ts:66-77 | wait offers whole hours only, last one 23:00 (`23 - hour`), 3600 step | calendar (hours_per_day, units_per_hour) and `world.wait` (W16); comment admits "Lantern's claim limit" |
+| P1 | mobile/app/book/model.ts:77-78 | `branch(t)` = double-hour branch from 3600 s per hour, `% 24` | cartridge calendar (W5/W6) via GameView, ideally a `time_label` text key/bindings |
+| P2 | removed | the wait offer (whole hours, 3600 step) was removed with Wait ([record](decisions/owner-decision-untimed-lantern-2026-10-02.md)) | calendar (hours_per_day, units_per_hour) and `world.wait` (W16) |
 | P3 | mobile/app/book/pages.tsx:15-29 | English DikuMUD band phrases ("is leaking guts"...) and colour tiers at cuts 80/40 | text.json band keys (`band.<key>`) and per-band tone from W13 |
 | P4 | mobile/app/book/model.ts:59-64; pages.tsx:183 | `hp` is the condition pool (phrase shown on hp only) | `resources.json <pool>.condition: true` or `world.condition_pool` |
 | P5 | mobile/app/book/model.ts:51-55 | story ends when every journal quest is resolved/failed/abandoned | a cartridge ending (story point / `world.ending`); already an OWNER item in the comment |
 | P7 | kernel/ts/play/text.ts:224-231 (`loka play` CLI) | `clock()` "day N, HH:MM" from 86400/3600/24/60 | calendar (W5/W6) |
 | P8 | kernel/ts/play/text.ts:99-103; play/main.ts:99 | `wait [hours]` 1..24, converted with `* 3600` | calendar units_per_hour / hours_per_day; `world.wait.max` (W16) |
 | P9 | kernel/ts/play/text.ts:239-246 | status line lists exactly `hp`, `ma`, `mv` (other pools never shown) | iterate `world.resourceSpecs` (as view.ts does) |
-| P6 | smoke.ts:34, :200 | fixed RNG seed `[1,2,3,4]` and world context for every new game | not a cartridge value: host must draw seed per lineage ([ROADMAP](ROADMAP.md), R7/R8 for chapter one row); listed because it fixes every luck roll of every new game |
+| P6 | session.ts:23-24, :83 | fixed RNG seed `[1,2,3,4]` and world context for every new game | not a cartridge value: host must draw seed per lineage ([ROADMAP](ROADMAP.md), R7/R8 for chapter one row); listed because it fixes every luck roll of every new game |

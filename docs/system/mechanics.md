@@ -90,7 +90,7 @@ nothing and passes when the body's value of `resource` at admission (before cost
 `perform {action, target_id?}`: no recipe by that key in the actor's set `not_found`; a target
 other than the recipe's detail `invalid_target`; the detail outside the room `not_present`;
 then `cooldown` (time since the actor's last admitted attempt below the recipe's cooldown) and
-`insufficient_resource` (`actions.ts:244`). Accepted, in one decision: the costs' adjusts;
+`insufficient_resource` (`actions.ts:245`). Accepted, in one decision: the costs' adjusts;
 the check and its event; the chosen outcome's `sequence` in order (`fact.assign` with the
 expected value as the steps before left it, saturating `resource.adjust`, `event.emit` as
 `custom_event`); `action_completed` unless the outcome is `failure`; a `cooldown.start` when
@@ -110,8 +110,8 @@ and an undeclared quest are refused before the rule. Accepted: `quest.activate` 
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never
 stored) or `post_activation_event` (met by an `item_acquired` of the named item into the
-instance's actor's body, placed after activation; `earned`, `quest.ts:47`), which the proposal
-completes to `objectives_complete` as its own writer group. Resolution (`:83`) happens in the
+instance's actor's body, placed after activation; `earned`, `quest.ts:74`), which the proposal
+completes to `objectives_complete` as its own writer group. Resolution (`:110`) happens in the
 rule that resolves it (a dialogue choice): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and

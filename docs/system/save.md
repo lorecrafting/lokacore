@@ -20,7 +20,7 @@ release's fresh world at revision 0 as a new save. Refusals, nothing written:
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:129`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The smoke controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`smoke.ts:179`), or a receipt response in the story's scope that is not valid JSON (`:187`). A valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`session.ts:61`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:66`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
@@ -87,7 +87,7 @@ newest release, drops every receipt (old invocation ids are new again) and recre
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
 (`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
 the file, or the report table or its index, corrupt, `replace` throws (`store.ts:137`) and the
-host's Start over deletes the whole file (`smoke.ts:292`), so pending reports and the trace are
+host's Start over deletes the whole file (`session.ts:161`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
 to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
@@ -122,12 +122,12 @@ a run alone at the cap writes no more and keeps its replayable prefix. `observat
 newest 1000 records (`:73`): `evaluation.budget_exceeded` (`authority.ts:130`) and, when the
 host supplies a clock, each NEW decision's `kernel.decision_latency` (`:216`).
 
-## The smoke controller and the phone
+## The session controller and the phone
 
-`smoke.ts` is the controller under the book UI: the GameView, its text, the offered actions
+`session.ts` and `mobile/app/book/presenter.ts` are the controller under the book UI: the GameView, its text, the offered actions
 as buttons carrying the view token they were drawn from, and a log of the last 200 lines
-(`:211`); a press that throws is retried unchanged by the next press (03 §14). It builds the
-fresh world with one fixed world context and RNG seed (`:33`, `:34`; see
-[DIFFERENCES.md](DIFFERENCES.md)) and a kernel version marked `-dirty` (`:37`). Refusal and
-outcome words live in `words.ts` until the presenter split moves them into `mobile/app`
+(`presenter.ts:145`); a press that throws is retried unchanged by the next press (`presenter.ts:153`, 03 §14). `session.ts` builds the
+fresh world with one fixed world context and RNG seed (`:23`, `:24`; see
+[DIFFERENCES.md](DIFFERENCES.md)) and a kernel version marked `-dirty` (`:27`). Refusal and
+outcome words live in `mobile/app/book/words.ts`
 ([owner rule](owner-rules.md#architecture-and-engine)).
