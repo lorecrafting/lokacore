@@ -1,0 +1,51 @@
+== 1-old-step
+revision|2
+receipts|2
+seed|[1,2,3,4]
+pin.world_context_id|(absent)
+run_id|cfadd914-5d42-4f24-a0f8-2cad20ce025a
+header|cfadd914-5d42-4f24-a0f8-2cad20ce025a|loka-kernel@0000000000000000000000000000000000000000-dirty|0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f
+== 2-head-over-old
+revision|2
+receipts|2
+seed|[1,2,3,4]
+pin.world_context_id|(absent)
+run_id|cfadd914-5d42-4f24-a0f8-2cad20ce025a
+header|cfadd914-5d42-4f24-a0f8-2cad20ce025a|loka-kernel@0000000000000000000000000000000000000000-dirty|0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f
+header|cfadd914-5d42-4f24-a0f8-2cad20ce025a|loka-kernel@063f6f36c14de0bd87e708f8e5409e8c8dd4af81|0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f
+== 3-fresh-install
+revision|0
+receipts|0
+seed|[1589861743,1024733867,3623415998,1777476367]
+pin.world_context_id|62ce1802-9055-40cd-bd2c-b246bf18f657
+run_id|9172ac4f-539c-4fd1-8b6e-9146db6219f3
+header|9172ac4f-539c-4fd1-8b6e-9146db6219f3|loka-kernel@063f6f36c14de0bd87e708f8e5409e8c8dd4af81|62ce1802-9055-40cd-bd2c-b246bf18f657
+== 4-kill-mid-play
+revision|3
+receipts|3
+seed|[1589861743,1024733867,3623415998,1777476367]
+pin.world_context_id|62ce1802-9055-40cd-bd2c-b246bf18f657
+run_id|9172ac4f-539c-4fd1-8b6e-9146db6219f3
+header|9172ac4f-539c-4fd1-8b6e-9146db6219f3|loka-kernel@063f6f36c14de0bd87e708f8e5409e8c8dd4af81|62ce1802-9055-40cd-bd2c-b246bf18f657
+== 5-after-relaunch
+revision|3
+receipts|3
+seed|[1589861743,1024733867,3623415998,1777476367]
+pin.world_context_id|62ce1802-9055-40cd-bd2c-b246bf18f657
+run_id|9172ac4f-539c-4fd1-8b6e-9146db6219f3
+header|9172ac4f-539c-4fd1-8b6e-9146db6219f3|loka-kernel@063f6f36c14de0bd87e708f8e5409e8c8dd4af81|62ce1802-9055-40cd-bd2c-b246bf18f657
+== 6-start-over
+revision|0
+receipts|0
+seed|[1501714025,3997010464,4276015454,255661014]
+pin.world_context_id|9ec73fe7-6f65-4760-ada9-21332f1d428b
+run_id|4889648c-73ab-436d-8b57-e57eb3a955c9
+header|9172ac4f-539c-4fd1-8b6e-9146db6219f3|loka-kernel@063f6f36c14de0bd87e708f8e5409e8c8dd4af81|62ce1802-9055-40cd-bd2c-b246bf18f657
+header|4889648c-73ab-436d-8b57-e57eb3a955c9|loka-kernel@063f6f36c14de0bd87e708f8e5409e8c8dd4af81|9ec73fe7-6f65-4760-ada9-21332f1d428b
+== 7-damaged-start-over
+revision|1
+receipts|1
+seed|[2310738935,574206200,4089633026,4015833041]
+pin.world_context_id|a16d1f22-6508-47c3-9497-e3abdd2fe091
+run_id|c95b16d6-e59c-4603-a9c0-41af2c572c85
+header|c95b16d6-e59c-4603-a9c0-41af2c572c85|loka-kernel@063f6f36c14de0bd87e708f8e5409e8c8dd4af81|a16d1f22-6508-47c3-9497-e3abdd2fe091
