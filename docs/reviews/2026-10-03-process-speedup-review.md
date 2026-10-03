@@ -49,3 +49,14 @@ All crafted commits were made in a throwaway `--no-local` clone with hooks off, 
 Requirements 1, 3 (isolation), 4 and 7 hold apart from the findings above. The `.gitattributes` and `ci.yml` job wiring are minimal, and there is nothing to delete.
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (3561d7e), verbatim
+
+CHANGES REQUESTED
+
+```text
+F1 | blocker | docs/WORKFLOW.md:98 at 3561d7e
+Scenario: A has green code jobs. Push B changes TypeScript, but its CI is queued or still in `changes`. Markdown-only push C cancels B via cancel-in-progress and skips all three code jobs. C’s lint/changes finish green; A remains “the last head that ran them,” so step 7 permits merging C even though B’s code never passed CI.
+
+Require a green code-tested ancestor with only Markdown changes between it and the merge head. If that cannot be established, run all three code jobs before merging; cancelled or unstarted runs cannot justify the skip.
+```
