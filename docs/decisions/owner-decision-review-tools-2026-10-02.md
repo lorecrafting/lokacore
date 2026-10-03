@@ -4,7 +4,7 @@ Relayed by the PM (Claude Code), **(paraphrased)**: the owner agreed to the PM's
 whether `/code-review` and the `advisor` tool earn their cost next to the subagent reviewers.
 
 - **`/code-review medium` (developer self-review):** run it only on a diff that changes code or bulk-edits
-  docs (for example a relink or a move), and always on a named target (the PR number or the branch), never
+  docs (for example a relink or a move), and always on a named target (the branch), never
   on whatever the working directory holds. Skip it on a tiny diff and on docs-only notes; the developer
   still does the correctness questions by hand. Evidence (2026-10-02): it found two real bugs in the R6P
   save fixes (#116) and a relink script's damage in compaction PR 2 (#119), found nothing on tiny diffs, and

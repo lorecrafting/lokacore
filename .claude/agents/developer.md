@@ -24,9 +24,9 @@ normative documents disagreeing means stop and ask. Never edit
 Before handing off:
 1. Run the full local check line from AGENTS.md via `mise exec --`; every new check has a
    planted violation that fails.
-2. Self-review the diff: `/ponytail-review`, then `/code-review medium` on the PR number or
-   branch when the diff changes code or bulk-edits docs (otherwise, or if skills are
-   unavailable, the same questions by hand). Then break your own core logic once and
+2. Self-review the diff: `/ponytail-review`, then `/code-review medium` on the branch
+   when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
+   unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a
    disposition for each finding.
 3. Commit (attribution lines per the session), push the branch, open the PR citing the
