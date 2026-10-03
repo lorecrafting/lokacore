@@ -100,3 +100,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner leaning, not a decision: [Realm separation, a middle path on ADR-074 §5 route (a): shared foundation, separate rules, new keys for online behaviour](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md).
 - Owner decision: [fresh independent Codex primary review for c1-position PR #137 only](owner-decision-c1-position-codex-review-2026-10-03.md).
 - Owner decision (paraphrased): [prioritize touch interaction; de-emphasize loka play UX and typed synonyms](owner-decision-touch-priority-2026-10-03.md).
+
+- [C1 mechanics continuation](owner-decision-c1-mechanics-continuation-2026-10-03.md): PM selects bounded independent Codex reviews under the owner's delegated workflow.

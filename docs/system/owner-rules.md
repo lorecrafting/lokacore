@@ -102,6 +102,11 @@ and not repeated here.
 
 ## Process
 
+- For remaining C1 mechanics (journal, chapters, scenes-modal, sampler), the PM selects a fresh
+  independent Codex primary plus separate Sol while Claude quota prevents Opus, under the
+  owner's delegated workflow; default policy otherwise remains in force
+  ([record](../decisions/owner-decision-c1-mechanics-continuation-2026-10-03.md)).
+
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
 - Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
