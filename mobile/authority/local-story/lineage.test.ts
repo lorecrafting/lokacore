@@ -15,7 +15,7 @@ import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/
 import { validate } from '../../../kernel/ts/src/validate.ts';
 import { INSTALLED } from '../../../kernel/ts/src/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openStory, type Host, type Release } from './authority.ts';
+import { openStory, type Host, type Release, type Saved } from './authority.ts';
 
 const TEMPLATE = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId; // session.ts CONTEXT
 // numeric-vectors.json rng_steps[3].state and [4].state: dusk's pick_lock draws once (saves.test.ts).
@@ -76,7 +76,7 @@ function processOn(path: string, { releases = [dusk], ...host }: Options = {}) {
       actor_id: story.world().character,
       target_ids: [],
       input: {},
-    }) as { replay: boolean; decision: never };
+    }) as Saved;
   return { sql, opened, story, one, pin, seed, rng, headers, pick };
 }
 const file = () => join(mkdtempSync(join(tmpdir(), 'loka-c1-host-')), 'save.db');

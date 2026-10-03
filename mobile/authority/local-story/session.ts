@@ -22,7 +22,7 @@ const ID_PREFIX = '00000000-0000-4000-8000-';
 
 type Latency = Host['latency'];
 type Build = Pick<Host, 'kernel_version' | 'random'>; // the build's commit and its random source
-type HostPart = Pick<Host, 'newId' | 'latency'> & Required<Build>; // and its ids and its clock
+type HostPart = Pick<Host, 'newId' | 'latency'> & Build; // and its ids and its clock
 
 function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
