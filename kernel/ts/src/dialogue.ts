@@ -27,6 +27,7 @@ import {
   type World,
 } from './decision.ts';
 import { holds } from './policy.ts';
+import { acceptRefused } from './quest.ts';
 import { cmp } from './validate.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
@@ -73,7 +74,8 @@ export function blocked(world: World, row: ChoiceRow): 'not_present' | 'not_owne
 /**
  * `actor`'s PendingChoice for the GameView (04 §14), if it has one: the dialogue's prompt, its
  * speaker's bound EntityId (from the row, never a name lookup), closable (06 §37), and each option
- * in the row's order, unavailable with blocked's code while it holds.
+ * in the row's order, unavailable with blocked's code while it holds, else an accept with
+ * acceptRefused's (choose refuses both).
  */
 export function choiceView(world: World, actor: CharacterId): PendingChoice | undefined {
   const found = pending(world, actor);
@@ -91,36 +93,43 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
     speaker_id: row.roles.find((r) => r.role === speaker)!.entity_id,
     closable: true,
     choices: row.choice_ids.map((choice_id) => {
-      const label = d.choices[choice_id]!.label;
-      return code
-        ? { available: false, choice_id, label, reason: { code } }
+      const { label, accept } = d.choices[choice_id]!;
+      const why = code ?? (accept && acceptRefused(world, actor, accept, { n: 0 }));
+      return why
+        ? { available: false, choice_id, label, reason: { code: why } }
         : { available: true, choice_id, label };
     }),
   };
 }
 
-/** The dialogue whose speaker is `target`, if any (the loader allows one per speaker). */
-export const spokenBy = (world: World, target: EntityId | undefined) =>
-  Object.values(world.cartridge.dialogues ?? {}).find(
-    (d) => world.entityIds[refString(d.npc)] === target,
-  );
+/** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
+const spoken = (world: World, target: EntityId | undefined) =>
+  Object.values(world.cartridge.dialogues ?? {})
+    .filter((d) => world.entityIds[refString(d.npc)] === target)
+    .sort((a, b) => cmp(a.key, b.key));
+
+/** Whether `target` speaks any dialogue (else its talk is not_found). */
+export const speaks = (world: World, target: EntityId | undefined) =>
+  spoken(world, target).length > 0;
 
 /**
- * Whether `target`'s dialogue refuses `actor`'s talk now, its policy failing or the actor having a
- * pending choice (one per actor): the talk rule's check after admission, and the GameView's for
- * every talk listed on the target, since a cartridge action with command talk (an alias) is
- * admitted on its own policy. Each policy leaf it evaluates adds one to `steps` (04 §5.4).
+ * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
+ * whose own policy holds, if any. Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
-export function talkRefused(
+export const spokenBy = (
   world: World,
   actor: CharacterId,
   target: EntityId | undefined,
   steps: Steps = { n: 0 },
-) {
-  const d = spokenBy(world, target);
-  const ctx = { target, steps };
-  return d !== undefined && (!holds(world, actor, d.policy.root, ctx) || !!pending(world, actor));
-}
+) => spoken(world, target).find((d) => holds(world, actor, d.policy.root, { target, steps }));
+
+/**
+ * Whether `target`'s dialogues refuse `actor`'s talk now, no policy of theirs holding or the actor
+ * having a pending choice (one per actor): the GameView's check for every talk listed on the
+ * target, since a cartridge action with command talk (an alias) is admitted on its own policy.
+ */
+export const talkRefused = (world: World, actor: CharacterId, target: EntityId | undefined) =>
+  speaks(world, target) && (!spokenBy(world, actor, target) || !!pending(world, actor));
 
 /**
  * The talk of each dialogue whose speaker is in `actor`'s room, keyed by the dialogue's key: its

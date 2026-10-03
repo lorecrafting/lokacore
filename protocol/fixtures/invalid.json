@@ -11791,10 +11791,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/offer",
-        "code": "missing_property"
-      },
-      {
         "path": "/title",
         "code": "missing_property"
       },
@@ -12770,6 +12766,7 @@
         "e": {
           "label": "a",
           "narration": "b",
+          "accept": "lantern",
           "hand_over": {
             "item": "Bad",
             "to": "B"
@@ -12825,6 +12822,10 @@
       {
         "path": "/choices/d/sequence/2/op",
         "code": "missing_property"
+      },
+      {
+        "path": "/choices/e/accept",
+        "code": "invalid_type"
       },
       {
         "path": "/choices/e/hand_over/item",

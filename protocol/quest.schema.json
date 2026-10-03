@@ -4,7 +4,7 @@
   "description": "QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation policy, §43; 04 §5.2), owned by quest@1. The persisted lifecycle state is policy.schema.json QuestState.",
   "$defs": {
     "QuestDefinition": {
-      "description": "An offered quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields.",
+      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields.",
       "type": "object",
       "properties": {
         "key": {
@@ -30,7 +30,7 @@
           "$ref": "#/$defs/QuestObjective"
         }
       },
-      "required": ["key", "title", "offer", "objective"],
+      "required": ["key", "title", "objective"],
       "additionalProperties": false,
       "examples": [
         {

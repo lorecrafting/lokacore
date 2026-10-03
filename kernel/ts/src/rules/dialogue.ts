@@ -1,25 +1,33 @@
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §38, §43; 04 §5.3 Choice/continuation
 // resolution; 21 §20): talk, choose and close_choice. talk: a target that is no dialogue's speaker
-// is not_found; else the dialogue's policy is enforced here, since a cartridge action with command
-// talk (an alias) passes admission on its own policy: failing it, or a pending choice of the
-// actor's, is invalid_state; else one choice.open of a new
-// continuation (its id the command's IdSource ordinal 0: each talk is a distinct occurrence),
+// is not_found; else it opens the first of its dialogues, in key order, whose own policy holds
+// (enforced here, since a cartridge action with command talk (an alias) passes admission on its own
+// policy): none, or a pending choice of the actor's, is invalid_state; else one choice.open of a
+// new continuation (its id the command's IdSource ordinal 0: each talk is a distinct occurrence),
 // beat the dialogue's key, each role bound to its EntityId in role-name order, the choice ids in
 // key order, and its choice_opened. choose: a continuation that is not pending, not the actor's or
-// does not offer choice_id is invalid_state (a resolved or closed one is never chosen again);
-// then a bound NPC not in the actor's room not_present, then a bound item the actor's body does
-// not hold not_owned (dialogue.ts blocked, the GameView's availability too); then the dialogue's
-// quest resolves with outcome choice_id (quest.ts resolution on the world before this decision:
-// invalid_state or quest_requirement). Accepted, outcome choice_id, in one decision: the hand_over
-// (an entity.transfer of the bound item to the bound NPC and its item_acquired, as give), the
-// choice's fact.assign steps (fact.ts assigned), the quest's transitions and quest_resolved, the
-// choice.resolve at the revision its continuation was opened at, and choice_resolved; one
-// narration line, its participants the actor's body and every bound role, read from the row
-// (06 §43: never re-resolved by name); after choice_resolved, if a story point's outcome names
-// this dialogue and choice, its story_point_reached (23 §3). close_choice: the actor's pending
-// continuation (the ActionSet fills it) closes, nothing else changes (06 §37, §43); else
-// invalid_state.
-import type { DialogueChoice, EntityId } from '../contracts.gen.ts';
+// does not offer choice_id is invalid_state (a resolved or closed one is never chosen again); then
+// a bound NPC not in the actor's room not_present, then a bound item the actor's body does not hold
+// not_owned (dialogue.ts blocked, the GameView's availability too); then the dialogue's quest
+// resolves with outcome choice_id (quest.ts resolution on the world before this decision:
+// invalid_state or quest_requirement), or the choice's accept activates its quest (quest.ts
+// activation; invalid_state if the actor already has an instance: the talk-time policy may be
+// stale). Accepted, outcome choice_id, in one decision: the hand_over (an entity.transfer of the
+// bound item to the bound NPC and its item_acquired, as give), the choice's fact.assign steps
+// (fact.ts assigned), the quest's transitions and quest_resolved (or its quest.activate and
+// quest_activated), the choice.resolve at the revision its continuation was opened at, and
+// choice_resolved; one narration line, its participants the actor's body and every bound role, read
+// from the row (06 §43: never re-resolved by name); after choice_resolved, if a story point's
+// outcome names this dialogue and choice, its story_point_reached (23 §3). close_choice: the
+// actor's pending continuation (the ActionSet fills it) closes, nothing else changes (06 §37, §43);
+// else invalid_state.
+import type {
+  CharacterId,
+  DialogueChoice,
+  DialogueDefinition,
+  EntityId,
+  Key,
+} from '../contracts.gen.ts';
 import { same } from '../compose.ts';
 import {
   accepted,
@@ -41,11 +49,12 @@ import {
   choiceIds,
   continuationId,
   definition,
+  pending,
+  speaks,
   spokenBy,
-  talkRefused,
 } from '../dialogue.ts';
 import { assigned } from '../fact.ts';
-import { resolution } from '../quest.ts';
+import { acceptRefused, activation, resolution } from '../quest.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
   readonly payload: Extract<Parameters<Rule<'dialogue'>>[1]['payload'], { type: T }>;
@@ -65,9 +74,9 @@ export const decide: Rule<'dialogue'> = (world, command, mint, steps = { n: 0 })
 
 function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) {
   const p = command.payload;
-  const d = spokenBy(world, p.target_id);
-  if (!d) return rejected('not_found');
-  if (talkRefused(world, p.actor_id, p.target_id, steps)) return rejected('invalid_state');
+  if (!speaks(world, p.target_id)) return rejected('not_found');
+  const d = spokenBy(world, p.actor_id, p.target_id, steps);
+  if (!d || pending(world, p.actor_id)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const op = {
@@ -91,13 +100,13 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   if (code) return rejected(code);
   const d = definition(world, row.source);
   const option = d.choices[choice_id]!;
-  const resolved = d.quest && resolution(world, actor_id, d.quest, choice_id, 0, used);
-  if (typeof resolved === 'string') return rejected(resolved);
+  const q = quest(world, actor_id, d, option, choice_id, mint, used);
+  if (typeof q === 'string') return rejected(q);
   const body = bodyOf(world, actor_id)!;
   const given = handOver(world, command, mint, row, option, body);
   const start = { ops: given.ops, position: given.events.length, facts: {} };
   const run = (option.sequence ?? []).reduce((r, s) => assigned(world, actor_id, r, s), start);
-  const quest = resolved ? [event(world, command, mint, run.position + 1, resolved.payload)] : [];
+  const quests = q ? [event(world, command, mint, run.position + 1, q.payload)] : [];
   const expected_revision = row.opened_revision;
   const op = {
     op: 'choice.resolve',
@@ -107,7 +116,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
     expected_revision,
   } as const;
   const chosen = { type: 'choice_resolved', continuation_id, choice_id } as const;
-  const at = run.position + quest.length + 1;
+  const at = run.position + quests.length + 1;
   const resolvedChoice = event(world, command, mint, at, chosen);
   // Minted after choice_resolved, so the earlier ids stay put.
   const reached = storyPoints(world, command, mint, row, at + 1);
@@ -117,10 +126,27 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   return accepted(
     world,
     choice_id,
-    [...run.ops, ...(resolved ? resolved.ops : []), op],
-    [...given.events, ...quest, resolvedChoice, ...reached],
+    [...run.ops, ...(q ? q.ops : []), op],
+    [...given.events, ...quests, resolvedChoice, ...reached],
     [{ key: option.narration, participants }],
   );
+}
+
+// The dialogue's quest resolving with outcome `choice_id`, or the option's accept activating its
+// quest: invalid_state when accept_quest would refuse it (quest.ts acceptRefused; the talk-time
+// policy may be stale).
+function quest(
+  world: World,
+  actor: CharacterId,
+  d: DialogueDefinition,
+  { accept }: DialogueChoice,
+  choice_id: Key,
+  mint: Mint,
+  used: Steps,
+) {
+  if (d.quest) return resolution(world, actor, d.quest, choice_id, 0, used);
+  if (!accept) return undefined;
+  return acceptRefused(world, actor, accept, used) ?? activation(mint, actor, accept);
 }
 
 // The option's hand_over: the bound item from the body to the bound NPC and its item_acquired.

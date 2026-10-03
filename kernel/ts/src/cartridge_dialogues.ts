@@ -1,20 +1,21 @@
 // The loader's dialogue checks (dialogue@1; dialogue.schema.json DialogueDefinition; 06 §8
 // references exist, §17, §33), twin of lib/loka/content/dialogues.ex: what each dialogue uses, for
 // the lock stage (cartridge.ts): its own kind and each fact.assign's fact_changed (and each story
-// point its story_point_reached); and its references: its key is no registered command's,
-// action's, recipe's or quest's
-// (DUPLICATE_DEFINITION: its talk is an ActionSet identity), its speaker no other dialogue's
-// (DUPLICATE_DEFINITION at npc: a talk names only its target, so one dialogue per NPC), its
-// prompt, labels and narrations have catalog entries, its speaker, roles and quest name an NPC,
-// item or quest of this cartridge, its speaker is one of its npc roles, no role is named actor
-// (the actor is always a participant: DUPLICATE_DEFINITION), it has a choice (the subset has no
-// minProperties: SCHEMA_VIOLATION too_few_items), each hand_over gives an item role to an npc
-// role, and each fact.assign names a fact of it with a value of its type. Its policy is walked
-// with every other policy (cartridge_refs.ts nodes). Each story point (cartridge.schema.json
-// StoryPointDefinition; 23 §3) has an outcome (SCHEMA_VIOLATION too_few_items), and each
-// outcome's trigger names a dialogue of this cartridge and one of its choices, a site no other
-// outcome names (DUPLICATE_DEFINITION), in a dialogue that resolves a quest, so its choice is
-// made once (OUTCOME_MISMATCH).
+// point its story_point_reached); and its references: its key is no registered command's, action's,
+// recipe's or quest's (DUPLICATE_DEFINITION: its talk is an ActionSet identity), its prompt, labels
+// and narrations have catalog entries, its speaker, roles and quest name an NPC, item or quest of
+// this cartridge, its speaker is one of its npc roles, no role is named actor (the actor is always
+// a participant: DUPLICATE_DEFINITION), it has a choice (the subset has no minProperties:
+// SCHEMA_VIOLATION too_few_items), each accept names a quest of this cartridge in a dialogue
+// without a quest, on a choice without a hand_over (else OUTCOME_MISMATCH: accepting would resolve,
+// or activation and acquisition conflict), each hand_over gives an item role to an npc role, and
+// each fact.assign names a fact of it with a value of its type. A speaker may have several
+// dialogues: its talk opens the first, in key order, whose policy holds (dialogue.ts). Its policy
+// is walked with every other policy (cartridge_refs.ts nodes). Each story point
+// (cartridge.schema.json StoryPointDefinition; 23 §3) has an outcome (SCHEMA_VIOLATION
+// too_few_items), and each outcome's trigger names a dialogue of this cartridge and one of its
+// choices, a site no other outcome names (DUPLICATE_DEFINITION), in a dialogue that resolves a
+// quest, so its choice is made once (OUTCOME_MISMATCH).
 import {
   CAPABILITY_OWNERS,
   type DefinitionRef,
@@ -60,12 +61,8 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     ...[c.actions, c.recipes ?? {}, c.quests ?? {}].flatMap(Object.values).map((d: Obj) => d.key),
   ]);
   const out: Diagnostic[] = [];
-  const speakers = each(c).map(([d]) => refString(d.npc as DefinitionRef));
   for (const [d, at] of each(c)) {
     if (taken.has(d.key)) out.push(diag('DUPLICATE_DEFINITION', at));
-    const speaker = refString(d.npc as DefinitionRef);
-    if (speakers.filter((s) => s === speaker).length > 1)
-      out.push(diag('DUPLICATE_DEFINITION', `${at}.npc`));
     text(d, ['prompt'], at);
     named(d.npc, 'npc', `${at}.npc`);
     if (d.quest) named(d.quest, 'quest', `${at}.quest`);
@@ -81,7 +78,7 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     if (!Object.keys(d.choices).length)
       out.push(diag('SCHEMA_VIOLATION', `${at}.choices`, { error: 'too_few_items' }));
     for (const [id, o] of Object.entries(d.choices as Obj))
-      out.push(...choice(o, `${at}.choices${step(id)}`, roles, checks));
+      out.push(...choice(o, `${at}.choices${step(id)}`, d, checks));
   }
   return [...out, ...storyPoints(c, named)];
 }
@@ -109,9 +106,17 @@ function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
   return out;
 }
 
-// One option's texts, fact.assign steps and hand_over (an item role to an npc role).
-function choice(o: Obj, path: string, roles: Obj, { named, typedValue, text }: Checks) {
+// One option's texts, fact.assign steps, accept (a quest of this cartridge, in a dialogue that
+// resolves none, with no hand_over: OUTCOME_MISMATCH) and hand_over (an item role to an npc role).
+function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Checks) {
+  const roles = d.roles as Obj;
+  const out: Diagnostic[] = [];
   text(o, ['label', 'narration'], path);
+  if (o.accept) {
+    named(o.accept, 'quest', `${path}.accept`);
+    if (d.quest) out.push(diag('OUTCOME_MISMATCH', `${path}.accept`));
+    if (o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.hand_over`));
+  }
   (o.sequence ?? []).forEach((s: Obj, i: number) => {
     named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
     typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
@@ -119,9 +124,11 @@ function choice(o: Obj, path: string, roles: Obj, { named, typedValue, text }: C
   const h = o.hand_over;
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);
-  return (['item', 'to'] as const)
-    .filter((field) => wrong(field, field === 'to' ? 'npc' : 'item'))
-    .map((field) =>
-      diag('UNRESOLVED_REFERENCE', `${path}.hand_over.${field}`, { target: h[field] }),
-    );
+  return out.concat(
+    (['item', 'to'] as const)
+      .filter((field) => wrong(field, field === 'to' ? 'npc' : 'item'))
+      .map((field) =>
+        diag('UNRESOLVED_REFERENCE', `${path}.hand_over.${field}`, { target: h[field] }),
+      ),
+  );
 }

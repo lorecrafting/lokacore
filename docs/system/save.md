@@ -33,7 +33,12 @@ for a rejection) and the DecisionResult. Replay (`authority.ts:167`): a known in
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
 other known id is `conflict`. A fault gets no receipt (`:187`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
-Lantern traces and the 11 adverse cases).
+Lantern traces and the 11 adverse cases). The latter projects kernel values onto the traces'
+vocabulary by the R6P P4b mapping ([archived ROADMAP](../archive/ROADMAP.md), R6P row) as
+changed by Quest from dialogue: action `activate` is gone; action `talk` with no target is the
+talk Bram's GameView offers now (`bram_offer` before the quest, then `bram`); continuations
+`offer-choice:offer` and `proof-choice:talk` are the minted ContinuationIds of Bram's `bram_offer`
+and `bram` choices, and narration ids follow them; outcome `accept` is the kernel's.
 
 ## Replies
 

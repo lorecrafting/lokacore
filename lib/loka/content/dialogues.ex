@@ -4,12 +4,14 @@ defmodule Loka.Content.Dialogues do
   `kernel/ts/src/cartridge_dialogues.ts`: each dialogue's owner (dialogue@1) and each
   fact.assign's (fact@1, by its fact_changed) is required; its key is no registered command's,
   action's, recipe's or quest's (DUPLICATE_DEFINITION: its talk is an ActionSet identity); its
-  speaker no other dialogue's (DUPLICATE_DEFINITION at npc: one dialogue per NPC); its
   prompt, labels and narrations have catalog entries (unless the catalog was rejected,
   `:unknown`); its speaker, roles and quest name an NPC, item or quest of this cartridge; its
   speaker is one of its npc roles (else UNRESOLVED_REFERENCE at npc); no role is named actor
   (DUPLICATE_DEFINITION); it has a choice (SCHEMA_VIOLATION too_few_items: the subset has no
-  minProperties); each hand_over gives an item role to an npc role (else UNRESOLVED_REFERENCE);
+  minProperties); each accept names a quest of this cartridge, in a dialogue without a quest, on a
+  choice without a hand_over (else OUTCOME_MISMATCH: accepting would resolve, or activation and
+  acquisition conflict); each hand_over gives an item role to an npc role (else
+  UNRESOLVED_REFERENCE); a speaker may have several dialogues;
   each fact.assign names a fact with a value of its type. Its policy tree is checked with every
   other (`conditions/1`, `Loka.Content.Checks`). Each story point (cartridge.schema.json
   StoryPointDefinition; 23 §3) requires dialogue@1 (by its story_point_reached) and has an
@@ -41,7 +43,6 @@ defmodule Loka.Content.Dialogues do
       defs: defs,
       text: text,
       taken: MapSet.new(commands() ++ keys),
-      shared: shared(defs),
       kinds: {caps, owners(registry, ["definitions"])},
       events: {caps, owners(registry, ["events"])}
     }
@@ -92,16 +93,12 @@ defmodule Loka.Content.Dialogues do
       end
   end
 
-  # The speakers of more than one dialogue.
-  defp shared(defs),
-    do: for({n, c} <- Enum.frequencies(for {_, d} <- all(defs), do: d["npc"]), c > 1, do: n)
-
   defp dialogue({rel, d}, ctx) do
     owned(at(rel, []), "dialogue", ctx.kinds) ++
       own(rel, d, ctx) ++
       texts(rel, [{["prompt"], d["prompt"]}], ctx.text) ++
       refs(rel, d, ctx) ++
-      Enum.flat_map(d["choices"], &choice(rel, &1, d["roles"], ctx))
+      Enum.flat_map(d["choices"], &choice(rel, &1, d, ctx))
   end
 
   # Its speaker, quest and roles name definitions of this cartridge.
@@ -111,8 +108,7 @@ defmodule Loka.Content.Dialogues do
     |> Enum.concat(Enum.flat_map(d["roles"], &role(rel, &1, ctx)))
   end
 
-  # The dialogue's own checks: its key, its speaker no other dialogue's and among its npc roles,
-  # at least one choice.
+  # The dialogue's own checks: its key, its speaker among its npc roles, at least one choice.
   defp own(rel, d, ctx) do
     n = d["npc"]
     target = "#{n["cartridge_id"]}@#{n["cartridge_version"]}:#{n["kind"]}/#{n["key"]}"
@@ -120,7 +116,6 @@ defmodule Loka.Content.Dialogues do
 
     for {true, diag} <- [
           {d["key"] in ctx.taken, diag("DUPLICATE_DEFINITION", at(rel, []))},
-          {n in ctx.shared, diag("DUPLICATE_DEFINITION", at(rel, ["npc"]))},
           {%{"role" => "npc", "npc" => n} not in Map.values(d["roles"]),
            diag("UNRESOLVED_REFERENCE", at(rel, ["npc"]), %{"target" => target})},
           {d["choices"] == %{}, diag("SCHEMA_VIOLATION", at(rel, ["choices"]), empty)}
@@ -137,7 +132,7 @@ defmodule Loka.Content.Dialogues do
     actor ++ reference(rel, ["roles", name], kind, r, ctx.m, ctx.defs)
   end
 
-  defp choice(rel, {id, o}, roles, ctx) do
+  defp choice(rel, {id, o}, d, ctx) do
     steps = ["choices", id]
 
     texts(
@@ -145,16 +140,30 @@ defmodule Loka.Content.Dialogues do
       [{steps ++ ["label"], o["label"]}, {steps ++ ["narration"], o["narration"]}],
       ctx.text
     ) ++
-      Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
-        owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
-          reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs)
-      end) ++
-      hand_over(rel, steps, o["hand_over"], roles)
+      sequence(rel, steps, o, ctx) ++ accept(rel, steps, o, d, ctx) ++ hand_over(rel, steps, o, d)
   end
 
-  defp hand_over(_, _, nil, _), do: []
+  defp sequence(rel, steps, o, ctx) do
+    Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
+      owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
+        reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs)
+    end)
+  end
 
-  defp hand_over(rel, steps, h, roles) do
+  # A choice's accept: a quest of this cartridge, in a dialogue that resolves none (accepting
+  # would resolve it), on a choice without a hand_over (activation and acquisition conflict).
+  defp accept(rel, steps, %{"accept" => _} = o, d, ctx) do
+    reference(rel, steps, {"accept", "quest"}, o, ctx.m, ctx.defs) ++
+      for {true, field} <- [
+            {is_map_key(d, "quest"), "accept"},
+            {is_map_key(o, "hand_over"), "hand_over"}
+          ],
+          do: diag("OUTCOME_MISMATCH", at(rel, steps ++ [field]))
+  end
+
+  defp accept(_, _, _, _, _), do: []
+
+  defp hand_over(rel, steps, %{"hand_over" => h}, %{"roles" => roles}) do
     for {field, kind} <- [{"item", "item"}, {"to", "npc"}],
         not match?(%{"role" => ^kind}, roles[h[field]]),
         do:
@@ -162,6 +171,8 @@ defmodule Loka.Content.Dialogues do
             "target" => h[field]
           })
   end
+
+  defp hand_over(_, _, _, _), do: []
 
   defp texts(_, _, :unknown), do: []
 

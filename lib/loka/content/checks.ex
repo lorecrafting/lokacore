@@ -63,7 +63,7 @@ defmodule Loka.Content.Checks do
   node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
   included), a recipe's fact.assign fact, its target's room or the resource of its cost,
   threshold check or resource.adjust step, a narration participant's or dialogue role's npc or item, a dialogue's npc and
-  quest, a dialogue choice's fact.assign fact, a story point trigger's dialogue, an exit's `to` and `barrier`, a barrier's
+  quest, a dialogue choice's fact.assign fact and accept, a story point trigger's dialogue, an exit's `to` and `barrier`, a barrier's
   `key_item`, a quest objective's `item_acquired`, a reaction trigger's fact or room, an item's location (its room,
   npc or item, as `in` selects), an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
@@ -122,6 +122,9 @@ defmodule Loka.Content.Checks do
   # A story point's trigger (StoryPointDefinition outcome): its short dialogue.
   def expand(%{"dialogue" => d, "choice" => c} = t, m) when is_binary(c),
     do: Map.put(t, "dialogue", ref(d, "dialogue", m))
+
+  def expand(%{"accept" => k, "narration" => _} = o, m) when is_binary(k),
+    do: o |> Map.delete("accept") |> expand(m) |> Map.put("accept", ref(k, "quest", m))
 
   # A dialogue (DialogueDefinition, its prompt a text key): its short speaker and quest.
   def expand(%{"npc" => n, "prompt" => p} = d, m) when is_binary(p) do

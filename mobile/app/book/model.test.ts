@@ -64,7 +64,7 @@ test('a touch link is shown as its label', () => {
 // draws them twice (once under the choice, once among the place's actions).
 test("a choice's answers and Close are their own group, not place actions", () => {
   const g = group([
-    b("Offer to fetch Bram's lantern", 'lantern'),
+    b('Scan', 'scan'),
     b('Carry it along the bank', 'choose', [], { choice_id: 'carry', continuation_id: 'c-1' }),
     b('Close', 'close_choice'),
   ]);
@@ -74,7 +74,7 @@ test("a choice's answers and Close are their own group, not place actions", () =
   );
   assert.deepEqual(
     g.place.map((x) => x.label),
-    ["Offer to fetch Bram's lantern"],
+    ['Scan'],
   );
 });
 
