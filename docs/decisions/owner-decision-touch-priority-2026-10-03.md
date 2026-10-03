@@ -44,3 +44,11 @@ The owner subsequently directed: “What is in PR#137? we should just merge it, 
 stuff after that”. Finish PR #137's existing fixes, required checks and independent re-review,
 then merge its approved exact head with green CI. Pause further position/terminal development
 after that merge and continue the touch UI. This supersedes the earlier hold on PR #137 only.
+
+## Latest priority: mechanics after PR #137
+
+The owner then directed: “wait deprioritize the ui for now and work on all the game mechanic
+stuff”, followed by “after the merge that is”. Finish and merge #137 first, then continue the
+approved game-mechanics slices. The partial touch-controls draft is parked, not merged or
+counted complete. This supersedes the preceding touch-first ordering. No individual proposed
+LegendMUD mechanic is approved by this instruction; those proposals remain separate.

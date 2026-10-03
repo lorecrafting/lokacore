@@ -89,3 +89,74 @@ Limitations: full pre-push, full mutation/schema sweeps, file-backed reopen and 
 - Controlled reproductions: automatic-dependency input failed 1/2 before the fix and passes after; blocked-alias input failed before the invariant fix and passes after. Focused Elixir compiler/cross-kernel checks after both new regressions: 5/5, exit 0. Focused TS position: 5/5, exit 0.
 - Developer mutation run after fixes: 20/20 killed, zero survivors, all restored. Adds automatic dependency omission, normalization hiding authored fact@2 and selected-alias omission to the initial 17 controls. Every failing log contains assertion evidence. All 16 cartridge source artifacts still match frozen bytes after the compiler fix.
 - Ponytail and correctness self-review: two small fixes at shared boundaries; no new runtime dependency, storage shape or schema. The extra test catches normalization accidentally bypassing the existing authored-version validation. Required full pre-push check and broad primary/Sol re-review follow on the committed fix head; no approval is claimed here.
+
+
+## Independent primary fix re-review — 2026-10-03
+
+**APPROVE** at exact pushed head `678c00572f2bb3297c06114d2320b9fef064c7fc`. No remaining findings. Reviewed fixes `cdc2e7e` and `678c005` against the initial code head `7cb725f`; the initial verdict and evidence above remain historical.
+
+The owner resumed this PR after the development/review pause. This re-review retains the one-slice independent Codex primary-review exception. I fetched the branch and reviewed in the existing detached worktree; preserved the initial local draft in the scratchpad, then loaded the committed record/index before appending. No implementation was authored or fixed by this reviewer.
+
+The settled brief requires broad contract-freeze re-review after a compiler/loader fix. I rechecked the original requirements, the amended compiler/admission clauses, the complete position path and its contract neighbors. The fixes introduce no schema, fixture, delta, event, refusal code, persistence or app change. Existing artifact/release/trace bytes remain unchanged. The latest owner-priority documentation is process scope, not a mechanic change.
+
+### Dispositions
+
+- **C1P-01 / SOL-01 closed:** Compiler.manifest validates authored capability versions with Requires.check, then normalizes Position.requires before definitions and content ownership checks. Artifact no longer supplies the late redundant normalization. The existing controlled reads/reserved-writes case now omits authored fact@1; legal reads compile and all reserved writes retain the exact expected diagnostics. The new independent literal UNKNOWN_CAPABILITY case rejects authored fact@2, so normalization cannot silently hide an unsupported declared version.
+- **SOL-02 closed:** The position invariant filters by observation.action_key when supplied; unkeyed Command observations retain matching-action aggregation. The alias test exercises unavailable kneel→sit while ordinary sit is available. The guarded commandOf lookup preserves own-property checks in position, door and equipment consumers.
+- **N1 closed:** W13’s actual use pointer is view.ts:197; the changed invariant pointer also lands on its take refusal entry at line 76.
+
+### Independent verification on the fix head
+
+All commands used mise; all mutations were confined to this detached worktree with a separate local _build.
+
+- Focused Node position, invocation, equipment, validator, transcript and file-backed SQLite reopen suites: **29/29 passed**. Separate `keyed_admission.test.ts`, `barriers.test.ts` and `sim.test.ts`: **31/31 passed**, including 500 fresh simulator sequences and existing planted controls.
+- `mix test test/loka/content_rest_test.exs test/loka/cartridge_cross_kernel_test.exs --force`: **5/5 passed**.
+- All **16** source cartridges independently recompiled to exact frozen known-answer artifact bytes, including rest. No frozen artifact, release or trace change appears in the fix diff.
+- Eleven literal controlled observations independently check selected available/unavailable/missing aliases, the unkeyed fallback, and inherited resolver entries in position, door and equipment checks: passed.
+- `elixir bin/contracts.exs --check`, `elixir bin/features.exs --check`, `elixir bin/check_docs.exs`, and `node bin/check_ts_size.mjs`: passed (docs: 279, zero broken links or unreachable files).
+
+The following independent mutations each failed with assertion evidence, and were restored:
+
+| Mutation | Intended failure observed |
+|---|---|
+| Remove early Position.requires normalization | Known-answer and legal-read/reserved-write cases fail; exit 2 |
+| Normalize before raw Requires.check | Authored fact@2 regression fails; exit 2 |
+| Omit selected action_key filtering | Policy-blocked alias invariant test fails; exit 1 |
+| Remove loader recipe reserved-write guard | Position loader diagnostic test fails; exit 1 |
+| Remove movement standing gate | Invocation walk/admission invariant fails; exit 1 |
+
+After restoration, the Elixir compiler/cross-kernel suites pass **5/5**, and position plus SQLite reopen pass **6/6**. Source diff is clean before writing this appendix. The earlier schema sweep is not repeated or represented as independent reviewer execution because the fixes change no schema.
+
+Ponytail Review: lean already. A single normalization line fixes the compiler boundary; commandOf reuses the guarded lookup across three consumers and fits the size budget. New regression inputs catch distinct realistic failures; no redundant fixture or future scaffolding is required. Correctness and contract-neighbor review found no new failure scenario.
+
+The PM reports the full normal pre-push checks passed and all six GitHub jobs green on this exact head (changes, bundle, lint, elixir, sim, typescript). Those are PM verification, not my reruns. This independent approval covers code at 678c005; later owner-priority Markdown and review-record commits remain subject to the workflow’s final exact-head CI requirement. Record/index are left uncommitted for PM transfer; no push, merge or external message was performed.
+
+## Independent Sol fix re-review at 678c005
+
+Verbatim second opinion, run concurrently with the primary fix review:
+
+```text
+APPROVE — PR #137, fix round 1
+Broad review: e59627c → 678c00572f2bb3297c06114d2320b9fef064c7fc.
+No open or new findings.
+
+C1P-01 / SOL-01 | blocker | CLOSED | lib/loka/content/compiler.ex:95
+Position without authored fact@1 now permits position fact_compare reads and ordinary fact writes. Raw capability validation precedes normalization; authored fact@2 still fails. Artifact.cartridge no longer adds the dependency late.
+
+SOL-02 | should-fix | CLOSED | kernel/ts/src/invariants_view.ts:57
+With sit available and policy-disabled kneel→sit, keyed kneel refusal now satisfies the invariant. Incorrect acceptance fails it. Unkeyed observations retain aggregation; direct callers remain compatible.
+
+N1 | nit | CLOSED | docs/world-parameters.md:35
+W13 now points to the actual band selection at view.ts:197.
+
+Independent checks actually run:
+- 173 TypeScript tests passed, including position, keyed admission, schemas, loaders, equipment, containers and composition.
+- Controlled probes verified twelve transitions, four same-position refusals, distinct actor scope, movement refusal order, optional projection, aliases and unchanged regeneration.
+- In-memory Elixir compilation matched all 16 frozen artifacts; compiler probes checked implicit ownership, reads, three write guards and authored-fact rejection.
+- Six in-memory mutations killed: compiler dependency omission, premature normalization, compiler/loader write-guard removal, same-position acceptance and selected-key omission.
+- Real SQLite in-memory save/reload preserved sitting and the headless state hash.
+- Independent Python artifact reconstruction passed; 500 simulator sequences passed; 15 transcripts/119 commands replayed byte-identically.
+- Generated contracts, feature/docs and size checks passed. Existing hashes/releases/traces and excluded runtime files are unchanged. Ponytail review found no unnecessary machinery. Workspace remained clean.
+
+Limits: no full pre-push, CI verification, full schema sweep, file-backed reopen or device run. Missing dependencies prevented Mix tests/xref; Elixir probes omitted Boundary setup only.
+```

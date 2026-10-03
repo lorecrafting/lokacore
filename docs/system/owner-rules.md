@@ -8,8 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
-- Finish and merge PR #137, then pause further position/terminal development; prioritize touch UI
-  with required checks and independent review ([record](../decisions/owner-decision-touch-priority-2026-10-03.md)).
+- Finish and merge PR #137, then continue the approved game mechanics; touch UI is deprioritized
+  ([record](../decisions/owner-decision-touch-priority-2026-10-03.md#latest-priority-mechanics-after-pr-137)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms
