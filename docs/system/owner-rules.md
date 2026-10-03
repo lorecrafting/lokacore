@@ -35,8 +35,8 @@ and not repeated here.
 - Puppeting comes later; rules read the actor from the command, never the player
   ([record](../archive/decisions/owner-decision-puppeting-2026-09-25.md)). Player-written descriptions
   come with the online work ([record](../archive/decisions/owner-decisions-r5-s4-2026-09-25.md)).
-- Bram's quest starts from a dialogue choice, not a place action (not built yet: the ROADMAP row
-  "Quest from dialogue"); one-off quest triggers may come later ([record](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
+- Bram's quest starts from a dialogue choice, not a place action (the Lantern's `bram_offer`
+  dialogue); one-off quest triggers may come later ([record](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 - The owner is the human-proof tester for now ([record](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md)).
 
 ## Architecture and engine
