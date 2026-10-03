@@ -24,3 +24,14 @@ no mutation testing (WORKFLOW Review stance).
 - **N-1 nit** `docs/system/protocol.md:172`: `dialogue.ts:79` is the closing `*/`; `choiceView` is `:80` (the old `:78` was also inside the comment).
 - **N-2 nit** `docs/world-parameters.md:76`: P1 `model.ts:75` is `ANIMALS`; `branch(t)` with `3600` and `% 24` is `:77`-`:78`.
 - **N-3 nit** (developer-flagged) `docs/world-parameters.md:77`: the last cell "comment admits 'Lantern's claim limit'" is now false; no such comment exists in `mobile` or `kernel/ts/src`. A reader looking for that comment to fix finds nothing. The "should come from" cell (calendar, `world.wait` W16) stays true as the home if Wait returns; keep it. Drop only the comment clause, a word the `removed` pointer forces.
+
+## Fix round 1 re-check (bd938e9)
+
+**Verdict: APPROVE.** Only the fix commit was reviewed; it changes 4 docs files, no code.
+
+- F-1 fixed: `App.tsx:11` imports `localSession`, `:31` is `NAME = 'loka-lantern.db'`, `:44` is the `performance.now()` latency host.
+- N-1 fixed: `dialogue.ts:80` is `choiceView`.
+- N-2 fixed: `model.ts:77-78` is `branch` with `3600` and `% 24`.
+- N-3 fixed: the "Lantern's claim limit" clause dropped; the W16 cell kept.
+- Extra: `save.md` `presenter.ts:145` is the 200-line log splice, `:153` is `retry ??= b.label`; both match their sentences.
+- `bin/check_docs.exs` green.
