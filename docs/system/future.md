@@ -1,22 +1,13 @@
 # Future plans
 
 Short list; each item links the plan it comes from. The open stages and their carries are the
-[ROADMAP](../ROADMAP.md#slices) rows "Docs compaction", "Presenter split", "Quest from
-dialogue", "R7/R8 for chapter one" and "Playtest and tune"; the gate ladder is
+[ROADMAP](../ROADMAP.md#slices) rows "R7/R8 for chapter one" and "Playtest and tune"; the gate ladder is
 [14](../archive/spec/14-implementation-plan.md) and [R milestones](../archive/spec/R-MILESTONES.md).
 
 ## Next
 
-- **Presenter split**: display text out of `mobile/authority`, the `GameSession` boundary, a
-  check that the renderer imports only the session and protocol types
-  ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
-- **R7/R8 for chapter one** ([ROADMAP row](../ROADMAP.md#slices)): the R5 deferrals (keys that
-  break, locked containers, a resources policy leaf, one-way and bent passages, `equipment@1`,
-  `attributes@1`, `position@1`, `EntityOrigin`), the 04 §5.4 generation re-read, graceful
-  `selector_cardinality`, per-exit actions, the unlock-then-open composition amendment, the
-  journal's objective and scan content, the world parameters marked C1
-  ([world-parameters](../world-parameters.md)), and the time model with its TM rows
-  ([rule](owner-rules.md#product-and-scope)).
+- **R7/R8 for chapter one**: 12 slices and Gate C1 ([record](../decisions/owner-decision-chapter-one-plan-2026-10-02.md);
+  what stays LATER, with its trigger, is in the record's §2 triage table).
 - **Playtest and tune** ([record](../archive/decisions/owner-decision-playtest-2026-09-25.md)).
 
 ## Chapter one and the proof cartridge

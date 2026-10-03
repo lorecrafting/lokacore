@@ -1,9 +1,10 @@
 # Documentation check, no deps: every relative Markdown link in a tracked .md file
 # resolves, and every tracked .md file is reachable by links from an entry file (README.md, AGENTS.md, CLAUDE.md)
 # (an agent can find it). Fenced code blocks are skipped; anchors are not checked.
+# Code pointers in the live docs name a real file and line (see below).
 # AGENTS.md stays within a word budget: every agent loads it every session.
 #
-#   elixir bin/check_docs.exs [file-to-budget]
+#   elixir bin/check_docs.exs [file-to-budget [extra-doc-to-check]]
 root = Path.expand("..", __DIR__)
 
 {out, 0} =
@@ -65,7 +66,50 @@ over =
     ],
     else: []
 
-problems = Enum.sort(broken) ++ Enum.sort(orphans) ++ over
+# Code pointers (`path:line`) in the live docs must name one tracked file and a line inside it.
+# A bare name or partial path must match exactly one tracked file. History (archive, reviews, decisions) cites old commits,
+# so it is not checked. ponytail: a line that moved inside the file still passes; reviewers catch that.
+{tracked, 0} = System.cmd("git", ["ls-files"], cd: root)
+tracked = String.split(tracked, "\n", trim: true)
+by_base = Enum.group_by(tracked, &Path.basename/1)
+
+live_re =
+  ~r{\A(AGENTS\.md|docs/(system/[^/]+|ROADMAP|world-parameters|CHECKS|WORKFLOW|lessons/[^/]+)\.md)\z}
+
+# Optional second argument: an extra doc to check (the red control passes a planted one).
+live = Enum.filter(docs, &String.match?(&1, live_re)) ++ Enum.drop(System.argv(), 1)
+
+pointers =
+  for file <- live,
+      [_, path, line] <-
+        Regex.scan(~r/`([\w.\/-]+\.\w+):(\d+)/, File.read!(Path.expand(file, root))),
+      matches =
+        if(String.contains?(path, "/"),
+          do: Enum.filter(tracked, &(&1 == path or String.ends_with?(&1, "/" <> path))),
+          else: Map.get(by_base, path, [])
+        ),
+      problem =
+        (case matches do
+           [one] ->
+             if String.to_integer(line) >
+                  length(
+                    String.split(
+                      String.trim_trailing(File.read!(Path.join(root, one)), "\n"),
+                      "\n"
+                    )
+                  ),
+                do: "past the end of #{one}"
+
+           [] ->
+             "no such tracked file"
+
+           _ ->
+             "ambiguous name: give the path"
+         end),
+      problem != nil,
+      do: "stale pointer #{file}: #{path}:#{line} (#{problem})"
+
+problems = Enum.sort(broken) ++ Enum.sort(orphans) ++ over ++ pointers
 Enum.each(problems, &IO.puts/1)
 IO.puts("#{length(docs)} docs, #{length(broken)} broken link(s), #{length(orphans)} unreachable")
 System.halt(if problems == [], do: 0, else: 1)

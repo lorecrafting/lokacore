@@ -110,7 +110,7 @@ and an undeclared quest are refused before the rule. Accepted: `quest.activate` 
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never
 stored) or `post_activation_event` (met by an `item_acquired` of the named item into the
-instance's actor's body, placed after activation; `earned`, `quest.ts:74`), which the proposal
+instance's actor's body, placed after activation; `earned`, `kernel/ts/src/quest.ts:74`), which the proposal
 completes to `objectives_complete` as its own writer group. Resolution (`:110`) happens in the
 rule that resolves it (a dialogue choice): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
@@ -126,7 +126,7 @@ actor already having a pending choice, `invalid_state`. Accepted
 dialogue's roles bound to EntityIds in role-name order, the choice ids in key order, and
 `choice_opened`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
 actor's or not offering the choice `invalid_state`; a bound NPC not in the room `not_present`;
-a bound item not held `not_owned` (`dialogue.ts:66`; the GameView shows the same); then the
+a bound item not held `not_owned` (`kernel/ts/src/dialogue.ts:66`; the GameView shows the same); then the
 dialogue's quest resolves (above), or the choice's `accept` activates its quest as
 `accept_quest` does, `invalid_state` when `accept_quest` would be: the actor already has an
 instance, or the quest's offer, if declared, has a policy that fails (the talk-time policy may be
@@ -140,7 +140,7 @@ and every bound role as participants, and the `story_point_reached` of a story p
 whose trigger is this dialogue and choice (`rules/dialogue.ts:177`). `close_choice {continuation_id}`: the
 actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`.
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
-contribution removes them (`dialogue.ts:151`). Only a dialogue's speaker, present in the room,
+contribution removes them (`kernel/ts/src/dialogue.ts:151`). Only a dialogue's speaker, present in the room,
 offers its talk (`:138`), one per dialogue under the dialogue's key, available while that
 dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one

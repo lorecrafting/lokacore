@@ -57,7 +57,7 @@ storage half):
 6. **Propose** (`proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
-   (`quest.ts:74`), then each ReactionRule it triggers runs as its own writer group when its
+   (`kernel/ts/src/quest.ts:74`), then each ReactionRule it triggers runs as its own writer group when its
    `when` holds (`reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
    (`proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
@@ -169,7 +169,7 @@ barrier) or `insufficient_resource` (the body cannot pay a move); `actions` of t
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
-(prompt, speaker id, closable, each option available or blocked, `dialogue.ts:80`); and
+(prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
 `resources`, each with current, maximum and a condition band from one fixed table of 11 bands
 by percentage of the range, `perfect_health` at 100 down to `dying` at 0 (`view.ts:80`, `:97`).
 Actions are listed highest priority first, then by key, available or with the refusal code

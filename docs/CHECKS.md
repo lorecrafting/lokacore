@@ -56,7 +56,10 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   matched (nominal ids, `Loka.Core.Contracts`), and requires each check to fail.
 - `elixir bin/check_docs.exs`: relative links resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
-  within its word budget (it is loaded by every agent, every session).
+  within its word budget (it is loaded by every agent, every session); each `path:line` code
+  pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,
+  world-parameters) names exactly one tracked file and a line inside it
+  (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
 - `bin/docs_only.sh <base> <after>` prints `skip` when every file changed in the range is `*.md` (not
   `*.gen.md`, which the elixir drift checks cover), else `run` (also for a missing or non-ancestor
   `<base>` or an empty diff). The `changes` job of `ci.yml` passes the newest ancestor of a pull request

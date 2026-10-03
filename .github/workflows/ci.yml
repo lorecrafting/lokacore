@@ -102,6 +102,7 @@ jobs:
           elixir-version: '1.20.4'
           version-type: strict
       - run: elixir bin/check_docs.exs
+      - run: bin/docs_red_controls.sh
 
   # The 10,000 fresh sequences (CI is set), in parallel with the typescript job, which skips sim.test.ts.
   sim:
