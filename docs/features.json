@@ -412,6 +412,6 @@
     "invariants": [
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "C1 c1-attributes attributes with starting values (content); stat_compare and resource_compare"
+    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare"
   }
 }
