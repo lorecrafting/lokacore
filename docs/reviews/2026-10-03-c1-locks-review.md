@@ -119,3 +119,9 @@ At `3d58eff`: `kernel/ts/src/lookups.ts` (holds `reach`/`opened`), `kernel/ts/sr
 ## Codex Sol review
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (3d58eff), verbatim
+
+APPROVE
+
+no findings
