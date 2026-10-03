@@ -201,7 +201,8 @@ worn item's contents are never shown (c1-locks); `equipment`, one entry per slot
 holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
 accepts (only those resolving to `remove`), absent when the world has no holder
 ([equipment@1](mechanics.md#equipment1-kerneltssrcrulesequipmentts)); `journal` (each quest the player
-has an instance of, with state and title); `time` (the logical clock); the pending `choice`
+has an instance of, with state and title, and optional `journal`, the selected TextKey
+from [quest@1](mechanics.md#quest1-rulesquestts-kerneltssrcquestts)); `time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
 `resources`, each with current, maximum, a condition band key and its tone (`normal`, `warning`
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own

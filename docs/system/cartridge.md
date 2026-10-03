@@ -49,7 +49,8 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   lock (`UNDECLARED_CAPABILITY`); an action's command is never `run_job`;
 - every reference resolves to a definition of this cartridge and of its field's kind
   (`UNRESOLVED_REFERENCE`); a fact value matches its FactSpec (`FACT_TYPE_MISMATCH`,
-  `FACT_DEFAULT_INVALID`); every text key has a catalog entry;
+  `FACT_DEFAULT_INVALID`); every text key has a catalog entry, including each of a quest's five `journal` stage texts
+  and every `journal.outcomes` value;
 - a recipe's, quest's or dialogue's key is no registered command's and no other action's,
   recipe's or quest's (`DUPLICATE_DEFINITION`: each is an ActionSet identity); an NPC may speak
   several dialogues; no dialogue role named `actor`; a choice's `accept` names a quest, in a
@@ -136,6 +137,13 @@ replay never resolve a name again. Catalog strings carry the touch links above; 
 model strips them to prose until details are tappable (`mobile/app/book/model.ts:25`).
 
 ## Development cartridges
+
+`cartridges/ashmere_journal` exercises [quest journal selection](mechanics.md#quest1-rulesquestts-kerneltssrcquestts):
+the Lantern's current possession changes its active text, while the oar's post-activation
+acquisition keeps its earned text after drop; terminal states select an outcome text or their
+stage's fallback. `lantern_proof` stays byte-identical to preserve phone saves pinned to its
+release. Adding journal keys there requires retaining the old pinned Lantern release, a save
+migration outside this slice; c1-sampler supplies journal keys for the phone first.
 
 `cartridges/ashmere_{hello,rooms,details,facts,items,bell,dusk,road,gate,errand,ferry,green}`
 each exercise one slice; most carry replayable transcripts

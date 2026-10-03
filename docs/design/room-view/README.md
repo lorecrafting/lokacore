@@ -37,7 +37,7 @@ Compared against [protocol/gameview.schema.json](../../../protocol/gameview.sche
 | 4 | a typed distinction between a closed door and a barred way (openable or not); the player-facing `message` already tells them apart | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |
 | 5 | per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView {id, name, kind, actions} |
 | 6 | inspectable details marked as targetable non-entities | the tappable mooring post | none |
-| 7 | the objective or stage text of each quest | Journal; tracked objective | QuestView {quest, state, title} |
+| 7 | the objective or stage text of each quest | Journal; tracked objective | DONE for the kernel (c1-journal): QuestView {quest, state, title, journal?}, selected by [quest@1](../../system/mechanics.md#quest1-rulesquestts-kerneltssrcquestts); drawing is c1-touch |
 | 8 | discovered dialogue topics per NPC | "Ask about" chips | none |
 | 9 | text aliases per action and target | text drawer suggestions and echoes | ActionDefinition notes they arrive with the parser |
 | 10 | the accessibility text key on each advertised action | screen readers | ActionDefinition.accessibility (not projected) |
