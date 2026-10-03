@@ -2,7 +2,15 @@
 // buttons, the log of what each press said, and who came or went. The engine returns structured
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
 // 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
-import type { Game, GameView, Intent, Reply } from '../../packages/game-view/session.ts';
+import type {
+  ActionInput,
+  EntityId,
+  Game,
+  GameView,
+  Intent,
+  Key,
+  Reply,
+} from '../../packages/game-view/session.ts';
 import { OUTCOME, reason, SENTENCE } from './words.ts';
 
 /**
@@ -117,13 +125,13 @@ const sayers = (g: Game): { text: Say; label: Say } => ({
       .replace(/^./, (a) => a.toUpperCase()),
 });
 
-const intentOf = ({ action_key, target_ids, input, token }: Button) =>
-  ({
-    action_key,
-    target_ids,
-    input,
-    ...(token && { view_freshness_token: token }),
-  }) as unknown as Intent;
+// The button's plain strings are the wire's branded ones: a button is built from the view's own keys.
+const intentOf = ({ action_key, target_ids, input, token }: Button): Intent => ({
+  action_key: action_key as Key,
+  target_ids: target_ids as EntityId[],
+  input: input as ActionInput,
+  ...(token && { view_freshness_token: token }),
+});
 
 /** The log, the buttons and the press of one Game; one per game being played. */
 export function presenter(game: Game) {

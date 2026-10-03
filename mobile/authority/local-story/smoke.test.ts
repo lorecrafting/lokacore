@@ -39,6 +39,8 @@ const processOn = (
   const game = openGame(adapt(sql, tap), ITEMS, randomUUID);
   return { sql, game, ...screenOf(game) };
 };
+// ponytail: the presenter (app/book) is this file's harness, so the authority tests still drive presses by
+// label and read the log; test-only, a stub Game would hide the real session.
 const shown = new WeakMap<Game, ReturnType<typeof presenter>>();
 const at = (g: Game) => shown.get(g) ?? shown.set(g, presenter(g)).get(g)!;
 const screenOf = (game: Game) => {

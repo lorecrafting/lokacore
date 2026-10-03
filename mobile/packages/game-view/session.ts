@@ -3,14 +3,26 @@
 // engine internals (no Db, Story, World or Cartridge), so the local TypeScript authority and a
 // future online Elixir Realm can both serve one presenter. The renderer's words live in the app.
 import type {
+  ActionInput,
   ActionInvocation,
   DecisionResult,
+  EntityId,
   ErrorCode,
   GameView,
+  Key,
   NarrationRecord,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 
-export type { ActionInvocation, DecisionResult, ErrorCode, GameView, NarrationRecord };
+export type {
+  ActionInput,
+  ActionInvocation,
+  DecisionResult,
+  EntityId,
+  ErrorCode,
+  GameView,
+  Key,
+  NarrationRecord,
+};
 
 /** What a press sends: an invocation without its id and actor, which the session adds. */
 export type Intent = Omit<ActionInvocation, 'invocation_id' | 'actor_id'>;

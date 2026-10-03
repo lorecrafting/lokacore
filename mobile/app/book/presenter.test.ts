@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { DecisionResult, Game, Reply } from '../../packages/game-view/session.ts';
 import { presenter } from './presenter.ts';
+import { detail } from './words.ts';
 
 const VIEW = {
   actions: [],
@@ -45,4 +46,12 @@ test('the log stops growing in one room, its last line the latest answer', () =>
   };
   const [once, log] = [cycles().length, cycles()];
   assert.deepEqual([log.length, ...log.slice(-2)], [once, '> Go north', 'Dropped.']);
+});
+
+// Breaks (review N-1): a Start over that is not confirmed shown as its empty message, or a failed
+// one hiding its own message behind "not confirmed".
+test('the save-error line says a pending start over in words and shows any other message', () => {
+  const failed = { message: '', startOver: true };
+  assert.equal(detail({ ...failed, code: 'start_over_pending' }), 'start over not confirmed');
+  assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'disk I/O error');
 });

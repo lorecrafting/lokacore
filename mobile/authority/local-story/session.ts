@@ -111,6 +111,8 @@ export function openGame(db: Db, bundled: Bundled, newId: () => string, latency?
 /** The refusal and its start over options, as the authority keeps them beyond the shared Failed. */
 type Local = Failed & { newGame?: () => { kind: string }; replace?: boolean };
 type Why = Omit<Local, 'startOver'>;
+const offered = (f?: Why): Local | undefined =>
+  f && { ...f, startOver: !!(f.newGame || f.replace) }; // Start over is offered
 
 /**
  * The game on the save file, or why it does not open, and start over (10 §31: the host has the
@@ -121,11 +123,12 @@ type Why = Omit<Local, 'startOver'>;
  * Never started over: a newer app's save (`unsupported_save_format`, update the app, 10 §32) or an
  * open that failed for another reason (a full disk: the save may be intact). A start over that
  * fails otherwise keeps the game being played and returns why; one whose outcome is unknown does
- * not (its next press would settle the new game, then apply to it): `start_over_pending`.
+ * not (its next press would settle the new game, then apply to it): `start_over_pending`, a
+ * code only that outcome sets, so a failed retry shows its own error.
  */
 export function localSession(open: () => Db, remove: () => void, items: Bundled, host: HostPart) {
-  const s: { db?: Db; game?: ReturnType<typeof openGame>; failed?: Local } = {};
-  const fail = (f: Why) => (s.failed = { ...f, startOver: !!(f.newGame || f.replace) });
+  const s: { db?: Db; game?: ReturnType<typeof openGame>; failed?: Why } = {};
+  const fail = (f: Why, code?: Failed['code']) => (s.failed = { ...f, code });
   const reopen = () => {
     try {
       s.game = openGame((s.db ??= open()), items, host.newId, host.latency);
@@ -139,20 +142,19 @@ export function localSession(open: () => Db, remove: () => void, items: Bundled,
   reopen();
   return {
     game: () => s.game,
-    failed: () => s.failed,
+    failed: () => offered(s.failed),
     startOver(): string | undefined {
       const newGame = s.game?.newGame ?? s.failed?.newGame;
       if (!newGame && !s.failed?.replace) return;
       try {
         if (newGame?.().kind === 'pending') {
           s.game = undefined;
-          return void fail({ ...s.failed, message: '', code: 'start_over_pending', newGame });
+          return void fail({ ...s.failed, message: '', newGame }, 'start_over_pending');
         }
         if (newGame) return void reopen();
       } catch (e) {
         const { message } = e as Error;
-        if (!corrupt(e))
-          return s.game ? message : void fail({ ...s.failed, message, code: undefined });
+        if (!corrupt(e)) return s.game ? message : void fail({ ...s.failed, message });
       }
       try {
         [s.game, s.db] = [undefined, undefined]; // the handle goes with the file

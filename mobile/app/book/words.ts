@@ -2,6 +2,12 @@
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
 
+import type { Failed } from '../../packages/game-view/session.ts';
+
+/** The line under the save-error headline: a Start over that is not confirmed gets its words. */
+export const detail = (f: Failed) =>
+  f.code === 'start_over_pending' ? 'start over not confirmed' : f.message;
+
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk draws its
 // choice below).
 export const OUTCOME: Record<string, string> = {
