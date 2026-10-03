@@ -22,3 +22,11 @@ PR #121 (`workflow-code-review`), commit reviewed `f610b09`. Docs only; no tests
 - **should-fix F-1** `docs/decisions/owner-decision-review-tools-2026-10-02.md:8`: "Skip it on a tiny diff" contradicts `docs/WORKFLOW.md:55` and `.claude/agents/developer.md:27-29`, which run it on any diff that changes code. Scenario: a 3-line code fix; WORKFLOW says run, the record says skip. The brief's rule ("only on a diff that changes code or bulk-edits docs") matches WORKFLOW. Fix: change the record to "Skip it on docs-only notes", or add "tiny" to both rule sites.
 - **nit N-1** `docs/WORKFLOW.md:55`, `.claude/agents/developer.md:27`: "on the PR number" at self-review, but the PR is opened after it (WORKFLOW:58, developer.md step 3). Only the branch is available then; harmless, the branch option covers it.
 - **nit N-2** `.claude/agents/developer.md:27-29` restates the condition with no link to the record, while WORKFLOW links it. The restatement is the existing pattern for the agent file; a link would let a later change touch one source.
+
+## Fix round 1: `35ae38e`
+
+**Verdict: APPROVE**
+
+- F-1 closed: `docs/WORKFLOW.md:55` and `.claude/agents/developer.md:28` now say "non-tiny diff". This matches the record's "Skip it on a tiny diff and on docs-only notes".
+- N-1 closed: all three docs now name "the branch" as the target.
+- N-2 closed: `.claude/agents/developer.md:29` links the record. The relative path `../../docs/decisions/...` resolves.
