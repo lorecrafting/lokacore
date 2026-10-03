@@ -3,7 +3,8 @@ language: tsx
 severity: error
 message: Only mobile/authority/local-story imports the kernel (spec document 10 §2).
 files: [mobile/**]
-ignores: [mobile/authority/local-story/**]
+# session.ts has its own rule: it may import the generated contracts, as types only.
+ignores: [mobile/authority/local-story/**, mobile/packages/game-view/session.ts]
 rule:
   kind: string_fragment
   regex: '(^|/)kernel(/|$)'

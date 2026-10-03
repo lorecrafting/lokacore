@@ -1,0 +1,23 @@
+id: mobile-authority-no-display-text
+valid:
+  - "const kind = 'save_corrupt';"
+  - "throw new Error('effect outbox not built');"
+  - "throw new Error(`cartridge did not load: ${reason}`);"
+  - "db.getFirstSync('SELECT max(id) AS id FROM receipt WHERE id LIKE ?', p);"
+  - "const n = db.getFirstSync(`SELECT 1 FROM ${t} LIMIT 1`);"
+  - "const m = s.db.getFirstSync('SELECT max(id) FROM receipt');"
+  - "const tried = 'UPDATE report SET tried = tried + 1 WHERE report_id = ?';"
+  - "const id = `${PREFIX}${n.toString(16)}`;"
+invalid:
+  - "const go = `Go ${d}`;"
+  - "const both = `${a} and ${b}`;"
+  - "const formatSync = (s) => s; formatSync('You are too tired.');"
+  - "db.runSync('UPDATE report SET note = ?', 'You are too tired');"
+  - "const said = (r) => (r.kind === 'stale_view' ? 'The page had changed; here it is again.' : '');"
+  - "log.push(`${name} leaves.`);"
+  - "const done = 'Taken.';"
+  - "const note = '(pending: not confirmed saved)';"
+  - "const fail = new Error(msg) && 'You cannot do that';"
+  - "formatter.runSync('You are too tired.');"
+  - "formatter.runSync('SELECT you are too tired');"
+  - "db.runSync('Hello there friend');"

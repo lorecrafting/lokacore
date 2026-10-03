@@ -1,0 +1,15 @@
+id: mobile-session-contracts-only
+language: tsx
+severity: error
+message: 'session.ts names no engine: its only import or re-export is a type-only one of the generated contracts (spec document 07, the session boundary).'
+files: [mobile/packages/game-view/session.ts]
+rule:
+  kind: string_fragment
+  inside: { matches: module-specifier }
+  not:
+    all:
+      - regex: '^(\.\./)+kernel/ts/src/contracts\.gen\.ts$'
+      - inside:
+          stopBy: end
+          any: [{ kind: import_statement }, { kind: export_statement }]
+          regex: '^(import|export) type[ {*]'
