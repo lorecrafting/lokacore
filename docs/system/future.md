@@ -12,6 +12,10 @@ Short list; each item links the plan it comes from. The open stages and their ca
 
 ## Chapter one and the proof cartridge
 
+- Mechanical planning now follows the [LegendMUD baseline](../decisions/owner-decision-legendmud-baseline-2026-10-03.md),
+  with its [sourced system reference](../reference/legendmud-system.md). Its reconciliation table
+  governs character, resources, skills, guild/training gates, magic, combat and death before their
+  implementation slices; it adds nothing to the current Gate C1 scope.
 - Capabilities registered but not installed, with the slice that first needs them:
   [feature map](../features.gen.md), [release scope](../spec/release-scope.md) (full chapter one
   is 57 rooms, 10 quests, two endings).

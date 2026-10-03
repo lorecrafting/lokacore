@@ -6,6 +6,10 @@ DecisionResult (`kernel/ts/src/decision.ts:192`). Admission, budgets and composi
 Which capability owns which command, event and policy op: `CAPABILITY_OWNERS`
 (`kernel/ts/src/contracts.gen.ts:367`), summarised in the [feature map](../features.gen.md).
 
+The clauses below describe installed behavior. Future character, resource, skill, magic and combat
+planning follows the [LegendMUD baseline decision](../decisions/owner-decision-legendmud-baseline-2026-10-03.md);
+its reconciliation table must be resolved before an implementation changes these clauses.
+
 ## A fresh world
 
 `newWorld(cartridge, context, seed)` (`kernel/ts/src/fresh.ts:26`) mints ids under the nil
