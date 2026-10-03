@@ -179,3 +179,34 @@ Open for the PM:
 - The PR is again CONFLICTING. Main moved to `6c56897` (#117), and no CI has run on `6b8a6c3`.
   Merge main and get every CI job green before merge.
 - `docs/system/owner-rules.md` now exists on main: the owner wish's entry there is owed.
+
+## Fix round 2 re-check (head `d14bf85`; main merged as `22abe9a`)
+
+Scope: `d14bf85` only. Results:
+- `npm test` (mobile/app): 148 tests, 147 pass, 1 skipped.
+- `ast-grep test --skip-snapshot-tests`: 13 rules pass. `ast-grep scan --error` passes.
+- `bin/lint_red_controls.sh`: exit 0.
+
+I ran one probe file through `ast-grep scan` for each case:
+
+| Rule | Flagged (1 hit) | Allowed (0 hits) |
+|---|---|---|
+| `mobile-renderer-imports` | `{ Text, type Alert }`, `import type * as RN`, `export { Text } from 'react-native'`, `{ Vibration }`, `` require(`expo-font`) ``, `../SaveError.tsx`, `./fonts/../../App.tsx` | `import { Text } from 'react-native'`, `./Book.tsx` |
+| `mobile-authority-no-display-text` | a bind value (`db.runSync('SELECT …', 'You lose.')`), `s.db.execSync('Hello there friend')`, `other.db.runSync('You are tired.')`, `f('SELECT you lose', 1)` | a `SELECT` constant, `` db.runSync(`UPDATE x SET y = '${a}'`) `` |
+
+Two cases are deliberately conservative, not findings:
+- A renderer import of `../SaveError.tsx` from `book/` is flagged.
+- `other.db.…` passes the receiver regex `(\w+\.)?db` but still hits the rule, because the
+  literal does not start with an SQL keyword.
+
+- **Owner rule:** the line in `docs/system/owner-rules.md` links the decision record. It matches
+  the decision's addendum.
+- **N-3, half fixed:** `start_over.test.ts:280` now asserts `startOver: true` for a
+  `save_corrupt` with a new game, so the `!!f.replace` mutant fails. The `!!f.newGame` mutant
+  stays green: no test asserts the flag for a replace-only failure. Scenario: a NOTADB file whose
+  SaveError shows no Start over button. It stays a nit.
+
+CI on `d14bf85`: elixir, bundle and lint pass; typescript was still running when checked. The PR
+is MERGEABLE and contains main.
+
+Verdict: **APPROVE WITH NOTES** (N-3 remainder open as a nit; merge once typescript is green).
