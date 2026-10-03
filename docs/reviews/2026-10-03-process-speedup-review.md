@@ -98,3 +98,24 @@ Scope: `d53f047..0548f83`: `bin/ci_base.sh`, the `ci.yml` `changes` step that ca
 - `docs/CHECKS.md` lists the new planted cases. `lint` runs `bin/docs_only_red_controls.sh` (`ci.yml:90`), and `check_docs` and then `docs_red_controls.sh` after it (`:96-97`), as the PM's merge resolved them.
 
 Verdict: **APPROVE** (N-3 optional).
+
+## Codex Sol fix round 1 re-check (db0baf6), verbatim
+
+CHANGES REQUESTED
+
+```text
+F2 | should-fix | .github/workflows/ci.yml:40 at db0baf6
+Scenario: An ancestor lookup returns HTTP 500, but an older green ancestor is subsequently found; alternatively, one jobs request fails while another returns three successes. Both reproduced skip=true, violating the documented “any API error runs everything” rule. Preserve pipeline failures and stop the search with an empty base on any API error; add a planted API-error case.
+```
+
+## Codex Sol fix round 2 re-check (0548f83), verbatim
+
+APPROVE
+
+```text
+no findings — F2 fixed: both API failure paths return an empty base.
+
+Live “base=” is the echoed script initializer, not the computed result.
+Replaying live responses selects green parent d53f047; code changes
+correctly run all jobs. The search works.
+```
