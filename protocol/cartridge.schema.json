@@ -843,7 +843,8 @@
       ],
       "examples": [
         "UNRESOLVED_REFERENCE",
-        "CONTENT_HASH_MISMATCH"
+        "CONTENT_HASH_MISMATCH",
+        "RESERVED_FACT"
       ]
     },
     "Diagnostic": {

@@ -20,13 +20,15 @@ import { choiceView } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
+import * as position from './position.ts';
 import { cmp } from './validate.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
  * the player sees (description_variant.describe), exits in compass order (unavailable while
  * movement refuses them: exit_closed or exit_locked through a closed or locked barrier,
- * movement.passage, else insufficient_resource while the body cannot pay a move, movement.fare),
+ * movement.passage, else invalid_state while the player is not standing, position.standing, else
+ * insufficient_resource while the body cannot pay a move, movement.fare),
  * each with its barrier's door (short name, state and the door verbs step accepts there now,
  * action_lists.ts door), also when passable, and, unless its barrier bars the way, what is seen
  * through it (movement.sight; 04 §15 as amended by c1-doors), the place's actions without the door verbs,
@@ -37,7 +39,8 @@ import { cmp } from './validate.ts';
  * inside it (within; c1-locks); and the journal, each quest the player has an instance of with its
  * state and title (04 §15 quest journal state), in DefinitionRefString order; and the player's
  * pending choice, if any (dialogue.ts choiceView); and the body's resources with their bands (04 §15
- * as amended), absent when the cartridge has none.
+ * as amended), absent when the cartridge has none; and the player's position (position@1), absent
+ * without it.
  */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
@@ -51,6 +54,7 @@ export function gameView(world: World): GameView {
   const description = text(description_variant.describe(world, world.character, room));
   const choice = choiceView(world, world.character);
   const pools = resources(world);
+  const at = position.positionOf(world, world.character) as Key | undefined;
   return {
     actor_id: world.character,
     place: { id: here, title: text(room.title), description },
@@ -59,6 +63,7 @@ export function gameView(world: World): GameView {
     entities: within(world, actions, here),
     inventory: within(world, actions, world.body),
     ...(equipment.length > 0 && { equipment }),
+    ...(at !== undefined && { position: at }),
     journal: journal(world),
     time: world.state.clock,
     ...(choice && { choice }),
@@ -124,6 +129,7 @@ type Lists = ReturnType<typeof lists>;
 function exits(world: World, door: (direction: Key) => AdvertisedAction[]): ExitView[] {
   const room = world.rooms[world.state.containers[world.body]];
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
+  const seated = !position.standing(world, world.character); // position@1, after the barrier
   return movement.sight(world, world.body).map((seen) => {
     const { direction } = seen;
     const barrier = exitOf(room, direction)!.barrier;
@@ -147,7 +153,9 @@ function exits(world: World, door: (direction: Key) => AdvertisedAction[]): Exit
         },
       }),
     };
-    const code = movement.passage(world, room, direction) ?? (tired && 'insufficient_resource');
+    const code =
+      movement.passage(world, room, direction) ??
+      (seated ? 'invalid_state' : tired && 'insufficient_resource');
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   });
 }

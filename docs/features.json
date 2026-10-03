@@ -450,5 +450,29 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "C1 c1-equipment (#134) twelve slots as holders in the body; wear and remove"
+  },
+  "position": {
+    "spec": "21 §28 position@1 (amendment 2026-10-03); 00 §4.3 Positions (amendment 2026-10-03)",
+    "contracts": [
+      "CommandPayload",
+      "GameView",
+      "FactSpec",
+      "DiagnosticCode"
+    ],
+    "modules": [
+      "kernel/ts/src/cartridge_position.ts",
+      "kernel/ts/src/position.ts",
+      "lib/loka/content/position.ex",
+      "kernel/ts/src/action_lists.ts",
+      "kernel/ts/src/view.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_rest_hash.json"
+    ],
+    "invariants": [
+      "facts_typed",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "C1 c1-position (PR pending) stand, sit, rest and sleep; move needs standing"
   }
 }

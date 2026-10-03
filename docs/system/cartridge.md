@@ -98,7 +98,7 @@ cartridge and its hash, or the first diagnostic of the first failing stage (`:62
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:108`), the
 lock (`:157`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
-references (`kernel/ts/src/cartridge_refs.ts:155` and the `cartridge_*.ts` twins of the
+references (`kernel/ts/src/cartridge_refs.ts:156` and the `cartridge_*.ts` twins of the
 compiler's checks), and the installed kernel (`cartridge.ts:226`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
@@ -117,12 +117,12 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/world.ts:63`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/world.ts:65`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
-`dialogue`, `equipment`, `position` (`:33`); without a command, so without a rule, `fact`, `policy`,
+`dialogue`, `equipment`, `position` (`:34`); without a command, so without a rule, `fact`, `policy`,
 `inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
-`target_resolution`, `attributes` (`:48`). The [feature map](../features.gen.md) is the authority for what
+`target_resolution`, `attributes` (`:50`). The [feature map](../features.gen.md) is the authority for what
 each one implements and where; `bin/features.exs --check` fails when a rule module exists
 without its row. The 16 registered capabilities it marks `not yet` may be named by a
 cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.

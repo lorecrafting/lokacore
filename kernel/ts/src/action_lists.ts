@@ -13,6 +13,7 @@ import { MODAL, speaks, talkRefused } from './dialogue.ts';
 import { holds } from './policy.ts';
 import * as barrier from './rules/barrier.ts';
 import * as equipment from './rules/equipment.ts';
+import * as position from './position.ts';
 import { cmp } from './validate.ts';
 
 /**
@@ -26,10 +27,13 @@ import { cmp } from './validate.ts';
  * accept there now (refusal, then barrier.transition).
  * Likewise wear and remove (equipment@1) are listed on an item only when step would accept them
  * (refusal, then equipment.transfer), never with the place; `worn(id)` lists only those that
- * resolve to remove.
+ * resolve to remove. The place never lists an action resolving to the verb of the actor's current
+ * position (position@1), which step refuses invalid_state.
  */
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
+  const at = position.positionOf(world, actor);
+  const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
   const here = (a: Offered) =>
     !a.recipe ||
@@ -41,7 +45,9 @@ export function lists(world: World, actor: CharacterId) {
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .map((a) => advertise(world, actor, a, id, scope));
   return {
-    place: listed((a) => a.target.kind === 'none' && !door(a) && !equip(a)),
+    place: listed(
+      (a) => a.target.kind === 'none' && !door(a) && !equip(a) && a.command !== current,
+    ),
     // `nested`: an item inside a container (c1-locks) lists only the engine's take.
     of: (scope: string, id: string, nested = false) =>
       listed(

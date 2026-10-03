@@ -21,6 +21,7 @@ import { level, resourceRef } from '../src/resource.ts';
 export type Parsed =
   | { type: 'look' }
   | { type: 'scan' }
+  | { type: 'stand' | 'sit' | 'rest' | 'sleep' } // position@1
   | { type: 'move'; direction: string }
   | { lookup: string; verb?: 'take' | 'drop' | 'give' | 'talk'; to?: string }
   | { choose: string }
@@ -50,6 +51,7 @@ const WORDS: Record<string, Parsed> = {
   bye: 'bye',
 };
 for (const d of COMPASS) WORDS[d] = WORDS[d[0]] = { type: 'move', direction: d };
+for (const v of ['stand', 'sit', 'rest', 'sleep'] as const) WORDS[v] = { type: v };
 
 const LOOK = ['look', 'l', 'examine', 'x'];
 const DOORS = ['open', 'close', 'lock', 'unlock'] as const;

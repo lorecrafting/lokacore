@@ -47,7 +47,7 @@ dependency cycles and zero compile-connected edges (`mix xref`, [checks](../CHEC
 Pure: no I/O, clock, randomness, locale or Node API (`kernel/ts/src/index.ts:1`;
 `lint/rules/ts-kernel-pure.yml`; `bin/kernel_red_controls.sh` plants each escape and requires
 `tsc` to fail). Rules live only in `kernel/ts/src/rules/<capability>.ts`, one per capability
-that owns a command, bound in the rule table `RULES` (`kernel/ts/src/world.ts:33`); the lint
+that owns a command, bound in the rule table `RULES` (`kernel/ts/src/world.ts:34`); the lint
 rules `lint/rules/ts-rule-*.yml` keep them there, pure, importing only kernel modules and
 registered only as `<module>.decide`. The typed `Rule<C>` contract limits a rule to its own
 commands and events (`kernel/ts/src/decision.ts:192`), and admission re-checks event ownership

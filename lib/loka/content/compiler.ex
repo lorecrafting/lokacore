@@ -5,7 +5,7 @@ defmodule Loka.Content.Compiler do
   the diagnostics of the others.
   """
   alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
-  alias Loka.Content.Resources
+  alias Loka.Content.{Position, Resources}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -45,7 +45,9 @@ defmodule Loka.Content.Compiler do
       Recipes.check(manifest, defs, v2, registry) ++
       Quests.check(manifest, defs, v2, registry) ++
       Reactions.check(manifest, defs, v2, registry) ++
-      Dialogues.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
+      Dialogues.check(manifest, defs, v2, registry) ++
+      Links.check(defs, v2) ++
+      Position.check(manifest, defs)
   end
 
   # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, story points, an
@@ -128,11 +130,12 @@ defmodule Loka.Content.Compiler do
 
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
+    {facts, d4} = Position.facts(facts, m)
     {resources, d1} = Resources.load(of(files, :resources))
     {attributes, d3} = Resources.attributes(of(files, :attributes))
     {defs, d2} = kinds(files)
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3}
+    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3 ++ d4}
   end
 
   # The one-file-per-definition kinds (@kinds) and their diagnostics.

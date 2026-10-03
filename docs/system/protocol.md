@@ -45,15 +45,15 @@ storage half):
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
-5. **Step** (`kernel/ts/src/world.ts:77`): the capability owning the command type
+5. **Step** (`kernel/ts/src/world.ts:79`): the capability owning the command type
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
-   `unsupported_capability`. Admission (`:104`): the nil CommandId is `permission_denied`
-   (`:113`), another world or actor `not_found`, and the ActionSet must offer an action that
-   resolves to this Command and accepts its target and input (`actions.ts:182`:
+   `unsupported_capability`. Admission (`:106`): the nil CommandId is `permission_denied`
+   (`:115`), another world or actor `not_found`, and the ActionSet must offer an action that
+   resolves to this Command and accepts its target and input (`actions.ts:186`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `decision.ts:179`) does not own
-   (`proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`world.ts:99`).
+   (`proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`world.ts:101`).
 6. **Propose** (`proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
@@ -117,7 +117,7 @@ leaf evaluated adds one query step (`policy.ts:32`).
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
 Pure checks by id: `kernel/ts/src/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
-(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:137`).
+(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:139`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
 ([architecture.md](architecture.md#hosts)).
@@ -132,8 +132,8 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/actions.ts:149`) are, in order: the engine verbs of the
-capabilities the lock holds (`VERBS`, `:84`: look, move, scan, take, drop, give, wait, open,
+An actor's actions (`kernel/ts/src/actions.ts:153`) are, in order: the engine verbs of the
+capabilities the lock holds (`VERBS`, `:85`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, wear, remove, stand, sit, rest, sleep, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
@@ -148,7 +148,7 @@ item's scope as its entity target and no input, so a client invokes it with `tar
 `[item]` and resolve fills `target_id` (`kernel/ts/src/invocation.ts` `TARGETS`).
 `wear` and `remove` (equipment@1) take an `inventory` item target in the set (an engine verb's
 rule checks its own target); for a cartridge action resolving to `remove`, the `inventory` scope
-also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:234`). The GameView lists `wear` on a held
+also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:238`). The GameView lists `wear` on a held
 item and `remove` on a worn one only when admission and equipment@1's check accept it now, all
 available, never `drop`, `give` or `wear` on a worn item, and never either with the place's
 actions (a targetless one is never accepted: its Command needs `item_id`) (c1-equipment).
@@ -177,7 +177,7 @@ named by its keywords through `doors` (`:72`). A Command carries only ids, never
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:42`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:45`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
 barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
@@ -207,11 +207,11 @@ has an instance of, with state and title); `time` (the logical clock); the pendi
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view.ts:165`, `:184`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view.ts:173`, `:192`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`kernel/ts/src/action_lists.ts:31`). Invariant `gameview_agrees_with_admission` holds this for exits and
+(`kernel/ts/src/action_lists.ts:33`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes, and for the door and container verbs and `wear`/`remove`, matched by the Command each
 listed action resolves to (a cartridge alias included): one listed on its exit or item (a nested
 one in `contents` included) is never refused with a code the view predicts (`not_present`
@@ -219,4 +219,4 @@ among them), one not listed is never accepted, and none of `wear`/`remove` is a 
 position verb (`stand`, `sit`, `rest`, `sleep`) some listed, available place action resolves to is never
 refused `invalid_state`, and one none resolves to is never accepted; an available exit's move is never
 refused `invalid_state`; a
-`take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:26`, `:62`).
+`take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:29`, `:75`).

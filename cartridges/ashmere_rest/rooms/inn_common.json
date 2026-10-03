@@ -1,0 +1,10 @@
+{
+  "title": "room.inn_common.title",
+  "description": "room.inn_common.description",
+  "exits": {
+    "north": {
+      "to": "inn_rooms",
+      "barrier": "inn_door"
+    }
+  }
+}

@@ -10,6 +10,7 @@ import type {
 } from './contracts.gen.ts';
 import { MOVES } from './rules/barrier.ts';
 import { VERBS as EQUIP_VERBS } from './rules/equipment.ts';
+import { VERBS as POSITION_VERBS } from './position.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in invariants.ts.
 type Any = any;
@@ -22,7 +23,9 @@ type Any = any;
 // actor's or world's command is the envelope's); not listed, it is never accepted. Likewise a door
 // verb on the item it targets (a container, c1-locks, nested ones in contents included), and wear
 // and remove (protocol.md GameView as amended by c1-equipment) on the item they name, and never
-// among the place's actions; a listed take is never refused not_present.
+// among the place's actions; a listed take is never refused not_present. A position verb
+// (position@1, c1-position) that some listed, available place action resolves to is never refused
+// invalid_state, and one none resolves to is never accepted.
 export const gameview_agrees_with_admission = ({
   view,
   command,
@@ -49,6 +52,13 @@ export const gameview_agrees_with_admission = ({
     );
     return listed ? !VERB_CODES.includes(code) : decision.kind !== 'accepted';
   }
+  if (Object.hasOwn(POSITION_VERBS, type)) {
+    const listed = view.actions.some(
+      (a: AdvertisedAction) =>
+        a.available && Object.hasOwn(resolves, a.action_key) && resolves[a.action_key] === type,
+    );
+    return listed ? code !== 'invalid_state' : decision.kind !== 'accepted';
+  }
   const entry = advertised(view, command.payload);
   const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
   if (!entry) return true;
@@ -56,11 +66,11 @@ export const gameview_agrees_with_admission = ({
   return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
 };
 
-// The codes the view can show on an entry: an exit's passage and fare; a recipe's policy and
-// admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
+// The codes the view can show on an entry: an exit's passage, position (position@1) and fare; a
+// recipe's policy and admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
 // action with a policy on an engine command joins when a cartridge authors one.
 const SHOWN: Readonly<Record<string, readonly string[]>> = {
-  move: ['exit_closed', 'exit_locked', 'insufficient_resource'],
+  move: ['exit_closed', 'exit_locked', 'invalid_state', 'insufficient_resource'],
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
   take: ['not_present'], // a listed take is in reach (c1-locks custody)
 };

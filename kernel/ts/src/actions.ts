@@ -96,6 +96,10 @@ const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   unlock: [{ kind: 'none' }, ['direction']],
   wear: [entity('inventory'), []],
   remove: [entity('inventory'), []],
+  stand: [{ kind: 'none' }, []],
+  sit: [{ kind: 'none' }, []],
+  rest: [{ kind: 'none' }, []],
+  sleep: [{ kind: 'none' }, []],
 };
 
 // The engine verbs whose owning capability the cartridge locks, labelled action.<verb>.

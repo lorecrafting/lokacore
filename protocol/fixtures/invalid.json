@@ -14603,5 +14603,181 @@
         "code": "pattern_mismatch"
       }
     ]
+  },
+  {
+    "name": "position stand needs actor",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "stand"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "position stand has no target",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "stand",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "position sit needs actor",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "sit"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "position sit has no target",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "sit",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "position rest needs actor",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "rest"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "position rest has no target",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "rest",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "position sleep needs actor",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "sleep"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "position sleep has no target",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "sleep",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "position view requires a Key pattern_mismatch",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "12121212-3434-4565-8787-909090909090",
+        "title": {
+          "key": "room.ferry_landing.title"
+        },
+        "description": {
+          "key": "room.ferry_landing.description",
+          "bindings": {
+            "time": "clock.dusk"
+          }
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 18,
+      "position": ""
+    },
+    "errors": [
+      {
+        "path": "/position",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "position view requires a Key invalid_type",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "12121212-3434-4565-8787-909090909090",
+        "title": {
+          "key": "room.ferry_landing.title"
+        },
+        "description": {
+          "key": "room.ferry_landing.description",
+          "bindings": {
+            "time": "clock.dusk"
+          }
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 18,
+      "position": 0
+    },
+    "errors": [
+      {
+        "path": "/position",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

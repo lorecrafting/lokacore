@@ -773,7 +773,7 @@
       ]
     },
     "GameView": {
-      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field). Map, shop and other surfaces join with their capabilities.",
+      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.",
       "type": "object",
       "properties": {
         "actor_id": {
@@ -811,6 +811,10 @@
           "items": {
             "$ref": "#/$defs/WornSlotView"
           }
+        },
+        "position": {
+          "description": "The actor's position (position@1: standing, sitting, resting or sleeping; the engine fact's value, mechanics.md position@1); present exactly when the cartridge locks position@1, an optional field: the snapshot format stays.",
+          "$ref": "action.schema.json#/$defs/Key"
         },
         "journal": {
           "type": "array",
@@ -940,6 +944,7 @@
               ]
             }
           ],
+          "position": "standing",
           "equipment": [
             {
               "slot": "head",

@@ -1,0 +1,7 @@
+{
+  "room.inn_common.title": "The Common Room",
+  "room.inn_common.description": "Benches by a low fire. A door leads north to the rooms.",
+  "room.inn_rooms.title": "The Inn's Rooms",
+  "room.inn_rooms.description": "A narrow passage of doors.",
+  "barrier.inn_door.short": "the door to the rooms"
+}
