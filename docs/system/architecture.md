@@ -84,7 +84,7 @@ Elixir host adapter for a `portable_capability` without a declared differential 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared
 packages never import an authority or a feature; Story and Realm code never import each other.
 The app shell imports the local authority's session controller
-(`localSession`, `mobile/app/App.tsx:29`); the `GameSession` boundary is the presenter split's work
+(`localSession`, `mobile/app/App.tsx:29`); it implements `GameSession`
 ([owner rule](owner-rules.md#architecture-and-engine)).
 
 ## Hosts
