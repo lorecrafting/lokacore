@@ -57,3 +57,7 @@ This is a rule for `mobile/app/book/` and `SaveError.tsx` (the renderer). The ap
 holds every phone-only API (expo-sqlite, expo-font, `Alert`) and injects what the renderer needs.
 `mobile-renderer-imports` in [CHECKS](../CHECKS.md) enforces it. No web build and no dependency
 are added now.
+
+The owner, **(paraphrased)**, on names: keep `GameSession` and `Game`. `GameSession` is the player's play
+session in the app, from app open to close; it holds the current `Game` across Start over, and online it
+will also hold the login and the connection. `Game` is the story being played inside it.
