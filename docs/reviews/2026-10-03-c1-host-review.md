@@ -137,3 +137,12 @@
   follows Q2. The Node test is the acceptance proof.
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (49d4dff), verbatim
+
+CHANGES REQUESTED
+
+```text
+R1 | should-fix | mobile/app/metro.config.js:19 at 49d4dff
+Export a modified source copy without Git metadata while EXPO_PUBLIC_KERNEL_COMMIT contains a previous clean SHA. Git fails, but the empty catch preserves that value; App.tsx reports the old bare SHA in Release, falsely claiming a clean source revision. Delete EXPO_PUBLIC_KERNEL_COMMIT in the catch so the app uses its zero-commit -dirty fallback. Reproduced with controlled Git failure.
+```
