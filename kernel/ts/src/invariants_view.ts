@@ -7,11 +7,19 @@ type Any = any;
 
 // The view's entry for the command (its exit for a move, else its action) and admission agree
 // (04 §15, §19): available is never refused with a code the view shows for that entry;
-// unavailable is never accepted, and a refusal with such a code is the view's code.
+// unavailable is never accepted, and a refusal with such a code is the view's code. A door verb
+// (04 §15 as amended by c1-doors) is listed on its exit's door only when admission and the barrier
+// rule accept it: listed, it is never refused with a code they give (not_found aside: a foreign
+// actor's or world's command is the envelope's); not listed, it is never accepted.
 export const gameview_agrees_with_admission = ({ view, command, decision }: Any): boolean => {
   const entry = advertised(view, command.payload);
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type; // own keys only: an action may be keyed `constructor`
+  if (DOOR_VERBS.includes(type)) {
+    const exit = view.exits.find((e: ExitView) => e.direction === command.payload.direction);
+    const listed = exit?.door?.actions.some((a: AdvertisedAction) => a.action_key === type);
+    return listed ? !DOOR_CODES.includes(code) : decision.kind !== 'accepted';
+  }
   const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
   if (!entry) return true;
   if (entry.available) return !shown.includes(code);
@@ -25,6 +33,15 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
   move: ['exit_closed', 'exit_locked', 'insufficient_resource'],
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
 };
+
+const DOOR_VERBS = ['open', 'close', 'lock', 'unlock'];
+const DOOR_CODES = [
+  'unsupported_capability',
+  'invalid_target',
+  'invalid_state',
+  'exit_locked',
+  'not_owned',
+];
 
 function advertised(view: GameView, p: Any): ExitView | AdvertisedAction | undefined {
   if (p.type === 'move') return view.exits.find((e) => e.direction === p.direction);

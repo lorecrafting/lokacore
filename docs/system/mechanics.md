@@ -4,7 +4,7 @@ Every rule is a pure function `decide(world, command, mint, steps)` returning a
 DecisionResult (`kernel/ts/src/decision.ts:192`). Admission, budgets and composition are in
 [protocol.md](protocol.md). Refusal codes are gameplay rejections (`protocol/error_registry.json`).
 Which capability owns which command, event and policy op: `CAPABILITY_OWNERS`
-(`kernel/ts/src/contracts.gen.ts:349`), summarised in the [feature map](../features.gen.md).
+(`kernel/ts/src/contracts.gen.ts:361`), summarised in the [feature map](../features.gen.md).
 
 ## A fresh world
 
@@ -34,11 +34,11 @@ way (`passage`), else the destination room and the NPCs and items directly in it
 
 `open`, `close`, `lock`, `unlock {direction}` on the exit's barrier in the actor's room: a
 direction outside the compass `invalid_target`, no exit `not_found`, an exit without a barrier
-`invalid_target`; legal transitions only (`MOVES`, `:24`): open needs closed (a locked one is
+`invalid_target`; legal transitions only (`MOVES`, `:26`): open needs closed (a locked one is
 `exit_locked`), close needs open, lock needs closed, unlock needs locked, else
 `invalid_state`; lock and unlock need the barrier's `key_item` held by the body, directly or
-nested, else `not_owned` (`:47`). These checks are one read-only function the rule and the
-GameView's door verbs share. Accepted: one `barrier.transition` and `barrier_changed`.
+nested, else `not_owned` (`:67`). These checks are one read-only function the rule and the
+GameView's door verbs share (`transition`, `:48`). Accepted: one `barrier.transition` and `barrier_changed`.
 Both faces of a door name one state. Policy leaf `barrier_state`.
 
 ## containment@1 (`kernel/ts/src/rules/containment.ts`)

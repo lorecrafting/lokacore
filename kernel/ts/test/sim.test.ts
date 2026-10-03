@@ -167,7 +167,7 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   assert.ok(f.shrunk.length <= 4 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 5, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 6, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-4] commands:\n/);
 });
@@ -242,6 +242,26 @@ test('red control: a GameView that disagrees with admission trips gameview_agree
     // A refusal the view hides may need MV drained first (which seed finds it depends on the
     // demo cartridges): moves, then the refused command.
     assert.ok(f.shrunk.length <= 4, f.text);
+  }
+});
+
+// Breaks: the door-verb half of the check (04 §15 as amended by c1-doors): a view listing a verb
+// the barrier rule refuses (lock on a door with no key_item), or hiding one it accepts, unseen.
+test('red control: a door verb listed but refused, or accepted but unlisted, trips gameview_agrees_with_admission', () => {
+  const doors = (f: (vs: readonly AdvertisedAction[]) => AdvertisedAction[]) =>
+    planted({
+      gameView: (w) => ({
+        ...gameView(w),
+        exits: gameView(w).exits.map((e) =>
+          e.door ? { ...e, door: { ...e.door, actions: f(e.door.actions) } } : e,
+        ),
+      }),
+    });
+  const lock = { available: true, action_key: 'lock', label: 'action.lock' } as AdvertisedAction;
+  for (const kernel of [doors((vs) => [...vs, lock]), doors(() => [])]) {
+    const f = caught(kernel);
+    assert.equal(f.id, 'gameview_agrees_with_admission');
+    assert.ok(['open', 'close', 'lock', 'unlock'].includes(types(f.shrunk).at(-1)!), f.text);
   }
 });
 

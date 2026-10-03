@@ -70,7 +70,7 @@ storage half):
 A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (always empty
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
 `fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
-`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:347`). A rejection or fault changes nothing: not the state, RNG,
+`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:359`). A rejection or fault changes nothing: not the state, RNG,
 clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:246`).
 
 ## Composition
@@ -107,7 +107,7 @@ never writes one keeps its state hash.
 ## Budgets
 
 The eleven composition-profile limits and their values are `LIMITS`
-(`kernel/ts/src/contracts.gen.ts:348`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
+(`kernel/ts/src/contracts.gen.ts:360`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
 that order names the fault (`compose.ts:130`, `:141`), returned beside the decision and
 observed as `evaluation.budget_exceeded`, never in the result (`proposal.ts:26`). Every policy
 leaf evaluated adds one query step (`policy.ts:29`).
@@ -164,7 +164,7 @@ named by its keywords through `doors` (`:71`). A Command carries only ids, never
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:33`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:36`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
 barrier) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
@@ -181,10 +181,10 @@ has an instance of, with state and title); `time` (the logical clock); the pendi
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:81`, `:100`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:107`, `:126`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`kernel/ts/src/action_lists.ts:17`). Invariant `gameview_agrees_with_admission` holds this for exits and
+(`kernel/ts/src/action_lists.ts:25`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes, and for the door verbs: one listed on its exit is never refused with a code the view
-predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:11`, `:24`).
+predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:14`, `:32`).

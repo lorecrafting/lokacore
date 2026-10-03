@@ -188,7 +188,7 @@
       ]
     },
     "ExitView": {
-      "description": "One exit of the current place (04 §14; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now.",
+      "description": "One exit of the current place (04 §14, §15 as amended by c1-doors; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.",
       "oneOf": [
         {
           "description": "Moving through it is legal now.",
@@ -199,6 +199,12 @@
             },
             "direction": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "door": {
+              "$ref": "#/$defs/DoorView"
+            },
+            "sight": {
+              "$ref": "#/$defs/SightView"
             }
           },
           "required": [
@@ -219,6 +225,12 @@
             },
             "reason": {
               "$ref": "#/$defs/UnavailableReason"
+            },
+            "door": {
+              "$ref": "#/$defs/DoorView"
+            },
+            "sight": {
+              "$ref": "#/$defs/SightView"
             }
           },
           "required": [
@@ -232,7 +244,35 @@
       "examples": [
         {
           "available": true,
-          "direction": "north"
+          "direction": "north",
+          "door": {
+            "name": "barrier.oak_door.short",
+            "state": "open",
+            "actions": [
+              {
+                "available": true,
+                "action_key": "close",
+                "label": "action.close",
+                "target": {
+                  "kind": "none"
+                },
+                "input": [
+                  "direction"
+                ]
+              }
+            ]
+          },
+          "sight": {
+            "room": "a1b2c3d4-e5f6-8a7b-9c8d-0e1f2a3b4c5d",
+            "title": "room.courtyard.title",
+            "entities": [
+              {
+                "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+                "name": "npc.wren.name",
+                "kind": "npc"
+              }
+            ]
+          }
         },
         {
           "available": false,
@@ -242,7 +282,109 @@
             "message": {
               "key": "reason.causeway_flooded"
             }
+          },
+          "door": {
+            "name": "barrier.old_gate.short",
+            "state": "locked",
+            "actions": []
           }
+        }
+      ]
+    },
+    "DoorView": {
+      "description": "The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "state": {
+          "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "state",
+        "actions"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "name": "barrier.cell_door.short",
+          "state": "locked",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "unlock",
+              "label": "action.unlock",
+              "target": {
+                "kind": "none"
+              },
+              "input": [
+                "direction"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "SightView": {
+      "description": "What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.",
+      "type": "object",
+      "properties": {
+        "room": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              },
+              "name": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "kind": {
+                "$ref": "action.schema.json#/$defs/Key"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "kind"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "room",
+        "title",
+        "entities"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "room": "a1b2c3d4-e5f6-8a7b-9c8d-0e1f2a3b4c5d",
+          "title": "room.landing.title",
+          "entities": [
+            {
+              "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+              "name": "npc.bram.name",
+              "kind": "npc"
+            }
+          ]
         }
       ]
     },

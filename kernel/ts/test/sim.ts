@@ -30,7 +30,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 5;
+export const GENERATOR = 6;
 /** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
 /** invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -294,8 +294,9 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
 }
 
 // A command the GameView offers, available or not: each place action (a recipe's perform, a
-// quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each action on a listed entity, and
-// look at each detail of the room.
+// quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each door
+// verb of the set through each exit (the GameView lists only the accepted ones, on their exits),
+// each action on a listed entity, and look at each detail of the room.
 function offered(world: World, g: Gen): Payload {
   const view = gameView(world);
   const set = resolved(world, world.character);
@@ -311,6 +312,9 @@ function offered(world: World, g: Gen): Payload {
     if (o.input.includes('until')) return [{ type: 'wait', until: g.pick(boundaries(world)) }];
     return [{ type: o.command }];
   });
+  for (const o of Object.values(set))
+    if (['open', 'close', 'lock', 'unlock'].includes(o.command))
+      options.push(...exits.map((direction) => ({ type: o.command, direction })));
   for (const e of [...view.entities, ...view.inventory])
     for (const a of e.actions)
       options.push(aimed(set[a.action_key]!.command, e.id, g.pick([...npcs, STALE])));

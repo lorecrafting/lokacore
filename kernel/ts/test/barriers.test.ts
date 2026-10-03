@@ -80,6 +80,17 @@ const refused = (w: World, p: object, code: string) => {
   assert.equal(s.world, w, JSON.stringify(p));
 };
 const exits = (w: World) => gameView(w).exits;
+// A door verb as the GameView lists it on an exit (action.schema.json AdvertisedAction).
+const verb = (k: string) => ({
+  available: true,
+  action_key: k,
+  label: `action.${k}`,
+  target: { kind: 'none' },
+  input: ['direction'],
+});
+const OAK_SHORT = 'barrier.oak_door.short';
+const CELL_SHORT = 'barrier.cell_door.short';
+const roomId = (w: World, key: string) => w.roomIds[`${G}:room/${key}`];
 const KEY = (w: World) => take(w, 'iron_key');
 const withKey = () =>
   run(world(), door('open', 'north'), move('north'), KEY(world()), move('south'));
@@ -176,7 +187,18 @@ test('lock and unlock need the key, held directly or in a carried bag', () => {
 // other, or closing it from the far side leaves the near side open.
 test('both faces of a door are one barrier', () => {
   const inCourtyard = run(world(), door('open', 'north'), move('north'));
-  assert.deepEqual(exits(inCourtyard), [{ available: true, direction: 'south' }]);
+  assert.deepEqual(exits(inCourtyard), [
+    {
+      available: true,
+      direction: 'south',
+      door: { name: OAK_SHORT, state: 'open', actions: [verb('close')] },
+      sight: {
+        room: roomId(inCourtyard, 'gatehouse'),
+        title: 'room.gatehouse.title',
+        entities: [],
+      },
+    },
+  ]);
   const closed = run(inCourtyard, door('close', 'south'));
   refused(closed, move('south'), 'exit_closed');
   const back = run(closed, door('open', 'south'), move('south'), door('close', 'north'));
@@ -184,6 +206,7 @@ test('both faces of a door are one barrier', () => {
     available: false,
     direction: 'north',
     reason: { code: 'exit_closed' },
+    door: { name: OAK_SHORT, state: 'closed', actions: [verb('open')] },
   });
 });
 
@@ -195,18 +218,92 @@ test('moves through closed and locked exits are refused, and the GameView says w
   refused(w, move('east'), 'exit_locked');
   // Exits list in the RoomDefinition exits order (view.ts): east before north.
   assert.deepEqual(exits(w), [
-    { available: false, direction: 'east', reason: { code: 'exit_locked' } },
-    { available: false, direction: 'north', reason: { code: 'exit_closed' } },
+    {
+      available: false,
+      direction: 'east',
+      reason: { code: 'exit_locked' },
+      door: { name: CELL_SHORT, state: 'locked', actions: [] },
+    },
+    {
+      available: false,
+      direction: 'north',
+      reason: { code: 'exit_closed' },
+      door: { name: OAK_SHORT, state: 'closed', actions: [verb('open')] },
+    },
   ]);
   const opened = run(w, door('open', 'north'));
-  assert.deepEqual(exits(opened)[1], { available: true, direction: 'north' });
+  const key = w.entityIds[`${G}:item/iron_key`];
+  assert.deepEqual(exits(opened)[1], {
+    available: true,
+    direction: 'north',
+    door: { name: OAK_SHORT, state: 'open', actions: [verb('close')] },
+    sight: {
+      room: roomId(w, 'courtyard'),
+      title: 'room.courtyard.title',
+      entities: [{ id: key, name: 'item.iron_key.short', kind: 'item' }],
+    },
+  });
   run(opened, move('north'));
-  const verbs = gameView(w).actions.map((a) => [a.action_key, a.input]);
-  for (const v of ['open', 'close', 'lock', 'unlock'])
-    assert.deepEqual(
-      verbs.find(([k]) => k === v),
-      [v, ['direction']],
-    );
+  // Q-3: the door verbs are listed per exit, never with the place.
+  const verbs: string[] = gameView(w).actions.map((a) => a.action_key);
+  for (const v of ['open', 'close', 'lock', 'unlock']) assert.ok(!verbs.includes(v), v);
+});
+
+// Breaks: a door verb listed that step would refuse (unlock without the key, lock on a door with
+// no key_item), the verbs out of presentation order (priority, then key), a transition on one
+// face not shown on the other, or a room's ActionSet subtract ignored (00 §4.10, need #12).
+test('each exit lists only the door verbs step accepts there now', () => {
+  const oak = (state: string, ...vs: string[]) => ({
+    name: OAK_SHORT,
+    state,
+    actions: vs.map(verb),
+  });
+  const cell = (state: string, ...vs: string[]) => ({
+    name: CELL_SHORT,
+    state,
+    actions: vs.map(verb),
+  });
+  const doorOf = (w: World, d: string) => exits(w).find((e) => e.direction === d)!.door;
+  // The courtyard face: close it, then the gatehouse face shows the one state.
+  const yard = run(world(), door('open', 'north'), move('north'));
+  assert.deepEqual(doorOf(run(yard, door('close', 'south')), 'south'), oak('closed', 'open'));
+  const reopened = run(yard, door('close', 'south'), door('open', 'south'), move('south'));
+  assert.deepEqual(doorOf(reopened, 'north'), oak('open', 'close'));
+  // Keyed verbs: unlock only with the key; after it, lock before open (key order).
+  const held = withKey();
+  assert.deepEqual(doorOf(held, 'east'), cell('locked', 'unlock'));
+  const unlocked = run(held, door('unlock', 'east'));
+  assert.deepEqual(doorOf(unlocked, 'east'), cell('closed', 'lock', 'open'));
+  assert.deepEqual(doorOf(unlocked, 'north'), oak('open', 'close')); // no key_item: never lock
+  const open = run(unlocked, door('open', 'east'));
+  assert.deepEqual(exits(open)[0], {
+    available: true,
+    direction: 'east',
+    door: cell('open', 'close'),
+    sight: { room: roomId(open, 'cell'), title: 'room.cell.title', entities: [] },
+  });
+  // A room that subtracts unlock (06 §19): the key held, nothing listed.
+  const barred = world((c) => {
+    c.rooms[`${G}:room/gatehouse`].actions = [{ op: 'subtract', actions: ['unlock'] }];
+  });
+  const k = run(barred, door('open', 'north'), move('north'), KEY(barred), move('south'));
+  assert.deepEqual(doorOf(k, 'east'), cell('locked'));
+  // A cartridge open whose policy fails (open only while locked): refused, so not listed.
+  const strict = world((c) => {
+    Object.assign(c.text, { 'action.open': 'Open', 'action.open.a11y': 'Open the door' });
+    c.actions[`${G}:action/open`] = {
+      key: 'open',
+      command: 'open',
+      target: { kind: 'none' },
+      input: ['direction'],
+      label: 'action.open',
+      priority: 0,
+      policy: { policy_version: 1, root: { op: 'barrier_state', barrier: OAK, equals: 'locked' } },
+      accessibility: 'action.open.a11y',
+    };
+  });
+  refused(strict, door('open', 'north'), 'invalid_state');
+  assert.deepEqual(doorOf(strict, 'north'), oak('closed'));
 });
 
 // Breaks: barrier_state reading the initial state after a change, or the wrong barrier.

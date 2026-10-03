@@ -20,6 +20,7 @@ const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
 const SEED = [1, 2, 3, 4];
 const SHOVE = 'ashmere_road@0.0.1:recipe/shove_cart';
 const PRAY = 'ashmere_road@0.0.1:recipe/pray';
+const YARD = (w: World) => w.roomIds['ashmere_road@0.0.1:room/mill_yard'];
 
 const sorted = (v: any): any =>
   Array.isArray(v)
@@ -246,11 +247,13 @@ test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavail
     reason: { code: 'insufficient_resource' },
   });
   const tired = run(world(), move('east'), move('west'), move('east'));
+  // Sight follows passage, not fare: the unaffordable exit still shows the mill yard.
+  const sight = { room: YARD(tired), title: 'room.mill_yard.title', entities: [] };
   assert.deepEqual(gameView(tired).exits, [
-    { available: false, direction: 'west', reason: { code: 'insufficient_resource' } },
+    { available: false, direction: 'west', reason: { code: 'insufficient_resource' }, sight },
   ]);
   assert.deepEqual(gameView(run(tired, wait(3600))).exits, [
-    { available: true, direction: 'west' },
+    { available: true, direction: 'west', sight },
   ]);
 });
 
@@ -333,7 +336,12 @@ test('a cartridge move cost of 2 mv charges 2 and refuses the next move at 1 mv'
   const spent = run(w, move('east'));
   rejects(spent, move('west'), 'insufficient_resource');
   assert.deepEqual(gameView(spent).exits, [
-    { available: false, direction: 'west', reason: { code: 'insufficient_resource' } },
+    {
+      available: false,
+      direction: 'west',
+      reason: { code: 'insufficient_resource' },
+      sight: { room: YARD(spent), title: 'room.mill_yard.title', entities: [] },
+    },
   ]);
 });
 

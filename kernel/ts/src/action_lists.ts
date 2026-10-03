@@ -1,9 +1,16 @@
 // The GameView lists of an actor's ActionSet (actions.ts resolved; 04 §14, §19; 00 §4.10).
-import type { AdvertisedAction, CharacterId, EntityId, TargetSpec } from './contracts.gen.ts';
-import { admission, detailOf, resolved, type Offered } from './actions.ts';
+import type {
+  AdvertisedAction,
+  CharacterId,
+  CommandPayload,
+  EntityId,
+  Key,
+} from './contracts.gen.ts';
+import { admission, detailOf, refusal, resolved, type Offered } from './actions.ts';
 import { bodyOf, type World } from './decision.ts';
 import { MODAL, speaks, talkRefused } from './dialogue.ts';
 import { holds } from './policy.ts';
+import * as barrier from './rules/barrier.ts';
 import { cmp } from './validate.ts';
 
 /**
@@ -12,10 +19,12 @@ import { cmp } from './validate.ts';
  * its admission passes, else shown with invalid_state or admission's code (00 §4.10); a talk in
  * step's order: invalid_state when its policy fails, not_found when its target speaks no
  * dialogue, invalid_state when talkRefused. A recipe is listed with the place while its detail is
- * in the actor's room.
+ * in the actor's room. The door verbs (barrier@1) are listed not with the place but on an exit,
+ * `door(direction)`: only those step would accept there now (refusal, then barrier.transition).
  */
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
+  const door = (a: Offered) => Object.hasOwn(barrier.MOVES, a.command);
   const body = bodyOf(world, actor);
   const here = (a: Offered) =>
     !a.recipe ||
@@ -33,15 +42,27 @@ export function lists(world: World, actor: CharacterId) {
       : talk || (typeof admitted === 'string' ? admitted : undefined);
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   };
-  const listed = (fits: (t: TargetSpec) => boolean, id?: string) =>
+  const listed = (fits: (a: Offered) => boolean, id?: string) =>
     Object.values(set)
-      .filter((a) => fits(a.target) && here(a) && !MODAL.includes(a.command))
+      .filter((a) => fits(a) && here(a) && !MODAL.includes(a.command))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .map((a) => advertise(a, id));
   return {
-    place: listed((t) => t.kind === 'none'),
+    place: listed((a) => a.target.kind === 'none' && !door(a)),
     of: (scope: string, id: string) =>
-      listed((t) => t.kind === 'entity' && t.scopes.includes(scope as never), id),
+      listed(({ target: t }) => t.kind === 'entity' && t.scopes.includes(scope as never), id),
+    door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, direction)),
   };
+}
+
+// True when step would accept door verb `a` by `actor` through `direction` now: admission
+// (refusal), then barrier@1's checks (barrier.transition).
+function usable(world: World, actor: CharacterId, a: Offered, direction: Key) {
+  const payload = { type: a.command, direction, actor_id: actor } as CommandPayload;
+  const steps = { n: 0 };
+  return (
+    !refusal(world, payload, steps, a.key) &&
+    typeof barrier.transition(world, actor, a.command, direction, steps) !== 'string'
+  );
 }
