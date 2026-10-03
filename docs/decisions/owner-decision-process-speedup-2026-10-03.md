@@ -1,6 +1,6 @@
 # Owner decisions: process speed-up, 2026-10-03
 
-Owner decisions (paraphrased): the owner accepted all PM recommendations from the timing diagnosis of PRs #97-#126 (23 h window, 30 merged PRs; 16 of 17 `main` merges conflicted, 15 of them in index files only; the typescript job took 172 s, 72 s of it the 10k simulator; 54 pushes were Markdown-only review records or codex appends). Source: `process-timing.md` section (e), kept outside the repository. The slice PR (#130) measured the parallel jobs at sim 1m36s, typescript 2m06s, elixir 57s, lint 17s.
+Owner decisions (paraphrased): the owner accepted all PM recommendations from the timing diagnosis of PRs #97-#126 (23 h window, 30 merged PRs; 16 of 17 `main` merges conflicted, 15 of them in index files only; the typescript job took 172 s, 72 s of it the 10k simulator; 54 pushes were Markdown-only review records or codex appends). Source: `process-timing.md` section (e), kept outside the repository. The slice PR (#130) measured the parallel jobs at sim 1m36s, typescript 2m06s, elixir 57s, lint 17s; a Markdown-only push skips elixir, typescript and sim.
 
 | # | Decision | Takes effect |
 |---|---|---|
