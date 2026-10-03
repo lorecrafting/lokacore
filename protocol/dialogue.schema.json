@@ -4,7 +4,7 @@
   "description": "DialogueDefinition (06 §17, §18, §33, §37, §43; 04 §5.3 Choice/continuation resolution; 21 §20), owned by dialogue@1.",
   "$defs": {
     "DialogueDefinition": {
-      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles; policy, the talk's availability; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome; and choices, at least one (a loader check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order.",
+      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a loader check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order.",
       "type": "object",
       "properties": {
         "key": {
@@ -149,7 +149,7 @@
       ]
     },
     "DialogueChoice": {
-      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give). The choose that selects it applies all of them, resolves the dialogue's quest and resolves the choice in one decision.",
+      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when the actor already has an instance of it), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id.",
       "type": "object",
       "properties": {
         "label": {
@@ -180,6 +180,9 @@
             ],
             "additionalProperties": false
           }
+        },
+        "accept": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "hand_over": {
           "type": "object",
@@ -219,6 +222,16 @@
               "value": "player_led"
             }
           ]
+        },
+        {
+          "label": "quest.lantern.accept",
+          "narration": "dialogue.bram.offer.narration",
+          "accept": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "lantern"
+          }
         }
       ]
     }
