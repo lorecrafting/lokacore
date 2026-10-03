@@ -6,6 +6,13 @@
 import type { CharacterId, EntityId, ErrorCode } from '../contracts.gen.ts';
 import { accepted, bodyOf, has, rejected, type Rule, values, type World } from '../decision.ts';
 
+/** equipment@1's commands, shared by the GameView and its invariant. */
+export const VERBS: readonly string[] = ['wear', 'remove'];
+
+/** True when `at` is one of `body`'s slot holders: what it contains is worn. */
+export const wornIn = (world: World, at: EntityId | undefined, body: EntityId | undefined) =>
+  values(world.slots).some((h) => h === at && world.state.containers[h] === body);
+
 export const decide: Rule<'equipment'> = (world, command) => {
   const { type, actor_id, item_id } = command.payload;
   const t = transfer(world, actor_id, type, item_id);
@@ -32,8 +39,7 @@ export function transfer(
   const e = world.entities[item];
   if (e.kind !== 'item') return 'invalid_target';
   const at = world.state.containers[item];
-  // The actor's holders are those in its body.
-  const worn = values(world.slots).some((h) => h === at && world.state.containers[h] === body);
+  const worn = wornIn(world, at, body);
   if (type === 'remove') return worn ? [at, body] : at === body ? 'invalid_state' : 'not_owned';
   if (worn) return 'invalid_state';
   if (at !== body) return 'not_owned';

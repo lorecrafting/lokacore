@@ -3,6 +3,7 @@
 // of the actor's set to the Command type it resolves to (actions.ts resolved).
 import type { AdvertisedAction, EntityView, ExitView, GameView } from './contracts.gen.ts';
 import { MOVES } from './rules/barrier.ts';
+import { VERBS as EQUIP_VERBS } from './rules/equipment.ts';
 
 // Observations are decoded JSON; fields are read loosely, as in invariants.ts.
 type Any = any;
@@ -13,15 +14,19 @@ type Any = any;
 // (04 §15 as amended by c1-doors) is listed on its exit's door only when admission and the barrier
 // rule accept it, under any key that resolves to it: listed, it is never refused with a code they give (not_found aside: a foreign
 // actor's or world's command is the envelope's); not listed, it is never accepted. Likewise wear
-// and remove (protocol.md GameView as amended by c1-equipment) on the item they name.
+// and remove (protocol.md GameView as amended by c1-equipment) on the item they name, and never
+// among the place's actions.
 export const gameview_agrees_with_admission = ({
   view,
   command,
   decision,
-  resolves,
+  resolves = {},
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type; // own keys only: an action may be keyed `constructor`
+  const equip = (a: AdvertisedAction) =>
+    Object.hasOwn(resolves, a.action_key) && EQUIP_VERBS.includes(resolves[a.action_key]);
+  if (view.actions?.some(equip)) return false; // a targetless wear or remove is never accepted
   if (DOOR_VERBS.includes(type) || EQUIP_VERBS.includes(type)) {
     const actions = DOOR_VERBS.includes(type)
       ? view.exits.find((e: ExitView) => e.direction === command.payload.direction)?.door?.actions
@@ -48,7 +53,6 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
 };
 
 const DOOR_VERBS = Object.keys(MOVES);
-const EQUIP_VERBS = ['wear', 'remove'];
 const VERB_CODES = [
   'unsupported_capability',
   'invalid_target',

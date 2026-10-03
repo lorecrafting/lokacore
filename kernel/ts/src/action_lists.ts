@@ -23,7 +23,8 @@ import { cmp } from './validate.ts';
  * in the actor's room. The door verbs (barrier@1) are listed not with the place but on an exit,
  * `door(direction)`: only those step would accept there now (refusal, then barrier.transition).
  * Likewise wear and remove (equipment@1) are listed on an item only when step would accept them
- * (refusal, then equipment.transfer); `worn(id)` lists only those that resolve to remove.
+ * (refusal, then equipment.transfer), never with the place; `worn(id)` lists only those that
+ * resolve to remove.
  */
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
@@ -52,21 +53,22 @@ export function lists(world: World, actor: CharacterId) {
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .map((a) => advertise(a, id));
   return {
-    place: listed((a) => a.target.kind === 'none' && !door(a)),
+    // A targetless wear or remove is never accepted (its Command needs item_id): not listed.
+    place: listed(
+      (a) => a.target.kind === 'none' && !door(a) && !equipment.VERBS.includes(a.command),
+    ),
     of: (scope: string, id: string) =>
       listed(
         (a) =>
           a.target.kind === 'entity' &&
           a.target.scopes.includes(scope as never) &&
-          (!EQUIP.includes(a.command) || fits(world, actor, a, id)),
+          (!equipment.VERBS.includes(a.command) || fits(world, actor, a, id)),
         id,
       ),
     worn: (id: string) => listed((a) => a.command === 'remove' && fits(world, actor, a, id), id),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, direction)),
   };
 }
-
-const EQUIP: readonly string[] = ['wear', 'remove'];
 
 // True when step would accept equipment verb `a` by `actor` on `item` now: admission (refusal),
 // then equipment@1's checks (equipment.transfer).

@@ -2,13 +2,14 @@
 // holders in a fresh world, wear and remove by invocation (identify, resolve, step), the GameView's
 // equipment and wear/remove listing, and a worn item under containment@1. Worlds are the wear known
 // answer (protocol/fixtures/cartridge_wear_hash.json) and the items one relocked with equipment@1
-// (re-hashed with node:crypto over sorted-key JSON.stringify). Expected ids are Python hashlib over
+// (re-hashed with node:crypto over the canonical encoding). Expected ids are Python hashlib over
 // the IdSource input (the wear fixture's description holds the code), never the kernel's; codes
 // and ops are hand-derived from mechanics.md.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DefinitionRef, EntityId, GameView } from '../src/contracts.gen.ts';
+import { encode } from '../src/canonical.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { resolved } from '../src/actions.ts';
 import { identify, resolve } from '../src/invocation.ts';
@@ -38,25 +39,14 @@ const [BODY, KEY, LANTERN, CAP, HAT, CLOAK] = [ID[1], ID[5], ID[6], ID[7], ID[8]
 const [BRAM, HEAD] = [ID[4], ID[12]];
 const W = 'ashmere_wear@0.0.1';
 
-const sorted = (v: any): any =>
-  Array.isArray(v)
-    ? v.map(sorted)
-    : v && typeof v === 'object'
-      ? Object.fromEntries(
-          Object.keys(v)
-            .sort()
-            .map((k) => [k, sorted(v[k])]),
-        )
-      : v;
-// The fixture's artifact, or its value changed by `f` and re-hashed (a value without
-// integer-like keys: JSON.stringify orders those numerically).
+// The fixture's artifact, or its value changed by `f` and re-hashed over its canonical encoding.
 const world = (fixture: string, f?: (c: any) => void): World => {
   const kat = read(`protocol/fixtures/${fixture}`);
   let [text, h] = [kat.canonical, kat.sha256];
   if (f) {
     const c = structuredClone(kat.value);
     f(c);
-    text = JSON.stringify(sorted(c));
+    text = encode(c);
     h = createHash('sha256').update(text).digest('hex');
   }
   const loaded = loadCartridge(
@@ -262,4 +252,71 @@ test('two items in one holder fail containment_acyclic', () => {
   const w = wear();
   const containers = { ...w.state.containers, [CAP]: HEAD as EntityId, [HAT]: HEAD as EntityId };
   assert.equal(holds('containment_acyclic', { ...w, state: { ...w.state, containers } }), false);
+});
+
+// A cartridge action `key` resolving to `command` with `target`, always true (protocol.md ActionSet).
+const action = (c: any, key: string, command: string, target: object) => {
+  c.text[`action.${key}`] = key;
+  c.lock.capabilities.policy = c.manifest.requires.capabilities.policy = 1;
+  c.actions[`${W}:action/${key}`] = {
+    key,
+    command,
+    target,
+    input: [],
+    label: `action.${key}`,
+    accessibility: `action.${key}`,
+    priority: 0,
+    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+  };
+};
+const inventory = { kind: 'entity', scopes: ['inventory'] };
+
+// Breaks (C1E-01): admission's inventory scope excluding a worn item for an action resolving to
+// remove, so an override or alias of remove is neither listed on the worn item nor accepted.
+test('a cartridge remove and its alias list on and remove a worn item', () => {
+  let w = world('cartridge_wear_hash.json', (c) => {
+    action(c, 'remove', 'remove', inventory);
+    action(c, 'doff', 'remove', inventory);
+  });
+  w = accepted(accepted(w, 'take', CAP).world, 'wear', CAP).world;
+  const head = gameView(w).equipment!.find((s) => s.slot === 'head')!;
+  assert.deepEqual(
+    head.item!.actions.map((a) => a.action_key),
+    ['doff', 'remove'],
+  );
+  for (const key of ['remove', 'doff'])
+    assert.equal(accepted(w, key, CAP).world.state.containers[CAP], BODY, key);
+});
+
+// Breaks (C1E-02): a targetless wear alias listed with the place (its Command lacks item_id, so it
+// is never accepted), and gameview_agrees_with_admission not flagging such a view.
+test('a targetless wear alias is not listed, and the invariant refuses a view listing it', () => {
+  const w = world('cartridge_wear_hash.json', (c) => action(c, 'dress', 'wear', { kind: 'none' }));
+  const view = gameView(w);
+  assert.deepEqual(
+    view.actions.map((a) => a.action_key),
+    ['move', 'scan', 'wait'],
+  );
+  const s = invoke(w, 'take', CAP); // the invariant holds on the real view
+  const dress = {
+    available: true,
+    action_key: 'dress',
+    label: 'action.dress',
+    target: { kind: 'none' },
+    input: [],
+  };
+  const listed = { ...view, actions: [...view.actions, dress] };
+  const resolves = Object.fromEntries(
+    Object.values(resolved(w, w.character)).map((a) => [a.key, a.command]),
+  );
+  const command = { payload: { type: 'take', item_id: CAP } };
+  assert.equal(
+    check('gameview_agrees_with_admission', {
+      view: listed,
+      command,
+      decision: s.decision,
+      resolves,
+    }),
+    false,
+  );
 });

@@ -49,7 +49,7 @@ storage half):
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
    `unsupported_capability`. Admission (`:104`): the nil CommandId is `permission_denied`
    (`:113`), another world or actor `not_found`, and the ActionSet must offer an action that
-   resolves to this Command and accepts its target and input (`actions.ts:181`:
+   resolves to this Command and accepts its target and input (`actions.ts:182`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `decision.ts:179`) does not own
@@ -132,7 +132,7 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/actions.ts:148`) are, in order: the engine verbs of the
+An actor's actions (`kernel/ts/src/actions.ts:149`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS`, `:84`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, wear, remove, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
@@ -143,10 +143,12 @@ contribution removes. A recipe's admission adds `cooldown` and `insufficient_res
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
 The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
 the GameView lists them only on the exits they act on, never with the place's actions.
-`wear` and `remove` (equipment@1) take an `inventory` item target in the set, and admission is
-unchanged (an engine verb's rule checks its own target); the GameView lists `wear` on a held
+`wear` and `remove` (equipment@1) take an `inventory` item target in the set (an engine verb's
+rule checks its own target); for a cartridge action resolving to `remove`, the `inventory` scope
+also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:234`). The GameView lists `wear` on a held
 item and `remove` on a worn one only when admission and equipment@1's check accept it now, all
-available, and never `drop`, `give` or `wear` on a worn item (c1-equipment).
+available, never `drop`, `give` or `wear` on a worn item, and never either with the place's
+actions (a targetless one is never accepted: its Command needs `item_id`) (c1-equipment).
 
 ## Policy
 
@@ -177,7 +179,7 @@ carries `door` (the barrier's short name, its state and the door verbs the actor
 now: those admission and barrier@1's check accept, all available), also when passable; an exit
 whose barrier does not bar the way carries `sight` (the destination room id and title and the
 NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
-(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs;
+(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`;
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); `equipment`, one entry per slot
 holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
@@ -193,7 +195,7 @@ tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:125`, `:144`
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`kernel/ts/src/action_lists.ts:28`). Invariant `gameview_agrees_with_admission` holds this for exits and
+(`kernel/ts/src/action_lists.ts:29`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes, and for the door verbs and `wear`/`remove`, matched by the Command each listed action
 resolves to (a cartridge alias included): one listed on its exit or item is never refused with a
-code the view predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:17`, `:45`).
+code the view predicts, one not listed is never accepted, and none of `wear`/`remove` is a place action (`kernel/ts/src/invariants_view.ts:19`, `:50`).
