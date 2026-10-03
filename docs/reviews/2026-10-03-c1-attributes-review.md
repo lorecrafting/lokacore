@@ -95,3 +95,11 @@ Trial merge of `origin/c1-doors` into `6556bcd`: text conflicts in `docs/system/
 `invalid.json` parses and its suites pass.
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (6556bcd), verbatim
+
+APPROVE
+
+```text
+no findings
+```
