@@ -16,7 +16,7 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 reviewed once, with a narrow fix check, by a reviewer on the highest Opus.
 **Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
 our own independent review, never instead of it: the PM may add it to any slice beyond
-docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only; `-m` Astra on gate reviews and on changes to
+docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only; `-m` Astra on the gate audit and on changes to
 `kernel/ts/src/proposal.ts`, Sol for every other review and every fix re-check;
 [owner decision](decisions/owner-decision-review-rules-2026-10-01.md)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
@@ -104,12 +104,16 @@ Report at the end of the slice, not at every step.
 - PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
 
-## Milestone gate: docs tidy pass
+## Milestone gate
 
-The gate review also covers the docs changed during the milestone (not `docs/spec/`,
-which changes only by reviewed amendment, and not review or decision records, which are
-history): a fact stated in two places (keep one, link to it), a lesson that is stale or
-now enforced by a check, a doc turning into a catch-all. Findings are fixed in the gate PR.
+A gate is slim ([owner decision](decisions/owner-decision-slim-gates-2026-10-02.md)): the owner's
+play or test when the stage has something touchable; one codex Astra audit of the stage's riskiest
+code; and a short checklist, checked by one reviewer without narrative (no separate Opus-plus-Astra
+review of a docs-only gate PR). The checklist: every spec proof linked, every carry in a stage row,
+and the docs tidy pass over the docs changed during the milestone (not `docs/spec/`, which changes
+only by reviewed amendment, and not review or decision records, which are history): a fact stated
+in two places (keep one, link to it), a lesson that is stale or now enforced by a check, a doc
+turning into a catch-all. Findings are fixed in the gate PR.
 
 ## Git hygiene
 
