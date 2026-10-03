@@ -30,6 +30,8 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   `.prettierignore` only applies there);
   `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
+  `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
+  passing test, failures printed in full.
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
   40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt):
   `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs` (red control
@@ -59,6 +61,8 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   cancelled; `mobile.yml` builds the native apps on pull requests that change native
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
   on pull requests that touch `mobile/` or `kernel/`. The simulator (`kernel/ts/test/sim.ts`) runs its
-  regression seeds and 10,000 fresh sequences in `npm test` on every fast CI run
+  regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
+  sets it; locally, `npm test`, `bin/check_all.sh` and pre-push run 200), by
+  [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3); its Hermes replay sample (seeds 1-19) ran on the iPhone 11 in
   [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074).

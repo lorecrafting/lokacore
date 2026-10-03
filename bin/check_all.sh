@@ -5,6 +5,8 @@
 set -e
 cd "$(dirname "$0")/.."
 export MIX_ENV=test
+# The dot reporter keeps the node test output to a line; failures still print in full.
+export TEST_REPORTER=dot
 m() { mise exec -- "$@"; }
 m mix deps.get --check-locked
 m mix format --check-formatted

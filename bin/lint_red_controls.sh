@@ -17,11 +17,11 @@ printf 'export const t = Date.now();\nexport const decide = () => 0;\n' > kernel
 printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.state.clock = 1; };\nconst { assign } = Object;\nFunction('x')();\nconst p = JSON.parse('{}');\n" > kernel/ts/src/rules/red_control.ts
 # Review F2: an inline rule registered in RULES.
 sed -i.bak 's/  movement: movement.decide,/  movement: (w) => w,/' kernel/ts/src/world.ts && rm kernel/ts/src/world.ts.bak
-# The shared and realm plants are a template-literal require and a jest.mock only, so their
+# The shared and realm plants are a template-literal require and a require.resolve only, so their
 # rules are reported only if module-specifier sees those forms.
 echo "const a = require(\`../../authority/local-story\`);" > mobile/packages/ui/red_control.tsx
 printf "const b = () => import('../realm');\nimport { k } from '../../../kernel/ts/src';\nexport const P = () => <>{k}</>;\n" > mobile/features/story/red_control.tsx
-echo "jest.mock('../story');" > mobile/features/realm/red_control.tsx
+echo "require.resolve('../story');" > mobile/features/realm/red_control.tsx
 # The presenter split: a display line in the authority; the renderer reaching the authority and a phone
 # API; session.ts importing an engine (its backup is restored on exit).
 printf '%s\n' "export const said = 'You are too tired.';" 'export const go = `Go ${d}`;' "export const f = (s) => s; f('You are too tired.');" "export const g = formatter.runSync('You are too tired.');" > mobile/authority/local-story/red_control.ts

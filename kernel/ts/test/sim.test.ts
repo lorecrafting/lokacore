@@ -19,7 +19,8 @@ const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = re
   'kernel/ts/test/sim_seeds.json',
 );
 const seeds = SEEDS.seeds.map((s) => s.seed);
-const FRESH = 10_000;
+// CI (set by GitHub Actions) runs the full 10,000; locally a small count, the seeds still run.
+const FRESH = process.env.CI ? 10_000 : 200;
 // Observation records of this run (playbacks' game traces included) go to its own directory.
 const OBS = (process.env.LOKA_OBS_DIR = mkdtempSync(join(tmpdir(), 'loka-obs-')));
 after(() => rmSync(OBS, { recursive: true, force: true }));

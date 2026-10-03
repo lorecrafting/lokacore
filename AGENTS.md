@@ -107,15 +107,21 @@ A test exists to catch a specific break. Adapted from
 - **Behavior, not text.** Run scripts and checks on controlled input and assert output or
   exit status; do not grep source.
 - **Test our contract, not the library.** No tests for trivial structs, getters or
-  forwarding; no tests of Elixir, Node or `boundary` mechanics.
+  forwarding; no tests of Elixir, Node or `boundary` mechanics. A test never checks logic it
+  defines itself (a host model, a stand-in).
 - **Real over mocks.** Mock only what is slow or external (the network, a device); storage
   faults are real (see [storage lessons](docs/lessons/storage.md));
   never assert on the mock itself. Production modules carry no test-only functions.
+  Inject storage faults by operation (a table read, the n-th COMMIT), never by SQL text.
 - **Nothing extra.** No fixture, helper or validation the test does not need; no test
   written for coverage alone.
+- **One test per break per layer.** Apply a new test's mutant to the unchanged suite first;
+  if a focused same-layer test already fails, add nothing. Broad runs (simulator,
+  transcripts, frozen traces) do not count: they do not name the break.
 - **Mutation check before handoff.** For each realistic mutation (wrong constant or
   branch, missing state change, empty return, missing validation of empty/zero/malformed
   input) at least one test fails; actually break the code once and watch it fail.
+  A test that passes with its header's named break is wrong: fix or delete it.
   Mix compares mtimes to the second, so run Elixir mutants with `mix test --force`.
 
 ## Searching code (use precise tools first)

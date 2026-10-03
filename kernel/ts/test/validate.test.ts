@@ -49,13 +49,6 @@ test('the capability lock encodes and hashes to the independent known answer', (
   assert.equal(hash(value), sha256);
 });
 
-test('the hello cartridge encodes and hashes to the independent known answer', () => {
-  const { value, canonical, sha256 } = read('protocol/fixtures/cartridge_hash.json');
-  assert.deepEqual(validate('CompiledCartridge', value), []);
-  assert.equal(encode(value), canonical);
-  assert.equal(hash(value), sha256);
-});
-
 test('a declared __proto__ property survives generation', () => {
   assert.deepEqual(validate('SubsetProbe', JSON.parse('{"__proto__":"ok"}'), defs), []);
 });
@@ -63,15 +56,6 @@ test('a declared __proto__ property survives generation', () => {
 test('values outside the canonical profile are rejected at decode, before validation', () => {
   for (const text of ['{"n":1.0}', '{"n":1e0}', '{"n":1,"n":1}'])
     assert.throws(() => decode(text), { code: 'invalid_json' }, text);
-});
-
-// validate() takes decoded values, so recursion is bounded by the canonical depth cap: a
-// Policy nested 128 deep decodes and validates; 129 is rejected by the decoder.
-test('a recursive Policy at the depth cap', () => {
-  const nots = (n: number) =>
-    '{"op":"not","item":'.repeat(n) + '{"op":"target_present"}' + '}'.repeat(n);
-  assert.deepEqual(validate('Policy', decode(nots(127))), []);
-  assert.throws(() => decode(nots(128)), { code: 'invalid_json' });
 });
 
 // 64 narration lines (an admission limit, decision.schema.json) is the maximum; 65 is not.
