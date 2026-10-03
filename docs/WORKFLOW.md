@@ -89,8 +89,9 @@ Report at the end of the slice, not at every step.
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
    Merge with `gh pr merge <N> --merge --match-head-commit <sha>`, where `<sha>` is the head
    whose CI you confirmed green, so a later push makes the merge fail instead of landing
-   unchecked. Commits after the verdict that are not the PM's own (a `main` merge or a
-   review-record append) send the PR back to the reviewer. Then tell the owner:
+   unchecked. The PM's own commits after the verdict (a `main` merge, a codex answer
+   appended verbatim, a ROADMAP or index line) need only green CI on the new head; any
+   other commit after the verdict sends the PR back to the reviewer. Then tell the owner:
    PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
