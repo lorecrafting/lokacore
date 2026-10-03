@@ -8,8 +8,8 @@ import type { Failed } from '../../packages/game-view/session.ts';
 export const detail = (f: Failed) =>
   f.code === 'start_over_pending' ? 'start over not confirmed' : f.message;
 
-// No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk draws its
-// choice below).
+// No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
+// choice in the NPC menu).
 export const OUTCOME: Record<string, string> = {
   taken: 'Taken.',
   dropped: 'Dropped.',

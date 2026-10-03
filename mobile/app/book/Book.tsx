@@ -6,6 +6,7 @@ import { Pressable, SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Footer } from './Footer.tsx';
 import { branch, cap, group, said, type Hint, type Pool } from './model.ts';
+import { Menu, useMenu } from './Menu.tsx';
 import { body, paper } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import {
@@ -17,6 +18,7 @@ import {
   SettingsPage,
   ThingPage,
   bands,
+  type More,
 } from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
@@ -24,8 +26,8 @@ type Kind = 'character' | 'journal' | 'carrying' | 'map' | 'settings';
 type Page = { kind: Kind } | { kind: 'thing'; id: string };
 type Presenter = ReturnType<typeof presenter>;
 
-/** What the phone shell injects: its confirm step and its first-run stores (react-native-web has none). */
-export type Shell = { confirm: (go: () => void) => void; learned: Hint; looked: Hint };
+/** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
+export type Shell = { confirm: (go: () => void) => void; learned: Hint };
 
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
@@ -43,6 +45,7 @@ export default function Book(p: {
   const [, redraw] = useState(0);
   const screen = pr.screen();
   const { view, buttons } = screen;
+  const menu = useMenu(view);
   const g = group(buttons);
   const go = (next: Page[], dir: 1 | -1) => {
     setStack(next);
@@ -50,17 +53,18 @@ export default function Book(p: {
   };
   const press = (b: Button) => {
     const placeId = view.place.id;
-    pr.press(b);
+    const said = pr.press(b);
     const { log } = pr.screen(); // a new place's room log starts at its heading, the presenter's last line
     if (pr.screen().view.place.id !== placeId) log.splice(0, log.length - 1);
     go([], 1);
+    return said; // the NPC menu shows it
   };
   const page = stack.at(-1);
   const open = (p: Page) => go([...stack, p], 1);
   const walk = (d: string) => press(g.exits.find((e) => e.direction === d)!.button);
   const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1)); // no page turn
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
-  const ctx = { screen, g, press, walk, refused, open, startOver, shell: p.shell };
+  const ctx = { screen, g, press, walk, refused, open, menu, startOver, shell: p.shell };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={flip.turn} dir={flip.dir}>
@@ -102,21 +106,21 @@ function Bottom(p: {
         time={view.time}
         resources={view.resources}
         pending={pending}
-        open={(kind) => p.open({ kind })}
+        open={() => p.open({ kind: 'character' })}
       />
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
   );
 }
 
-// One line: the time as its earthly branch, then the way into each page; the character button shows the body's
+// One line: the time as its earthly branch, then the character button, which shows the body's
 // resources coloured by band when GameView carries them (the room-view status line, an owner-
-// ruled departure).
+// ruled departure) and opens the Character page, the way to Journal, Carrying and Settings.
 function Status(p: {
   time: number;
   resources?: readonly Pool[];
   pending: boolean;
-  open: (k: 'character' | 'journal' | 'carrying' | 'settings') => void;
+  open: () => void;
 }) {
   return (
     <View
@@ -131,19 +135,16 @@ function Status(p: {
       <Text style={{ ...small, color: paper.dim }} accessibilityLabel={branch(p.time).label}>
         {branch(p.time).glyph}
       </Text>
-      {(['character', 'journal', 'carrying', 'settings'] as const).map((k) => (
-        <Pressable
-          key={k}
-          accessibilityRole="button"
-          accessibilityLabel={k === 'character' && p.resources ? said(p.resources) : k}
-          onPress={() => p.open(k)}
-          style={{ minHeight: 44, justifyContent: 'center' }}
-        >
-          <Text style={{ ...small, color: paper.accent }}>
-            {k === 'character' && p.resources ? shown(p.resources) : k}
-          </Text>
-        </Pressable>
-      ))}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={p.resources ? said(p.resources) : 'character'}
+        onPress={p.open}
+        style={{ minHeight: 44, justifyContent: 'center' }}
+      >
+        <Text style={{ ...small, color: paper.accent }}>
+          {p.resources ? shown(p.resources) : 'character'}
+        </Text>
+      </Pressable>
       {p.pending && (
         <Text style={{ ...small, color: paper.dim, width: '100%', textAlign: 'center' }}>
           save not confirmed
@@ -167,26 +168,24 @@ function Body(p: {
   page?: Page;
   screen: Screen;
   g: ReturnType<typeof group>;
-  press: (b: Button) => void;
+  press: (b: Button) => string;
   walk: (direction: string) => void;
   open: (p: Page) => void;
+  menu: ReturnType<typeof useMenu>;
   startOver: () => void;
   shell: Shell;
 }) {
   const { view, text, log } = p.screen;
   const { page } = p;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
+  const tap = (id: string) =>
+    view.entities.find((e) => e.id === id)?.kind === 'npc' ? p.menu.tap(id) : openThing(id);
   if (!page)
     return (
-      <RoomPage
-        view={view}
-        text={text}
-        log={log}
-        looked={p.shell.looked}
-        g={p.g}
-        press={p.press}
-        open={openThing}
-      />
+      <>
+        <RoomPage view={view} text={text} log={log} g={p.g} press={p.press} open={tap} />
+        <Menu view={view} text={text} g={p.g} press={p.press} menu={p.menu} />
+      </>
     );
   if (page.kind === 'thing') {
     const t = [...view.entities, ...view.inventory].find((e) => e.id === page.id);
@@ -194,7 +193,8 @@ function Body(p: {
       <ThingPage name={t ? cap(text(t.name)) : ''} actions={p.g.on(page.id)} press={p.press} />
     );
   }
-  if (page.kind === 'character') return <CharacterPage resources={view.resources} />;
+  if (page.kind === 'character')
+    return <CharacterPage resources={view.resources} open={(kind: More) => p.open({ kind })} />;
   if (page.kind === 'map')
     return <MapPage view={view} text={text} place={p.g.place} press={p.press} walk={p.walk} />;
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;

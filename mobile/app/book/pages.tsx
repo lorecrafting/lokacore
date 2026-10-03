@@ -1,9 +1,9 @@
 // The book's pages: room, a thing's page, and the Character / Journal / Carrying pages. Each is
 // only drawing; what a tap does is passed in by Book.tsx.
-import { useRef, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, ended, plain, why, type group, type Hint, type Pool } from './model.ts';
+import { cap, ended, plain, why, type group, type Pool } from './model.ts';
 import type { Button } from './presenter.ts';
 import { body, head, paper } from './paper.ts';
 
@@ -27,11 +27,11 @@ export const bands: Record<Pool['band'], [colour: string, phrase: string]> = {
   dying: [paper.accent, 'is DYING'],
 };
 
-const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
-const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
-const note = { ...prose, color: paper.dim };
+export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
+export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
+export const note = { ...prose, color: paper.dim };
 
-function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
+export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -44,7 +44,7 @@ function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
   );
 }
 
-function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
+export function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
   return (
     <Tap label={b.label} onPress={() => press(b)}>
       <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>
@@ -53,54 +53,35 @@ function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
 }
 
 // The place: its title (a tap looks), description, who and what is here, its own actions (an
-// offered quest among them), the log, then the pending choice under it.
+// offered quest among them) and the log. A tapped NPC's menu (Menu.tsx) opens over it.
 export function RoomPage(p: {
   view: GameView;
   text: Say;
   log: string[];
-  looked: Hint;
   g: Grouped;
   press: (b: Button) => void;
   open: (id: string) => void;
 }) {
-  const scroll = useRef<ScrollView>(null);
+  const title = (
+    <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.text(p.view.place.title.key)}</Text>
+  );
   return (
-    <ScrollView
-      ref={scroll}
-      contentContainerStyle={{ padding: 24 }}
-      onContentSizeChange={() => p.view.choice && scroll.current?.scrollToEnd()} // its answers in view
-    >
-      <Title
-        name={p.text(p.view.place.title.key)}
-        look={p.g.look}
-        looked={p.looked}
-        press={p.press}
-      />
+    <ScrollView contentContainerStyle={{ padding: 24 }}>
+      {p.g.look ? (
+        <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
+          {title}
+        </Tap>
+      ) : (
+        title
+      )}
       <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
       <Here view={p.view} text={p.text} open={p.open} />
       {p.g.place.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
       ))}
       {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
-      {p.view.choice && <Choice {...p} choice={p.view.choice} />}
       {ended(p.view) !== '' && <Text style={{ ...note, marginTop: 12 }}>{ended(p.view)}</Text>}
     </ScrollView>
-  );
-}
-
-// The place's name; a tap looks, and a first-run hint says so until the first look.
-function Title(p: { name: string; look?: Button; looked: Hint; press: (b: Button) => void }) {
-  const title = <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.name}</Text>;
-  if (!p.look) return title;
-  return (
-    <>
-      <Tap label={`Look, ${p.name}`} onPress={() => (p.looked.see(), p.press(p.look!))}>
-        {title}
-      </Tap>
-      {!p.looked.seen() && (
-        <Text style={{ ...note, textAlign: 'center' }}>Tap the title to look</Text>
-      )}
-    </>
   );
 }
 
@@ -116,37 +97,6 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
       </Tap>
     );
   });
-}
-
-// The pending choice (06 §43): its speaker if here, the prompt, each answer (an unavailable one
-// with its reason, not pressable) and Close. It blocks nothing: the footer stays usable.
-function Choice(p: {
-  view: GameView;
-  choice: NonNullable<GameView['choice']>;
-  text: Say;
-  g: Grouped;
-  press: (b: Button) => void;
-}) {
-  const speaker = p.view.entities.find((e) => e.id === p.choice.speaker_id);
-  const answer = (id: string) =>
-    p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
-  const close = p.g.choice.find((b) => b.action_key === 'close_choice');
-  return (
-    <View style={{ marginTop: 12 }}>
-      {speaker && <Text style={note}>{p.text(speaker.name)}</Text>}
-      <Text style={prose}>{p.text(p.choice.prompt.key)}</Text>
-      {absent(p.view) !== '' && <Text style={note}>{absent(p.view)}</Text>}
-      {p.choice.choices.map((o) => {
-        const b = answer(o.choice_id);
-        return b ? (
-          <Act key={o.choice_id} b={b} press={p.press} />
-        ) : (
-          <Text key={o.choice_id} style={note}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
-        );
-      })}
-      {close && <Act b={close} press={p.press} />}
-    </View>
-  );
 }
 
 function Sheet({ title, children }: { title: string; children: ReactNode }) {
@@ -171,8 +121,11 @@ export function ThingPage(p: { name: string; actions: Button[]; press: (b: Butto
   );
 }
 
-export function CharacterPage({ resources = [] }: { resources?: readonly Pool[] }) {
+// The way into the other pages (U3): Journal, Carrying and Settings are opened from here.
+export type More = 'journal' | 'carrying' | 'settings';
+export function CharacterPage(p: { resources?: readonly Pool[]; open: (k: More) => void }) {
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
+  const { resources = [] } = p;
   return (
     <Sheet title="Character">
       {resources.length === 0 && <Text style={note}>Nothing is known about you yet.</Text>}
@@ -180,6 +133,11 @@ export function CharacterPage({ resources = [] }: { resources?: readonly Pool[] 
         <Text key={key} style={prose}>
           {`${key}  ${current} / ${maximum}${key === 'hp' ? `, ${bands[band][1]}` : ''}`}
         </Text>
+      ))}
+      {(['journal', 'carrying', 'settings'] as const).map((k) => (
+        <Tap key={k} label={cap(k)} onPress={() => p.open(k)}>
+          <Text style={{ ...prose, color: paper.accent }}>{cap(k)}</Text>
+        </Tap>
       ))}
     </Sheet>
   );

@@ -34,7 +34,7 @@ test('a move rejected for want of MV says the body is too exhausted', () => {
   const rejected = { kind: 'rejected', error: { code: 'insufficient_resource' } } as DecisionResult;
   const p = presenter(game(() => ({ kind: 'saved', decision: rejected })));
   p.press(north);
-  assert.deepEqual(p.screen().log, ['> Go north', 'You are too exhausted.']);
+  assert.deepEqual(p.screen().log, ['You are too exhausted.']);
 });
 
 // Breaks (R6P-A04): a log that keeps every press while the process lives (memory, redraws).
@@ -45,7 +45,7 @@ test('the log stops growing in one room, its last line the latest answer', () =>
     return p.screen().log;
   };
   const [once, log] = [cycles().length, cycles()];
-  assert.deepEqual([log.length, ...log.slice(-2)], [once, '> Go north', 'Dropped.']);
+  assert.deepEqual([log.length, ...log.slice(-2)], [once, 'Taken.', 'Dropped.']);
 });
 
 // Breaks (review N-1): a Start over that is not confirmed shown as its empty message, or a failed

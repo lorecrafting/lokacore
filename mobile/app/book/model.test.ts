@@ -10,6 +10,10 @@ import {
   ended,
   group,
   hint,
+  menuDone,
+  menuLive,
+  menuOpen,
+  menuTap,
   plain,
   refused,
   said,
@@ -26,6 +30,7 @@ const b = (label: string, action_key: string, target_ids: string[] = [], input =
 const buttons = [
   b('look', 'look'),
   b('scan', 'scan'),
+  b('wait', 'wait'),
   b('Go north', 'move', [], { direction: 'north' }),
   b('take a leather satchel', 'take', ['satchel-1']),
 ];
@@ -42,13 +47,50 @@ test('exits, the look title, place actions and a thing page come from the right 
   );
   assert.deepEqual(
     g.place.map((x) => x.label),
-    ['scan'],
+    ['wait'], // scan has no button (DIFFERENCES 3); wait is an ordinary place action
   );
   assert.deepEqual(
     g.on('satchel-1').map((x) => x.label),
     ['take a leather satchel'],
   );
   assert.deepEqual(g.on('bram-1'), []);
+});
+
+// Breaks (U5): a pending choice restored after a restart that opens no menu (the player cannot see
+// it), a dismissed one that stays open or that a new choice cannot reopen, a tapped NPC who left
+// that keeps a menu open on nothing.
+const room = (place: string, choice?: string, here = true) =>
+  ({
+    place: { id: place },
+    entities: here ? [{ id: 'bram' }] : [],
+    choice: choice && { continuation_id: choice, speaker_id: 'bram' },
+  }) as never;
+test('the NPC menu is open for a tapped NPC here and for a pending choice not dismissed', () => {
+  assert.equal(menuOpen(room('a'), {}), false);
+  assert.equal(menuOpen(room('a'), menuTap(room('a'), 'bram')), true);
+  assert.equal(menuOpen(room('a', undefined, false), menuTap(room('a'), 'bram')), false);
+  assert.equal(menuOpen(room('a', 'c1'), {}), true);
+  assert.equal(menuOpen(room('a', 'c1', false), {}), true); // walked away, still pending
+  assert.equal(menuOpen(room('a', 'c1'), menuDone(room('a', 'c1'))), false);
+  assert.equal(menuOpen(room('a', 'c2'), menuDone(room('a', 'c1'))), true);
+});
+
+// Breaks (review B-1, F1): Done, then a walk, leaves a pending choice with no menu and so no Close;
+// a tap after Done, then a walk, does the same.
+test('Done, then a walk: the pending choice shows its menu again; also after a new tap', () => {
+  const done = menuDone(room('a', 'c1'));
+  assert.equal(menuOpen(room('b', 'c1', false), done), true);
+  const again = menuTap(room('a', 'c1'), 'bram'); // tap clears the dismissal
+  assert.equal(menuOpen(room('a', 'c1'), again), true);
+  assert.equal(menuOpen(room('b', 'c1', false), again), true);
+});
+
+// Breaks (review F2): a tapped NPC's menu reopens by itself when the player leaves and returns.
+test('a tapped NPC does not reopen the menu after leave and return', () => {
+  const tapped = menuTap(room('a'), 'bram');
+  const away = menuLive(room('b', undefined, false), tapped); // what the hook stores while away
+  assert.equal(menuOpen(room('b', undefined, false), away), false);
+  assert.equal(menuOpen(room('a'), menuLive(room('a'), away)), false);
 });
 
 // Breaks: raw link syntax shown (Ferry Landing's "[mooring post](mooring_post)"), or a greedy
@@ -64,7 +106,7 @@ test('a touch link is shown as its label', () => {
 // draws them twice (once under the choice, once among the place's actions).
 test("a choice's answers and Close are their own group, not place actions", () => {
   const g = group([
-    b('Scan', 'scan'),
+    b('Rest', 'rest'),
     b('Carry it along the bank', 'choose', [], { choice_id: 'carry', continuation_id: 'c-1' }),
     b('Close', 'close_choice'),
   ]);
@@ -74,7 +116,7 @@ test("a choice's answers and Close are their own group, not place actions", () =
   );
   assert.deepEqual(
     g.place.map((x) => x.label),
-    ['Scan'],
+    ['Rest'],
   );
 });
 
@@ -157,7 +199,7 @@ test('a hint survives a store that throws, for this session', () => {
       throw new Error('disk I/O error');
     },
   };
-  const h = hint(broken, 'hint.looked');
+  const h = hint(broken, 'hint.learned');
   assert.equal(h.seen(), false);
   h.see();
   assert.equal(h.seen(), true);

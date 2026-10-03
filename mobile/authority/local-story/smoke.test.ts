@@ -72,7 +72,7 @@ test('a scripted session survives a restart and plays on', () => {
   assert.deepEqual(a.now().buttons, ['Look', 'Scan', 'Go north', 'Take a leather satchel']);
   a.press('Take a leather satchel');
   assert.deepEqual(a.now().carrying, ['a leather satchel']);
-  assert.deepEqual(a.now().log, ['> Take a leather satchel', 'Taken.']);
+  assert.deepEqual(a.now().log, ['Taken.']);
   a.press('Go north');
   assert.equal(a.now().place, 'Village Green');
   a.sql.close();
@@ -83,7 +83,7 @@ test('a scripted session survives a restart and plays on', () => {
   assert.deepEqual(b.now().log, []);
   assert.ok(b.now().buttons.includes('Drop a leather satchel'));
   b.press('Go south');
-  assert.deepEqual(b.now().log, ['> Go south', 'Ferry Landing']);
+  assert.deepEqual(b.now().log, ['Ferry Landing']);
   assert.equal(b.now().place, 'Ferry Landing');
 });
 
@@ -94,12 +94,12 @@ test('an invalid press before a save does not make the next id collide after a r
   const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
   const a = processOn(path);
   at(a.game).press({ label: 'bad', action_key: 'NOT A KEY', target_ids: [], input: {} });
-  assert.deepEqual(a.now().log, ['> bad', '(invalid)']);
+  assert.deepEqual(a.now().log, ['(invalid)']);
   a.press('Take a leather satchel');
   a.sql.close();
   const b = processOn(path);
   b.press('Go north');
-  assert.deepEqual(b.now().log, ['> Go north', 'Village Green']);
+  assert.deepEqual(b.now().log, ['Village Green']);
 });
 
 // Breaks (03 §15): a press whose COMMIT outcome is unknown shown as a success (the satchel carried,
@@ -117,7 +117,7 @@ test('an unknown COMMIT shows pending, not a success; a restart shows what commi
   });
   arm = true;
   a.press('Take a leather satchel');
-  assert.deepEqual(a.now().log, ['> Take a leather satchel', PENDING]);
+  assert.deepEqual(a.now().log, [PENDING]);
   assert.equal(a.now().pending, true);
   assert.deepEqual(a.now().carrying, []);
   const b = processOn(path);
@@ -156,7 +156,7 @@ test('a pending press is retried with its own id and replays what committed', ()
   p.press('Go north');
   assert.equal(p.now().pending, true);
   p.press('Take a leather satchel'); // another button: still retries the north
-  assert.deepEqual(p.now().log.slice(-3), [PENDING, '> Go north', 'Village Green']);
+  assert.deepEqual(p.now().log.slice(-2), [PENDING, 'Village Green']);
   assert.equal(p.now().pending, false);
   assert.equal(p.now().place, 'Village Green');
   assert.deepEqual(p.now().carrying, []);
@@ -175,7 +175,7 @@ test('a same-scope receipt from another allocator does not move the id counter',
   a.sql.close();
   const b = processOn(path);
   b.press('Go south');
-  assert.deepEqual(b.now().log, ['> Go south', 'Ferry Landing']);
+  assert.deepEqual(b.now().log, ['Ferry Landing']);
 });
 
 // Breaks: a throw shown as "not saved" with the retry cleared (a read error can follow a durable
@@ -188,12 +188,11 @@ test('a failed write is not claimed unsaved; the next press retries it', () => {
   p.press('Go north');
   assert.equal(p.now().pending, true);
   assert.match(p.now().fault!, /full/i);
-  assert.equal(p.now().log[0], '> Go north');
-  assert.match(p.now().log[1], /^\(not confirmed: .*full.*retries Go north\)$/i);
+  assert.match(p.now().log[0], /^\(not confirmed: .*full.*retries Go north\)$/i);
   assert.equal(one('SELECT revision FROM head'), 0);
   p.sql.exec('PRAGMA max_page_count = 1000000');
   p.press('Scan');
-  assert.deepEqual(p.now().log.slice(2), ['> Go north', 'Village Green']);
+  assert.deepEqual(p.now().log.slice(1), ['Village Green']);
   assert.equal(p.now().place, 'Village Green');
   assert.equal(p.now().pending, false);
   assert.equal(p.now().fault, undefined); // a stale fault would keep offering start over
@@ -236,7 +235,7 @@ test('a confirmed receipt that is not a decision is a conflict and ends the atte
   p.press('Scan'); // settles, finds the receipt, which is not a decision
   assert.equal(p.now().pending, false);
   p.press('Go north');
-  assert.deepEqual(p.now().log.slice(-3), ['(conflict)', '> Go north', 'Village Green']);
+  assert.deepEqual(p.now().log.slice(-2), ['(conflict)', 'Village Green']);
 });
 
 // The app's save file under localSession, as App.tsx wires it: `remove` closes the handle and deletes
@@ -282,7 +281,7 @@ const damaged = (name: string) => {
   return path;
 };
 
-// Breaks: start over that keeps the file: a NOTADB file cannot be repaired on its handle (its new
+// Breaks: a failed save with no Start over button (the NOTADB file has a replace, no new game); start over that keeps the file: a NOTADB file cannot be repaired on its handle (its new
 // game throws), so reopening the same bytes fails again; or a start over that throws. A corrupt
 // receipt id index fails the open untyped (the smoke's next-id read uses it): no new game, same
 // file replace.
@@ -296,11 +295,12 @@ test('start over replaces a file that does not open with a fresh game', () => {
   ]) {
     const a = app(path!);
     assert.equal(a.c.failed()?.kind, kind, path);
+    assert.equal(a.c.failed()?.startOver, true, path); // else SaveError shows no Start over: a trap
     a.c.startOver();
     assert.equal(a.c.failed(), undefined, path);
     assert.equal(a.now().place, 'Ferry Landing');
     a.press('Go north');
-    assert.deepEqual(a.now().log, ['> Go north', 'Village Green']);
+    assert.deepEqual(a.now().log, ['Village Green']);
     assert.equal(readFileSync(path!).subarray(0, 16).toString('latin1'), 'SQLite format 3\0');
   }
 });
@@ -334,7 +334,7 @@ test('a damaged receipt index fails the open with start over, which gives a fres
   assert.equal(b.now().place, 'Ferry Landing');
   assert.deepEqual(b.now().carrying, []);
   b.press('Go north');
-  assert.deepEqual(b.now().log, ['> Go north', 'Village Green']);
+  assert.deepEqual(b.now().log, ['Village Green']);
 });
 
 // Breaks (10 §32; saves.test.ts): start over of a newer app's save, destroying it instead of
@@ -391,9 +391,8 @@ test('a start over that fails during play keeps the game and its retry', () => {
   assert.equal(a.c.failed(), undefined); // a cached failure would outlive the play's recovery
   a.sql().exec('PRAGMA query_only = 0');
   a.press('Scan');
-  assert.deepEqual(a.now().log.slice(-3), [
+  assert.deepEqual(a.now().log.slice(-2), [
     '(start over: attempt to write a readonly database)',
-    '> Go north',
     'Village Green',
   ]);
 });
