@@ -166,3 +166,11 @@ New nit (pointers this round moved):
   `session.ts:153` is the handle reset, not `remove()` (`:154`), which the old pointer `:161` named.
 
 Open: CI had not yet reported on `0fcd507` when checked (last green: `0bf21ea`).
+
+## Codex Sol fix round 1 re-check (0fcd507), verbatim
+
+APPROVE
+
+```text
+no findings
+```
