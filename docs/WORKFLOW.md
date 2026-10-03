@@ -86,7 +86,11 @@ Report at the end of the slice, not at every step.
 7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
    NOTES with nothing open and every CI job started on the head has finished green
    ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
-   [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)); then tell the owner:
+   [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
+   Merge with `gh pr merge <N> --merge --match-head-commit <sha>`, where `<sha>` is the head
+   whose CI you confirmed green, so a later push makes the merge fail instead of landing
+   unchecked. Commits after the verdict that are not the PM's own (a `main` merge or a
+   review-record append) send the PR back to the reviewer. Then tell the owner:
    PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
