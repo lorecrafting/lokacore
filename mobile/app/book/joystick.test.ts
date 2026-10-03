@@ -4,8 +4,9 @@ import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
-import { openSmoke } from '../../authority/local-story/smoke.ts';
+import { openGame } from '../../authority/local-story/session.ts';
 import { gesture, pick, ZOOM } from './joystick.ts';
+import { presenter } from './presenter.ts';
 
 // Breaks: sectors off by one (east lit for a north drag, or a wrong quadrant edge), a quadrant
 // that is too narrow (a drag 30 degrees off north does nothing), a non-existent exit lit.
@@ -43,16 +44,18 @@ const LANTERN = '../../../protocol/fixtures/cartridge_lantern_hash.json';
 function lantern() {
   type P = (string | number | null)[];
   const sql = new DatabaseSync(':memory:');
-  const smoke = openSmoke(
-    {
-      execSync: (s) => void sql.exec(s),
-      isInTransactionSync: () => sql.isTransaction,
-      runSync: (s, ...p: P) => sql.prepare(s).run(...p),
-      getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T | null,
-      getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
-    },
-    JSON.parse(readFileSync(new URL(LANTERN, import.meta.url), 'utf8')),
-    randomUUID,
+  const smoke = presenter(
+    openGame(
+      {
+        execSync: (s) => void sql.exec(s),
+        isInTransactionSync: () => sql.isTransaction,
+        runSync: (s, ...p: P) => sql.prepare(s).run(...p),
+        getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T | null,
+        getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
+      },
+      JSON.parse(readFileSync(new URL(LANTERN, import.meta.url), 'utf8')),
+      randomUUID,
+    ),
   );
   return { sql, smoke };
 }

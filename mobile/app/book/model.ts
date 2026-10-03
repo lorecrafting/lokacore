@@ -1,8 +1,9 @@
-// How the book view sorts the controller's flat button list (smoke.ts `buttons`): the place's look,
+// How the book view sorts the controller's flat button list (presenter.ts `buttons`): the place's look,
 // the exits (a move button carries input.direction), the pending choice's answers and Close, other
 // place actions, and a thing's own actions.
-import type { Button, GameView } from '../../authority/local-story/smoke.ts';
-import { reason, SENTENCE } from '../../authority/local-story/words.ts';
+import type { GameView } from '../../packages/game-view/session.ts';
+import type { Button } from './presenter.ts';
+import { reason, SENTENCE } from './words.ts';
 
 export type Exit = { direction: string; button: Button };
 
@@ -76,9 +77,10 @@ export const branch = (t: number) => {
   return { glyph: '子丑寅卯辰巳午未申酉戌亥'[i]!, label };
 };
 
-// A first-run hint's "seen" flag in a key-value store (expo-sqlite/kv-store: its own file, not the
+// A first-run hint's "seen" flag in a key-value store (the shell's key-value store: its own file, not the
 // save). A store that throws falls back to this session's memory: a hint never stops the book.
 type Store = { getItemSync(key: string): string | null; setItemSync(key: string, v: string): void };
+export type Hint = ReturnType<typeof hint>;
 export function hint(store: Store, key: string) {
   let seen = false;
   return {

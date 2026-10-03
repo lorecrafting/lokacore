@@ -11,7 +11,14 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
 - `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): the Elixir kernel
   (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) stay pure; in `mobile/`,
   shared packages never import an authority, Story and Realm never import each other, and
-  only `authority/local-story` imports the kernel ([mobile import rules](system/architecture.md#mobile-import-rules)); rule
+  only `authority/local-story` imports the kernel ([mobile import rules](system/architecture.md#mobile-import-rules)) and
+  `packages/game-view/session.ts` imports only the generated contracts, as types
+  (`mobile-session-contracts-only`); the authority holds no display text, that is a string with
+  two words or a final full stop outside an `Error`, a module specifier or SQL
+  (`mobile-authority-no-display-text`, tests exempt); the renderer (`app/book/`,
+  `SaveError.tsx`, tests exempt) imports only `react`, `react-native` without `Alert`, its own
+  files and `packages/game-view` (`mobile-renderer-imports`, so react-native-web can mount it;
+  [owner wish](decisions/owner-decision-presenter-split-2026-10-02.md)); rule
   modules live only in `kernel/ts/src/rules/`, are registered in `world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)

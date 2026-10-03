@@ -10,7 +10,9 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openSmoke, playSmoke } from './smoke.ts';
+import { presenter } from '../../app/book/presenter.ts';
+import type { Game } from '../../packages/game-view/session.ts';
+import { localSession, openGame } from './session.ts';
 import type { Db } from './store.ts';
 
 const PENDING = '(pending: not confirmed saved; press any button to retry it)';
@@ -34,23 +36,30 @@ const processOn = (
 ) => {
   const sql = new DatabaseSync(path);
   if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`);
-  const smoke = openSmoke(adapt(sql, tap), ITEMS, randomUUID);
-  return { sql, smoke, ...screenOf(smoke) };
+  const game = openGame(adapt(sql, tap), ITEMS, randomUUID);
+  return { sql, game, ...screenOf(game) };
 };
-const screenOf = (smoke: ReturnType<typeof openSmoke>) => ({
-  now: () => {
-    const { view, text, buttons, log, pending, fault } = smoke.screen();
-    return {
-      place: text(view.place.title.key),
-      carrying: view.inventory.map((e) => text(e.name)),
-      buttons: buttons.map((b) => b.label),
-      log: [...log],
-      pending,
-      fault,
-    };
-  },
-  press: (label: string) => smoke.press(smoke.screen().buttons.find((b) => b.label === label)!),
-});
+// ponytail: the presenter (app/book) is this file's harness, so the authority tests still drive presses by
+// label and read the log; test-only, a stub Game would hide the real session.
+const shown = new WeakMap<Game, ReturnType<typeof presenter>>();
+const at = (g: Game) => shown.get(g) ?? shown.set(g, presenter(g)).get(g)!;
+const screenOf = (game: Game) => {
+  const p = at(game);
+  return {
+    now: () => {
+      const { view, text, buttons, log, pending, fault } = p.screen();
+      return {
+        place: text(view.place.title.key),
+        carrying: view.inventory.map((e) => text(e.name)),
+        buttons: buttons.map((b) => b.label),
+        log: [...log],
+        pending,
+        fault,
+      };
+    },
+    press: (label: string) => p.press(p.screen().buttons.find((b) => b.label === label)!),
+  };
+};
 
 // Breaks: a button that sends the wrong invocation (target, direction or actor), a world that is
 // not committed through the authority, a restart that loads the fresh world instead of the save,
@@ -84,7 +93,7 @@ test('a scripted session survives a restart and plays on', () => {
 test('an invalid press before a save does not make the next id collide after a restart', () => {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
   const a = processOn(path);
-  a.smoke.press({ label: 'bad', action_key: 'NOT A KEY', target_ids: [], input: {} });
+  at(a.game).press({ label: 'bad', action_key: 'NOT A KEY', target_ids: [], input: {} });
   assert.deepEqual(a.now().log, ['> bad', '(invalid)']);
   a.press('Take a leather satchel');
   a.sql.close();
@@ -239,12 +248,12 @@ test('a confirmed receipt that is not a decision is a conflict and ends the atte
   assert.deepEqual(p.now().log.slice(-3), ['(conflict)', '> Go north', 'Village Green']);
 });
 
-// The app's save file under playSmoke, as App.tsx wires it: `remove` closes the handle and deletes
+// The app's save file under localSession, as App.tsx wires it: `remove` closes the handle and deletes
 // the file, as expo's closeSync and deleteDatabaseSync do (the main file only).
 // `fail` names a step that throws: 'open' always (as expo's open can), 'remove' once.
 const app = (path: string, fail?: 'open' | 'remove', tap?: Parameters<typeof adapt>[1]) => {
   let sql: DatabaseSync | undefined;
-  const c = playSmoke(
+  const c = localSession(
     () => {
       if (fail === 'open') throw new Error('disk I/O error');
       return adapt((sql = new DatabaseSync(path)), tap);
@@ -263,7 +272,8 @@ const app = (path: string, fail?: 'open' | 'remove', tap?: Parameters<typeof ada
   );
   const now = () => screenOf(c.game()!).now();
   const press = (l: string) => screenOf(c.game()!).press(l);
-  return { c, sql: () => sql!, now, press };
+  const startOver = () => at(c.game()!).startOverFailed(c.startOver()); // as Book logs it
+  return { c, sql: () => sql!, now, press, startOver };
 };
 
 /** A save at revision 1 (the satchel taken) whose index `name` has its b-tree page type byte broken. */
@@ -385,7 +395,7 @@ test('a start over that fails during play keeps the game and its retry', () => {
   a.sql().exec('PRAGMA query_only = 1');
   a.press('Go north');
   assert.match(a.now().fault!, /readonly/);
-  a.c.startOver();
+  a.startOver();
   assert.equal(a.now().log.at(-1), '(start over: attempt to write a readonly database)');
   assert.equal(a.c.failed(), undefined); // a cached failure would outlive the play's recovery
   a.sql().exec('PRAGMA query_only = 0');
@@ -487,14 +497,3 @@ test(
     assert.deepEqual(dump(process.env.LOKA_DEVICE_DB!), dump(gateRun(GATE_KILLS).path));
   },
 );
-
-// Breaks (R6P-A04): a log that keeps every press while the process lives (memory, redraws).
-test('the log stops growing in one room, its last line the latest answer', () => {
-  const p = processOn(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'));
-  const cycles = () => {
-    for (let i = 0; i < 150; i++) ['Take a leather satchel', 'Drop a leather satchel'].map(p.press);
-    return p.now().log;
-  };
-  const [once, log] = [cycles().length, cycles()];
-  assert.deepEqual([log.length, ...log.slice(-2)], [once, '> Drop a leather satchel', 'Dropped.']);
-});

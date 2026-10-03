@@ -16,7 +16,9 @@ import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/
 import { INSTALLED } from '../../../kernel/ts/src/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Saved } from './authority.ts';
-import { playSmoke, type Button } from './smoke.ts';
+import { presenter, type Button } from '../../app/book/presenter.ts';
+import type { Game } from '../../packages/game-view/session.ts';
+import { localSession } from './session.ts';
 import type { Db } from './store.ts';
 
 const FERRY = read('protocol/fixtures/cartridge_ferry_hash.json');
@@ -35,14 +37,17 @@ const adapt = (sql: DatabaseSync): Db => ({
   getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T | null,
   getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
 });
+// One presenter (its log) per game, as Book keeps one.
+const shown = new WeakMap<Game, ReturnType<typeof presenter>>();
+const at = (g: Game) => shown.get(g) ?? shown.set(g, presenter(g)).get(g)!;
 const save = () => join(mkdtempSync(join(tmpdir(), 'loka-p4a-')), 'save.db');
 const all = (sql: DatabaseSync, q: string) => JSON.stringify(sql.prepare(q).all());
 const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
 
-/** The app's save under playSmoke, as App.tsx wires it (smoke.test.ts `app`). */
+/** The app's save under localSession, as App.tsx wires it (smoke.test.ts `app`). */
 function app(path: string) {
   let sql: DatabaseSync | undefined;
-  const c = playSmoke(
+  const c = localSession(
     () => adapt((sql = new DatabaseSync(path))),
     () => {
       sql?.close();
@@ -52,8 +57,8 @@ function app(path: string) {
     FERRY as never,
     { newId: randomUUID },
   );
-  const screen = () => c.game()!.screen();
-  const press = (b: Button) => c.game()!.press(b);
+  const screen = () => at(c.game()!).screen();
+  const press = (b: Button) => at(c.game()!).press(b);
   const tap = (label: string) => press(screen().buttons.find((b) => b.label === label)!);
   /** Plays from a fresh game to Bram's choice. */
   const talk = () =>
@@ -271,7 +276,10 @@ test('a malformed receipt response: Start over keeps the pending report', () => 
   a.sql().exec("UPDATE receipt SET response = '{' WHERE revision = 4");
   a.sql().close();
   const b = app(path);
-  assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
+  assert.deepEqual(
+    [b.c.failed()?.kind, b.c.failed()?.replace, b.c.failed()?.startOver],
+    ['save_corrupt', false, true],
+  );
   b.c.startOver();
   assert.equal(b.c.failed(), undefined);
   assert.equal(all(b.sql(), REPORTS), reports);
@@ -287,7 +295,7 @@ test('a narration read that fails on a lock offers no Start over', () => {
   a.sql().close();
   const other = new DatabaseSync(path);
   const db = adapt(new DatabaseSync(path));
-  const c = playSmoke(
+  const c = localSession(
     () => ({
       ...db,
       getFirstSync: <T>(s: string, ...p: P) => {
@@ -326,6 +334,23 @@ for (const [what, damage] of [
     assert.equal(b.c.failed(), undefined);
     assert.equal(b.screen().view.place.title.key, 'room.ferry_landing.title');
   });
+
+// Breaks (review F1): a receipt whose narration holds a null line parses, so the open passes and the
+// presenter throws on `.key` while drawing; it must route to the save-error screen at open.
+test('a receipt narration line that is null: save_corrupt at open, Start over repairs it', () => {
+  const path = save();
+  const a = app(path);
+  a.talk();
+  a.leave();
+  a.sql().exec(
+    "UPDATE receipt SET response = json_set(response, '$.narration', json('[null]')) WHERE json_array_length(response, '$.narration') > 0",
+  );
+  a.sql().close();
+  const b = app(path);
+  assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
+  b.c.startOver();
+  assert.equal(b.screen().view.place.title.key, 'room.ferry_landing.title');
+});
 
 // Breaks (R6P-A03; 03 §14 original outcome): a receipt whose response is not a DecisionResult
 // replayed as {kind: 'saved', replay: true, decision: null}, or taken as no receipt (decided again).

@@ -2,11 +2,10 @@
 // only drawing; what a tap does is passed in by Book.tsx.
 import { useRef, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import Storage from 'expo-sqlite/kv-store';
-import type { Button, GameView } from '../../authority/local-story/smoke.ts';
-import { absent, cap, ended, hint, plain, why, type group, type Pool } from './model.ts';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { absent, cap, ended, plain, why, type group, type Hint, type Pool } from './model.ts';
+import type { Button } from './presenter.ts';
 import { body, head, paper } from './paper.ts';
-import { confirmStartOver } from '../SaveError.tsx';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -59,6 +58,7 @@ export function RoomPage(p: {
   view: GameView;
   text: Say;
   log: string[];
+  looked: Hint;
   g: Grouped;
   press: (b: Button) => void;
   open: (id: string) => void;
@@ -70,7 +70,12 @@ export function RoomPage(p: {
       contentContainerStyle={{ padding: 24 }}
       onContentSizeChange={() => p.view.choice && scroll.current?.scrollToEnd()} // its answers in view
     >
-      <Title name={p.text(p.view.place.title.key)} look={p.g.look} press={p.press} />
+      <Title
+        name={p.text(p.view.place.title.key)}
+        look={p.g.look}
+        looked={p.looked}
+        press={p.press}
+      />
       <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
       <Here view={p.view} text={p.text} open={p.open} />
       {p.g.place.map((b) => (
@@ -84,16 +89,15 @@ export function RoomPage(p: {
 }
 
 // The place's name; a tap looks, and a first-run hint says so until the first look.
-const looked = hint(Storage, 'hint.looked');
-function Title(p: { name: string; look?: Button; press: (b: Button) => void }) {
+function Title(p: { name: string; look?: Button; looked: Hint; press: (b: Button) => void }) {
   const title = <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.name}</Text>;
   if (!p.look) return title;
   return (
     <>
-      <Tap label={`Look, ${p.name}`} onPress={() => (looked.see(), p.press(p.look!))}>
+      <Tap label={`Look, ${p.name}`} onPress={() => (p.looked.see(), p.press(p.look!))}>
         {title}
       </Tap>
-      {!looked.seen() && (
+      {!p.looked.seen() && (
         <Text style={{ ...note, textAlign: 'center' }}>Tap the title to look</Text>
       )}
     </>
@@ -244,11 +248,11 @@ export function MapPage(p: {
   );
 }
 
-// Start over destroys the save: the confirm step says so (SaveError.tsx). Nothing else lives here yet.
+// `startOver` asks first: it destroys the save (the shell's confirm). Nothing else lives here yet.
 export function SettingsPage({ startOver }: { startOver: () => void }) {
   return (
     <Sheet title="Settings">
-      <Tap label="Start over" onPress={() => confirmStartOver(startOver)}>
+      <Tap label="Start over" onPress={startOver}>
         <Text style={{ ...prose, color: paper.accent }}>Start over</Text>
       </Tap>
     </Sheet>

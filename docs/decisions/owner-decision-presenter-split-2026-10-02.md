@@ -47,3 +47,17 @@ slice also:
 Words for refusal codes live in the presenter and key on the registered error codes, so the same
 words serve both engines. Outcome codes are cartridge and rule keys with no registry; a code with no
 words shows no answer line (R6P Polish), so an unknown one is quiet, not wrong.
+
+## Addendum, 2026-10-02: React Native only, so the web can mount it later
+
+The owner, **(paraphrased)**: the renderer uses only React Native building blocks and the
+`GameSession`, with no phone-only APIs, so that react-native-web can mount it later.
+
+This is a rule for `mobile/app/book/` and `SaveError.tsx` (the renderer). The app shell (`App.tsx`)
+holds every phone-only API (expo-sqlite, expo-font, `Alert`) and injects what the renderer needs.
+`mobile-renderer-imports` in [CHECKS](../CHECKS.md) enforces it. No web build and no dependency
+are added now.
+
+The owner, **(paraphrased)**, on names: keep `GameSession` and `Game`. `GameSession` is the player's play
+session in the app, from app open to close; it holds the current `Game` across Start over, and online it
+will also hold the login and the connection. `Game` is the story being played inside it.

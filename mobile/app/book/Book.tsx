@@ -1,13 +1,13 @@
 // The book: the room page, the pages opened from it, the status line and the footer, over the
-// smoke controller (smoke.ts). Real data only: it draws what GameView projects and nothing else.
+// presenter (presenter.ts) over a Game. Real data only: it draws what GameView projects and nothing
+// else. It uses React Native and the Game only; the shell (App.tsx) injects the rest.
 import { useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
-import { useFonts } from 'expo-font';
-import { type Button, type openSmoke } from '../../authority/local-story/smoke.ts';
+import type { Game } from '../../packages/game-view/session.ts';
 import { Footer } from './Footer.tsx';
-import { branch, cap, group, said, type Pool } from './model.ts';
-import { body, fonts, paper } from './paper.ts';
-import { confirmStartOver } from '../SaveError.tsx';
+import { branch, cap, group, said, type Hint, type Pool } from './model.ts';
+import { body, paper } from './paper.ts';
+import { presenter, type Button } from './presenter.ts';
 import {
   CarryingPage,
   CharacterPage,
@@ -22,21 +22,26 @@ import { Turn } from './Turn.tsx';
 
 type Kind = 'character' | 'journal' | 'carrying' | 'map' | 'settings';
 type Page = { kind: Kind } | { kind: 'thing'; id: string };
-type Smoke = ReturnType<typeof openSmoke>;
+type Presenter = ReturnType<typeof presenter>;
+
+/** What the phone shell injects: its confirm step and its first-run stores (react-native-web has none). */
+export type Shell = { confirm: (go: () => void) => void; learned: Hint; looked: Hint };
 
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
 // Pressing turns to a fresh room page with the answer in the log; the log restarts at the new
 // place's heading on a place change, not on the tapped button (a pending retry may run another
 // action). A press that threw shows its fault with Start over.
-export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: () => void }) {
-  const [loaded, fontError] = useFonts(fonts);
+export default function Book(p: {
+  game: Game;
+  shell: Shell;
+  startOver: () => string | undefined; // a start over that failed and kept the game: why
+}) {
+  const [pr] = useState(() => presenter(p.game));
   const [stack, setStack] = useState<Page[]>([]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
-  if (!loaded && !fontError) return null;
-
-  const screen = smoke.screen();
+  const screen = pr.screen();
   const { view, buttons } = screen;
   const g = group(buttons);
   const go = (next: Page[], dir: 1 | -1) => {
@@ -45,17 +50,17 @@ export default function Book({ smoke, startOver }: { smoke: Smoke; startOver: ()
   };
   const press = (b: Button) => {
     const placeId = view.place.id;
-    smoke.press(b);
-    const { log } = smoke.screen(); // a new place's room log starts at its heading, smoke's last line
-    if (smoke.screen().view.place.id !== placeId) log.splice(0, log.length - 1);
+    pr.press(b);
+    const { log } = pr.screen(); // a new place's room log starts at its heading, the presenter's last line
+    if (pr.screen().view.place.id !== placeId) log.splice(0, log.length - 1);
     go([], 1);
   };
   const page = stack.at(-1);
   const open = (p: Page) => go([...stack, p], 1);
-  // a start over that failed shows its message in the room page's log
   const walk = (d: string) => press(g.exits.find((e) => e.direction === d)!.button);
   const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1)); // no page turn
-  const ctx = { screen, g, press, walk, refused, open, startOver: () => (startOver(), go([], 1)) };
+  const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
+  const ctx = { screen, g, press, walk, refused, open, startOver, shell: p.shell };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={flip.turn} dir={flip.dir}>
@@ -76,6 +81,7 @@ function Bottom(p: {
   open: (p: Page) => void;
   back?: () => void;
   startOver: () => void;
+  shell: Shell;
 }) {
   const { view, text, pending, fault } = p.screen;
   return (
@@ -88,6 +94,7 @@ function Bottom(p: {
           text={text}
           go={p.walk}
           refused={p.refused}
+          learned={p.shell.learned}
           openMap={() => p.open({ kind: 'map' })}
         />
       )}
@@ -154,7 +161,7 @@ const shown = (rs: readonly Pool[]) =>
     </Text>
   ));
 
-type Screen = ReturnType<Smoke['screen']>;
+type Screen = ReturnType<Presenter['screen']>;
 
 function Body(p: {
   page?: Page;
@@ -164,12 +171,23 @@ function Body(p: {
   walk: (direction: string) => void;
   open: (p: Page) => void;
   startOver: () => void;
+  shell: Shell;
 }) {
   const { view, text, log } = p.screen;
   const { page } = p;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
   if (!page)
-    return <RoomPage view={view} text={text} log={log} g={p.g} press={p.press} open={openThing} />;
+    return (
+      <RoomPage
+        view={view}
+        text={text}
+        log={log}
+        looked={p.shell.looked}
+        g={p.g}
+        press={p.press}
+        open={openThing}
+      />
+    );
   if (page.kind === 'thing') {
     const t = [...view.entities, ...view.inventory].find((e) => e.id === page.id);
     return (
@@ -191,7 +209,7 @@ function Fault(p: { fault: string; startOver: () => void }) {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Start over"
-      onPress={() => confirmStartOver(p.startOver)}
+      onPress={p.startOver}
       style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
     >
       <Text style={{ ...small, color: paper.dim }}>{p.fault}</Text>

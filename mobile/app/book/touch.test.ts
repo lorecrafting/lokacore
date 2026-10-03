@@ -5,18 +5,20 @@
 // docs/decisions/owner-decision-untimed-lantern-2026-10-02.md), so Bram is always at the landing.
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
-import { read } from '../../../kernel/ts/test/read.ts';
-import { openSmoke } from './smoke.ts';
-import { absent } from '../../app/book/model.ts';
+import { openGame } from '../../authority/local-story/session.ts';
+import { absent } from './model.ts';
+import { presenter } from './presenter.ts';
 import { reason } from './words.ts';
 
-const LANTERN = read('protocol/fixtures/cartridge_lantern_hash.json') as never;
-const FERRY = read('protocol/fixtures/cartridge_ferry_hash.json') as never;
+const read = (name: string) =>
+  JSON.parse(readFileSync(new URL(`../../../protocol/fixtures/${name}`, import.meta.url), 'utf8'));
+const LANTERN = read('cartridge_lantern_hash.json');
+const FERRY = read('cartridge_ferry_hash.json');
 const CARRY = 'You keep the lantern. Bram nods once and points you down the bank.';
 const LEAVE = 'You hand Bram the lantern. He lifts it toward the reeds and calls the others in.';
 const LANDING =
@@ -43,7 +45,7 @@ const adapt = (sql: DatabaseSync) => ({
 });
 const processOn = (path: string, cartridge = LANTERN) => {
   const sql = new DatabaseSync(path);
-  const smoke = openSmoke(adapt(sql), cartridge, randomUUID);
+  const smoke = presenter(openGame(adapt(sql), cartridge, randomUUID));
   const screen = () => smoke.screen();
   const find = (label: string, from = screen()) =>
     from.buttons.find((b) => b.label === label) ?? assert.fail(label);
