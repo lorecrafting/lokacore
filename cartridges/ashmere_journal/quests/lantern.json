@@ -1,0 +1,33 @@
+{
+  "title": "quest.lantern.title",
+  "offer": {
+    "label": "quest.lantern.accept",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    }
+  },
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "has_item",
+        "item": "lantern"
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.lantern.find",
+    "objectives_met": "quest.lantern.return",
+    "resolved": "quest.lantern.done",
+    "failed": "quest.lantern.failed",
+    "abandoned": "quest.lantern.abandoned",
+    "outcomes": {
+      "carry": "quest.lantern.carried"
+    }
+  }
+}

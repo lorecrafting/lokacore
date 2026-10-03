@@ -14779,5 +14779,202 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "name": "journal_missing_active",
+    "contract": "QuestJournal",
+    "value": {
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      }
+    },
+    "errors": [
+      {
+        "path": "/active",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "journal_missing_objectives_met",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      }
+    },
+    "errors": [
+      {
+        "path": "/objectives_met",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "journal_missing_resolved",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      }
+    },
+    "errors": [
+      {
+        "path": "/resolved",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "journal_missing_failed",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      }
+    },
+    "errors": [
+      {
+        "path": "/failed",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "journal_missing_abandoned",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      }
+    },
+    "errors": [
+      {
+        "path": "/abandoned",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "journal_unknown_field",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "stage": "quest.lantern.find"
+    },
+    "errors": [
+      {
+        "path": "/stage",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "journal_bad_outcome_key",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "Carry": "quest.lantern.carried"
+      }
+    },
+    "errors": [
+      {
+        "path": "/outcomes/Carry",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "journal_bad_stage_text",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "bad key",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      }
+    },
+    "errors": [
+      {
+        "path": "/active",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "journal_bad_outcome_text",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "bad key"
+      }
+    },
+    "errors": [
+      {
+        "path": "/outcomes/carry",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "questview_bad_journal_text",
+    "contract": "QuestView",
+    "value": {
+      "quest": {
+        "cartridge_id": "ferrymans_lantern",
+        "cartridge_version": "0.1.0",
+        "kind": "quest",
+        "key": "find_the_child"
+      },
+      "state": "active",
+      "title": "quest.find_the_child.title",
+      "journal": "bad key"
+    },
+    "errors": [
+      {
+        "path": "/journal",
+        "code": "pattern_mismatch"
+      }
+    ]
   }
 ]

@@ -195,6 +195,14 @@ rule that resolves it (a dialogue choice): no open instance `invalid_state`; `ac
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
 `quest_resolved`. Policy leaf `quest_state`; the GameView journal lists the player's instances.
+A quest may declare `journal` texts: `active`, `objectives_met`, `resolved`, `failed`,
+`abandoned`, and optional `outcomes` keyed by outcome. The view selects one TextKey without
+persisting it: `active` shows `objectives_met` while `holdsNow` holds, else `active`;
+`objectives_complete` shows `objectives_met` (event-earned credit survives dropping the item);
+`resolved`, `failed` and `abandoned` show `outcomes[outcome]` when declared, else their state's
+text. Without `journal`, the entry has only quest, state and title. Outcome keys need not name
+a dialogue choice: an unknown key falls back to the state's text. Revisit that check when a
+rule other than a dialogue choice resolves or fails a quest with an outcome.
 
 ## dialogue@1 (`rules/dialogue.ts`, `kernel/ts/src/dialogue.ts`)
 

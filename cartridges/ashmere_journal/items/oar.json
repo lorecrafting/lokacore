@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "oar"
+  ],
+  "short": "item.oar.short",
+  "room_line": "item.oar.room",
+  "description": "item.oar.description",
+  "location": {
+    "in": "room",
+    "room": "ferry_landing"
+  }
+}
