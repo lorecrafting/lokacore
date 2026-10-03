@@ -1,15 +1,5 @@
 {
   "title": "quest.lantern.title",
-  "offer": {
-    "label": "quest.lantern.accept",
-    "policy": {
-      "policy_version": 1,
-      "root": {
-        "op": "all",
-        "items": []
-      }
-    }
-  },
   "objective": {
     "evidence": "current_state",
     "policy": {

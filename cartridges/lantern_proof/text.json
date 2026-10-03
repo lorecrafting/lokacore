@@ -19,6 +19,8 @@
   "quest.lantern.title": "Bram's lantern",
   "quest.lantern.accept": "Offer to fetch Bram's lantern",
   "action.talk": "Talk to",
+  "dialogue.bram_offer.prompt": "Bram keeps his eyes on the reeds. \"My lantern's out at the shelter past the reed bank, and I can't leave the ferry. The search party won't go out without it.\"",
+  "proof.accept": "You say you'll fetch it. Bram nods toward the path north.",
   "dialogue.bram.prompt": "Bram looks at the lantern, then at the reeds. \"Are you coming with us, or do you mean to go along the bank yourself?\"",
   "dialogue.bram.carry": "Carry it along the bank",
   "dialogue.bram.leave": "Leave it with the search party",
