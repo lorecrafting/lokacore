@@ -152,3 +152,11 @@ protocol.md, world-parameters.md) and the invariant's direct callers (`invariant
 - **Q-1: closed** (PM accepted as written).
 
 No new findings. **Verdict: APPROVE.**
+
+## Codex Sol fix round 1 re-check (da8d759), verbatim
+
+APPROVE
+
+```text
+no findings
+```
