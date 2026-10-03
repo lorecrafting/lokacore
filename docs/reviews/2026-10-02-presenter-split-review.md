@@ -210,3 +210,51 @@ CI on `d14bf85`: elixir, bundle and lint pass; typescript was still running when
 is MERGEABLE and contains main.
 
 Verdict: **APPROVE WITH NOTES** (N-3 remainder open as a nit; merge once typescript is green).
+
+## Codex Sol reviews (gpt-6.1-sol), appended verbatim by the PM
+
+### First review (b66a197)
+
+CHANGES REQUESTED
+
+```text
+F1 | blocker | mobile/authority/local-story/session.ts:66
+A damaged receipt containing narration: [null] passes this opening check. Book then initializes the presenter, which throws on t.key outside save-error routing. Reproduced against both versions: the base shows SaveError; b66a197 publishes a Game and crashes during rendering. Validate the structured narration before exposing the Game.
+
+F2 | should-fix | lint/rules/mobile-renderer-imports.yml:13
+SaveError.tsx can import App from './App.tsx' with zero diagnostics. That imports the phone shell, including expo-sqlite and the local authority, into the shared renderer. Restrict relative imports to renderer-owned files.
+
+F3 | should-fix | lint/rules/mobile-renderer-imports.yml:18
+import * as RN from 'react-native'; RN.Alert.alert(...) produces zero diagnostics, allowing phone-only confirmation back into the renderer. Default imports and require destructuring also bypass the Alert check. Cover these forms or reject them.
+
+F4 | should-fix | lint/rules/mobile-authority-no-display-text.yml:23
+The Sync$ exemption applies to every argument of any matching function. Reintroducing wording as const formatSync = (s: string) => s; export const said = formatSync('You are too tired.'); produces zero diagnostics. Display strings used as SQL bind values also pass. Limit the exemption to actual SQL statement arguments.
+```
+
+### Fix round 1 re-check (6b8a6c3)
+
+CHANGES REQUESTED
+
+```text
+F2 | should-fix | lint/rules/mobile-renderer-imports.yml:13
+SaveError.tsx can import './metro.config.js' with zero diagnostics. That existing file imports Node's path and expo/metro-config, pulling build configuration into the shared renderer. Blocking App/index still leaves relative imports to non-renderer files allowed.
+
+F3 | should-fix | lint/rules/mobile-renderer-imports.yml:27
+import { default as RN } from 'react-native'; RN.Alert.alert('Start over'); produces zero diagnostics. So does import { 'Alert' as Ask } from 'react-native'; Ask.alert('Start over');. Both forms were transpiled and verified to call Alert.alert, allowing phone-only confirmation back into the renderer.
+
+F4 | should-fix | lint/rules/mobile-authority-no-display-text.yml:27
+The SQL exemption still trusts method names on arbitrary receivers. const formatter = {runSync: (s: string) => s}; export const said = formatter.runSync('You are too tired.'); produces zero diagnostics and exports display wording. Using the same formatter call as a SQL bind value also passes; its argument is exempt despite containing no SQL.
+```
+
+### Fix round 2 re-check (d14bf85)
+
+CHANGES REQUESTED
+
+```text
+F5 | should-fix | lint/rules/mobile-renderer-imports.yml:11
+TypeScript assertions bypass both import allowlists: require('./metro.config.js' as const) and const RN = require('react-native' as const); RN.Alert.alert('Start over'); produce zero diagnostics. The module-specifier gate misses literals inside as_expression. Verified Babel strips the assertions, leaving the forbidden static imports and Alert call.
+```
+
+### PM ruling on F5 (after two fix rounds; advisor consulted)
+
+Known limit, not fixed here: the lint rules guard against accidental drift, not adversarial constructions; `require('x' as const)` is not written by accident, and the Opus reviewer found no realistic bypass. CARRIED to the UI batch: in renderer files flag every `require(...)` and `import()` call whatever its argument (removes the class), and the Opus N-3 rest (a NOTADB save still shows Start over, the `!!f.newGame` mutant).
