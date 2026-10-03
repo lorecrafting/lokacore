@@ -4,7 +4,7 @@ Result: **every automated row passes on the phone at d37b268 (the savefix head, 
 byte mismatches over 1,669 records; the A01 case gives `save_corrupt`, `replace: false` on expo-sqlite;
 the planted and mutant red controls fail.** Same rows, drivers and method as
 [the R6P rerun](../2026-10-02-r6p-rerun-iphone11/README.md) (#112); only the differences are written here.
-Spec: [pre-release-proof.md](../../spec/pre-release-proof.md) P6; 03 §14; 04 §§14-15; ROADMAP SM2a, S6a.
+Spec: [pre-release-proof.md](../../archive/spec/pre-release-proof.md) P6; 03 §14; 04 §§14-15; ROADMAP SM2a, S6a.
 
 Facts are labeled **device-reported**, **inspected** or **owner-reported**. Device name, UDID, team,
 container ids and paths are withheld; driver output went through `redact`

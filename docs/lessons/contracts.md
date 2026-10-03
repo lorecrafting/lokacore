@@ -22,12 +22,12 @@ file covers: [the protocol map](../../protocol/README.md).
   second actor, `bodyOf` must change, as must `give` accepting only an NPC as recipient
   (`rules/containment.ts`) and the invariant `player_in_one_room`, which checks the one body. A rule that assumes "the actor is the player" blocks puppeting and NPC-issued
   commands
-  ([owner decision](../decisions/owner-decision-puppeting-2026-09-25.md)).
+  ([owner decision](../archive/decisions/owner-decision-puppeting-2026-09-25.md)).
 - Cartridge source accepts a short reference (a Key) at every DefinitionRef, but only the
   fields `Loka.Content.Checks.expand/2` lists get expanded. A new source reference field
   needs an entry there and a short-ref test; otherwise the compiler emits an artifact the
   loader rejects
-  ([owner decision](../decisions/owner-decision-short-refs-2026-09-25.md)).
+  ([owner decision](../archive/decisions/owner-decision-short-refs-2026-09-25.md)).
 - A command reaches its rule only if an action of the actor's ActionSet resolves to it and
   accepts its target and input (`refusal` in `kernel/ts/src/actions.ts`; an engine verb's rule
   is its own contract): a new player verb needs its entry in `VERBS` there, or `step` rejects

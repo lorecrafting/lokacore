@@ -15,7 +15,7 @@ Landing: the Quest from dialogue row of the [ROADMAP](../ROADMAP.md).
 - On main the offer is the quest's `offer` (`kernel/ts/src/actions.ts:131-135`). Bram's dialogue
   requires `quest_state` active (`cartridges/lantern_proof/dialogues/bram.json`), and the loaders
   reject two dialogues for one speaker. So the slice changes the contract: a spec amendment
-  ([pre-release-proof](../spec/pre-release-proof.md) :47, :61; `lantern-traces.json`;
+  ([pre-release-proof](../archive/spec/pre-release-proof.md) :47, :61; `lantern-traces.json`;
   `adverse-cases.json`), the schema, both loaders, the cartridge and the fixture hash, the walk
   selector in the [mobile lessons](../lessons/mobile.md), and the device rows rerun for the new hash.
 - Opus developer; codex Astra reviews it if `proposal.ts` changes.

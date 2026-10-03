@@ -40,7 +40,7 @@ lists only what a file adds to that.
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |
 | **Host, platform, verification** | | | |
 | `account.schema.json` | account/run binding, story point reports, admission | 23 §2-§7, §11; 03 §25-§27 | |
-| `observation.schema.json`, `event_registry.json` | the observation record envelope, stores, correlation ids, game-trace entry, and the registered event names | 11 §11-§15; 08 §6; 09 §2, §7; [ADR-075](../docs/decisions/adr-075-observability-proposal.md) | `delta_digest.json`, `input_digest.json` |
+| `observation.schema.json`, `event_registry.json` | the observation record envelope, stores, correlation ids, game-trace entry, and the registered event names | 11 §11-§15; 08 §6; 09 §2, §7; [ADR-075](../docs/archive/decisions/adr-075-observability-proposal.md) | `delta_digest.json`, `input_digest.json` |
 | (no schema) | the invocation-intent digest a receipt stores (`residency.json` receipts; TypeScript only) | 03 §14 | `intent_digest.json` |
 | `invariant.schema.json`, `invariants.json` | registered invariants, checked by id | [roadmap](../docs/ROADMAP.md) | `composition.json` |
 

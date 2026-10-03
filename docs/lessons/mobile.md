@@ -29,7 +29,7 @@ Hard-won lessons for `mobile/` and physical-device runs.
 
 **Physical-device runs**
 - Until the first free product gate the only phone is the iPhone 11
-  ([owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)). After
+  ([owner decision](../archive/decisions/owner-decision-android-descope-2026-09-30.md)). After
   that the owner can connect only one phone at a time: batch all work per phone; ask for a
   swap only when needed.
 - A locked screen stops the app's JS. Check the lock state before a run; keep the app in

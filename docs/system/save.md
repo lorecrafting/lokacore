@@ -84,7 +84,7 @@ and `head` tables whatever shape a corrupt save left them in; `report` rows and 
 the file, or the report table or its index, corrupt, `replace` throws (`store.ts:137`) and the
 host's Start over deletes the whole file (`smoke.ts:292`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
-the [R6P plan](../decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
+the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
 to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
 unknown COMMIT fences like an invocation's. The host confirms with the player first.
 

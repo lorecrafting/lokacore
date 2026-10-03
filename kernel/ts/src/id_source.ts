@@ -1,9 +1,9 @@
 // Deterministic gameplay ids (spec 01 A8; owner decision
-// docs/decisions/owner-decisions-r3-2026-09-24.md): a UUIDv8 from the first 16 bytes of
+// docs/archive/decisions/owner-decisions-r3-2026-09-24.md): a UUIDv8 from the first 16 bytes of
 // SHA-256 over the canonical JSON ["loka-id-v1", worldContextId, commandId, ordinal].
 // commandId derives the stable CommandId (04 §3, 03 §14) the same way from
 // ["loka-command-v1", idempotencyScopeId, invocationId]; authority placement never enters it
-// (owner decision docs/decisions/owner-decisions-r3-lanes-2026-09-24.md; rule in
+// (owner decision docs/archive/decisions/owner-decisions-r3-lanes-2026-09-24.md; rule in
 // docs/spec/conformance/numeric-profile.md). It is for invocation-derived commands only:
 // jobCommandId derives an authority-internal run_job's from ["loka-job-command-v1", jobId,
 // occurrence], the occurrence being the job's due time (numeric-profile.md, job CommandId).

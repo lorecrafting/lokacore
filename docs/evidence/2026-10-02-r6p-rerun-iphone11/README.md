@@ -4,8 +4,8 @@ Result: **every rerun row passes on the phone (rows 2, 4-12, 15); 0 Node/Hermes 
 1,739 records; the on-device mutant fails the compare.** Rows 1, 13 and 14 stay as
 [P6b](../2026-10-02-r6p-iphone11/README.md) recorded them. Why a rerun: #110 (R6P Untime) changed the
 Lantern cartridge (no wait, no Bram schedule, MV 100), so its content hash and every Lantern byte
-changed. Spec: [pre-release-proof.md](../../spec/pre-release-proof.md) P6 and "Evidence required to
-finish R6P"; [envelope](../../spec/r1-acceptance-envelope.md) §4-5; ADR-074 §3; 04 §§14-15; 03 §14;
+changed. Spec: [pre-release-proof.md](../../archive/spec/pre-release-proof.md) P6 and "Evidence required to
+finish R6P"; [envelope](../../archive/spec/r1-acceptance-envelope.md) §4-5; ADR-074 §3; 04 §§14-15; 03 §14;
 [owner decision](../../decisions/owner-decision-untimed-lantern-2026-10-02.md).
 
 Facts are labeled by source: **device-reported**, **inspected**, **not checked**. Device name, UDID,

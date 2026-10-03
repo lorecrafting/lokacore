@@ -12,14 +12,14 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 
 ## Specification (source of truth)
 
-- [docs/spec/](docs/spec/README.md): the R0-accepted specification, imported at the R2
-  cutover ([import record](docs/spec/IMPORT.md)). Its README §8 says which documents are
-  normative. Two normative documents disagreeing is a defect: stop and ask.
-- [docs/decisions/](docs/decisions/README.md): full ADR texts and verbatim owner decisions
-  since R0. [docs/reference/](docs/reference/README.md): informative material, linked in
-  the legacy repository, never authority.
-- Amend the spec here first, get it reviewed, then change code (spec README §11). Cite
-  the governing spec section in every PR.
+- [docs/system/](docs/system/README.md), [protocol/](protocol/README.md) and the conformance
+  fixtures say what exists. A change amends `docs/system` first, then the code, in one PR
+  citing the governing section (or an archived plan). If they disagree,
+  stop and ask ([known differences](docs/system/DIFFERENCES.md)).
+- [Owner rules in force](docs/system/owner-rules.md): a new decision adds its record to
+  [docs/decisions/](docs/decisions/README.md) and a line there.
+- [docs/archive/](docs/archive/README.md): old specs, decisions, reviews and roadmap rows.
+  History, read only when a task needs it.
 
 ## Architecture decisions already made (do not reopen silently)
 
@@ -28,8 +28,8 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   Elixir and TypeScript, held to the reviewed fixtures and randomized differential testing.
   Story rules (`portable_capability`) are TypeScript-only until a server first consumes
   them; an Elixir host adapter on one needs a declared differential (`bin/contracts.exs`).
-  [ADR-071](docs/decisions/adr-071-072-proposal.md),
-  [ADR-074](docs/decisions/adr-074-ts-first-proposal.md).
+  [ADR-071](docs/archive/decisions/adr-071-072-proposal.md),
+  [ADR-074](docs/archive/decisions/adr-074-ts-first-proposal.md).
 - **Persistence shape (ADR-072):** the world lives in memory; rules are pure
   (`decide(state, command) → proposal`) and never write memory or storage; the host
   commits only the changed rows plus the receipt in one transaction, then adopts the
@@ -139,7 +139,7 @@ CI runs them all, each with a planted case that must fail; the list is in
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
 - Merge record-bearing PRs with merge commits, never squash.
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored
-  none of the work ([owner ruling](docs/decisions/owner-decision-reviewers-2026-09-24.md));
+  none of the work ([owner ruling](docs/system/owner-rules.md#process));
   who reviews what: [the workflow](docs/WORKFLOW.md).
 - Each fact lives in one place; other docs link to it rather than restate it.
 - Readiness probes that exit 1 by design are expected; don't "fix" them.

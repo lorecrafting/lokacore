@@ -4,7 +4,7 @@ What the code does now, checked claim by claim against the code and its tests at
 A `path:line` cites that commit; a quoted name cites a test. Where the code and an old spec
 disagree, the text follows the code and [DIFFERENCES.md](DIFFERENCES.md) lists the
 difference for the owner. History (the specification packet, ADRs, decision records,
-reviews) is read only when a task needs it.
+reviews) is in [docs/archive/](../archive/README.md), read only when a task needs it.
 
 | File | Covers |
 |---|---|
@@ -27,6 +27,3 @@ Executable contracts stay where they are and are not restated here: `protocol/`
 ([map](../../protocol/README.md)), `docs/spec/conformance/` (frozen fixtures and the
 [numeric profile](../spec/conformance/numeric-profile.md)) and
 [release scope](../spec/release-scope.md).
-
-New owner decisions (proposed; the PM or owner decides): a record in `docs/decisions/` as
-today, plus one line in [owner-rules.md](owner-rules.md) in the same PR.

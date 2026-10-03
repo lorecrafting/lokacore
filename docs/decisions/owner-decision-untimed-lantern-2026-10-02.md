@@ -34,5 +34,5 @@ During the slice's review the owner also set (paraphrased):
   way out. Applied now to the Lantern only, by its `resources.json` (gains unchanged); the engine
   defaults (`lib/loka/content/resources.ex`) change in a later slice.
 
-Effect: [pre-release-proof](../spec/pre-release-proof.md#concrete-proof-the-ferrymans-lantern) and
+Effect: [pre-release-proof](../archive/spec/pre-release-proof.md#concrete-proof-the-ferrymans-lantern) and
 [ROADMAP](../ROADMAP.md) R6P row (slice Untime) and the R7/R8 for chapter one row (the time model).

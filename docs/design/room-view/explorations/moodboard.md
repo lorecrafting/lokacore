@@ -1,6 +1,6 @@
 # Loka UI mood board (round 1)
 
-Sources: docs/spec/00-first-cartridge-design.md §1, §4.10, §6; pre-release-proof.md (Lantern); 00a §8, §12.
+Sources: docs/archive/spec/00-first-cartridge-design.md §1, §4.10, §6; pre-release-proof.md (Lantern); 00a §8, §12.
 
 | # | Name | Risk | One-line hook |
 |---|---|---|---|

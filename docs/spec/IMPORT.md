@@ -1,5 +1,9 @@
 # Specification import record (R2 cutover)
 
+Since 2026-10-02 the imported documents live in [docs/archive/spec/](../archive/spec/README.md) as
+history, and the authority is [docs/system/](../system/README.md) ([AGENTS.md](../../AGENTS.md#specification-source-of-truth)).
+Below is the record as written at the cutover.
+
 Imported 2026-09-24 from [lorecrafting/lokacore-v2-legacy](https://github.com/lorecrafting/lokacore-v2-legacy/tree/997a7a8/docs/rewrite-v3) at commit `997a7a8`.
 The 37 `docs/spec/` files in the table below are byte-identical between the R0-accepted commit `f5bef28` and
 `997a7a8` (`git diff f5bef28 997a7a8` over those paths is empty). The `docs/decisions/`
@@ -8,7 +12,7 @@ files were written after R0 and are imported as they stand at `997a7a8`.
 **Cutover record** (required by the R0 record's `cutover_destination`): destination
 repository <https://github.com/lorecrafting/lokacore>, import commit `b968a8f`. The R0
 acceptance record itself is imported unchanged as
-[decisions/r0-acceptance.json](../decisions/r0-acceptance.json) (legacy
+[decisions/r0-acceptance.json](../archive/decisions/r0-acceptance.json) (legacy
 `prep/after-pr-10/r0-acceptance.pending.json`, SHA-256
 `ceb006ce826ec0765594d226c9d6517520637a4a6b7acd622459d96e425066b5`). Its `normative_files`
 defines the R0-accepted file set (all imported here) and its `architecture_index` is the
@@ -16,13 +20,13 @@ preserved invariant index. Its `governing_companions` include `r1-work-package.m
 stays informative in the legacy repository because R1 is complete.
 
 From this cutover on, this repository is the source of truth for specification and ADR
-amendments (spec [README §12](README.md#12-r0-cutover-and-implementation-facing-specification-organization)).
+amendments (spec [README §12](../archive/spec/README.md#12-r0-cutover-and-implementation-facing-specification-organization)).
 The legacy packet is provenance only; never amend it or choose it over these files.
 
 ## Authority layout
 
 - `docs/spec/`: normative architecture, content pull list, gates and sequencing, and
-  their companions and reading aids. The authority map is spec [README §8](README.md#8-specification-authority-map).
+  their companions and reading aids. The authority map is spec [README §8](../archive/spec/README.md#8-specification-authority-map).
   The directory stays flat so the packet's relative links keep working.
 - [docs/decisions/](../decisions/README.md): full ADR texts (accepted in document 16) and verbatim owner decisions
   made after R0.
@@ -33,28 +37,28 @@ The legacy packet is provenance only; never amend it or choose it over these fil
 
 The table below describes the files as imported. Later amendments are in git history:
 
-- 2026-09-24, [ADR-073](../decisions/adr-073-single-app.md): documents 02 §1 and
+- 2026-09-24, [ADR-073](../archive/decisions/adr-073-single-app.md): documents 02 §1 and
   14 §R2, one Mix application instead of an umbrella; 14's shape names `kernel/ts/`.
 - 2026-09-24, R3 PR 1: [conformance/numeric-profile.md](conformance/numeric-profile.md)
   frozen as `loka-numeric-v1` (owner-approved 2026-09-24), adding the parse, encode,
   depth, hash, budget, error-code and IdSource rules. No fixture JSON changed.
-- 2026-09-24, R3 PR 4a ([owner decision](../decisions/owner-decisions-r3-pr4a-2026-09-24.md)):
+- 2026-09-24, R3 PR 4a ([owner decision](../archive/decisions/owner-decisions-r3-pr4a-2026-09-24.md)):
   document 05 §3's compiled manifest form (`protocol/manifest.schema.json`) writes the
   `kernel_api` range as `{at_least, below}` (MAJOR.MINOR, half-open, so `">=1.3 <2.0"` is
   `{"at_least": "1.3", "below": "2.0"}`) and `requires.capabilities` as a key-to-version
   map (`movement@1` is `"movement": 1`); the compiler normalizes the authored string forms.
 - 2026-09-24, R3 PR 3: [conformance/numeric-profile.md](conformance/numeric-profile.md)
   gains the CommandId rule beside IdSource (additive; owner decision
-  [R3 lanes](../decisions/owner-decisions-r3-lanes-2026-09-24.md)). No existing rule or
+  [R3 lanes](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)). No existing rule or
   fixture changed.
-- 2026-09-24, R3 PR 6b ([owner decision](../decisions/owner-decisions-r3-gate-2026-09-24.md)):
+- 2026-09-24, R3 PR 6b ([owner decision](../archive/decisions/owner-decisions-r3-gate-2026-09-24.md)):
   how document 14's Gate R3 item "Elixir portable/domain types and validators" is met. In
   R3 it is satisfied by schema-driven validation (`Loka.Core.Contracts`, read from
   `protocol/` at compile time) plus generated nominal id types. Elixir domain data types
   for composite contracts arrive with their first Elixir consumer, generated from or
   checked against `protocol/` at that point. Document 14's text is unchanged.
-- 2026-09-24, [ADR-074](../decisions/adr-074-ts-first-proposal.md)
-  ([owner record](../decisions/owner-decision-adr-074-2026-09-24.md)): TypeScript-first
+- 2026-09-24, [ADR-074](../archive/decisions/adr-074-ts-first-proposal.md)
+  ([owner record](../archive/decisions/owner-decision-adr-074-2026-09-24.md)): TypeScript-first
   `portable_capability` rules until the ADR-074 trigger, per its appendix crosswalk.
   Historical failed and unmeasured results stand.
   - 16 ADR-004 and ADR-068: C's Elixir rules arrive at the trigger; ADR-074 added. The
@@ -77,20 +81,20 @@ The table below describes the files as imported. Later amendments are in git his
     (R1 procedure). Retained unchanged: 05 §6 last paragraph (how the trigger is checked),
     09 §31.
 - 2026-09-24, document 16 gains entries for the owner-accepted proposals ADR-070
-  ([A2 record](../decisions/owner-decision-a2-2026-09-23.md)), ADR-071
-  ([record](../decisions/owner-decisions-2026-09-24.md)), ADR-072
-  ([record](../decisions/owner-decisions-r3-open-questions-2026-09-24.md), item 3) and
-  ADR-073 ([R2 record](../decisions/owner-decision-r2-2026-09-24.md)), each pointing to its
+  ([A2 record](../archive/decisions/owner-decision-a2-2026-09-23.md)), ADR-071
+  ([record](../archive/decisions/owner-decisions-2026-09-24.md)), ADR-072
+  ([record](../archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md), item 3) and
+  ADR-073 ([R2 record](../archive/decisions/owner-decision-r2-2026-09-24.md)), each pointing to its
   proposal.
-- 2026-09-24, [owner decision](../decisions/owner-decisions-r3-open-questions-2026-09-24.md),
+- 2026-09-24, [owner decision](../archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md),
   dotted fact names: the R4 compiler maps each `.` in an authored fact name to `_`; two
   authored names that map to the same key are a compile error, never a merge; the
   64-character limit applies after mapping. (The same record keeps ambiguous-target order
   as ascending id; no spec change.)
-- 2026-09-25, R4 S1 ([owner decision](../decisions/owner-decisions-r4-2026-09-25.md)):
+- 2026-09-25, R4 S1 ([owner decision](../archive/decisions/owner-decisions-r4-2026-09-25.md)):
   notes in 05 §2 (source is JSON for now, YAML later) and 00a §12 (R4 compiles the hello
   fixture's frozen subset; the rest after R5/R7/R8).
-- 2026-09-25, R5 S1 ([review](../reviews/2026-09-25-r5-s1-review.md) F4, F8, Astra A6):
+- 2026-09-25, R5 S1 ([review](../archive/reviews/2026-09-25-r5-s1-review.md) F4, F8, Astra A6):
   [conformance/numeric-profile.md](conformance/numeric-profile.md) gains the initial world
   ids rule beside IdSource (additive; the nil CommandId reserved for world creation, one
   allocation counter per decision); 00a §12 notes the frozen room, text and entry shapes.
@@ -103,7 +107,7 @@ The table below describes the files as imported. Later amendments are in git his
   gains the job CommandId rule beside CommandId (additive: the `run_job` tag the CommandId
   rule reserved "where it first executes"), and records the initial ids after the details (NPCs,
   items, then each scheduled NPC's first job). No existing rule or fixture changed.
-- 2026-09-30, [owner decision](../decisions/owner-decision-android-descope-2026-09-30.md)
+- 2026-09-30, [owner decision](../archive/decisions/owner-decision-android-descope-2026-09-30.md)
   (paraphrased): one phone, the iPhone 11, until the first free product gate (14 Shipping
   rule); Android evidence is deferred to that gate, not dropped. The rule lives in envelope §4.
   - Envelope §3 applicability note and §4 (new paragraph); 14 R9 runner and Shipping rule;
@@ -114,7 +118,7 @@ The table below describes the files as imported. Later amendments are in git his
     and §4.1 (governed by the new paragraph), the R1 history (07 §14, 09 §42, 14 R1/R2,
     16 ADR-070 and the sequencing entry) and the release-time Android requirements
     (09 §19, 10 §23, 11 §22, 14 R13).
-- 2026-09-30, [owner decision](../decisions/owner-decision-one-save-2026-09-30.md)
+- 2026-09-30, [owner decision](../archive/decisions/owner-decision-one-save-2026-09-30.md)
   (paraphrased): one save per story, no manual bookmarks; a new game replaces the save after
   the player confirms. The rule lives in 10 §31 (amendment paragraph).
   - Amendment notes: 03 §27; 14 readiness notes (R6, R12); 15 RUN-02 and RUN-05;
@@ -122,7 +126,7 @@ The table below describes the files as imported. Later amendments are in git his
   - Note only, text unchanged: 16 ADR-066 entry. Retained unchanged: 10 §16's garbage
     collection condition and 10 §32's package retention (their bookmark clauses are vacuous)
     and 23 §11's fork provenance (forks still come from import or backup).
-- 2026-10-01, [owner decision](../decisions/owner-decision-story-point-2026-10-01.md)
+- 2026-10-01, [owner decision](../archive/decisions/owner-decision-story-point-2026-10-01.md)
   (paraphrased): the story-sense "milestone" is renamed "story point" in every document, and
   23 §3's event `story.milestone_reached` becomes `story_point_reached`. A pure rename: no rule
   changes. INDEX §3 gains row 40 (story point). The trace field `milestone` becomes `story_point` (shape unchanged) in
@@ -135,9 +139,9 @@ The table below describes the files as imported. Later amendments are in git his
   their anchors. The project-plan sense (R milestones, milestone gates) is unchanged.
 - 2026-10-02, [owner decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md)
   (paraphrased): the Lantern has no wait and no schedule; Bram stays at the landing and the game
-  clock stays at 06:00. Amended: [pre-release-proof](pre-release-proof.md) (:45, :47, :59, :63
-  and the P3 and P4 rows), [14 Gate R6P](14-implementation-plan.md) and the
-  [R-MILESTONES](R-MILESTONES.md) R6P row. In [conformance/adverse-cases.json](conformance/adverse-cases.json)
+  clock stays at 06:00. Amended: [pre-release-proof](../archive/spec/pre-release-proof.md) (:45, :47, :59, :63
+  and the P3 and P4 rows), [14 Gate R6P](../archive/spec/14-implementation-plan.md) and the
+  [R-MILESTONES](../archive/spec/R-MILESTONES.md) R6P row. In [conformance/adverse-cases.json](conformance/adverse-cases.json)
   (`fixture_version` 2, SHA-256 now
   `4b8f5a28085e8e55aa1556d534dd79d02544bebf4df02d610162d30c2b359526`, pinned by the
   portable ABI tests) four `lantern` cases are rewritten by hand: moved-bram-rejects-new-choice
@@ -155,35 +159,35 @@ at `997a7a8` on GitHub. Nothing else changed. `rewrites` counts changed links.
 
 | Imported file | Legacy source | SHA-256 of source at `997a7a8` | rewrites |
 | --- | --- | --- | --- |
-| [decisions/adr-071-072-proposal.md](../decisions/adr-071-072-proposal.md) | `docs/rewrite-v3/prep/adr-071-072-proposal.md` | `c7c46570b47b13e97a2494433860ea378101ee6a9d1a22bb5785f5e8c51dfa42` | 5 |
-| [decisions/owner-decision-a2-2026-09-23.md](../decisions/owner-decision-a2-2026-09-23.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a2-2026-09-23.md` | `40b33035646008135795c4e8d10f487397fb138e55df88397aa15b6246b68f2a` | 2 |
-| [decisions/owner-decision-a3-2026-09-24.md](../decisions/owner-decision-a3-2026-09-24.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a3-2026-09-24.md` | `69981f5ecba046a18d243509c7157be9562b2e0c580013e460a40ce23c781d0a` | 0 |
-| [decisions/owner-decision-prep-03-2026-09-24.md](../decisions/owner-decision-prep-03-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decision-prep-03-2026-09-24.md` | `6bf1d6f8ec5b40fb46620d789d33a00875d2eedfe1248584f7aa4cf34489dd6c` | 1 |
-| [decisions/owner-decision-reviewers-2026-09-24.md](../decisions/owner-decision-reviewers-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decision-reviewers-2026-09-24.md` | `8b84a1b3f0aebfd517de8bac737a971744c20ccfd76a7d1956aeb8761d73e88b` | 0 |
-| [decisions/owner-decisions-2026-09-24.md](../decisions/owner-decisions-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decisions-2026-09-24.md` | `a2a383dc52159e53c43f3bbfd9b94f55c6b2bb49c8f2cb2ae1ec0a61c68dadb7` | 0 |
-| [spec/00-first-cartridge-design.md](00-first-cartridge-design.md) | `docs/rewrite-v3/00-first-cartridge-design.md` | `809ba8073b05e1df9839a40800f06c2af712fb688e7148dc44762f5f98375ac9` | 0 |
-| [spec/00a-chapter-one-content.md](00a-chapter-one-content.md) | `docs/rewrite-v3/00a-chapter-one-content.md` | `85aba34f031ec590cb5b68b4f12352a26183199bb38b8016285213a491748d42` | 0 |
-| [spec/01-core-principles.md](01-core-principles.md) | `docs/rewrite-v3/01-core-principles.md` | `ad575cd2762a5e1eee41508179cff45360e7cbd891b68e5d1cb440c99e85956c` | 0 |
-| [spec/02-beam-runtime-architecture.md](02-beam-runtime-architecture.md) | `docs/rewrite-v3/02-beam-runtime-architecture.md` | `3760601eda7f455e43fd9462b71fa7bdf4c215d5686cc538ad2e449a0bef6def` | 0 |
-| [spec/03-domain-state-persistence.md](03-domain-state-persistence.md) | `docs/rewrite-v3/03-domain-state-persistence.md` | `e2b96029d3d003782dd0e494b1a20e362f834b32f21fca7361c5e6176586a733` | 0 |
-| [spec/04-command-event-effect-protocol.md](04-command-event-effect-protocol.md) | `docs/rewrite-v3/04-command-event-effect-protocol.md` | `1243eb240c2fd5028b5d26ca19b1b1d822d30609dbd51bb95f06152c68b63444` | 0 |
-| [spec/05-cartridges-content-capabilities.md](05-cartridges-content-capabilities.md) | `docs/rewrite-v3/05-cartridges-content-capabilities.md` | `46aeaa72056f5a7dc547a1fa1d9477dcbf30979ce1b666ddd0f1ae497c83a78d` | 0 |
-| [spec/06-quests-dialogue-actions-scripting.md](06-quests-dialogue-actions-scripting.md) | `docs/rewrite-v3/06-quests-dialogue-actions-scripting.md` | `0edae241b8a4f5091590606a87fd006e6ec4a4ef4482b99d311c05579fa6e90b` | 0 |
-| [spec/07-offline-storypacks-to-mmo.md](07-offline-storypacks-to-mmo.md) | `docs/rewrite-v3/07-offline-storypacks-to-mmo.md` | `3d0a516164ade2f1534877891715d49e3cdf62089e8e72f4f118d9918008664b` | 0 |
-| [spec/08-builder-api-ai-factory.md](08-builder-api-ai-factory.md) | `docs/rewrite-v3/08-builder-api-ai-factory.md` | `72de02a4d48a85b7af595c30131aae1211fe25f7030d2f58b46c20efde006004` | 0 |
-| [spec/09-cartridge-lab-certification.md](09-cartridge-lab-certification.md) | `docs/rewrite-v3/09-cartridge-lab-certification.md` | `06370f7bfbcef8e13ab140a71ff4d611a1cf2d67b43445736b144a524d8540b5` | 0 |
-| [spec/10-mobile-commerce-release.md](10-mobile-commerce-release.md) | `docs/rewrite-v3/10-mobile-commerce-release.md` | `e78bf9dfbf19719081bb84c00e42d810ae4718ff3cb27028cb5f50cc0f701e4b` | 0 |
-| [spec/11-security-observability-operations.md](11-security-observability-operations.md) | `docs/rewrite-v3/11-security-observability-operations.md` | `140d7a93110f84f295b9f3697b9188635551f75f210ef2484bdc2a734ff22831` | 0 |
-| [spec/14-implementation-plan.md](14-implementation-plan.md) | `docs/rewrite-v3/14-implementation-plan.md` | `0578fd7404b59a3c37819ebd4edc5fae75fda413431076d03e1b75b234c865e4` | 1 |
-| [spec/15-acceptance-scenarios.md](15-acceptance-scenarios.md) | `docs/rewrite-v3/15-acceptance-scenarios.md` | `104e66dcebb6639394386e3487af61b382ee563501d6876b74ea8540aeef2436` | 0 |
-| [spec/16-decision-register.md](16-decision-register.md) | `docs/rewrite-v3/16-decision-register.md` | `e949d65e3e5ce8d9a17b7b2734451e3f0ef3d4d8c8a8c8ab13f3db91965c460d` | 0 |
-| [spec/19-quest-sharing-instancing-capacity.md](19-quest-sharing-instancing-capacity.md) | `docs/rewrite-v3/19-quest-sharing-instancing-capacity.md` | `f6e597fd7ebc1d3410e43cba3b9df1a8d870a42f73b1794ad8d029b105ed5bb5` | 0 |
-| [spec/21-composable-world-primitives.md](21-composable-world-primitives.md) | `docs/rewrite-v3/21-composable-world-primitives.md` | `959d2b9ba411cb2c03fb6a4c022a1e17ea611471d65c2a3f59582795b1a63164` | 0 |
-| [spec/23-accounts-progress-admission.md](23-accounts-progress-admission.md) | `docs/rewrite-v3/23-accounts-progress-admission.md` | `a09f4aa32d070718c6718c3cb1680224e3ad120b87c791e16dff0fef1e468a1b` | 0 |
-| [spec/INDEX.md](INDEX.md) | `docs/rewrite-v3/INDEX.md` | `369c98f77d3e1b383e44ae1e7d3d743298aef6edc8ac8a313beda0f4d75e98b8` | 1 |
-| [spec/R-MILESTONES.md](R-MILESTONES.md) | `docs/rewrite-v3/R-MILESTONES.md` | `62f6f8097768ba7c45bc12934aa3987f4bb5bcec92d3a636c08890f21db8112c` | 2 |
-| [spec/README.md](README.md) | `docs/rewrite-v3/README.md` | `3e89bb5c87edfaaa7434127dbf6dafa83e15d537fdd4d516415b33c1071e9ce1` | 12 |
-| [spec/REVIEW-GUIDE.md](REVIEW-GUIDE.md) | `docs/rewrite-v3/REVIEW-GUIDE.md` | `2bde70363bca57e150b9419eb443a4642a7cdf19a690d7467a1ba3706fdb42bc` | 12 |
+| [decisions/adr-071-072-proposal.md](../archive/decisions/adr-071-072-proposal.md) | `docs/rewrite-v3/prep/adr-071-072-proposal.md` | `c7c46570b47b13e97a2494433860ea378101ee6a9d1a22bb5785f5e8c51dfa42` | 5 |
+| [decisions/owner-decision-a2-2026-09-23.md](../archive/decisions/owner-decision-a2-2026-09-23.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a2-2026-09-23.md` | `40b33035646008135795c4e8d10f487397fb138e55df88397aa15b6246b68f2a` | 2 |
+| [decisions/owner-decision-a3-2026-09-24.md](../archive/decisions/owner-decision-a3-2026-09-24.md) | `docs/rewrite-v3/prep/after-pr-10/owner-decision-a3-2026-09-24.md` | `69981f5ecba046a18d243509c7157be9562b2e0c580013e460a40ce23c781d0a` | 0 |
+| [decisions/owner-decision-prep-03-2026-09-24.md](../archive/decisions/owner-decision-prep-03-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decision-prep-03-2026-09-24.md` | `6bf1d6f8ec5b40fb46620d789d33a00875d2eedfe1248584f7aa4cf34489dd6c` | 1 |
+| [decisions/owner-decision-reviewers-2026-09-24.md](../archive/decisions/owner-decision-reviewers-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decision-reviewers-2026-09-24.md` | `8b84a1b3f0aebfd517de8bac737a971744c20ccfd76a7d1956aeb8761d73e88b` | 0 |
+| [decisions/owner-decisions-2026-09-24.md](../archive/decisions/owner-decisions-2026-09-24.md) | `docs/rewrite-v3/prep/owner-decisions-2026-09-24.md` | `a2a383dc52159e53c43f3bbfd9b94f55c6b2bb49c8f2cb2ae1ec0a61c68dadb7` | 0 |
+| [spec/00-first-cartridge-design.md](../archive/spec/00-first-cartridge-design.md) | `docs/rewrite-v3/00-first-cartridge-design.md` | `809ba8073b05e1df9839a40800f06c2af712fb688e7148dc44762f5f98375ac9` | 0 |
+| [spec/00a-chapter-one-content.md](../archive/spec/00a-chapter-one-content.md) | `docs/rewrite-v3/00a-chapter-one-content.md` | `85aba34f031ec590cb5b68b4f12352a26183199bb38b8016285213a491748d42` | 0 |
+| [spec/01-core-principles.md](../archive/spec/01-core-principles.md) | `docs/rewrite-v3/01-core-principles.md` | `ad575cd2762a5e1eee41508179cff45360e7cbd891b68e5d1cb440c99e85956c` | 0 |
+| [spec/02-beam-runtime-architecture.md](../archive/spec/02-beam-runtime-architecture.md) | `docs/rewrite-v3/02-beam-runtime-architecture.md` | `3760601eda7f455e43fd9462b71fa7bdf4c215d5686cc538ad2e449a0bef6def` | 0 |
+| [spec/03-domain-state-persistence.md](../archive/spec/03-domain-state-persistence.md) | `docs/rewrite-v3/03-domain-state-persistence.md` | `e2b96029d3d003782dd0e494b1a20e362f834b32f21fca7361c5e6176586a733` | 0 |
+| [spec/04-command-event-effect-protocol.md](../archive/spec/04-command-event-effect-protocol.md) | `docs/rewrite-v3/04-command-event-effect-protocol.md` | `1243eb240c2fd5028b5d26ca19b1b1d822d30609dbd51bb95f06152c68b63444` | 0 |
+| [spec/05-cartridges-content-capabilities.md](../archive/spec/05-cartridges-content-capabilities.md) | `docs/rewrite-v3/05-cartridges-content-capabilities.md` | `46aeaa72056f5a7dc547a1fa1d9477dcbf30979ce1b666ddd0f1ae497c83a78d` | 0 |
+| [spec/06-quests-dialogue-actions-scripting.md](../archive/spec/06-quests-dialogue-actions-scripting.md) | `docs/rewrite-v3/06-quests-dialogue-actions-scripting.md` | `0edae241b8a4f5091590606a87fd006e6ec4a4ef4482b99d311c05579fa6e90b` | 0 |
+| [spec/07-offline-storypacks-to-mmo.md](../archive/spec/07-offline-storypacks-to-mmo.md) | `docs/rewrite-v3/07-offline-storypacks-to-mmo.md` | `3d0a516164ade2f1534877891715d49e3cdf62089e8e72f4f118d9918008664b` | 0 |
+| [spec/08-builder-api-ai-factory.md](../archive/spec/08-builder-api-ai-factory.md) | `docs/rewrite-v3/08-builder-api-ai-factory.md` | `72de02a4d48a85b7af595c30131aae1211fe25f7030d2f58b46c20efde006004` | 0 |
+| [spec/09-cartridge-lab-certification.md](../archive/spec/09-cartridge-lab-certification.md) | `docs/rewrite-v3/09-cartridge-lab-certification.md` | `06370f7bfbcef8e13ab140a71ff4d611a1cf2d67b43445736b144a524d8540b5` | 0 |
+| [spec/10-mobile-commerce-release.md](../archive/spec/10-mobile-commerce-release.md) | `docs/rewrite-v3/10-mobile-commerce-release.md` | `e78bf9dfbf19719081bb84c00e42d810ae4718ff3cb27028cb5f50cc0f701e4b` | 0 |
+| [spec/11-security-observability-operations.md](../archive/spec/11-security-observability-operations.md) | `docs/rewrite-v3/11-security-observability-operations.md` | `140d7a93110f84f295b9f3697b9188635551f75f210ef2484bdc2a734ff22831` | 0 |
+| [spec/14-implementation-plan.md](../archive/spec/14-implementation-plan.md) | `docs/rewrite-v3/14-implementation-plan.md` | `0578fd7404b59a3c37819ebd4edc5fae75fda413431076d03e1b75b234c865e4` | 1 |
+| [spec/15-acceptance-scenarios.md](../archive/spec/15-acceptance-scenarios.md) | `docs/rewrite-v3/15-acceptance-scenarios.md` | `104e66dcebb6639394386e3487af61b382ee563501d6876b74ea8540aeef2436` | 0 |
+| [spec/16-decision-register.md](../archive/spec/16-decision-register.md) | `docs/rewrite-v3/16-decision-register.md` | `e949d65e3e5ce8d9a17b7b2734451e3f0ef3d4d8c8a8c8ab13f3db91965c460d` | 0 |
+| [spec/19-quest-sharing-instancing-capacity.md](../archive/spec/19-quest-sharing-instancing-capacity.md) | `docs/rewrite-v3/19-quest-sharing-instancing-capacity.md` | `f6e597fd7ebc1d3410e43cba3b9df1a8d870a42f73b1794ad8d029b105ed5bb5` | 0 |
+| [spec/21-composable-world-primitives.md](../archive/spec/21-composable-world-primitives.md) | `docs/rewrite-v3/21-composable-world-primitives.md` | `959d2b9ba411cb2c03fb6a4c022a1e17ea611471d65c2a3f59582795b1a63164` | 0 |
+| [spec/23-accounts-progress-admission.md](../archive/spec/23-accounts-progress-admission.md) | `docs/rewrite-v3/23-accounts-progress-admission.md` | `a09f4aa32d070718c6718c3cb1680224e3ad120b87c791e16dff0fef1e468a1b` | 0 |
+| [spec/INDEX.md](../archive/spec/INDEX.md) | `docs/rewrite-v3/INDEX.md` | `369c98f77d3e1b383e44ae1e7d3d743298aef6edc8ac8a313beda0f4d75e98b8` | 1 |
+| [spec/R-MILESTONES.md](../archive/spec/R-MILESTONES.md) | `docs/rewrite-v3/R-MILESTONES.md` | `62f6f8097768ba7c45bc12934aa3987f4bb5bcec92d3a636c08890f21db8112c` | 2 |
+| [spec/README.md](../archive/spec/README.md) | `docs/rewrite-v3/README.md` | `3e89bb5c87edfaaa7434127dbf6dafa83e15d537fdd4d516415b33c1071e9ce1` | 12 |
+| [spec/REVIEW-GUIDE.md](../archive/spec/REVIEW-GUIDE.md) | `docs/rewrite-v3/REVIEW-GUIDE.md` | `2bde70363bca57e150b9419eb443a4642a7cdf19a690d7467a1ba3706fdb42bc` | 12 |
 | [spec/conformance/README.md](conformance/README.md) | `docs/rewrite-v3/conformance/README.md` | `bab701a261173bfd0f116e1bffa9e47863a64959e5b8c78053f72ff38304ca42` | 2 |
 | [spec/conformance/adverse-cases.json](conformance/adverse-cases.json) | `docs/rewrite-v3/conformance/adverse-cases.json` | `1b699cf2ce71181a2b09a596ed2253c06caa435aad4b5eb8a8ea9601fbadf5b1` | 0 |
 | [spec/conformance/cases.json](conformance/cases.json) | `docs/rewrite-v3/conformance/cases.json` | `fa4969066ed86de5c26c10d23c069d7928f90e8b5064ff751597d30c0c787bcb` | 0 |
@@ -194,7 +198,7 @@ at `997a7a8` on GitHub. Nothing else changed. `rewrites` counts changed links.
 | [spec/conformance/numeric-profile.md](conformance/numeric-profile.md) | `docs/rewrite-v3/conformance/numeric-profile.md` | `2fad2bfcb6fe0840b58e9fdcce049b4d441a1be4b9d9d2e82e0879a24c69aa1f` | 0 |
 | [spec/conformance/numeric-vectors.json](conformance/numeric-vectors.json) | `docs/rewrite-v3/conformance/numeric-vectors.json` | `85472ae4e7626ca7326b881766e21ae23dd253c82b5c9d4c8d0c86f89ee168c9` | 0 |
 | [spec/conformance/r1-run-manifest.template.json](conformance/r1-run-manifest.template.json) | `docs/rewrite-v3/conformance/r1-run-manifest.template.json` | `ed703ec67a0a0d4575550a9e628cce7d851b8b4d3fb1bdca18c5798a03a0c4a4` | 0 |
-| [spec/pre-release-proof.md](pre-release-proof.md) | `docs/rewrite-v3/pre-release-proof.md` | `b41d8689ae4207d56e494354a5ceca2beb9835bfb74d9e973dd021434ecd9e4a` | 0 |
-| [spec/r1-acceptance-envelope.md](r1-acceptance-envelope.md) | `docs/rewrite-v3/r1-acceptance-envelope.md` | `11a81f8e4ce4d9c8d4614e08a99469c4f28d086452c87015066516a2889dd5f6` | 1 |
+| [spec/pre-release-proof.md](../archive/spec/pre-release-proof.md) | `docs/rewrite-v3/pre-release-proof.md` | `b41d8689ae4207d56e494354a5ceca2beb9835bfb74d9e973dd021434ecd9e4a` | 0 |
+| [spec/r1-acceptance-envelope.md](../archive/spec/r1-acceptance-envelope.md) | `docs/rewrite-v3/r1-acceptance-envelope.md` | `11a81f8e4ce4d9c8d4614e08a99469c4f28d086452c87015066516a2889dd5f6` | 1 |
 | [spec/release-scope.json](release-scope.json) | `docs/rewrite-v3/release-scope.json` | `3e44ad12522f06d5af470ea1c77651df37c11a2bee6f2808c04534ce1accdbd9` | 0 |
 | [spec/release-scope.md](release-scope.md) | `docs/rewrite-v3/release-scope.md` | `25a49818a6fde1d21a5953d9d6d4e0a7903cac14259cce57c4c05280111ba51d` | 0 |

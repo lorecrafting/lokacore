@@ -1,5 +1,5 @@
 // target_resolution@1's target_present (06 §20-21; 21 §7; 04 §5.4) and the talk paths it shares
-// with dialogue@1 (PM decision D1; docs/reviews/2026-10-01-r78-d1-review.md, R2-2). Worlds are
+// with dialogue@1 (PM decision D1; docs/archive/reviews/2026-10-01-r78-d1-review.md, R2-2). Worlds are
 // the ferry known answer (protocol/fixtures/cartridge_ferry_hash.json: 06:00, the player, Bram,
 // the lantern and the mooring post at the landing; Bram's talk while the quest is active) locking
 // target_resolution@1, plus NPCs ada (the landing, no dialogue) and cole (the green), re-hashed

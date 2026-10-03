@@ -1,7 +1,7 @@
 # Gate R6P record: checklist, human proof, carries (2026-10-02)
 
 The slim gate record ([owner decision](../decisions/owner-decision-slim-gates-2026-10-02.md)) for
-[pre-release-proof](../spec/pre-release-proof.md#evidence-required-to-finish-r6p) :82-88. It holds
+[pre-release-proof](../archive/spec/pre-release-proof.md#evidence-required-to-finish-r6p) :82-88. It holds
 no verdict; the gate reviewer rules. R = the [P6 rerun](2026-10-02-r6p-rerun-iphone11/README.md),
 P = [P6b](2026-10-02-r6p-iphone11/README.md); line numbers are in those READMEs.
 
@@ -14,7 +14,7 @@ P = [P6b](2026-10-02-r6p-iphone11/README.md); line numbers are in those READMEs.
 | :84 quit at a choice, airplane resume, no developer instructions | G3 below; P:51 (row 13) is not this (old hash `050cba8c`, cable kill, not at a choice) | recorded; reviewer rules |
 | :84 confusing interactions | G1 below; P:55-58 are agent Simulator runs, excluded | recorded; reviewer rules |
 | :84 authoring effort | below (inspected) | recorded |
-| Tester's exposure ([r6p plan](../decisions/owner-decision-r6p-plan-2026-10-01.md)) | Tester below | recorded |
+| Tester's exposure ([r6p plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md)) | Tester below | recorded |
 | :86 build and cartridge hash, OS, device | R:15-33 | linked |
 | :86 conformance profile | R:33, P:32-33: null (none exists) | reviewer rules |
 | :86 both path transcripts, save/restore | R:42 (row 4), planted control | linked |
@@ -26,7 +26,7 @@ P = [P6b](2026-10-02-r6p-iphone11/README.md); line numbers are in those READMEs.
 | :88 known answers on the actual adapters | R:43-44 (rows 5-6), R:17-21 | linked |
 | :88 per-step diagnostics carry canonical bytes | R:42-43 | linked |
 | Carries in stage rows | Carries below | linked |
-| Docs tidy pass | the [gate review](../reviews/2026-10-02-r6p-gate-review.md) | linked |
+| Docs tidy pass | the [gate review](../archive/reviews/2026-10-02-r6p-gate-review.md) | linked |
 
 ## Build played
 
@@ -53,7 +53,7 @@ naive tester.
 
 U7 is in the [ROADMAP](../ROADMAP.md) Playtest row.
 
-After the [gate review](../reviews/2026-10-02-r6p-gate-review.md)'s ruling (G-1), the owner gave their own
+After the [gate review](../archive/reviews/2026-10-02-r6p-gate-review.md)'s ruling (G-1), the owner gave their own
 explanation of the consequence (paraphrased): "carry (leading) meant I went with the party; leaving meant
 Bram's party goes out." No verdict here; the reviewer re-checks it against the consequence clause.
 
@@ -81,7 +81,7 @@ Lines are JSON lines; time spent is null (not recorded).
 
 ## The save fix (#116) and the build the owner played
 
-The Astra audit below is FAIL; #116 (branch `r6p-savefix`, [review](../reviews/2026-10-02-r6p-savefix-review.md))
+The Astra audit below is FAIL; #116 (branch `r6p-savefix`, [review](../archive/reviews/2026-10-02-r6p-savefix-review.md))
 fixed R6P-A01, A02 and A04 and carried A03's content-tamper case to R12, before this gate merged. The owner
 played 64a2b12; the gate build includes #116 (and #115), so the builds differ. #116 changes code the owner's
 play ran: the load path at open (A02; the G3 airplane resume reopens through it) and the log the owner reads
