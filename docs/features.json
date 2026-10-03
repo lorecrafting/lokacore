@@ -473,6 +473,6 @@
       "facts_typed",
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "C1 c1-position (PR pending) stand, sit, rest and sleep; move needs standing"
+    "implemented_in": "C1 c1-position (#137) stand, sit, rest and sleep; move needs standing"
   }
 }
