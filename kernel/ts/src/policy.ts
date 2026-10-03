@@ -3,7 +3,8 @@
 // target_present, attributes@1's stat_compare and resource_compare; 21 §3.2, §4 Policy; 06
 // §20-21): pure, over committed state, for one actor and the target of the action evaluated, if any.
 import type { CharacterId, EntityId, Policy } from './contracts.gen.ts';
-import { barrierState, bodyOf, questOf, refString, type World } from './decision.ts';
+import { bodyOf, refString, type World } from './decision.ts';
+import { barrierState, questOf } from './lookups.ts';
 import { key } from './compose.ts';
 import { value } from './fact.ts';
 import { level } from './resource.ts';

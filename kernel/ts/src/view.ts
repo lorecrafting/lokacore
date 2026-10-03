@@ -12,7 +12,8 @@ import type {
   TextKey,
 } from './contracts.gen.ts';
 import { lists } from './action_lists.ts';
-import { barrierState, COMPASS, exitOf, refString, type QuestRow, type World } from './decision.ts';
+import { COMPASS, refString, type QuestRow, type World } from './decision.ts';
+import { barrierState, exitOf } from './lookups.ts';
 import { choiceView } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
 import * as description_variant from './rules/description_variant.ts';

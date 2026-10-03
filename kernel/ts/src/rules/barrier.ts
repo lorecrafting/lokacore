@@ -9,17 +9,16 @@
 import type { BarrierState, CharacterId, Key } from '../contracts.gen.ts';
 import {
   accepted,
-  barrierState,
   bodyOf,
   COMPASS,
   event,
-  exitOf,
   refString,
   rejected,
   type Rule,
   type Steps,
   type World,
 } from '../decision.ts';
+import { barrierState, exitOf } from '../lookups.ts';
 import { holds } from '../policy.ts';
 
 // Each command's required state, the state it leaves and its outcome.

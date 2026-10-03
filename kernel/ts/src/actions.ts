@@ -23,7 +23,8 @@ import {
   type VersionedPolicy,
 } from './contracts.gen.ts';
 import { key, same } from './compose.ts';
-import { bodyOf, questOf, refString, type Steps, type World } from './decision.ts';
+import { bodyOf, refString, type Steps, type World } from './decision.ts';
+import { questOf } from './lookups.ts';
 import { ALWAYS, modal, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';

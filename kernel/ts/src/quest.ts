@@ -13,7 +13,8 @@ import type {
   QuestDefinition,
   QuestInstanceId,
 } from './contracts.gen.ts';
-import { bodyOf, questOf, refString } from './decision.ts';
+import { bodyOf, refString } from './decision.ts';
+import { questOf } from './lookups.ts';
 import type { Mint, QuestRow, Steps, World } from './decision.ts';
 import { holds } from './policy.ts';
 import { cmp } from './validate.ts';
