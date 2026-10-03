@@ -22,6 +22,7 @@ m elixir bin/red_controls.exs
 m ast-grep test --skip-snapshot-tests
 m ast-grep scan --error
 m bin/lint_red_controls.sh
+m bin/docs_only_red_controls.sh
 m elixir bin/check_docs.exs
 [ "${1-}" = --no-ts ] && exit 0
 for d in . kernel/ts mobile/app; do

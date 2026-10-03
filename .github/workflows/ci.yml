@@ -13,7 +13,32 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      skip: ${{ steps.docs.outputs.skip }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # Code jobs are skipped when the push since the previous head changed only Markdown
+      # (bin/docs_only.sh); the lint job always runs. Before merging a head whose code jobs
+      # were skipped, the PM confirms they were green on the last head that ran them.
+      - id: docs
+        run: |
+          [ "$EVENT" = pull_request ] && [ "$ACTION" = synchronize ] || BEFORE=
+          echo "skip=$([ "$(bin/docs_only.sh "$BEFORE" "$HEAD")" = skip ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+        env:
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          BEFORE: ${{ github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+
   elixir:
+    needs: changes
+    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -43,7 +68,6 @@ jobs:
       - run: mix credo --strict
       - run: elixir bin/check_size.exs
       - run: elixir bin/red_controls.exs
-      - run: elixir bin/check_docs.exs
 
   lint:
     runs-on: ubuntu-latest
@@ -59,8 +83,39 @@ jobs:
       - run: ast-grep test --skip-snapshot-tests
       - run: ast-grep scan --error
       - run: bin/lint_red_controls.sh
+      - run: bin/docs_only_red_controls.sh
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
+        with:
+          otp-version: '28.4'
+          elixir-version: '1.20.4'
+          version-type: strict
+      - run: elixir bin/check_docs.exs
+
+  # The 10,000 fresh sequences (CI is set), in parallel with the typescript job, which skips sim.test.ts.
+  sim:
+    needs: changes
+    if: needs.changes.outputs.skip != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+      - run: npm ci --no-audit --no-fund && npm run test:sim
+        working-directory: kernel/ts
+      - if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: game-trace-sim
+          path: tmp/obs/game_trace/
+          if-no-files-found: ignore
 
   typescript:
+    needs: changes
+    if: needs.changes.outputs.skip != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -72,7 +127,7 @@ jobs:
           node-version: '24.21.0'
       - run: npm ci --no-audit --no-fund && npx tsc --noEmit && npm test
         working-directory: mobile/app
-      - run: npm ci --no-audit --no-fund && npm run typecheck && npm test
+      - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' | xargs -0 npx prettier --check
       - run: node bin/check_ts_size.mjs

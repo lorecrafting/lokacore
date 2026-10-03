@@ -22,7 +22,8 @@ normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass.
 
 Before handing off:
-1. Run the full local check line from AGENTS.md via `mise exec --`; every new check has a
+1. Run the full local check line from AGENTS.md via `mise exec --` once; the pre-push hook is the
+   final run, so do not run it again right before pushing. Every new check has a
    planted violation that fails.
 2. Self-review the diff: `/ponytail-review`, then `/code-review medium` on the branch
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are

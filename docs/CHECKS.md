@@ -57,12 +57,17 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
 - `elixir bin/check_docs.exs`: relative links resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
+- `bin/docs_only.sh <before> <after>` prints `skip` when every file changed in the range is `*.md`,
+  else `run` (also for a missing or non-ancestor `<before>` or an empty diff); the `changes` job of
+  `ci.yml` uses it on a `synchronize` push to skip the `elixir`, `typescript` and `sim` jobs. `lint`
+  (with the docs link check) always runs. Planted cases, in a throwaway repo: `bin/docs_only_red_controls.sh`
+  (a `.json` under `docs/`, a mixed range, no `<before>` and a force push must say `run`).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `mobile.yml` builds the native apps on pull requests that change native
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
   on pull requests that touch `mobile/` or `kernel/`. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
-  sets it; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
+  sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3); its Hermes replay sample (seeds 1-19) ran on the iPhone 11 in
   [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074).
