@@ -82,3 +82,19 @@ Scope: `92e1b0a..db0baf6`, each disposition, the code each fix touched and its d
 **Open item (not a code finding):** no CI run exists for `db0baf6`. The API returns no `workflow_runs` for it, and PR #130 is `CONFLICTING` with `main`, so GitHub creates no merge ref and does not run `pull_request` workflows. The new `changes` job (`actions: read`, `gh api` with `GITHUB_TOKEN`) has therefore not run in real CI. The PM merges `main`, then confirms that `changes` ran and that all code jobs finished green on that head before merging. The merge commit itself has no passed run, so that push runs everything.
 
 Verdict: **APPROVE**. CI on the post-merge head still has to be confirmed under WORKFLOW step 7.
+
+## Fix round 2 re-check (0548f83)
+
+Scope: `d53f047..0548f83`: `bin/ci_base.sh`, the `ci.yml` `changes` step that calls it, the planted cases in `bin/docs_only_red_controls.sh`, and `docs/CHECKS.md`.
+
+- **Sol F2 fixed.** In `bin/ci_base.sh`, any failing `gh` call returns 1, and the script then prints nothing, so CI runs everything. Mutants run against `bin/docs_only_red_controls.sh` in a throwaway clone:
+  - run-list error ignored: caught.
+  - jobs-list error ignored: caught.
+  - head searched instead of `head^`: caught.
+  - fallback `echo` removed: green, but harmless because the output is empty either way.
+- **Live search works.** I ran `bin/ci_base.sh` locally against the real API. For `0548f83` it returns `d53f047`, whose run 37105017056 had `elixir`, `typescript` and `sim` all `success`, finished at 07:05:00Z, before `0548f83`'s `changes` job started at 07:07:12Z. For `d53f047` it returns `b434ce2`. The `.sh` diff from `d53f047` correctly gives `run`.
+- **The "`base=`" in the log is not output.** In run 37105285676, "Run base=" is the step's title, which GitHub takes from the first script line (`base=`). The step never prints the base it found. The log therefore cannot show whether a base was found, and it does not show that the search failed.
+- **N-3 nit** (`.github/workflows/ci.yml`, `changes` step). The step prints neither the base nor the API errors, which `2>/dev/null` in `bin/ci_base.sh:17` swallows. If the token or permission ever breaks, every push silently runs everything and the speed-up is lost unnoticed; that already led to this misreading. Fix: `echo "base=$base"` in the step. Optional.
+- `docs/CHECKS.md` lists the new planted cases. `lint` runs `bin/docs_only_red_controls.sh` (`ci.yml:90`), and `check_docs` and then `docs_red_controls.sh` after it (`:96-97`), as the PM's merge resolved them.
+
+Verdict: **APPROVE** (N-3 optional).
