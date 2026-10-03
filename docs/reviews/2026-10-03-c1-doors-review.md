@@ -120,3 +120,12 @@ fixed (verified `:359`-`:361`); the dated quest-from-dialogue record left unchan
 dated records are not re-pointed).
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (b1fe931), verbatim
+
+CHANGES REQUESTED
+
+```text
+R1 | blocker | kernel/ts/src/invariants_view.ts:19 at b1fe931
+The invariant equates action_key with payload.type, although cartridge actions may alias commands. Reproduced with a loader-valid `unbar` action resolving to `open`, and a room subtracting engine `open`: the closed north door lists `unbar`, and step accepts it, but the invariant returns false. Conversely, an incorrect `invalid_state` refusal returns true, hiding a regression. Match through the offered action’s resolved command rather than assuming its key equals the command type.
+```
