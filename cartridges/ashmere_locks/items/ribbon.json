@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "ribbon"
+  ],
+  "short": "item.ribbon.short",
+  "room_line": "item.ribbon.room",
+  "description": "item.ribbon.description",
+  "location": {
+    "in": "item",
+    "item": "coffer"
+  }
+}

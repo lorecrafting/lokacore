@@ -1,0 +1,10 @@
+{
+  "keywords": [
+    "maud",
+    "seamstress"
+  ],
+  "short": "npc.maud.short",
+  "room_line": "npc.maud.room",
+  "description": "npc.maud.description",
+  "room": "inn_rooms"
+}

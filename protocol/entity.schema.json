@@ -108,7 +108,7 @@
       ]
     },
     "ItemDefinition": {
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally capacity, the most items it holds directly (any item can hold items; without capacity it has no limit); and optionally slot, the SlotKey it is worn in (equipment@1).",
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally capacity, the most items it holds directly (any item can hold items; without capacity it has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody).",
       "type": "object",
       "properties": {
         "key": {
@@ -149,6 +149,9 @@
         },
         "slot": {
           "$ref": "#/$defs/SlotKey"
+        },
+        "barrier": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
       "required": [

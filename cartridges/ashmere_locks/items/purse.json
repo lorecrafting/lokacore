@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "purse"
+  ],
+  "short": "item.purse.short",
+  "room_line": "item.purse.room",
+  "description": "item.purse.description",
+  "location": {
+    "in": "npc",
+    "npc": "maud"
+  }
+}

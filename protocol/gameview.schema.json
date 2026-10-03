@@ -389,7 +389,7 @@
       ]
     },
     "EntityView": {
-      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6).",
+      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions.",
       "type": "object",
       "properties": {
         "id": {
@@ -405,6 +405,15 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/AdvertisedAction"
+          }
+        },
+        "state": {
+          "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "contents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ContentView"
           }
         }
       },
@@ -429,6 +438,105 @@
                 "kind": "entity",
                 "scopes": [
                   "room_occupants"
+                ]
+              },
+              "input": []
+            }
+          ]
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
+          "name": "item.sewing_box.short",
+          "kind": "item",
+          "state": "open",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "close",
+              "label": "action.close",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_contents"
+                ]
+              },
+              "input": []
+            }
+          ],
+          "contents": [
+            {
+              "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
+              "name": "item.brass_key.short",
+              "kind": "item",
+              "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
+              "actions": [
+                {
+                  "available": true,
+                  "action_key": "take",
+                  "label": "action.take",
+                  "target": {
+                    "kind": "entity",
+                    "scopes": [
+                      "room_contents"
+                    ]
+                  },
+                  "input": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "ContentView": {
+      "description": "An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "kind": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "container_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "state": {
+          "$ref": "room.schema.json#/$defs/BarrierState"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "container_id",
+        "actions"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8c",
+          "name": "item.brass_key.short",
+          "kind": "item",
+          "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "take",
+              "label": "action.take",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_contents"
                 ]
               },
               "input": []
