@@ -313,6 +313,8 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Target ambiguity | two novices; three hounds; two boots; two keys. Touch taps a specific entity so ambiguity only arises in the text drawer, where it returns a candidate list | TargetResolution | R5 |
 | Item flow | items dropped in the river surface at fishing shallows next day | ReactionRule on drop + move | R8 |
 
+*Amendment 2026-10-03 (chapter-one slice c1-locks; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 6, owner descope):* "keys that break" is LATER: forcing a lock and the snapped-key sink leave chapter one's stage (trigger: content that needs a breakable key). Locks and keys stay: `lock` and `unlock` need the barrier's `key_item` held (barrier@1).
+
 ### 4.2 Time and environment
 
 | Mechanic | In this game | Primitive | Phase |
@@ -379,6 +381,8 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 | Fishing rod, pickaxe, lockpicks, rope, torch | tool requirements for skills | ToolRequirement | R8 |
 
 *Amendment 2026-10-03 (chapter-one slice c1-equipment; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 5, triage 8):* `equipment@1` has twelve slot keys: `head`, `neck`, `body`, `cloak`, `arms`, `hands`, `waist`, `legs`, `feet`, `wield`, `off_hand`, `light`. The two finger slots are LATER (choosing either finger needs slot compatibility, as dual wield does; trigger: the first content with rings, chapter two). Chapter one's items (00a §5) use `light`, `wield`, `off_hand`, `head`, `body`, `feet`, `cloak`, `hands`, `legs` and `neck`. Dual wield and two-handed, item affects, and cursed or no-remove items stay at their rows' phases.
+
+*Amendment 2026-10-03 (chapter-one slice c1-locks; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 6, triage 2):* "Containers with locks": an item may name a barrier (its lid, one site only); `open`, `close`, `lock` and `unlock` take that item as an optional target instead of a direction, with the door's states, transitions, key and refusals; `take` reaches an item inside containers only while each container on the way is an item with no lid or an open one, never an NPC's ([mechanics](../../system/mechanics.md#containment1-kerneltssrcrulescontainmentts)). The loader rejects only keys that can never be reached. Weight limits stay with capacity (R8).
 
 ### 4.5 Combat
 

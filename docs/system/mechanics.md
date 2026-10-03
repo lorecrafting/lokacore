@@ -35,20 +35,32 @@ way (`passage`), else the destination room and the NPCs and items directly in it
 
 ## barrier@1 (`kernel/ts/src/rules/barrier.ts`)
 
-`open`, `close`, `lock`, `unlock {direction}` on the exit's barrier in the actor's room: a
-direction outside the compass `invalid_target`, no exit `not_found`, an exit without a barrier
-`invalid_target`; legal transitions only (`MOVES`, `:25`): open needs closed (a locked one is
-`exit_locked`), close needs open, lock needs closed, unlock needs locked, else
-`invalid_state`; lock and unlock need the barrier's `key_item` held by the body, directly or
-nested, else `not_owned` (`:66`). These checks are one read-only function the rule and the
-GameView's door verbs share (`transition`, `:47`). Accepted: one `barrier.transition` and `barrier_changed`.
-Both faces of a door name one state. Policy leaf `barrier_state`.
+`open`, `close`, `lock`, `unlock` name exactly one of `direction` (the barrier on that exit of the
+actor's room) or `target_id` (the barrier on that item, a container's lid; c1-locks), else
+`invalid_target`. Direction: outside the compass `invalid_target`, no exit `not_found`, an exit
+without a barrier `invalid_target`. Target: no entity `not_found`, not an item
+`invalid_target`, out of reach (containment@1's custody walk, below) `not_present`, an item
+without a barrier `invalid_target`. Then, for both: legal transitions only (`MOVES`, `:25`):
+open needs closed (a locked one is `exit_locked`), close needs open, lock needs closed, unlock
+needs locked, else `invalid_state`; lock and unlock need the barrier's `key_item` held by the
+body, directly or nested, else `not_owned` (`:66`). `has_item` climbs every held container, a
+locked one included, so a key locked inside a held chest still opens it (a `ponytail:` limit,
+never a lockout). These checks are one read-only function the rule and the GameView's door and
+container verbs share (`transition`, `:47`). Accepted: one `barrier.transition` and
+`barrier_changed`. Both faces of a door name one state; a barrier an item names is named by no
+exit and no other item (the loader's `BARRIER_MISMATCH`). Policy leaf `barrier_state`. Keys that
+break on a failed force are LATER (owner descope, [plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md)).
 
 ## containment@1 (`kernel/ts/src/rules/containment.ts`)
 
 An entity's one container is `State.containers`; inventory is what the body contains, never
-stored. `take {item_id}`: no entity `not_found`, not an item `invalid_target`, elsewhere
-`not_present`, already held `invalid_state`; accepted `taken`, `item_acquired`. `drop`: not
+stored. `take {item_id}`: no entity `not_found`, not an item `invalid_target`, already held
+`invalid_state`, out of reach `not_present`; accepted `taken`, `item_acquired`, one transfer
+from its container to the body. Custody (c1-locks; `reach`): walking up `State.containers`
+from the item, every container before the body's room or the body is an item without a barrier
+or with an open one; an NPC, a slot holder or a closed or locked lid on the way fails it. A
+container without a barrier is open: its contents are in reach (a sack can be emptied).
+Custody leaves `has_item` and target resolution's `target_present` unchanged. `drop`: not
 held `not_owned` (`:47`); accepted `dropped`, `item_dropped`. `give {item_id, recipient_id}`:
 not held `not_owned`; recipient missing `not_found`, not an NPC `invalid_target`, not here
 `not_present`, at its declared capacity `invalid_state` (`:56`, undeclared is unlimited);
