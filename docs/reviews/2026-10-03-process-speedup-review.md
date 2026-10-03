@@ -60,3 +60,25 @@ Scenario: A has green code jobs. Push B changes TypeScript, but its CI is queued
 
 Require a green code-tested ancestor with only Markdown changes between it and the merge head. If that cannot be established, run all three code jobs before merging; cancelled or unstarted runs cannot justify the skip.
 ```
+
+## Fix round 1 re-check (db0baf6)
+
+Scope: `92e1b0a..db0baf6`, each disposition, the code each fix touched and its direct callers (`ci.yml` `changes` job, `bin/check_all.sh`).
+
+- **F-1 fixed.** `bin/docs_only_red_controls.sh` now plants `code.ts` renamed to `code.md`. With `--no-renames` removed from `bin/docs_only.sh:7`, the red controls fail ("a code file renamed to .md: want run, got skip").
+- **F-2 fixed.** `bin/docs_only.sh:8` counts `*.gen.md` as code. With that clause removed, the planted `.gen.md` case fails.
+- **F-3 fixed.** The Git hygiene bullet now says to check for duplicate and twice-edited lines as well as order.
+- **F-4 / Sol F1 fixed by design.** The `changes` job no longer uses `event.before`. It takes the newest of the 30 nearest ancestors of `HEAD^` whose run has `elixir`, `typescript` and `sim` all `success`, then diffs from that commit.
+  - Mocked test: I extracted the step script into a throwaway clone at `db0baf6` and replaced `gh` with a stub. Results:
+    - `skip`: code commit passed, then Markdown only; two workflows on one SHA; a merge commit that itself passed.
+    - `run`: newest code commit cancelled (2 of 3 jobs); API error on the newest code commit with an older commit passed (its diff includes that code); nothing passed; `push` event; merge from `main` that brings code while `main`'s tip passed.
+  - The real API pipeline, run locally with the repository's jobs: `b434ce2` gives 1 (all three passed), `3561d7e` gives 0 (skipped), `e7a899b` gives 0 (no `sim` job before this PR).
+  - The step 7 wording ("green CI on the head is enough") is now true, because a skip requires a passed ancestor that differs from the head only in Markdown.
+- **Q-1 accepted** by the PM, with a mitigation: pushes to `main` never skip, and the decision record (4c) says the PM watches `main`'s run after each merge.
+- **N-1 fixed.** `find test -name '*.test.ts' ! -name sim.test.ts` gives 32 of 33 files and recurses.
+- **N-2 fixed** in `WORKFLOW.md:81` and `developer.md:48`.
+- **Red controls without `git config` writes:** I ran them under `GIT_DIR=<clone>/.git`. The clone's refs, HEAD and config were unchanged. The main checkout's `core.bare` is `false` again.
+
+**Open item (not a code finding):** no CI run exists for `db0baf6`. The API returns no `workflow_runs` for it, and PR #130 is `CONFLICTING` with `main`, so GitHub creates no merge ref and does not run `pull_request` workflows. The new `changes` job (`actions: read`, `gh api` with `GITHUB_TOKEN`) has therefore not run in real CI. The PM merges `main`, then confirms that `changes` ran and that all code jobs finished green on that head before merging. The merge commit itself has no passed run, so that push runs everything.
+
+Verdict: **APPROVE**. CI on the post-merge head still has to be confirmed under WORKFLOW step 7.
