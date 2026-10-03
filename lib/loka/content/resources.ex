@@ -6,7 +6,8 @@ defmodule Loka.Content.Resources do
   ResourceSpec without `key`. Every loka-cartridge-v2 cartridge gets the three pools and
   resource@1 and schedule@1 (`requires/1`), with or without the file.
   """
-  import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, schema: 4]
+  alias Loka.Content.Refs
   alias Loka.Core.Contracts
 
   @rel "resources.json"
@@ -44,6 +45,43 @@ defmodule Loka.Content.Resources do
   end
 
   def load(_), do: specs(@rel, %{})
+
+  @doc """
+  Diagnostics of the condition band tables (resource.schema.json BandTable: each pool's `bands`
+  and cartridge.json's `world.bands`) and of `world.movement.cost`, given a manifest and a v2
+  source: cuts not strictly descending to a last 0, or a repeated key, is RESOURCE_SPEC_INVALID at
+  the table; a band key without `band.<key>` in the catalog (unless it was rejected) or a cost
+  naming no resource of this cartridge is UNRESOLVED_REFERENCE.
+  """
+  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}) :: [map()]
+  def check(m, defs, {_, text}, {_, settings}) when m != nil do
+    world = Map.get(settings, "world", %{})
+    pools = for {_, {rel, steps, %{"bands" => b}}} <- defs["resource"], do: {rel, steps, b}
+    own = if world["bands"], do: [{"cartridge.json", ["world"], world["bands"]}], else: []
+    cost = world["movement"]["cost"]
+    at = ["world", "movement", "cost"]
+
+    Enum.flat_map(own ++ pools, &table(&1, text)) ++
+      if(cost, do: Refs.reference("cartridge.json", at, "resource", cost, m, defs), else: [])
+  end
+
+  def check(_, _, _, _), do: []
+
+  defp table({rel, steps, bands}, text) do
+    path = at(rel, steps ++ ["bands"])
+    shape = if ordered?(bands), do: [], else: [diag("RESOURCE_SPEC_INVALID", path)]
+
+    shape ++
+      for {%{"key" => k}, i} <- Enum.with_index(bands),
+          text != :unknown and not is_map_key(text, "band." <> k),
+          do: diag("UNRESOLVED_REFERENCE", "#{path}[#{i}].key", %{"target" => "band." <> k})
+  end
+
+  # Cuts strictly descending to a last 0, keys unique.
+  defp ordered?(bands) do
+    {cuts, keys} = {Enum.map(bands, & &1["at_percent"]), Enum.map(bands, & &1["key"])}
+    cuts == Enum.sort(Enum.uniq(cuts), :desc) and List.last(cuts) == 0 and Enum.uniq(keys) == keys
+  end
 
   @doc """
   The manifest with resource@1 required, which the default pools need, and schedule@1, whose

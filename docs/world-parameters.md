@@ -20,19 +20,19 @@ Priority: **C1** before chapter one; **TM** with the time-model slice; **L** lat
 
 | id | value | path:line | what it controls | today | recommendation | prio |
 |---|---|---|---|---|---|---|
-| W1 | `amount: 1` | kernel/ts/src/rules/movement.ts:93 (used :72) | mv each move costs | HC | `cartridge.json world.movement.cost` (default), per-exit `cost` in room exits, per-room `terrain` tag to cost table (`world.terrain.<tag>.cost`; spec 00 §4.1: average of two rooms) | C1 |
-| W2 | `'mv'` | kernel/ts/src/rules/movement.ts:71 | which pool pays a move | HC | same field: `world.movement.cost = {resource, amount}` | C1 |
-| W3 | no `time.advance` (0 s) | kernel/ts/src/rules/movement.ts:51 | game time a move takes | HC (zero) | `world.movement.duration`, per-exit/terrain override | TM |
-| W4 | 0 s for look, scan, examine, take, drop, give, open, close, lock, unlock, talk, choose, close_choice, accept_quest | kernel/ts/src/rules/description_variant.ts:12, :19; movement.ts:30; containment.ts:45, :50, :57; barrier.ts:50; dialogue.ts:63, :84, :117; quest.ts:20 | time cost of each engine verb | HC (zero) | `cartridge.json world.verbs.<verb>.duration` (optional `costs`, as RecipeCost); recipes already have it (W15) | TM |
+| W1 | DONE [#131](https://github.com/lorecrafting/lokacore/pull/131) | kernel/ts/src/rules/movement.ts:72 | mv each move costs | DEF: engine default 1 mv, cartridge override `cartridge.json world.movement.cost` | LATER: per-exit `cost` in room exits, per-room `terrain` tag to cost table (spec 00 §4.1: average of two rooms; 00 §11 chapter three) | — |
+| W2 | DONE [#131](https://github.com/lorecrafting/lokacore/pull/131) | kernel/ts/src/rules/movement.ts:72 | which pool pays a move | DEF: engine default `mv`, cartridge override `world.movement.cost = {resource, amount}` | none | — |
+| W3 | no `time.advance` (0 s) | kernel/ts/src/rules/movement.ts:52 | game time a move takes | HC (zero) | `world.movement.duration`, per-exit/terrain override | TM |
+| W4 | 0 s for look, scan, examine, take, drop, give, open, close, lock, unlock, talk, choose, close_choice, accept_quest | kernel/ts/src/rules/description_variant.ts:12, :19; movement.ts:31; containment.ts:45, :50, :57; barrier.ts:50; dialogue.ts:63, :84, :117; quest.ts:20 | time cost of each engine verb | HC (zero) | `cartridge.json world.verbs.<verb>.duration` (optional `costs`, as RecipeCost); recipes already have it (W15) | TM |
 | W5 | `3600` (s per hour) | kernel/ts/src/behavior.ts:18, :28; policy.ts:41; compose.ts:89; lib/loka/core/compose.ex:110; protocol/command.schema.json LogicalTime (PM ruling "until calendar@1 R8") | length of a game hour | HC | `cartridge.json calendar.units_per_hour` (calendar@1 already exists, has only `start`) | TM |
 | W6 | `24` / `86400` (hours/day) | behavior.ts:18, :25, :29; policy.ts:41; schemas: policy.schema time_window from/to max 23, entity.schema daily_schedule keys 0-23, cartridge.schema Calendar.start max 86399 | length of a day; day wrap of schedules and windows | HC (engine + schema) | `calendar.hours_per_day`; schema bounds become loader checks against the calendar | TM |
 | W7 | `start ?? 0` (midnight day 1) | kernel/ts/src/fresh.ts:39 | world start time | CT (`calendar.start`, Lantern/ferry/green use 21600); engine default 0; schema caps it to day 1 | keep; lift the 86399 cap with W6; add `calendar.start_day` if multi-day needed | L |
 | W8 | regen tick = every hour boundary (`/3600`) | compose.ts:89; lib/loka/core/compose.ex:110 | how often `gain` is applied | HC | `resources.json <pool>.gain_every` (units), default one calendar hour | TM |
-| W9 | gain hp 5, ma 4, mv 18 | lib/loka/content/resources.ex:14-16 | regen per tick | DEF (resources.json) | keep as overridable default; document in cartridge guide | — |
-| W10 | hp 0..20 start 20; ma 0..100 start 100; mv 0..82 start 82 | lib/loka/content/resources.ex:14-16 | pool bounds and start values | DEF (resources.json; ashmere_road overrides hp/mv) | keep as overridable default | — |
-| W11 | hp/ma/mv always added; resource@1 + schedule@1 always required | lib/loka/content/resources.ex:53-69 | whether a world has these pools at all | HC (cannot opt out, only re-tune) | allow `resources.json "<pool>": null` (or `world.pools`) to drop a default pool | L |
+| W9 | gain hp 5, ma 4, mv 18 | lib/loka/content/resources.ex:15-17 | regen per tick | DEF (resources.json) | keep as overridable default; document in cartridge guide | — |
+| W10 | hp 0..20 start 20; ma 0..100 start 100; mv 0..82 start 82 | lib/loka/content/resources.ex:15-17 | pool bounds and start values | DEF (resources.json; ashmere_road overrides hp/mv) | keep as overridable default | — |
+| W11 | hp/ma/mv always added; resource@1 + schedule@1 always required | lib/loka/content/resources.ex:99-115 | whether a world has these pools at all | HC (cannot opt out, only re-tune) | allow `resources.json "<pool>": null` (or `world.pools`) to drop a default pool | L |
 | W12 | rest/position multipliers: absent | kernel/ts/src/resource.ts:5 (ponytail note); spec 00 §4 row "Regeneration" (sleep +1/2, rest +1/4, sit +1/8, hunger 1/4) | regen while resting/sleeping/hungry | missing | when added: `resources.json <pool>.regen.by_position.{sleeping,resting,sitting}`, `regen.hungry`; never in kernel | TM (shape) / R7 (values) |
-| W13 | band cuts 100,90,...,10,0 and 11 band keys (`perfect_health`...`dying`) | kernel/ts/src/view.ts:80-92 (used :102-104) | condition band of every pool in GameView | HC (one table for all pools) | `resources.json <pool>.bands: [{at_percent, key}]` with a cartridge default `world.bands`; band text in text.json | C1 (shown on status line) |
+| W13 | DONE [#131](https://github.com/lorecrafting/lokacore/pull/131) | kernel/ts/src/view.ts:81 (used :105) | condition band of every pool in GameView | DEF: engine default 04 §15 table with tones, cartridge override `world.bands`, per pool `resources.json <pool>.bands: [{at_percent, key, tone}]`; band text `band.<key>` in text.json | none | — |
 | W14 | luck die `100` (uniform [0,100)); schema `chance` max 99 | kernel/ts/src/rules/action_recipe.ts:118; protocol/action.schema.json RecipeCheck.chance.maximum 99 | odds scale of a luck check | HC (percent scale) | acceptable mechanism (percent); per-recipe `chance` is CT. Optional later `check.out_of` | L |
 | W15 | recipe `duration`, `cooldown`, `costs`, check `chance`/`difficulty`/`resource` | rules/action_recipe.ts:61-77, :117-122 | perform time, cooldown, cost, odds/DC | CT (per recipe) | none | — |
 | W16 | wait: no max, no min step, no extra regen | kernel/ts/src/rules/schedule.ts:44-47 | how far one wait may jump; rest effect | HC (unbounded) | `world.wait.max` (units) optional; rest effect via W12 | TM |
@@ -43,14 +43,14 @@ Priority: **C1** before chapter one; **TM** with the time-model slice; **L** lat
 | W21 | engine verb, talk and quest-offer priority `0` | kernel/ts/src/actions.ts:109, :135; dialogue.ts:135, :156 | presentation order of engine verbs | HC | `world.verbs.<verb>.priority` (same block as W4) | L |
 | W22 | lock/unlock need `key_item` | kernel/ts/src/rules/barrier.ts:44-47 | key rule | CT (key_item per barrier); the rule itself is mechanism | none | — |
 
-Counts: 22 rows. HC 15 (W1-W6, W8, W11, W13, W14, W16, W17, W19-W21; W14 acceptable as mechanism, so 14 to move), DEF 3 (W9, W10, W18), CT 3 (W7, W15, W22), missing 1 (W12). Priority: C1 3 (W1, W2, W13), TM 9 (W3-W6, W8, W12, W16, W19, W20), L 5 (W7, W11, W14, W17, W21).
+Counts: 22 rows. HC 12 (W3-W6, W8, W11, W14, W16, W17, W19-W21; W14 acceptable as mechanism, so 11 to move), DEF 6 (W1, W2, W9, W10, W13, W18), CT 3 (W7, W15, W22), missing 1 (W12). Priority: C1 3 (W1, W2, W13; all DONE in #131), TM 9 (W3-W6, W8, W12, W16, W19, W20), L 5 (W7, W11, W14, W17, W21).
 Only `time.advance` producers today: rules/action_recipe.ts:75-77 (recipe duration) and rules/schedule.ts:47 (wait); every other verb is instantaneous.
 
 ### Spec-pinned rows (need a spec/schema amendment before code)
-- W1/W2: 00 §4 amendment 2026-09-25 ("1 MV per move from R5, terrain R8") and resource.schema ResourceSpec description.
+- W1/W2: 00 §4 amendment 2026-09-25 ("1 MV per move from R5, terrain R8") and resource.schema ResourceSpec description; amended 2026-10-02 (#131).
 - W5/W6/W19/W20: PM ruling R5 S6 in command.schema LogicalTime ("until calendar@1 R8 the kernel fixes them"), plus schema bounds time_window 0-23, daily_schedule keys 0-23, Calendar.start <= 86399.
 - W8: resource.schema ResourceSpec and delta.schema resource.adjust ("each hour boundary, floor(time / 3600)").
-- W13: 04 §15 bands amendment 2026-10-01.
+- W13: 04 §15 bands amendment 2026-10-01; amended 2026-10-02 (#131).
 Correction to the brief: regeneration timing does exist (fixed hourly tick, compose.ts:89 and compose.ex:110); only rest/position multipliers are missing.
 
 ### Spec values still to come (land them as content, not kernel)

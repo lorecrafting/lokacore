@@ -1,5 +1,5 @@
 {
-  "description": "Invalid-artifact corpus for the cartridge loader (protocol/cartridge.schema.json DiagnosticCode: stage order, paths and data; 05 §11, §20; CAR-05, CAR-07). Each case is an artifact file as text (its UTF-8 bytes are the input), the installed kernel/app, and the one expected diagnostic, hand-written from the DiagnosticCode text; break names the bug the case catches. Artifacts derive from cartridge_hash.json value; each canonical text and content_hash was produced by Python json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False) and hashlib.sha256 over its UTF-8 bytes, never by the kernels. Over-cap and non-UTF-8 inputs are bytes, not text, and live in the test.",
+  "description": "Invalid-artifact corpus for the cartridge loader (protocol/cartridge.schema.json DiagnosticCode: stage order, paths and data; 05 §11, §20; CAR-05, CAR-07). Each case is an artifact file as text (its UTF-8 bytes are the input), the installed kernel/app, and the one expected diagnostic, hand-written from the DiagnosticCode text; break names the bug the case catches. Artifacts derive from cartridge_hash.json value (the band_* and move_cost_* cases from cartridge_rooms_hash.json value with condition band tables, band.<key> text and a world move cost added); each canonical text and content_hash was produced by Python json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False) and hashlib.sha256 over its UTF-8 bytes, never by the kernels. Over-cap and non-UTF-8 inputs are bytes, not text, and live in the test.",
   "cases": [
     {
       "name": "not_decodable",
@@ -1975,6 +1975,348 @@
         "data": {
           "capability": "schedule",
           "required": 1
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_table_unsorted",
+      "break": "a pool band table whose cuts rise is accepted (first-match lookup would skip bands)",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"ac5f7cf99c20160bbce299f956c7741c1df0c1ae169a0b25b6b206af3c4cfba4\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "RESOURCE_SPEC_INVALID",
+        "path": ".cartridge.resources[\"ashmere_rooms@0.0.1:resource/mv\"].bands",
+        "message_key": "diagnostics.resource_spec_invalid",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_table_gap",
+      "break": "a band table whose last cut is not 0 is accepted (a value below it has no band)",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":10,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"2538f7053a75b802d43e4fca344cba8eeaf19796bc47b14f2072db23550aaf17\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "RESOURCE_SPEC_INVALID",
+        "path": ".cartridge.world.bands",
+        "message_key": "diagnostics.resource_spec_invalid",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_table_duplicate_cut",
+      "break": "two bands with one cut are accepted (the second is unreachable)",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":50,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"21c1fdd7f0c861e1c251afdb254afef155b4416a4f5877ea666c53b488909fe9\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "RESOURCE_SPEC_INVALID",
+        "path": ".cartridge.resources[\"ashmere_rooms@0.0.1:resource/mv\"].bands",
+        "message_key": "diagnostics.resource_spec_invalid",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_table_duplicate_key",
+      "break": "one band key twice in a table is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"fresh\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"f3405f2df4d08b6ecd5abae65851e9d9d01cdc9c0627444c814a4f41d5aa1086\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "RESOURCE_SPEC_INVALID",
+        "path": ".cartridge.world.bands",
+        "message_key": "diagnostics.resource_spec_invalid",
+        "data": {},
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_text_missing",
+      "break": "an authored band key without band.<key> text is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"spent\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"c051d8a2a8834fcd49c10801b572f8578cd0a130c575d543157d3824249cc03f\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNRESOLVED_REFERENCE",
+        "path": ".cartridge.resources[\"ashmere_rooms@0.0.1:resource/mv\"].bands[2].key",
+        "message_key": "diagnostics.unresolved_reference",
+        "data": {
+          "target": "band.spent"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "move_cost_unknown_pool",
+      "break": "a move cost on a pool the cartridge lacks is accepted (the move would fault)",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"stamina\",\"kind\":\"resource\"}}}}},\"content_hash\":\"b4e9d21b8d5b399cf730cf278594fd94984b53efe0bca8683f8b067a5f2c149b\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNRESOLVED_REFERENCE",
+        "path": ".cartridge.world.movement.cost.resource",
+        "message_key": "diagnostics.unresolved_reference",
+        "data": {
+          "target": "ashmere_rooms@0.0.1:resource/stamina"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "move_cost_zero",
+      "break": "a move cost of 0 is accepted (RecipeCost amount minimum 1)",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":0,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"11adc8e1d5e8a1b4890b074aacd1f4013789420fdc9b35cee7db0bebd06f613a\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.world.movement.cost.amount",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "below_minimum"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_cut_over_100",
+      "break": "a cut above 100 is accepted (no value reaches it)",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":101,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"6d41fb9fa500601878f60852572b39595648e3b2011e24c2d3f6bedc9d401738\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.resources[\"ashmere_rooms@0.0.1:resource/mv\"].bands[0].at_percent",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "above_maximum"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_tone_unknown",
+      "break": "a tone outside normal, warning, danger is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":20,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"red\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"329aa40e8f03477ba2ff1d3cf618dc897adc50f48d6823fca633e17b206ad2d7\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.world.bands[1].tone",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "not_in_enum"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "band_table_empty",
+      "break": "an empty band table is accepted (no value has a band)",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rooms\",\"requires\":{\"capabilities\":{\"description_variant\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rooms\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rooms@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rooms@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rooms@0.0.1:resource/mv\":{\"bands\":[],\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rooms@0.0.1:room/boathouse\":{\"description\":\"room.boathouse.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"boathouse\",\"title\":\"room.boathouse.title\"},\"ashmere_rooms@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"boathouse\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_rooms@0.0.1:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"text\":{\"band.fresh\":\"fresh\",\"band.tired\":\"tired\",\"band.winded\":\"winded\",\"room.boathouse.description\":\"Oars and nets hang from the rafters above Bram's ferry.\",\"room.boathouse.title\":\"Boathouse\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A mooring post leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.well_lane.description\":\"Worn steps lead to the village well. A bucket hangs from its chain.\",\"room.well_lane.title\":\"Well Lane\"},\"world\":{\"bands\":[{\"at_percent\":50,\"key\":\"fresh\",\"tone\":\"normal\"},{\"at_percent\":0,\"key\":\"winded\",\"tone\":\"danger\"}],\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"ashmere_rooms\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}}}}},\"content_hash\":\"805405baacea95ccddfbd38cf3ebeda6f60c659db8ae7562d000a3481bcb2a1b\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "description_variant": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "resource": [
+            1
+          ],
+          "schedule": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.resources[\"ashmere_rooms@0.0.1:resource/mv\"].bands",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "too_few_items"
         },
         "suggested_capabilities": []
       }

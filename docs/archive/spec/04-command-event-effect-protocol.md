@@ -598,6 +598,8 @@ Examples:
 | 10 | `almost_dead` |
 | 0 | `dying` |
 
+*Amendment 2026-10-02 (chapter-one slice c1-numbers; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 2, triage 21, W13; supersedes the [condition-bands owner decision](../decisions/owner-decision-condition-bands-2026-10-01.md)'s "one table serves every resource; cartridges do not declare thresholds"):* the table above is the engine default. A cartridge may declare its own: a pool's `bands` in resources.json, else a cartridge default `world.bands` in cartridge.json, each a list of `{at_percent, key, tone}` with cuts strictly descending, the last 0, and keys unique (`RESOURCE_SPEC_INVALID` otherwise). A band key is a content Key; an authored key has its text at `band.<key>` in the catalog. Every band has a tone, `normal`, `warning` or `danger`, which the presenter maps to a colour; the default table's tones are `normal` for 100 to 80, `warning` for 70 to 40 and `danger` for 30 to 0. The integer rule above is unchanged.
+
 The portable projector returns a host-neutral **GameView** / projection model.
 
 Online:

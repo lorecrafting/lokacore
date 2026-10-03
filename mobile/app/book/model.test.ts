@@ -123,8 +123,8 @@ test("a choice's answers and Close are their own group, not place actions", () =
 // Breaks: the status line's character label without the hp band, or with a band on ma too (the
 // owner's bands decision: the phrase on hp only). Two pools as GameView carries them.
 test('the character label says the hp band and no other', () => {
-  const pool = (key: string, current: number, maximum: number, band: Pool['band']) =>
-    ({ resource: { key }, current, maximum, band }) as Pool;
+  const pool = (key: string, current: number, maximum: number, band: string) =>
+    ({ resource: { key }, current, maximum, band, tone: 'normal' }) as Pool;
   assert.equal(
     said([pool('hp', 20, 20, 'perfect_health'), pool('ma', 100, 100, 'perfect_health')]),
     'Character, hp 20 of 20, perfect health, ma 100 of 100',

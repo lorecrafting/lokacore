@@ -402,7 +402,7 @@
       ]
     },
     "ResourceView": {
-      "description": "One of the viewer's body's resources (04 §15 as amended 2026-10-01; 21 §4 Resource): its current value at the view's time, its maximum and its condition band, which the kernel computes from the band table in 04 §15; the UI never computes a threshold (00 §4.10).",
+      "description": "One of the viewer's body's resources (04 §15 as amended 2026-10-01 and 2026-10-02; 21 §4 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 §15 default table); the UI never computes a threshold (00 §4.10).",
       "type": "object",
       "properties": {
         "resource": {
@@ -415,27 +415,18 @@
           "$ref": "resource.schema.json#/$defs/ResourceInt"
         },
         "band": {
-          "type": "string",
-          "enum": [
-            "perfect_health",
-            "slightly_scratched",
-            "few_bruises",
-            "some_cuts",
-            "several_wounds",
-            "many_nasty_wounds",
-            "bleeding_freely",
-            "covered_in_blood",
-            "leaking_guts",
-            "almost_dead",
-            "dying"
-          ]
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "tone": {
+          "$ref": "resource.schema.json#/$defs/BandTone"
         }
       },
       "required": [
         "resource",
         "current",
         "maximum",
-        "band"
+        "band",
+        "tone"
       ],
       "additionalProperties": false,
       "examples": [
@@ -448,7 +439,8 @@
           },
           "current": 81,
           "maximum": 82,
-          "band": "slightly_scratched"
+          "band": "slightly_scratched",
+          "tone": "normal"
         }
       ]
     },

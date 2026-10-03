@@ -6,10 +6,10 @@ A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`):
 
 | File | Holds |
 |---|---|
-| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room and `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) |
+| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room, `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) and `world {movement {cost {resource, amount}}, bands}`: what a move costs and the cartridge's default condition bands |
 | `facts.json` | `{"facts": {name: FactSpec}}`; a dotted name maps to a snake_case key, two names mapping to one key is `FACT_NAME_COLLISION` |
 | `text.json` | the TextCatalog: key → string |
-| `resources.json` | overrides of the default pools' fields, or further ResourceSpecs (`lib/loka/content/resources.ex:2`) |
+| `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
@@ -27,9 +27,11 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `{"cartridge": …, "content_hash": sha256(canonical cartridge)}` (`:53`), at most 4 MiB
 (`ARTIFACT_TOO_LARGE`, `:67`). Every v2 cartridge gets the pools hp, ma, mv and
 `resource@1` and `schedule@1` in its lock, with or without `resources.json`
-(`lib/loka/content/resources.ex:53`); the engine defaults are hp 0..20 start 20 gain 5, ma
-0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:13`), and
-`minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`.
+(`lib/loka/content/resources.ex:99`); the engine defaults are hp 0..20 start 20 gain 5, ma
+0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:14`), and
+`minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
+and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the
+compiler writes `world` and `bands` only where the source authors them.
 
 What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 `protocol/cartridge.schema.json` DiagnosticCode):
@@ -45,6 +47,10 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   dialogue without a `quest`, on a choice without a `hand_over` (`OUTCOME_MISMATCH`); a recipe has a `failure` outcome exactly when it has a
   check (`content_dusk_test.exs`); `time_window` needs `schedule@1` and a non-empty window
   (`EMPTY_TIME_WINDOW`); a schedule needs `behavior@1` and a calendar `calendar@1`;
+- condition band tables (a pool's `bands`, `world.bands`): cuts strictly descending, the last
+  0 and keys unique within the table, else `RESOURCE_SPEC_INVALID` at the table; each key has
+  `band.<key>` in the catalog; `world.movement.cost` names a pool of this cartridge
+  (`UNRESOLVED_REFERENCE`);
 - items and NPCs start somewhere real with no containment cycle and within capacity
   (`CONTAINMENT_CYCLE`, `CAPACITY_EXCEEDED`); details are reachable (`UNREACHABLE_DETAIL`);
 - barriers: each exit's barrier and its reciprocal face name the same one (`BARRIER_MISMATCH`);

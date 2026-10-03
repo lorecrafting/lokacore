@@ -109,12 +109,38 @@ defmodule Loka.CartridgeCrossKernelTest do
     })
   end
 
+  # ashmere_road with a world move cost on a short ref, the cartridge's and mv's own condition
+  # bands and their band.<key> text (c1-numbers; cartridge.schema.json WorldSettings).
+  defp numbered(dir) do
+    road = "cartridges/ashmere_road"
+    dir = Path.join(dir, "numbered")
+    File.cp_r!(road, dir)
+    src = &JSON.decode!(File.read!(Path.join(road, &1)))
+    band = &%{"at_percent" => &1, "key" => &2, "tone" => &3}
+    bands = [band.(50, "fresh", "normal"), band.(0, "winded", "danger")]
+    cost = %{"resource" => "ma", "amount" => 2}
+
+    files = %{
+      "cartridge.json" =>
+        Map.put(src.("cartridge.json"), "world", %{
+          "movement" => %{"cost" => cost},
+          "bands" => bands
+        }),
+      "resources.json" => put_in(src.("resources.json"), ["resources", "mv", "bands"], bands),
+      "text.json" =>
+        Map.merge(src.("text.json"), %{"band.fresh" => "fresh", "band.winded" => "winded"})
+    }
+
+    for {rel, v} <- files, do: File.write!(Path.join(dir, rel), JSON.encode!(v))
+    dir
+  end
+
   # Breaks: the kernels encode, hash or lock differently; the loader rejects a compiled artifact.
   test "compiled artifacts load in TypeScript with identical bytes, hash and lock", %{
     tmp_dir: tmp
   } do
     paths =
-      for {name, src} <- [{"hello", @hello}, {"rich", rich(tmp)}] do
+      for {name, src} <- [{"hello", @hello}, {"rich", rich(tmp)}, {"numbered", numbered(tmp)}] do
         out = Path.join(tmp, "#{name}.artifact.json")
         compile(src, out)
         assert_received {:exit, :ok}
@@ -124,12 +150,12 @@ defmodule Loka.CartridgeCrossKernelTest do
     input = Path.join(tmp, "peer.json")
     File.write!(input, JSON.encode!(%{"installed" => @installed, "paths" => paths}))
     {stdout, 0} = System.cmd("node", [@peer, input])
-    [hello, rich] = JSON.decode!(stdout)
+    [hello | _] = loaded = JSON.decode!(stdout)
 
     assert hello["hash"] == @kat["sha256"]
     assert hello["lock"] == @kat["value"]["lock"]
 
-    for {theirs, path} <- Enum.zip([hello, rich], paths) do
+    for {theirs, path} <- Enum.zip(loaded, paths) do
       bytes = File.read!(path)
       ours = JSON.decode!(bytes)
       assert theirs["artifact"] == bytes, path
