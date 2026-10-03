@@ -135,3 +135,40 @@ Override remove with a valid ActionDefinition using command=remove, target=entit
 C1E-02 | should-fix | kernel/ts/src/action_lists.ts:55
 A loader-valid alias dress with command=wear, target=none, empty input, and an always-true policy appears in GameView.actions as available. Invoking that advertised action without targets returns unsupported_capability because wear requires item_id. The place-action branch bypasses equipment legality filtering, violating the requirement to advertise wear/remove only when legal.
 ```
+
+## Fix round 1 re-check (e99d104)
+
+Scope: `844c66f..e99d104` (`0ce1ce1`, `e99d104`): the touched code (`actions.ts` `accepts`,
+`action_lists.ts` `lists`, `invariants_view.ts`, `rules/equipment.ts` `VERBS`/`wornIn`), its
+direct callers (`refusal`/admission, `resolve`, the `of`/`worn` listings, the sim's observation
+builders) and the new tests. CI is green on `e99d104`. `test:nosim` and `test:sim` passed
+locally.
+
+- **C1E-01 (Sol, blocker): resolved.** `actions.ts:234-235` widens the `inventory` scope to an
+  item in one of the body's slot holders, and only for an action that resolves to `remove`. The
+  same `wornIn` is used by `equipment.transfer`. The new test drives a cartridge `remove`
+  override and a `doff` alias through identify, resolve and step. Both are listed on the worn cap
+  and both remove it. Mutant `accepts` without the worn clause: red.
+- **C1E-02 (Sol, should-fix): resolved.** `place` excludes actions that resolve to wear or
+  remove (`action_lists.ts:56`), and the invariant returns false when the view lists one with the
+  place (`invariants_view.ts:29`). Mutants: place filter dropped, red; invariant place check
+  dropped, red.
+- **N-1: resolved.** `equipment.VERBS` is the single list, imported by `action_lists.ts` and
+  `invariants_view.ts`.
+- **`resolves = {}` default: OK.** `sim.test.ts:79` builds an observation without `resolves`, and
+  the place check now runs on every command. In production, `sim.ts` passes `resolves`.
+- **Test re-hash via `canonical.encode`: OK.** It hashes only the input artifact. The expected
+  values are still Python literals.
+- **Earlier mutants rerun:** holder order, all 12 slots when locked, occupied slot accepted,
+  remove no-op or swapped, `not_owned` and already-worn branches, `has_item` direct-only, the
+  three listing mutants and `TARGETS.wear` are all red.
+- **N-2 (nit, new code)** `kernel/ts/src/actions.ts:235`: the `a.command === 'remove'` guard
+  survives a mutant (`wornIn` for any command; suite green). Failure scenario: a cartridge alias
+  of `drop` (or `give`, or `wear`) with an `inventory` target, invoked on a worn item. The spec
+  (protocol.md ActionSet) gives `unsupported_capability` at admission. The mutant gives
+  `not_owned`/`invalid_state` from the rule instead. Nothing moves either way, so only the
+  refusal code is unpinned.
+- **PM carries noted (LATER, next slice's ROADMAP edit):** targetless take/drop/give aliases, and
+  typed text that cannot name a worn item.
+
+**Verdict after fix round 1: APPROVE** (N-2 is a nit only, not blocking).
