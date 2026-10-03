@@ -4,15 +4,25 @@ severity: error
 message: 'The renderer imports only react, react-native (never Alert), its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
 files: [mobile/app/book/**, mobile/app/SaveError.tsx]
 ignores: ['**/*.test.ts']
-# ponytail: `import * as RN` and a shell file reached by a plain ./ path are not seen.
+# ponytail: only mobile/app's two shell files (App, index) are named; a new shell file needs adding here.
 rule:
   kind: string_fragment
   inside: { matches: module-specifier }
   any:
     - not:
         regex: '^(react|react-native|\./([\w-][\w.-]*/)*[\w-][\w.-]*|(\.\./)+packages/game-view/[\w-][\w.-]*)$'
+    - regex: '^\./(App|index)(\.\w+)?$'
+    # react-native only as a plain named import without Alert: a namespace or default import, a
+    # re-export, require() or import() would reach Alert unseen.
     - regex: '^react-native$'
-      inside:
-        stopBy: end
-        kind: import_statement
-        has: { stopBy: end, kind: import_specifier, regex: '^Alert\b' }
+      not:
+        inside:
+          stopBy: end
+          kind: import_statement
+          not:
+            has:
+              stopBy: end
+              any:
+                - kind: namespace_import
+                - { kind: import_specifier, regex: '^Alert\b' }
+                - { kind: identifier, inside: { kind: import_clause } }

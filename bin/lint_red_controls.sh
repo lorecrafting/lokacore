@@ -24,8 +24,8 @@ printf "const b = () => import('../realm');\nimport { k } from '../../../kernel/
 echo "jest.mock('../story');" > mobile/features/realm/red_control.tsx
 # The presenter split: a display line in the authority; the renderer reaching the authority and a phone
 # API; session.ts importing an engine (its backup is restored on exit).
-echo "export const said = 'You are too tired.';" > mobile/authority/local-story/red_control.ts
-printf "import { openGame } from '../../authority/local-story/session.ts';\nimport Storage from 'expo-sqlite/kv-store';\nexport const S = [openGame, Storage];\n" > mobile/app/book/red_control.tsx
+printf '%s\n' "export const said = 'You are too tired.';" 'export const go = `Go ${d}`;' "export const f = (s) => s; f('You are too tired.');" > mobile/authority/local-story/red_control.ts
+printf "import { openGame } from '../../authority/local-story/session.ts';\nimport Storage from 'expo-sqlite/kv-store';\nimport * as RN from 'react-native';\nimport { phone } from './App.tsx';\nexport const S = [openGame, Storage, RN, phone];\n" > mobile/app/book/red_control.tsx
 echo "import type { World } from '../../../kernel/ts/src/index.ts';" >> mobile/packages/game-view/session.ts
 out=$(ast-grep scan --error 2>&1)
 status=0
