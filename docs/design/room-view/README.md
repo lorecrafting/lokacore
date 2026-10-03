@@ -1,6 +1,6 @@
 # Room view prototype (design exploration)
 
-**Status:** informative, not authority. This is an owner-chosen UI direction from exploratory mockups (2026-09-24), not specification. [docs/spec](../../spec/IMPORT.md) still governs, including [00 §4.10 Touch interface](../../spec/00-first-cartridge-design.md#410-touch-interface) and the [Lantern proof](../../spec/pre-release-proof.md). Where this page conflicts with the spec, the spec wins until an owner decision changes it.
+**Status:** informative, not authority. This is an owner-chosen UI direction from exploratory mockups (2026-09-24), not specification. [docs/spec](../../spec/IMPORT.md) still governs, including [00 §4.10 Touch interface](../../archive/spec/00-first-cartridge-design.md#410-touch-interface) and the [Lantern proof](../../archive/spec/pre-release-proof.md). Where this page conflicts with the spec, the spec wins until an owner decision changes it.
 
 Open [room-view.html](room-view.html) in a browser to play the Lantern loop on the chosen design. The pages are self-contained HTML and load fonts from Google Fonts. The model inside is a hand-written mock of the proof's four places, not the engine.
 
@@ -11,7 +11,7 @@ Open [room-view.html](room-view.html) in a browser to play the Lantern loop on t
 - **The page.** A pinned room title, then the description (only small details such as the mooring post are tappable inline), then MUD-style lines for people and things ("**Bram** the ferryman stands here, one boot on the ferry."), then that room's event log.
 - **The footer.** A tiny endpaper minimap sits between two long hairline rules. You are the solid dot, places are open rings reaching two steps out, and paths meet each ring at its edge. Unexplored ways are dotted, and a barred way ends in a small red tick.
   - **The map is the joystick.** Press it and it zooms about 2.6×. Drag toward a path to light it, then release to walk; drag back to the middle to cancel. For up and down, drag out to stair nodes that appear beside it. A tap opens the Map page. A tip bubble teaches the gesture once, and hidden "Go north" buttons serve screen readers.
-  - **One status line:** `06:00 · standing · hp 20/20  ma 100/100  mv 82/82` (the pools and defaults: [owner decision](../../decisions/owner-decision-hp-ma-mv-2026-09-25.md)). Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
+  - **One status line:** `06:00 · standing · hp 20/20  ma 100/100  mv 82/82` (the pools and defaults: [owner decision](../../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)). Tapping the position cycles standing, sitting, resting, meditating and sleeping (you must stand to walk). Tapping the numbers opens Character.
   - Swiping up on the footer (away from the map), or tapping the small handle, opens the text drawer. Every tap shows up there as its command.
 
 ## Departures from 00 §4.10
@@ -31,7 +31,7 @@ Compared against [protocol/gameview.schema.json](../../../protocol/gameview.sche
 
 | # | Need (nice to have) | For | Nearest today |
 |---|---|---|---|
-| 1 | resources as current/max with a condition band ([04 §15](../../spec/04-command-event-effect-protocol.md#15-portable-game-view-projection)), so the UI never invents thresholds | the status line and Character | GameView `resources` (slice G) |
+| 1 | resources as current/max with a condition band ([04 §15](../../archive/spec/04-command-event-effect-protocol.md#15-portable-game-view-projection)), so the UI never invents thresholds | the status line and Character | GameView `resources` (slice G) |
 | 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | none |
 | 3 | discovered map places with grid coordinates and z, the edges between them, and which are visited | the minimap and Map page | none ("map joins with its capability") |
 | 4 | a typed distinction between a closed door and a barred way (openable or not); the player-facing `message` already tells them apart | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |
@@ -49,7 +49,7 @@ Questions for the engine rather than needs:
 - Should rooms carry lit or dark, and obscured entities a perceived name ("something brass") with an opaque handle?
 - Are "is here" lines ("Bram the ferryman stands here…") cartridge content in GameView, or built by the UI from the name?
 - Should narration carry a semantic cue key (for example `quest_resolved`) for sound and haptics, or should the UI infer it?
-- Answered: moving costs 1 `mv` per room from R5 S6b; per-terrain costs come at R8 ([owner decision](../../decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
+- Answered: moving costs 1 `mv` per room from R5 S6b; per-terrain costs come at R8 ([owner decision](../../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
 
 ## Explorations
 

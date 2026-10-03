@@ -20,7 +20,27 @@ ROADMAP read by almost every agent) and proposed a compaction stage. The owner a
 - **Accuracy.** Each claim in the new doc set is checked against the code and its tests. Where the
   code and an old spec disagree, the doc follows the code and the difference is listed for the owner.
 - **Model.** The owner chose Fable to write the compaction, an exception to the
-  [review rules](owner-decision-review-rules-2026-10-01.md) that keep Fable as a codex stand-in only.
+  [review rules](../archive/decisions/owner-decision-review-rules-2026-10-01.md) that keep Fable as a codex stand-in only.
   An independent reviewer still checks it.
 
 Effect: [ROADMAP](../ROADMAP.md) Docs compaction row.
+
+## Decisions for the move (2026-10-02)
+
+Relayed by the PM after PR #117, **(paraphrased)**:
+
+- **Source of truth** after the compaction: `docs/system/` (thin, checked against the code) plus
+  `protocol/` and the conformance fixtures. A change amends `docs/system` first, then the code.
+  The old specs move to `docs/archive/` as history, read only when a task needs it.
+  [AGENTS.md "Specification (source of truth)"](../../AGENTS.md#specification-source-of-truth) is
+  rewritten to say this; it replaces the old spec README §11 ("amend the spec here first") and
+  the §8 normative map.
+- **Decision records:** `docs/decisions/` stays live for new records, each adding one line to
+  [owner-rules.md](../system/owner-rules.md); the older records move to `docs/archive/decisions/`.
+  The records of 2026-10-02 still in force stay in place.
+- **ROADMAP:** a finished stage is one line; its history moves to the
+  [archived roadmap](../archive/ROADMAP.md), indexed so the docs checker reaches every moved file
+  with no exemption.
+- **Stays in place:** `protocol/`, `docs/spec/conformance/`, `release-scope.*` and `IMPORT.md`.
+
+Effect: PR #117 (`docs/system/`) and the move PR.

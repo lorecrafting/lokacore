@@ -1,12 +1,12 @@
 # R6P P6b: device proof on the iPhone 11, 2026-10-02
 
 Result: **13 of 15 rows pass on the phone. Row 14 is partial. Row 1 is P6a's (merged, #105).
-0 Node/Hermes byte mismatches.** Spec: [pre-release-proof.md](../../spec/pre-release-proof.md)
-P6 and "Evidence required to finish R6P"; [envelope](../../spec/r1-acceptance-envelope.md) §4
+0 Node/Hermes byte mismatches.** Spec: [pre-release-proof.md](../../archive/spec/pre-release-proof.md)
+P6 and "Evidence required to finish R6P"; [envelope](../../archive/spec/r1-acceptance-envelope.md) §4
 (release build, battery recorded, cold apart from warm) and §5 (decision timing apart from
 persistence and projection); ADR-074 §3; 04 §§14-15 (receipts, unknown COMMIT); 03 §14; OFF-07.
 Brief: R6P P6 Part B. The carries: ROADMAP R6P row, from
-[Gate R6](../../decisions/owner-decision-gate-r6-carries-2026-09-30.md).
+[Gate R6](../../archive/decisions/owner-decision-gate-r6-carries-2026-09-30.md).
 
 Facts are labeled by source: **device-reported**, **inspected**, **owner-reported (paraphrased)**,
 **not checked**. Device name, UDID, team, container ids and paths are withheld. Every capture went

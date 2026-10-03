@@ -28,7 +28,7 @@ Effect: [ROADMAP](../ROADMAP.md) Presenter split row.
 The owner, **(paraphrased)**: the presentation layer must work with the TypeScript engine and with a
 future online Elixir engine; decouple it as much as possible.
 
-This is the session boundary that [07](../spec/07-offline-storypacks-to-mmo.md#the-session-boundary)
+This is the session boundary that [07](../archive/spec/07-offline-storypacks-to-mmo.md#the-session-boundary)
 already requires: the renderer receives host-neutral `GameView` data and emits host-neutral
 `ActionInvocation` values through one `GameSession`, implemented by `LocalStorySession` (the
 TypeScript authority) now and `RemoteRealmSession` (Phoenix transport to the BEAM server) later.

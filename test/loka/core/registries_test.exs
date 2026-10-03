@@ -182,7 +182,7 @@ defmodule Loka.Core.RegistriesTest do
   end
 
   # Invariants are checked by id (docs/ROADMAP.md), so an id must name one invariant, and a
-  # citation must point at a real docs/spec heading.
+  # citation must point at a real docs/archive/spec heading.
   defp invariant_problems(entries) do
     dupes = for {id, n} <- Enum.frequencies_by(entries, & &1["id"]), n > 1, do: {:duplicate, id}
 
@@ -195,7 +195,7 @@ defmodule Loka.Core.RegistriesTest do
 
   defp entry_problem(e) do
     with :ok <- Contracts.validate("InvariantEntry", e),
-         {:ok, text} <- File.read(Path.join("docs/spec", e["citation"]["document"])) do
+         {:ok, text} <- File.read(Path.join("docs/archive/spec", e["citation"]["document"])) do
       if e["citation"]["heading"] in String.split(text, "\n"), do: nil, else: :no_heading
     else
       {:error, :enoent} -> :no_document

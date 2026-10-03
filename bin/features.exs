@@ -1,5 +1,5 @@
 # Generates docs/features.gen.md, the feature map (owner decision
-# docs/decisions/owner-decision-r5-setup-2026-09-25.md): one row per capability of
+# docs/archive/decisions/owner-decision-r5-setup-2026-09-25.md): one row per capability of
 # protocol/capability_registry.json. Derived here: kind (residency, portability), the release
 # profile it is first required in (docs/spec/release-scope.json), the rule module
 # kernel/ts/src/rules/<key>.ts, the example transcripts cartridges/*/transcripts/<key>.jsonl

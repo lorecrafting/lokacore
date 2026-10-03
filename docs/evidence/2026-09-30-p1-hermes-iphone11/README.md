@@ -2,8 +2,8 @@
 
 Result: **pass, 0 mismatches** on `run(items world, cases)` (3 cases; 11 steps from the fixture) and
 `run(dusk world, dusk_cases)` (1 case; 1 step from the fixture). Raw device output: [p1run.txt](p1run.txt).
-Spec: [pre-release-proof.md](../../spec/pre-release-proof.md) P1, ADR-074 §3; decision
-[owner-decision-p1-hermes-batching-2026-09-30](../../decisions/owner-decision-p1-hermes-batching-2026-09-30.md).
+Spec: [pre-release-proof.md](../../archive/spec/pre-release-proof.md) P1, ADR-074 §3; decision
+[owner-decision-p1-hermes-batching-2026-09-30](../../archive/decisions/owner-decision-p1-hermes-batching-2026-09-30.md).
 
 Facts, by source:
 - **Device-reported (p1run.txt):** run id `p1-1790804037351`; Hermes Release, bytecode version 98,

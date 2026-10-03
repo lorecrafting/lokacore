@@ -54,7 +54,7 @@ Only `time.advance` producers today: rules/action_recipe.ts:75-77 (recipe durati
 Correction to the brief: regeneration timing does exist (fixed hourly tick, compose.ts:89 and compose.ex:110); only rest/position multipliers are missing.
 
 ### Spec values still to come (land them as content, not kernel)
-From docs/spec/00-first-cartridge-design.md: terrain cost table and "average of two rooms, rounded down" (:301), mounted halves (:301), position regen bonuses and hunger quarter (:323), encumbrance STR cap halving regen (:341), sleeping takes double damage (:342; also 21 §position@1 :1606), node regrow 3 days (:415). The rounding/averaging rule is mechanism; every number and table is cartridge data.
+From docs/archive/spec/00-first-cartridge-design.md: terrain cost table and "average of two rooms, rounded down" (:301), mounted halves (:301), position regen bonuses and hunger quarter (:323), encumbrance STR cap halving regen (:341), sleeping takes double damage (:342; also 21 §position@1 :1606), node regrow 3 days (:415). The rounding/averaging rule is mechanism; every number and table is cartridge data.
 
 ## 2. Excluded constants (not world settings)
 

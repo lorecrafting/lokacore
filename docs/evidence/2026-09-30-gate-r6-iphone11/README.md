@@ -5,9 +5,9 @@ owner-reported (paraphrased) / inspected / not checked, as in the
 [smoke run](../2026-09-30-sm-iphone11/README.md). Never write a device name, UDID, team or
 container identifier or a home path here; pipe every captured line through `redact` (step 0).
 
-Gate: [14 §R6](../../spec/14-implementation-plan.md#r6--offline-authority-and-save-system) Gate R6,
-[OFF-01 to OFF-07](../../spec/15-acceptance-scenarios.md#b-offline-lifecycle). "Finish" is
-[option A](../../decisions/owner-decision-gate-r6-finish-2026-09-30.md): a fixed tap script played to
+Gate: [14 §R6](../../archive/spec/14-implementation-plan.md#r6--offline-authority-and-save-system) Gate R6,
+[OFF-01 to OFF-07](../../archive/spec/15-acceptance-scenarios.md#b-offline-lifecycle). "Finish" is
+[option A](../../archive/decisions/owner-decision-gate-r6-finish-2026-09-30.md): a fixed tap script played to
 an end state declared in advance, whose save equals a headless run of the same script; finishing a
 real story is R6P's gate. The app is the R6 SM smoke screen over the real local authority and
 expo-sqlite; its save is `Documents/SQLite/loka-save.db` in the app container.
@@ -148,9 +148,9 @@ Run date 2026-09-30; build commit `c963af1` (Release, Hermes, free personal team
   `sqlite3.c` holds both texts; carried to R6P's device proof (P6).
 - **Not checked:** the exact full on-screen line (partly hidden); a kill during a COMMIT on the
   device (Gate R6 accepts S6a's headless corpus plus the kills between taps; the device kill is
-  carried to R6P, [owner decision](../../decisions/owner-decision-gate-r6-carries-2026-09-30.md)); where run 1's two extra commands came from.
+  carried to R6P, [owner decision](../../archive/decisions/owner-decision-gate-r6-carries-2026-09-30.md)); where run 1's two extra commands came from.
 
 ## Deferred, not passed (Gate R6)
 
 Listed once, in the [ROADMAP R6 row](../../ROADMAP.md#slices); the owner's three Gate R6 carries
-([record](../../decisions/owner-decision-gate-r6-carries-2026-09-30.md)) land in its R6P row.
+([record](../../archive/decisions/owner-decision-gate-r6-carries-2026-09-30.md)) land in its R6P row.
