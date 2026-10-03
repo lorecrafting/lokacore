@@ -51,14 +51,21 @@ Hard-won lessons for `mobile/` and physical-device runs.
 - agent-device: its daemon keeps the environment it first started with; after setting
   `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save; for a
   fresh start, uninstall and reinstall the app.
-- The walk on a fresh dev build (the Lantern, Ferry Landing): `react-native dismiss-overlay`
-  first (agent-device flags the dev warning overlay as covering part of the app), then
-  `press 'label="Got it"' --settle` (the map tip),
-  `press "label=\"Offer to fetch Bram's lantern\"" --settle`, `press 'label="Map"' --settle` and
-  `press 'label="Go north"' --settle`; Talk is on
-  Bram's page (`press 'label="Bram the ferryman, open"'`), the choice's answers and Close on
-  the room page. A selector with spaces is one shell argument, quotes inside. `scroll` does not
-  move the book's pages (it reports no shift); a raw `swipe 200 600 200 250` does.
+- The walk on a fresh Release build (the Lantern, Ferry Landing): `press 'label="Got it"' --settle`
+  (the map tip; wait 2 s after `open`, an early press misses), `press "label=\"Offer to fetch Bram's lantern\"" --settle`,
+  `press 'label="Map"' --settle`. Bram is a context menu: `press 'label="Bram the ferryman, open"'` opens it,
+  `press 'label="Talk to Bram the ferryman"'` shows the choice and Close in it, `press 'label="Done"'` hides it
+  (a pending choice shows it again in the next room). Journal, Carrying and Settings are taps on the Character
+  page: `press` the status line's button (its label starts "Character, hp ..."; copy it from `snapshot -i`).
+  A selector with spaces is one shell argument, quotes inside. The footer map takes a raw
+  `gesture pan 207 781 0 -55 5000` (north; 55 px is about 21 map units); take a mid-drag shot with
+  `xcrun simctl io <udid> screenshot` while that runs in the background (`agent-device screenshot` waits for the
+  pan). `scroll` does not move the book's pages; a raw `swipe 200 600 200 250` does.
+- A ScrollView drawn over other content blurs its text on iOS 27 (the system scroll edge effect); the NPC menu
+  is a plain View for that reason.
+- An `Animated.View` with a `transform` around the footer map's dot displaced the dot after the map tip went and
+  the page changed (R6P Polish O-1), even with the transform at identity. The dot is now a `Disc` placed from state.
+  Check a footer fix with a fresh install, the tip still showing: tap Map, then Back, and look at the dot.
 - `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
   edit that starts the app on that state; such shots are static and prove layout only,
   not navigation or gestures.

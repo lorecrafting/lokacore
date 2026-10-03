@@ -10,6 +10,7 @@ import {
   ended,
   group,
   hint,
+  menuOpen,
   plain,
   refused,
   said,
@@ -26,6 +27,7 @@ const b = (label: string, action_key: string, target_ids: string[] = [], input =
 const buttons = [
   b('look', 'look'),
   b('scan', 'scan'),
+  b('wait', 'wait'),
   b('Go north', 'move', [], { direction: 'north' }),
   b('take a leather satchel', 'take', ['satchel-1']),
 ];
@@ -42,13 +44,31 @@ test('exits, the look title, place actions and a thing page come from the right 
   );
   assert.deepEqual(
     g.place.map((x) => x.label),
-    ['scan'],
+    ['wait'], // scan has no button (DIFFERENCES 3); wait is an ordinary place action
   );
   assert.deepEqual(
     g.on('satchel-1').map((x) => x.label),
     ['take a leather satchel'],
   );
   assert.deepEqual(g.on('bram-1'), []);
+});
+
+// Breaks (U5): a pending choice restored after a restart that opens no menu (the player cannot see
+// it), a dismissed one that stays open or that a new choice cannot reopen, a tapped NPC who left
+// that keeps a menu open on nothing.
+test('the NPC menu is open for a tapped NPC here and for a pending choice not dismissed', () => {
+  const view = (choice?: string, here = true) =>
+    ({
+      entities: here ? [{ id: 'bram' }] : [],
+      choice: choice && { continuation_id: choice, speaker_id: 'bram' },
+    }) as never;
+  assert.equal(menuOpen(view(), undefined), false);
+  assert.equal(menuOpen(view(), 'bram'), true);
+  assert.equal(menuOpen(view(undefined, false), 'bram'), false);
+  assert.equal(menuOpen(view('c1'), undefined), true);
+  assert.equal(menuOpen(view('c1', false), undefined), true); // walked away, still pending
+  assert.equal(menuOpen(view('c1'), undefined, 'c1'), false);
+  assert.equal(menuOpen(view('c2'), undefined, 'c1'), true);
 });
 
 // Breaks: raw link syntax shown (Ferry Landing's "[mooring post](mooring_post)"), or a greedy
@@ -157,7 +177,7 @@ test('a hint survives a store that throws, for this session', () => {
       throw new Error('disk I/O error');
     },
   };
-  const h = hint(broken, 'hint.looked');
+  const h = hint(broken, 'hint.learned');
   assert.equal(h.seen(), false);
   h.see();
   assert.equal(h.seen(), true);

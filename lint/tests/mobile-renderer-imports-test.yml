@@ -1,6 +1,5 @@
 id: mobile-renderer-imports
 valid:
-  - "const f = require('./fonts/EBGaramond.ttf');"
   - "import { useState } from 'react';"
   - "import { Pressable, Text } from 'react-native';"
   - "import { P } from './book/paper.ts';"
@@ -8,6 +7,10 @@ valid:
   - "import type { Game } from '../../packages/game-view/session.ts';"
   - "import type { Failed } from '../packages/game-view/session.ts';"
 invalid:
+  - "const f = require('./fonts/EBGaramond.ttf');"
+  - "const f = require('x' as const);"
+  - "const f = require(name);"
+  - "const f = await import(`./${name}.ts`);"
   - "import Storage from 'expo-sqlite/kv-store';"
   - "import { useFonts } from 'expo-font';"
   - "import { openGame } from '../../authority/local-story/session.ts';"

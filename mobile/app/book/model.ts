@@ -16,7 +16,10 @@ export function group(buttons: Button[]) {
     look: buttons.find((b) => b.action_key === 'look' && !aimed(b)),
     exits: buttons.flatMap((b) => (dir(b) ? [{ direction: dir(b)!, button: b }] : [])),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
-    place: buttons.filter((b) => !aimed(b) && !dir(b) && !OWN.includes(b.action_key)),
+    // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
+    place: buttons.filter(
+      (b) => !aimed(b) && !dir(b) && !OWN.includes(b.action_key) && b.action_key !== 'scan',
+    ),
     on: (id: string) => buttons.filter((b) => b.target_ids.includes(id)),
   };
 }
@@ -76,6 +79,11 @@ export const branch = (t: number) => {
   const label = `Hour of the ${ANIMALS[i]}, ${STARTS[i % 6]} to ${STARTS[(i + 1) % 6]}`;
   return { glyph: '子丑寅卯辰巳午未申酉戌亥'[i]!, label };
 };
+
+// Whether an NPC's context menu is open: an NPC tapped and still here, else a pending choice (a
+// restored one reopens it) until its menu was dismissed. Dismissing sends nothing; only Close does.
+export const menuOpen = (v: GameView, tapped?: string, dismissed?: string) =>
+  v.entities.some((e) => e.id === tapped) || (!!v.choice && v.choice.continuation_id !== dismissed);
 
 // A first-run hint's "seen" flag in a key-value store (the shell's key-value store: its own file, not the
 // save). A store that throws falls back to this session's memory: a hint never stops the book.

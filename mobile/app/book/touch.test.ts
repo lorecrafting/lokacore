@@ -87,9 +87,8 @@ test('a second press from the same screen is a stale view and changes nothing', 
   a.smoke.press(a.find('Go north', drawn));
   assert.equal(a.revision(), revision);
   assert.equal(a.screen().view.place.title.key, 'room.landing.title');
-  assert.deepEqual(a.screen().log.slice(-3), [
+  assert.deepEqual(a.screen().log.slice(-2), [
     'You take on the task. It is in your journal.',
-    '> Go north',
     'The page had changed; here it is again.',
   ]);
   a.tap('Go north'); // the redrawn screen's buttons are current
