@@ -14,7 +14,8 @@ later descope and two later additions are in [Owner decisions](#owner-decisions)
   commerce, service, topics, relationship, faction, readable, light, liquid, tide and sense_cue
   are later stages after Gate C1.
 - **Q2, the gate story: yes.** A new development story of about six Ashmere rooms, its keys and
-  wearables found in rooms or given by a dialogue choice (no combat, commerce or trust), prose from
+  wearables found in rooms or given by a dialogue choice (no combat, commerce or trust; PM ruling
+  in fix round 1: found in rooms only, see item 32), prose from
   the owner's UI prototype. **No story picker:** for the gate the sampler replaces the Lantern on
   the phone. The app opens the sampler in its own save file; the Lantern's save file stays on the
   phone untouched (not deleted); the Lantern stays reachable for tests through Node (`loka play`,
@@ -40,7 +41,7 @@ The owner plays, by touch on the iPhone 11, a small Ashmere piece from 00a: door
 what is seen through them, a locked container, wearing, sitting and resting, each quest's journal
 text, a chapter title page and a modal cutscene. W1, W2, W13 are content; every phone save has its own seed and a clean kernel version.
 
-## 2. Triage of the row (31 of 31)
+## 2. Triage of the row (31 of 31, plus item 32 from fix round 1)
 
 IN = slice below; LATER = not this stage, reason given (each stays in the ROADMAP row).
 
@@ -58,7 +59,7 @@ IN = slice below; LATER = not this stage, reason given (each stays in the ROADMA
 | 10 | "spawned-entity provenance (`EntityOrigin`, with the first spawner)" | LATER: rides with population@1 (Q1) |
 | 11 | "the 04 §5.4 generation re-read ... first slice that adds an operation cancelling, rescheduling or completing a job" | LATER: no slice here adds one; trigger unchanged |
 | 12 | "scene@1 ... until chapter-one content needs scenes" | partly IN c1-scenes-modal (modal text scenes); LATER (Q1, next stage): restricted control, scoped_overlay and dreams, dialogue and choices in scenes, consequence beats with checkpoints |
-| 13 | "narration@1 beyond pinned participants: `narration.emit`, observers, rendering names" | LATER (Q1): with scene@1 |
+| 13 | "narration@1 beyond pinned participants: `narration.emit`, observers, rendering names" | LATER (Q1): trigger: the first content that needs `narration.emit` or observers |
 | 14 | G1 "a root that activates a strict quest and then emits its matching acquisition faults `conflicting_write`" | LATER, trigger kept: the sampler must not compose it (c1-sampler acceptance) |
 | 15 | G2 "the `before = now(p)` branch of `join` ... first slice letting a job emit an acquisition" | LATER, trigger kept: no slice here lets a job emit `item_acquired` |
 | 16 | "graceful handling of a lookup over `selector_cardinality`" | LATER: 57 rooms and about 60 definitions, cap 1024 |
@@ -75,8 +76,9 @@ IN = slice below; LATER = not this stage, reason given (each stays in the ROADMA
 | 27 | "a measured touch-to-visible-feedback (touch-to-photon) on the iPhone 11" | IN Gate C1 (owner's human part) |
 | 28 | "a host trace stores the Command, not the invoked key ... before the first cartridge with an alias" | LATER, trigger kept: the sampler declares no alias (c1-sampler acceptance) |
 | 29 | "the phone reports `kernel_version` `loka-kernel@000…0-dirty`" | IN c1-host (`session.ts:27`) |
-| 30 | M1 ruling a "two dialogues of one speaker whose policies both hold" | LATER: 00a §8 "Each named NPC has one dialogue graph" |
+| 30 | M1 ruling a "two dialogues of one speaker whose policies both hold" | LATER: 00a §8 "Each named NPC has one dialogue graph"; trigger: the first speaker with two dialogues whose policies can both hold |
 | 31 | "the NPC menu (`Menu.tsx`) does not scroll ..." | LATER, trigger kept: every sampler choice fits the menu (c1-sampler acceptance) |
+| 32 | (new, PM ruling in fix round 1) an NPC hands the player an item (no installed vocabulary: `hand_over` moves an item to an NPC) | LATER: trigger: the first content where an NPC hands the player an item |
 
 Files at their cap (CHECKS: split, never raise): `mobile/authority/local-story/authority.ts`
 300/300, `kernel/ts/src/cartridge_refs.ts` 314 and `checks.ex` 315 (both allow 315; new loader
@@ -93,8 +95,8 @@ FactValue is a Key, integer or boolean, never an EntityId.
 | Worn slot (c1-equipment) | `entity.transfer` into a slot holder entity inside the body (capacity 1), made by `fresh.ts` per declared slot | conservation, one container (03 §23), capacity and `has_item` "directly or nested" already hold; `fact.assign` cannot hold an item id |
 | Position (c1-position) | `fact.assign` on an engine fact the compiler adds when `position@1` is locked (as `resources.ex` adds hp/ma/mv), scope player, Key value | `expected` = current position is the transition check; the loader refuses content that writes it |
 | Locked container (c1-locks) | `barrier.transition` on a barrier attached to the item | the target is already the barrier, not the exit |
-| Chapter reached (c1-chapters) | none: derived in the view from quest state | a story point outcome fires on a dialogue choice that resolves a quest (cartridge.md, story points), so "reached" is that quest resolved with that outcome, already persisted |
-| Scene in progress (c1-scenes-modal) | `fact.assign` on an engine fact per declared scene (beat number, 0 = not running), compiler-added as for position | the beat is an integer; the fact persists, so a scene in progress survives reopen |
+| Chapter reached (c1-chapters) | none: derived in the view from quest state | a story point outcome fires on a dialogue choice that resolves a quest (cartridge.md, story points), so "reached" is that quest resolved by that choice, already persisted (mapping in slice 9) |
+| Scene in progress (c1-scenes-modal) | `fact.assign` on an engine fact per declared scene (line index, 0 = not running), compiler-added as for position | the beat is an integer; the fact persists, so a scene in progress survives reopen |
 
 `compose.*` stays untouched. If a slice's spec commit shows a reuse fails, that slice adds the op in
 both kernels with new conformance cases, splits `compose.*` first, and gets Astra (Q4 b). Slot
@@ -113,7 +115,8 @@ The brief lists every protocol file the slice may change. **Scope trigger:** a c
 existing frozen case or to a protocol file the brief does not list: stop and ask; new named cases
 are in scope. **Hashes:** gameplay outcomes and state hashes of existing traces must not change; a
 cartridge `content_hash` may change when its content moves into the artifact; the PR lists each
-re-derived hash with its fixture and bundled release, and keeps old pinned releases loadable where
+re-derived hash with its fixture (`protocol/fixtures/cartridge_lantern_hash.json`, the compiled
+fixtures, the `lantern-traces.json` pins) and bundled release, and keeps old pinned releases loadable where
 the save acceptance needs them. **New commands** take the whole invocation path: command ownership
 in `capability_registry.json`, action registration, the `invocation.ts` `TARGETS` map, offered
 actions in GameView, and a touch row in c1-touch; a new domain event (`event.schema.json`) or
@@ -167,7 +170,8 @@ refusal code (`error_registry.json`, `error.schema.json`) of that slice is in it
   rewritten. TypeScript only: Elixir has no GameView. Opus. Device: none.
 - Sight rule (00 §4.1 "`scan` adjacent rooms", chapter one; far scan from `view` rooms is chapter
   two, 00 §11): per exit, what `sight` returns today: the destination room and the NPCs and items
-  directly in it, or nothing beyond a barrier that bars the way. `sight` follows `passage`, not
+  directly in it, or nothing beyond a barrier that bars the way. The slice narrows DIFFERENCES row
+  10 to far scan from `view` rooms (chapter two), perception and darkness. `sight` follows `passage`, not
   `fare`, so the field sits on both ExitView branches.
 - Acceptance: each barrier exit shows its door and state even when passable, with only its legal
   verbs; `unlock` toward `old_gate` absent without the lantern, present with it; an open exit shows
@@ -237,14 +241,25 @@ refusal code (`error_registry.json`, `error.schema.json`) of that slice is in it
   story_point?, outcome?}`, the first with no story point), `gameview.schema.json` (the current
   chapter's key).
 - Code: `view.ts`, the loaders in both kernels (each reference resolves; only the first chapter
-  has no story point). Rule: the current chapter is the last declared one whose story point
-  outcome is reached (its quest resolved with that outcome), else the first. No new persisted
-  field, no new op. Opus. Device: none.
+  has no story point). No new persisted field, no new op. Opus. Device: none.
+- Rule: the current chapter is the last declared one that is reached, else the first. A chapter
+  with `outcome` O is reached when O is: O's trigger is `{dialogue, choice}` (StoryPointDefinition,
+  `cartridge.schema.json`), and `choose` emits `story_point_reached` with outcome O
+  (`rules/dialogue.ts:189`) in the decision that resolves the dialogue's quest with the choice id
+  as its outcome (mechanics.md dialogue@1); so O is reached when that quest is resolved with
+  outcome `choice`. The story point's outcome key and the quest's outcome (the choice id) are
+  different keys; the view maps one to the other through the trigger. A chapter with no `outcome`
+  is reached when any outcome of its story point is reached.
 - Acceptance: literal checks: a new game shows the first chapter; the outcome's choice moves it to
-  its chapter, the other outcome does not; it survives reopen; frozen state hashes unchanged;
-  unresolved title or story point is a diagnostic in both kernels.
+  its chapter, the other outcome does not; a chapter with no outcome is reached by either; a story
+  point whose outcome key differs from its trigger choice id (outcome `carry`, choice `take_it`)
+  still reaches its chapter; it survives reopen; frozen state hashes unchanged; an unresolved
+  title or story point is a diagnostic in both kernels.
 
 ### 10. c1-scenes-modal: modal text cutscenes (contract-freeze depth)
+- Brief: carries a composes-with statement on where the trigger lives; prefer the scene's own
+  trigger declaration (`on {story_point, outcome}`, read by scene@1) over scene code in
+  `rules/dialogue.ts`.
 - Spec first: mechanics.md scene@1 (the modal subset of 06 §33-§37: steps `narrate`,
   `await_ack`, `end`; control `modal`; not skippable, no replay); amends the 21 §28 scene row and
   `docs/spec/release-scope.json` to say which part of scene@1 is installed.
@@ -252,22 +267,24 @@ refusal code (`error_registry.json`, `error.schema.json`) of that slice is in it
   (continue), `gameview.schema.json` (the scene's current lines), `capability_registry.json`,
   `event.schema.json` (scene started, scene ended), `error_registry.json` and `error.schema.json`
   only if no existing code fits the modal refusal.
-- Code: new `rules/scene.ts` (TypeScript only, ADR-074), `rules/dialogue.ts` (the trigger),
-  `invocation.ts`, `actions.ts`, the
-  compiler-added beat fact and the loader in both kernels. Opus. Device: Simulator kill row.
+- Code: new `rules/scene.ts` (TypeScript only, ADR-074), `invocation.ts`, `actions.ts`, the
+  compiler-added line fact and the loader in both kernels; `rules/dialogue.ts` only if the brief's
+  composes-with statement shows the declaration cannot work. Opus. Device: Simulator kill row.
 - Trigger (00a §9, QUESTSCENE-01): a story point outcome; the decision that emits its
-  `story_point_reached` sets the scene's beat to 1.
+  `story_point_reached` sets the scene's line index to 1.
+- Line rule: one `continue` advances exactly one `narrate` line; the persisted position is the
+  line index (the fact; 0 = not running); `continue` on the last line ends the scene.
 - Acceptance: the scene starts once (a retried choice does not start a second, QUESTSCENE-01);
   while it runs, only `continue` is offered and a direct `move` is refused (SCENE-03); each
-  `continue` advances one beat, the last ends it and emits a typed event; a kill and reopen
-  mid-scene shows the same beat and re-applies nothing (SCENE-01 minimum); content cannot write
+  `continue` advances exactly one line, the last ends it and emits a typed event; a kill on line 2
+  reopens on line 2 and re-applies nothing (SCENE-01 minimum); content cannot write
   the fact; a scene with a step outside the subset is a loader diagnostic in both kernels.
 
 ### 11. c1-sampler: the gate story (Q2)
 - Docs: cartridge.md; 00a §2, §5. No protocol change.
 - Content: about six Ashmere rooms (for example well_lane, drowned_lantern, inn_rooms, inn_attic
-  with its locked trunk, lantern_cellar); keys and wearables placed in rooms or given by a dialogue
-  choice; the cellar key just unlocks; prose from the owner's UI prototype.
+  with its locked trunk, lantern_cellar); keys and wearables placed in rooms only (no NPC hands
+  the player an item, item 32); the cellar key just unlocks; prose from the owner's UI prototype.
 - Files: `cartridges/<owner-named id>/**`, its compiled fixture with an independent known answer;
   `mobile/app/App.tsx` (the single-story constant `NAME`, :31, and the fixture import, :14) points
   at the sampler, in its own save file; the Lantern's file stays on the phone untouched and its
@@ -311,7 +328,7 @@ before the gate counts the audit.
   facts' write guards, the scene's modal restriction and single start, c1-host's seed in the pin; audited SHAs recorded, later diffs re-checked.
 - Checklist, one reviewer: spec proofs linked (00 §4.1/§4.3/§4.4, 00a §9, 06 §2/§21/§35/§37,
   15 SCENE-01/SCENE-03/QUESTSCENE-01, 21 §8, 04 §15, numeric profile, the new chapter-marker
-  section); every carry in a stage row (items 1, 5-7, 10-16 (12: the scene@1 rest), 20, 22, 28, 30, 31 with
+  section); every carry in a stage row (items 1, 5-7, 10-16 (12: the scene@1 rest), 20, 22, 28, 30, 31, 32 with
   triggers); DIFFERENCES 3, 6, 7 gone and row 10 narrowed to far scan from `view` rooms
   (chapter two), perception and darkness; W1, W2, W13, P3, P6 DONE; docs tidy pass.
 
@@ -323,7 +340,8 @@ chapters, scenes-modal, sampler, touch; Gate C1); ten Opus developers, two Sonne
 ## 6. PM rulings (settled 2026-10-02)
 
 - Sight lines (c1-doors) are in the GameView room, in every view, not only in the reply to a
-  `look`: the touch UI has no Look button; one place, and the presenter decides what to draw.
+  `look`: one place, and the presenter decides what to draw (the room title is the Look tap,
+  `mobile/app/book/pages.tsx:71`).
 - Chapter markers (c1-chapters): a chapter is reached when its story point is reached. Limit:
   this holds while story points fire only from quest-resolving dialogue choices (cartridge.md),
   so "reached" is derived from the quest resolved with that outcome. Trigger: revisit (a persisted
