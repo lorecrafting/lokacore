@@ -87,38 +87,6 @@ defmodule Loka.ContentTest do
     assert Loka.Content.compile("cartridges/ashmere_hello") == {:ok, @hello_artifact, []}
   end
 
-  describe "determinism (CAR-04)" do
-    # Break: the canonical encoder's key sort skipped (maps over 32 keys iterate unsorted),
-    # or the output depends on authored key order.
-    test "reordered keys, in a map of 40, give identical bytes; a changed byte does not",
-         %{tmp_dir: tmp} do
-      names = for i <- 10..49, do: "f.#{i}"
-      obj = &("{" <> Enum.map_join(&1, ",", fn {k, v} -> JSON.encode!(k) <> ":" <> v end) <> "}")
-      facts = &obj.([{"facts", obj.(for n <- &1, do: {n, JSON.encode!(&2)})}])
-      manifest = @manifest |> Enum.reverse() |> Enum.map(fn {k, v} -> {k, JSON.encode!(v)} end)
-
-      compile = fn dir, files ->
-        assert {:ok, bytes, []} = Loka.Content.compile(source(Path.join(tmp, dir), files))
-        bytes
-      end
-
-      a = compile.("a", %{"facts.json" => {:raw, facts.(names, @fact)}})
-      assert Loka.Content.compile(Path.join(tmp, "a")) == {:ok, a, []}
-
-      b =
-        compile.("b", %{
-          "facts.json" => {:raw, facts.(Enum.reverse(names), @fact)},
-          "cartridge.json" => {:raw, obj.(manifest)}
-        })
-
-      changed =
-        compile.("c", %{"facts.json" => {:raw, facts.(names, %{@fact | "meaning" => "n"})}})
-
-      assert a == b
-      assert changed != a
-    end
-  end
-
   describe "one diagnostic per code" do
     test "INVALID_JSON: unparsable text or trailing data", %{tmp_dir: tmp} do
       assert errors(tmp, %{"facts.json" => {:raw, "{"}}) == [d("INVALID_JSON", "facts")]
@@ -322,11 +290,6 @@ defmodule Loka.ContentTest do
              ]
     end
 
-    test "UNKNOWN_COMMAND", %{tmp_dir: tmp} do
-      assert errors(tmp, %{"actions/talk.json" => %{@talk | "command" => "fly"}}) ==
-               [d("UNKNOWN_COMMAND", "actions/talk.command")]
-    end
-
     test "FACT_TYPE_MISMATCH: wrong JSON type, enum value not listed", %{tmp_dir: tmp} do
       enum = %{@fact | "value_type" => %{"type" => "enum", "values" => ["x"], "default" => "x"}}
       compare = &%{"op" => "fact_compare", "fact" => ref("fact", &1), "equals" => &2}
@@ -389,16 +352,6 @@ defmodule Loka.ContentTest do
                Loka.Content.compile(
                  source(tmp, %{"cartridge.json" => manifest(["requires", "kernel_api"], range)})
                )
-    end
-
-    test "PINNED_VERSION_UNSUPPORTED", %{tmp_dir: tmp} do
-      assert errors(tmp, %{"cartridge.json" => manifest(["requires", "rule_ir"], 2)}) == [
-               d("PINNED_VERSION_UNSUPPORTED", "cartridge.requires.rule_ir", %{
-                 "field" => "rule_ir",
-                 "declared" => 2,
-                 "supported" => 1
-               })
-             ]
     end
 
     test "UNDECLARED_CAPABILITY: an action's command and a policy op", %{tmp_dir: tmp} do

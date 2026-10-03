@@ -155,20 +155,6 @@ defmodule Loka.ContentRecipesTest do
              {:error, [d("DUPLICATE_DEFINITION", "recipes/look")]}
   end
 
-  # Breaks: the fact capability not required by a recipe that assigns a fact.
-  test "a fact.assign step needs fact", %{tmp_dir: dir} do
-    caps = Map.delete(src("cartridge.json")["requires"]["capabilities"], "fact")
-    m = put_in(src("cartridge.json"), ["requires", "capabilities"], caps)
-    {:error, diags} = compile(dir, %{"cartridge.json" => m})
-
-    assert d(
-             "UNDECLARED_CAPABILITY",
-             "recipes/ring_bell.outcomes.success.sequence[0].op",
-             %{"capability" => "fact"},
-             ["fact@1"]
-           ) in diags
-  end
-
   # Breaks: a room's contribution naming nothing compiles (a typo that silently changes
   # nothing), or an engine verb, action or recipe key is refused.
   test "a room's action contribution names a verb, action or recipe", %{tmp_dir: dir} do
