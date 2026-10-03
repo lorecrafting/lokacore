@@ -122,3 +122,11 @@ Diff `3507191..242bb30`. I checked only the dispositions, the code they touched,
 - **N-2, accepted** as a comment at `:23`. The test title already names the count.
 - **N-3, no action.** Accepted. AGENTS.md is still 1400 words.
 - **Q-1, answered.** `AGENTS.md:118-121` now defines a layer as "one kernel's unit files, one authority file". The four new rules are shortened without changing their meaning, and no existing text changed.
+
+## Codex Sol fix round 1 re-check (242bb30), verbatim
+
+APPROVE
+
+```text
+no findings
+```
