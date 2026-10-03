@@ -150,7 +150,13 @@
     "key": "position",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "rest",
+      "sit",
+      "sleep",
+      "stand"
+    ]
   },
   {
     "key": "skills",

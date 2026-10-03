@@ -1,7 +1,8 @@
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
 // A direction outside the compass is invalid_target; a compass direction without an exit here
 // is not_found, and one through a closed or locked barrier (barrier@1) exit_closed or exit_locked
-// (passage). A move costs the body the cartridge's world.movement.cost, else 1 mv where it
+// (passage); then, under position@1, an actor not standing is invalid_state (position.ts
+// standing). A move costs the body the cartridge's world.movement.cost, else 1 mv where it
 // declares the mv pool (resource@1; 00 §4 amendments 2026-09-25, 2026-10-02), and one it cannot
 // pay is insufficient_resource ("You are too exhausted."). Accepted: that resource.adjust (none
 // without a cost), one entity.transfer of the actor's body and entity_entered_room; no resource
@@ -24,6 +25,7 @@ import {
 import { barrierState, exitOf, exitTo } from '../lookups.ts';
 import type { DefinitionRef, EntityId, RoomDefinition } from '../contracts.gen.ts';
 import { level, pay, resourceRef } from '../resource.ts';
+import { standing } from '../position.ts';
 
 export const decide: Rule<'movement'> = (world, command, mint) => {
   if (command.payload.type === 'scan') return accepted(world, 'scanned', [], []);
@@ -37,6 +39,7 @@ export const decide: Rule<'movement'> = (world, command, mint) => {
   if (!there) return rejected('not_found');
   const barred = passage(world, world.rooms[here], direction);
   if (barred) return rejected(barred);
+  if (!standing(world, command.payload.actor_id)) return rejected('invalid_state');
   const paid = fare(world, body);
   if (!paid) return rejected('insufficient_resource');
   const transfer = {

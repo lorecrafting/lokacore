@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Finish and merge PR #137, then continue the approved game mechanics; touch UI is deprioritized
+  ([record](../decisions/owner-decision-touch-priority-2026-10-03.md#latest-priority-mechanics-after-pr-137)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms
@@ -105,6 +107,9 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
 - A fresh agent of any vendor that authored none of the work is an independent reviewer
   ([record](../archive/decisions/owner-decision-reviewers-2026-09-24.md)).
+- For c1-position PR #137 only, a fresh independent Codex agent replaces the primary Opus
+  reviewer; all other review and merge requirements remain in force
+  ([record](../decisions/owner-decision-c1-position-codex-review-2026-10-03.md)).
 - Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green
   ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner

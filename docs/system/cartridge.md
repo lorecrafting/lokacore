@@ -33,6 +33,14 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
 and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the
 compiler writes `world` and `bands` only where the source authors them.
+A cartridge whose manifest requires `position@1` gets the engine fact
+`<id>@<version>:fact/position`, exactly `{"key": "position", "version": 1, "value_type":
+{"type": "enum", "values": ["standing", "sitting", "resting", "sleeping"], "default":
+"standing"}, "scopes": ["player"], "meaning": "The character's position (position@1): only its
+rule writes it."}`, and `fact@1` in its requires and lock, since its rule's `fact.assign` logs
+`fact_changed` (`lib/loka/content/position.ex`). Without position@1 a fact named `position` is
+the cartridge's own. The compiler validates authored capability versions before adding this
+dependency, and includes it in the effective requirements before checking content ownership.
 
 What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 `protocol/cartridge.schema.json` DiagnosticCode):
@@ -67,6 +75,10 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   locked with its key in reach (never inside an NPC). The loader rejects only keys that can never
   be reached (its own key inside a locked chest, circular keys); every other case is a runtime
   refusal (barrier@1, containment@1);
+- under position@1 the position fact is the engine's: an authored fact named `position`
+  (`facts.facts.position`) and a `fact.assign` of it in a recipe outcome, a reaction's `apply` or
+  a dialogue choice are `RESERVED_FACT` (at the fact, `recipes/nap.outcomes.success.sequence[0].fact`);
+  reading it is allowed;
 - story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
   one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
   `lib/loka/content/dialogues.ex:2`);
@@ -87,13 +99,16 @@ cartridge and its hash, or the first diagnostic of the first failing stage (`:62
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:108`), the
 lock (`:157`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
-references (`kernel/ts/src/cartridge_refs.ts:155` and the `cartridge_*.ts` twins of the
+references (`kernel/ts/src/cartridge_refs.ts:156` and the `cartridge_*.ts` twins of the
 compiler's checks), and the installed kernel (`cartridge.ts:226`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
 An item's `barrier` is a reference to a barrier (barrier@1 owns the kind; a short key compiles
 to its full ref) and is checked as above in both the compiler and the loader. An item's `slot` is a definition part owned by `equipment` (`UNDECLARED_CAPABILITY` when the
-lock lacks it), in both the compiler and the loader. Compiled artifacts load in TypeScript with identical bytes, hash and lock
+lock lacks it), in both the compiler and the loader. Under position@1 the loader, at the
+reference stage, rejects the same writes and a position FactSpec missing or other than the
+engine's (`RESERVED_FACT`, at `.cartridge.facts["<id>@<version>:fact/position"]`;
+`kernel/ts/src/cartridge_position.ts`). Compiled artifacts load in TypeScript with identical bytes, hash and lock
 (`test/loka/cartridge_cross_kernel_test.exs:113`); the loader corpus is
 `protocol/fixtures/cartridge_loader.json`.
 
@@ -103,14 +118,14 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/world.ts:63`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/world.ts:65`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
-`dialogue`, `equipment` (`:33`); without a command, so without a rule, `fact`, `policy`,
+`dialogue`, `equipment`, `position` (`:34`); without a command, so without a rule, `fact`, `policy`,
 `inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
-`target_resolution`, `attributes` (`:48`). The [feature map](../features.gen.md) is the authority for what
+`target_resolution`, `attributes` (`:50`). The [feature map](../features.gen.md) is the authority for what
 each one implements and where; `bin/features.exs --check` fails when a rule module exists
-without its row. The 17 registered capabilities it marks `not yet` may be named by a
+without its row. The 16 registered capabilities it marks `not yet` may be named by a
 cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.
 
 ## Text

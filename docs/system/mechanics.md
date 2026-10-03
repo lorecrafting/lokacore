@@ -16,22 +16,24 @@ then one slot holder per distinct `slot` some item declares, in slot-key order (
 body with capacity 1; it is not in `entities`, so no command targets it and no view lists it.
 The body starts in `entry`, each NPC in its room, each item at its location; the clock is
 `calendar.start` or 0 (`:40`); each scheduled NPC's first job is due at its schedule's first
-hour strictly after the start; facts hold their defaults; a world starting after time 0 stores
+hour strictly after the start; facts hold their defaults, with no record until the first change
+(so the [position](#position1-kerneltssrcrulespositionts) fact adds nothing to a fresh state); a world starting after time 0 stores
 the body's resources at their start values. One body per world; rules read the actor from the
 command and its body from `bodyOf` (`decision.ts:159`).
 
 ## movement@1 (`kernel/ts/src/rules/movement.ts`)
 
 `move {direction}`: a direction outside the six compass directions is `invalid_target`
-(`:31`); no exit here, `not_found`; an exit through a closed or locked barrier, `exit_closed`
-or `exit_locked` (`passage`, `:59`); the move costs the body the cartridge's
-`world.movement.cost {resource, amount}`, else (the engine default) 1 mv when the cartridge
-declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:70`).
+(`:33`); no exit here, `not_found`; an exit through a closed or locked barrier, `exit_closed`
+or `exit_locked` (`passage`, `:62`); under [position@1](#position1-kerneltssrcrulespositionts), an
+actor not standing, `invalid_state` (`kernel/ts/src/position.ts` `standing`); the move costs the body
+the cartridge's `world.movement.cost {resource, amount}`, else (the engine default) 1 mv when the cartridge
+declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:73`).
 Per-exit and terrain costs are later (00 §11 chapter three). Accepted
 `moved`: the `resource.adjust` (none without a cost), one `entity.transfer` of the body and
 `entity_entered_room`. `scan` is accepted `scanned` with nothing to change and no event
-(`:29`). The GameView carries `sight` (`:85`) per exit: nothing through a barrier that bars the
-way (`passage`), else the destination room and the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:97`).
+(`:31`). The GameView carries `sight` (`:88`) per exit: nothing through a barrier that bars the
+way (`passage`), else the destination room and the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:100`).
 
 ## barrier@1 (`kernel/ts/src/rules/barrier.ts`)
 
@@ -89,6 +91,25 @@ rule and the GameView share. Composition re-checks custody, cycles and the holde
 `has_item` climbs containers, so a worn item still counts. Finger slots, slot compatibility
 and dual wield, granted modifiers and affects, curses and no-remove items are LATER
 ([ROADMAP](../ROADMAP.md)).
+
+## position@1 (`kernel/ts/src/rules/position.ts`)
+
+Shared position queries and the verb mapping live in `kernel/ts/src/position.ts`; rule modules
+use that kernel helper without importing another rule module.
+
+The actor's position is the engine fact `position` (enum `standing`, `sitting`, `resting`,
+`sleeping`, default `standing`, scope player), which the compiler adds when the lock holds
+`position` ([cartridge.md](cartridge.md#compiler)). `stand`, `sit`, `rest`, `sleep` (no
+target): the command's position equal to the current one is `invalid_state`; else accepted
+`stood`, `sat`, `rested` or `slept`, one `fact.assign` at the actor's player scope with
+`expected` the current position and no event from the rule (the host adds `fact_changed`).
+Every change between two positions is legal (twelve), and every verb but `move` works in any
+position ([movement@1](#movement1-kerneltssrcrulesmovementts)). Content may read the fact
+(`fact_compare`, a reaction's `on.fact`) but never write it (`RESERVED_FACT`). The GameView
+shows `position` and lists the verbs but the current position's with the place's actions
+([protocol.md](protocol.md#gameview)). No position changes regeneration (00 §4.2 as amended
+2026-10-03). Sleeping that cannot act, waking on damage, double damage and `meditating` are
+LATER ([ROADMAP](../ROADMAP.md)).
 
 ## description_variant@1 and inspectable_detail@1 (`rules/description_variant.ts`)
 
@@ -148,7 +169,7 @@ nothing and passes when the body's value of `resource` at admission (before cost
 `perform {action, target_id?}`: no recipe by that key in the actor's set `not_found`; a target
 other than the recipe's detail `invalid_target`; the detail outside the room `not_present`;
 then `cooldown` (time since the actor's last admitted attempt below the recipe's cooldown) and
-`insufficient_resource` (`actions.ts:249`). Accepted, in one decision: the costs' adjusts;
+`insufficient_resource` (`actions.ts:253`). Accepted, in one decision: the costs' adjusts;
 the check and its event; the chosen outcome's `sequence` in order (`fact.assign` with the
 expected value as the steps before left it, saturating `resource.adjust`, `event.emit` as
 `custom_event`); `action_completed` unless the outcome is `failure`; a `cooldown.start` when
@@ -163,7 +184,7 @@ The narration is the outcome's `narration.actor` key with its participants pinne
 A quest starts through its offer, which is optional, or through a dialogue choice's `accept`
 (dialogue@1 below; [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
-accept action), withdrawn once the actor has an instance (`actions.ts:134`), so a second accept
+accept action), withdrawn once the actor has an instance (`actions.ts:138`), so a second accept
 and an undeclared quest are refused before the rule. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never

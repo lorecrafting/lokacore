@@ -4,7 +4,8 @@ defmodule Loka.Content.Compiler do
   Each stage runs on the parts the stages before it accepted, so one bad file does not hide
   the diagnostics of the others.
   """
-  alias Loka.Content.{Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires, Resources}
+  alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
+  alias Loka.Content.{Position, Resources}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -29,7 +30,7 @@ defmodule Loka.Content.Compiler do
     v2 = v2(defs, located, text, files)
 
     case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)]) do
-      {warnings, []} -> {:ok, cartridge(manifest, defs, v2, located), warnings}
+      {warnings, []} -> {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
       {_, errors} -> {:error, errors}
     end
   end
@@ -44,7 +45,9 @@ defmodule Loka.Content.Compiler do
       Recipes.check(manifest, defs, v2, registry) ++
       Quests.check(manifest, defs, v2, registry) ++
       Reactions.check(manifest, defs, v2, registry) ++
-      Dialogues.check(manifest, defs, v2, registry) ++ Links.check(defs, v2)
+      Dialogues.check(manifest, defs, v2, registry) ++
+      Links.check(defs, v2) ++
+      Position.check(manifest, defs)
   end
 
   # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, story points, an
@@ -89,6 +92,7 @@ defmodule Loka.Content.Compiler do
         {extra, manifest} = Map.split(m, ["entry", "calendar", "world"])
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
         diags = Requires.check(rel, manifest, registry)
+        manifest = Position.requires(manifest)
         {manifest, located, diags ++ calendar(manifest, extra["calendar"], registry)}
 
       diags ->
@@ -127,11 +131,12 @@ defmodule Loka.Content.Compiler do
 
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
+    {facts, d4} = Position.facts(facts, m)
     {resources, d1} = Resources.load(of(files, :resources))
     {attributes, d3} = Resources.attributes(of(files, :attributes))
     {defs, d2} = kinds(files)
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3}
+    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3 ++ d4}
   end
 
   # The one-file-per-definition kinds (@kinds) and their diagnostics.
@@ -257,44 +262,4 @@ defmodule Loka.Content.Compiler do
   # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
   defp source_defs,
     do: Map.update!(Contracts.defs(), "DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
-
-  # The v2 cartridge with cartridge.json's calendar and world, when it has them.
-  defp cartridge(m, defs, v2, {_, settings}), do: Map.merge(cartridge(m, defs, v2), settings)
-
-  defp cartridge(m, defs, nil) do
-    %{
-      "format" => "loka-cartridge-v1",
-      "manifest" => m,
-      "lock" => %{
-        "format" => "loka-capability-lock-v1",
-        "capabilities" => m["requires"]["capabilities"]
-      },
-      "facts" => keyed(m, "fact", defs),
-      "policies" => keyed(m, "policy", defs),
-      "actions" => keyed(m, "action", defs)
-    }
-  end
-
-  # items, npcs, recipes, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The
-  # default pools are always there, with resource@1 (Resources).
-  defp cartridge(m, defs, {entry, text}) do
-    m = Resources.requires(m)
-
-    optional =
-      for k <- ~w(item npc recipe barrier quest reaction dialogue story_point attribute),
-          defs[k] != %{},
-          into: %{},
-          do: {k <> "s", keyed(m, k, defs)}
-
-    cartridge(m, defs, nil)
-    |> Map.merge(%{"format" => "loka-cartridge-v2", "rooms" => keyed(m, "room", defs)})
-    |> Map.merge(%{"entry" => entry, "text" => text, "resources" => keyed(m, "resource", defs)})
-    |> Map.merge(optional)
-  end
-
-  defp keyed(m, kind, defs),
-    do:
-      Map.new(defs[kind], fn {key, {_, _, v}} ->
-        {"#{m["id"]}@#{m["version"]}:#{kind}/#{key}", v}
-      end)
 end
