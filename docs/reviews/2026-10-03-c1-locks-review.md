@@ -146,3 +146,18 @@ C1 row). No mutants (no logic changed).
   Fix: bump each by one (or re-wrap the header to its old line count).
 
 Verdict for the round: F-1 resolved; F-2 open (docs-only, CHANGES REQUIRED until fixed).
+
+## Fix round 2 re-check (8cffe34)
+
+Scope: `0b69fca..8cffe34`, docs only (`mechanics.md`, `world-parameters.md`).
+
+- **F-2: resolved.** All six pointers land at `8cffe34`: `mechanics.md` `MOVES` `:39`, `not_owned`
+  `:84`, `transition` `:64`; world-parameters W4 `barrier.ts:41` (same row as before, shifted),
+  W22 `:81-84` (key check through `return 'not_owned'`), Mechanism tables `:39-44` (`MOVES`). No
+  other live `barrier.ts:N` pointer exists outside reviews and archive.
+- **N-1: resolved** in `mechanics.md:48-50` (lock with the key inside, then drop it out of reach;
+  `put` adds ways to cause it; a lockout rule is the fix). The `barrier.ts:13` comment still says
+  "until put or a lockout rule exists": a nit at most, accepted, since the spec text and the
+  ROADMAP trigger carry the precise statement.
+
+Verdict: **APPROVE**. Nothing open.
