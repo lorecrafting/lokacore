@@ -3,7 +3,7 @@
 Relayed by the PM (Claude Code), **(paraphrased)**: the wording is smoothed, not quoted. No checker
 can verify it against the chat.
 
-The PM proposed the plan (an Opus draft at `f8564cb`, reviewed by codex Astra, which asked for
+The PM proposed the plan (an Opus draft written at `16f2536`, its citations re-checked at `f8564cb`; reviewed by codex Astra, which asked for
 changes, folded and re-checked twice by codex Sol) and four questions. The owner's answers, a
 later descope and two later additions are in [Owner decisions](#owner-decisions); the plan below already applies them.
 
@@ -116,7 +116,8 @@ cartridge `content_hash` may change when its content moves into the artifact; th
 re-derived hash with its fixture and bundled release, and keeps old pinned releases loadable where
 the save acceptance needs them. **New commands** take the whole invocation path: command ownership
 in `capability_registry.json`, action registration, the `invocation.ts` `TARGETS` map, offered
-actions in GameView, and a touch row in c1-touch.
+actions in GameView, and a touch row in c1-touch; a new domain event (`event.schema.json`) or
+refusal code (`error_registry.json`, `error.schema.json`) of that slice is in its protocol list.
 
 ### 1. c1-host: a seed and a clean kernel version per lineage
 - First: the row's trigger is "before the first cartridge whose play draws the RNG", and
@@ -149,7 +150,7 @@ actions in GameView, and a touch row in c1-touch.
 
 ### 3. c1-attributes: `attributes@1` and the resources policy leaf
 - Spec: new mechanics.md section; amends 06 §21 (policy leaves: one reading a resource, one an
-  attribute); 00 §4.3 six stats; release-scope.json (chapter_one, R5).
+  attribute); 00 §4.3 six stats; `docs/spec/release-scope.json` (chapter_one, R5).
 - Protocol files: `policy.schema.json`, `cartridge.schema.json` (or an attributes file schema),
   `capability_registry.json`.
 - Code: `policy.ts`, loader in both kernels, `fresh.ts`, features.json. Opus. Device: none.
@@ -246,10 +247,13 @@ actions in GameView, and a touch row in c1-touch.
 ### 10. c1-scenes-modal: modal text cutscenes (contract-freeze depth)
 - Spec first: mechanics.md scene@1 (the modal subset of 06 §33-§37: steps `narrate`,
   `await_ack`, `end`; control `modal`; not skippable, no replay); amends the 21 §28 scene row and
-  release-scope.json to say which part of scene@1 is installed.
+  `docs/spec/release-scope.json` to say which part of scene@1 is installed.
 - Protocol files: a scene definition schema, `cartridge.schema.json`, `command.schema.json`
-  (continue), `gameview.schema.json` (the scene's current lines), `capability_registry.json`.
-- Code: new `rules/scene.ts` (TypeScript only, ADR-074), `invocation.ts`, `actions.ts`, the
+  (continue), `gameview.schema.json` (the scene's current lines), `capability_registry.json`,
+  `event.schema.json` (scene started, scene ended), `error_registry.json` and `error.schema.json`
+  only if no existing code fits the modal refusal.
+- Code: new `rules/scene.ts` (TypeScript only, ADR-074), `rules/dialogue.ts` (the trigger),
+  `invocation.ts`, `actions.ts`, the
   compiler-added beat fact and the loader in both kernels. Opus. Device: Simulator kill row.
 - Trigger (00a §9, QUESTSCENE-01): a story point outcome; the decision that emits its
   `story_point_reached` sets the scene's beat to 1.
