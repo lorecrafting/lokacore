@@ -260,11 +260,11 @@ for (const seed of SEEDS)
 const pages = (sql: DatabaseSync) => Object.values(sql.prepare('PRAGMA page_count').get()!)[0];
 
 // Breaks (the corpus's own footing): the driver or the authority drifting from answers checked by
-// hand against the fixtures. Seed 1 (cartridge_details_hash.json): move constructor is no compass
-// direction, so invalid_target, twice, each keeping the revision; scan changes nothing but the
-// revision, at clock 0. Seed 240 (cartridge_dusk_hash.json): ring_bell lasts 60.
+// hand against the fixtures. Seed 1716 (cartridge_details_hash.json): wait until 1 advances the
+// clock to 1; wait until 1 again is not later than now, so invalid_state, and keeps the revision;
+// looking at a detail changes nothing but the revision. Seed 240 (cartridge_dusk_hash.json): ring_bell lasts 60.
 test('hand-checked anchors', () => {
-  const p = processOn(save(), 1);
+  const p = processOn(save(), 1716);
   const replies = [0, 1, 2].map((k) => p.send(k) as Extract<Reply, { kind: 'saved' }>);
   const shown = replies.map(({ revision, decision: d }) => {
     const { kind, outcome, error } = d as {
@@ -275,13 +275,13 @@ test('hand-checked anchors', () => {
     return [revision, kind, outcome ?? error!.code];
   });
   assert.deepEqual(shown, [
-    [0, 'rejected', 'invalid_target'],
-    [0, 'rejected', 'invalid_target'],
-    [1, 'accepted', 'scanned'],
+    [1, 'accepted', 'waited'],
+    [1, 'rejected', 'invalid_state'],
+    [2, 'accepted', 'examined'],
   ]);
   assert.deepEqual(
     { ...p.sql.prepare('SELECT revision, clock FROM head').get() },
-    { revision: 1, clock: 0 },
+    { revision: 2, clock: 1 },
   );
   const d = processOn(save(), 240);
   d.send(0);
