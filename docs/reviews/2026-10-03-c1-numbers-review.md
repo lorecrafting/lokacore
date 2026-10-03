@@ -85,3 +85,9 @@ kernels (`invalid fixtures fail with exactly the listed errors`). WorldSettings 
 No blocker or should-fix.
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (79721f3), verbatim
+
+APPROVE
+
+no findings
