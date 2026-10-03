@@ -108,3 +108,17 @@ CHANGES REQUESTED
 R1 | should-fix | kernel/ts/test/validate.test.ts:61 at 42a9bc2
 Deleting “a recursive Policy at the depth cap” removes a distinct decoder check. Mutant: canonical.ts:48 guards only c === '[' instead of both '[' and '{'. A Policy nested 129 objects deep then decodes successfully. The surviving ABI depth test exercises array decoding; 259 remaining kernel tests passed with this mutant (disk-writing suites excluded). Restoring the deleted test fails. Keep this case, or extend the ABI test to check object decoding at depths 128 and 129.
 ```
+
+## Fix round 1 re-check (242bb30)
+
+Diff `3507191..242bb30`. I checked only the dispositions, the code they touched, and that code's direct callers.
+
+**Verdict: APPROVE**
+
+- **Sol R1, fixed.** `validate.test.ts:61` is restored as before. The mutant `canonical.ts:48` (depth cap checks `[` only) makes exactly one kernel test fail: "a recursive Policy at the depth cap". So the D8 deletion was not covered elsewhere, and restoring it is right.
+- **F-1, fixed.** `sim.test.ts:24` is now `CI ? 10_000 : 500`. Both failure messages (`:94`, `:110`) carry the fresh seed range. Planted check: I added an unreachable code to REACHED and ran `env -u CI TEST_REPORTER=dot npm test` (check_all's reporter). It exits 1, and the dot output shows `never reached; fresh seeds 1791005254822 to 1791005255321`. That range is 500 seeds and can be rerun.
+- **F-2, fixed.** `architecture.md:101-102` and `CHECKS.md:65` say 10,000 in CI and 500 locally. The pointer `sim.test.ts:24` is the `FRESH` line.
+- **N-1, fixed** at `sim.test.ts:2`.
+- **N-2, accepted** as a comment at `:23`. The test title already names the count.
+- **N-3, no action.** Accepted. AGENTS.md is still 1400 words.
+- **Q-1, answered.** `AGENTS.md:118-121` now defines a layer as "one kernel's unit files, one authority file". The four new rules are shortened without changing their meaning, and no existing text changed.
