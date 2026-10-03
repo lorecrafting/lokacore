@@ -116,6 +116,7 @@ function keyStage(c: Obj): Diagnostic[] {
     'items',
     'recipes',
     'resources',
+    'attributes',
     'barriers',
     'quests',
     'reactions',
@@ -146,7 +147,7 @@ function keyStage(c: Obj): Diagnostic[] {
 // The lock equals requires.capabilities (mismatched), every action's command is owned and none is
 // run_job (authority-internal, 04 §1; checked as an unowned name), and every command, policy op,
 // definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar,
-// recipe, resource, barrier), recipe check (by the events it produces, check@1's), recipe step
+// recipe, resource, attribute, barrier), recipe check (by the events it produces, check@1's), recipe step
 // of any outcome (by the event it produces: fact_changed for fact.assign, custom_event for
 // event.emit; a resource.adjust, like a cost, through the resource it names), quest (by its
 // quest_activated), daily schedule (also by the run_job that runs it, schedule@1's), reaction
@@ -185,8 +186,9 @@ function lockStage(c: Obj): Diagnostic[] {
           use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`);
       });
   }
-  for (const ref of Object.keys((c.resources ?? {}) as Obj))
-    use('definition', 'resource', `.cartridge.resources${step(ref)}`);
+  for (const kind of ['resource', 'attribute'])
+    for (const ref of Object.keys((c[`${kind}s`] ?? {}) as Obj))
+      use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
     use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
   for (const [kind, name, at] of [...uses(c), ...dialogueUses(c)]) use(kind, name, at);

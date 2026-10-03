@@ -53,6 +53,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
     resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
+    attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
     state: { clock, containers, rng: seed, ...written({ jobs, resources }) },
   };
 }

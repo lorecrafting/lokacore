@@ -1,7 +1,6 @@
-# size: allow 315, expand's one clause per short-reference shape keeps every source kind here
 defmodule Loka.Content.Checks do
   @moduledoc """
-  Manifest requirements, capability ownership, references and fact types (05 §3, §4, §6;
+  Capability ownership, references and fact types (05 §4, §6;
   06 §20–21). `registry` is a decoded capability registry (CapabilitySpec entries, like
   protocol/capability_registry.json); ownership comes from its commands and policies.
   """
@@ -12,51 +11,17 @@ defmodule Loka.Content.Checks do
   alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
-  @supported_pin 1
   @ref_fields %{
     "fact_compare" => "fact",
     "has_item" => "item",
     "quest_state" => "quest",
     "fact.assign" => "fact",
-    "barrier_state" => "barrier"
+    "barrier_state" => "barrier",
+    "stat_compare" => "attribute",
+    "resource_compare" => "resource"
   }
   # A definition sits inside the artifact, the cartridge and its kind's map.
   @enclosing 3
-
-  @doc "Diagnostics for a schema-valid manifest's requires and supported_profiles."
-  @spec requirements(String.t(), map(), [map()]) :: [map()]
-  def requirements(rel, %{"requires" => req} = m, registry) do
-    offline? = "offline_private" in m["supported_profiles"]
-
-    range(rel, req["kernel_api"]) ++
-      pins(rel, req) ++
-      Enum.flat_map(req["capabilities"], &capability(rel, &1, offline?, registry))
-  end
-
-  defp range(rel, %{"at_least" => low, "below" => high}) do
-    if version(low) >= version(high),
-      do: [diag("KERNEL_API_RANGE_INVALID", at(rel, ["requires", "kernel_api"]))],
-      else: []
-  end
-
-  defp pins(rel, req) do
-    for field <- ~w(content_schema rule_ir), req[field] != @supported_pin do
-      data = %{"field" => field, "declared" => req[field], "supported" => @supported_pin}
-      diag("PINNED_VERSION_UNSUPPORTED", at(rel, ["requires", field]), data)
-    end
-  end
-
-  defp version(v), do: v |> String.split(".") |> Enum.map(&String.to_integer/1)
-
-  defp capability(rel, {key, v}, offline?, registry) do
-    path = at(rel, ["requires", "capabilities", key])
-
-    case Enum.find(registry, &(&1["key"] == key and &1["version"] == v)) do
-      nil -> [diag("UNKNOWN_CAPABILITY", path)]
-      %{"portability" => "server_only"} when offline? -> [diag("SERVER_ONLY_CAPABILITY", path)]
-      _ -> []
-    end
-  end
 
   @doc """
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy

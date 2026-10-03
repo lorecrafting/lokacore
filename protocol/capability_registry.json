@@ -130,7 +130,14 @@
     "key": "attributes",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "definitions": [
+      "attribute"
+    ],
+    "policies": [
+      "resource_compare",
+      "stat_compare"
+    ]
   },
   {
     "key": "position",

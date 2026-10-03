@@ -396,5 +396,22 @@
       "rejection_consumes_nothing"
     ],
     "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report"
+  },
+  "attributes": {
+    "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
+    "contracts": [
+      "AttributeSpec",
+      "Policy"
+    ],
+    "modules": [
+      "kernel/ts/src/policy.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_loader.json"
+    ],
+    "invariants": [
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare"
   }
 }

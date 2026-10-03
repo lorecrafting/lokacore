@@ -1,10 +1,10 @@
 # Mechanics: the rules of each installed capability
 
 Every rule is a pure function `decide(world, command, mint, steps)` returning a
-DecisionResult (`kernel/ts/src/decision.ts:192`). Admission, budgets and composition are in
+DecisionResult (`kernel/ts/src/decision.ts:193`). Admission, budgets and composition are in
 [protocol.md](protocol.md). Refusal codes are gameplay rejections (`protocol/error_registry.json`).
 Which capability owns which command, event and policy op: `CAPABILITY_OWNERS`
-(`kernel/ts/src/contracts.gen.ts:361`), summarised in the [feature map](../features.gen.md).
+(`kernel/ts/src/contracts.gen.ts:363`), summarised in the [feature map](../features.gen.md).
 
 ## A fresh world
 
@@ -15,7 +15,7 @@ The body starts in `entry`, each NPC in its room, each item at its location; the
 `calendar.start` or 0 (`:39`); each scheduled NPC's first job is due at its schedule's first
 hour strictly after the start; facts hold their defaults; a world starting after time 0 stores
 the body's resources at their start values. One body per world; rules read the actor from the
-command and its body from `bodyOf` (`decision.ts:159`).
+command and its body from `bodyOf` (`decision.ts:160`).
 
 ## movement@1 (`kernel/ts/src/rules/movement.ts`)
 
@@ -63,12 +63,13 @@ chosen the same way. Details are named through their aliases ([target resolution
 
 ## target_resolution@1, policy@1, fact@1
 
-Ruleless. `target_present` is true when the action's target is in reach (`policy.ts:44`,
-`target.ts:58`). `policy@1` is `all`, `any`, `not` (`policy.ts:15`). A fact is read and set at
+Ruleless. `target_present` is true when the action's target is in reach (`policy.ts:46`,
+`target.ts:58`). `policy@1` is `all`, `any`, `not` (`policy.ts:17`). A fact is read and set at
 its one declared scope: the actor's for `player`, the world's for `instance`
 (`fact.ts:21`); unset means its default; `fact_compare` compares equality. The host appends a
 `fact_changed {fact, old, new}` for each `fact.assign` that changes its value, at the assign's
 causal position (`fact.ts:108`); an unchanged assign emits nothing. Invariant `facts_typed`.
+The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1)'s.
 
 ## resource@1 (`kernel/ts/src/resource.ts`)
 
@@ -80,6 +81,22 @@ and is dropped when it changes nothing (`adjust`, `:39`; `rules/action_recipe.ts
 events. The engine pools are hp, ma, mv ([cartridge.md](cartridge.md#compiler)); the GameView
 shows each with a condition band and its tone from the pool's own `bands`, else the
 cartridge's `world.bands`, else the engine default table ([protocol.md](protocol.md#gameview)).
+
+## attributes@1 (`kernel/ts/src/policy.ts:59`)
+
+Ruleless, and no state. An attribute is a definition `AttributeSpec {key, start}` in the
+cartridge's `attributes` map (source `attributes.json`, [cartridge.md](cartridge.md#source-layout));
+the engine declares none, so the six 00 §4.3 stats are content. Every actor's value of an
+attribute is its `start`: nothing writes attributes yet, so no row, delta op or state hash
+carries them. The first writer (training, chapter three, or an ancestry modifier, LATER)
+decides whether a value belongs to the body or the character and how it is saved.
+`attributes@1` owns two 06 §21 leaves, each `{<ref>, at_least}` (a ResourceInt; "below" is
+`not`, a range `all`): `stat_compare {attribute, at_least}` holds when the actor's value is at
+least `at_least`; `resource_compare {resource, at_least}` when the current value of the pool
+on the actor's body, as [resource@1](#resource1) derives it and before the action's costs, is.
+Both fail closed: an actor without a body reads no pool, and the compiler and loader reject an
+unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILITY`). Not
+`resource@1`'s: a new op would take `resource@2`, re-deriving every v2 lock and hash.
 
 ## check@1 (`rules/action_recipe.ts:109`)
 
@@ -176,7 +193,7 @@ runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pend
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
 scheduled at the schedule's next listed hour, strictly later (`behavior.ts:24`). One unit of
 logical time is one second, an hour 3600, a day 86400, time 0 midnight (`behavior.ts:18`;
-`policy.ts:39`). `calendar@1` is the cartridge's start time only. Policy leaf `time_window
+`policy.ts:41`). `calendar@1` is the cartridge's start time only. Policy leaf `time_window
 {from, to}` in hours, wrapping past midnight. Invariant `job_complete_owned_by_run`.
 
 ## Engine-wide behaviours
@@ -184,5 +201,5 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`behavio
 - **Ids are deterministic**: every entity, event, instance, continuation and job id comes
   from the IdSource under its command, so a replay mints the same ids.
 - **Composes-with**: a choice composes quest and containment, a recipe composes check, a job
-  composes movement (`decision.ts:179`); facts, containment, barriers, resources and the clock
+  composes movement (`decision.ts:180`); facts, containment, barriers, resources and the clock
   are the shared vocabulary every mechanic reads through the same policy leaves.

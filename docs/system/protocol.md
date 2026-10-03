@@ -24,7 +24,7 @@ pass `numeric-vectors.json` and `adverse-cases.json` (`test/loka/core/portable_a
 Implementations: canonical JSON and its hash (`kernel/ts/src/canonical.ts`,
 `lib/loka/core/canonical.ex`), checked integers (`int.ts`, `int.ex`), RNG (`rng.ts`, `rng.ex`),
 IdSource, CommandId and the job CommandId (`id_source.ts`, `id_source.ex`); a decision mints its
-ordinals from one allocator (`kernel/ts/src/decision.ts:218`).
+ordinals from one allocator (`kernel/ts/src/decision.ts:219`).
 
 ## The decision loop
 
@@ -45,15 +45,15 @@ storage half):
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
-5. **Step** (`kernel/ts/src/world.ts:74`): the capability owning the command type
+5. **Step** (`kernel/ts/src/world.ts:75`): the capability owning the command type
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
-   `unsupported_capability`. Admission (`:101`): the nil CommandId is `permission_denied`
-   (`:110`), another world or actor `not_found`, and the ActionSet must offer an action that
+   `unsupported_capability`. Admission (`:102`): the nil CommandId is `permission_denied`
+   (`:111`), another world or actor `not_found`, and the ActionSet must offer an action that
    resolves to this Command and accepts its target and input (`actions.ts:178`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
-   event the capability (or one it composes, `decision.ts:179`) does not own
-   (`proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`world.ts:96`).
+   event the capability (or one it composes, `decision.ts:180`) does not own
+   (`proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`world.ts:97`).
 6. **Propose** (`proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
@@ -70,7 +70,7 @@ storage half):
 A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (always empty
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
 `fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
-`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:359`). A rejection or fault changes nothing: not the state, RNG,
+`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:361`). A rejection or fault changes nothing: not the state, RNG,
 clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:246`).
 
 ## Composition
@@ -107,24 +107,24 @@ never writes one keeps its state hash.
 ## Budgets
 
 The eleven composition-profile limits and their values are `LIMITS`
-(`kernel/ts/src/contracts.gen.ts:360`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
+(`kernel/ts/src/contracts.gen.ts:362`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
 that order names the fault (`compose.ts:130`, `:141`), returned beside the decision and
 observed as `evaluation.budget_exceeded`, never in the result (`proposal.ts:26`). Every policy
-leaf evaluated adds one query step (`policy.ts:29`).
+leaf evaluated adds one query step (`policy.ts:31`).
 
 ## Invariants
 
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
 Pure checks by id: `kernel/ts/src/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
-(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:134`).
+(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:135`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
 ([architecture.md](architecture.md#hosts)).
 
 ## Events
 
-A `DomainEvent` (`kernel/ts/src/decision.ts:227`) has an IdSource id, the world, player scope,
+A `DomainEvent` (`kernel/ts/src/decision.ts:228`) has an IdSource id, the world, player scope,
 the actor, the world's logical time, a one-based causal `position`, and the command as
 `causation_id` and `correlation_id`. A job's `entity_entered_room` is at instance scope and the
 job's due time, caused by the `run_job` (`behavior.ts:58`); the proposal renumbers positions and
@@ -146,12 +146,13 @@ the GameView lists them only on the exits they act on, never with the place's ac
 
 ## Policy
 
-`holds` (`kernel/ts/src/policy.ts:15`) evaluates `all`, `any`, `not` and the leaves
+`holds` (`kernel/ts/src/policy.ts:17`) evaluates `all`, `any`, `not` and the leaves
 `fact_compare` (the fact's value at the actor's scope equals), `has_item` (inside the actor's
 body, directly or nested), `barrier_state`, `quest_state` (false while the actor has no
-instance), `time_window` (hour of day from `clock / 3600 % 24`, wrapping windows allowed, `:39`)
-and `target_present` (the action's target is in reach, `:44`). An op outside this list throws:
-the loader closes the set (`cartridge.ts:156`).
+instance), `time_window` (hour of day from `clock / 3600 % 24`, wrapping windows allowed, `:41`),
+`target_present` (the action's target is in reach, `:46`), and `stat_compare` and
+`resource_compare` (`:59`, [attributes@1](mechanics.md#attributes1)). An op outside this list throws:
+the loader closes the set (`cartridge.ts:157`).
 
 ## Target resolution
 

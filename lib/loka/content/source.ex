@@ -13,6 +13,7 @@ defmodule Loka.Content.Source do
           | :facts
           | :text
           | :resources
+          | :attributes
           | {:policy
              | :action
              | :room
@@ -89,6 +90,7 @@ defmodule Loka.Content.Source do
   defp classify("facts.json"), do: :facts
   defp classify("text.json"), do: :text
   defp classify("resources.json"), do: :resources
+  defp classify("attributes.json"), do: :attributes
 
   @dirs %{
     "policies" => :policy,
