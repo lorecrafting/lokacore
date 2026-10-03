@@ -3,7 +3,7 @@
 // adverse-cases.json `lantern`) played through openStory on node:sqlite in the rollback journal,
 // one connection per simulated process, a kill a real child, on P3's compiled known answer
 // (protocol/fixtures/cartridge_lantern_hash.json). Kernel values are projected onto the traces'
-// vocabulary by the mapping in docs/ROADMAP.md (R6P row); the fixtures are the expected values,
+// vocabulary by the mapping in docs/system/save.md (Receipts); the fixtures are the expected values,
 // compared as canonical bytes. The platform is a fake (the network is external).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -16,6 +16,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { encode, hash, type Json } from '../../../kernel/ts/src/canonical.ts';
 import type {
+  ContinuationId,
   DecisionResult,
   DefinitionRef,
   NarrationRecord,
@@ -53,7 +54,11 @@ const NAMES: Record<string, string> = {
   [LANTERN]: 'lantern',
   ...Object.fromEntries(Object.entries(fresh.roomIds!).map(([r, id]) => [id, r.split('/')[1]!])),
 };
-const CHOICE = 'proof-choice:talk';
+/** Trace names of the minted continuations, by the dialogue they belong to. */
+const CHOICES: Record<string, string> = {
+  bram: 'proof-choice:talk',
+  bram_offer: 'offer-choice:offer',
+};
 const ADA = '00000000-0000-4000-8000-0000000000ad'; // the account a run is bound to
 const CODES: Record<string, string> = {
   carry: 'resolved_carry',
@@ -75,8 +80,8 @@ type Step = {
 type Case = { id: string; prefix: { trace: string; from: number; to: number }; steps: Step[] };
 type Tap = (statement: string, run: () => unknown) => unknown;
 type Proc = ReturnType<typeof processOn>;
-/** One save played by a test: its process and the minted continuation it has seen. */
-type Run = { path: string; p: Proc; continuation?: string; last?: object };
+/** One save played by a test: its process and its last invocation. */
+type Run = { path: string; p: Proc; last?: object };
 
 /** A connection adapted to expo-sqlite's sync names, as local_story.test.ts. */
 const adapt = (sql: DatabaseSync, tap: Tap = (_, run) => run()) => ({
@@ -135,11 +140,18 @@ const revision = (p: Proc) => Number(p.story.token().split(':')[2]);
 function invocation(run: Run, r: Request) {
   const h = createHash('sha256').update(r.id).digest('hex');
   const id = `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
+  const w = run.p.story.world();
   const input = { ...r.input };
-  if (input.continuation_id === CHOICE) input.continuation_id = run.continuation!;
+  const minted = Object.keys(w.state.choices ?? {}).find(
+    (c) => named(w, c) === input.continuation_id,
+  );
+  if (minted) input.continuation_id = minted;
+  // A talk is the talk Bram's GameView offers now (the offer's before the quest, then the quest's).
+  const talk = gameView(w)
+    .entities.find((e) => e.id === BRAM)
+    ?.actions.find((a) => a.label === 'action.talk' && a.available)?.action_key;
   const [action_key, target_ids] = {
-    activate: ['lantern', []],
-    talk: ['bram', [BRAM]],
+    talk: [talk, [BRAM]],
     take: ['take', [LANTERN]],
     drop: ['drop', [LANTERN]],
   }[r.action] ?? [r.action, []];
@@ -168,15 +180,18 @@ function said(p: Proc, r: Reply) {
   return at(d.kind, CODES[code] ?? code, r.revision, r.replay ? 'replay' : 'new');
 }
 
-const named = (run: Run, id: string | undefined) =>
-  id === undefined ? null : id === run.continuation ? CHOICE : (NAMES[id] ?? id);
+/** The trace name of an id of `w`'s: a continuation by its dialogue, else NAMES. */
+const named = (w: World, id: string | undefined) => {
+  const row = id === undefined ? undefined : w.state.choices?.[id as ContinuationId];
+  return id === undefined ? null : row ? CHOICES[row.source.key]! : (NAMES[id] ?? id);
+};
 /** The narration entries of a receipt's lines, the choice's continuation projected. */
-const entries = (run: Run, continuation: string, lines: NarrationRecord['lines']) =>
+const entries = (w: World, continuation: string, lines: NarrationRecord['lines']) =>
   lines.map((l) => ({
-    id: `${named(run, continuation)}:outcome`,
+    id: `${named(w, continuation)}:outcome`,
     text_key: l.key,
     bindings: Object.fromEntries(
-      Object.entries(l.participants ?? {}).map(([k, v]) => [k, named(run, v)]),
+      Object.entries(l.participants ?? {}).map(([k, v]) => [k, named(w, v)]),
     ),
   }));
 
@@ -184,9 +199,9 @@ const entries = (run: Run, continuation: string, lines: NarrationRecord['lines']
  * The trace state of world `w` at `rev`, with the narration of `sql`'s committed receipts and the
  * story point of its report rows up to `rev` (memory has adopted nothing later).
  */
-function project(run: Run, w: World, rev: number, sql: DatabaseSync) {
+function project(w: World, rev: number, sql: DatabaseSync) {
   const v = gameView(w);
-  const at = (id: string) => named(run, w.state.containers[id]);
+  const at = (id: string) => named(w, w.state.containers[id]);
   type Event = { payload: { type: string; continuation_id?: string } };
   const receipts = sql
     .prepare(
@@ -204,28 +219,28 @@ function project(run: Run, w: World, rev: number, sql: DatabaseSync) {
     room: at(w.body),
     lantern: at(LANTERN),
     quest: v.journal[0]?.state ?? 'absent',
-    choice: named(run, v.choice?.continuation_id),
+    choice: named(w, v.choice?.continuation_id),
     search_plan: value(w, w.character, def('fact', 'search_plan')),
     clock: w.state.clock / 3600,
     bram_room: at(BRAM),
     rng: w.state.rng,
-    narration: receipts.flatMap((x) => entries(run, x.c, x.d.narration ?? [])),
+    narration: receipts.flatMap((x) => entries(w, x.c, x.d.narration ?? [])),
     story_point: occurrence
       ? {
           key: CODES[sp!.story_point],
-          occurrence: named(run, occurrence.continuation_id),
+          occurrence: named(w, occurrence.continuation_id),
           outcome: sp!.outcome,
         }
       : null,
   };
 }
-const memory = (run: Run) => project(run, run.p.story.world(), revision(run.p), run.p.sql);
+const memory = (run: Run) => project(run.p.story.world(), revision(run.p), run.p.sql);
 /** The save as a restart would load it, read on a second, read-only connection. */
 function durable(run: Run) {
   const ro = new DatabaseSync(run.path, { readOnly: true });
   try {
     const saved = load(adapt(ro), fresh, () => assert.fail('no save'))!;
-    return project(run, saved.world, saved.revision, ro);
+    return project(saved.world, saved.revision, ro);
   } finally {
     ro.close();
   }
@@ -275,8 +290,6 @@ function act(run: Run, step: Step) {
   } catch (e) {
     if ((e as Error).message !== INJECTED) throw e;
     return at('retryable', 'rolled_back');
-  } finally {
-    run.continuation ??= gameView(p.story.world()).choice?.continuation_id;
   }
 }
 
@@ -285,7 +298,6 @@ function act(run: Run, step: Step) {
 if (process.argv[2] === 'kill') {
   const [path, request] = process.argv.slice(3) as [string, string];
   const run: Run = { path, p: processOn(path) };
-  run.continuation = gameView(run.p.story.world()).choice?.continuation_id;
   run.p.fault = 'after_commit_before_memory';
   run.p.story.invoke(invocation(run, JSON.parse(request)));
   process.exit(1); // not killed: the parent sees no SIGKILL
@@ -310,12 +322,21 @@ function play(run: Run, steps: Step[], label: string) {
     // survives a rollback, and a retry or recovery adds none.
     const sp = (saved as { story_point: object | null }).story_point;
     same(`${what} reports`, bindings(run), sp ? [ADA] : []);
-    // 06 §43: the latest committed narration is the save's, whatever memory holds.
+    // 06 §43: the latest committed narration is the save's, whatever memory holds; none while an
+    // unknown COMMIT holds the transaction open (authority.ts narration).
     const shown = run.p.story.narration();
+    const of = (id: string) =>
+      run.p.sql
+        .prepare(
+          `SELECT command ->> '$.payload.continuation_id' AS c FROM receipt WHERE command_id = ?`,
+        )
+        .get(id)!.c as string;
     same(
       `${what} narration()`,
-      shown ? entries(run, run.continuation!, shown.lines) : [],
-      (saved as { narration: object[] }).narration.slice(-1),
+      shown ? entries(run.p.story.world(), of(shown.command_id), shown.lines) : [],
+      run.p.sql.isOpen && run.p.sql.isTransaction
+        ? []
+        : (saved as { narration: object[] }).narration.slice(-1),
     );
   }
 }
@@ -363,7 +384,7 @@ for (const { id } of traces)
     const row = run.p.sql.prepare('SELECT binding, report, disposition FROM report').all();
     const { report_id, run_id, ...report } = JSON.parse(row[0]!.report as string);
     const release = {
-      cartridge_hash: '9b0969438f5ddad877c88506ffe295c5084e3014d607ef0ba24c922ee5db2821',
+      cartridge_hash: '806508c7d82223575e74873b7e60ffd61705e675cf0989d0f864e916de6b9e84',
       cartridge_id: 'lantern_proof',
       cartridge_version: '0.0.1',
     };
@@ -373,7 +394,7 @@ for (const { id } of traces)
       [
         1,
         ADA,
-        { observed_revision: 10, outcome, release, story_point: 'proof_terminal' },
+        { observed_revision: 11, outcome, release, story_point: 'proof_terminal' },
         'accepted',
       ],
     );
@@ -383,10 +404,10 @@ for (const { id } of traces)
 // again once the new run reaches its revision, and a command made against that old view is decided.
 test("an old run's view token is stale after a new game, at the same revision", () => {
   const run = begin();
-  act(run, { request: { id: 'accept', action: 'activate' } } as Step);
+  act(run, { request: { id: 'offer', action: 'talk' } } as Step);
   const old = run.p.story.token();
   assert.deepEqual(run.p.story.newGame(), { kind: 'replaced' });
-  act(run, { request: { id: 'accept', action: 'activate' } } as Step);
+  act(run, { request: { id: 'offer', action: 'talk' } } as Step);
   assert.equal(revision(run.p), 1);
   const north = { id: 'north', action: 'move', input: { direction: 'north' } };
   const i = { ...invocation(run, north), view_freshness_token: old };
@@ -422,12 +443,12 @@ async function delivered(run: Run, reached: object | null) {
 // instead of finding its receipt. Expected: choice-unknown-commit-committed's recover and replay.
 test('a choice committed with its acknowledgement lost recovers to its receipt, reported once', async () => {
   const run = begin();
-  for (const step of trace('lantern-carry').slice(0, 9)) act(run, step);
+  for (const step of trace('lantern-carry').slice(0, 10)) act(run, step);
   const [resolve, , , , ...after] = CASES.find(
     (c) => c.id === 'choice-unknown-commit-committed',
   )!.steps;
   const lost = { ...resolve!, options: { fault: 'ack_lost' } };
-  same('lost', act(run, lost), result('retryable', 'commit_pending', 9));
+  same('lost', act(run, lost), result('retryable', 'commit_pending', 10));
   assert.deepEqual(run.p.story.invoke(run.last), { kind: 'pending' }); // fenced
   play(run, after, 'after the lost acknowledgement');
   await delivered(run, {});

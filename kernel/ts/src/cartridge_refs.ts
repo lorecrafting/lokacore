@@ -92,12 +92,11 @@ export function nodes(c: Obj): [Obj, string][] {
     ...parts(c).flatMap(([k, v, at]) =>
       k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
     ),
-    ...Object.entries((c.quests ?? {}) as Obj).flatMap(([ref, q]) => [
-      ...walk(q.offer.policy.root, `.cartridge.quests${step(ref)}.offer.policy.root`),
-      ...(q.objective.policy
-        ? walk(q.objective.policy.root, `.cartridge.quests${step(ref)}.objective.policy.root`)
-        : []),
-    ]),
+    ...Object.entries((c.quests ?? {}) as Obj).flatMap(([ref, q]) =>
+      ['offer', 'objective']
+        .filter((f) => q[f]?.policy)
+        .flatMap((f) => walk(q[f].policy.root, `.cartridge.quests${step(ref)}.${f}.policy.root`)),
+    ),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),

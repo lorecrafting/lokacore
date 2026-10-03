@@ -1,4 +1,4 @@
-// size: allow 608, dialogue@1's rule and loader checks, story points included, share the ferry harness
+// size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
 // dialogue@1 (Early R7/R8 D1, D2; 06 §17, §33, §37, §43; 04 §5.3; 23 §3): talk, choose and
 // close_choice, the pending choice in the GameView, the opened_revision stamp, the story point a
 // choice reaches, and the loader's dialogue and story point checks.
@@ -459,7 +459,7 @@ const bram = (c: any) => c.dialogues[`${F}:dialogue/bram`];
 // kernel would bind a role, speaker or quest that does not exist, hand over through a role of the
 // wrong kind, show a missing text, assign an undeclared fact or a wrong value, run a dialogue its
 // capability is not locked for, shadow the actor participant, open a choice with no option, list
-// a talk under another action's key, or give one NPC two dialogues (talk names only its target).
+// a talk under another action's key.
 test('the loader checks dialogue references, roles, texts, facts, keys and the lock', () => {
   const missing = (kind: string) => ({ target: `${F}:${kind}/missing` });
   fails(
@@ -541,11 +541,6 @@ test('the loader checks dialogue references, roles, texts, facts, keys and the l
     },
     'DUPLICATE_DEFINITION',
     `.cartridge.dialogues["${F}:dialogue/lantern"]`,
-  );
-  fails(
-    (c) => (c.dialogues[`${F}:dialogue/bram_two`] = { ...bram(c), key: 'bram_two' }),
-    'DUPLICATE_DEFINITION',
-    `${D}.npc`,
   );
   fails(
     (c) => {

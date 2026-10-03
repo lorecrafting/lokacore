@@ -4,7 +4,8 @@ defmodule Loka.Content.Quests do
   `kernel/ts/src/cartridge_quests.ts`: each quest's owning capability is required (quest@1, by
   its quest_activated, as a recipe's check by check@1's events), its key is no registered
   command's, action's or recipe's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
-  title and offer label have catalog entries (unless the catalog was rejected, `:unknown`), and a
+  title and its offer's label (the offer is optional) have catalog entries (unless the catalog was
+  rejected, `:unknown`), and a
   post_activation_event objective names an item of this cartridge. Its policy trees are checked
   with every other (`conditions/1`, `Loka.Content.Checks`).
   """
@@ -47,7 +48,9 @@ defmodule Loka.Content.Quests do
   defp texts(_, _, :unknown), do: []
 
   defp texts(rel, q, text) do
-    for {steps, key} <- [{["title"], q["title"]}, {["offer", "label"], q["offer"]["label"]}],
+    offer = for %{"label" => label} <- [q["offer"]], do: {["offer", "label"], label}
+
+    for {steps, key} <- [{["title"], q["title"]} | offer],
         not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => key})
   end

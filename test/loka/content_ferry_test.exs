@@ -211,8 +211,7 @@ defmodule Loka.ContentFerryTest do
   # Breaks: the compiler admitting what the loader rejects (kernel/ts/test/dialogue.test.ts): an
   # unresolved speaker, role, quest or policy quest; a speaker that is no npc role; a hand_over
   # through a role of the wrong kind; a missing text; an undeclared fact or a wrong value; a role
-  # named actor; no choice; a talk key another action's; dialogue@1 not required; two dialogues of
-  # one speaker.
+  # named actor; no choice; a talk key another action's; dialogue@1 not required.
   test "the compiler checks dialogue references, roles, texts, facts, keys and the lock", %{
     tmp_dir: dir
   } do
@@ -263,13 +262,46 @@ defmodule Loka.ContentFerryTest do
       assert compile(Path.join(dir, "#{n}"), Map.put(files, @point, nil)) == {:error, [diag]},
              inspect(diag)
     end
+  end
 
-    assert compile(Path.join(dir, "two"), dialogue(& &1, "dialogues/bram_two.json")) ==
-             {:error,
-              [
-                d("DUPLICATE_DEFINITION", "dialogues/bram.npc", %{}),
-                d("DUPLICATE_DEFINITION", "dialogues/bram_two.npc", %{})
-              ]}
+  # Breaks (twin of kernel/ts/test/quest_dialogue.test.ts): one dialogue per speaker still
+  # enforced; the compiler admitting an accept of no quest, an accept in a dialogue that resolves
+  # a quest, or an accept with a hand_over; a short accept left unexpanded.
+  test "a second dialogue of Bram's may accept the quest, checked", %{tmp_dir: dir} do
+    at = "dialogues/bram_offer.choices.accept"
+    choice = %{"label" => "quest.lantern.accept", "narration" => "narration.bram.carry"}
+
+    offer = fn f ->
+      %{
+        "dialogues/bram_offer.json" =>
+          f.(%{
+            "npc" => "bram",
+            "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+            "prompt" => "dialogue.bram.prompt",
+            "roles" => %{"bram" => %{"role" => "npc", "npc" => "bram"}},
+            "choices" => %{"accept" => Map.put(choice, "accept", "lantern")}
+          })
+      }
+    end
+
+    assert {:ok, _, []} = compile(Path.join(dir, "ok"), offer.(& &1))
+
+    cases = [
+      {&put_in(&1, ~w(choices accept accept), "missing"),
+       d("UNRESOLVED_REFERENCE", at <> ".accept", %{
+         "target" => "ashmere_ferry@0.0.1:quest/missing"
+       })},
+      {&Map.put(&1, "quest", "lantern"), d("OUTCOME_MISMATCH", at <> ".accept", %{})},
+      {fn o ->
+         o
+         |> put_in(~w(roles lantern), %{"role" => "item", "item" => "lantern"})
+         |> put_in(~w(choices accept hand_over), %{"item" => "lantern", "to" => "bram"})
+       end, d("OUTCOME_MISMATCH", at <> ".hand_over", %{})}
+    ]
+
+    for {{f, diag}, n} <- Enum.with_index(cases) do
+      assert compile(Path.join(dir, "#{n}"), offer.(f)) == {:error, [diag]}, inspect(diag)
+    end
   end
 
   # Breaks (23 §3: the compiler validates its trigger, outcome coverage and capability
