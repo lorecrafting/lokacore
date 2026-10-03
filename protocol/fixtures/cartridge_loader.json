@@ -2736,6 +2736,237 @@
         },
         "suggested_capabilities": []
       }
+    },
+    {
+      "name": "journal_missing_stage_text",
+      "break": "the loader skips validating a quest journal stage text catalog entry",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"calendar\":{\"start\":21600},\"dialogues\":{\"ashmere_journal@0.0.1:dialogue/bram\":{\"choices\":{\"carry\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]},\"leave\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}}},\"entry\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_journal@0.0.1:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"undecided\",\"type\":\"enum\",\"values\":[\"undecided\",\"player_led\",\"party_led\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_journal@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\"},\"ashmere_journal@0.0.1:item/oar\":{\"description\":\"item.oar.description\",\"key\":\"oar\",\"keywords\":[\"oar\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.oar.room\",\"short\":\"item.oar.short\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_journal\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Journal\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_journal@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"quests\":{\"ashmere_journal@0.0.1:quest/lantern\":{\"journal\":{\"abandoned\":\"quest.lantern.abandoned\",\"active\":\"quest.lantern.find\",\"failed\":\"quest.lantern.failed\",\"objectives_met\":\"quest.lantern.return\",\"outcomes\":{\"carry\":\"quest.lantern.carried\"},\"resolved\":\"quest.lantern.done\"},\"key\":\"lantern\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}}},\"offer\":{\"label\":\"quest.lantern.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.lantern.title\"},\"ashmere_journal@0.0.1:quest/oar\":{\"journal\":{\"abandoned\":\"quest.oar.abandoned\",\"active\":\"quest.oar.find\",\"failed\":\"quest.oar.failed\",\"objectives_met\":\"quest.oar.found\",\"resolved\":\"quest.oar.done\"},\"key\":\"oar\",\"objective\":{\"evidence\":\"post_activation_event\",\"item_acquired\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"oar\",\"kind\":\"item\"}},\"offer\":{\"label\":\"quest.oar.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.oar.title\"}},\"resources\":{\"ashmere_journal@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_journal@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_journal@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_journal@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"post\",\"mooring_post\"],\"description\":\"detail.mooring_post\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_journal@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"story_points\":{\"ashmere_journal@0.0.1:story_point/lantern_resolved\":{\"key\":\"lantern_resolved\",\"outcomes\":{\"carry\":{\"choice\":\"carry\",\"dialogue\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}},\"leave\":{\"choice\":\"leave\",\"dialogue\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}}}}},\"text\":{\"action.talk\":\"Talk\",\"actions.coil_rope\":\"Coil the mooring rope\",\"detail.mooring_post\":\"Rope has worn a groove into the post. Someone has carved a fox into it.\",\"dialogue.bram.carry\":\"Carry it along the bank\",\"dialogue.bram.leave\":\"Leave it with the search party\",\"dialogue.bram.prompt\":\"Bram looks at the lantern, then at the reeds. \\\"Are you coming with us, or do you mean to go along the bank yourself?\\\"\",\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] sits on a coil of rope.\",\"item.lantern.short\":\"a brass lantern\",\"item.oar.description\":\"A weathered wooden oar.\",\"item.oar.room\":\"A lost [oar] lies at the landing.\",\"item.oar.short\":\"the lost oar\",\"narration.bram.carry\":\"You keep the lantern. Bram nods once and points you down the bank.\",\"narration.bram.leave\":\"You hand Bram the lantern. He lifts it toward the reeds and calls the others in.\",\"narration.coil_rope.actor\":\"You coil the wet rope around the post, slowly, the way Bram does it.\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.abandoned\":\"The lantern search was abandoned.\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.carried\":\"You carry the lantern for the search party.\",\"quest.lantern.done\":\"Bram's lantern is found.\",\"quest.lantern.failed\":\"The lantern search failed.\",\"quest.lantern.find\":\"Find Bram's lantern.\",\"quest.lantern.title\":\"Bram's lantern\",\"quest.oar.abandoned\":\"The oar search was abandoned.\",\"quest.oar.accept\":\"Find the oar\",\"quest.oar.done\":\"The oar search is complete.\",\"quest.oar.failed\":\"The oar search failed.\",\"quest.oar.find\":\"Find the oar at the landing.\",\"quest.oar.found\":\"The oar was found.\",\"quest.oar.title\":\"The lost oar\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}},\"content_hash\":\"c478a16de5b6cf4384b3f2475d20dc2d65c785476a2c166a9b72f4fbb4f9795e\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ],
+          "action_recipe": [
+            1
+          ],
+          "calendar": [
+            1
+          ],
+          "resource": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNRESOLVED_REFERENCE",
+        "path": ".cartridge.quests[\"ashmere_journal@0.0.1:quest/lantern\"].journal.objectives_met",
+        "message_key": "diagnostics.unresolved_reference",
+        "data": {
+          "target": "quest.lantern.return"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "journal_missing_outcome_text",
+      "break": "the loader skips validating a quest journal outcome text catalog entry",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"calendar\":{\"start\":21600},\"dialogues\":{\"ashmere_journal@0.0.1:dialogue/bram\":{\"choices\":{\"carry\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]},\"leave\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}}},\"entry\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_journal@0.0.1:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"undecided\",\"type\":\"enum\",\"values\":[\"undecided\",\"player_led\",\"party_led\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_journal@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\"},\"ashmere_journal@0.0.1:item/oar\":{\"description\":\"item.oar.description\",\"key\":\"oar\",\"keywords\":[\"oar\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.oar.room\",\"short\":\"item.oar.short\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_journal\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Journal\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_journal@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"quests\":{\"ashmere_journal@0.0.1:quest/lantern\":{\"journal\":{\"abandoned\":\"quest.lantern.abandoned\",\"active\":\"quest.lantern.find\",\"failed\":\"quest.lantern.failed\",\"objectives_met\":\"quest.lantern.return\",\"outcomes\":{\"carry\":\"quest.lantern.carried\"},\"resolved\":\"quest.lantern.done\"},\"key\":\"lantern\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}}},\"offer\":{\"label\":\"quest.lantern.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.lantern.title\"},\"ashmere_journal@0.0.1:quest/oar\":{\"journal\":{\"abandoned\":\"quest.oar.abandoned\",\"active\":\"quest.oar.find\",\"failed\":\"quest.oar.failed\",\"objectives_met\":\"quest.oar.found\",\"resolved\":\"quest.oar.done\"},\"key\":\"oar\",\"objective\":{\"evidence\":\"post_activation_event\",\"item_acquired\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"oar\",\"kind\":\"item\"}},\"offer\":{\"label\":\"quest.oar.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.oar.title\"}},\"resources\":{\"ashmere_journal@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_journal@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_journal@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_journal@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"post\",\"mooring_post\"],\"description\":\"detail.mooring_post\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_journal@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"story_points\":{\"ashmere_journal@0.0.1:story_point/lantern_resolved\":{\"key\":\"lantern_resolved\",\"outcomes\":{\"carry\":{\"choice\":\"carry\",\"dialogue\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}},\"leave\":{\"choice\":\"leave\",\"dialogue\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}}}}},\"text\":{\"action.talk\":\"Talk\",\"actions.coil_rope\":\"Coil the mooring rope\",\"detail.mooring_post\":\"Rope has worn a groove into the post. Someone has carved a fox into it.\",\"dialogue.bram.carry\":\"Carry it along the bank\",\"dialogue.bram.leave\":\"Leave it with the search party\",\"dialogue.bram.prompt\":\"Bram looks at the lantern, then at the reeds. \\\"Are you coming with us, or do you mean to go along the bank yourself?\\\"\",\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] sits on a coil of rope.\",\"item.lantern.short\":\"a brass lantern\",\"item.oar.description\":\"A weathered wooden oar.\",\"item.oar.room\":\"A lost [oar] lies at the landing.\",\"item.oar.short\":\"the lost oar\",\"narration.bram.carry\":\"You keep the lantern. Bram nods once and points you down the bank.\",\"narration.bram.leave\":\"You hand Bram the lantern. He lifts it toward the reeds and calls the others in.\",\"narration.coil_rope.actor\":\"You coil the wet rope around the post, slowly, the way Bram does it.\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.abandoned\":\"The lantern search was abandoned.\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.done\":\"Bram's lantern is found.\",\"quest.lantern.failed\":\"The lantern search failed.\",\"quest.lantern.find\":\"Find Bram's lantern.\",\"quest.lantern.return\":\"Bring the lantern to Bram.\",\"quest.lantern.title\":\"Bram's lantern\",\"quest.oar.abandoned\":\"The oar search was abandoned.\",\"quest.oar.accept\":\"Find the oar\",\"quest.oar.done\":\"The oar search is complete.\",\"quest.oar.failed\":\"The oar search failed.\",\"quest.oar.find\":\"Find the oar at the landing.\",\"quest.oar.found\":\"The oar was found.\",\"quest.oar.title\":\"The lost oar\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}},\"content_hash\":\"7b078ee119c003425f25f3b5dac56b41a1c0d990c12c5a751415f59b6aa3d808\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ],
+          "action_recipe": [
+            1
+          ],
+          "calendar": [
+            1
+          ],
+          "resource": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNRESOLVED_REFERENCE",
+        "path": ".cartridge.quests[\"ashmere_journal@0.0.1:quest/lantern\"].journal.outcomes.carry",
+        "message_key": "diagnostics.unresolved_reference",
+        "data": {
+          "target": "quest.lantern.carried"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "journal_missing_failed",
+      "break": "the loader admits a journal without the required failed-stage text",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"calendar\":{\"start\":21600},\"dialogues\":{\"ashmere_journal@0.0.1:dialogue/bram\":{\"choices\":{\"carry\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]},\"leave\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}}},\"entry\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_journal@0.0.1:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"undecided\",\"type\":\"enum\",\"values\":[\"undecided\",\"player_led\",\"party_led\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_journal@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\"},\"ashmere_journal@0.0.1:item/oar\":{\"description\":\"item.oar.description\",\"key\":\"oar\",\"keywords\":[\"oar\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.oar.room\",\"short\":\"item.oar.short\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_journal\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Journal\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_journal@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"quests\":{\"ashmere_journal@0.0.1:quest/lantern\":{\"journal\":{\"abandoned\":\"quest.lantern.abandoned\",\"active\":\"quest.lantern.find\",\"objectives_met\":\"quest.lantern.return\",\"outcomes\":{\"carry\":\"quest.lantern.carried\"},\"resolved\":\"quest.lantern.done\"},\"key\":\"lantern\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}}},\"offer\":{\"label\":\"quest.lantern.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.lantern.title\"},\"ashmere_journal@0.0.1:quest/oar\":{\"journal\":{\"abandoned\":\"quest.oar.abandoned\",\"active\":\"quest.oar.find\",\"failed\":\"quest.oar.failed\",\"objectives_met\":\"quest.oar.found\",\"resolved\":\"quest.oar.done\"},\"key\":\"oar\",\"objective\":{\"evidence\":\"post_activation_event\",\"item_acquired\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"oar\",\"kind\":\"item\"}},\"offer\":{\"label\":\"quest.oar.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.oar.title\"}},\"resources\":{\"ashmere_journal@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_journal@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_journal@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_journal@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"post\",\"mooring_post\"],\"description\":\"detail.mooring_post\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_journal@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"story_points\":{\"ashmere_journal@0.0.1:story_point/lantern_resolved\":{\"key\":\"lantern_resolved\",\"outcomes\":{\"carry\":{\"choice\":\"carry\",\"dialogue\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}},\"leave\":{\"choice\":\"leave\",\"dialogue\":{\"cartridge_id\":\"ashmere_journal\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}}}}},\"text\":{\"action.talk\":\"Talk\",\"actions.coil_rope\":\"Coil the mooring rope\",\"detail.mooring_post\":\"Rope has worn a groove into the post. Someone has carved a fox into it.\",\"dialogue.bram.carry\":\"Carry it along the bank\",\"dialogue.bram.leave\":\"Leave it with the search party\",\"dialogue.bram.prompt\":\"Bram looks at the lantern, then at the reeds. \\\"Are you coming with us, or do you mean to go along the bank yourself?\\\"\",\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] sits on a coil of rope.\",\"item.lantern.short\":\"a brass lantern\",\"item.oar.description\":\"A weathered wooden oar.\",\"item.oar.room\":\"A lost [oar] lies at the landing.\",\"item.oar.short\":\"the lost oar\",\"narration.bram.carry\":\"You keep the lantern. Bram nods once and points you down the bank.\",\"narration.bram.leave\":\"You hand Bram the lantern. He lifts it toward the reeds and calls the others in.\",\"narration.coil_rope.actor\":\"You coil the wet rope around the post, slowly, the way Bram does it.\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.abandoned\":\"The lantern search was abandoned.\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.carried\":\"You carry the lantern for the search party.\",\"quest.lantern.done\":\"Bram's lantern is found.\",\"quest.lantern.failed\":\"The lantern search failed.\",\"quest.lantern.find\":\"Find Bram's lantern.\",\"quest.lantern.return\":\"Bring the lantern to Bram.\",\"quest.lantern.title\":\"Bram's lantern\",\"quest.oar.abandoned\":\"The oar search was abandoned.\",\"quest.oar.accept\":\"Find the oar\",\"quest.oar.done\":\"The oar search is complete.\",\"quest.oar.failed\":\"The oar search failed.\",\"quest.oar.find\":\"Find the oar at the landing.\",\"quest.oar.found\":\"The oar was found.\",\"quest.oar.title\":\"The lost oar\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\"}},\"content_hash\":\"082e99b7181c576992d6869a554bb851dc085c3ba926ce34241acaa7899efee9\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "behavior": [
+            1
+          ],
+          "check": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "description_variant": [
+            1
+          ],
+          "dialogue": [
+            1
+          ],
+          "equipment": [
+            1
+          ],
+          "fact": [
+            1
+          ],
+          "inspectable_detail": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "narration": [
+            1
+          ],
+          "policy": [
+            1
+          ],
+          "quest": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "target_resolution": [
+            1
+          ],
+          "topics": [
+            1
+          ],
+          "action_recipe": [
+            1
+          ],
+          "calendar": [
+            1
+          ],
+          "resource": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.quests[\"ashmere_journal@0.0.1:quest/lantern\"].journal.failed",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "missing_property"
+        },
+        "suggested_capabilities": []
+      }
     }
   ]
 }

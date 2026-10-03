@@ -4,9 +4,8 @@ defmodule Loka.Content.Quests do
   `kernel/ts/src/cartridge_quests.ts`: each quest's owning capability is required (quest@1, by
   its quest_activated, as a recipe's check by check@1's events), its key is no registered
   command's, action's or recipe's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
-  title and its offer's label (the offer is optional) have catalog entries (unless the catalog was
-  rejected, `:unknown`), and a
-  post_activation_event objective names an item of this cartridge. Its policy trees are checked
+  title, its offer's label (the offer is optional) and all journal texts have catalog entries
+  (unless the catalog was rejected, `:unknown`), and a post_activation_event objective names an item of this cartridge. Its policy trees are checked
   with every other (`conditions/1`, `Loka.Content.Checks`).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -50,9 +49,19 @@ defmodule Loka.Content.Quests do
   defp texts(rel, q, text) do
     offer = for %{"label" => label} <- [q["offer"]], do: {["offer", "label"], label}
 
-    for {steps, key} <- [{["title"], q["title"]} | offer],
+    for {steps, key} <- [{["title"], q["title"]} | offer] ++ journal(q["journal"]),
         not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => key})
+  end
+
+  defp journal(nil), do: []
+
+  defp journal(j) do
+    stages =
+      for k <- ~w(active objectives_met resolved failed abandoned), do: {["journal", k], j[k]}
+
+    outcomes = for {k, v} <- j["outcomes"] || %{}, do: {["journal", "outcomes", k], v}
+    stages ++ outcomes
   end
 
   defp item(rel, %{"item_acquired" => _} = o, m, defs),

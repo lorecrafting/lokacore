@@ -662,7 +662,7 @@
       ]
     },
     "QuestView": {
-      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal).",
+      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
       "type": "object",
       "properties": {
         "quest": {
@@ -672,6 +672,9 @@
           "$ref": "policy.schema.json#/$defs/QuestState"
         },
         "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "journal": {
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
@@ -691,6 +694,17 @@
           },
           "state": "active",
           "title": "quest.find_the_child.title"
+        },
+        {
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_child"
+          },
+          "state": "active",
+          "title": "quest.find_the_child.title",
+          "journal": "quest.find_the_child.active"
         }
       ]
     },

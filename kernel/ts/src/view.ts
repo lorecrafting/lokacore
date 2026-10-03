@@ -14,13 +14,14 @@ import type {
   TextKey,
 } from './contracts.gen.ts';
 import { lists } from './action_lists.ts';
-import { COMPASS, refString, type Entity, type QuestRow, type World } from './decision.ts';
+import { COMPASS, refString, type Entity, type World } from './decision.ts';
 import { barrierState, exitOf, opened } from './lookups.ts';
 import { choiceView } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
 import * as position from './position.ts';
+import { holdsNow } from './quest.ts';
 import { cmp } from './validate.ts';
 
 /**
@@ -37,7 +38,8 @@ import { cmp } from './validate.ts';
  * scope, an NPC by room_occupants, a held item by inventory; a talk only on its speaker), NPCs
  * first, then in DefinitionRefString order, an item with its lid's state and what is in reach
  * inside it (within; c1-locks); and the journal, each quest the player has an instance of with its
- * state and title (04 §15 quest journal state), in DefinitionRefString order; and the player's
+ * state, title and optional selected journal text (04 §15 quest journal state), in
+ * DefinitionRefString order; and the player's
  * pending choice, if any (dialogue.ts choiceView); and the body's resources with their bands (04 §15
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it.
@@ -161,10 +163,23 @@ function exits(world: World, door: (direction: Key) => AdvertisedAction[]): Exit
 }
 
 function journal(world: World): QuestView[] {
-  const title = (q: QuestRow) => world.cartridge.quests![refString(q.quest)].title;
   return Object.values(world.state.quests ?? {})
     .filter(({ scope: s }) => s.kind === 'player' && s.character_id === world.character)
-    .map((q) => ({ quest: q.quest, state: q.state, title: title(q) }))
+    .map((q) => {
+      const d = world.cartridge.quests![refString(q.quest)];
+      const shown = { quest: q.quest, state: q.state, title: d.title };
+      const j = d.journal;
+      if (!j) return shown;
+      const journal =
+        q.state === 'active'
+          ? holdsNow(world, world.character, q.quest, { n: 0 })
+            ? j.objectives_met
+            : j.active
+          : q.state === 'objectives_complete'
+            ? j.objectives_met
+            : ((q.outcome && j.outcomes?.[q.outcome]) ?? j[q.state]);
+      return { ...shown, journal };
+    })
     .sort((a, b) => cmp(refString(a.quest), refString(b.quest)));
 }
 
