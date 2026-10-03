@@ -96,10 +96,12 @@ defmodule Loka.ContentAttributesTest do
       &d("UNRESOLVED_REFERENCE", "#{root}.#{&1}", %{"target" => "ashmere_road@0.0.1:#{&1}/#{&2}"})
 
     cases = [
-      leaf_unlocked: {pool("mv", 2), false, nil, [undeclared.("#{root}.op")]},
-      attribute_unlocked:
-        {pool("mv", 2), false, str,
+      pool_unlocked: {pool("mv", 2), false, nil, [undeclared.("#{root}.op")]},
+      stat_unlocked:
+        {stat("str", 14), false, str,
          [undeclared.("attributes.attributes.str"), undeclared.("#{root}.op")]},
+      attribute_unlocked:
+        {%{"op" => "all", "items" => []}, false, str, [undeclared.("attributes.attributes.str")]},
       luck: {stat("luck", 1), true, str, [unresolved.("attribute", "luck")]},
       stamina: {pool("stamina", 1), true, str, [unresolved.("resource", "stamina")]},
       over:
