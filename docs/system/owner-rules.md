@@ -12,6 +12,8 @@ and not repeated here.
   ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).
 - Fixed time; no player-driven time skips. The later time model follows elapsed time, and rest or
   retrieval does not jump the clock ([record](../decisions/owner-decision-fixed-time-2026-10-03.md)).
+- Backgrounding does not pause the world; the later time model preserves elapsed combat, recovery
+  and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms

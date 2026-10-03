@@ -101,3 +101,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [LegendMUD mechanical baseline and research](owner-decision-legendmud-baseline-2026-10-03.md): future character/resource/skill/magic/combat planning, with explicit reconciliation before implementation.
 - [One shared game difficulty](owner-decision-single-difficulty-2026-10-03.md): supersedes selectable normal/hard/ironman modes and their separate death policies.
 - [Fixed time; no player-driven time skips](owner-decision-fixed-time-2026-10-03.md): rest and retrieval do not jump the clock; the later authority drives elapsed time.
+- [Backgrounding does not pause the world](owner-decision-background-time-2026-10-03.md): elapsed time applies to combat, recovery and world events; preparing players for online play.

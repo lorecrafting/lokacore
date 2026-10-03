@@ -27,28 +27,46 @@ For the offline Story app, propose these initial time values:
 
 | Setting | Logical duration | Player-facing target at 72 real seconds per game hour |
 |---|---|---|
+| Host heartbeat | 1/72 game hour | 1 second; process due work |
 | Combat round | 1/24 game hour | 3 seconds |
-| Recovery pulse | 1/12 game hour | 6 seconds |
+| Recovery interval | 1/12 game hour | 6 seconds |
+| World tick / calendar hour | 1 game hour | 72 seconds |
+| Calendar day | 24 game hours | 28.8 minutes |
 | Death penalty | 2 game hours | 144 seconds at the target rate |
 
-The current 3600-unit hour would make those durations 150, 300 and 7200 logical units. This
+The current 3600-unit hour would make the heartbeat, combat round, recovery interval and death
+penalty 50, 150, 300 and 7200 logical units respectively. This
 explicitly replaces the archived plan's literal three-*logical*-second rounds; it is not a new
 engine literal. The later time-model slice must reconcile these units before implementing combat.
 The 72-second hour is the target already carried by the
-[untimed-Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md), not current behavior.
+[untimed-Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md), not current behavior
+or verified current LegendMUD timing. One world tick means one calendar hour; a game hour contains
+24 combat rounds and 12 recovery intervals. The host heartbeat does not delay command admission:
+player commands respond immediately, while admitted combat actions use the round opportunity.
 
-The six-second pulse is a recovery tick, not a universal world update. Combat rounds, recovery
+The six-second interval is recovery cadence, not a universal world update. Combat rounds, recovery
 and scheduled NPC/world events have their own due times on one fixed-rate clock. The host drives
 that clock from elapsed time; player actions, resting and retrieval never add a jump to it.
 Use the existing due-job foundation and derived resources rather than scanning/writing every actor
 at each pulse. A future host clock driver is still needed; the current mobile proof has no live
 world heartbeat. Exact scheduler/storage vocabulary belongs to the implementation slice.
 
-Combat and recovery use the same logical clock. Pause the offline world in the background and
-while reading a full-page menu/dialogue; no combat or recovery time is credited for that pause.
-Read-only inspection consumes no action, while equipping or using an item during combat takes a
-round opportunity. Resuming does not accumulate background attacks. This pause rule is a proposal
-for offline Story mode; it does not set future online Realm timing.
+Combat and recovery use the same logical clock. Under the owner's
+[background-time decision](../decisions/owner-decision-background-time-2026-10-03.md), backgrounding
+does not pause that clock: automatic attacks, recovery, effects, penalties and scheduled events
+continue according to elapsed time. Resting in safety can recover resources; remaining in combat
+can result in damage or death. Backgrounding does not change position or choose a new action.
+
+If the OS suspends execution, resolve the elapsed interval on resume in the same due-time order,
+including intermediate state changes, before accepting a new action. Do not merely evaluate the
+final clock value, credit the same interval twice or discard elapsed attacks. Death interrupts
+that actor's combat as usual. Bounded catch-up, persistence and clock-source details belong to the
+future implementation slice; gameplay continuity does not require a background timer guarantee.
+
+Propose that menus/dialogue also leave time running, to match the online expectation; that extension
+is not approved by the owner's backgrounding instruction. Read-only inspection consumes no action,
+while equipping or using an item during combat takes a round opportunity. The fully terminated-app
+policy still needs a decision in the time-model slice.
 
 For the initial one-opponent fight, the initiator acts first in odd rounds, the defender first in
 even rounds. Recheck life/target/eligibility before each action; a dead actor never acts later in
@@ -158,8 +176,8 @@ to select the final position for all elapsed time. Reopening a save cannot credi
 
 Resting changes the recovery rate while the fixed clock continues. There is no rest-for-an-hour,
 wait-until-healed, or other instant time skip. The temporary death timer follows the same clock;
-rest does not deduct additional time from it. The pause/background policy in section1 remains a
-proposal, and any paused interval credits neither recovery nor penalty expiry.
+rest does not deduct additional time from it. Background elapsed time applies to recovery and
+penalty expiry under section1, using each interval's actual eligible state.
 
 This deliberately proposes a level-scaled percentage model in place of copying LegendHUB's
 level50 regeneration-point formulas into all levels. Keep its coefficients tunable and compare

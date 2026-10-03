@@ -18,8 +18,9 @@ LegendMUD timing and is not a running clock already installed in the mobile proo
 
 The [mechanics proposal](../design/provisional-story-mechanics.md#1-time-and-combat-pacing)
 uses one clock for combat rounds, recovery ticks, scheduled events and temporary death penalties.
-Its individual timings and its pause/background policy remain proposed. This decision does not
-approve background combat, offline catch-up or menu pausing.
+Its individual timings remain proposed. The later [background-time decision](owner-decision-background-time-2026-10-03.md)
+supersedes background pausing: background elapsed time applies to the same clock and mechanics.
+Menu/dialogue pausing remains a separate proposed policy.
 
 The engine still needs internal logical-clock progression and its due-job processing. The existing
 `time.advance` mechanism is not removed by this gameplay restriction: a later authority clock
