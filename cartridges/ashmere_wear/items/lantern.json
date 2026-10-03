@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "lantern"
+  ],
+  "short": "item.lantern.short",
+  "room_line": "item.lantern.room",
+  "description": "item.lantern.description",
+  "location": {
+    "in": "room",
+    "room": "inn_rooms"
+  },
+  "slot": "light"
+}

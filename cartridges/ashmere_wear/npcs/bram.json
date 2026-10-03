@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "bram",
+    "ferryman"
+  ],
+  "short": "npc.bram.short",
+  "room_line": "npc.bram.room",
+  "description": "npc.bram.description",
+  "room": "inn_rooms",
+  "daily_schedule": {
+    "6": "inn_rooms",
+    "19": "inn_attic"
+  }
+}

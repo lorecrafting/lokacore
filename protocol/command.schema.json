@@ -257,6 +257,48 @@
           "additionalProperties": false
         },
         {
+          "description": "Take an item into the actor's inventory.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "wear"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Take an item into the actor's inventory.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "remove"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.",
           "type": "object",
           "properties": {
@@ -437,6 +479,16 @@
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
           "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
           "recipient_id": "11111111-2222-4333-8444-555555555555"
+        },
+        {
+          "type": "wear",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+        },
+        {
+          "type": "remove",
+          "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+          "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
         },
         {
           "type": "perform",

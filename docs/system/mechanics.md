@@ -1,47 +1,47 @@
 # Mechanics: the rules of each installed capability
 
 Every rule is a pure function `decide(world, command, mint, steps)` returning a
-DecisionResult (`kernel/ts/src/decision.ts:193`). Admission, budgets and composition are in
+DecisionResult (`kernel/ts/src/decision.ts:192`). Admission, budgets and composition are in
 [protocol.md](protocol.md). Refusal codes are gameplay rejections (`protocol/error_registry.json`).
 Which capability owns which command, event and policy op: `CAPABILITY_OWNERS`
-(`kernel/ts/src/contracts.gen.ts:363`), summarised in the [feature map](../features.gen.md).
+(`kernel/ts/src/contracts.gen.ts:367`), summarised in the [feature map](../features.gen.md).
 
 ## A fresh world
 
-`newWorld(cartridge, context, seed)` (`kernel/ts/src/fresh.ts:25`) mints ids under the nil
+`newWorld(cartridge, context, seed)` (`kernel/ts/src/fresh.ts:26`) mints ids under the nil
 CommandId in a fixed order: the player's CharacterId, its body, each room (DefinitionRefString
 order), each room's details, each NPC, each item, then one job per NPC with a daily schedule,
 then one slot holder per distinct `slot` some item declares, in slot-key order (UTF-8 bytes;
 [equipment@1](#equipment1-kerneltssrcrulesequipmentts)). A holder is an entity inside the
 body with capacity 1; it is not in `entities`, so no command targets it and no view lists it.
 The body starts in `entry`, each NPC in its room, each item at its location; the clock is
-`calendar.start` or 0 (`:39`); each scheduled NPC's first job is due at its schedule's first
+`calendar.start` or 0 (`:40`); each scheduled NPC's first job is due at its schedule's first
 hour strictly after the start; facts hold their defaults; a world starting after time 0 stores
 the body's resources at their start values. One body per world; rules read the actor from the
-command and its body from `bodyOf` (`decision.ts:160`).
+command and its body from `bodyOf` (`decision.ts:159`).
 
 ## movement@1 (`kernel/ts/src/rules/movement.ts`)
 
 `move {direction}`: a direction outside the six compass directions is `invalid_target`
-(`:33`); no exit here, `not_found`; an exit through a closed or locked barrier, `exit_closed`
-or `exit_locked` (`passage`, `:61`); the move costs the body the cartridge's
+(`:31`); no exit here, `not_found`; an exit through a closed or locked barrier, `exit_closed`
+or `exit_locked` (`passage`, `:59`); the move costs the body the cartridge's
 `world.movement.cost {resource, amount}`, else (the engine default) 1 mv when the cartridge
-declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:72`).
+declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:70`).
 Per-exit and terrain costs are later (00 §11 chapter three). Accepted
 `moved`: the `resource.adjust` (none without a cost), one `entity.transfer` of the body and
 `entity_entered_room`. `scan` is accepted `scanned` with nothing to change and no event
-(`:31`). The GameView carries `sight` (`:87`) per exit: nothing through a barrier that bars the
-way (`passage`), else the destination room and the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:99`).
+(`:29`). The GameView carries `sight` (`:85`) per exit: nothing through a barrier that bars the
+way (`passage`), else the destination room and the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:97`).
 
 ## barrier@1 (`kernel/ts/src/rules/barrier.ts`)
 
 `open`, `close`, `lock`, `unlock {direction}` on the exit's barrier in the actor's room: a
 direction outside the compass `invalid_target`, no exit `not_found`, an exit without a barrier
-`invalid_target`; legal transitions only (`MOVES`, `:26`): open needs closed (a locked one is
+`invalid_target`; legal transitions only (`MOVES`, `:25`): open needs closed (a locked one is
 `exit_locked`), close needs open, lock needs closed, unlock needs locked, else
 `invalid_state`; lock and unlock need the barrier's `key_item` held by the body, directly or
-nested, else `not_owned` (`:67`). These checks are one read-only function the rule and the
-GameView's door verbs share (`transition`, `:48`). Accepted: one `barrier.transition` and `barrier_changed`.
+nested, else `not_owned` (`:66`). These checks are one read-only function the rule and the
+GameView's door verbs share (`transition`, `:47`). Accepted: one `barrier.transition` and `barrier_changed`.
 Both faces of a door name one state. Policy leaf `barrier_state`.
 
 ## containment@1 (`kernel/ts/src/rules/containment.ts`)
@@ -86,8 +86,8 @@ chosen the same way. Details are named through their aliases ([target resolution
 
 ## target_resolution@1, policy@1, fact@1
 
-Ruleless. `target_present` is true when the action's target is in reach (`policy.ts:46`,
-`target.ts:58`). `policy@1` is `all`, `any`, `not` (`policy.ts:17`). A fact is read and set at
+Ruleless. `target_present` is true when the action's target is in reach (`policy.ts:47`,
+`target.ts:59`). `policy@1` is `all`, `any`, `not` (`policy.ts:18`). A fact is read and set at
 its one declared scope: the actor's for `player`, the world's for `instance`
 (`fact.ts:21`); unset means its default; `fact_compare` compares equality. The host appends a
 `fact_changed {fact, old, new}` for each `fact.assign` that changes its value, at the assign's
@@ -105,7 +105,7 @@ events. The engine pools are hp, ma, mv ([cartridge.md](cartridge.md#compiler));
 shows each with a condition band and its tone from the pool's own `bands`, else the
 cartridge's `world.bands`, else the engine default table ([protocol.md](protocol.md#gameview)).
 
-## attributes@1 (`kernel/ts/src/policy.ts:59`)
+## attributes@1 (`kernel/ts/src/policy.ts:60`)
 
 Ruleless, and no state. An attribute is a definition `AttributeSpec {key, start}` in the
 cartridge's `attributes` map (source `attributes.json`, [cartridge.md](cartridge.md#source-layout));
@@ -134,28 +134,28 @@ nothing and passes when the body's value of `resource` at admission (before cost
 `perform {action, target_id?}`: no recipe by that key in the actor's set `not_found`; a target
 other than the recipe's detail `invalid_target`; the detail outside the room `not_present`;
 then `cooldown` (time since the actor's last admitted attempt below the recipe's cooldown) and
-`insufficient_resource` (`actions.ts:243`). Accepted, in one decision: the costs' adjusts;
+`insufficient_resource` (`actions.ts:246`). Accepted, in one decision: the costs' adjusts;
 the check and its event; the chosen outcome's `sequence` in order (`fact.assign` with the
 expected value as the steps before left it, saturating `resource.adjust`, `event.emit` as
 `custom_event`); `action_completed` unless the outcome is `failure`; a `cooldown.start` when
-the recipe has a cooldown (`:72`); a `time.advance` by `duration` after the steps (`:76`),
+the recipe has a cooldown (`:73`); a `time.advance` by `duration` after the steps (`:77`),
 which is an explicit advance that runs due jobs. A failure commits its costs, draw, cooldown
 and time exactly like success. The outcome is `success`, `failure` or `performed` (no check).
 The narration is the outcome's `narration.actor` key with its participants pinned to EntityIds
-(`:89`). Recipes are offered by the cartridge and by room contributions (ActionSet).
+(`:90`). Recipes are offered by the cartridge and by room contributions (ActionSet).
 
 ## quest@1 (`rules/quest.ts`, `kernel/ts/src/quest.ts`)
 
 A quest starts through its offer, which is optional, or through a dialogue choice's `accept`
 (dialogue@1 below; [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
-accept action), withdrawn once the actor has an instance (`actions.ts:130`), so a second accept
+accept action), withdrawn once the actor has an instance (`actions.ts:133`), so a second accept
 and an undeclared quest are refused before the rule. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never
 stored) or `post_activation_event` (met by an `item_acquired` of the named item into the
-instance's actor's body, placed after activation; `earned`, `kernel/ts/src/quest.ts:74`), which the proposal
-completes to `objectives_complete` as its own writer group. Resolution (`:110`) happens in the
+instance's actor's body, placed after activation; `earned`, `kernel/ts/src/quest.ts:75`), which the proposal
+completes to `objectives_complete` as its own writer group. Resolution (`:111`) happens in the
 rule that resolves it (a dialogue choice): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
@@ -216,7 +216,7 @@ runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pend
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
 scheduled at the schedule's next listed hour, strictly later (`behavior.ts:24`). One unit of
 logical time is one second, an hour 3600, a day 86400, time 0 midnight (`behavior.ts:18`;
-`policy.ts:41`). `calendar@1` is the cartridge's start time only. Policy leaf `time_window
+`policy.ts:42`). `calendar@1` is the cartridge's start time only. Policy leaf `time_window
 {from, to}` in hours, wrapping past midnight. Invariant `job_complete_owned_by_run`.
 
 ## Engine-wide behaviours
@@ -224,5 +224,5 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`behavio
 - **Ids are deterministic**: every entity, event, instance, continuation and job id comes
   from the IdSource under its command, so a replay mints the same ids.
 - **Composes-with**: a choice composes quest and containment, a recipe composes check, a job
-  composes movement (`decision.ts:180`); facts, containment, barriers, resources and the clock
+  composes movement (`decision.ts:179`); facts, containment, barriers, resources and the clock
   are the shared vocabulary every mechanic reads through the same policy leaves.

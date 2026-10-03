@@ -136,6 +136,7 @@ export type World = {
   readonly entities: Readonly<Record<string, Entity>>; // items and NPCs, by EntityId
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly capacities: Readonly<Record<string, number>>; // by EntityId, where declared
+  readonly slots: Readonly<Record<string, EntityId>>; // each slot holder, by SlotKey (equipment@1)
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
   readonly resourceSpecs: Readonly<Record<string, ResourceSpec>>; // by canonical DefinitionRef text
   readonly barrierInitial: Readonly<Record<string, BarrierState>>; // by canonical DefinitionRef text

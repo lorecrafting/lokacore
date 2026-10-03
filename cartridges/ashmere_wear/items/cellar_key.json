@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "key",
+    "cellar_key"
+  ],
+  "short": "item.cellar_key.short",
+  "room_line": "item.cellar_key.room",
+  "description": "item.cellar_key.description",
+  "location": {
+    "in": "room",
+    "room": "inn_rooms"
+  }
+}

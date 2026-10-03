@@ -31,7 +31,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 6;
+export const GENERATOR = 7;
 /** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
 /** invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -300,7 +300,8 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
 // A command the GameView offers, available or not: each place action (a recipe's perform, a
 // quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each door
 // verb of the set through each exit (the GameView lists only the accepted ones, on their exits),
-// each action on a listed entity, and look at each detail of the room.
+// each wear and remove of the set on each held and worn item (likewise listed only where
+// accepted), each action on a listed entity, and look at each detail of the room.
 function offered(world: World, g: Gen): Payload {
   const view = gameView(world);
   const set = resolved(world, world.character);
@@ -319,7 +320,11 @@ function offered(world: World, g: Gen): Payload {
   for (const o of Object.values(set))
     if (Object.hasOwn(MOVES, o.command))
       options.push(...exits.map((direction) => ({ type: o.command, direction })));
-  for (const e of [...view.entities, ...view.inventory])
+  const worn = (view.equipment ?? []).flatMap((slot) => (slot.item ? [slot.item] : []));
+  for (const o of Object.values(set))
+    if (o.command === 'wear' || o.command === 'remove')
+      options.push(...[...view.inventory, ...worn].map((e) => aimed(o.command, e.id, STALE)));
+  for (const e of [...view.entities, ...view.inventory, ...worn])
     for (const a of e.actions)
       options.push(aimed(set[a.action_key]!.command, e.id, g.pick([...npcs, STALE])));
   for (const [d, detail] of Object.entries(world.details))

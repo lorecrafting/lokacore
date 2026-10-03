@@ -1,5 +1,5 @@
 {
-  "description": "Invalid-artifact corpus for the cartridge loader (protocol/cartridge.schema.json DiagnosticCode: stage order, paths and data; 05 §11, §20; CAR-05, CAR-07). Each case is an artifact file as text (its UTF-8 bytes are the input), the installed kernel/app, and the one expected diagnostic, hand-written from the DiagnosticCode text; break names the bug the case catches. Artifacts derive from cartridge_hash.json value (the attribute*, stat_compare_* and resource_compare_* cases from cartridge_road_hash.json value with attributes, the attributes@1 lock or pray's policy root changed; the band_* and move_cost_* cases from cartridge_rooms_hash.json value with condition band tables, band.<key> text and a world move cost added); each canonical text and content_hash was produced by Python json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False) and hashlib.sha256 over its UTF-8 bytes, never by the kernels. Over-cap and non-UTF-8 inputs are bytes, not text, and live in the test.",
+  "description": "Invalid-artifact corpus for the cartridge loader (protocol/cartridge.schema.json DiagnosticCode: stage order, paths and data; 05 §11, §20; CAR-05, CAR-07). Each case is an artifact file as text (its UTF-8 bytes are the input), the installed kernel/app, and the one expected diagnostic, hand-written from the DiagnosticCode text; break names the bug the case catches. Artifacts derive from cartridge_hash.json value (the attribute*, stat_compare_* and resource_compare_* cases from cartridge_road_hash.json value with attributes, the attributes@1 lock or pray's policy root changed; the band_* and move_cost_* cases from cartridge_rooms_hash.json value with condition band tables, band.<key> text and a world move cost added); each canonical text and content_hash was produced by Python json.dumps(sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False) and hashlib.sha256 over its UTF-8 bytes, never by the kernels. The slot_* cases derive from cartridge_wear_hash.json value with equipment@1 left out of requires and the lock, or the lantern's slot made finger. Over-cap and non-UTF-8 inputs are bytes, not text, and live in the test.",
   "cases": [
     {
       "name": "not_decodable",
@@ -2643,6 +2643,96 @@
           "field": "key",
           "declared": "str",
           "expected": "dex"
+        },
+        "suggested_capabilities": []
+      }
+    },
+    {
+      "name": "slot_unlocked",
+      "break": "an item slot is accepted without equipment@1 in the lock",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"calendar\":{\"start\":21600},\"entry\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_wear@0.0.1:item/cellar_key\":{\"description\":\"item.cellar_key.description\",\"key\":\"cellar_key\",\"keywords\":[\"key\",\"cellar_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.cellar_key.room\",\"short\":\"item.cellar_key.short\"},\"ashmere_wear@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\",\"slot\":\"light\"},\"ashmere_wear@0.0.1:item/leather_cap\":{\"description\":\"item.leather_cap.description\",\"key\":\"leather_cap\",\"keywords\":[\"cap\",\"leather_cap\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.leather_cap.room\",\"short\":\"item.leather_cap.short\",\"slot\":\"head\"},\"ashmere_wear@0.0.1:item/straw_hat\":{\"description\":\"item.straw_hat.description\",\"key\":\"straw_hat\",\"keywords\":[\"hat\",\"straw_hat\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.straw_hat.room\",\"short\":\"item.straw_hat.short\",\"slot\":\"head\"},\"ashmere_wear@0.0.1:item/wool_cloak\":{\"description\":\"item.wool_cloak.description\",\"key\":\"wool_cloak\",\"keywords\":[\"cloak\",\"wool_cloak\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.wool_cloak.room\",\"short\":\"item.wool_cloak.short\",\"slot\":\"cloak\"}},\"lock\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_wear\",\"requires\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Wear\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_wear@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"resources\":{\"ashmere_wear@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_wear@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_wear@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_wear@0.0.1:room/inn_attic\":{\"description\":\"room.inn_attic.description\",\"exits\":{\"down\":{\"to\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_attic\",\"title\":\"room.inn_attic.title\"},\"ashmere_wear@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"up\":{\"to\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"title\":\"room.inn_rooms.title\"}},\"text\":{\"item.cellar_key.description\":\"A cellar key.\",\"item.cellar_key.room\":\"A [key] lies here.\",\"item.cellar_key.short\":\"a cellar key\",\"item.lantern.description\":\"A brass lantern.\",\"item.lantern.room\":\"A [lantern] lies here.\",\"item.lantern.short\":\"a brass lantern\",\"item.leather_cap.description\":\"A leather cap.\",\"item.leather_cap.room\":\"A [cap] lies here.\",\"item.leather_cap.short\":\"a leather cap\",\"item.straw_hat.description\":\"A straw hat.\",\"item.straw_hat.room\":\"A [hat] lies here.\",\"item.straw_hat.short\":\"a straw hat\",\"item.wool_cloak.description\":\"A wool cloak.\",\"item.wool_cloak.room\":\"A [cloak] lies here.\",\"item.wool_cloak.short\":\"a wool cloak\",\"npc.bram.description\":\"A ferryman with rope-scarred hands.\",\"npc.bram.room\":\"[Bram] the ferryman stands here.\",\"npc.bram.short\":\"Bram the ferryman\",\"room.inn_attic.description\":\"Low rafters and the smell of old straw.\",\"room.inn_attic.title\":\"The Attic\",\"room.inn_rooms.description\":\"A narrow passage of doors. A ladder climbs to the attic.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}},\"content_hash\":\"3378b687fe93257391f1bef3d513a7c50ef35b8963423a15995eb96f441def1d\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "resource": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "behavior": [
+            1
+          ],
+          "calendar": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "equipment": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "UNDECLARED_CAPABILITY",
+        "path": ".cartridge.items[\"ashmere_wear@0.0.1:item/lantern\"].slot",
+        "message_key": "diagnostics.undeclared_capability",
+        "data": {
+          "capability": "equipment"
+        },
+        "suggested_capabilities": [
+          "equipment@1"
+        ]
+      }
+    },
+    {
+      "name": "slot_finger",
+      "break": "a slot outside the twelve SlotKeys (a finger slot, LATER) is accepted",
+      "artifact": "{\"cartridge\":{\"actions\":{},\"calendar\":{\"start\":21600},\"entry\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_wear@0.0.1:item/cellar_key\":{\"description\":\"item.cellar_key.description\",\"key\":\"cellar_key\",\"keywords\":[\"key\",\"cellar_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.cellar_key.room\",\"short\":\"item.cellar_key.short\"},\"ashmere_wear@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\",\"slot\":\"finger\"},\"ashmere_wear@0.0.1:item/leather_cap\":{\"description\":\"item.leather_cap.description\",\"key\":\"leather_cap\",\"keywords\":[\"cap\",\"leather_cap\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.leather_cap.room\",\"short\":\"item.leather_cap.short\",\"slot\":\"head\"},\"ashmere_wear@0.0.1:item/straw_hat\":{\"description\":\"item.straw_hat.description\",\"key\":\"straw_hat\",\"keywords\":[\"hat\",\"straw_hat\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.straw_hat.room\",\"short\":\"item.straw_hat.short\",\"slot\":\"head\"},\"ashmere_wear@0.0.1:item/wool_cloak\":{\"description\":\"item.wool_cloak.description\",\"key\":\"wool_cloak\",\"keywords\":[\"cloak\",\"wool_cloak\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.wool_cloak.room\",\"short\":\"item.wool_cloak.short\",\"slot\":\"cloak\"}},\"lock\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"equipment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_wear\",\"requires\":{\"capabilities\":{\"behavior\":1,\"calendar\":1,\"containment\":1,\"equipment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Wear\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_wear@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"resources\":{\"ashmere_wear@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_wear@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_wear@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_wear@0.0.1:room/inn_attic\":{\"description\":\"room.inn_attic.description\",\"exits\":{\"down\":{\"to\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_attic\",\"title\":\"room.inn_attic.title\"},\"ashmere_wear@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"up\":{\"to\":{\"cartridge_id\":\"ashmere_wear\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"title\":\"room.inn_rooms.title\"}},\"text\":{\"item.cellar_key.description\":\"A cellar key.\",\"item.cellar_key.room\":\"A [key] lies here.\",\"item.cellar_key.short\":\"a cellar key\",\"item.lantern.description\":\"A brass lantern.\",\"item.lantern.room\":\"A [lantern] lies here.\",\"item.lantern.short\":\"a brass lantern\",\"item.leather_cap.description\":\"A leather cap.\",\"item.leather_cap.room\":\"A [cap] lies here.\",\"item.leather_cap.short\":\"a leather cap\",\"item.straw_hat.description\":\"A straw hat.\",\"item.straw_hat.room\":\"A [hat] lies here.\",\"item.straw_hat.short\":\"a straw hat\",\"item.wool_cloak.description\":\"A wool cloak.\",\"item.wool_cloak.room\":\"A [cloak] lies here.\",\"item.wool_cloak.short\":\"a wool cloak\",\"npc.bram.description\":\"A ferryman with rope-scarred hands.\",\"npc.bram.room\":\"[Bram] the ferryman stands here.\",\"npc.bram.short\":\"Bram the ferryman\",\"room.inn_attic.description\":\"Low rafters and the smell of old straw.\",\"room.inn_attic.title\":\"The Attic\",\"room.inn_rooms.description\":\"A narrow passage of doors. A ladder climbs to the attic.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}},\"content_hash\":\"25b4cadaf55aacc70fa4b98f31d37a66b19c01d8dc27e364b5ac90e653d9241c\"}",
+      "installed": {
+        "kernel_api": "1.0",
+        "capabilities": {
+          "resource": [
+            1
+          ],
+          "movement": [
+            1
+          ],
+          "containment": [
+            1
+          ],
+          "behavior": [
+            1
+          ],
+          "calendar": [
+            1
+          ],
+          "schedule": [
+            1
+          ],
+          "equipment": [
+            1
+          ]
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "client_features": []
+      },
+      "expected": {
+        "severity": "error",
+        "code": "SCHEMA_VIOLATION",
+        "path": ".cartridge.items[\"ashmere_wear@0.0.1:item/lantern\"].slot",
+        "message_key": "diagnostics.schema_violation",
+        "data": {
+          "error": "not_in_enum"
         },
         "suggested_capabilities": []
       }

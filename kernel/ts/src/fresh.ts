@@ -14,8 +14,9 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * A fresh world: IdSource ids under the nil CommandId (ordinal 0 the player's CharacterId, 1 its
  * body entity, then each room in DefinitionRefString order, then each room's details in the same
  * room order and detail-key order, then each NPC, then each item, both in DefinitionRefString
- * order, then one job per NPC with a non-empty daily schedule, in the same NPC order: numeric
- * profile, Initial world ids), the body in the entry room, each NPC in its room and each item at
+ * order, then one job per NPC with a non-empty daily schedule, in the same NPC order, then one
+ * slot holder per distinct item slot, in slot-key order: numeric profile, Initial world ids and
+ * Slot holder ids), each holder in the body with capacity 1 and not an entity, the body in the entry room, each NPC in its room and each item at
  * its location, the calendar's start time (0 without one), each NPC's first job pending at its
  * schedule's first listed hour strictly after that time (behavior.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
@@ -38,6 +39,10 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   containers[body] = roomIds[refString(cartridge.entry)];
   const clock = cartridge.calendar?.start ?? 0;
   const jobs = firstJobs(cartridge, clock, mint);
+  // The loader admits a slot only under equipment@1, so a world without it mints no holder.
+  const slotKeys = [...new Set(Object.values(cartridge.items ?? {}).flatMap((i) => i.slot ?? []))];
+  const slots = Object.fromEntries(slotKeys.sort(cmp).map((k) => [k, mint()]));
+  for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
   const resources = clock ? started(cartridge, body, clock) : {};
   return {
     cartridge,
@@ -50,6 +55,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entities,
     entityIds,
     capacities,
+    slots,
     factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
     resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),

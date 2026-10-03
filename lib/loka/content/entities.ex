@@ -13,15 +13,17 @@ defmodule Loka.Content.Entities do
   def all(defs), do: for(k <- ~w(npc item), {_, {rel, [], e}} <- defs[k], do: {k, rel, e})
 
   @doc """
-  An entity, each of its room-line variants and an NPC's daily schedule, as `{steps, kind}`
-  (registry definitions).
+  An entity, each of its room-line variants, an NPC's daily schedule and an item's slot, as
+  `{steps, kind}` (registry definitions).
   """
   @spec parts(map(), String.t()) :: [{list(), String.t()}]
   def parts(e, kind) do
-    schedule =
-      if is_map_key(e, "daily_schedule"), do: [{["daily_schedule"], "schedule"}], else: []
+    optional =
+      for {f, k} <- [{"daily_schedule", "schedule"}, {"slot", "slot"}],
+          is_map_key(e, f),
+          do: {[f], k}
 
-    [{[], kind} | for({steps, _} <- variants(e), do: {steps, "variant"})] ++ schedule
+    [{[], kind} | for({steps, _} <- variants(e), do: {steps, "variant"})] ++ optional
   end
 
   defp variants(e) do

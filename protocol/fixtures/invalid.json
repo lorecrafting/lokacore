@@ -14271,5 +14271,173 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "wear"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/item_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "remove"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/item_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "remove",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "slot": "head"
+    },
+    "errors": [
+      {
+        "path": "/slot",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "k",
+      "keywords": [
+        "k"
+      ],
+      "short": "s",
+      "room_line": "r",
+      "description": "d",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "r"
+        }
+      },
+      "slot": "finger"
+    },
+    "errors": [
+      {
+        "path": "/slot",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "WornSlotView",
+    "value": {
+      "item": {},
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/item/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/item/id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/item/kind",
+        "code": "missing_property"
+      },
+      {
+        "path": "/item/name",
+        "code": "missing_property"
+      },
+      {
+        "path": "/slot",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "time": 0,
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "equipment": [
+        {
+          "slot": "ring"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/equipment/0/slot",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "wear",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "item_id": "cap"
+    },
+    "errors": [
+      {
+        "path": "/item_id",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "remove",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "item_id": "cap"
+    },
+    "errors": [
+      {
+        "path": "/item_id",
+        "code": "pattern_mismatch"
+      }
+    ]
   }
 ]

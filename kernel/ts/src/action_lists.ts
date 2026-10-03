@@ -11,6 +11,7 @@ import { bodyOf, type World } from './decision.ts';
 import { MODAL, speaks, talkRefused } from './dialogue.ts';
 import { holds } from './policy.ts';
 import * as barrier from './rules/barrier.ts';
+import * as equipment from './rules/equipment.ts';
 import { cmp } from './validate.ts';
 
 /**
@@ -21,6 +22,8 @@ import { cmp } from './validate.ts';
  * dialogue, invalid_state when talkRefused. A recipe is listed with the place while its detail is
  * in the actor's room. The door verbs (barrier@1) are listed not with the place but on an exit,
  * `door(direction)`: only those step would accept there now (refusal, then barrier.transition).
+ * Likewise wear and remove (equipment@1) are listed on an item only when step would accept them
+ * (refusal, then equipment.transfer); `worn(id)` lists only those that resolve to remove.
  */
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
@@ -51,9 +54,28 @@ export function lists(world: World, actor: CharacterId) {
   return {
     place: listed((a) => a.target.kind === 'none' && !door(a)),
     of: (scope: string, id: string) =>
-      listed(({ target: t }) => t.kind === 'entity' && t.scopes.includes(scope as never), id),
+      listed(
+        (a) =>
+          a.target.kind === 'entity' &&
+          a.target.scopes.includes(scope as never) &&
+          (!EQUIP.includes(a.command) || fits(world, actor, a, id)),
+        id,
+      ),
+    worn: (id: string) => listed((a) => a.command === 'remove' && fits(world, actor, a, id), id),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, direction)),
   };
+}
+
+const EQUIP: readonly string[] = ['wear', 'remove'];
+
+// True when step would accept equipment verb `a` by `actor` on `item` now: admission (refusal),
+// then equipment@1's checks (equipment.transfer).
+function fits(world: World, actor: CharacterId, a: Offered, item: string) {
+  const payload = { type: a.command, item_id: item, actor_id: actor } as CommandPayload;
+  return (
+    !refusal(world, payload, { n: 0 }, a.key) &&
+    typeof equipment.transfer(world, actor, a.command, item as EntityId) !== 'string'
+  );
 }
 
 // True when step would accept door verb `a` by `actor` through `direction` now: admission

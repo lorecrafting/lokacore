@@ -1,0 +1,9 @@
+{
+  "title": "room.inn_rooms.title",
+  "description": "room.inn_rooms.description",
+  "exits": {
+    "up": {
+      "to": "inn_attic"
+    }
+  }
+}

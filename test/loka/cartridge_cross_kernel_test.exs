@@ -174,7 +174,8 @@ defmodule Loka.CartridgeCrossKernelTest do
             {"hello", @hello},
             {"rich", rich(tmp)},
             {"numbered", numbered(tmp)},
-            {"attributed", attributed(tmp)}
+            {"attributed", attributed(tmp)},
+            {"wear", "cartridges/ashmere_wear"}
           ] do
         out = Path.join(tmp, "#{name}.artifact.json")
         compile(src, out)

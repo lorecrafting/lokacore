@@ -62,7 +62,14 @@
     "key": "equipment",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "wear",
+      "remove"
+    ],
+    "definitions": [
+      "slot"
+    ]
   },
   {
     "key": "inspectable_detail",

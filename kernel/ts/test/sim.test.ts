@@ -8,7 +8,13 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
-import type { AdvertisedAction, Command, DecisionResult } from '../src/contracts.gen.ts';
+import type {
+  AdvertisedAction,
+  Command,
+  DecisionResult,
+  EntityView,
+  WornSlotView,
+} from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
 import { gameView, step } from '../src/world.ts';
 import { check } from '../src/invariants.ts';
@@ -56,6 +62,7 @@ const PICKED = [
   'items',
   'road',
   'rooms',
+  'wear',
 ].map((c) => `ashmere_${c}`);
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 
@@ -183,7 +190,7 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   assert.ok(f.shrunk.length <= 4 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 6, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 7, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-4] commands:\n/);
 });
@@ -278,6 +285,35 @@ test('red control: a door verb listed but refused, or accepted but unlisted, tri
     const f = caught(kernel);
     assert.equal(f.id, 'gameview_agrees_with_admission');
     assert.ok(['open', 'close', 'lock', 'unlock'].includes(types(f.shrunk).at(-1)!), f.text);
+  }
+});
+
+// Breaks: the wear/remove half of the check (protocol.md GameView as amended by c1-equipment): a
+// view listing wear where equipment@1 refuses it (an unslotted item, a taken slot), or hiding the
+// remove it accepts on a worn item, unseen.
+test('red control: wear listed but refused, or remove accepted but unlisted, trips gameview_agrees_with_admission', () => {
+  const wear = { available: true, action_key: 'wear', label: 'action.wear' } as AdvertisedAction;
+  const listed = planted({
+    gameView: (w) => {
+      const v = gameView(w);
+      const add = (e: EntityView) => ({
+        ...e,
+        actions: [...e.actions.filter((a) => a.action_key !== 'wear'), wear],
+      });
+      return { ...v, inventory: v.inventory.map(add) };
+    },
+  });
+  const hidden = planted({
+    gameView: (w) => {
+      const v = gameView(w);
+      const strip = (s: WornSlotView) => (s.item ? { ...s, item: { ...s.item, actions: [] } } : s);
+      return { ...v, ...(v.equipment && { equipment: v.equipment.map(strip) }) };
+    },
+  });
+  for (const kernel of [listed, hidden]) {
+    const f = caught(kernel);
+    assert.equal(f.id, 'gameview_agrees_with_admission');
+    assert.ok(['wear', 'remove'].includes(types(f.shrunk).at(-1)!), f.text);
   }
 });
 
