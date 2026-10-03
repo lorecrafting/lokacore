@@ -126,7 +126,7 @@ host supplies a clock, each NEW decision's `kernel.decision_latency` (`:216`).
 
 `session.ts` and `mobile/app/book/presenter.ts` are the controller under the book UI: the GameView, its text, the offered actions
 as buttons carrying the view token they were drawn from, and a log of the last 200 lines
-(`presenter.ts:148`); a press that throws is retried unchanged by the next press (`presenter.ts:155`, 03 §14). `session.ts` builds the
+(`presenter.ts:145`); a press that throws is retried unchanged by the next press (`presenter.ts:153`, 03 §14). `session.ts` builds the
 fresh world with one fixed world context and RNG seed (`:23`, `:24`; see
 [DIFFERENCES.md](DIFFERENCES.md)) and a kernel version marked `-dirty` (`:27`). Refusal and
 outcome words live in `mobile/app/book/words.ts`

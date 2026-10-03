@@ -84,7 +84,7 @@ Elixir host adapter for a `portable_capability` without a declared differential 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared
 packages never import an authority or a feature; Story and Realm code never import each other.
 The app shell imports the local authority's session controller
-(`localSession`, `mobile/app/App.tsx:29`); it implements `GameSession`
+(`localSession`, `mobile/app/App.tsx:11`); it implements `GameSession`
 ([owner rule](owner-rules.md#architecture-and-engine)).
 
 ## Hosts
@@ -94,8 +94,8 @@ The app shell imports the local authority's session controller
   re-decides the trace's Commands and requires a byte-identical transcript (`:2`, `:287`).
 - **The phone app** (`mobile/app/App.tsx`): bundles the Lantern known answer
   (`protocol/fixtures/cartridge_lantern_hash.json`), opens one expo-sqlite file per story
-  (`loka-lantern.db`, `:26`), plays through `localSession` with the device clock for latency
-  (`:39`), and draws the book UI or the save-error screen.
+  (`loka-lantern.db`, `:31`), plays through `localSession` with the device clock for latency
+  (`:44`), and draws the book UI or the save-error screen.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus 10,000 fresh sequences run in every `npm test`

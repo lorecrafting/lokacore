@@ -169,7 +169,7 @@ barrier) or `insufficient_resource` (the body cannot pay a move); `actions` of t
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
-(prompt, speaker id, closable, each option available or blocked, `dialogue.ts:79`); and
+(prompt, speaker id, closable, each option available or blocked, `dialogue.ts:80`); and
 `resources`, each with current, maximum and a condition band from one fixed table of 11 bands
 by percentage of the range, `perfect_health` at 100 down to `dying` at 0 (`view.ts:80`, `:97`).
 Actions are listed highest priority first, then by key, available or with the refusal code
