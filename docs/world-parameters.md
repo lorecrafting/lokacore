@@ -63,7 +63,7 @@ From docs/archive/spec/00-first-cartridge-design.md: terrain cost table and "ave
 - **Encoding/hash/id**: canonical.ts:10-20 (SAFE 2^53-1, MAX_DEPTH 128, surrogates), lib/loka/core/canonical.ex:10, :161; sha256.ts (all); id_source.ts:34-43 (UUIDv8); rng.ts / rng.ex (xoshiro constants); `INTENT_DIGEST_VERSION`.
 - **Schema sizes**: aliases/keywords/variants 16, recipe sequence 16, costs 8, room details 64, actions 64, narration lines 64, entity capacity max 1024, target_ids 8, ResourceInt 32-bit bounds, ARTIFACT_MAX_BYTES 4 MiB; checks.ex:24 `@enclosing 3` (nesting depth bookkeeping).
 - **Mechanism tables**: COMPASS (decision.ts:204, from room.schema), barrier `MOVES` transitions (rules/barrier.ts:24-29), check order (target, cooldown, costs, check), target `normalize` stop-words (target.ts).
-- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:214 `*1000` (µs); session.ts:27-28 KERNEL_VERSION, ID_PREFIX.
+- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:209 `*1000` (µs); session.ts:21 ID_PREFIX.
 - **UI layout/animation**: joystick.ts (ZOOM 2.6, CANCEL 6, TAP_MS 500, STAIR), MapDrawing.tsx, Footer.tsx, Turn.tsx, Book.tsx, pages.tsx sizes, paper.ts colours.
 - **Test-only**: all `*.test.ts` seeds and fixtures (faults.test.ts SEEDS, saves.test.ts SEED, etc.).
 

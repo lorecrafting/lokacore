@@ -7,10 +7,10 @@ rows plus a receipt in one transaction, then adopts the result, then replies (AD
 
 ## Opening a story
 
-`openStory(db, releases, host)` (`authority.ts:66`) takes the bundled releases newest first
+`openStory(db, releases, host)` (`authority.ts:69`) takes the bundled releases newest first
 (each a content hash and a fresh world) and the host: its `kernel_version`, a random UUID per
 call (`newId`), an optional account binding read once when a run starts, an optional clock
-for latency, and an optional random source shaped like `getRandomValues` (`:42`). It opens the
+for latency, and an optional random source shaped like `getRandomValues` (`:44`). It opens the
 save on the release its pin names, or saves a fresh world of the newest release at revision 0 as
 a new save: with a random source, under a world context and RNG seed drawn for the new lineage
 (below), else the release's own fresh world. Refusals, nothing written:
@@ -22,16 +22,16 @@ a new save: with a random source, under a world context and RNG seed drawn for t
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:129`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`session.ts:61`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:66`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`session.ts:55`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:60`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
 ## Receipts
 
-Scope `story/<lineage_id>/<character>` (`authority.ts:122`). A receipt (`store.ts:23`) stores
+Scope `story/<lineage_id>/<character>` (`save.ts:101`). A receipt (`store.ts:23`) stores
 the invocation id, the CommandId, actor, `intent_digest_version` (`loka-intent-v1`) and intent
 digest, the resolved Command (null for a rejection before one existed), the revision (unchanged
-for a rejection) and the DecisionResult. Replay (`authority.ts:167`): a known invocation id
+for a rejection) and the DecisionResult. Replay (`authority.ts:162`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
 other known id is `conflict`. A fault gets no receipt (`:187`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
@@ -94,7 +94,7 @@ trace segment header, its kernel version differing ([ADR-075](../archive/decisio
 
 ## New game
 
-`newGame` (`authority.ts:274`): after settling any fenced attempt, one transaction replaces the
+`newGame` (`authority.ts:269`): after settling any fenced attempt, one transaction replaces the
 save with a fresh world of the newest release at revision 0 under a new lineage and run (no
 parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
@@ -109,7 +109,7 @@ unknown COMMIT fences like an invocation's. The host confirms with the player fi
 ## Narration on reopen
 
 The latest committed narration is read from the receipts, never memory, so a crash before
-display shows it again; no acknowledgement is stored (`authority.ts:107`;
+display shows it again; no acknowledgement is stored (`save.ts:86`;
 `start_over.test.ts` "the latest committed narration is read again on reopen, from the
 receipts").
 
@@ -117,7 +117,7 @@ receipts").
 
 An accepted decision's `story_point_reached` events become pending `report` rows committed
 with the decision, each with a host id, the run, lineage, release and the run's binding
-(`authority.ts:236`); a replay adds none; a malformed report throws before anything is stored.
+(`authority.ts:231`); a replay adds none; a malformed report throws before anything is stored.
 `deliver(db, submit, limit)` (`progress.ts:22`) sends pending reports with a binding (a
 guest's wait), least tried first; the answer must be a StoryPointAcceptance of this report for
 this account; `accepted` or `rejected` with a matching payload digest is stored as itself, else
@@ -132,7 +132,7 @@ digest and RNG state; the commit outcome and committed events), written after th
 transaction in its own; a write failure is swallowed and caught up later from the receipts
 (`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
-newest 1000 records (`:73`): `evaluation.budget_exceeded` (`authority.ts:130`) and, when the
+newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:110`) and, when the
 host supplies a clock, each NEW decision's `kernel.decision_latency` (`:216`).
 
 ## The session controller and the phone
@@ -144,7 +144,8 @@ as buttons carrying the view token they were drawn from, and a log of the last 2
 `loka-kernel@<commit>`, the commit stamped by `mobile/app/metro.config.js` when Metro starts, with
 `-dirty` when the tree had changes ([ADR-075](../archive/decisions/adr-075-observability-proposal.md) §3, a dirty tree is never the bare commit) and always
 in a development build (its bundle can change after the stamp); with no stamp, the all-zero
-commit `-dirty`. CI checks the exported bundles of a clean tree carry the bare form
-(`.github/workflows/mobile-bundle.yml`). Refusal and
+commit `-dirty`. CI checks the exported bundles of a clean tree carry the bare commit, not `-dirty`
+(`.github/workflows/mobile-bundle.yml`). The stamp keys Metro's transform cache, so a cached
+bundle never keeps an older one. Refusal and
 outcome words live in `mobile/app/book/words.ts`
 ([owner rule](owner-rules.md#architecture-and-engine)).
