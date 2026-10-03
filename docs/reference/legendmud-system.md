@@ -275,3 +275,6 @@ Public evidence has not recovered the full resolver. Current in-game HELP or mai
 rules are still needed for hit/dodge/parry/block order and odds, weapon swings and damage, skill
 success, concentration, arbitrary-level pools, recovery cadence, encumbrance, saves/resistances,
 and death penalties. Until verified or deliberately designed for Loka, those rules stay `null`.
+
+Loka now has a [proposal for dodge/parry, attack resolution, recovery, encumbrance and death](../design/provisional-story-mechanics.md).
+It is a design proposal, not additional LegendMUD evidence or an approved implementation contract.

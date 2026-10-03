@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
+  ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms
