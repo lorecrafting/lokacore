@@ -1,15 +1,17 @@
 # Future plans
 
 Short list; each item links the plan it comes from. The open stages and their carries are the
-[ROADMAP](../ROADMAP.md#slices) rows "Docs compaction", "Presenter split", "R7/R8 for chapter
-one" and "Playtest and tune"; the gate ladder is [14](../spec/14-implementation-plan.md) and
-[R milestones](../spec/R-MILESTONES.md).
+[ROADMAP](../ROADMAP.md#slices) rows "Docs compaction", "Presenter split", "Quest from
+dialogue", "R7/R8 for chapter one" and "Playtest and tune"; the gate ladder is
+[14](../spec/14-implementation-plan.md) and [R milestones](../spec/R-MILESTONES.md).
 
 ## Next
 
 - **Presenter split**: display text out of `mobile/authority`, the `GameSession` boundary, a
   check that the renderer imports only the session and protocol types
   ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
+- **Quest from dialogue** ([ROADMAP row](../ROADMAP.md#slices)): Bram's quest starts from a dialogue
+  choice ([rule](owner-rules.md#product-and-scope)).
 - **R7/R8 for chapter one** ([ROADMAP row](../ROADMAP.md#slices)): the R5 deferrals (keys that
   break, locked containers, a resources policy leaf, one-way and bent passages, `equipment@1`,
   `attributes@1`, `position@1`, `EntityOrigin`), the 04 §5.4 generation re-read, graceful
@@ -50,7 +52,7 @@ one" and "Playtest and tune"; the gate ladder is [14](../spec/14-implementation-
 
 - [14 §R12](../spec/14-implementation-plan.md#r12--loka-app-production-story-mode): accounts and
   story progress ([23](../spec/23-accounts-progress-admission.md)), typed receipt integrity
-  (`result_digest`, [DIFFERENCES](DIFFERENCES.md) 1), save migrations, release garbage collection
+  (`result_digest`, [DIFFERENCES](DIFFERENCES.md)), save migrations, release garbage collection
   and the recovery copy ([record](../decisions/owner-decision-s3b-scope-2026-09-30.md)),
   `real_elapsed` time ([record](../decisions/owner-decision-s4-scope-2026-09-30.md)), export and
   import ([10 §§31–33](../spec/10-mobile-commerce-release.md)); commerce
