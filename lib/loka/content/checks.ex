@@ -62,7 +62,7 @@ defmodule Loka.Content.Checks do
   `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
   node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
   included), a recipe's fact.assign fact, its target's room or the resource of its cost,
-  threshold check or resource.adjust step, a narration participant's or dialogue role's npc or item, a dialogue's npc and
+  threshold check or resource.adjust step (or of cartridge.json's world.movement.cost), a narration participant's or dialogue role's npc or item, a dialogue's npc and
   quest, a dialogue choice's fact.assign fact and accept, a story point trigger's dialogue, an exit's `to` and `barrier`, a barrier's
   `key_item`, a quest objective's `item_acquired`, a reaction trigger's fact or room, an item's location (its room,
   npc or item, as `in` selects), an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge

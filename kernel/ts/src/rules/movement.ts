@@ -1,11 +1,12 @@
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
 // A direction outside the compass is invalid_target; a compass direction without an exit here
 // is not_found, and one through a closed or locked barrier (barrier@1) exit_closed or exit_locked
-// (passage). In a cartridge that declares the mv pool (resource@1; 00 §4 amendment), a move
-// costs the body 1 mv, and one it cannot pay is insufficient_resource ("You are too exhausted.").
-// Accepted: that resource.adjust (none without the pool), one entity.transfer of the actor's
-// body and entity_entered_room; no resource event. ponytail: 1 mv per room; terrain costs (the
-// average of the two rooms' terrain, 00 §4.1) replace the 1 in R8. scan (00 §4.1) is accepted
+// (passage). A move costs the body the cartridge's world.movement.cost, else 1 mv where it
+// declares the mv pool (resource@1; 00 §4 amendments 2026-09-25, 2026-10-02), and one it cannot
+// pay is insufficient_resource ("You are too exhausted."). Accepted: that resource.adjust (none
+// without a cost), one entity.transfer of the actor's body and entity_entered_room; no resource
+// event. ponytail: one cost per world; per-exit and terrain costs (the average of the two rooms'
+// terrain, 00 §4.1) join in chapter three (00 §11). scan (00 §4.1) is accepted
 // with nothing to change, no RNG and no event, like look; the host shows sight().
 import {
   accepted,
@@ -64,12 +65,16 @@ export function passage(world: World, room: RoomDefinition, direction: string) {
 }
 
 /**
- * What a move costs `body`: 1 mv where the cartridge declares the pool, else nothing; undefined
- * when the body cannot pay. Read-only, shared with the GameView's exits (view.ts).
+ * What a move costs `body`: the cartridge's world.movement.cost, else 1 mv where it declares the
+ * pool, else nothing; undefined when the body cannot pay. Read-only, shared with the GameView's
+ * exits (view.ts).
  */
 export function fare(world: World, body: EntityId) {
   const mv = resourceRef(world, 'mv');
-  return level(world, body, mv) === undefined ? { ops: [] } : pay(world, body, [MV(mv)]);
+  const cost =
+    world.cartridge.world?.movement?.cost ??
+    (level(world, body, mv) === undefined ? undefined : { resource: mv, amount: 1 });
+  return cost ? pay(world, body, [cost]) : { ops: [] };
 }
 
 /**
@@ -89,8 +94,6 @@ export function sight(world: World, body: EntityId) {
     return { direction, room: there, entities: keys(world.entities).filter(at) };
   });
 }
-
-const MV = (resource: DefinitionRef) => ({ resource, amount: 1 });
 
 /** Registered invariants of movement (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {

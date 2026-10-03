@@ -97,6 +97,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
         current: 20,
         maximum: 20,
         band: 'perfect_health',
+        tone: 'normal',
       },
       {
         resource: {
@@ -108,6 +109,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
         current: 100,
         maximum: 100,
         band: 'perfect_health',
+        tone: 'normal',
       },
       {
         resource: {
@@ -119,6 +121,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
         current: 82,
         maximum: 82,
         band: 'perfect_health',
+        tone: 'normal',
       },
     ],
     time: 0,

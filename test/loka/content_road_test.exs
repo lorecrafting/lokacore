@@ -154,4 +154,84 @@ defmodule Loka.ContentRoadTest do
                 )
               ]}
   end
+
+  # c1-numbers: cartridge.json world and a pool's bands (00 §4 and 04 §15 amendments 2026-10-02;
+  # cartridge.schema.json WorldSettings, resource.schema.json BandTable). Paths and codes are
+  # hand-written from DiagnosticCode; the loader's twins are protocol/fixtures/cartridge_loader.json
+  # band_* and move_cost_* cases.
+  @tired [
+    %{"at_percent" => 50, "key" => "fresh", "tone" => "normal"},
+    %{"at_percent" => 20, "key" => "tired", "tone" => "warning"},
+    %{"at_percent" => 0, "key" => "winded", "tone" => "danger"}
+  ]
+  @world %{
+    "movement" => %{"cost" => %{"resource" => "mv", "amount" => 2}},
+    "bands" => [
+      %{"at_percent" => 50, "key" => "fresh", "tone" => "normal"},
+      %{"at_percent" => 0, "key" => "winded", "tone" => "danger"}
+    ]
+  }
+
+  # ashmere_road with cartridge.json's `world`, mv's `bands` and the band.<key> text of @tired.
+  defp numbered(world, bands) do
+    text = Map.merge(src("text.json"), Map.new(~w(fresh tired winded), &{"band." <> &1, &1}))
+    pools = put_in(src("resources.json"), ["resources", "mv", "bands"], bands)
+
+    %{
+      "cartridge.json" => Map.put(src("cartridge.json"), "world", world),
+      "resources.json" => pools,
+      "text.json" => text
+    }
+  end
+
+  # Breaks: the world's short cost resource left short (the loader would reject the artifact), or
+  # world or a pool's bands dropped from the artifact.
+  test "world and a pool's bands compile; the short cost resource expands", %{tmp_dir: dir} do
+    a = artifact(compile(dir, numbered(@world, @tired)))
+    assert a["world"] == put_in(@world, ["movement", "cost", "resource"], ref("resource", "mv"))
+    assert a["resources"]["ashmere_road@0.0.1:resource/mv"]["bands"] == @tired
+  end
+
+  # Breaks: a table rule (sorted, last cut 0, unique key), the band text or the cost's pool
+  # unchecked, or a schema bound of the table or cost lost, each compiling what the loader rejects.
+  test "malformed band tables and move costs", %{tmp_dir: dir} do
+    row = fn at, k, tone -> %{"at_percent" => at, "key" => k, "tone" => tone} end
+    [fresh, tired, winded] = @tired
+    {pool, world} = {"resources.resources.mv.bands", "cartridge.world.bands"}
+    bands = &Map.put(@world, "bands", &1)
+    cost = &put_in(@world, ["movement", "cost", &1], &2)
+    {r, u, v} = {"RESOURCE_SPEC_INVALID", "UNRESOLVED_REFERENCE", "SCHEMA_VIOLATION"}
+
+    cases = [
+      unsorted: {@world, [tired, fresh, winded], d(r, pool)},
+      gap: {bands.([fresh, row.(10, "winded", "danger")]), @tired, d(r, world)},
+      cut: {@world, [fresh, row.(50, "tired", "warning"), winded], d(r, pool)},
+      key: {bands.([fresh, row.(0, "fresh", "danger")]), @tired, d(r, world)},
+      text:
+        {@world, [fresh, tired, row.(0, "spent", "danger")],
+         d(u, pool <> "[2].key", %{"target" => "band.spent"})},
+      pool:
+        {cost.("resource", "stamina"), @tired,
+         d(u, "cartridge.world.movement.cost.resource", %{
+           "target" => "ashmere_road@0.0.1:resource/stamina"
+         })},
+      zero:
+        {cost.("amount", 0), @tired,
+         d(v, "cartridge.world.movement.cost.amount", %{"error" => "below_minimum"})},
+      over:
+        {@world, [row.(101, "fresh", "normal"), tired, winded],
+         d(v, pool <> "[0].at_percent", %{"error" => "above_maximum"})},
+      tone:
+        {bands.([fresh, row.(0, "winded", "red")]), @tired,
+         d(v, world <> "[1].tone", %{"error" => "not_in_enum"})},
+      empty: {@world, [], d(v, pool, %{"error" => "too_few_items"})}
+    ]
+
+    for {name, {w, b, diag}} <- cases,
+        do:
+          assert(
+            compile(Path.join(dir, "#{name}"), numbered(w, b)) == {:error, [diag]},
+            "#{name}"
+          )
+  end
 end

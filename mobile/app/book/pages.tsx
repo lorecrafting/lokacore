@@ -11,9 +11,9 @@ type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 export type Thing = GameView['entities'][number];
 
-// Each condition band's colour and hp phrase (04 §15 bands). The colour tiers by the band's cut
-// as the mock does: from 80 up none, from 40 up mid, below that accent.
-export const bands: Record<Pool['band'], [colour: string, phrase: string]> = {
+// Each default condition band's colour and hp phrase (04 §15 bands). The colour tiers by the
+// band's cut as the mock does: from 80 up none, from 40 up mid, below that accent.
+const bands: Record<string, [colour: string, phrase: string]> = {
   perfect_health: [paper.fg, 'is in perfect health'],
   slightly_scratched: [paper.fg, 'is slightly scratched'],
   few_bruises: [paper.fg, 'has a few bruises'],
@@ -26,6 +26,10 @@ export const bands: Record<Pool['band'], [colour: string, phrase: string]> = {
   almost_dead: [paper.accent, 'is almost dead'],
   dying: [paper.accent, 'is DYING'],
 };
+// A band's colour and phrase. ponytail: a cartridge's own band (04 §15 as amended 2026-10-02)
+// draws neutral with its key as words until c1-touch draws its band.<key> text and tone.
+export const band = (key: string): [colour: string, phrase: string] =>
+  Object.hasOwn(bands, key) ? bands[key] : [paper.fg, key.replaceAll('_', ' ')];
 
 export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
 export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
@@ -129,9 +133,9 @@ export function CharacterPage(p: { resources?: readonly Pool[]; open: (k: More) 
   return (
     <Sheet title="Character">
       {resources.length === 0 && <Text style={note}>Nothing is known about you yet.</Text>}
-      {resources.map(({ resource: { key }, current, maximum, band }) => (
+      {resources.map(({ resource: { key }, current, maximum, band: b }) => (
         <Text key={key} style={prose}>
-          {`${key}  ${current} / ${maximum}${key === 'hp' ? `, ${bands[band][1]}` : ''}`}
+          {`${key}  ${current} / ${maximum}${key === 'hp' ? `, ${band(b)[1]}` : ''}`}
         </Text>
       ))}
       {(['journal', 'carrying', 'settings'] as const).map((k) => (

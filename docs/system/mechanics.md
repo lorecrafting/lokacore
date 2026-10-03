@@ -20,15 +20,15 @@ command and its body from `bodyOf` (`decision.ts:159`).
 ## movement@1 (`kernel/ts/src/rules/movement.ts`)
 
 `move {direction}`: a direction outside the six compass directions is `invalid_target`
-(`:32`); no exit here, `not_found`; an exit through a closed or locked barrier, `exit_closed`
-or `exit_locked` (`passage`, `:60`); the move costs the body the cartridge's
+(`:33`); no exit here, `not_found`; an exit through a closed or locked barrier, `exit_closed`
+or `exit_locked` (`passage`, `:61`); the move costs the body the cartridge's
 `world.movement.cost {resource, amount}`, else (the engine default) 1 mv when the cartridge
-declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:70`).
+declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`fare`, `:72`).
 Per-exit and terrain costs are later (00 §11 chapter three). Accepted
 `moved`: the `resource.adjust` (none without a cost), one `entity.transfer` of the body and
 `entity_entered_room`. `scan` is accepted `scanned` with nothing to change and no event
-(`:30`); the host shows `sight` (`:82`): per exit, the passage code or the destination room and
-the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:97`).
+(`:31`); the host shows `sight` (`:87`): per exit, the passage code or the destination room and
+the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:99`).
 
 ## barrier@1 (`kernel/ts/src/rules/barrier.ts`)
 

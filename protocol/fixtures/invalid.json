@@ -13110,6 +13110,10 @@
       {
         "path": "/resource",
         "code": "missing_property"
+      },
+      {
+        "path": "/tone",
+        "code": "missing_property"
       }
     ]
   },
@@ -13125,6 +13129,7 @@
       "current": 20,
       "maximum": 20,
       "band": "perfect_health",
+      "tone": "normal",
       "x": 1
     },
     "errors": [
@@ -13163,14 +13168,15 @@
           },
           "current": 20,
           "maximum": 20,
-          "band": "hale"
+          "band": "Hale",
+          "tone": "normal"
         }
       ]
     },
     "errors": [
       {
         "path": "/resources/0/band",
-        "code": "not_in_enum"
+        "code": "pattern_mismatch"
       }
     ]
   },
@@ -13199,6 +13205,701 @@
       {
         "path": "/resources",
         "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "BandTone",
+    "value": "red",
+    "errors": [
+      {
+        "path": "",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "ConditionBand",
+    "value": {},
+    "errors": [
+      {
+        "path": "/at_percent",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/tone",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ConditionBand",
+    "value": {
+      "at_percent": -1,
+      "key": "tired",
+      "tone": "warning",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_percent",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ConditionBand",
+    "value": {
+      "at_percent": 101,
+      "key": "Tired",
+      "tone": "amber"
+    },
+    "errors": [
+      {
+        "path": "/at_percent",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/key",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/tone",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "BandTable",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "BandTable",
+    "value": [
+      {
+        "at_percent": 100,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 99,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 98,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 97,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 96,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 95,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 94,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 93,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 92,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 91,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 90,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 89,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 88,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 87,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 86,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 85,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 84,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 83,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 82,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 81,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 80,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 79,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 78,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 77,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 76,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 75,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 74,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 73,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 72,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 71,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 70,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 69,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 68,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 67,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 66,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 65,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 64,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 63,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 62,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 61,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 60,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 59,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 58,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 57,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 56,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 55,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 54,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 53,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 52,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 51,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 50,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 49,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 48,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 47,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 46,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 45,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 44,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 43,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 42,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 41,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 40,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 39,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 38,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 37,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 36,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 35,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 34,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 33,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 32,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 31,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 30,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 29,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 28,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 27,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 26,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 25,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 24,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 23,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 22,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 21,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 20,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 19,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 18,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 17,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 16,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 15,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 14,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 13,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 12,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 11,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 10,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 9,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 8,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 7,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 6,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 5,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 4,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 3,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 2,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 1,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 0,
+        "key": "b",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 0,
+        "key": "b",
+        "tone": "normal"
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceSpec",
+    "value": {
+      "key": "mv",
+      "minimum": 0,
+      "maximum": 3,
+      "start": 3,
+      "gain": 1,
+      "bands": []
+    },
+    "errors": [
+      {
+        "path": "/bands",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "movement": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/cost",
+        "code": "missing_property"
+      },
+      {
+        "path": "/movement/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "movement": {
+        "cost": {
+          "resource": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "amount": 0
+        }
+      },
+      "bands": []
+    },
+    "errors": [
+      {
+        "path": "/bands",
+        "code": "too_few_items"
+      },
+      {
+        "path": "/movement/cost/amount",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ResourceView",
+    "value": {
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "current": 20,
+      "maximum": 20,
+      "band": "winded",
+      "tone": "red"
+    },
+    "errors": [
+      {
+        "path": "/tone",
+        "code": "not_in_enum"
       }
     ]
   }

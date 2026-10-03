@@ -17,7 +17,7 @@ import {
   RoomPage,
   SettingsPage,
   ThingPage,
-  bands,
+  band,
   type More,
 } from './pages.tsx';
 import { Turn } from './Turn.tsx';
@@ -157,7 +157,7 @@ function Status(p: {
 // The resources as the status line shows them (coloured by band); its label is model.ts `said`.
 const shown = (rs: readonly Pool[]) =>
   rs.map((r, i) => (
-    <Text key={r.resource.key} style={{ color: bands[r.band][0] }}>
+    <Text key={r.resource.key} style={{ color: band(r.band)[0] }}>
       {`${i ? '  ' : ''}${r.resource.key} ${r.current}/${r.maximum}`}
     </Text>
   ));

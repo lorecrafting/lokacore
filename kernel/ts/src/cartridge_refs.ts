@@ -146,8 +146,9 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 // touch link names what it may (cartridge_links.ts), every detail's first alias is its own and
 // typable, items and NPCs start where containment allows, recipes and rooms' action
 // contributions name what exists (recipes), quests, reactions and dialogues are coherent
-// (cartridge_quests.ts, cartridge_reactions.ts, cartridge_dialogues.ts), and each resource's
-// bounds hold its start (RESOURCE_SPEC_INVALID).
+// (cartridge_quests.ts, cartridge_reactions.ts, cartridge_dialogues.ts), each resource's
+// bounds hold its start (RESOURCE_SPEC_INVALID), each band table is well formed (bands) and the
+// world's move cost names a resource of this cartridge.
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -181,9 +182,39 @@ export function refStage(c: Obj): Diagnostic[] {
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
-  for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj))
+  out.push(...pools(c, named));
+  return out;
+}
+
+// Each resource's bounds hold its start (RESOURCE_SPEC_INVALID), each band table (a pool's,
+// the world's) is well formed (bands), and the world's move cost names a resource of this
+// cartridge.
+function pools(c: Obj, named: ReturnType<typeof checkers>['named']): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj)) {
+    const at = `.cartridge.resources${step(ref)}`;
     if (!(s.minimum <= s.start && s.start <= s.maximum))
-      out.push(diag('RESOURCE_SPEC_INVALID', `.cartridge.resources${step(ref)}`));
+      out.push(diag('RESOURCE_SPEC_INVALID', at));
+    if (s.bands) out.push(...bands(c, s.bands, `${at}.bands`));
+  }
+  if (c.world?.bands) out.push(...bands(c, c.world.bands, '.cartridge.world.bands'));
+  const cost = c.world?.movement?.cost;
+  if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');
+  return out;
+}
+
+// A condition band table (resource.schema.json BandTable) at `at`: cuts strictly descending to a
+// last 0 and keys unique (RESOURCE_SPEC_INVALID at the table), each key's band.<key> text in the
+// catalog (UNRESOLVED_REFERENCE at the key).
+function bands(c: Obj, table: Obj[], at: string): Diagnostic[] {
+  const sorted = table.every((b, i) => i === 0 || b.at_percent < table[i - 1].at_percent);
+  const unique = new Set(table.map((b) => b.key)).size === table.length;
+  const out =
+    sorted && unique && table.at(-1)!.at_percent === 0 ? [] : [diag('RESOURCE_SPEC_INVALID', at)];
+  table.forEach(({ key }, i) => {
+    if (!Object.hasOwn(c.text, `band.${key}`))
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}[${i}].key`, { target: `band.${key}` }));
+  });
   return out;
 }
 

@@ -27,8 +27,8 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `{"cartridge": …, "content_hash": sha256(canonical cartridge)}` (`:53`), at most 4 MiB
 (`ARTIFACT_TOO_LARGE`, `:67`). Every v2 cartridge gets the pools hp, ma, mv and
 `resource@1` and `schedule@1` in its lock, with or without `resources.json`
-(`lib/loka/content/resources.ex:53`); the engine defaults are hp 0..20 start 20 gain 5, ma
-0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:13`), and
+(`lib/loka/content/resources.ex:99`); the engine defaults are hp 0..20 start 20 gain 5, ma
+0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:14`), and
 `minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
 and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the
 compiler writes `world` and `bands` only where the source authors them.
@@ -76,7 +76,7 @@ cartridge and its hash, or the first diagnostic of the first failing stage (`:62
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:108`), the
 lock (`:156`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
-references (`kernel/ts/src/cartridge_refs.ts:151` and the `cartridge_*.ts` twins of the
+references (`kernel/ts/src/cartridge_refs.ts:152` and the `cartridge_*.ts` twins of the
 compiler's checks), and the installed kernel (`cartridge.ts:224`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).

@@ -308,3 +308,113 @@ test('the band is the first row of 04 §15 whose cut p reaches', () => {
     assert.equal(gameView(w).resources![1].band, band, `${minimum}..${maximum} at ${start}`);
   }
 });
+
+// c1-numbers: cartridge.json world and a pool's bands (00 §4 and 04 §15 amendments 2026-10-02).
+const HP = 'ashmere_road@0.0.1:resource/hp';
+const MV = 'ashmere_road@0.0.1:resource/mv';
+const band = (at_percent: number, key: string, tone: string) => ({ at_percent, key, tone });
+const TIRED = [
+  band(50, 'fresh', 'normal'),
+  band(20, 'tired', 'warning'),
+  band(0, 'winded', 'danger'),
+];
+// The authored band keys' text (band.<key>), which the loader requires.
+const said = (c: any, ...keys: string[]) => keys.forEach((k) => (c.text[`band.${k}`] = k));
+const costs = (key: string, amount: number) => (c: any) =>
+  (c.world = { movement: { cost: { resource: ref(key), amount } } });
+const paid = (w: World, c: Command) =>
+  ops(w, c).filter((o: { op: string }) => o.op === 'resource.adjust');
+
+// Breaks: fare ignoring world.movement.cost (always 1 mv), or a move admitted that would take
+// mv below its minimum, or the GameView's exits out of step with that refusal.
+test('a cartridge move cost of 2 mv charges 2 and refuses the next move at 1 mv', () => {
+  const w = world(costs('mv', 2));
+  assert.deepEqual(paid(w, move('east')), [adjust('mv', 3, 1)]);
+  const spent = run(w, move('east'));
+  rejects(spent, move('west'), 'insufficient_resource');
+  assert.deepEqual(gameView(spent).exits, [
+    { available: false, direction: 'west', reason: { code: 'insufficient_resource' } },
+  ]);
+});
+
+// Breaks: the cost's pool ignored, so mv pays instead of ma (W2).
+test('a move cost on another pool pays that pool and leaves mv', () => {
+  const w = world(costs('ma', 3));
+  assert.deepEqual(paid(w, move('east')), [adjust('ma', 100, 97)]);
+  const view = gameView(run(w, move('east'))).resources!;
+  assert.deepEqual(
+    view.map((r) => [r.resource.key, r.current]),
+    [
+      ['hp', 10],
+      ['ma', 97],
+      ['mv', 3],
+    ],
+  );
+});
+
+// Breaks: the pool's own table ignored, `>=` read as `>` at a cut (5 and 2 sit on the cuts of
+// 0..10), or a tone not the row's. Each row: [current, band, tone], hand-checked.
+test("a pool's own band table gives the first band whose cut p reaches, with its tone", () => {
+  const rows = [
+    [10, 'fresh', 'normal'],
+    [5, 'fresh', 'normal'],
+    [4, 'tired', 'warning'],
+    [2, 'tired', 'warning'],
+    [1, 'winded', 'danger'],
+    [0, 'winded', 'danger'],
+  ] as const;
+  for (const [start, key, tone] of rows) {
+    const w = world((c) => {
+      Object.assign(c.resources[MV], { minimum: 0, maximum: 10, start, bands: TIRED });
+      said(c, 'fresh', 'tired', 'winded');
+    });
+    const mv = gameView(w).resources![2];
+    assert.deepEqual([mv.band, mv.tone], [key, tone], `at ${start}`);
+  }
+});
+
+// Breaks: a default band's tone off its tier (normal from 80, warning from 40, danger below), or
+// a cut misplaced on hp 0..20 or -100..100. Each row: [minimum, maximum, current, band, tone].
+test('the engine default table gives each band its tone', () => {
+  const rows = [
+    [0, 20, 20, 'perfect_health', 'normal'],
+    [0, 20, 18, 'slightly_scratched', 'normal'],
+    [0, 20, 17, 'few_bruises', 'normal'],
+    [0, 20, 14, 'some_cuts', 'warning'],
+    [0, 20, 8, 'bleeding_freely', 'warning'],
+    [0, 20, 7, 'covered_in_blood', 'danger'],
+    [0, 20, 2, 'almost_dead', 'danger'],
+    [0, 20, 1, 'dying', 'danger'],
+    [0, 20, 0, 'dying', 'danger'],
+    [-100, 100, -1, 'bleeding_freely', 'warning'],
+  ] as const;
+  for (const [minimum, maximum, start, key, tone] of rows) {
+    const w = world((c) => Object.assign(c.resources[HP], { minimum, maximum, start }));
+    const hp = gameView(w).resources![0];
+    assert.deepEqual([hp.band, hp.tone], [key, tone], `${minimum}..${maximum} at ${start}`);
+  }
+});
+
+// Breaks: world.bands ignored, or preferred over a pool's own table, or maximum = minimum not
+// the top row of the table in effect. Road: hp 10/25 (p 40), ma 100/100, mv 3/3.
+test("a pool's bands beat world.bands, which beat the engine default", () => {
+  const view = (shared: boolean) =>
+    gameView(
+      world((c) => {
+        c.resources[HP].bands = [band(0, 'mine', 'warning')];
+        if (shared) c.world = { bands: [band(50, 'fresh', 'normal'), band(0, 'winded', 'danger')] };
+        Object.assign(c.resources[MV], { minimum: 0, maximum: 0, start: 0 });
+        said(c, 'mine', 'fresh', 'winded');
+      }),
+    ).resources!.map((r) => [r.resource.key, r.band, r.tone]);
+  assert.deepEqual(view(true), [
+    ['hp', 'mine', 'warning'],
+    ['ma', 'fresh', 'normal'],
+    ['mv', 'fresh', 'normal'],
+  ]);
+  assert.deepEqual(view(false), [
+    ['hp', 'mine', 'warning'],
+    ['ma', 'perfect_health', 'normal'],
+    ['mv', 'perfect_health', 'normal'],
+  ]);
+});
