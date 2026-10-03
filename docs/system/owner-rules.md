@@ -8,6 +8,12 @@ and not repeated here.
 
 ## Product and scope
 
+- One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
+  ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).
+- Fixed time; no player-driven time skips. The later time model follows elapsed time, and rest or
+  retrieval does not jump the clock ([record](../decisions/owner-decision-fixed-time-2026-10-03.md)).
+- Backgrounding does not pause the world; the later time model preserves elapsed combat, recovery
+  and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms
@@ -41,6 +47,9 @@ and not repeated here.
 
 ## Architecture and engine
 
+- LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
+  rule before each implementation slice. The current chapter-one gate scope stays unchanged
+  ([record and planning carry](../decisions/owner-decision-legendmud-baseline-2026-10-03.md)).
 - The engine owns mechanics; cartridges own numbers and world settings; no game-world value is a
   literal in the engine or a presenter. The inventory of values still to move:
   [world-parameters.md](../world-parameters.md)
@@ -48,7 +57,8 @@ and not repeated here.
 - Engine output is structured; each presenter owns its layout and wording; one `GameSession`
   boundary serves the TypeScript authority now and the Elixir Realm later; refusal words key on
   registered error codes ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
-- Default pools hp, ma, mv (DikuMUD-derived starts and gains), 1 mv per room by default (a
+- Installed default pools hp, ma, mv (historical DikuMUD-derived starts and gains; future
+  derivation follows the LegendMUD reconciliation above), 1 mv per room by default (a
   cartridge's `world.movement.cost` overrides it; terrain costs later), regeneration per game
   hour derived from the clock; every v2 cartridge gets the pools
   ([record](../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)).

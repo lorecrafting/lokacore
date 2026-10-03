@@ -26,6 +26,11 @@ The verification harness (registered invariants, the deterministic simulator, fa
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
+Planning carry: before the first character/resource/skill/magic/combat/death implementation that
+uses the new [LegendMUD baseline](decisions/owner-decision-legendmud-baseline-2026-10-03.md), resolve
+the record's reconciliation table for that area. The [research reference](reference/legendmud-system.md)
+records sources and unknowns; Gate C1's scope and slice count stay as approved.
+
 ## C1 slices
 
 Owner-approved, in this order, one at a time; each slice's scope and acceptance are in [the record](decisions/owner-decision-chapter-one-plan-2026-10-02.md).
