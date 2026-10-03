@@ -43,4 +43,4 @@ Relayed by the PM after PR #117, **(paraphrased)**:
   with no exemption.
 - **Stays in place:** `protocol/`, `docs/spec/conformance/`, `release-scope.*` and `IMPORT.md`.
 
-Effect: PR #117 (`docs/system/`) and the move PR.
+Effect: PR #117 (`docs/system/`) and #119 (the move).
