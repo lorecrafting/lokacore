@@ -58,6 +58,15 @@ test('values outside the canonical profile are rejected at decode, before valida
     assert.throws(() => decode(text), { code: 'invalid_json' }, text);
 });
 
+// validate() takes decoded values, so recursion is bounded by the canonical depth cap: a
+// Policy nested 128 deep decodes and validates; 129 is rejected by the decoder.
+test('a recursive Policy at the depth cap', () => {
+  const nots = (n: number) =>
+    '{"op":"not","item":'.repeat(n) + '{"op":"target_present"}' + '}'.repeat(n);
+  assert.deepEqual(validate('Policy', decode(nots(127))), []);
+  assert.throws(() => decode(nots(128)), { code: 'invalid_json' });
+});
+
 // 64 narration lines (an admission limit, decision.schema.json) is the maximum; 65 is not.
 test('narration at 64 and 65 lines', () => {
   const lines = (n: number) => Array.from({ length: n }, () => ({ key: 'n' }));
