@@ -121,3 +121,48 @@ the owner decision and the brief:
   with the corrected selector, together with the device rerun.
 - Device rows (iPhone 11, new hash `806508c7`): pending, PM appends.
 - Codex Sol review: PM appends.
+
+## Fix round 1 (`785818b..10e59e2`, reviewed at `10e59e2`)
+
+**Verdict: APPROVE.** `bin/check_all.sh` green at `10e59e2`. Scope: the fix commits, the code
+each touched, and its direct callers (`choiceView` from the GameView, `quest()` from `choose`).
+
+| Item | Disposition | Check |
+|---|---|---|
+| F-1 (and Sol F2) | `choiceView` (`kernel/ts/src/dialogue.ts:96`) marks an accept unavailable with `acceptRefused`'s code, after `blocked` (`e83059e`) | Same order as `choose` (`blocked` first, then `quest()`). The stale-accept test now asserts the view. Reverting the view line: both accept tests red. |
+| Sol F1 | `choose` refuses through `quest.ts` `acceptRefused`: an instance, or the quest's offer policy (if declared) failing, target none, as `accept_quest` admission (`e83059e`) | Reverting the instance check fails the stale test; reverting the offer-policy check fails the new offer-policy test; reverting the `choose` call (view kept) fails both. Lantern has no offer, so no policy leaf is added to its decisions (no frozen-trace or query_steps change). `quest.ts` does not import `dialogue.ts`: no cycle. |
+| F-2 | `docs/lessons/mobile.md:56-61`: Bram's page, Talk, then the offer, then Map, Go north (`b3a612e`) | Every selector matched on the Simulator walk below. |
+| N-1 | twin path fixed | read |
+| (a) | carried to the R7/R8 row (`10e59e2`) | read |
+
+Spec: `docs/system/mechanics.md` dialogue@1 and the `DialogueChoice` description name the new
+offer-policy refusal and the GameView rule. The other `mechanics.md` edits are line-cite updates.
+
+**Node anchor claim: confirmed.** At `10e59e2` I copied the M1 harness
+(`docs/evidence/2026-10-02-m1-quest-dialogue-iphone11/dev-harness.ts.txt`) and the linked node
+runner into `mobile/app/p6/`. `node p6/node-run.ts 18` printed `N=18 data.ts bytes=1999793
+self-check failures=0`. `data.ts` sha256 is `2a7619ff937568fb…` and `node-expected.json` sha256 is
+`ad63f530fcddd509…`. Both equal the evidence anchor, and `gzip -dc node-expected.json.gz` hashes
+to the same `ad63f530…`. The device evidence at `ea3cd6b` holds for `10e59e2`. Copies deleted.
+
+**Simulator walk (brief Acceptance 4): passed.** Release build of `10e59e2` (`expo run:ios
+--configuration Release`), on a fresh private simulator (iPhone 11 Pro, iOS 27.0), driven by
+agent-device. Screenshots in [2026-10-02-m1-walk/](2026-10-02-m1-walk/):
+
+1. `01`: the Ferry Landing has no offer place action (only Bram, Scan, Map).
+2. `02`: Bram's page shows one "Talk to Bram the ferryman".
+3. `03`: Talk opens the `bram_offer` prompt with "Offer to fetch Bram's lantern" and Close.
+4. `04`: after the offer, the narration is "You say you'll fetch it…" and the journal shows
+   "Bram's lantern: active".
+5. `05`: the walk went north, east, east to the Lantern Shelter, and took the lantern.
+6. `06`: back at the landing (west, west, south), Bram's page again shows one Talk.
+7. `07`: Talk opens the `bram` choice (carry, leave, Close).
+8. `08`: I chose "Leave it with the search party": party-led landing text, "The story ends here".
+9. `09`: the journal shows "Bram's lantern: resolved". Bram's page then says "Nothing to do here."
+   (no dialogue holds).
+
+Note: I first walked on the shared booted simulator (`polish-414`). Partway through, another
+process installed a different Loka build on it: the bundle had no `bram_offer` text, and the app
+showed the old offer place action. I discarded that run and redid the whole walk on a private
+simulator, deleted afterwards. On `polish-414`, I uninstalled the app once before that other
+install, so any save that was on it is gone.
