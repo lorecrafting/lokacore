@@ -5,23 +5,26 @@ message: 'The local authority returns results, never display text; the app''s pr
 files: [mobile/authority/**]
 ignores: ['**/*.test.ts']
 # A string with two words, or ending in a full stop, is display text unless it is an Error message, a
-# module specifier or SQL (a db method's statement, or a constant that starts with a SQL verb).
+# module specifier or SQL: a constant that starts with an SQL keyword, or the first argument of a call on
+# `db` that starts with one. A bind argument, or the same call on any other receiver, is not exempt.
 rule:
   kind: string_fragment
   regex: '[A-Za-z]+ [A-Za-z]+|[A-Za-z]\.$|[A-Za-z] $|^ [A-Za-z]'
   not:
     any:
       - inside: { matches: module-specifier }
-      - regex: '^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|PRAGMA)\b' # a SQL constant
       - inside:
           stopBy: end
           kind: new_expression
           has: { field: constructor, regex: 'Error$' }
-      # the SQL statement: the first argument of a db method, not its bind values
-      - inside:
+      - regex: '^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|PRAGMA|BEGIN|COMMIT|ROLLBACK|DROP|ALTER|REPLACE|WITH)\b'
+        not: { inside: { stopBy: end, kind: arguments } } # a SQL constant
+      - inside: # a SQL literal: the first argument of a call on db
+          any: [{ kind: string }, { kind: template_string }]
+          regex: '^.\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|PRAGMA|BEGIN|COMMIT|ROLLBACK|DROP|ALTER|REPLACE|WITH)\b'
           nthChild: 1
           inside:
             kind: arguments
             inside:
               kind: call_expression
-              has: { field: function, regex: '\.(exec|run|getFirst|getAll)Sync$' }
+              has: { field: function, regex: '^(\w+\.)?db\.(exec|run|getFirst|getAll)Sync$' }

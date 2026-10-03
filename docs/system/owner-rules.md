@@ -99,6 +99,7 @@ and not repeated here.
 
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
+- Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
 - A fresh agent of any vendor that authored none of the work is an independent reviewer
   ([record](../decisions/owner-decision-reviewers-2026-09-24.md)).
 - Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green

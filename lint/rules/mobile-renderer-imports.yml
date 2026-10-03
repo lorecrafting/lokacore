@@ -1,28 +1,31 @@
 id: mobile-renderer-imports
 language: tsx
 severity: error
-message: 'The renderer imports only react, react-native (never Alert), its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
+message: 'The renderer imports only react, named React Native building blocks from the list, its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
 files: [mobile/app/book/**, mobile/app/SaveError.tsx]
 ignores: ['**/*.test.ts']
-# ponytail: only mobile/app's two shell files (App, index) are named; a new shell file needs adding here.
+# Allowlists, not blocklists: every other form or name is flagged. ponytail: a new renderer file, or a new
+# React Native building block, needs adding here (one name in each regex).
 rule:
   kind: string_fragment
   inside: { matches: module-specifier }
   any:
     - not:
-        regex: '^(react|react-native|\./([\w-][\w.-]*/)*[\w-][\w.-]*|(\.\./)+packages/game-view/[\w-][\w.-]*)$'
-    - regex: '^\./(App|index)(\.\w+)?$'
-    # react-native only as a plain named import without Alert: a namespace or default import, a
-    # re-export, require() or import() would reach Alert unseen.
+        regex: '^(react|react-native|\./(book/)?(fonts/[\w.-]+|Book|Footer|MapDrawing|Turn|SaveError|joystick|model|pages|paper|presenter|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
+    # react-native: only `import { A, B } from`, every name plain and on the list. A namespace, default,
+    # `{ default as X }`, aliased or string-named import, a re-export, require() or import() is flagged.
     - regex: '^react-native$'
       not:
         inside:
           stopBy: end
           kind: import_statement
-          not:
-            has:
-              stopBy: end
-              any:
-                - kind: namespace_import
-                - { kind: import_specifier, regex: '^Alert\b' }
-                - { kind: identifier, inside: { kind: import_clause } }
+          all:
+            - has: { stopBy: end, kind: named_imports }
+            - not:
+                has:
+                  stopBy: end
+                  any:
+                    - kind: namespace_import
+                    - { kind: identifier, inside: { kind: import_clause } }
+                    - kind: import_specifier
+                      not: { regex: '^(AccessibilityInfo|Animated|Button|Easing|PanResponder|Pressable|SafeAreaView|ScrollView|Text|View)$' }

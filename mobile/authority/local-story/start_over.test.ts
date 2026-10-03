@@ -276,7 +276,10 @@ test('a malformed receipt response: Start over keeps the pending report', () => 
   a.sql().exec("UPDATE receipt SET response = '{' WHERE revision = 4");
   a.sql().close();
   const b = app(path);
-  assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
+  assert.deepEqual(
+    [b.c.failed()?.kind, b.c.failed()?.replace, b.c.failed()?.startOver],
+    ['save_corrupt', false, true],
+  );
   b.c.startOver();
   assert.equal(b.c.failed(), undefined);
   assert.equal(all(b.sql(), REPORTS), reports);
