@@ -125,3 +125,24 @@ Codex Sol review: appended by the PM.
 APPROVE
 
 no findings
+
+## Fix round 1 re-check (35ddebd)
+
+Scope: `ea3e903..35ddebd`, docs and comments only (`mechanics.md`, `barrier.ts` header, ROADMAP
+C1 row). No mutants (no logic changed).
+
+- **F-1: resolved.** `docs/system/mechanics.md:48-49`, `kernel/ts/src/rules/barrier.ts:11-13` and
+  the new ROADMAP LATER clause no longer claim "never a lockout"; they name the runtime lockout,
+  true to the repro, and the ROADMAP trigger (a carried lockable container holding its own key,
+  or `put`) fits it. Nit N-1: `mechanics.md:49` "until `put` or a lockout rule exists" reads as if
+  `put` cures it; `put` adds paths to it (the ROADMAP has it right, as a trigger), and the lockout
+  arises when the locked chest leaves the player's hands (dropped), not at `lock`.
+- **F-2 (should-fix, new, caused by the fix).** The fix adds one line to the `barrier.ts` header,
+  so every pointer below line 13 is now one short. Scenario: a reader following
+  `mechanics.md:43` (`MOVES`, `:38`) lands on the comment above `MOVES` (now `:39`); `:83`
+  (`not_owned`) on the `has_item` check (now `:84`); `:63` (`transition`) on its doc comment
+  (now `:64`). Likewise `docs/world-parameters.md` W4 `barrier.ts:40` (now `:41`), W22
+  `barrier.ts:80-83` (now `:81-84`) and "Mechanism tables" `barrier.ts:38-43` (now `:39-44`).
+  Fix: bump each by one (or re-wrap the header to its old line count).
+
+Verdict for the round: F-1 resolved; F-2 open (docs-only, CHANGES REQUIRED until fixed).
