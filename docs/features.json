@@ -275,6 +275,7 @@
     "contracts": [
       "QuestDefinition",
       "QuestObjective",
+      "QuestJournal",
       "QuestState",
       "QuestView",
       "CommandPayload",
@@ -292,13 +293,14 @@
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_errand_hash.json",
+      "protocol/fixtures/cartridge_journal_hash.json",
       "protocol/fixtures/composition.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal"
+    "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal; C1 c1-journal (#PR) selected lifecycle and outcome journal text"
   },
   "behavior": {
     "spec": "06 §13 Behavior/schedule profiles; 21 §10",
