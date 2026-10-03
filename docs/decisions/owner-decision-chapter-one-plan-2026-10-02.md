@@ -320,16 +320,17 @@ before the gate counts the audit.
 12 slices + gate (host, numbers, attributes, doors, equipment, locks, position, journal,
 chapters, scenes-modal, sampler, touch; Gate C1); ten Opus developers, two Sonnet.
 
-## 6. Open for the PM (settle in the slice brief)
+## 6. PM rulings (settled 2026-10-02)
 
-- Sight lines (c1-doors): in every GameView snapshot or only in the reply to a `look`. On the phone
-  they are the same (Look shows the GameView); the plan assumes every snapshot.
-- Chapter markers (c1-chapters): "reached" is derived from the quest resolved with the story
-  point's outcome, which holds while story points fire only from quest-resolving dialogue choices
-  (cartridge.md); a later trigger kind needs a persisted record.
-- Modal scenes (c1-scenes-modal): installed under the `scene@1` name with the subset declared, or
-  a narrower capability name; 06 and 21 §28 name only the whole of scene@1. The trigger is a story
-  point outcome only (QUESTSCENE-01).
+- Sight lines (c1-doors) are in the GameView room, in every view, not only in the reply to a
+  `look`: the touch UI has no Look button; one place, and the presenter decides what to draw.
+- Chapter markers (c1-chapters): a chapter is reached when its story point is reached. Limit:
+  this holds while story points fire only from quest-resolving dialogue choices (cartridge.md),
+  so "reached" is derived from the quest resolved with that outcome. Trigger: revisit (a persisted
+  record) when another source of story points appears.
+- Modal scenes (c1-scenes-modal) are installed as `scene@1` with the subset declared (modal
+  `narrate` and `await_ack`), so no rename later; the rest of scene@1 stays a LATER carry with its
+  trigger (ROADMAP row).
 
 ## 7. Review dispositions (summary)
 
