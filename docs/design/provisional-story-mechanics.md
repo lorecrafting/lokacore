@@ -54,7 +54,8 @@ Flee uses the round's opportunity, pays twice the exit's load-adjusted MV cost, 
 traversable exit unless a status prevents escape. Resolve it in the same alternating action order: an
 opponent acting first may hit before the escape; no extra attack follows a successful departure.
 Validate the exit and available MV before paying, then use the normal movement/barrier checks.
-This is a deterministic starting rule rather than another unknown escape probability.
+This is a deterministic starting rule rather than another unknown escape probability. While engaged,
+a directional move uses the same flee rule; touch or typed movement cannot bypass its turn or cost.
 
 ## 2. Accuracy, dodge, parry and shield block
 
