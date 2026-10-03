@@ -80,10 +80,28 @@ export const branch = (t: number) => {
   return { glyph: '子丑寅卯辰巳午未申酉戌亥'[i]!, label };
 };
 
-// Whether an NPC's context menu is open: an NPC tapped and still here, else a pending choice (a
-// restored one reopens it) until its menu was dismissed. Dismissing sends nothing; only Close does.
-export const menuOpen = (v: GameView, tapped?: string, dismissed?: string) =>
-  v.entities.some((e) => e.id === tapped) || (!!v.choice && v.choice.continuation_id !== dismissed);
+// The NPC menu's state: who was tapped, or which choice's menu was dismissed, in `room`. It holds only
+// while the player stays in that room: a walk clears both, so a pending choice reopens its menu (with
+// Close) wherever the player is, and a tapped NPC does not reopen on return.
+export type MenuState = { room?: string; tapped?: string; dismissed?: string };
+export const menuTap = (v: GameView, id: string): MenuState => ({ room: v.place.id, tapped: id });
+// Dismissing sends nothing; only Close does.
+export const menuDone = (v: GameView): MenuState => ({
+  room: v.place.id,
+  dismissed: v.choice?.continuation_id,
+});
+// The hook stores this at every render, so a cleared state stays cleared on return.
+export const menuLive = (v: GameView, s: MenuState): MenuState =>
+  s.room === undefined || s.room === v.place.id ? s : {};
+// Whether the menu is open: an NPC tapped and still here, else a pending choice (a restored one
+// reopens it) until its menu was dismissed.
+export const menuOpen = (v: GameView, state: MenuState) => {
+  const s = menuLive(v, state);
+  return (
+    v.entities.some((e) => e.id === s.tapped) ||
+    (!!v.choice && v.choice.continuation_id !== s.dismissed)
+  );
+};
 
 // A first-run hint's "seen" flag in a key-value store (the shell's key-value store: its own file, not the
 // save). A store that throws falls back to this session's memory: a hint never stops the book.

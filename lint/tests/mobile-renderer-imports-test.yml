@@ -7,6 +7,7 @@ valid:
   - "import type { Game } from '../../packages/game-view/session.ts';"
   - "import type { Failed } from '../packages/game-view/session.ts';"
 invalid:
+  - "import font from './fonts/EBGaramond.ttf';"
   - "const f = require('./fonts/EBGaramond.ttf');"
   - "const f = require('x' as const);"
   - "const f = require(name);"

@@ -3,7 +3,17 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, menuOpen, why, type group } from './model.ts';
+import {
+  absent,
+  cap,
+  menuDone,
+  menuLive,
+  menuOpen,
+  menuTap,
+  why,
+  type group,
+  type MenuState,
+} from './model.ts';
 import type { Button } from './presenter.ts';
 import { paper } from './paper.ts';
 import { Act, note, prose, Tap, titleStyle, type Thing } from './pages.tsx';
@@ -40,19 +50,19 @@ function Choice(p: {
   );
 }
 
-// The menu's state: who was tapped, the choice whose menu was dismissed, and the last answer.
+// The menu's state (model.ts `MenuState`) and the last answer.
 export function useMenu(view: GameView) {
-  const [tapped, setTapped] = useState<string>();
-  const [dismissed, setDismissed] = useState<string>();
+  const [stored, setState] = useState<MenuState>({});
+  const state = menuLive(view, stored);
+  if (state !== stored) setState(state); // a walk clears the state for good
   const [said, say] = useState('');
   return {
     said,
     say,
-    open: menuOpen(view, tapped, dismissed),
-    npc: view.entities.find((e) => e.id === tapped),
-    tap: (id: string) => (setTapped(id), say('')),
-    // Hides the menu; a pending choice stays pending (only Close sends close_choice).
-    dismiss: () => (setTapped(undefined), setDismissed(view.choice?.continuation_id), say('')),
+    open: menuOpen(view, state),
+    npc: view.entities.find((e) => e.id === state.tapped),
+    tap: (id: string) => (setState(menuTap(view, id)), say('')),
+    dismiss: () => (setState(menuDone(view)), say('')),
   };
 }
 
