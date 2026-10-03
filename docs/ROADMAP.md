@@ -36,7 +36,7 @@ Owner-approved, in this order, one at a time; each slice's scope and acceptance 
 | c1-numbers | `c1-numbers` | done | [#131](https://github.com/lorecrafting/lokacore/pull/131) |
 | c1-attributes | `c1-attributes` | done | [#133](https://github.com/lorecrafting/lokacore/pull/133) |
 | c1-doors | `c1-doors` | done | [#132](https://github.com/lorecrafting/lokacore/pull/132) |
-| c1-equipment | `c1-equipment` | planned | |
+| c1-equipment | `c1-equipment` | done | [#134](https://github.com/lorecrafting/lokacore/pull/134) |
 | c1-locks | `c1-locks` | planned | |
 | c1-position | `c1-position` | planned | |
 | c1-journal | `c1-journal` | planned | |
