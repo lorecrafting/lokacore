@@ -124,6 +124,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   is green ([record](../archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
 - UI-slice reviews drive the app with agent-device on the iOS Simulator
   ([record](../archive/decisions/owner-decision-agent-device-2026-10-01.md)).
+- Per-slice device rows run on the iOS Simulator; the iPhone 11 only at gates, before a release, and
+  for native, performance or touch changes ([record](../decisions/owner-decision-simulator-device-rows-2026-10-02.md)).
 - Source of truth: `docs/system/` plus `protocol/` and the conformance fixtures; a change amends
   `docs/system` first, then the code. `docs/archive/` is history, read when a task needs it; new
   decision records go in `docs/decisions/` and add a line here
