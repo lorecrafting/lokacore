@@ -53,22 +53,22 @@ export function lists(world: World, actor: CharacterId) {
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .map((a) => advertise(a, id));
   return {
-    // A targetless wear or remove is never accepted (its Command needs item_id): not listed.
-    place: listed(
-      (a) => a.target.kind === 'none' && !door(a) && !equipment.VERBS.includes(a.command),
-    ),
+    place: listed((a) => a.target.kind === 'none' && !door(a) && !equip(a)),
     of: (scope: string, id: string) =>
       listed(
         (a) =>
           a.target.kind === 'entity' &&
           a.target.scopes.includes(scope as never) &&
-          (!equipment.VERBS.includes(a.command) || fits(world, actor, a, id)),
+          (!equip(a) || fits(world, actor, a, id)),
         id,
       ),
     worn: (id: string) => listed((a) => a.command === 'remove' && fits(world, actor, a, id), id),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, direction)),
   };
 }
+
+// Never with the place: a targetless wear or remove is never accepted (its Command needs item_id).
+const equip = (a: Offered) => equipment.VERBS.includes(a.command);
 
 // True when step would accept equipment verb `a` by `actor` on `item` now: admission (refusal),
 // then equipment@1's checks (equipment.transfer).
