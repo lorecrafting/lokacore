@@ -29,3 +29,14 @@
 ## Question
 
 - Q-1, 00:55: the fey-touched ancestry gets "one spell word", and chapter one has all four ancestries (00:639). After decision 4, does a fey-touched character in chapter one still get a word? This is not an owner decision yet. The PM can ask the owner, or say in the record that it stays open.
+
+## Fix round 1 re-check (21a0390)
+
+Commits `b3580db`, `21a0390`, one file. Verdict: **APPROVE**.
+
+- F-1 fixed, decision record line 9: it now cites 00a:508, 00a:485 and 00:714, and it requires certification of all three endings (rescued, stays, lost).
+- F-2 fixed, line 10: the citation is now §4.3 (00:329 heading, row at 00:338).
+- N-1 fixed, line 10: the ward topic is attributed to 00a:445, and the record says the owner said only "a topic".
+- N-2 fixed, lines 8-10: "the later chapter-one stages after Gate C1 (plan #127)" matches plan Q1.
+- Q-1 answered by the owner (relayed by the PM, paraphrased), line 10: fey-touched keeps +SPI and Priory -2, and its spell word waits for chapter two. The cited clauses are correct: 00:55 is the ancestry, 00:639 lists four ancestries in chapter one.
+- `check_docs` is green (pre-push).
