@@ -146,3 +146,36 @@ the brief's in-rule exception and is stricter than it.
 - `docs/system/` does not exist at this base, so the owner wish went in as an addendum. The
   owner-rules list entry is owed when the compaction PRs land.
 - Codex Sol review: appended by the PM.
+
+## Fix round 1 re-check (head `6b8a6c3`; main merged as `f5001be`)
+
+Scope: the fix commits `901315b`, `435f27b`, `6bac8f8`, `6b8a6c3` and their direct callers.
+`npm test` (mobile/app): 148 tests, 147 pass, 1 skipped. `bin/lint_red_controls.sh`: exit 0.
+
+| Item | Disposition | Check |
+|---|---|---|
+| F-1 | fixed: `fail(f, code?)` sets `code` only when it is passed (`session.ts:131`) | Reverting to `code ?? f.code` fails the new "a pending start over whose retry fails shows that error…" test (`session.test.ts`) |
+| F-2 | fixed: the regex adds `[A-Za-z] $` and `^ [A-Za-z]` | `` `Go ${d}` `` now gives 1 hit. `` `> ${l}` `` gives 0, a stated limit. |
+| N-1 | fixed: `detail()` (`words.ts`) is used by `SaveError.tsx:23` | Breaking its code test fails the presenter.test.ts case |
+| N-2 | fixed: a typed `Intent` build with three branded casts (`presenter.ts:129`) | `tsc` sees a missing field now |
+| Q-1 | accepted by the PM, `ponytail:` line at `smoke.test.ts:42` | none |
+| Sol: `[null]` narration | `checked()` throws `malformed JSON` on a line without a string key (`session.ts:66-70`) | Disabling the check fails "a receipt narration line that is null…" (`start_over.test.ts`) |
+| Sol: SQL exemption | now only the first argument of `.exec/run/getFirst/getAllSync` | Text in a bind value (`db.runSync('UPDATE…', 'You lose.')`) gives 1 hit. A `SELECT` constant gives 0. |
+| Sol: renderer imports | Default, namespace and re-export forms of `react-native` are rejected, as are `require`/`import()` and the shell files `./App`, `../App` | Each probe gives 1 hit. `import { Text }` and `import type { ViewStyle }` give 0. |
+
+`offered` drift: none. It computes the same `!!(newGame || replace)` as the old `fail`, now on
+read. `s.failed` no longer stores `startOver`, and a stale `code` cannot survive a later `fail`.
+`failed()` returns a new object on each call; its only caller, `App.tsx:70`, reads it once per
+render.
+
+- **N-3 (nit, in the touched code)** `session.ts:114`: no test asserts `failed().startOver`.
+  Both `!!f.newGame` and `!!f.replace` mutants stay green. Scenario: a damaged identity
+  (`save_corrupt` with a new game, no replace) under the `!!f.replace` mutant shows SaveError with
+  no Start over button, a trap. This was equally untested at `b66a197` and on main.
+
+Verdict: **APPROVE WITH NOTES** (N-3 open as a nit).
+
+Open for the PM:
+- The PR is again CONFLICTING. Main moved to `6c56897` (#117), and no CI has run on `6b8a6c3`.
+  Merge main and get every CI job green before merge.
+- `docs/system/owner-rules.md` now exists on main: the owner wish's entry there is owed.
