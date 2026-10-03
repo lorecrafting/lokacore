@@ -1,0 +1,38 @@
+// The GameView invariant of invariants.ts (registered in protocol/invariants.json): a STEP check
+// of the actor's view before a command against the decision on it.
+import type { AdvertisedAction, ExitView, GameView } from './contracts.gen.ts';
+
+// Observations are decoded JSON; fields are read loosely, as in invariants.ts.
+type Any = any;
+
+// The view's entry for the command (its exit for a move, else its action) and admission agree
+// (04 §15, §19): available is never refused with a code the view shows for that entry;
+// unavailable is never accepted, and a refusal with such a code is the view's code.
+export const gameview_agrees_with_admission = ({ view, command, decision }: Any): boolean => {
+  const entry = advertised(view, command.payload);
+  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  const type = command.payload.type; // own keys only: an action may be keyed `constructor`
+  const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
+  if (!entry) return true;
+  if (entry.available) return !shown.includes(code);
+  return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
+};
+
+// The codes the view can show on an entry: an exit's passage and fare; a recipe's policy and
+// admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
+// action with a policy on an engine command joins when a cartridge authors one.
+const SHOWN: Readonly<Record<string, readonly string[]>> = {
+  move: ['exit_closed', 'exit_locked', 'insufficient_resource'],
+  perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
+};
+
+function advertised(view: GameView, p: Any): ExitView | AdvertisedAction | undefined {
+  if (p.type === 'move') return view.exits.find((e) => e.direction === p.direction);
+  const id = p.type === 'perform' ? undefined : (p.item_id ?? p.target_id);
+  if (id === undefined) {
+    const key = p.type === 'perform' ? p.action : p.type;
+    return view.actions.find((a) => a.action_key === key);
+  }
+  const held = [...view.entities, ...view.inventory].find((e) => e.id === id);
+  return held?.actions.find((a) => a.action_key === p.type);
+}

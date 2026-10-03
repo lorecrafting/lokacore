@@ -9,7 +9,7 @@ import type {
   ResourceView,
   TextKey,
 } from './contracts.gen.ts';
-import { lists } from './actions.ts';
+import { lists } from './action_lists.ts';
 import { COMPASS, refString, type QuestRow, type World } from './decision.ts';
 import { choiceView } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
@@ -23,7 +23,7 @@ import { cmp } from './validate.ts';
  * movement refuses them: exit_closed or exit_locked through a closed or locked barrier,
  * movement.passage, else insufficient_resource while the body cannot pay a move, movement.fare), the place's actions,
  * the NPCs and items in the room and the items the player's body holds (03 §23), each named by
- * its short description with its actions (actions.ts lists: an item here by the room_contents
+ * its short description with its actions (action_lists.ts lists: an item here by the room_contents
  * scope, an NPC by room_occupants, a held item by inventory; a talk only on its speaker), NPCs
  * first, then in DefinitionRefString order; and the journal, each quest the player has an instance of with its
  * state and title (04 §15 quest journal state), in DefinitionRefString order; and the player's

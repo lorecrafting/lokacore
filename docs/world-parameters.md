@@ -40,7 +40,7 @@ Priority: **C1** before chapter one; **TM** with the time-model slice; **L** lat
 | W18 | NPC/item capacity default `Infinity` | kernel/ts/src/rules/containment.ts:56 | how many items an NPC accepts when undeclared | DEF (per-entity `capacity` is CT) | keep | — |
 | W19 | NPC schedule granularity = whole hour | behavior.ts:24-31; entity.schema daily_schedule keys 0-23 | when NPCs move | HC | keys in calendar time (`"06:30"` or units) once W5/W6 land | TM |
 | W20 | `time_window` granularity = whole hour | policy.ts:41-42; policy.schema time_window 0-23 | dusk/dawn style conditions | HC | windows in calendar units, or named periods `calendar.periods.{dusk:[18,6]}` | TM |
-| W21 | engine verb, talk and quest-offer priority `0` | kernel/ts/src/actions.ts:109, :135; dialogue.ts:135, :156 | presentation order of engine verbs | HC | `world.verbs.<verb>.priority` (same block as W4) | L |
+| W21 | engine verb, talk and quest-offer priority `0` | kernel/ts/src/actions.ts:107, :133; dialogue.ts:135, :156 | presentation order of engine verbs | HC | `world.verbs.<verb>.priority` (same block as W4) | L |
 | W22 | lock/unlock need `key_item` | kernel/ts/src/rules/barrier.ts:44-47 | key rule | CT (key_item per barrier); the rule itself is mechanism | none | — |
 
 Counts: 22 rows. HC 12 (W3-W6, W8, W11, W14, W16, W17, W19-W21; W14 acceptable as mechanism, so 11 to move), DEF 6 (W1, W2, W9, W10, W13, W18), CT 3 (W7, W15, W22), missing 1 (W12). Priority: C1 3 (W1, W2, W13; all DONE in #131), TM 9 (W3-W6, W8, W12, W16, W19, W20), L 5 (W7, W11, W14, W17, W21).

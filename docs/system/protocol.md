@@ -49,7 +49,7 @@ storage half):
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
    `unsupported_capability`. Admission (`:101`): the nil CommandId is `permission_denied`
    (`:110`), another world or actor `not_found`, and the ActionSet must offer an action that
-   resolves to this Command and accepts its target and input (`actions.ts:180`:
+   resolves to this Command and accepts its target and input (`actions.ts:178`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `decision.ts:179`) does not own
@@ -71,7 +71,7 @@ A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (a
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
 `fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
 `protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:347`). A rejection or fault changes nothing: not the state, RNG,
-clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:252`).
+clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:246`).
 
 ## Composition
 
@@ -116,7 +116,7 @@ leaf evaluated adds one query step (`policy.ts:29`).
 
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
-Pure checks by id: `kernel/ts/src/invariants.ts:155` (all), `lib/loka/core/invariants.ex:34`
+Pure checks by id: `kernel/ts/src/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
 (the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:134`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
@@ -132,13 +132,13 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/actions.ts:147`) are, in order: the engine verbs of the
-capabilities the lock holds (`VERBS`, `:85`: look, move, scan, take, drop, give, wait, open,
+An actor's actions (`kernel/ts/src/actions.ts:145`) are, in order: the engine verbs of the
+capabilities the lock holds (`VERBS`, `:83`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
-intersect; `:58`), then the answers to a pending choice (`choose`, `close_choice`), which no
+intersect; `:56`), then the answers to a pending choice (`choose`, `close_choice`), which no
 contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
 
@@ -178,5 +178,5 @@ tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:81`, `:100`)
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`actions.ts:267`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes (`invariants.ts:264`, `:278`).
+(`kernel/ts/src/action_lists.ts:17`). Invariant `gameview_agrees_with_admission` holds this for exits and
+recipes (`kernel/ts/src/invariants_view.ts:11`, `:24`).

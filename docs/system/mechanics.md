@@ -93,7 +93,7 @@ nothing and passes when the body's value of `resource` at admission (before cost
 `perform {action, target_id?}`: no recipe by that key in the actor's set `not_found`; a target
 other than the recipe's detail `invalid_target`; the detail outside the room `not_present`;
 then `cooldown` (time since the actor's last admitted attempt below the recipe's cooldown) and
-`insufficient_resource` (`actions.ts:245`). Accepted, in one decision: the costs' adjusts;
+`insufficient_resource` (`actions.ts:243`). Accepted, in one decision: the costs' adjusts;
 the check and its event; the chosen outcome's `sequence` in order (`fact.assign` with the
 expected value as the steps before left it, saturating `resource.adjust`, `event.emit` as
 `custom_event`); `action_completed` unless the outcome is `failure`; a `cooldown.start` when
@@ -108,7 +108,7 @@ The narration is the outcome's `narration.actor` key with its participants pinne
 A quest starts through its offer, which is optional, or through a dialogue choice's `accept`
 (dialogue@1 below; [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
-accept action), withdrawn once the actor has an instance (`actions.ts:132`), so a second accept
+accept action), withdrawn once the actor has an instance (`actions.ts:130`), so a second accept
 and an undeclared quest are refused before the rule. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never
