@@ -27,8 +27,8 @@ declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`
 Per-exit and terrain costs are later (00 §11 chapter three). Accepted
 `moved`: the `resource.adjust` (none without a cost), one `entity.transfer` of the body and
 `entity_entered_room`. `scan` is accepted `scanned` with nothing to change and no event
-(`:31`); the host shows `sight` (`:87`): per exit, the passage code or the destination room and
-the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:99`).
+(`:31`). The GameView carries `sight` (`:87`) per exit: nothing through a barrier that bars the
+way (`passage`), else the destination room and the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:99`).
 
 ## barrier@1 (`kernel/ts/src/rules/barrier.ts`)
 
@@ -37,7 +37,8 @@ direction outside the compass `invalid_target`, no exit `not_found`, an exit wit
 `invalid_target`; legal transitions only (`MOVES`, `:24`): open needs closed (a locked one is
 `exit_locked`), close needs open, lock needs closed, unlock needs locked, else
 `invalid_state`; lock and unlock need the barrier's `key_item` held by the body, directly or
-nested, else `not_owned` (`:47`). Accepted: one `barrier.transition` and `barrier_changed`.
+nested, else `not_owned` (`:47`). These checks are one read-only function the rule and the
+GameView's door verbs share. Accepted: one `barrier.transition` and `barrier_changed`.
 Both faces of a door name one state. Policy leaf `barrier_state`.
 
 ## containment@1 (`kernel/ts/src/rules/containment.ts`)

@@ -141,6 +141,8 @@ the room's contributions by ADR-016's operations (union, override, replace, subt
 intersect; `:56`), then the answers to a pending choice (`choose`, `close_choice`), which no
 contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
+The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
+the GameView lists them only on the exits they act on, never with the place's actions.
 
 ## Policy
 
@@ -165,7 +167,12 @@ named by its keywords through `doors` (`:71`). A Command carries only ids, never
 `gameView` (`kernel/ts/src/view.ts:33`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
-barrier) or `insufficient_resource` (the body cannot pay a move); `actions` of the place;
+barrier) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
+carries `door` (the barrier's short name, its state and the door verbs the actor may use on it
+now: those admission and barrier@1's check accept, all available), also when passable; an exit
+whose barrier does not bar the way carries `sight` (the destination room id and title and the
+NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
+(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs;
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
@@ -179,4 +186,5 @@ first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/action_lists.ts:17`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes (`kernel/ts/src/invariants_view.ts:11`, `:24`).
+recipes, and for the door verbs: one listed on its exit is never refused with a code the view
+predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:11`, `:24`).
