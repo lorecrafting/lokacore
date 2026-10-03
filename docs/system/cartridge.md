@@ -28,7 +28,7 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `{"cartridge": …, "content_hash": sha256(canonical cartridge)}` (`:53`), at most 4 MiB
 (`ARTIFACT_TOO_LARGE`, `:67`). Every v2 cartridge gets the pools hp, ma, mv and
 `resource@1` and `schedule@1` in its lock, with or without `resources.json`
-(`lib/loka/content/resources.ex:135`); the engine defaults are hp 0..20 start 20 gain 5, ma
+(`lib/loka/content/resources.ex:141`, `def requires`); the engine defaults are hp 0..20 start 20 gain 5, ma
 0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:15`), and
 `minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
 and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the

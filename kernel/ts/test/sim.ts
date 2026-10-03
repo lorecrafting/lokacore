@@ -18,6 +18,7 @@ import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '
 import { check } from '../src/invariants.ts';
 import { resolved } from '../src/actions.ts';
 import { resourceRef } from '../src/resource.ts';
+import { MOVES } from '../src/rules/barrier.ts';
 import { next, type RngState } from '../src/rng.ts';
 import { utf8 } from '../src/sha256.ts';
 import { resolve } from '../src/target.ts';
@@ -30,7 +31,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 5;
+export const GENERATOR = 6;
 /** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
 /** invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -234,6 +235,9 @@ function violated(
     command,
     decision,
     view,
+    resolves: Object.fromEntries(
+      Object.values(resolved(before, before.character)).map((a) => [a.key, a.command]),
+    ),
   };
   const ids = CHECKED.step.filter((i) => i !== 'target_candidates_ordered');
   return (
@@ -294,8 +298,9 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
 }
 
 // A command the GameView offers, available or not: each place action (a recipe's perform, a
-// quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each action on a listed entity, and
-// look at each detail of the room.
+// quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each door
+// verb of the set through each exit (the GameView lists only the accepted ones, on their exits),
+// each action on a listed entity, and look at each detail of the room.
 function offered(world: World, g: Gen): Payload {
   const view = gameView(world);
   const set = resolved(world, world.character);
@@ -311,6 +316,9 @@ function offered(world: World, g: Gen): Payload {
     if (o.input.includes('until')) return [{ type: 'wait', until: g.pick(boundaries(world)) }];
     return [{ type: o.command }];
   });
+  for (const o of Object.values(set))
+    if (Object.hasOwn(MOVES, o.command))
+      options.push(...exits.map((direction) => ({ type: o.command, direction })));
   for (const e of [...view.entities, ...view.inventory])
     for (const a of e.actions)
       options.push(aimed(set[a.action_key]!.command, e.id, g.pick([...npcs, STALE])));

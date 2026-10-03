@@ -328,8 +328,9 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **ChoiceOption**: One option of a pending choice: choosing it invokes choose with this choice_id.
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
+- **DoorView**: The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.
 - **EntityView**: A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6).
-- **ExitView**: One exit of the current place (04 §14; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now.
+- **ExitView**: One exit of the current place (04 §14, §15 as amended by c1-doors; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.
   - `true`: Moving through it is legal now.
   - `false`: Shown but not legal now, with the reason. Never a security boundary (ACT-09).
 - **GameView**: One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); map, equipment, shop and other surfaces join with their capabilities.
@@ -339,6 +340,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **PlaceView**: The current place (04 §14 room).
 - **QuestView**: A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal).
 - **ResourceView**: One of the viewer's body's resources (04 §15 as amended 2026-10-01 and 2026-10-02; 21 §4 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 §15 default table); the UI never computes a threshold (00 §4.10).
+- **SightView**: What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.
 - **UnavailableReason**: Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.
 
 ## Identity contracts (`protocol/identity.schema.json`)

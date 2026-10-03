@@ -4,7 +4,7 @@ Every rule is a pure function `decide(world, command, mint, steps)` returning a
 DecisionResult (`kernel/ts/src/decision.ts:193`). Admission, budgets and composition are in
 [protocol.md](protocol.md). Refusal codes are gameplay rejections (`protocol/error_registry.json`).
 Which capability owns which command, event and policy op: `CAPABILITY_OWNERS`
-(`kernel/ts/src/contracts.gen.ts:359`), summarised in the [feature map](../features.gen.md).
+(`kernel/ts/src/contracts.gen.ts:363`), summarised in the [feature map](../features.gen.md).
 
 ## A fresh world
 
@@ -27,17 +27,18 @@ declares `mv`, else nothing, and an unpayable move is `insufficient_resource` (`
 Per-exit and terrain costs are later (00 §11 chapter three). Accepted
 `moved`: the `resource.adjust` (none without a cost), one `entity.transfer` of the body and
 `entity_entered_room`. `scan` is accepted `scanned` with nothing to change and no event
-(`:31`); the host shows `sight` (`:87`): per exit, the passage code or the destination room and
-the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:99`).
+(`:31`). The GameView carries `sight` (`:87`) per exit: nothing through a barrier that bars the
+way (`passage`), else the destination room and the NPCs and items directly in it. Invariants `player_in_one_room`, `exits_resolve` (`:99`).
 
 ## barrier@1 (`kernel/ts/src/rules/barrier.ts`)
 
 `open`, `close`, `lock`, `unlock {direction}` on the exit's barrier in the actor's room: a
 direction outside the compass `invalid_target`, no exit `not_found`, an exit without a barrier
-`invalid_target`; legal transitions only (`MOVES`, `:24`): open needs closed (a locked one is
+`invalid_target`; legal transitions only (`MOVES`, `:26`): open needs closed (a locked one is
 `exit_locked`), close needs open, lock needs closed, unlock needs locked, else
 `invalid_state`; lock and unlock need the barrier's `key_item` held by the body, directly or
-nested, else `not_owned` (`:47`). Accepted: one `barrier.transition` and `barrier_changed`.
+nested, else `not_owned` (`:67`). These checks are one read-only function the rule and the
+GameView's door verbs share (`transition`, `:48`). Accepted: one `barrier.transition` and `barrier_changed`.
 Both faces of a door name one state. Policy leaf `barrier_state`.
 
 ## containment@1 (`kernel/ts/src/rules/containment.ts`)
@@ -110,7 +111,7 @@ nothing and passes when the body's value of `resource` at admission (before cost
 `perform {action, target_id?}`: no recipe by that key in the actor's set `not_found`; a target
 other than the recipe's detail `invalid_target`; the detail outside the room `not_present`;
 then `cooldown` (time since the actor's last admitted attempt below the recipe's cooldown) and
-`insufficient_resource` (`actions.ts:245`). Accepted, in one decision: the costs' adjusts;
+`insufficient_resource` (`actions.ts:243`). Accepted, in one decision: the costs' adjusts;
 the check and its event; the chosen outcome's `sequence` in order (`fact.assign` with the
 expected value as the steps before left it, saturating `resource.adjust`, `event.emit` as
 `custom_event`); `action_completed` unless the outcome is `failure`; a `cooldown.start` when
@@ -125,7 +126,7 @@ The narration is the outcome's `narration.actor` key with its participants pinne
 A quest starts through its offer, which is optional, or through a dialogue choice's `accept`
 (dialogue@1 below; [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
-accept action), withdrawn once the actor has an instance (`actions.ts:132`), so a second accept
+accept action), withdrawn once the actor has an instance (`actions.ts:130`), so a second accept
 and an undeclared quest are refused before the rule. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never

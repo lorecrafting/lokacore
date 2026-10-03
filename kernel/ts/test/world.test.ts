@@ -66,8 +66,16 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
       description: { key: 'room.ferry_landing.description' },
     },
     exits: [
-      { available: true, direction: 'north' },
-      { available: true, direction: 'west' },
+      {
+        available: true,
+        direction: 'north',
+        sight: { room: WELL, title: 'room.well_lane.title', entities: [] },
+      },
+      {
+        available: true,
+        direction: 'west',
+        sight: { room: BOATHOUSE, title: 'room.boathouse.title', entities: [] },
+      },
     ],
     actions: [
       { available: true, action_key: 'look', label: 'action.look', target: none, input: [] },

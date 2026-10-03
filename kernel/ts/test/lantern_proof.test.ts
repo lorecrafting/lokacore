@@ -93,10 +93,69 @@ test('at 06:00 the west gate is locked', () => {
   assert.equal(w.state.clock, 6 * 3600);
   assert.deepEqual(
     gameView(w).exits.find((e) => e.direction === 'west'),
-    { available: false, direction: 'west', reason: { code: 'exit_locked' } },
+    {
+      available: false,
+      direction: 'west',
+      reason: { code: 'exit_locked' },
+      door: { name: 'barrier.old_gate.short', state: 'locked', actions: [] },
+    },
   );
   assert.deepEqual(run(w, { type: 'unlock', direction: 'west' }).decision, {
     kind: 'rejected',
     error: { code: 'not_owned' },
   });
+});
+
+// Breaks: unlock listed toward the old gate without the lantern or missing with it, one face of
+// the gate not showing the other's transition, sight through a barred exit or missing through an
+// open one, or the entities seen in another order than NPCs first (04 §15 as amended by c1-doors).
+test('the old gate lists unlock only with the lantern, and each exit shows what lies beyond', () => {
+  const L = 'lantern_proof@0.0.1';
+  const w = world();
+  const [bram, lantern] = [w.entityIds[`${L}:npc/bram`], w.entityIds[`${L}:item/lantern`]];
+  const room = (k: string) => w.roomIds[`${L}:room/${k}`];
+  const gate = (state: string, ...vs: string[]) => ({
+    name: 'barrier.old_gate.short',
+    state,
+    actions: vs.map((k) => ({
+      available: true,
+      action_key: k,
+      label: `action.${k}`,
+      target: { kind: 'none' },
+      input: ['direction'],
+    })),
+  });
+  const exit = (v: World, d: string) => gameView(v).exits.find((e) => e.direction === d)!;
+  assert.deepEqual(exit(w, 'north'), {
+    available: true,
+    direction: 'north',
+    sight: { room: room('green'), title: 'room.green.title', entities: [] },
+  });
+  const shelter = play(
+    move(w, 'north', 'east', 'east'),
+    { type: 'take', item_id: lantern },
+    'taken',
+  ).world;
+  assert.deepEqual(exit(shelter, 'east').door, gate('locked', 'unlock'));
+  assert.deepEqual(
+    exit(move(shelter, 'west', 'west', 'south'), 'west').door,
+    gate('locked', 'unlock'),
+  );
+  const open = play(
+    play(shelter, { type: 'unlock', direction: 'east' }, 'unlocked').world,
+    { type: 'open', direction: 'east' },
+    'opened',
+  ).world;
+  assert.deepEqual(exit(open, 'east').sight, {
+    room: room('landing'),
+    title: 'room.landing.title',
+    entities: [{ id: bram, name: 'npc.bram.short', kind: 'npc' }],
+  });
+  const landing = move(open, 'east');
+  assert.deepEqual(exit(landing, 'west').door, gate('open', 'close'));
+  const green = move(play(landing, { type: 'drop', item_id: lantern }, 'dropped').world, 'north');
+  assert.deepEqual(exit(green, 'south').sight!.entities, [
+    { id: bram, name: 'npc.bram.short', kind: 'npc' },
+    { id: lantern, name: 'item.lantern.short', kind: 'item' },
+  ]);
 });

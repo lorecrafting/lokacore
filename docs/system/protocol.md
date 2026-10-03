@@ -49,7 +49,7 @@ storage half):
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
    `unsupported_capability`. Admission (`:102`): the nil CommandId is `permission_denied`
    (`:111`), another world or actor `not_found`, and the ActionSet must offer an action that
-   resolves to this Command and accepts its target and input (`actions.ts:180`:
+   resolves to this Command and accepts its target and input (`actions.ts:178`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
    event the capability (or one it composes, `decision.ts:180`) does not own
@@ -70,8 +70,8 @@ storage half):
 A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (always empty
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
 `fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
-`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:349`). A rejection or fault changes nothing: not the state, RNG,
-clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:252`).
+`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:361`). A rejection or fault changes nothing: not the state, RNG,
+clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:246`).
 
 ## Composition
 
@@ -107,7 +107,7 @@ never writes one keeps its state hash.
 ## Budgets
 
 The eleven composition-profile limits and their values are `LIMITS`
-(`kernel/ts/src/contracts.gen.ts:350`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
+(`kernel/ts/src/contracts.gen.ts:362`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
 that order names the fault (`compose.ts:130`, `:141`), returned beside the decision and
 observed as `evaluation.budget_exceeded`, never in the result (`proposal.ts:26`). Every policy
 leaf evaluated adds one query step (`policy.ts:31`).
@@ -116,7 +116,7 @@ leaf evaluated adds one query step (`policy.ts:31`).
 
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
-Pure checks by id: `kernel/ts/src/invariants.ts:155` (all), `lib/loka/core/invariants.ex:34`
+Pure checks by id: `kernel/ts/src/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
 (the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:135`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
@@ -132,15 +132,17 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/actions.ts:147`) are, in order: the engine verbs of the
-capabilities the lock holds (`VERBS`, `:85`: look, move, scan, take, drop, give, wait, open,
+An actor's actions (`kernel/ts/src/actions.ts:145`) are, in order: the engine verbs of the
+capabilities the lock holds (`VERBS`, `:83`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
-intersect; `:58`), then the answers to a pending choice (`choose`, `close_choice`), which no
+intersect; `:56`), then the answers to a pending choice (`choose`, `close_choice`), which no
 contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
+The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
+the GameView lists them only on the exits they act on, never with the place's actions.
 
 ## Policy
 
@@ -163,10 +165,15 @@ named by its keywords through `doors` (`:71`). A Command carries only ids, never
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:33`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:38`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
-barrier) or `insufficient_resource` (the body cannot pay a move); `actions` of the place;
+barrier) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
+carries `door` (the barrier's short name, its state and the door verbs the actor may use on it
+now: those admission and barrier@1's check accept, all available), also when passable; an exit
+whose barrier does not bar the way carries `sight` (the destination room id and title and the
+NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
+(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs;
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
@@ -175,9 +182,11 @@ has an instance of, with state and title); `time` (the logical clock); the pendi
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:81`, `:100`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:114`, `:133`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`actions.ts:267`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes (`invariants.ts:264`, `:278`).
+(`kernel/ts/src/action_lists.ts:25`). Invariant `gameview_agrees_with_admission` holds this for exits and
+recipes, and for the door verbs, matched by the Command each listed action resolves to (a cartridge
+alias included): one listed on its exit is never refused with a code the view
+predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:16`, `:42`).
