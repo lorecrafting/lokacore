@@ -136,3 +136,36 @@ key list. Link `contracts.gen.md`.
 
 **N-5 (nit, question):** `owner-decision-ts-test-types-2026-09-25.md` (type-check the TS tests)
 is not in owner-rules. Is it still a rule, or only a CHECKS item?
+
+## Fix round 1 (head `281c910`): APPROVE
+
+Scope: only the fix commits and the hunks they touched (`git diff 3c5e802..281c910`). The merge
+of `main` (`3c5e802`) is a new commit, not a rebase.
+
+| Finding | Commit | Result |
+|---|---|---|
+| F-1 | `667ae47` | Fixed. `owner-rules.md` gains the slim-gates line, and it matches the record. |
+| F-2 | `5c52209`, `281c910` | Fixed. `save.md` gives `save_corrupt` two rows: parse damage gets a new game in place, and SQLite corruption makes `newGame` throw. The New game section names the file deletion (`smoke.ts:292` is `remove()`), the test names exist, and the P4A-2 carry is on the ROADMAP SM2 row. |
+| F-3 | `5c52209` | Fixed. The cause is now malformed JSON (`smoke.ts:187`), and `gameView` is at `:179`. |
+| F-4 | `5c52209` | Fixed. `save.md` and `protocol.md` now limit `stale_view` to `view:` tokens (`authority.ts:121`). |
+| F-5 | `241a006` | Fixed. Row 9 now describes the existing shelter and the loop (`rooms/landing.json:8`). |
+| F-6 | `241a006` | Fixed by the PM ruling. Rows 3, 4, 9 and 11 moved out, and each is covered in `future.md` or on a ROADMAP row. The header rule and the rows now agree. Rows 6 and 7 are marked as code bugs, and both carries are on the "R7/R8 for chapter one" row. |
+| N-1 to N-4 | `50f17ae` | Fixed. The restatements are replaced by links, and the anchors resolve. |
+| N-5 | `667ae47` | Kept, with a reason: the owner decision is enforced (`bin/check_all.sh:28`), so the rule line is correct. |
+
+Rulings on the two deviations:
+
+- **(a) New DIFFERENCES row 5: accepted.** The disagreement is real: 23 §11 (`:157`) says
+  "Completion-at-least-once persists despite local rollback/reset", but Start over deletes the
+  whole file (`smoke.ts:292`). Only the index-only case is carried, and the rest is a PM decision,
+  not an owner decision. So it belongs on the owner's list under the header rule.
+- **(b) Citations stay at `87a1246`: accepted.** `git diff 87a1246..281c910` outside `docs/`
+  changes only `README.md` (one line), so every code citation still holds at the head.
+
+Also checked:
+
+- The one-line ROADMAP addition (the `kernel_version` carry) is a PM-ruled carry, not a shrink of
+  done rows, so it does not take PR 2's work.
+- Sizes are 70,212 B in total and the largest file is 12,382 B, which meets both targets.
+- `check_docs` passes.
+- No new findings.
