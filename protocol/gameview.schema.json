@@ -437,6 +437,49 @@
         }
       ]
     },
+    "WornSlotView": {
+      "description": "One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.",
+      "type": "object",
+      "properties": {
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
+        "item": {
+          "$ref": "#/$defs/EntityView"
+        }
+      },
+      "required": [
+        "slot"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "slot": "head",
+          "item": {
+            "id": "22222222-3333-4444-8555-666666666666",
+            "name": "item.leather_cap.short",
+            "kind": "item",
+            "actions": [
+              {
+                "available": true,
+                "action_key": "remove",
+                "label": "action.remove",
+                "target": {
+                  "kind": "entity",
+                  "scopes": [
+                    "inventory"
+                  ]
+                },
+                "input": []
+              }
+            ]
+          }
+        },
+        {
+          "slot": "light"
+        }
+      ]
+    },
     "PendingChoice": {
       "description": "The actor's open choice (04 §15 'dialogue choices currently available'; 06 §43): its prompt (the line or scene text shown above the options), the speaking participant when there is one, the options in presentation order, and whether the player may close it without choosing (the close_choice command; 06 §43: never trapped in a modal screen, and closing does not change the outcome).",
       "type": "object",
@@ -622,7 +665,7 @@
       ]
     },
     "GameView": {
-      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); map, equipment, shop and other surfaces join with their capabilities.",
+      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field). Map, shop and other surfaces join with their capabilities.",
       "type": "object",
       "properties": {
         "actor_id": {
@@ -653,6 +696,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/EntityView"
+          }
+        },
+        "equipment": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WornSlotView"
           }
         },
         "journal": {
@@ -781,6 +830,33 @@
                   "input": []
                 }
               ]
+            }
+          ],
+          "equipment": [
+            {
+              "slot": "head",
+              "item": {
+                "id": "22222222-3333-4444-8555-666666666666",
+                "name": "item.leather_cap.short",
+                "kind": "item",
+                "actions": [
+                  {
+                    "available": true,
+                    "action_key": "remove",
+                    "label": "action.remove",
+                    "target": {
+                      "kind": "entity",
+                      "scopes": [
+                        "inventory"
+                      ]
+                    },
+                    "input": []
+                  }
+                ]
+              }
+            },
+            {
+              "slot": "light"
             }
           ],
           "journal": [

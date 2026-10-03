@@ -23,10 +23,12 @@ import {
   type VersionedPolicy,
 } from './contracts.gen.ts';
 import { key, same } from './compose.ts';
-import { bodyOf, questOf, refString, type Steps, type World } from './decision.ts';
+import { bodyOf, refString, type Steps, type World } from './decision.ts';
+import { questOf } from './lookups.ts';
 import { ALWAYS, modal, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
+import { wornIn } from './rules/equipment.ts';
 import { holds } from './policy.ts';
 
 /**
@@ -92,6 +94,8 @@ const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   close: [{ kind: 'none' }, ['direction']],
   lock: [{ kind: 'none' }, ['direction']],
   unlock: [{ kind: 'none' }, ['direction']],
+  wear: [entity('inventory'), []],
+  remove: [entity('inventory'), []],
 };
 
 // The engine verbs whose owning capability the cartridge locks, labelled action.<verb>.
@@ -204,7 +208,8 @@ const INPUTS: readonly string[] = ['direction', 'choice_id', 'continuation_id', 
  * engine verb's contract is its rule, which re-validates the target with typed codes (a held
  * item's take is invalid_state, not refused here). Another action's is its TargetSpec: none
  * takes no target id, an entity one the id (target_id or item_id) of an entity in one of its
- * scopes for the actor (a room's detail is in none); and its input lists exactly the payload's
+ * scopes for the actor (a room's detail is in none; a worn item is in inventory for an action
+ * resolving to remove, equipment@1); and its input lists exactly the payload's
  * input parameters. accept_quest resolves only through the offer of the quest it names (an
  * action of the cartridge's with command accept_quest names no quest, so it never does), a talk
  * only to its dialogue's speaker, and close_choice only through the close_choice of the pending
@@ -226,7 +231,8 @@ function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandP
   const kind = id === undefined ? undefined : world.entities[id]?.kind;
   const scope = {
     self: id !== undefined && id === body,
-    inventory: at !== undefined && at === body,
+    inventory:
+      at !== undefined && (at === body || (a.command === 'remove' && wornIn(world, at, body))),
     room_contents: kind === 'item' && at === world.state.containers[body!],
     room_occupants: kind === 'npc' && at === world.state.containers[body!],
   };

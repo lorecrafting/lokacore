@@ -4,7 +4,8 @@
 import type { Cartridge, World } from '../src/index.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { key } from '../src/compose.ts';
-import { COMPASS, exitOf, refString } from '../src/decision.ts';
+import { COMPASS, refString } from '../src/decision.ts';
+import { exitOf } from '../src/lookups.ts';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/rules/description_variant.ts';
 import { sight } from '../src/rules/movement.ts';

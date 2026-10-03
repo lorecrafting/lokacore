@@ -47,15 +47,15 @@ dependency cycles and zero compile-connected edges (`mix xref`, [checks](../CHEC
 Pure: no I/O, clock, randomness, locale or Node API (`kernel/ts/src/index.ts:1`;
 `lint/rules/ts-kernel-pure.yml`; `bin/kernel_red_controls.sh` plants each escape and requires
 `tsc` to fail). Rules live only in `kernel/ts/src/rules/<capability>.ts`, one per capability
-that owns a command, bound in the rule table `RULES` (`kernel/ts/src/world.ts:32`); the lint
+that owns a command, bound in the rule table `RULES` (`kernel/ts/src/world.ts:33`); the lint
 rules `lint/rules/ts-rule-*.yml` keep them there, pure, importing only kernel modules and
 registered only as `<module>.decide`. The typed `Rule<C>` contract limits a rule to its own
-commands and events (`kernel/ts/src/decision.ts:193`), and admission re-checks event ownership
+commands and events (`kernel/ts/src/decision.ts:192`), and admission re-checks event ownership
 (`kernel/ts/src/proposal.ts:285`).
 
 | Module | Role |
 |---|---|
-| `world.ts` | `step`: routes a command to its capability's rule, admission, budgets, adopt (`:75`); `INSTALLED` (`:61`) |
+| `world.ts` | `step`: routes a command to its capability's rule, admission, budgets, adopt (`:77`); `INSTALLED` (`:63`) |
 | `proposal.ts` | the whole proposal of one decision: root, quest deliveries, reactions, due jobs; composition and adoption |
 | `compose.ts`, `apply.ts` | StateDelta composition over an overlay; the state after it |
 | `decision.ts` | `World`, `State`, the `Rule` contract, IdSource allocator, event and acceptance helpers |
@@ -99,7 +99,7 @@ The app shell imports the local authority's session controller
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus fresh sequences (10,000 in CI, 500 locally) run in every `npm test`
-  (`kernel/ts/test/sim.test.ts:24`). Its proposals feed the Elixir compose differential.
+  (`kernel/ts/test/sim.test.ts:30`). Its proposals feed the Elixir compose differential.
 - **Fault simulation** (`mobile/authority/local-story/faults.test.ts`): the simulator's
   sequences through the local authority on real SQLite with real faults (SQLITE_FULL, a failed
   COMMIT, SIGKILL just before or after COMMIT; `:4`).

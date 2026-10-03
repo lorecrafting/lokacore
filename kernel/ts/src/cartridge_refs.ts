@@ -42,8 +42,8 @@ export const diag = (
 export const step = (name: string) =>
   /^[a-z0-9_]+$/.test(name) ? `.${name}` : `[${encode(name)}]`;
 
-// Each room, detail, NPC, NPC daily schedule, item, barrier, description variant (v2; an item's
-// room-line variants) and the calendar, with its kind (registry definitions) and path.
+// Each room, detail, NPC, NPC daily schedule, item, item slot, barrier, description variant (v2;
+// an item's room-line variants) and the calendar, with its kind (registry definitions) and path.
 export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (kind: string, d: Obj, at: string, field = 'variants') => {
@@ -62,8 +62,10 @@ export function parts(c: Obj): [string, Obj, string][] {
     if (n.daily_schedule)
       out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
   }
-  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj))
+  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
     add('item', i, `.cartridge.items${step(ref)}`, 'room_line_variants');
+    if (i.slot) out.push(['slot', i.slot, `.cartridge.items${step(ref)}.slot`]);
+  }
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);

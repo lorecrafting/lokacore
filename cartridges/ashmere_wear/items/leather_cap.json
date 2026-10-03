@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "cap",
+    "leather_cap"
+  ],
+  "short": "item.leather_cap.short",
+  "room_line": "item.leather_cap.room",
+  "description": "item.leather_cap.description",
+  "location": {
+    "in": "room",
+    "room": "inn_rooms"
+  },
+  "slot": "head"
+}

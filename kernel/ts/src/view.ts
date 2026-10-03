@@ -9,10 +9,12 @@ import type {
   Key,
   QuestView,
   ResourceView,
+  SlotKey,
   TextKey,
 } from './contracts.gen.ts';
 import { lists } from './action_lists.ts';
-import { barrierState, COMPASS, exitOf, refString, type QuestRow, type World } from './decision.ts';
+import { COMPASS, refString, type Entity, type QuestRow, type World } from './decision.ts';
+import { barrierState, exitOf } from './lookups.ts';
 import { choiceView } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
 import * as description_variant from './rules/description_variant.ts';
@@ -39,15 +41,23 @@ export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
   const actions = lists(world, world.character);
   const scope = { item: 'room_contents', npc: 'room_occupants' } as const;
-  const within = (holder: EntityId): EntityView[] =>
+  const within = (
+    holder: EntityId,
+    of = (kind: Entity['kind'], id: string) =>
+      actions.of(holder === world.body ? 'inventory' : scope[kind], id),
+  ): EntityView[] =>
     Object.entries(world.entities)
       .filter(([id]) => world.state.containers[id] === holder)
       .map(([id, e]) => ({
         id: id as EntityId,
         name: e.short,
         kind: e.kind as Key,
-        actions: actions.of(holder === world.body ? 'inventory' : scope[e.kind], id),
+        actions: of(e.kind, id),
       }));
+  const equipment = Object.entries(world.slots).map(([slot, holder]) => {
+    const [item] = within(holder, (_, id) => actions.worn(id));
+    return { slot: slot as SlotKey, ...(item && { item }) };
+  });
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
@@ -60,6 +70,7 @@ export function gameView(world: World): GameView {
     actions: actions.place,
     entities: within(here),
     inventory: within(world.body),
+    ...(equipment.length > 0 && { equipment }),
     journal: journal(world),
     time: world.state.clock,
     ...(choice && { choice }),

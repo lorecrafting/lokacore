@@ -9,7 +9,6 @@ import {
   type Command,
   type CommandPayload,
   type CompiledCartridge,
-  type Connection,
   type DecisionResult,
   type DefinitionRef,
   type DomainEvent,
@@ -23,7 +22,6 @@ import {
   type MutationTarget,
   type NpcDefinition,
   type Owned,
-  type QuestInstanceId,
   type QuestState,
   type ResourceSpec,
   type RoleBinding,
@@ -138,6 +136,7 @@ export type World = {
   readonly entities: Readonly<Record<string, Entity>>; // items and NPCs, by EntityId
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
   readonly capacities: Readonly<Record<string, number>>; // by EntityId, where declared
+  readonly slots: Readonly<Record<string, EntityId>>; // each slot holder, by SlotKey (equipment@1)
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
   readonly resourceSpecs: Readonly<Record<string, ResourceSpec>>; // by canonical DefinitionRef text
   readonly barrierInitial: Readonly<Record<string, BarrierState>>; // by canonical DefinitionRef text
@@ -265,33 +264,6 @@ export const accepted = <E>(
   rng,
   ...(narration && { narration }),
 });
-
-/** The room's exit in a direction, if it has one. */
-export const exitOf = (room: RoomDefinition, direction: string): Connection | undefined =>
-  (room.exits as Readonly<Record<string, Connection>>)[direction];
-
-/** The room a direction's exit leads to, if the room has that exit. */
-export const exitTo = (room: RoomDefinition, direction: string): DefinitionRef | undefined =>
-  exitOf(room, direction)?.to;
-
-/** A barrier's current state (barrier@1): its stored state, else its initial one. */
-export const barrierState = (world: World, barrier: DefinitionRef): BarrierState =>
-  world.state.barriers?.[key({ kind: 'barrier', barrier })] ?? world.barrierInitial[key(barrier)];
-
-/**
- * `actor`'s instance of `quest` (player scope, 06 §2), if it has one: its id and row. One per
- * quest and actor, since the offer is withdrawn once one exists (actions.ts).
- */
-export function questOf(
-  world: World,
-  actor: CharacterId,
-  quest: DefinitionRef,
-): [QuestInstanceId, QuestRow] | undefined {
-  const scope: StateScope = { kind: 'player', character_id: actor };
-  return Object.entries(world.state.quests ?? {}).find(
-    ([, q]) => key(q.quest) === key(quest) && key(q.scope) === key(scope),
-  ) as [QuestInstanceId, QuestRow] | undefined;
-}
 
 /** Own-key test, values and entries for rule modules, which may not name Object (ts-rule-module-pure). */
 export const has = (o: object, key: string): boolean => Object.hasOwn(o, key);

@@ -596,6 +596,8 @@ Typed stack identity and conservation rules.
 - equip/unequip;
 - granted capabilities/actions/modifiers.
 
+*Amendment 2026-10-03 (chapter-one slice c1-equipment; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 5, triage 8):* `equipment@1` gives an item an optional `slot`; a slot is a holder entity inside the body (capacity 1) that a fresh world makes for each slot some item declares, and equip/unequip (`wear`, `remove`) are containment transfers into and out of it, so conservation, one container and capacity already hold ([mechanics](../../system/mechanics.md#equipment1-kerneltssrcrulesequipmentts)). Compatibility policy, granted capabilities and modifiers, dual wield, affects and curses are LATER.
+
 ### Durability/condition
 
 Optional capability for pristine/worn/broken or numeric durability plus repair policy.

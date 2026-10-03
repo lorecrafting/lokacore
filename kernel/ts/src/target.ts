@@ -8,7 +8,8 @@ import {
   type Key,
   type TargetResolution,
 } from './contracts.gen.ts';
-import { bodyOf, COMPASS, exitOf, refString, type World } from './decision.ts';
+import { bodyOf, COMPASS, refString, type World } from './decision.ts';
+import { exitOf } from './lookups.ts';
 import { cmp } from './validate.ts';
 
 /**

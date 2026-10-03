@@ -24,7 +24,7 @@ pass `numeric-vectors.json` and `adverse-cases.json` (`test/loka/core/portable_a
 Implementations: canonical JSON and its hash (`kernel/ts/src/canonical.ts`,
 `lib/loka/core/canonical.ex`), checked integers (`int.ts`, `int.ex`), RNG (`rng.ts`, `rng.ex`),
 IdSource, CommandId and the job CommandId (`id_source.ts`, `id_source.ex`); a decision mints its
-ordinals from one allocator (`kernel/ts/src/decision.ts:219`).
+ordinals from one allocator (`kernel/ts/src/decision.ts:218`).
 
 ## The decision loop
 
@@ -40,24 +40,24 @@ storage half):
    intent is a conflict ([save.md](save.md#receipts)).
 3. **Freshness**: a NEW invocation with a stale `view:` token is `stale_view`, no receipt
    ([save.md](save.md#replies)).
-4. **Resolve** (`invocation.ts:73`): the action key must be in the actor's current ActionSet,
+4. **Resolve** (`invocation.ts:75`): the action key must be in the actor's current ActionSet,
    else `unsupported_capability`; its `target_ids` fill the Command's slots in order (`:57`:
    look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
-5. **Step** (`kernel/ts/src/world.ts:75`): the capability owning the command type
+5. **Step** (`kernel/ts/src/world.ts:77`): the capability owning the command type
    (`CAPABILITY_OWNERS.command`) must be in the cartridge lock and have a rule, else
-   `unsupported_capability`. Admission (`:102`): the nil CommandId is `permission_denied`
-   (`:111`), another world or actor `not_found`, and the ActionSet must offer an action that
-   resolves to this Command and accepts its target and input (`actions.ts:178`:
+   `unsupported_capability`. Admission (`:104`): the nil CommandId is `permission_denied`
+   (`:113`), another world or actor `not_found`, and the ActionSet must offer an action that
+   resolves to this Command and accepts its target and input (`actions.ts:182`:
    `unsupported_capability`; a recipe or quest the cartridge lacks `not_found`; offered but its
    policy fails `invalid_state`). Then the rule decides; `admit` faults `unowned_event` for an
-   event the capability (or one it composes, `decision.ts:180`) does not own
-   (`proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`world.ts:97`).
+   event the capability (or one it composes, `decision.ts:179`) does not own
+   (`proposal.ts:285`); a `KernelError` is an `evaluator_error` fault (`world.ts:99`).
 6. **Propose** (`proposal.ts:137`): the root's ops and events join first; each `fact.assign`
    that changes its fact gets a `fact_changed` at its causal position (`fact.ts:108`); each
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
-   (`kernel/ts/src/quest.ts:74`), then each ReactionRule it triggers runs as its own writer group when its
+   (`kernel/ts/src/quest.ts:75`), then each ReactionRule it triggers runs as its own writer group when its
    `when` holds (`reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
    (`proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
@@ -70,7 +70,7 @@ storage half):
 A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (always empty
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
 `fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
-`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:361`). A rejection or fault changes nothing: not the state, RNG,
+`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:365`). A rejection or fault changes nothing: not the state, RNG,
 clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:246`).
 
 ## Composition
@@ -97,7 +97,7 @@ A resource's `from` is its regenerated value ([resource@1](mechanics.md#resource
 unset means `start` at time 0 (`:87`). The result is the
 written rows sorted by canonical target text, which the host commits.
 
-**State** (`kernel/ts/src/decision.ts:49`): `clock`, `containers` (entity → container),
+**State** (`kernel/ts/src/decision.ts:47`): `clock`, `containers` (entity → container),
 `rng`, and the sections written so far, each keyed by canonical target text or id: `facts`,
 `resources` (`{value, at}`), `cooldowns`, `barriers`, `quests` (`{quest, scope, state,
 outcome?}`), `jobs` (`{job, due_time, status}`), `choices` (the `choice.open` fields plus
@@ -107,24 +107,24 @@ never writes one keeps its state hash.
 ## Budgets
 
 The eleven composition-profile limits and their values are `LIMITS`
-(`kernel/ts/src/contracts.gen.ts:362`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
+(`kernel/ts/src/contracts.gen.ts:366`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
 that order names the fault (`compose.ts:130`, `:141`), returned beside the decision and
 observed as `evaluation.budget_exceeded`, never in the result (`proposal.ts:26`). Every policy
-leaf evaluated adds one query step (`policy.ts:31`).
+leaf evaluated adds one query step (`policy.ts:32`).
 
 ## Invariants
 
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
 Pure checks by id: `kernel/ts/src/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
-(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:135`).
+(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:137`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
 ([architecture.md](architecture.md#hosts)).
 
 ## Events
 
-A `DomainEvent` (`kernel/ts/src/decision.ts:228`) has an IdSource id, the world, player scope,
+A `DomainEvent` (`kernel/ts/src/decision.ts:227`) has an IdSource id, the world, player scope,
 the actor, the world's logical time, a one-based causal `position`, and the command as
 `causation_id` and `correlation_id`. A job's `entity_entered_room` is at instance scope and the
 job's due time, caused by the `run_job` (`behavior.ts:58`); the proposal renumbers positions and
@@ -132,40 +132,46 @@ correlates everything to the player's command (`proposal.ts:183`).
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/actions.ts:145`) are, in order: the engine verbs of the
-capabilities the lock holds (`VERBS`, `:83`: look, move, scan, take, drop, give, wait, open,
-close, lock, unlock, each with its target kind and input; policy always true), then the
+An actor's actions (`kernel/ts/src/actions.ts:149`) are, in order: the engine verbs of the
+capabilities the lock holds (`VERBS`, `:84`: look, move, scan, take, drop, give, wait, open,
+close, lock, unlock, wear, remove, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
-intersect; `:56`), then the answers to a pending choice (`choose`, `close_choice`), which no
+intersect; `:57`), then the answers to a pending choice (`choose`, `close_choice`), which no
 contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
 The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
 the GameView lists them only on the exits they act on, never with the place's actions.
+`wear` and `remove` (equipment@1) take an `inventory` item target in the set (an engine verb's
+rule checks its own target); for a cartridge action resolving to `remove`, the `inventory` scope
+also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:234`). The GameView lists `wear` on a held
+item and `remove` on a worn one only when admission and equipment@1's check accept it now, all
+available, never `drop`, `give` or `wear` on a worn item, and never either with the place's
+actions (a targetless one is never accepted: its Command needs `item_id`) (c1-equipment).
 
 ## Policy
 
-`holds` (`kernel/ts/src/policy.ts:17`) evaluates `all`, `any`, `not` and the leaves
+`holds` (`kernel/ts/src/policy.ts:18`) evaluates `all`, `any`, `not` and the leaves
 `fact_compare` (the fact's value at the actor's scope equals), `has_item` (inside the actor's
 body, directly or nested), `barrier_state`, `quest_state` (false while the actor has no
-instance), `time_window` (hour of day from `clock / 3600 % 24`, wrapping windows allowed, `:41`),
-`target_present` (the action's target is in reach, `:46`), and `stat_compare` and
-`resource_compare` (`:59`, [attributes@1](mechanics.md#attributes1)). An op outside this list throws:
+instance), `time_window` (hour of day from `clock / 3600 % 24`, wrapping windows allowed, `:42`),
+`target_present` (the action's target is in reach, `:47`), and `stat_compare` and
+`resource_compare` (`:60`, [attributes@1](mechanics.md#attributes1)). An op outside this list throws:
 the loader closes the set (`cartridge.ts:157`).
 
 ## Target resolution
 
-Before any Command exists, the host resolves the player's words (`kernel/ts/src/target.ts:36`):
-lowercase, split, a leading `at` and article dropped (`:19`), joined by `_`, matched exactly
+Before any Command exists, the host resolves the player's words (`kernel/ts/src/target.ts:37`):
+lowercase, split, a leading `at` and article dropped (`:20`), joined by `_`, matched exactly
 against the aliases of the room's details and the keywords of items and NPCs in the room or
 held by the body; none, unique, or ambiguous with candidate ids in ascending code-point order
-(invariant `target_candidates_ordered`); over 1024 candidates it throws (`:49`). A barrier is
-named by its keywords through `doors` (`:71`). A Command carries only ids, never words.
+(invariant `target_candidates_ordered`); over 1024 candidates it throws (`:50`). A barrier is
+named by its keywords through `doors` (`:72`). A Command carries only ids, never words.
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:38`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:40`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
 barrier) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
@@ -173,20 +179,23 @@ carries `door` (the barrier's short name, its state and the door verbs the actor
 now: those admission and barrier@1's check accept, all available), also when passable; an exit
 whose barrier does not bar the way carries `sight` (the destination room id and title and the
 NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
-(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs;
+(04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`;
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
-actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
+actions it accepts (NPCs first, then DefinitionRefString order); `equipment`, one entry per slot
+holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
+accepts (only those resolving to `remove`), absent when the world has no holder
+([equipment@1](mechanics.md#equipment1-kerneltssrcrulesequipmentts)); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
 `resources`, each with current, maximum, a condition band key and its tone (`normal`, `warning`
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:114`, `:133`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:125`, `:144`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`kernel/ts/src/action_lists.ts:25`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes, and for the door verbs, matched by the Command each listed action resolves to (a cartridge
-alias included): one listed on its exit is never refused with a code the view
-predicts, one not listed is never accepted (`kernel/ts/src/invariants_view.ts:16`, `:42`).
+(`kernel/ts/src/action_lists.ts:29`). Invariant `gameview_agrees_with_admission` holds this for exits and
+recipes, and for the door verbs and `wear`/`remove`, matched by the Command each listed action
+resolves to (a cartridge alias included): one listed on its exit or item is never refused with a
+code the view predicts, one not listed is never accepted, and none of `wear`/`remove` is a place action (`kernel/ts/src/invariants_view.ts:19`, `:50`).

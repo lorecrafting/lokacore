@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "hat",
+    "straw_hat"
+  ],
+  "short": "item.straw_hat.short",
+  "room_line": "item.straw_hat.room",
+  "description": "item.straw_hat.description",
+  "location": {
+    "in": "room",
+    "room": "inn_rooms"
+  },
+  "slot": "head"
+}

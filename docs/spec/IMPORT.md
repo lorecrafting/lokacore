@@ -107,6 +107,10 @@ The table below describes the files as imported. Later amendments are in git his
   gains the job CommandId rule beside CommandId (additive: the `run_job` tag the CommandId
   rule reserved "where it first executes"), and records the initial ids after the details (NPCs,
   items, then each scheduled NPC's first job). No existing rule or fixture changed.
+- 2026-10-03, chapter-one slice c1-equipment (PM settlement under the owner's overnight
+  authority): [conformance/numeric-profile.md](conformance/numeric-profile.md) gains the slot
+  holder ids after the jobs (additive: one per declared slot, in slot-key order) and states the
+  whole initial id order. No existing rule or fixture changed.
 - 2026-09-30, [owner decision](../archive/decisions/owner-decision-android-descope-2026-09-30.md)
   (paraphrased): one phone, the iPhone 11, until the first free product gate (14 Shipping
   rule); Android evidence is deferred to that gate, not dropped. The rule lives in envelope §4.

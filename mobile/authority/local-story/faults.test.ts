@@ -26,11 +26,11 @@ import { simulate } from '../../../kernel/ts/test/sim.ts';
 import { openStory, type Reply } from './authority.ts';
 
 // One seed per demo cartridge: bell, rooms, facts, items, dusk, details, road, errand (accepting
-// its quest), gate, ferry (running Bram's job), green (delivering a reaction), and the proof
-// cartridge lantern_proof (sim.ts picks by seed among the cartridge known answers, so a new
-// cartridge remaps them). None emits an effect (no outbox is built yet); every sequence commits
-// several NEW commands.
-const SEEDS = [2, 7, 14, 8, 18, 4, 11, 1, 6, 3, 15, 45];
+// its quest), gate, ferry (running Bram's job), green (delivering a reaction), the proof
+// cartridge lantern_proof, and wear (wearing an item) (sim.ts picks by seed among the cartridge
+// known answers, so a new cartridge remaps them). None emits an effect (no outbox is built yet);
+// every sequence commits several NEW commands.
+const SEEDS = [9, 15, 82, 7, 16, 10, 2, 44, 17, 40, 1, 4, 29];
 
 type Tap = (statement: string, run: () => unknown) => unknown;
 /** A process on `path` playing seed `seed`'s release; its ids count from 1, as in every run. */
@@ -260,11 +260,12 @@ for (const seed of SEEDS)
 const pages = (sql: DatabaseSync) => Object.values(sql.prepare('PRAGMA page_count').get()!)[0];
 
 // Breaks (the corpus's own footing): the driver or the authority drifting from answers checked by
-// hand against the fixtures. Seed 13 (cartridge_details_hash.json): wait until 1 advances the clock
-// to 1; its room has no exits, so move up is not_found and keeps the revision; looking at a detail
-// changes nothing but the revision. Seed 18 (cartridge_dusk_hash.json): ring_bell lasts 60.
+// hand against the fixtures. Seed 293 (cartridge_details_hash.json): wait until 3600 advances the
+// clock to 3600; wait until 3599 is not later than now, so invalid_state, and keeps the revision;
+// looking at a detail changes nothing but the revision. Seed 88 (cartridge_dusk_hash.json):
+// ring_bell lasts 60.
 test('hand-checked anchors', () => {
-  const p = processOn(save(), 13);
+  const p = processOn(save(), 293);
   const replies = [0, 1, 2].map((k) => p.send(k) as Extract<Reply, { kind: 'saved' }>);
   const shown = replies.map(({ revision, decision: d }) => {
     const { kind, outcome, error } = d as {
@@ -276,14 +277,14 @@ test('hand-checked anchors', () => {
   });
   assert.deepEqual(shown, [
     [1, 'accepted', 'waited'],
-    [1, 'rejected', 'not_found'],
+    [1, 'rejected', 'invalid_state'],
     [2, 'accepted', 'examined'],
   ]);
   assert.deepEqual(
     { ...p.sql.prepare('SELECT revision, clock FROM head').get() },
-    { revision: 2, clock: 1 },
+    { revision: 2, clock: 3600 },
   );
-  const d = processOn(save(), 18);
+  const d = processOn(save(), 88);
   d.send(0);
   assert.deepEqual(
     { ...d.sql.prepare('SELECT revision, clock FROM head').get() },

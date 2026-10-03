@@ -10,12 +10,9 @@
 // with nothing to change, no RNG and no event, like look; the host shows sight().
 import {
   accepted,
-  barrierState,
   bodyOf,
   COMPASS,
   event,
-  exitOf,
-  exitTo,
   has,
   keys,
   refString,
@@ -24,6 +21,7 @@ import {
   values,
   type World,
 } from '../decision.ts';
+import { barrierState, exitOf, exitTo } from '../lookups.ts';
 import type { DefinitionRef, EntityId, RoomDefinition } from '../contracts.gen.ts';
 import { level, pay, resourceRef } from '../resource.ts';
 

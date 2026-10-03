@@ -141,4 +141,16 @@ defmodule Loka.ContentAttributesTest do
     path = "policies/village_arrived.root.resource"
     assert Loka.Content.compile(dir) == {:error, [d("UNRESOLVED_REFERENCE", path, target)]}
   end
+
+  # Breaks: attributes.json's file schema loses additionalProperties false (resources.ex
+  # file_schema), so a top-level key beside "attributes" (here an attribute written outside the
+  # map) is silently dropped instead of rejected (c1-attributes review N-3).
+  test "a key beside attributes in attributes.json is UNKNOWN_FIELD", %{tmp_dir: dir} do
+    File.mkdir_p!(dir)
+    file = %{"attributes" => %{"str" => %{"start" => 14}}, "dex" => %{"start" => 12}}
+    File.write!(Path.join(dir, "attributes.json"), JSON.encode!(file))
+
+    assert compile(dir, stat("str", 1), true, nil) ==
+             {:error, [d("UNKNOWN_FIELD", "attributes.dex", %{})]}
+  end
 end

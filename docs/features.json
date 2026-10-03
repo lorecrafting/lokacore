@@ -413,5 +413,30 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare"
+  },
+  "equipment": {
+    "spec": "21 §8 Equipment (amendment 2026-10-03); 00 §4.4 (amendment 2026-10-03)",
+    "contracts": [
+      "SlotKey",
+      "ItemDefinition",
+      "CommandPayload",
+      "WornSlotView",
+      "GameView"
+    ],
+    "modules": [
+      "kernel/ts/src/fresh.ts",
+      "kernel/ts/src/action_lists.ts",
+      "kernel/ts/src/view.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_wear_hash.json",
+      "protocol/fixtures/cartridge_loader.json"
+    ],
+    "invariants": [
+      "one_container_per_item",
+      "containment_acyclic",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "C1 c1-equipment (#134) twelve slots as holders in the body; wear and remove"
   }
 }
