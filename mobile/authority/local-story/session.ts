@@ -15,14 +15,13 @@ import { corrupt, type Db } from './store.ts';
 export type Bundled = { canonical: string; sha256: string };
 
 // The release's own fresh world: the context and seed of every save made before c1-host (whose
-// pin names no context), and of a new lineage when the host gives no random source.
+// pin names no context).
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const SEED = [1, 2, 3, 4];
 const ID_PREFIX = '00000000-0000-4000-8000-';
 
-type Latency = Host['latency'];
-type Build = Pick<Host, 'kernel_version' | 'random'>; // the build's commit and its random source
-type HostPart = Pick<Host, 'newId' | 'latency'> & Build; // and its ids and its clock
+// The build's commit, its random source (required: every new game draws its own), ids and clock.
+type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version'> & Required<Pick<Host, 'random'>>;
 
 function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
@@ -68,20 +67,13 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
 }
 
 /**
- * The game on the save in `db` (a new one if empty, its ids from `newId`, a random UUID each call)
+ * The game on the save in `db` (a new one if empty, its ids from `host.newId`, a random UUID each call)
  * of the bundled cartridge; open `db` once per process. A save that does not open throws, its
  * refusal (kind and newGame) as the error's cause.
  */
-export function openGame(
-  db: Db,
-  bundled: Bundled,
-  newId: () => string,
-  latency: Latency | undefined,
-  build: Build,
-) {
+export function openGame(db: Db, bundled: Bundled, host: HostPart) {
   const cartridge = cartridgeOf(bundled);
   const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
-  const host = { ...build, newId, latency };
   const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
   if (story.kind !== 'open') throw Object.assign(new Error(story.kind), { cause: story });
   checked(story);
@@ -131,7 +123,7 @@ export function localSession(open: () => Db, remove: () => void, items: Bundled,
   const fail = (f: Why, code?: Failed['code']) => (s.failed = { ...f, code });
   const reopen = () => {
     try {
-      s.game = openGame((s.db ??= open()), items, host.newId, host.latency, host);
+      s.game = openGame((s.db ??= open()), items, host);
       s.failed = undefined;
     } catch (e) {
       const { message, cause } = e as Error;

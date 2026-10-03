@@ -22,7 +22,7 @@ a new save: with a random source, under a world context and RNG seed drawn for t
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:129`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`session.ts:55`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:60`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`session.ts:54`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:59`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
@@ -34,7 +34,7 @@ digest, the resolved Command (null for a rejection before one existed), the revi
 for a rejection) and the DecisionResult. Replay (`authority.ts:162`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
-other known id is `conflict`. A fault gets no receipt (`:187`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
+other known id is `conflict`. A fault gets no receipt (`:182`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
 Lantern traces and the 11 adverse cases). The latter projects kernel values onto the traces'
 vocabulary by the R6P P4b mapping ([archived ROADMAP](../archive/ROADMAP.md), R6P row) as
 changed by Quest from dialogue: action `activate` is gone; action `talk` with no target is the
@@ -100,7 +100,7 @@ parent) pinned to it, with its own drawn world context and seed as in a new save
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
 (`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
 the file, or the report table or its index, corrupt, `replace` throws (`store.ts:137`) and the
-host's Start over deletes the whole file (`session.ts:161`), so pending reports and the trace are
+host's Start over deletes the whole file (`session.ts:153`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
 to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
@@ -133,7 +133,7 @@ transaction in its own; a write failure is swallowed and caught up later from th
 (`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
 newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:110`) and, when the
-host supplies a clock, each NEW decision's `kernel.decision_latency` (`:216`).
+host supplies a clock, each NEW decision's `kernel.decision_latency` (`authority.ts:209-211`).
 
 ## The session controller and the phone
 

@@ -36,7 +36,8 @@ const processOn = (
 ) => {
   const sql = new DatabaseSync(path);
   if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`);
-  const game = openGame(adapt(sql, tap), ITEMS, randomUUID, undefined, {
+  const game = openGame(adapt(sql, tap), ITEMS, {
+    newId: randomUUID,
     kernel_version: `loka-kernel@${'0'.repeat(40)}`,
   });
   return { sql, game, ...screenOf(game) };

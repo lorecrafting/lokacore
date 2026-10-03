@@ -16,6 +16,7 @@ import { validate } from '../../../kernel/ts/src/validate.ts';
 import { INSTALLED } from '../../../kernel/ts/src/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Host, type Release, type Saved } from './authority.ts';
+import { openGame } from './session.ts';
 
 const TEMPLATE = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId; // session.ts CONTEXT
 // numeric-vectors.json rng_steps[3].state and [4].state: dusk's pick_lock draws once (saves.test.ts).
@@ -40,18 +41,20 @@ const counter = () => {
   return () => `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
 };
 
+type P = (string | number | null)[];
+/** expo-sqlite's sync names on one node:sqlite connection. */
+const adapt = (sql: DatabaseSync) => ({
+  execSync: (s: string) => void sql.exec(s),
+  runSync: (s: string, ...p: P) => sql.prepare(s).run(...p),
+  getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T,
+  getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
+  isInTransactionSync: () => sql.isTransaction,
+});
 type Options = { releases?: [Release, ...Release[]] } & Partial<Host>;
-/** A process on the save at `path`: one connection, expo-sqlite's sync names. */
+/** A process on the save at `path`: one connection. */
 function processOn(path: string, { releases = [dusk], ...host }: Options = {}) {
   const sql = new DatabaseSync(path);
-  type P = (string | number | null)[];
-  const db = {
-    execSync: (s: string) => void sql.exec(s),
-    runSync: (s: string, ...p: P) => sql.prepare(s).run(...p),
-    getFirstSync: <T>(s: string, ...p: P) => (sql.prepare(s).get(...p) ?? null) as T,
-    getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
-    isInTransactionSync: () => sql.isTransaction,
-  };
+  const db = adapt(sql);
   const random = getRandomValues as Host['random'];
   const opened = openStory(db, releases, {
     kernel_version: KERNEL,
@@ -81,6 +84,20 @@ function processOn(path: string, { releases = [dusk], ...host }: Options = {}) {
 }
 const file = () => join(mkdtempSync(join(tmpdir(), 'loka-c1-host-')), 'save.db');
 const state = (p: ReturnType<typeof processOn>) => encode(p.story.world().state as never);
+
+// Breaks (ADR-075 §3): the app's path (session.ts openGame) drops the host's random source, so every
+// phone game is the template world again (DIFFERENCES row 6).
+test('the app path passes the random source: the pinned context is not the template', () => {
+  const sql = new DatabaseSync(':memory:');
+  openGame(adapt(sql), read('protocol/fixtures/cartridge_dusk_hash.json') as never, {
+    newId: randomUUID,
+    kernel_version: KERNEL,
+    random: getRandomValues as NonNullable<Host['random']>,
+  });
+  const pin = sql.prepare("SELECT pin ->> '$.world_context_id' AS c FROM save").get();
+  assert.match(pin?.c as string, V4);
+  assert.notEqual(pin?.c, TEMPLATE);
+});
 
 // Breaks (ADR-075 §3, §4 A4): the host's random source ignored, so every new game shares the
 // template's seed or context; the drawn context not pinned, or not the one the trace header names.
