@@ -146,3 +146,23 @@ CHANGES REQUESTED
 R1 | should-fix | mobile/app/metro.config.js:19 at 49d4dff
 Export a modified source copy without Git metadata while EXPO_PUBLIC_KERNEL_COMMIT contains a previous clean SHA. Git fails, but the empty catch preserves that value; App.tsx reports the old bare SHA in Release, falsely claiming a clean source revision. Delete EXPO_PUBLIC_KERNEL_COMMIT in the catch so the app uses its zero-commit -dirty fallback. Reproduced with controlled Git failure.
 ```
+
+## Fix round 1 re-check (0fcd507)
+
+Reviewed `fe7b19f..0fcd507` (`33f35e6`, `0fcd507`), its touched code and their direct callers only. Throwaway worktree, full
+`npm ci`: `mobile/app` `npm test` and `tsc --noEmit` green at `0fcd507`. **Verdict: APPROVE.**
+
+| Item | Disposition | Verified |
+|---|---|---|
+| Sol R1 `metro.config.js:19` | `catch` deletes `EXPO_PUBLIC_KERNEL_COMMIT`; `mobile/app/metro.test.ts` (fake failing git, inherited stamp) | holds; with the `delete` removed, "git failing drops an inherited stamp" fails; `*.test.ts` added to `npm test`, excluded from `tsc` like the other tests |
+| F-1 | PM accepts `random` optional; `lineage.test.ts:88` drives `openGame` with `random` | my mutant (`openGame` passes `{ ...host, random: undefined }`) now fails that test. Residual, not a finding: the same drop one level up in `localSession`'s `reopen` (`session.ts:127`) still survives; it is a plain pass-through, and the brief allowed `openStory` as the test seam |
+| F-2 | `kernel_version` in `joystick.test.ts:75`, `touch.test.ts:51` | holds |
+| N-1 | `openGame(db, bundled, host: HostPart)` | holds; all four callers (session `reopen`, smoke, book tests, lineage) updated |
+| N-2 | `save.md:37` `:182`, `:136` `authority.ts:209-211` | holds (`:182` is the fault branch) |
+
+New nit (pointers this round moved):
+- **N-3 nit, `docs/system/save.md:25`, `:103`, `docs/system/DIFFERENCES.md:13`.** One line early:
+  `session.ts:54` and `:59` land on `try {`, not `gameView(...)` (`:55`) and `story.narration()` (`:60`);
+  `session.ts:153` is the handle reset, not `remove()` (`:154`), which the old pointer `:161` named.
+
+Open: CI had not yet reported on `0fcd507` when checked (last green: `0bf21ea`).
