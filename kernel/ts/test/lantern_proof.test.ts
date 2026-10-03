@@ -7,16 +7,13 @@
 // accepted as Bram's offer dialogue choice (docs/system/mechanics.md dialogue@1).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Command, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
+import type { Command, EntityId } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { value } from '../src/fact.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_lantern_hash.json');
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
-const ref = (kind: string, key: string) =>
-  ({ cartridge_id: 'lantern_proof', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 const load = () =>
   loadCartridge(
     new TextEncoder().encode(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),
@@ -63,58 +60,22 @@ for (const [choice_id, plan] of [
   ['carry', 'player_led'],
   ['leave', 'party_led'],
 ] as const)
-  // Breaks: a wrong exit, start time, role, fact value, hand-over, quest acceptance or resolution,
-  // story point, landing variant or narration (key or bindings), a place action still offering the
-  // quest, or Bram's talk still offered after the ending.
-  test(`the ${choice_id} ending plays as its trace`, () => {
+  // Breaks: a place action still offering the quest, a wrong landing variant, or Bram's talk still
+  // offered after the ending (the frozen traces pin the rest).
+  test(`the ${choice_id} ending lands in its variant and ends Bram's talk`, () => {
     let w = world();
     assert.ok(!gameView(w).actions.some((a) => a.action_key === 'lantern')); // no place action
     w = play(w, { type: 'talk', target_id: here(w, 'npc') }, 'choice_opened').world;
     const offer = gameView(w).choice!.continuation_id;
-    const accepted = play(
-      w,
-      { type: 'choose', choice_id: 'accept', continuation_id: offer },
-      'accept',
-    );
-    assert.deepEqual(accepted.decision.kind === 'accepted' && accepted.decision.narration, [
-      { key: 'proof.accept', participants: { actor: w.body, bram: here(w, 'npc') } },
-    ]);
-    w = accepted.world;
-    assert.equal(gameView(w).journal[0].state, 'active');
+    w = play(w, { type: 'choose', choice_id: 'accept', continuation_id: offer }, 'accept').world;
     w = move(w, 'north', 'east', 'east');
-    const lantern = here(w, 'item') as EntityId;
-    w = play(w, { type: 'take', item_id: lantern }, 'taken').world;
-    assert.equal(gameView(w).journal[0].state, 'active');
+    w = play(w, { type: 'take', item_id: here(w, 'item') as EntityId }, 'taken').world;
     w = move(w, 'west', 'west', 'south');
-    // The trace's revision 9: the lantern is held, so the landing asks for it no more.
-    assert.doesNotMatch(kat.value.text[gameView(w).place.description.key], /Bring it down/);
     const bram = here(w, 'npc') as EntityId;
     w = play(w, { type: 'talk', target_id: bram }, 'choice_opened').world;
     const continuation_id = gameView(w).choice!.continuation_id;
-    const s = play(w, { type: 'choose', choice_id, continuation_id }, choice_id);
-    w = s.world;
-    assert.equal(value(w, w.character, ref('fact', 'search_plan')), plan);
-    assert.equal(w.state.containers[lantern], choice_id === 'carry' ? w.body : bram);
-    assert.equal(gameView(w).journal[0].state, 'resolved');
-    assert.equal(w.state.clock, 6 * 3600); // ordinary actions cost no time
-    assert.equal(w.state.containers[bram], gameView(w).place.id);
-    assert.deepEqual(
-      s.decision.kind === 'accepted' &&
-        s.decision.events
-          .filter((e) => e.payload.type === 'story_point_reached')
-          .map((e) => e.payload),
-      [
-        {
-          type: 'story_point_reached',
-          story_point: ref('story_point', 'proof_terminal'),
-          outcome: choice_id,
-        },
-      ],
-    );
+    w = play(w, { type: 'choose', choice_id, continuation_id }, choice_id).world;
     assert.equal(gameView(w).place.description.key, `room.landing.${plan}`);
-    assert.deepEqual(s.decision.kind === 'accepted' && s.decision.narration, [
-      { key: `proof.${choice_id}`, participants: { actor: w.body, bram, lantern } },
-    ]);
     assert.deepEqual(
       gameView(w)
         .entities.find((e) => e.id === bram)!
