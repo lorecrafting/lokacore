@@ -1,0 +1,7 @@
+build 063f6f36c14de0bd87e708f8e5409e8c8dd4af81 (clean, PR head at build time)
+head.app main.jsbundle: bare=1 dirty=0
+dusk harness main.jsbundle: dirty=1
+old f8564cb main.jsbundle: loka-kernel@0..0-dirty fallback (session.ts KERNEL_VERSION), stamp absent=0
+local `expo export --platform ios` at 4240787 (before the cache key): clean tree bare=1 dirty=0; untracked file, no --clear: dirty=0 (stale transform cache, kept as a failing result); with --clear: dirty=1
+local `expo export --platform ios` at the cache-key commit: clean bare=1 dirty=0; untracked file dirty=1; clean again bare=1 dirty=0
+CI grep step script on those bundles (both platform dirs filled with the iOS bundle): clean exit 0, dirty exit 1

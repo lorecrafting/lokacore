@@ -72,7 +72,7 @@ function lantern() {
         getAllSync: <T>(s: string, ...p: P) => sql.prepare(s).all(...p) as T[],
       },
       JSON.parse(readFileSync(new URL(LANTERN, import.meta.url), 'utf8')),
-      randomUUID,
+      { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}` },
     ),
   );
   return { sql, smoke };

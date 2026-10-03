@@ -28,6 +28,16 @@ jobs:
         with:
           node-version: '24.21.0'
       - run: npm ci --no-audit --no-fund
+      - name: The tree is clean, so the bundle's kernel stamp is the bare commit (ADR-075 §3)
+        run: test -z "$(git status --porcelain)"
       - run: CI=1 EXPO_NO_TELEMETRY=1 npx expo export --platform android --platform ios --output-dir "$RUNNER_TEMP/dist"
       - name: Kernel is in both Hermes bundles (portability smoke)
         run: for p in android ios; do grep -a -q loka-kernel "$RUNNER_TEMP"/dist/_expo/static/js/$p/*.hbc; done
+      # The app joins KERNEL_ID and the stamp at run time, so the bundle holds the commit alone.
+      - name: Both bundles carry the commit metro.config.js stamped, not -dirty
+        run: |
+          head=$(git rev-parse HEAD)
+          for p in android ios; do
+            grep -a -q "$head" "$RUNNER_TEMP"/dist/_expo/static/js/$p/*.hbc
+            ! grep -a -q "$head-dirty" "$RUNNER_TEMP"/dist/_expo/static/js/$p/*.hbc || exit 1
+          done

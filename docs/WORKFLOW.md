@@ -21,7 +21,8 @@ docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only;
 [owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
-answer verbatim to the review record, and adds its findings to the fix list.
+answer verbatim to the review record, and adds its findings to the fix list. A second concurrent
+codex run uses a temporary `../lokacore-codex2` worktree.
 Fable is used only if codex is out of quota: a Fable subagent stands in for it on a kernel or
 contract-freeze slice's head, never on fix re-reviews
 ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
@@ -40,7 +41,8 @@ reserve to the owner: a product or scope decision, a spec conflict, spending mon
 Report at the end of the slice, not at every step.
 
 1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its `docs/system` sections;
-   keep [the roadmap](ROADMAP.md) current.
+   keep [the roadmap](ROADMAP.md) current. The plan marks slices that share no files; the PM may run
+   two developers at once on those, each PR with its own fresh reviewer (steps 2 to 7 per slice, [owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    Get the owner's OK on the plan and on any decision that is theirs.
 2. **Brief (PM).** An Opus subagent drafts briefs and stage slice plans so the PM session
    stays thin; the PM decides ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)). Name the branch; do not check it out (the developer does, in its own
@@ -51,7 +53,7 @@ Report at the end of the slice, not at every step.
    fixture or protocol file that would need to change). Add a timebox only for open-ended work:
    at the limit the developer stops and returns partial findings.
 3. **Build and self-review (developer).** Implement; run the full local check line from
-   AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
+   AGENTS.md once (the pre-push hook is the final run: do not run it again right before the push); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
    docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
    both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
@@ -72,13 +74,13 @@ Report at the end of the slice, not at every step.
    findings (every call re-reads the whole context, so a large one makes each fix call the
    most expensive of the slice). One message per round: batch every request for that round,
    and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
-   resolved by the PM in `../lokacore-pm` (merge, never rebase) without waking the
+   resolved by the PM in `../lokacore-pm` (merge, never rebase; the union driver covers the two lists) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
    developer runs `git pull --rebase` first (the review record is on the branch), never
-   force-pushes, fixes or disputes each finding with a reason, reruns the checks and pushes.
+   force-pushes, fixes or disputes each finding with a reason, reruns the checks once (the pre-push hook is the final run) and pushes.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
-   the same reviewer. It checks each disposition and the code the fix touched, plus that
+   the same reviewer; the codex Sol fix re-check starts at the same moment, not after it. It checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
    result to its record. A broad re-review of the whole PR happens only when the fixes
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
@@ -90,8 +92,11 @@ Report at the end of the slice, not at every step.
    Merge with `gh pr merge <N> --merge --match-head-commit <sha>`, where `<sha>` is the head
    whose CI you confirmed green, so a later push makes the merge fail instead of landing
    unchecked. The PM's own commits after the verdict (a `main` merge, a codex answer
-   appended verbatim, a ROADMAP or index line) need only green CI on the new head; any
-   other commit after the verdict sends the PR back to the reviewer. Then tell the owner:
+   appended verbatim, an index line) need only green CI on the new head, and the PM puts them in one push; any
+   other commit after the verdict sends the PR back to the reviewer. CI skips the code jobs only when the head differs from a commit whose code jobs all passed by
+   Markdown files alone ([CHECKS](CHECKS.md)), so green CI on the head is enough. Right after the merge the PM writes the
+   ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
+   ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
    PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
    escalation ladder, go to the owner. If the slice taught a lesson, record it as
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
@@ -125,11 +130,14 @@ turning into a catch-all. Findings are fixed in the gate PR.
 
 - Every developer works in its own worktree on its own branch. The PM works in one
   persistent worktree, `../lokacore-pm`, moved with `git checkout --detach <sha>` and never
-  removed; it holds the PM's commits and is codex's read-only checkout. The main checkout is
+  removed; it is the checkout for the PM's commits and for codex's read-only runs. The main checkout is
   not used for slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
   Developer worktrees sit beside the repository (`../lokacore-<slice>`), outside
   the tree the checks scan, and are removed after merge. The reviewer mutates code only in a throwaway detached worktree
   (`git worktree add --detach`) and removes it before finishing.
+- `.gitattributes` merges `docs/reviews/README.md` and `docs/decisions/README.md` (append-only lists) with
+  `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
+  check may still report a conflict, so the PM still merges `main` locally and checks the merged index for duplicate or twice-edited lines and for order.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
 - The reviewer commits only its record, in a detached worktree at `origin/<branch>`,

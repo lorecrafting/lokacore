@@ -32,7 +32,7 @@ Owner-approved, in this order, one at a time; each slice's scope and acceptance 
 
 | Slice | Branch | Status | PR |
 |---|---|---|---|
-| c1-host | `c1-host` | planned | |
+| c1-host | `c1-host` | done | [#129](https://github.com/lorecrafting/lokacore/pull/129) |
 | c1-numbers | `c1-numbers` | planned | |
 | c1-attributes | `c1-attributes` | planned | |
 | c1-doors | `c1-doors` | planned | |

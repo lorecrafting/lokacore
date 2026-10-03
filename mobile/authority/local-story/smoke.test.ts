@@ -36,7 +36,10 @@ const processOn = (
 ) => {
   const sql = new DatabaseSync(path);
   if (pageSize) sql.exec(`PRAGMA page_size = ${pageSize}`);
-  const game = openGame(adapt(sql, tap), ITEMS, randomUUID);
+  const game = openGame(adapt(sql, tap), ITEMS, {
+    newId: randomUUID,
+    kernel_version: `loka-kernel@${'0'.repeat(40)}`,
+  });
   return { sql, game, ...screenOf(game) };
 };
 // ponytail: the presenter (app/book) is this file's harness, so the authority tests still drive presses by
@@ -258,7 +261,7 @@ const app = (path: string, fail?: 'open' | 'remove', tap?: Parameters<typeof ada
       rmSync(path);
     },
     ITEMS,
-    { newId: randomUUID },
+    { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}` },
   );
   const now = () => screenOf(c.game()!).now();
   const press = (l: string) => screenOf(c.game()!).press(l);

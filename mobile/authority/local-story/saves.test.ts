@@ -129,6 +129,7 @@ const PIN = encode({
   content_hash: kat.sha256,
   capability_lock: JSON.parse(kat.canonical).lock,
   rule_ir: 1,
+  world_context_id: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f',
   numeric_profile: null,
   rng_profile: null,
 });

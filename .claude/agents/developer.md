@@ -22,7 +22,8 @@ normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass.
 
 Before handing off:
-1. Run the full local check line from AGENTS.md via `mise exec --`; every new check has a
+1. Run the full local check line from AGENTS.md via `mise exec --` once; the pre-push hook is the
+   final run, so do not run it again right before pushing. Every new check has a
    planted violation that fails.
 2. Self-review the diff: `/ponytail-review`, then `/code-review medium` on the branch
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
@@ -45,7 +46,7 @@ A developer spawned for a fix round on an existing PR skips the build, self-revi
 above and follows only the next paragraph.
 
 When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
-checks, push, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
+checks once (the pre-push hook is the final run), push, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
 If the same issue survives two fix attempts within a round, stop: write down the assumption
 both attempts shared and test that, or escalate to the PM. A finding still open after fix
 round 2 goes to the owner, not a third round.

@@ -37,6 +37,7 @@ test('a pending start over whose retry fails shows that error, not "not confirme
     read('protocol/fixtures/cartridge_items_hash.json') as never,
     {
       newId: randomUUID,
+      kernel_version: `loka-kernel@${'0'.repeat(40)}`,
     },
   );
   stage = 1;

@@ -4,13 +4,8 @@
 // the app's presenter does, from the views, the replies and the cartridge text (docs/decisions/
 // owner-decision-presenter-split-2026-10-02.md). It adds no mechanics.
 import type { Key } from '../../../kernel/ts/src/contracts.gen.ts';
-import {
-  gameView,
-  INSTALLED,
-  KERNEL_ID,
-  loadCartridge,
-  newWorld,
-} from '../../../kernel/ts/src/index.ts';
+import { gameView, INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
+export { KERNEL_ID } from '../../../kernel/ts/src/index.ts'; // the app names its build with it
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import type { Failed, Game, GameSession, Intent, Reply } from '../../packages/game-view/session.ts';
 import { openStory, type Host } from './authority.ts';
@@ -19,16 +14,15 @@ import { corrupt, type Db } from './store.ts';
 /** A cartridge fixture: its canonical JSON text and content hash. */
 export type Bundled = { canonical: string; sha256: string };
 
-// ponytail: one fixed world context and seed; a real start draws them per lineage (R6P).
+// The release's own fresh world: the context and seed of every save made before c1-host (whose
+// pin names no context).
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const SEED = [1, 2, 3, 4];
-// ponytail: no build commit on the phone yet, so the kernel version is marked dirty and no phone
-// trace counts as evidence until it comes from the build (ROADMAP R6 SM).
-const KERNEL_VERSION = `${KERNEL_ID}@${'0'.repeat(40)}-dirty`;
 const ID_PREFIX = '00000000-0000-4000-8000-';
 
-type Latency = Host['latency'];
-type HostPart = Pick<Host, 'newId' | 'latency'>; // its ids and its clock
+// The build's commit, its random source (lineage.test.ts proves the app path passes it; tests
+// without one play the template world), its ids and its clock.
+type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random'>;
 
 function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
@@ -74,14 +68,13 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
 }
 
 /**
- * The game on the save in `db` (a new one if empty, its ids from `newId`, a random UUID each call)
+ * The game on the save in `db` (a new one if empty, its ids from `host.newId`, a random UUID each call)
  * of the bundled cartridge; open `db` once per process. A save that does not open throws, its
  * refusal (kind and newGame) as the error's cause.
  */
-export function openGame(db: Db, bundled: Bundled, newId: () => string, latency?: Latency) {
+export function openGame(db: Db, bundled: Bundled, host: HostPart) {
   const cartridge = cartridgeOf(bundled);
   const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
-  const host = { kernel_version: KERNEL_VERSION, newId, latency };
   const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
   if (story.kind !== 'open') throw Object.assign(new Error(story.kind), { cause: story });
   checked(story);
@@ -131,7 +124,7 @@ export function localSession(open: () => Db, remove: () => void, items: Bundled,
   const fail = (f: Why, code?: Failed['code']) => (s.failed = { ...f, code });
   const reopen = () => {
     try {
-      s.game = openGame((s.db ??= open()), items, host.newId, host.latency);
+      s.game = openGame((s.db ??= open()), items, host);
       s.failed = undefined;
     } catch (e) {
       const { message, cause } = e as Error;
