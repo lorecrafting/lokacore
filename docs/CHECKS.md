@@ -57,11 +57,14 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
 - `elixir bin/check_docs.exs`: relative links resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
   within its word budget (it is loaded by every agent, every session).
-- `bin/docs_only.sh <before> <after>` prints `skip` when every file changed in the range is `*.md`,
-  else `run` (also for a missing or non-ancestor `<before>` or an empty diff); the `changes` job of
-  `ci.yml` uses it on a `synchronize` push to skip the `elixir`, `typescript` and `sim` jobs. `lint`
-  (with the docs link check) always runs. Planted cases, in a throwaway repo: `bin/docs_only_red_controls.sh`
-  (a `.json` under `docs/`, a mixed range, no `<before>` and a force push must say `run`).
+- `bin/docs_only.sh <base> <after>` prints `skip` when every file changed in the range is `*.md` (not
+  `*.gen.md`, which the elixir drift checks cover), else `run` (also for a missing or non-ancestor
+  `<base>` or an empty diff). The `changes` job of `ci.yml` passes the newest ancestor of a pull request
+  head whose `elixir`, `typescript` and `sim` jobs all passed (GitHub API; none found or an API error
+  means `run`) and skips those three jobs on `skip`; pushes to main never skip. `lint` (with the docs
+  link check) always runs. Planted cases, in a throwaway repo: `bin/docs_only_red_controls.sh` (a
+  `.json` under `docs/`, a `.gen.md`, a code file renamed to `.md`, a mixed range, no `<base>`, a
+  non-ancestor `<base>` and an empty diff must say `run`).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `mobile.yml` builds the native apps on pull requests that change native
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle

@@ -8,14 +8,17 @@ d=$(mktemp -d)
 trap 'rm -rf "$d"' EXIT
 cd "$d"
 git init -q
-git config user.email t@t && git config user.name t
+export GIT_AUTHOR_NAME=t GIT_AUTHOR_EMAIL=t@t GIT_COMMITTER_NAME=t GIT_COMMITTER_EMAIL=t@t # no git config writes
 mkdir docs
-touch a.md docs/x.md docs/features.json
+touch a.md docs/x.md docs/features.json docs/features.gen.md
+seq 20 > code.ts
 git add . && git commit -qm base
 c() { git commit -qam "$1" && git rev-parse HEAD; }
 base=$(git rev-parse HEAD)
 echo 1 >> a.md && echo 1 >> docs/x.md; md=$(c md)
 echo 1 >> a.md && echo 1 >> docs/features.json; json=$(c json)
+echo 1 >> docs/features.gen.md; git add -A; gen=$(c gen)
+git mv code.ts code.md; ren=$(c rename)
 git checkout -q -b other "$base"
 echo 2 >> a.md; other=$(c other)
 git checkout -q -
@@ -24,6 +27,8 @@ t() { got=$("$script" "$2" "$3"); [ "$got" = "$1" ] || { echo "FAIL docs_only $4
 t skip "$base" "$md" "only .md changed"
 t run "$md" "$json" "a .json under docs/ changed"
 t run "$base" "$json" "md and json in range"
+t run "$json" "$gen" "a .gen.md changed"
+t run "$gen" "$ren" "a code file renamed to .md"
 t run "" "$md" "no before"
 t run "$other" "$md" "before not an ancestor"
 t run "$md" "$md" "empty diff"

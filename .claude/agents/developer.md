@@ -46,7 +46,7 @@ A developer spawned for a fix round on an existing PR skips the build, self-revi
 above and follows only the next paragraph.
 
 When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
-checks, push, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
+checks once (the pre-push hook is the final run), push, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
 If the same issue survives two fix attempts within a round, stop: write down the assumption
 both attempts shared and test that, or escalate to the PM. A finding still open after fix
 round 2 goes to the owner, not a third round.

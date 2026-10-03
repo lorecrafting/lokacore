@@ -78,7 +78,7 @@ Report at the end of the slice, not at every step.
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
    developer runs `git pull --rebase` first (the review record is on the branch), never
-   force-pushes, fixes or disputes each finding with a reason, reruns the checks and pushes.
+   force-pushes, fixes or disputes each finding with a reason, reruns the checks once (the pre-push hook is the final run) and pushes.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
    the same reviewer; the codex Sol fix re-check starts at the same moment, not after it. It checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
@@ -93,9 +93,8 @@ Report at the end of the slice, not at every step.
    whose CI you confirmed green, so a later push makes the merge fail instead of landing
    unchecked. The PM's own commits after the verdict (a `main` merge, a codex answer
    appended verbatim, an index line) need only green CI on the new head, and the PM puts them in one push; any
-   other commit after the verdict sends the PR back to the reviewer. CI skips the code jobs on a push that
-   changes only Markdown files ([CHECKS](CHECKS.md)): before merging such a head the PM confirms
-   the code jobs were green on the last head that ran them. Right after the merge the PM writes the
+   other commit after the verdict sends the PR back to the reviewer. CI skips the code jobs only when the head differs from a commit whose code jobs all passed by
+   Markdown files alone ([CHECKS](CHECKS.md)), so green CI on the head is enough. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
    PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
@@ -138,7 +137,7 @@ turning into a catch-all. Findings are fixed in the gate PR.
   (`git worktree add --detach`) and removes it before finishing.
 - `.gitattributes` merges `docs/reviews/README.md` and `docs/decisions/README.md` (append-only lists) with
   `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
-  check may still report a conflict, so the PM still merges `main` locally; it checks the line order.
+  check may still report a conflict, so the PM still merges `main` locally and checks the merged index for duplicate or twice-edited lines and for order.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
 - The reviewer commits only its record, in a detached worktree at `origin/<branch>`,
