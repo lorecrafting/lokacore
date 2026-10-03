@@ -50,12 +50,12 @@ Pure: no I/O, clock, randomness, locale or Node API (`kernel/ts/src/index.ts:1`;
 that owns a command, bound in the rule table `RULES` (`kernel/ts/src/world.ts:32`); the lint
 rules `lint/rules/ts-rule-*.yml` keep them there, pure, importing only kernel modules and
 registered only as `<module>.decide`. The typed `Rule<C>` contract limits a rule to its own
-commands and events (`kernel/ts/src/decision.ts:192`), and admission re-checks event ownership
+commands and events (`kernel/ts/src/decision.ts:193`), and admission re-checks event ownership
 (`kernel/ts/src/proposal.ts:285`).
 
 | Module | Role |
 |---|---|
-| `world.ts` | `step`: routes a command to its capability's rule, admission, budgets, adopt (`:74`); `INSTALLED` (`:60`) |
+| `world.ts` | `step`: routes a command to its capability's rule, admission, budgets, adopt (`:75`); `INSTALLED` (`:61`) |
 | `proposal.ts` | the whole proposal of one decision: root, quest deliveries, reactions, due jobs; composition and adoption |
 | `compose.ts`, `apply.ts` | StateDelta composition over an overlay; the state after it |
 | `decision.ts` | `World`, `State`, the `Rule` contract, IdSource allocator, event and acceptance helpers |

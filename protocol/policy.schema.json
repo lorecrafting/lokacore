@@ -43,7 +43,7 @@
       ]
     },
     "Policy": {
-      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue.",
+      "description": "A pure condition tree (06 §21). all/any/not compose; the leaves are the 06 §21 operators the R6P proof uses (pre-release-proof.md) and the rest are added with their first use, each versioned by its owning capability (VersionedPolicy). fact_compare compares FactValue. stat_compare and resource_compare (attributes@1, 06 §21 amendment 2026-10-03) hold when the actor's attribute value, or the current value of the resource on the actor's body, is at least at_least; below is not, a range is all.",
       "oneOf": [
         {
           "description": "Every item holds; an empty list is the policy with no condition.",
@@ -220,6 +220,48 @@
             "equals"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attributes@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "stat_compare"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "at_least": {
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
+            }
+          },
+          "required": [
+            "op",
+            "attribute",
+            "at_least"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Owned by attributes@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "resource_compare"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "at_least": {
+              "$ref": "resource.schema.json#/$defs/ResourceInt"
+            }
+          },
+          "required": [
+            "op",
+            "resource",
+            "at_least"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -287,6 +329,29 @@
             "key": "cell_door"
           },
           "equals": "open"
+        },
+        {
+          "op": "stat_compare",
+          "attribute": {
+            "cartridge_id": "ashmere_road",
+            "cartridge_version": "0.0.1",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "at_least": 14
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "resource_compare",
+            "resource": {
+              "cartridge_id": "ashmere_road",
+              "cartridge_version": "0.0.1",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "at_least": 2
+          }
         }
       ]
     }

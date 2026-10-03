@@ -137,7 +137,8 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 }
 
 // Every fact_compare names a fact of this cartridge with a value of its type, every has_item
-// an item of it, every barrier_state a barrier of it, every quest_state a quest of it (the kernel reads them; any format, since v1 action policies are evaluated too),
+// an item of it, every barrier_state a barrier of it, every quest_state a quest of it, every
+// stat_compare an attribute and every resource_compare a resource of it (the kernel reads them; any format, since v1 action policies are evaluated too),
 // and no time_window is empty (EMPTY_TIME_WINDOW). v2: the entry, every exit and every room an
 // NPC starts in or names in its daily schedule name a room of this cartridge, an exit's barrier
 // a barrier of it, which each exit of its destination back to its room names too
@@ -161,6 +162,8 @@ export function refStage(c: Obj): Diagnostic[] {
     if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
     if (n.op === 'barrier_state') named(n.barrier, 'barrier', `${at}.barrier`);
     if (n.op === 'quest_state') named(n.quest, 'quest', `${at}.quest`);
+    if (n.op === 'stat_compare') named(n.attribute, 'attribute', `${at}.attribute`);
+    if (n.op === 'resource_compare') named(n.resource, 'resource', `${at}.resource`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }
   if (c.format !== 'loka-cartridge-v2') return out;

@@ -14,7 +14,7 @@ A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`):
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
-its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:35`). Any other
+its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). Any other
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
@@ -28,8 +28,8 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `{"cartridge": …, "content_hash": sha256(canonical cartridge)}` (`:53`), at most 4 MiB
 (`ARTIFACT_TOO_LARGE`, `:67`). Every v2 cartridge gets the pools hp, ma, mv and
 `resource@1` and `schedule@1` in its lock, with or without `resources.json`
-(`lib/loka/content/resources.ex:99`); the engine defaults are hp 0..20 start 20 gain 5, ma
-0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:14`), and
+(`lib/loka/content/resources.ex:135`); the engine defaults are hp 0..20 start 20 gain 5, ma
+0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:15`), and
 `minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
 and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the
 compiler writes `world` and `bands` only where the source authors them.
@@ -79,9 +79,9 @@ cartridge and its hash, or the first diagnostic of the first failing stage (`:62
 (`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: v1 or v2), the
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:108`), the
-lock (`:156`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
-references (`kernel/ts/src/cartridge_refs.ts:152` and the `cartridge_*.ts` twins of the
-compiler's checks), and the installed kernel (`cartridge.ts:224`: `CAPABILITY_NOT_INSTALLED`,
+lock (`:157`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
+references (`kernel/ts/src/cartridge_refs.ts:153` and the `cartridge_*.ts` twins of the
+compiler's checks), and the installed kernel (`cartridge.ts:226`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
 Compiled artifacts load in TypeScript with identical bytes, hash and lock
@@ -94,7 +94,7 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/world.ts:60`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/world.ts:61`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
 `dialogue` (`:32`); without a command, so without a rule, `fact`, `policy`,

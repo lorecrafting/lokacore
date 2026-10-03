@@ -135,12 +135,47 @@ defmodule Loka.CartridgeCrossKernelTest do
     dir
   end
 
+  # ashmere_road with six attributes, attributes@1 and pray gated on both leaves, short refs
+  # (c1-attributes; cartridge.schema.json AttributeSpec, policy.schema.json Policy).
+  defp attributed(dir) do
+    road = "cartridges/ashmere_road"
+    dir = Path.join(dir, "attributed")
+    File.cp_r!(road, dir)
+    src = &JSON.decode!(File.read!(Path.join(road, &1)))
+    stats = %{"str" => 14, "dex" => 12, "con" => 13, "int" => 10, "spi" => 9, "per" => 11}
+
+    root = %{
+      "op" => "all",
+      "items" => [
+        %{"op" => "stat_compare", "attribute" => "str", "at_least" => 14},
+        %{"op" => "resource_compare", "resource" => "mv", "at_least" => 2}
+      ]
+    }
+
+    files = %{
+      "cartridge.json" =>
+        put_in(src.("cartridge.json"), ["requires", "capabilities", "attributes"], 1),
+      "attributes.json" => %{
+        "attributes" => Map.new(stats, fn {k, v} -> {k, %{"start" => v}} end)
+      },
+      "recipes/pray.json" => put_in(src.("recipes/pray.json"), ["policy", "root"], root)
+    }
+
+    for {rel, v} <- files, do: File.write!(Path.join(dir, rel), JSON.encode!(v))
+    dir
+  end
+
   # Breaks: the kernels encode, hash or lock differently; the loader rejects a compiled artifact.
   test "compiled artifacts load in TypeScript with identical bytes, hash and lock", %{
     tmp_dir: tmp
   } do
     paths =
-      for {name, src} <- [{"hello", @hello}, {"rich", rich(tmp)}, {"numbered", numbered(tmp)}] do
+      for {name, src} <- [
+            {"hello", @hello},
+            {"rich", rich(tmp)},
+            {"numbered", numbered(tmp)},
+            {"attributed", attributed(tmp)}
+          ] do
         out = Path.join(tmp, "#{name}.artifact.json")
         compile(src, out)
         assert_received {:exit, :ok}
