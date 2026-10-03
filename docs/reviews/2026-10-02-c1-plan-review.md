@@ -106,3 +106,26 @@ pins). c1-sampler re-points `App.tsx:14`; naming the files keeps the rule checka
 **N-4 nit: no slice owns the DIFFERENCES row 10 edit.** Record :315-316 asks the gate to find row
 10 narrowed, but neither c1-doors (:160-176) nor c1-touch (:288, which deletes row 3) lists it.
 Add it to c1-doors' docs.
+
+## Fix round 1 re-check (6188834)
+
+Scope: the fix commit only (record, ROADMAP). **Verdict: APPROVE.**
+
+- F-1 fixed (PM ruling): c1-sampler places keys and wearables in rooms only (record :285-287);
+  NPC-to-player giving is new item 32 with a trigger (record :81, ROADMAP row, gate list :331).
+  Q2's owner wording is kept, with the ruling annotated (:17-18).
+- F-2 fixed: slice 9 rule (:245-252) maps the outcome through its `{dialogue, choice}` trigger
+  (`rules/dialogue.ts:185-191` matches on `t.choice === choice_id`; `StoryPointDefinition`,
+  `cartridge.schema.json:687`), defines a chapter with no `outcome`, and adds a case whose outcome
+  key differs from its choice id. Residual wording, not blocking: §6 (:345-347) still says "the
+  quest resolved with that outcome"; slice 9 governs.
+- F-3 fixed: one `continue` = one `narrate` line, line index persisted (:274-275); the kill row is
+  line-specific (:279-280).
+- F-4 fixed: triggers for 13 (:62) and 30 (:79) in the record and the ROADMAP row.
+- Q-1 resolved: the brief carries composes-with, preferring a scene-side `on {story_point,
+  outcome}` (:259-261); `rules/dialogue.ts` is out of the code list unless that fails.
+- N-1, N-3, N-4 fixed (:343-344, :118-119, :173-174).
+- N-2 dispute accepted: the table is now Slice | Branch | Status | PR and links the record; it
+  restates nothing.
+
+check_docs at `6188834`: 0 broken, 0 unreachable.
