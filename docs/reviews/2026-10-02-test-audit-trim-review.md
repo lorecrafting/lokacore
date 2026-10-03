@@ -99,3 +99,12 @@ Open (out of scope, as the decision says): the existing SQL-text fault taps, for
 `saves.test.ts:469`, now break the new E4 rule until the rewrite slice.
 
 Codex Sol review: appended by the PM.
+
+## Codex Sol first review (42a9bc2), verbatim
+
+CHANGES REQUESTED
+
+```text
+R1 | should-fix | kernel/ts/test/validate.test.ts:61 at 42a9bc2
+Deleting “a recursive Policy at the depth cap” removes a distinct decoder check. Mutant: canonical.ts:48 guards only c === '[' instead of both '[' and '{'. A Policy nested 129 objects deep then decodes successfully. The surviving ABI depth test exercises array decoding; 259 remaining kernel tests passed with this mutant (disk-writing suites excluded). Restoring the deleted test fails. Keep this case, or extend the ABI test to check object decoding at depths 128 and 129.
+```
