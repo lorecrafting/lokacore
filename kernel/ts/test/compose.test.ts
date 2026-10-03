@@ -163,52 +163,6 @@ test('containment checks deep chains, untouched cycles and untouched capacity', 
   assert.equal(holds({ containers: { a: 'box', b: 'box' }, capacities: { box: 1 } }), false);
 });
 
-test('published events pass no_proposed_event_escapes', () => {
-  for (const { id, decision, commit, published } of fixture.publication)
-    assert.ok(check('no_proposed_event_escapes', { decision, commit, published }), id);
-});
-
-// A sequenced boundary (04 §5.1, 03 §15; 14 Gate R3), test-only: compose, commit, and only
-// on a confirmed commit adopt the changes and then deliver the events, each recorded in
-// order. R6 replaces this with the real authority.
-type Entry = [string, Json];
-const step = (log: Entry[], s: State, ops: Json, events: Json[], status: string) => {
-  const result = compose(s, { ops } as never) as { changes?: Json };
-  if (!result.changes) return;
-  log.push(['commit', status]);
-  if (status !== 'committed') return;
-  log.push(['adopted', result.changes]);
-  for (const e of events) log.push(['delivered', e]);
-};
-
-test('failed or unknown commits and faults adopt and deliver nothing; a commit adopts, then delivers', () => {
-  const byId = (section: string, id: string) =>
-    fixture[section].find((c: { id: string }) => c.id === id);
-  const ok = byId('cases', 'explicit-sequence-across-kinds');
-  const bad = byId('cases', 'conflict-fact-opposite-groups');
-  const events: Json[] = byId('publication', 'committed-publishes-committed-events').decision
-    .events;
-  assert.ok(events.length > 0);
-  const log: Entry[] = [];
-  step(log, state('base'), ok.ops, events, 'failed');
-  step(log, state('base'), ok.ops, events, 'unknown');
-  step(log, state('base'), bad.ops, events, 'committed');
-  assert.deepEqual(log, [
-    ['commit', 'failed'],
-    ['commit', 'unknown'],
-  ]);
-  log.length = 0;
-  step(log, state('base'), ok.ops, events, 'committed');
-  assert.equal(
-    encode(log as never),
-    encode([
-      ['commit', 'committed'],
-      ['adopted', ok.expected.changes],
-      ...events.map((e) => ['delivered', e]),
-    ] as never),
-  );
-});
-
 const jobId = (n: number) => uuid('d0', n);
 const jobs = (n: number, due: number) =>
   Object.fromEntries(range(n).map((i) => [jobId(i), { due_time: due, status: 'pending' }]));

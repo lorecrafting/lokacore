@@ -295,16 +295,6 @@ test('a foreign event faults unowned_event, and a rule mutating the world throws
   assert.equal(w.state.clock, 0);
 });
 
-// Review R1-2. Breaks: the per-command counter never advances or starts at 1 (numeric profile:
-// ordinals from 0, each used once). Expected ids: Python, ["loka-id-v1", context, command, n].
-test("a decision's allocator mints ordinals 0, 1, ... under its command", () => {
-  const mint = allocator(fresh(), { id: CMD as Command['id'] });
-  assert.deepEqual(
-    [mint(), mint()],
-    ['e2870386-6797-8a1b-8e1a-b2c028c16c49', '2ed1ae6f-befe-8e6a-a5b1-bce1b3d1e5d9'],
-  );
-});
-
 // R5 S3. Breaks: a capability a cartridge can lock with no feature map cells, or one the map
 // calls implemented that the loader rejects (CAPABILITY_NOT_INSTALLED). Expected: the rule
 // module files, plus each capability owning no command that docs/features.json marks

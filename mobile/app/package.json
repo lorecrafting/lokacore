@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.ts",
   "scripts": {
-    "test": "node --test \"../authority/**/*.test.ts\" \"book/*.test.ts\""
+    "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"../authority/**/*.test.ts\" \"book/*.test.ts\""
   },
   "engines": {
     "node": "24.21.0"
