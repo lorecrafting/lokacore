@@ -17,4 +17,6 @@ try {
   const dirty = git('status', '--porcelain') !== '';
   process.env.EXPO_PUBLIC_KERNEL_COMMIT = `${git('rev-parse', 'HEAD')}${dirty ? '-dirty' : ''}`;
 } catch {}
+// The transform cache does not see the stamp: keyed on it, a cached App.tsx never keeps an old one.
+config.cacheVersion = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? '';
 module.exports = config;
