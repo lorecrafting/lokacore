@@ -99,3 +99,48 @@ is about 58 pt above the bottom edge, which clears the home indicator.
 
 - After #120 merges: merge `origin/main` and check that U5 shows Bram's offer choice (the PR's own open item).
 - Codex Sol review: appended by the PM.
+
+## Fix round 1 re-check (38518a0)
+
+- Commits checked: `1a1bf5d` (menu state, lint, ROADMAP carry) and `38518a0` (walk shots 21, 22). Reviewer: Opus, fresh,
+  standing in for the first reviewer. Scope: the dispositions below, the code they touched and its callers (`Book.tsx`).
+- **Verdict: APPROVE WITH NOTES**
+
+### Checks (detached worktree at `38518a0`)
+
+- `mobile/app`: `npm ci`, then `npm test` 151 pass, 1 skipped. `npx tsc --noEmit` clean.
+- `ast-grep test --skip-snapshot-tests` 13/13, `ast-grep scan --error` and `bin/lint_red_controls.sh` green.
+- Mutants:
+  - `menuLive` never clears (returns `s`): red, two tests.
+  - `menuOpen` reads `state.dismissed`, not the live `s.dismissed`: red.
+  - The fonts allowlist entry restored: red on the new planted `import font from './fonts/EBGaramond.ttf'`.
+  - Two survivors, see the nits below.
+
+### Dispositions
+
+- **B-1 / Sol F1, fixed.** `model.ts:93` `menuLive` clears the state when the room changes. `menuOpen` (`model.ts:98`)
+  reads the cleared state, so Talk, Done, walk north opens the menu with the choice and Close (shot 21). Talk, Done,
+  tap, walk: the same.
+- **Sol F2, fixed.** `Menu.tsx:57` stores the cleared state while the player is away, so a tapped NPC does not reopen
+  the menu on return. Shot 22 shows Ferry Landing with Bram and no menu.
+- **F-1, fixed by the code.** `docs/lessons/mobile.md:59` ("a pending choice shows it again in the next room") is now true.
+- **N-1, fixed.** The entry is gone from `lint/rules/mobile-renderer-imports.yml:19`, and the planted case is in the
+  rule's test file.
+- **Still holds:**
+  - `dismiss` sends nothing; only Close sends `close_choice` (`Choice`, unchanged).
+  - The initial state `{}` lets a restored pending choice open the menu.
+  - `Book.tsx` press and stale-view path: not touched.
+
+### Findings
+
+- **N-2 (nit) `mobile/app/book/model.test.ts:83`.** The comment says "tap clears the dismissal", but no assertion
+  checks it.
+  - Mutant: `menuTap` keeps `dismissed: v.choice?.continuation_id`. The suite stays green.
+  - Failure: Done, tap Bram, then Bram leaves while the player stays. The pending choice has no menu.
+  - Fix: add `menuOpen(room('a', 'c1', false), again) === true`.
+- **N-3 (nit) `mobile/app/book/Menu.tsx:57`.** Deleting the store-on-render line leaves the suite green, so F2 comes back.
+  The F2 test only imitates the hook.
+  - Failure: tap Bram, walk north, return. The menu reopens. Shot 22 is the only evidence.
+  - Acceptable for a presenter slice with no hook harness. Noted, not required.
+
+No Simulator re-walk: the code reading and shots 21 and 22 agree.
