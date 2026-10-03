@@ -1,11 +1,17 @@
 // The phone app shell (R6 SM, SM2): the book view over the real local authority and
-// expo-sqlite, or the screen for a save that does not open. The logic is in
-// authority/local-story/smoke.ts, the drawing in book/ and SaveError.tsx.
+// expo-sqlite, or the screen for a save that does not open. The shell owns every phone-only API
+// (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
+// authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
 import { useState } from 'react';
+import { Alert } from 'react-native';
 import { randomUUID } from 'expo-crypto';
+import { useFonts } from 'expo-font';
 import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
-import { playSmoke } from '../authority/local-story/smoke';
-import Book from './book/Book.tsx';
+import Storage from 'expo-sqlite/kv-store';
+import { localSession } from '../authority/local-story/session';
+import Book, { type Shell } from './book/Book.tsx';
+import { hint } from './book/model.ts';
+import { fonts } from './book/paper.ts';
 import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';
 import { SaveError } from './SaveError';
 
@@ -19,8 +25,8 @@ import { SaveError } from './SaveError';
 // story's loka-save.db stays on the phone untouched. ponytail: no story picker until a second story.
 const NAME = 'loka-lantern.db';
 let db: SQLiteDatabase | undefined;
-const g = globalThis as { loka_smoke?: ReturnType<typeof playSmoke> };
-const smoke = (g.loka_smoke ??= playSmoke(
+const g = globalThis as { loka_session?: ReturnType<typeof localSession> };
+const session = (g.loka_session ??= localSession(
   () => (db = openDatabaseSync(NAME)),
   () => {
     db?.closeSync();
@@ -33,18 +39,34 @@ const smoke = (g.loka_smoke ??= playSmoke(
   { newId: randomUUID, latency: { host: 'hermes_ios', now: () => performance.now() } },
 ));
 
+// Start over destroys the save, so the player confirms it first (10 §31). The hints live here, not
+// in the book, so a fresh book keeps what the player has already seen.
+const shell: Shell = {
+  confirm: (go) =>
+    Alert.alert('Start over?', 'Your saved game will be lost.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Start over', style: 'destructive', onPress: go },
+    ]),
+  learned: hint(Storage, 'hint.learned'),
+  looked: hint(Storage, 'hint.looked'),
+};
+
 export default function App() {
+  const [loaded, fontError] = useFonts(fonts);
   const [starts, setStarts] = useState(0); // a start over opens a fresh book (its log, its pages)
   const [, redraw] = useState({});
+  if (!loaded && !fontError) return null;
   const startOver = () => {
-    const before = smoke.game();
-    smoke.startOver();
+    const before = session.game();
+    const why = session.startOver();
     // Only a start over that replaced the game opens a fresh book; a failed one keeps this book
     // and its log (which says why), so the log must not restart.
-    if (smoke.game() !== before) setStarts((n) => n + 1);
+    if (session.game() !== before) setStarts((n) => n + 1);
     else redraw({});
+    return why;
   };
-  const game = smoke.game();
-  if (!game) return <SaveError failed={smoke.failed()!} startOver={startOver} />;
-  return <Book key={starts} smoke={game} startOver={startOver} />;
+  const game = session.game();
+  if (!game)
+    return <SaveError failed={session.failed()!} startOver={() => shell.confirm(startOver)} />;
+  return <Book key={starts} game={game} shell={shell} startOver={startOver} />;
 }

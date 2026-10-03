@@ -3,7 +3,7 @@
 // an open ring, or a stub ending in a red tick when closed; up and down are stair nodes that fade
 // in with the zoom. Real data only: the current room and its exits.
 import { Animated, Text, View } from 'react-native';
-import type { GameView } from '../../authority/local-story/smoke.ts';
+import type { GameView } from '../../packages/game-view/session.ts';
 import { ANGLE, STAIR, ZOOM as U } from './joystick.ts';
 import { body, paper } from './paper.ts';
 

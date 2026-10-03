@@ -1,0 +1,16 @@
+id: mobile-renderer-imports
+valid:
+  - "import { useState } from 'react';"
+  - "import { Pressable, Text } from 'react-native';"
+  - "import { hint } from './model.ts';"
+  - "import type { Game } from '../../packages/game-view/session.ts';"
+  - "import type { Failed } from '../packages/game-view/session.ts';"
+invalid:
+  - "import Storage from 'expo-sqlite/kv-store';"
+  - "import { useFonts } from 'expo-font';"
+  - "import { openGame } from '../../authority/local-story/session.ts';"
+  - "import { k } from '../../../kernel/ts/src/index.ts';"
+  - "import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';"
+  - "import { x } from './../../authority/local-story/session.ts';"
+  - "import { Alert } from 'react-native';"
+  - "import { Text, Alert as Ask } from 'react-native';"

@@ -1,0 +1,18 @@
+id: mobile-renderer-imports
+language: tsx
+severity: error
+message: 'The renderer imports only react, react-native (never Alert), its own files and the GameSession package, so react-native-web can mount it (owner wish 2026-10-02); the shell, App.tsx, injects the phone''s APIs.'
+files: [mobile/app/book/**, mobile/app/SaveError.tsx]
+ignores: ['**/*.test.ts']
+# ponytail: `import * as RN` and a shell file reached by a plain ./ path are not seen.
+rule:
+  kind: string_fragment
+  inside: { matches: module-specifier }
+  any:
+    - not:
+        regex: '^(react|react-native|\./([\w-][\w.-]*/)*[\w-][\w.-]*|(\.\./)+packages/game-view/[\w-][\w.-]*)$'
+    - regex: '^react-native$'
+      inside:
+        stopBy: end
+        kind: import_statement
+        has: { stopBy: end, kind: import_specifier, regex: '^Alert\b' }

@@ -1,0 +1,14 @@
+id: mobile-authority-no-display-text
+valid:
+  - "const kind = 'save_corrupt';"
+  - "throw new Error('effect outbox not built');"
+  - "throw new Error(`cartridge did not load: ${reason}`);"
+  - "db.getFirstSync('SELECT max(id) AS id FROM receipt WHERE id LIKE ?', p);"
+  - "const tried = 'UPDATE report SET tried = tried + 1 WHERE report_id = ?';"
+  - "const id = `${PREFIX}${n.toString(16)}`;"
+invalid:
+  - "const said = (r) => (r.kind === 'stale_view' ? 'The page had changed; here it is again.' : '');"
+  - "log.push(`${name} leaves.`);"
+  - "const done = 'Taken.';"
+  - "const note = '(pending: not confirmed saved)';"
+  - "const fail = new Error(msg) && 'You cannot do that';"

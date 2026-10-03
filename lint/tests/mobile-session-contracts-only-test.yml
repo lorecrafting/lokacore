@@ -1,0 +1,10 @@
+id: mobile-session-contracts-only
+valid:
+  - "import type { GameView } from '../../../kernel/ts/src/contracts.gen.ts';"
+  - "export type { GameView } from '../../../kernel/ts/src/contracts.gen.ts';"
+invalid:
+  - "import { GameView } from '../../../kernel/ts/src/contracts.gen.ts';"
+  - "import type { World } from '../../../kernel/ts/src/index.ts';"
+  - "import type { Db } from '../../authority/local-story/store.ts';"
+  - "export * from '../../../kernel/ts/src/contracts.gen.ts';"
+  - "import typeless from '../../../kernel/ts/src/contracts.gen.ts';"

@@ -1,0 +1,23 @@
+id: mobile-authority-no-display-text
+language: tsx
+severity: error
+message: 'The local authority returns results, never display text; the app''s presenter says them (owner decision 2026-10-02, presenter split).'
+files: [mobile/authority/**]
+ignores: ['**/*.test.ts']
+# A string with two words, or ending in a full stop, is display text unless it is an Error message, a
+# module specifier or SQL (a db.*Sync argument, or a constant that starts with a SQL verb).
+rule:
+  kind: string_fragment
+  regex: '[A-Za-z]+ [A-Za-z]+|[A-Za-z]\.$'
+  not:
+    any:
+      - inside: { matches: module-specifier }
+      - regex: '^\s*(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|PRAGMA)\b' # a SQL constant
+      - inside:
+          stopBy: end
+          kind: new_expression
+          has: { field: constructor, regex: 'Error$' }
+      - inside:
+          stopBy: end
+          kind: call_expression
+          has: { field: function, regex: 'Sync$' }
