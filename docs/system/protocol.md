@@ -21,25 +21,10 @@ and policy op has exactly one owning capability (`:159`).
 pass `numeric-vectors.json` and `adverse-cases.json` (`test/loka/core/portable_abi_test.exs`,
 `kernel/ts/test/portable_abi.test.ts`).
 
-- **Canonical JSON**: null, booleans, integers in ±(2^53−1), UTF-8 strings, arrays, objects
-  with sorted keys, no whitespace, at most 128 nested containers; a strict parser rejects
-  floats, exponents, duplicate keys and bad Unicode (`kernel/ts/src/canonical.ts:10`, `:12`,
-  `:28`, `:167`; `lib/loka/core/canonical.ex:10`, `:27`, `:42`). The hash is lowercase hex
-  SHA-256 of the canonical bytes (`canonical.ts:174`, `canonical.ex:50`).
-- **Checked integers**: add, sub, mul, divide (truncated quotient and remainder); out of range
-  or non-integer is `integer_overflow`, never wraparound (`kernel/ts/src/int.ts:17`,
-  `lib/loka/core/int.ex:12`).
-- **RNG**: xoshiro128** 1.1, state four 32-bit words not all zero; `uniform(state, bound,
-  maxDraws)` draws in [0, bound) by rejection sampling, rejected draws advance the state, past
-  `maxDraws` it throws `rng_budget_exhausted` and the decision is discarded
-  (`kernel/ts/src/rng.ts:26`, `:44`; `lib/loka/core/rng.ex:34`).
-- **IdSource**: a UUIDv8 from the first 16 bytes of SHA-256 over the canonical
-  `["loka-id-v1", world_context_id, command_id, ordinal]`, version and variant bits set
-  (`kernel/ts/src/id_source.ts:14`, `:35`; `lib/loka/core/id_source.ex:24`). Each decision
-  mints ordinals 0, 1, 2, … from one allocator (`kernel/ts/src/decision.ts:218`).
-- **CommandId**: the same recipe over `["loka-command-v1", idempotency_scope_id,
-  invocation_id]`; authority placement never enters it (`id_source.ts:21`). A `run_job`'s id
-  is `["loka-job-command-v1", job_id, due_time]` (`:27`).
+Implementations: canonical JSON and its hash (`kernel/ts/src/canonical.ts`,
+`lib/loka/core/canonical.ex`), checked integers (`int.ts`, `int.ex`), RNG (`rng.ts`, `rng.ex`),
+IdSource, CommandId and the job CommandId (`id_source.ts`, `id_source.ex`); a decision mints its
+ordinals from one allocator (`kernel/ts/src/decision.ts:218`).
 
 ## The decision loop
 
@@ -84,9 +69,8 @@ storage half):
 
 A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (always empty
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
-`fault` (`code`, an evaluation fault: `budget_exceeded`, `conflicting_write`,
-`precondition_failed`, `containment_cycle`, `capacity_exceeded`, `nonfuture_job`,
-`unowned_event`, `evaluator_error`). A rejection or fault changes nothing: not the state, RNG,
+`fault` (`code`, an evaluation fault: `EVALUATION_FAULTS`, generated from
+`protocol/error_registry.json` into `kernel/ts/src/contracts.gen.ts:347`). A rejection or fault changes nothing: not the state, RNG,
 clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/invariants.ts:252`).
 
 ## Composition
@@ -109,8 +93,8 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 | `cooldown.start` | actor's action | `from` is the stored start; `at` is the clock |
 | `barrier.transition` | barrier | `from` is the state; the transition is legal (`:32`; [mechanics](mechanics.md#barrier1-kerneltssrcrulesbarrierts)) |
 
-A resource's current value is its stored value plus `gain` per hour boundary crossed since it
-was stored, capped at `maximum`; unset means `start` at time 0 (`:87`). The result is the
+A resource's `from` is its regenerated value ([resource@1](mechanics.md#resource1-kerneltssrcresourcets));
+unset means `start` at time 0 (`:87`). The result is the
 written rows sorted by canonical target text, which the host commits.
 
 **State** (`kernel/ts/src/decision.ts:49`): `clock`, `containers` (entity → container),
@@ -155,8 +139,8 @@ cartridge's actions, recipes, the offers of quests the actor has no instance of,
 of dialogues whose speaker is in the room (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
 intersect; `:58`), then the answers to a pending choice (`choose`, `close_choice`), which no
-contribution removes. A recipe's admission adds `cooldown` (time since its last admitted
-attempt below the recipe's cooldown) and `insufficient_resource` (`:244`).
+contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
+([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
 
 ## Policy
 

@@ -77,11 +77,9 @@ Compiled artifacts load in TypeScript with identical bytes, hash and lock
 (`test/loka/cartridge_cross_kernel_test.exs:113`); the loader corpus is
 `protocol/fixtures/cartridge_loader.json`.
 
-A compiled v2 cartridge (`protocol/cartridge.schema.json` CompiledCartridge) holds `manifest`,
-`lock`, `entry`, `text`, optional `calendar`, and the definition maps keyed by
-DefinitionRefString (`<id>@<version>:<kind>/<key>`): `facts`, `policies`, `actions`, `rooms`,
-`npcs`, `items`, `recipes`, `resources`, `barriers`, `quests`, `reactions`, `dialogues`,
-`story_points` (`cartridge.ts:110`).
+A compiled cartridge is a CompiledCartridge ([contracts](../contracts.gen.md#cartridge-artifact-contracts-protocolcartridgeschemajson)):
+the manifest, lock and definition maps keyed by DefinitionRefString
+(`<id>@<version>:<kind>/<key>`; `cartridge.ts:110`).
 
 ## Installed capabilities
 
@@ -110,7 +108,6 @@ each exercise one slice; most carry replayable transcripts
 `kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
 Ferryman's Lantern": four rooms, Bram, one lantern, one offered quest with a
 `post_activation_event` objective, one dialogue with two choices (`carry`, `leave` with a
-hand-over), a locked west gate keyed by the lantern, the fact `search_plan`, a story point
-with one outcome per choice, pools hp 10, ma 100, mv 100, start 06:00
-(`cartridges/lantern_proof/*`). The phone bundles its known answer
+hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
+(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). The phone bundles its known answer
 (`mobile/app/App.tsx`).

@@ -102,7 +102,7 @@ The app shell imports the local authority's smoke controller directly today
   (`kernel/ts/test/sim.test.ts:22`). Its proposals feed the Elixir compose differential.
 - **Fault simulation** (`mobile/authority/local-story/faults.test.ts`): the simulator's
   sequences through the local authority on real SQLite with real faults (SQLITE_FULL, a failed
-  COMMIT, SIGKILL after COMMIT; `:3`).
+  COMMIT, SIGKILL just before or after COMMIT; `:4`).
 
 ## Observability
 
