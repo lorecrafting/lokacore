@@ -149,6 +149,20 @@ The table below describes the files as imported. Later amendments are in git his
   (a move north replaces the wait), and the fenced `other` call of choice-unknown-commit-absent
   and -committed is a move north. [conformance/lantern-traces.json](conformance/lantern-traces.json)
   is unchanged (no wait step; `clock` 6 and `bram_room` landing throughout).
+- 2026-10-02, [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)
+  (paraphrased): Bram's quest starts from a dialogue choice, not a place action. Amended:
+  [docs/system/mechanics.md](../system/mechanics.md) quest@1 and dialogue@1 (the source of
+  truth since the docs compaction; the archived pre-release-proof is not edited). Rewritten by
+  hand: [conformance/lantern-traces.json](conformance/lantern-traces.json) (`fixture_version` 2,
+  SHA-256 now `99e8a554e262195d0aeaa9f556a4328dc8737b6f9bdf842058ab51ae1994d0be`): step 0
+  `activate` becomes the offer talk (`offer`, continuation `offer-choice:offer`) and the accept
+  choose (`accept`, outcome `accept`, narration `proof.accept`); every later revision moves up by
+  one and the accept's narration heads every later `narration` list.
+  [conformance/adverse-cases.json](conformance/adverse-cases.json) (`fixture_version` 3, SHA-256
+  now `f34106a44231581dfa2fea3178ee42067087b13159e874966da7936b89d21b13`, pinned by the portable
+  ABI tests): the `lantern` cases the same way (prefixes `to` 10; early-possession replays steps 2
+  to 8, then the offer talk and accept, its `activated_with_possession` gone with the offer); the
+  `uniform`, `tiny` and `composition` suites are unchanged.
 
 ## Link rewrites (the only byte changes at import)
 

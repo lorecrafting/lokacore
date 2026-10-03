@@ -1,5 +1,5 @@
 {
-  "fixture_version": 2,
+  "fixture_version": 3,
   "evidence_class": "specification-known-answers",
   "note": "Adverse known answers. Tiny and Lantern steps use the cases.json/lantern-traces.json shapes; see conformance/README.md.",
   "uniform": [
@@ -3693,22 +3693,22 @@
   "lantern": [
     {
       "id": "early-possession",
-      "description": "Taking the lantern before the quest exists: activation credits current possession, not a replayed event.",
+      "description": "Taking the lantern before accepting the quest: the current_state objective credits current possession, not a replayed event.",
       "prefix": {
         "trace": "lantern-carry",
-        "from": 1,
-        "to": 8
+        "from": 2,
+        "to": 9
       },
       "steps": [
         {
           "request": {
-            "id": "early-accept",
+            "id": "early-offer",
             "actor": "hero",
-            "action": "activate"
+            "action": "talk"
           },
           "result": {
             "kind": "accepted",
-            "code": "activated_with_possession",
+            "code": "choice_opened",
             "revision": 8,
             "delivery": "new"
           },
@@ -3716,8 +3716,8 @@
             "revision": 8,
             "room": "landing",
             "lantern": "hero",
-            "quest": "active",
-            "choice": null,
+            "quest": "absent",
+            "choice": "offer-choice:offer",
             "search_plan": "undecided",
             "clock": 6,
             "bram_room": "landing",
@@ -3733,6 +3733,50 @@
         },
         {
           "request": {
+            "id": "early-accept",
+            "actor": "hero",
+            "action": "choose",
+            "input": {
+              "choice_id": "accept",
+              "continuation_id": "offer-choice:offer"
+            }
+          },
+          "result": {
+            "kind": "accepted",
+            "code": "accept",
+            "revision": 9,
+            "delivery": "new"
+          },
+          "state": {
+            "revision": 9,
+            "room": "landing",
+            "lantern": "hero",
+            "quest": "active",
+            "choice": null,
+            "search_plan": "undecided",
+            "clock": 6,
+            "bram_room": "landing",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
+            "story_point": null
+          }
+        },
+        {
+          "request": {
             "id": "talk",
             "actor": "hero",
             "action": "talk"
@@ -3740,11 +3784,11 @@
           "result": {
             "kind": "accepted",
             "code": "choice_opened",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -3758,7 +3802,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -3775,11 +3828,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -3794,6 +3847,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -3819,7 +3880,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -3831,11 +3892,11 @@
           "result": {
             "kind": "accepted",
             "code": "dropped",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "landing",
             "quest": "active",
@@ -3849,7 +3910,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -3866,11 +3936,11 @@
           "result": {
             "kind": "rejected",
             "code": "not_owned",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "landing",
             "quest": "active",
@@ -3884,7 +3954,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -3897,11 +3976,11 @@
           "result": {
             "kind": "accepted",
             "code": "choice_closed",
-            "revision": 11,
+            "revision": 12,
             "delivery": "new"
           },
           "state": {
-            "revision": 11,
+            "revision": 12,
             "room": "landing",
             "lantern": "landing",
             "quest": "active",
@@ -3915,7 +3994,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         }
@@ -3927,7 +4015,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -3942,11 +4030,11 @@
           "result": {
             "kind": "accepted",
             "code": "moved",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "green",
             "lantern": "hero",
             "quest": "active",
@@ -3960,7 +4048,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -3977,11 +4074,11 @@
           "result": {
             "kind": "rejected",
             "code": "not_present",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "green",
             "lantern": "hero",
             "quest": "active",
@@ -3995,7 +4092,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4008,11 +4114,11 @@
           "result": {
             "kind": "accepted",
             "code": "choice_closed",
-            "revision": 11,
+            "revision": 12,
             "delivery": "new"
           },
           "state": {
-            "revision": 11,
+            "revision": 12,
             "room": "green",
             "lantern": "hero",
             "quest": "active",
@@ -4026,7 +4132,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         }
@@ -4038,7 +4153,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -4054,11 +4169,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4073,6 +4188,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4102,11 +4225,11 @@
           "result": {
             "kind": "accepted",
             "code": "moved",
-            "revision": 11,
+            "revision": 12,
             "delivery": "new"
           },
           "state": {
-            "revision": 11,
+            "revision": 12,
             "room": "green",
             "lantern": "bram",
             "quest": "resolved",
@@ -4121,6 +4244,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4152,11 +4283,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "replay"
           },
           "state": {
-            "revision": 11,
+            "revision": 12,
             "room": "green",
             "lantern": "bram",
             "quest": "resolved",
@@ -4171,6 +4302,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4196,7 +4335,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -4212,11 +4351,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4231,6 +4370,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4261,11 +4408,11 @@
           "result": {
             "kind": "rejected",
             "code": "integrity_conflict",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4280,6 +4427,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4310,11 +4465,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "replay"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4329,6 +4484,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4354,7 +4517,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -4373,11 +4536,11 @@
           "result": {
             "kind": "retryable",
             "code": "rolled_back",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4391,7 +4554,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4408,11 +4580,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4427,6 +4599,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4452,7 +4632,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -4471,11 +4651,11 @@
           "result": {
             "kind": "retryable",
             "code": "commit_pending",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4489,7 +4669,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4498,11 +4687,11 @@
           "result": {
             "kind": "retryable",
             "code": "commit_pending",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4516,7 +4705,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4532,11 +4730,11 @@
           "result": {
             "kind": "retryable",
             "code": "commit_pending",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4550,7 +4748,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4559,7 +4766,7 @@
           "committed": false,
           "result": null,
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4573,7 +4780,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4582,11 +4798,11 @@
           "result": {
             "kind": "recovered",
             "code": "recovered",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4600,7 +4816,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4617,11 +4842,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4636,6 +4861,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4661,7 +4894,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -4680,11 +4913,11 @@
           "result": {
             "kind": "retryable",
             "code": "commit_pending",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4698,7 +4931,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4707,11 +4949,11 @@
           "result": {
             "kind": "retryable",
             "code": "commit_pending",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4725,7 +4967,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4741,11 +4992,11 @@
           "result": {
             "kind": "retryable",
             "code": "commit_pending",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4759,7 +5010,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -4768,7 +5028,7 @@
           "committed": true,
           "result": null,
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4782,11 +5042,20 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           },
           "durable": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4801,6 +5070,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4823,11 +5100,11 @@
           "result": {
             "kind": "recovered",
             "code": "recovered",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4842,6 +5119,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4872,11 +5157,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "replay"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4891,6 +5176,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4916,7 +5209,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -4935,11 +5228,11 @@
           "result": {
             "kind": "retryable",
             "code": "commit_unknown",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -4953,11 +5246,20 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           },
           "durable": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -4972,6 +5274,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -4994,11 +5304,11 @@
           "result": {
             "kind": "recovered",
             "code": "recovered",
-            "revision": 10,
+            "revision": 11,
             "delivery": "new"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -5013,6 +5323,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -5043,11 +5361,11 @@
           "result": {
             "kind": "accepted",
             "code": "resolved_leave",
-            "revision": 10,
+            "revision": 11,
             "delivery": "replay"
           },
           "state": {
-            "revision": 10,
+            "revision": 11,
             "room": "landing",
             "lantern": "bram",
             "quest": "resolved",
@@ -5062,6 +5380,14 @@
               4
             ],
             "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              },
               {
                 "id": "proof-choice:talk:outcome",
                 "text_key": "proof.leave",
@@ -5087,7 +5413,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -5099,11 +5425,11 @@
           "result": {
             "kind": "accepted",
             "code": "observed",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -5117,7 +5443,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -5130,11 +5465,11 @@
           "result": {
             "kind": "accepted",
             "code": "observed",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -5148,7 +5483,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -5161,11 +5505,11 @@
           "result": {
             "kind": "accepted",
             "code": "observed",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -5179,7 +5523,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         }
@@ -5191,7 +5544,7 @@
       "prefix": {
         "trace": "lantern-carry",
         "from": 0,
-        "to": 9
+        "to": 10
       },
       "steps": [
         {
@@ -5208,11 +5561,11 @@
           "result": {
             "kind": "rejected",
             "code": "stale_view",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -5226,7 +5579,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         },
@@ -5242,11 +5604,11 @@
           "result": {
             "kind": "rejected",
             "code": "exit_unavailable",
-            "revision": 9,
+            "revision": 10,
             "delivery": "new"
           },
           "state": {
-            "revision": 9,
+            "revision": 10,
             "room": "landing",
             "lantern": "hero",
             "quest": "active",
@@ -5260,7 +5622,16 @@
               3,
               4
             ],
-            "narration": [],
+            "narration": [
+              {
+                "id": "offer-choice:offer:outcome",
+                "text_key": "proof.accept",
+                "bindings": {
+                  "actor": "hero",
+                  "bram": "bram"
+                }
+              }
+            ],
             "story_point": null
           }
         }
