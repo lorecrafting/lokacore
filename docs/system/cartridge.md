@@ -70,7 +70,7 @@ cartridge and its hash, or the first diagnostic of the first failing stage (`:62
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:108`), the
 lock (`:156`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
-references (`kernel/ts/src/cartridge_refs.ts:152` and the `cartridge_*.ts` twins of the
+references (`kernel/ts/src/cartridge_refs.ts:151` and the `cartridge_*.ts` twins of the
 compiler's checks), and the installed kernel (`cartridge.ts:224`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
