@@ -35,6 +35,8 @@ and not repeated here.
 - Puppeting comes later; rules read the actor from the command, never the player
   ([record](../decisions/owner-decision-puppeting-2026-09-25.md)). Player-written descriptions
   come with the online work ([record](../decisions/owner-decisions-r5-s4-2026-09-25.md)).
+- Bram's quest starts from a dialogue choice, not a place action (not built yet: the ROADMAP row
+  "Quest from dialogue"); one-off quest triggers may come later ([record](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 - The owner is the human-proof tester for now ([record](../decisions/owner-decision-r6p-plan-2026-10-01.md)).
 
 ## Architecture and engine
@@ -103,7 +105,10 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   ([record](../decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
   ([record](../decisions/owner-decision-autonomy-2026-09-30.md)).
-- Reviews: codex Astra only on gate reviews and `proposal.ts` changes; Sol on other core and
+- Gates are slim: the owner's play when there is something touchable, one codex Astra audit of the
+  riskiest code, and a short checklist with one reviewer; no Opus-plus-Astra double review of a
+  docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
+- Reviews: codex Astra only on the gate audit and `proposal.ts` changes; Sol on other core and
   contract first reviews and every fix re-check; Fable only as codex's stand-in (and, by exception,
   the docs compaction); Opus drafts briefs; the PM keeps one persistent worktree
   ([record](../decisions/owner-decision-review-rules-2026-10-01.md),
@@ -112,6 +117,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   ([record](../decisions/owner-decisions-review-flow-2026-09-30.md)).
 - Developers default to Sonnet; Opus for kernel and contract-freeze slices
   ([record](../decisions/owner-decision-sonnet-developers-2026-09-30.md)).
+- The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
+  ([record](../decisions/owner-decision-ts-test-types-2026-09-25.md)).
 - Native mobile builds run only when native inputs change; the merge rule is every CI job that ran
   is green ([record](../decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
 - UI-slice reviews drive the app with agent-device on the iOS Simulator
