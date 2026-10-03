@@ -8,8 +8,9 @@
 // locked barrier is exit_locked), close needs open, lock needs closed, unlock needs locked, else
 // invalid_state; lock and unlock then need the barrier's key_item held by the actor's body,
 // directly or inside what it holds (has_item), else not_owned. ponytail: has_item climbs a held
-// locked chest too, so a key inside it opens it (never a lockout); custody for keys if content
-// needs it. Accepted: one barrier.transition and barrier_changed. Every face of the door names
+// locked chest too, so a key inside it opens it; custody for keys if content needs it. The loader
+// rejects keys never reachable at load time, but play can lock a container holding its own key
+// (runtime lockout) until put or a lockout rule exists. Accepted: one barrier.transition and barrier_changed. Every face of the door names
 // this one state.
 import type {
   BarrierState,

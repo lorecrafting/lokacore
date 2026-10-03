@@ -44,8 +44,9 @@ without a barrier `invalid_target`. Then, for both: legal transitions only (`MOV
 open needs closed (a locked one is `exit_locked`), close needs open, lock needs closed, unlock
 needs locked, else `invalid_state`; lock and unlock need the barrier's `key_item` held by the
 body, directly or nested, else `not_owned` (`:83`). `has_item` climbs every held container, a
-locked one included, so a key locked inside a held chest still opens it (a `ponytail:` limit,
-never a lockout). These checks are one read-only function the rule and the GameView's door and
+locked one included, so a key locked inside a held chest still opens it (a `ponytail:` limit).
+The loader rejects keys that can never be reached at load time, but play can still lock a
+container whose key is inside it (a runtime lockout) until `put` or a lockout rule exists. These checks are one read-only function the rule and the GameView's door and
 container verbs share (`transition`, `:63`). Accepted: one `barrier.transition` and
 `barrier_changed`. Both faces of a door name one state; a barrier an item names is named by no
 exit and no other item (the loader's `BARRIER_MISMATCH`). Policy leaf `barrier_state`. Keys that
