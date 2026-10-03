@@ -39,7 +39,8 @@ A cartridge whose manifest requires `position@1` gets the engine fact
 "standing"}, "scopes": ["player"], "meaning": "The character's position (position@1): only its
 rule writes it."}`, and `fact@1` in its requires and lock, since its rule's `fact.assign` logs
 `fact_changed` (`lib/loka/content/position.ex`). Without position@1 a fact named `position` is
-the cartridge's own.
+the cartridge's own. The compiler validates authored capability versions before adding this
+dependency, and includes it in the effective requirements before checking content ownership.
 
 What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 `protocol/cartridge.schema.json` DiagnosticCode):

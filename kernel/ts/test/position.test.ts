@@ -65,7 +65,7 @@ function invoke(w: World, action_key: string, input = {}) {
   const resolves = Object.fromEntries(
     Object.values(resolved(w, w.character)).map((a) => [a.key, a.command]),
   );
-  const observation = { view: gameView(w), command, decision: s.decision, resolves };
+  const observation = { view: gameView(w), command, decision: s.decision, resolves, action_key };
   assert.ok(check('gameview_agrees_with_admission', observation), action_key);
   assert.ok(holds('facts_typed', s.world), `facts_typed after ${action_key}`);
   return s;
@@ -168,22 +168,31 @@ test('the position walk by invocation: only move needs standing, after the door'
 });
 
 // Breaks: an alias of a position verb listed while it is the current position (listing by key,
-// not by resolved command), or the invariant blind to aliases.
-test('a cartridge alias of sit is listed and dropped with sit', () => {
-  const w = world((c) => {
-    Object.assign(c.text, { 'action.kneel': 'Kneel', 'action.kneel.a11y': 'Kneel down' });
-    for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities]) caps.policy = 1;
-    c.actions[`${R}:action/kneel`] = {
-      key: 'kneel',
-      command: 'sit',
-      target: { kind: 'none' },
-      input: [],
-      label: 'action.kneel',
-      accessibility: 'action.kneel.a11y',
-      priority: 0,
-      policy: { policy_version: 1, root: { op: 'all', items: [] } },
-    };
-  });
+// not by resolved command), or the invariant treating an alias's failed policy as a failure of
+// the available engine verb.
+test('a cartridge alias of sit is listed and dropped with sit, with its own policy', () => {
+  const aliased = (allow = true) =>
+    world((c) => {
+      Object.assign(c.text, { 'action.kneel': 'Kneel', 'action.kneel.a11y': 'Kneel down' });
+      for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities]) caps.policy = 1;
+      c.actions[`${R}:action/kneel`] = {
+        key: 'kneel',
+        command: 'sit',
+        target: { kind: 'none' },
+        input: [],
+        label: 'action.kneel',
+        accessibility: 'action.kneel.a11y',
+        priority: 0,
+        policy: {
+          policy_version: 1,
+          root: {
+            op: 'all',
+            items: allow ? [] : [{ op: 'fact_compare', fact: FACT, equals: 'sitting' }],
+          },
+        },
+      };
+    });
+  const w = aliased();
   assert.ok(place(gameView(w)).includes('kneel'));
   const sat = run(w, [['kneel', 'sat']]);
   assert.ok(!place(gameView(sat)).includes('kneel'));
@@ -191,6 +200,12 @@ test('a cartridge alias of sit is listed and dropped with sit', () => {
   run(sat, [
     ['kneel', 'invalid_state'],
     ['stand', 'stood'],
+  ]);
+  const denied = aliased(false);
+  assert.equal(gameView(denied).actions.find((a) => a.action_key === 'kneel')!.available, false);
+  run(denied, [
+    ['kneel', 'invalid_state'],
+    ['sit', 'sat'],
   ]);
 });
 

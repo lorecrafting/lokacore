@@ -22,10 +22,11 @@ defmodule Loka.ContentRestTest do
   defp compile(dir, position?, files) do
     File.cp_r!(@ferry, dir)
     caps = Map.merge(src("cartridge.json")["requires"]["capabilities"], %{"reaction" => 1})
-    caps = if position?, do: Map.put(caps, "position", 1), else: caps
+    # Breaks: fact@1 added only after validation, so legal reads under position@1 are refused.
+    caps = if position?, do: caps |> Map.delete("fact") |> Map.put("position", 1), else: caps
     manifest = put_in(src("cartridge.json"), ["requires", "capabilities"], caps)
 
-    for {rel, v} <- Map.put(files, "cartridge.json", manifest) do
+    for {rel, v} <- Map.put_new(files, "cartridge.json", manifest) do
       File.mkdir_p!(Path.dirname(Path.join(dir, rel)))
       File.write!(Path.join(dir, rel), JSON.encode!(v))
     end
@@ -108,5 +109,25 @@ defmodule Loka.ContentRestTest do
 
     assert {:ok, _, _} = compile(Path.join(dir, "reads"), true, writes(true))
     assert {:ok, _, _} = compile(Path.join(dir, "own"), false, writes())
+  end
+
+  # Breaks: dependency normalization before authored-version validation hides fact@2.
+  test "position's implicit fact dependency does not hide an unsupported authored version", %{
+    tmp_dir: dir
+  } do
+    manifest =
+      update_in(src("cartridge.json"), ["requires", "capabilities"], fn caps ->
+        Map.merge(caps, %{"position" => 1, "fact" => 2})
+      end)
+
+    assert compile(dir, true, %{"cartridge.json" => manifest}) ==
+             {:error,
+              [
+                %{
+                  d("cartridge.requires.capabilities.fact")
+                  | "code" => "UNKNOWN_CAPABILITY",
+                    "message_key" => "diagnostics.unknown_capability"
+                }
+              ]}
   end
 end

@@ -24,13 +24,14 @@ type Any = any;
 // verb on the item it targets (a container, c1-locks, nested ones in contents included), and wear
 // and remove (protocol.md GameView as amended by c1-equipment) on the item they name, and never
 // among the place's actions; a listed take is never refused not_present. A position verb
-// (position@1, c1-position) that some listed, available place action resolves to is never refused
-// invalid_state, and one none resolves to is never accepted.
+// (position@1, c1-position) uses the selected action_key when supplied, else any matching place
+// action: available, it is never refused invalid_state; unavailable or absent, never accepted.
 export const gameview_agrees_with_admission = ({
   view,
   command,
   decision,
   resolves = {},
+  action_key,
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type; // own keys only: an action may be keyed `constructor`
@@ -55,7 +56,10 @@ export const gameview_agrees_with_admission = ({
   if (Object.hasOwn(POSITION_VERBS, type)) {
     const listed = view.actions.some(
       (a: AdvertisedAction) =>
-        a.available && Object.hasOwn(resolves, a.action_key) && resolves[a.action_key] === type,
+        (action_key === undefined || a.action_key === action_key) &&
+        a.available &&
+        Object.hasOwn(resolves, a.action_key) &&
+        resolves[a.action_key] === type,
     );
     return listed ? code !== 'invalid_state' : decision.kind !== 'accepted';
   }

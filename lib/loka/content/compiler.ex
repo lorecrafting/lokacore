@@ -92,6 +92,7 @@ defmodule Loka.Content.Compiler do
         {extra, manifest} = Map.split(m, ["entry", "calendar", "world"])
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
         diags = Requires.check(rel, manifest, registry)
+        manifest = Position.requires(manifest)
         {manifest, located, diags ++ calendar(manifest, extra["calendar"], registry)}
 
       diags ->

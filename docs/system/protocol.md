@@ -216,7 +216,9 @@ recipes, and for the door and container verbs and `wear`/`remove`, matched by th
 listed action resolves to (a cartridge alias included): one listed on its exit or item (a nested
 one in `contents` included) is never refused with a code the view predicts (`not_present`
 among them), one not listed is never accepted, and none of `wear`/`remove` is a place action; a
-position verb (`stand`, `sit`, `rest`, `sleep`) some listed, available place action resolves to is never
-refused `invalid_state`, and one none resolves to is never accepted; an available exit's move is never
-refused `invalid_state`; a
-`take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:29`, `:75`).
+position invocation (`stand`, `sit`, `rest`, `sleep`) checks its selected `action_key` when
+the observation supplies it: an available matching place action is never refused
+`invalid_state`, and an unavailable or absent one is never accepted. Without an action key,
+any available place action resolving to that command qualifies. An available exit's move is
+never refused `invalid_state`; a
+`take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:29`, `:79`).

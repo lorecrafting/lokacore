@@ -4,12 +4,11 @@ defmodule Loka.Content.Artifact do
   manifest and its lock, each definition map keyed by DefinitionRefString, and, in v2, the
   entry, text, default pools and cartridge.json's calendar and world.
   """
-  alias Loka.Content.{Position, Resources}
+  alias Loka.Content.Resources
 
   @doc "The cartridge, v2 when `v2` is its {entry, text}, with cartridge.json's calendar and world."
   @spec cartridge(map(), map(), {term(), map()} | nil, {term(), map()}) :: map()
-  def cartridge(m, defs, v2, {_, settings}),
-    do: Map.merge(cartridge(Position.requires(m), defs, v2), settings)
+  def cartridge(m, defs, v2, {_, settings}), do: Map.merge(cartridge(m, defs, v2), settings)
 
   defp cartridge(m, defs, nil) do
     %{
