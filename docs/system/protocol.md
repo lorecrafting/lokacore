@@ -135,8 +135,8 @@ correlates everything to the player's command (`proposal.ts:183`).
 An actor's actions (`kernel/ts/src/actions.ts:146`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS`, `:85`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, each with its target kind and input; policy always true), then the
-cartridge's actions, recipes, the offers of quests the actor has no instance of, and the talks
-of dialogues whose speaker is in the room (`override`: a cartridge may redefine a verb), then
+cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
+of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
 intersect; `:58`), then the answers to a pending choice (`choose`, `close_choice`), which no
 contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`

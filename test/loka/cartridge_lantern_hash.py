@@ -44,7 +44,6 @@ value = {
    "room_line": "item.lantern.room", "description": "item.lantern.description",
    "location": {"in": "room", "room": ref("room","shelter")}, "key": "lantern"}},
  "quests": {k("quest","lantern"): {"title": "quest.lantern.title",
-   "offer": {"label": "quest.lantern.accept", "policy": P({"op":"all","items":[]})},
    "objective": {"evidence": "current_state", "policy": P({"op":"has_item","item":ref("item","lantern")})},
    "key": "lantern"}},
  "dialogues": {k("dialogue","bram"): {"npc": ref("npc","bram"),
@@ -55,7 +54,15 @@ value = {
    "choices": {"carry": {"label":"dialogue.bram.carry","narration":"proof.carry","sequence":assign("player_led")},
                "leave": {"label":"dialogue.bram.leave","narration":"proof.leave","sequence":assign("party_led"),
                          "hand_over": {"item":"lantern","to":"bram"}}},
-   "key": "bram"}},
+   "key": "bram"},
+   k("dialogue","bram_offer"): {"npc": ref("npc","bram"),
+   "policy": P({"op":"not","item":{"op":"any","items":[
+     {"op":"quest_state","quest":ref("quest","lantern"),"state":s}
+     for s in ["active","objectives_complete","resolved","failed","abandoned"]]}}),
+   "prompt": "dialogue.bram_offer.prompt",
+   "roles": {"bram": {"role":"npc","npc":ref("npc","bram")}},
+   "choices": {"accept": {"label":"quest.lantern.accept","narration":"proof.accept","accept":ref("quest","lantern")}},
+   "key": "bram_offer"}},
  "story_points": {k("story_point","proof_terminal"): {"key": "proof_terminal", "outcomes": {
    "carry": {"dialogue": ref("dialogue","bram"), "choice": "carry"},
    "leave": {"dialogue": ref("dialogue","bram"), "choice": "leave"}}}},
@@ -73,10 +80,12 @@ DESC = ("Known answer for the loka-cartridge-v2 content hash of cartridges/lante
  "The Ferryman's Lantern (pre-release-proof.md, Concrete proof; R6P P3; 05 §11; CartridgeArtifact.content_hash): its own ID "
  "and save lineage; four rooms (landing north to green, green east to reed bank, reed bank east to shelter, each reciprocal) and "
  "the blocked west exit, the barrier old_gate between landing (west) and shelter (east), locked, key_item the lantern "
- "(room.schema.json BarrierDefinition; PM ruling 1, docs/decisions/pm-decision-lantern-proof-content-2026-10-01.md); landing's "
+ "(room.schema.json BarrierDefinition; PM ruling 1, docs/archive/decisions/pm-decision-lantern-proof-content-2026-10-01.md); landing's "
  "description variants on search_plan (player_led, party_led), else Bram's opening; calendar@1 starting at 06:00 and Bram at "
- "the landing with no schedule (owner decision, docs/decisions/owner-decision-untimed-lantern-2026-10-02.md); the lantern at the shelter; the quest lantern (offered, current_state has_item "
- "objective); the player fact search_plan; Bram's dialogue (talk while the quest is active, roles bram and lantern, carry "
+ "the landing with no schedule (owner decision, docs/decisions/owner-decision-untimed-lantern-2026-10-02.md); the lantern at the shelter; the quest lantern (no offer, current_state has_item "
+ "objective; owner decision, docs/decisions/owner-decision-quest-from-dialogue-2026-10-02.md); the player fact search_plan; "
+ "Bram's offer dialogue bram_offer (talk while the player has no instance of the quest, role bram, one choice accept "
+ "accepting the quest with narration proof.accept); Bram's dialogue (talk while the quest is active, roles bram and lantern, carry "
  "setting player_led with narration proof.carry, leave setting party_led, handing the lantern to Bram, narration proof.leave); "
  "the story point proof_terminal (outcomes carry and leave, Bram's dialogue choice of that name). "
  "resources.json (owner decision, untimed Lantern record): hp 10 of 10, ma 100 of 100, mv 100 of 100, the default gains. Assembled by hand from the "

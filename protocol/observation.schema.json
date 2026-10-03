@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Observation contracts",
-  "description": "The one observation record format, its stores and correlation ids, and the game-trace entry (11 §11-§15; ADR-075, docs/decisions/adr-075-observability-proposal.md). Observation is never authority.",
+  "description": "The one observation record format, its stores and correlation ids, and the game-trace entry (11 §11-§15; ADR-075, docs/archive/decisions/adr-075-observability-proposal.md). Observation is never authority.",
   "$defs": {
     "ObservationFormat": {
       "description": "The format tag of every observation record. A new field or meaning takes a new tag.",

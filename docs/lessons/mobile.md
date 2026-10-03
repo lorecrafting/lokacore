@@ -53,10 +53,11 @@ Hard-won lessons for `mobile/` and physical-device runs.
   `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save; for a
   fresh start, uninstall and reinstall the app.
 - The walk on a fresh Release build (the Lantern, Ferry Landing): `press 'label="Got it"' --settle`
-  (the map tip; wait 2 s after `open`, an early press misses), `press "label=\"Offer to fetch Bram's lantern\"" --settle`,
-  `press 'label="Map"' --settle`. Bram is a context menu: `press 'label="Bram the ferryman, open"'` opens it,
-  `press 'label="Talk to Bram the ferryman"'` shows the choice and Close in it, `press 'label="Done"'` hides it
-  (a pending choice shows it again in the next room). Journal, Carrying and Settings are taps on the Character
+  (the map tip; wait 2 s after `open`, an early press misses). Bram is a context menu: `press 'label="Bram the ferryman, open"'`
+  opens it, `press 'label="Talk to Bram the ferryman"'` shows the choice in it (the answers and Close), then
+  `press "label=\"Offer to fetch Bram's lantern\"" --settle` accepts the quest (the result line is in the room log);
+  `press 'label="Done"'` hides the menu (a pending choice shows it again in the next room);
+  `press 'label="Map"' --settle`. Journal, Carrying and Settings are taps on the Character
   page: `press` the status line's button (its label starts "Character, hp ..."; copy it from `snapshot -i`).
   A selector with spaces is one shell argument, quotes inside. The footer map takes a raw
   `gesture pan 207 781 0 -55 5000` (north; 55 px is about 21 map units); take a mid-drag shot with

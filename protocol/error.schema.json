@@ -62,7 +62,7 @@
       ]
     },
     "GameError": {
-      "description": "A typed error: a stable code, never English text to parse (04 §7). Per-code data fields are added, as optional properties, when a code first needs them (owner decision Q5, docs/decisions/owner-decisions-r3-2026-09-24.md).",
+      "description": "A typed error: a stable code, never English text to parse (04 §7). Per-code data fields are added, as optional properties, when a code first needs them (owner decision Q5, docs/archive/decisions/owner-decisions-r3-2026-09-24.md).",
       "type": "object",
       "properties": {
         "code": {

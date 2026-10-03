@@ -25,7 +25,7 @@ import {
 } from './contracts.gen.ts';
 import { key, same } from './compose.ts';
 import { bodyOf, questOf, refString, type Steps, type World } from './decision.ts';
-import { ALWAYS, MODAL, modal, spokenBy, talkRefused, talks } from './dialogue.ts';
+import { ALWAYS, MODAL, modal, speaks, talkRefused, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
 import { holds } from './policy.ts';
@@ -112,8 +112,9 @@ function engine(world: World): ActionSet {
   );
 }
 
-// The cartridge's actions, recipes, the offers of the quests `actor` has no instance of and the
-// talks of the dialogues whose speaker is in the actor's room, by key: disjoint, since the
+// The cartridge's actions, recipes, the offers of the quests `actor` has no instance of (a quest
+// may have none) and the talks of the dialogues whose speaker is in the actor's room (several per
+// speaker), by key: disjoint, since the
 // compiler and the loader reject a recipe, quest or dialogue whose key is an action's, a recipe's,
 // a quest's or a registered command's (DUPLICATE_DEFINITION), so no key has two definitions here.
 function cartridge(world: World, actor: CharacterId): ActionSet {
@@ -130,7 +131,7 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const quests = Object.values(world.cartridge.quests ?? {}).flatMap(({ key, offer }) => {
     const quest = { cartridge_id, cartridge_version, kind: 'quest', key } as DefinitionRef;
-    if (questOf(world, actor, quest)) return [];
+    if (!offer || questOf(world, actor, quest)) return [];
     const command = 'accept_quest' as Key;
     const o = { key, ...offer, target: { kind: 'none' }, input: [], priority: 0, command, quest };
     return [[key, o] as [string, Offered]];
@@ -276,9 +277,7 @@ export function lists(world: World, actor: CharacterId) {
     const target = (a.recipe ? detailOf(world, a.recipe.target) : id) as EntityId | undefined;
     const talk =
       a.command === 'talk' &&
-      (spokenBy(world, target)
-        ? talkRefused(world, actor, target) && 'invalid_state'
-        : 'not_found');
+      (speaks(world, target) ? talkRefused(world, actor, target) && 'invalid_state' : 'not_found');
     const code = !holds(world, actor, a.policy.root, { target, steps: { n: 0 } })
       ? 'invalid_state'
       : talk || (typeof admitted === 'string' ? admitted : undefined);

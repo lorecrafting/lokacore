@@ -23,8 +23,11 @@ const CARRY = 'You keep the lantern. Bram nods once and points you down the bank
 const LEAVE = 'You hand Bram the lantern. He lifts it toward the reeds and calls the others in.';
 const LANDING =
   "Bram steadies the ferry with his boot. Across the water, someone's lantern swings once between the reeds and goes dark. An old gate stands in the west fence.";
-// Accept the quest, fetch the lantern from the shelter by the green and the reed bank, come back.
+const ACCEPT = "You say you'll fetch it. Bram nods toward the path north.";
+// Accept the quest from Bram, fetch the lantern from the shelter by the green and the reed bank,
+// come back.
 const FETCH = [
+  'Talk to Bram the ferryman',
   "Offer to fetch Bram's lantern",
   'Go north',
   'Go east',
@@ -81,16 +84,14 @@ test('talk by day offers one button per choice and Close; carry narrates', () =>
 // (it then always matches), or a stale reply logged as a refusal code.
 test('a second press from the same screen is a stale view and changes nothing', () => {
   const a = fresh();
+  a.tap('Talk to Bram the ferryman');
   const drawn = a.screen();
   a.smoke.press(a.find("Offer to fetch Bram's lantern", drawn));
   const revision = a.revision();
   a.smoke.press(a.find('Go north', drawn));
   assert.equal(a.revision(), revision);
   assert.equal(a.screen().view.place.title.key, 'room.landing.title');
-  assert.deepEqual(a.screen().log.slice(-2), [
-    'You take on the task. It is in your journal.',
-    'The page had changed; here it is again.',
-  ]);
+  assert.deepEqual(a.screen().log.slice(-2), [ACCEPT, 'The page had changed; here it is again.']);
   a.tap('Go north'); // the redrawn screen's buttons are current
   assert.equal(a.screen().view.place.title.key, 'room.green.title');
 });
@@ -144,7 +145,7 @@ test('walked away: the choices say why, Close leaves the quest open, the landing
 const CODE = /^[a-z_]+$|[a-z]_[a-z]/;
 test('the log has story words, never a kernel code, across both endings', () => {
   const a = fresh();
-  a.tap("Offer to fetch Bram's lantern", 'Go north', 'Go east', 'Go east');
+  a.tap(...FETCH.slice(0, 5));
   const lantern = a.screen().view.entities.find((e) => e.kind === 'item')!.id;
   const on = a.screen().buttons.filter((b) => b.target_ids.includes(lantern));
   assert.deepEqual(

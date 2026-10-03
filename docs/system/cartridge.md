@@ -40,8 +40,9 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   (`UNRESOLVED_REFERENCE`); a fact value matches its FactSpec (`FACT_TYPE_MISMATCH`,
   `FACT_DEFAULT_INVALID`); every text key has a catalog entry;
 - a recipe's, quest's or dialogue's key is no registered command's and no other action's,
-  recipe's or quest's (`DUPLICATE_DEFINITION`: each is an ActionSet identity); one dialogue per
-  NPC; no dialogue role named `actor`; a recipe has a `failure` outcome exactly when it has a
+  recipe's or quest's (`DUPLICATE_DEFINITION`: each is an ActionSet identity); an NPC may speak
+  several dialogues; no dialogue role named `actor`; a choice's `accept` names a quest, in a
+  dialogue without a `quest`, on a choice without a `hand_over` (`OUTCOME_MISMATCH`); a recipe has a `failure` outcome exactly when it has a
   check (`content_dusk_test.exs`); `time_window` needs `schedule@1` and a non-empty window
   (`EMPTY_TIME_WINDOW`); a schedule needs `behavior@1` and a calendar `calendar@1`;
 - items and NPCs start somewhere real with no containment cycle and within capacity
@@ -106,8 +107,9 @@ model strips them to prose until details are tappable (`mobile/app/book/model.ts
 each exercise one slice; most carry replayable transcripts
 (`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
 `kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
-Ferryman's Lantern": four rooms, Bram, one lantern, one offered quest with a
-`post_activation_event` objective, one dialogue with two choices (`carry`, `leave` with a
-hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
+Ferryman's Lantern": four rooms, Bram, one lantern, one quest with a `current_state`
+objective and no offer, two dialogues of Bram's: `bram_offer` while the player has no instance of
+the quest (one choice, `accept`, which accepts it) and `bram` while it is active (two choices,
+`carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
 (`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). The phone bundles its known answer
 (`mobile/app/App.tsx`).

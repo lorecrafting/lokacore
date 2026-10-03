@@ -10,8 +10,6 @@ dialogue", "R7/R8 for chapter one" and "Playtest and tune"; the gate ladder is
 - **Presenter split**: display text out of `mobile/authority`, the `GameSession` boundary, a
   check that the renderer imports only the session and protocol types
   ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
-- **Quest from dialogue** ([ROADMAP row](../ROADMAP.md#slices)): Bram's quest starts from a dialogue
-  choice ([rule](owner-rules.md#product-and-scope)).
 - **R7/R8 for chapter one** ([ROADMAP row](../ROADMAP.md#slices)): the R5 deferrals (keys that
   break, locked containers, a resources policy leaf, one-way and bent passages, `equipment@1`,
   `attributes@1`, `position@1`, `EntityOrigin`), the 04 §5.4 generation re-read, graceful

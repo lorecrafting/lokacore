@@ -1,6 +1,7 @@
 // quest@1 (capability_registry.json; 06 §1-§5, §43; 04 §5.2): what the quest rule
-// (rules/quest.ts), the proposal (proposal.ts) and a rule that resolves a quest share: an
-// objective's current-state evaluation, the instances an event earns, and resolution. A
+// (rules/quest.ts), the proposal (proposal.ts) and a rule that activates or resolves a quest share:
+// activation, an objective's current-state evaluation, the instances an event earns, and
+// resolution. A
 // QuestInstance is a row of State.quests (decision.ts questOf).
 import type {
   CharacterId,
@@ -21,8 +22,34 @@ import { cmp } from './validate.ts';
 const definition = (world: World, quest: DefinitionRef): QuestDefinition =>
   world.cartridge.quests![refString(quest)];
 
-/** A new QuestInstanceId from the decision's IdSource allocator. */
-export const instanceId = (mint: Mint) => mint() as QuestInstanceId;
+/**
+ * quest@1's activation of `actor`'s instance of `quest` (06 §2 Activation modes), active at player
+ * scope, as writer group 0: its quest.activate, with a new QuestInstanceId from the decision's
+ * IdSource allocator, and its quest_activated payload, for the rule that activates it
+ * (accept_quest, or a dialogue choice's accept), which emits the event at its position.
+ */
+export function activation(mint: Mint, actor: CharacterId, quest: DefinitionRef) {
+  const instance_id = mint() as QuestInstanceId;
+  const scope = { kind: 'player', character_id: actor } as const;
+  const op = { op: 'quest.activate', writer_group: 0, quest, scope, instance_id } as const;
+  return { ops: [op], payload: { type: 'quest_activated', quest, instance_id } as const };
+}
+
+/**
+ * Why `actor` cannot accept `quest` now, as accept_quest's admission refuses it (actions.ts):
+ * invalid_state when the actor already has an instance or the quest's offer, if it declares one,
+ * has a policy that fails (target none). Each policy leaf it evaluates adds one to `steps`.
+ */
+export function acceptRefused(
+  world: World,
+  actor: CharacterId,
+  quest: DefinitionRef,
+  steps: Steps,
+) {
+  const offer = definition(world, quest).offer;
+  if (questOf(world, actor, quest) || (offer && !holds(world, actor, offer.policy.root, { steps })))
+    return 'invalid_state' as const;
+}
 
 /**
  * True when `actor`'s current_state objective of `quest` holds now (06 §43: evaluated on the

@@ -1,0 +1,6 @@
+Planted red-control build (BUILD = 'm1-planted'), applied on top of the harness build:
+1. mobile/app/p6/data.ts: in the expected bytes of carry2/lantern-carry[7] state (the first
+   "clock" after that key, byte offset 1561782), "clock":21600 -> "clock":31600. Same length;
+   data.ts stays 1,999,793 bytes.
+Mutant build (BUILD = 'm1-mutant'): ../2026-10-02-r6p-rerun-iphone11/dev-mutant.diff, applied to
+kernel/ts/src/rng.ts on the unplanted data.ts, then reverted.

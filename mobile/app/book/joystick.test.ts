@@ -96,7 +96,7 @@ test('a drag begun before a redraw walks on its own screen: stale_view, no commi
     knob: nothing,
   });
   g.onPanResponderGrant();
-  smoke.press(smoke.screen().buttons.find((b) => b.action_key === 'lantern')!); // accept: revision 1
+  smoke.press(smoke.screen().buttons.find((b) => b.action_key === 'bram_offer')!); // revision 1
   now.current = props(); // the redraw
   g.onPanResponderMove(null, { dx: 0, dy: -20 * ZOOM }); // toward north
   g.onPanResponderRelease();
