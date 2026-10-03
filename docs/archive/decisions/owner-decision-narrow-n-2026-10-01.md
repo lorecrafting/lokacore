@@ -29,4 +29,4 @@ shapes outside the schema subset:**
   the actor's entity, its body.
 - `narration` joins the kernel's ruleless capabilities; N adds no policy leaf.
 
-Effect: [ROADMAP, Early R7/R8 slices](../../ROADMAP.md#early-r7r8-slices), row N.
+Effect: [ROADMAP, Early R7/R8 slices](../ROADMAP.md#early-r7r8-slices), row N.

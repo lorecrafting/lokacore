@@ -3,7 +3,7 @@
 Relayed by the PM (Claude Code), **(paraphrased)**: the wording is smoothed, not quoted. No
 checker can verify it against the chat.
 
-Question: [R6 S4](../../ROADMAP.md#proposed-r6-slices) was planned to make `play_time`
+Question: [R6 S4](../ROADMAP.md#proposed-r6-slices) was planned to make `play_time`
 action-driven, reconcile `real_elapsed` once through an idempotent resume input, and drain
 due jobs ([07 §10](../spec/07-offline-storypacks-to-mmo.md#10-offline-time),
 [10 §31](../spec/10-mobile-commerce-release.md#31-initial-player-run-lifetime-defaults),

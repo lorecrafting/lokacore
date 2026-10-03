@@ -63,7 +63,7 @@ inline link keeps the word and its target together in every language:
 
 ```text
 A [brass lantern] sits here.                       <- item text: the link targets that item
-Rope is looped over the [old post](../../decisions/mooring_post).  <- room text: targets a detail or entity
+Rope is looped over the [old post](mooring_post).  <- room text: targets a detail or entity
 ```
 
 The markup lives in the catalog strings (`Text` stays `{key, bindings}`), so each locale

@@ -17,5 +17,5 @@ Lantern trigger is D1's choice outcome.
 
 **Effect.** D1 builds `talk`, `choose` and `close_choice` with the 04 §5.3 continuation row as the
 durable occurrence (State `choices`); scene@1 stays an unimplemented capability (no SceneInstance,
-beats, control modes or SceneSpace). [ROADMAP, Early R7/R8 slices](../../ROADMAP.md#early-r7r8-slices),
+beats, control modes or SceneSpace). [ROADMAP, Early R7/R8 slices](../ROADMAP.md#early-r7r8-slices),
 rows D1 and D2; the slice count gains one.

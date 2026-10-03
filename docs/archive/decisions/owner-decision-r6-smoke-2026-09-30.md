@@ -15,7 +15,7 @@ after this one.
 
 Effect:
 
-- [ROADMAP R6 SM](../../ROADMAP.md#proposed-r6-slices): a bare text screen, the wiring proof for the
+- [ROADMAP R6 SM](../ROADMAP.md#proposed-r6-slices): a bare text screen, the wiring proof for the
   UI slice: the real local authority on real expo-sqlite, a bundled cartridge, relaunch. SM2, the
   owner's follow-up, replaces its view and keeps its controller.
 - It is not the R6P gate and adds no gate evidence ([pre-release proof](../spec/pre-release-proof.md)

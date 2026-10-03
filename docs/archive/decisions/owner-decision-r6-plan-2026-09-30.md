@@ -14,7 +14,7 @@ Owner's words:
 
 Effect:
 
-- The [R6 slice plan](../../ROADMAP.md#proposed-r6-slices) (P1 before S1, then S1 to S6 and Gate R6)
+- The [R6 slice plan](../ROADMAP.md#proposed-r6-slices) (P1 before S1, then S1 to S6 and Gate R6)
   is approved; R6 development may start.
 - Nothing else is decided. ADR-074's route (a)/(b) choice stays deferred to its trigger.
   Not yet put to the owner: evaluating candidate A (one TypeScript kernel behind a BEAM Port)

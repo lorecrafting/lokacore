@@ -105,7 +105,7 @@ Ground, z0:
 ```text
                           [chapel_steps]                          (Priory, north)
                                 |n
-   [elspeth_cottage]-e-[north_gate]-e-[watch_post]-e-[watch_cell](../../spec/L)
+   [elspeth_cottage]-e-[north_gate]-e-[watch_post]-e-[watch_cell](L)
                                 |n
    [orchard]-e-[smithy]-e-[village_green]-e-[east_gate]--e-- (King's Road, east)
                                 |n
@@ -121,15 +121,15 @@ Ground, z0:
 Vertical shafts:
 
 ```text
-z+2                                            [inn_attic](../../spec/H)
+z+2                                            [inn_attic](H)
                                                     |d
-z+1   [gate_tower](../../spec/view)   [mill_loft](../../spec/D)      [inn_rooms]        [cottage_loft]
+z+1   [gate_tower](view)   [mill_loft](D)      [inn_rooms]        [cottage_loft]
            |d                  |d                   |d                  |d
 z 0   [watch_post]         [old_mill]          [drowned_lantern]   [empty_cottage]   [well_lane]   [chandler]
                                |d                   |d                                  |d            |d
-z-1                        [mill_cellar](../../spec/D)    [lantern_cellar]--w(H)--------------[well_shaft](../../spec/climb)  [chandler_storeroom]
+z-1                        [mill_cellar](D)    [lantern_cellar]--w(H)--------------[well_shaft](climb)  [chandler_storeroom]
                                                                                         |d
-z-2                                                                                 [well_bottom](../../spec/W,D)
+z-2                                                                                 [well_bottom](W,D)
 ```
 
 The well bottom holds the miller's murder weapon for S13. The lantern cellar's hidden way into the well shaft is how the smugglers moved goods; it is also how a prisoner in the watch cell hears the inn.
@@ -143,11 +143,11 @@ Ground, z0:
                                 |s
    [willow_shade]-e-[reed_bank]-e-[hound_run]-e-[adder_nest]
          |s               |s              |s
-   [drowned_oak]-e-[mire_crossing](../../spec/W,tide)-e-[marsh_light](../../spec/D)
+   [drowned_oak]-e-[mire_crossing](W,tide)-e-[marsh_light](D)
          |s               |s                       |s
-   [black_pool](../../spec/W)-e-[fox_hollow]           [old_causeway]-e-[tide_flats](../../spec/W,tide)
+   [black_pool](W)-e-[fox_hollow]           [old_causeway]-e-[tide_flats](W,tide)
          |s
-   [fishing_shallows](../../spec/W)
+   [fishing_shallows](W)
 
    ferry from boathouse:   [fen_isle_landing]-e-[isle_hut]-e-[herb_garden]
                                   |s
@@ -157,13 +157,13 @@ Ground, z0:
 Vertical shafts:
 
 ```text
-z+2   [oak_crown](../../spec/view)
+z+2   [oak_crown](view)
            |d
 z+1   [oak_branches](crow nest)                     [hut_loft]
            |d                                            |d
 z 0   [drowned_oak]     [fox_hollow]    [black_pool]   [isle_hut]
                              |d              |d
-z-1                     [fox_den_deep]  [pool_bottom](../../spec/W,D)
+z-1                     [fox_den_deep]  [pool_bottom](W,D)
 ```
 
 Crows carry scavenged items to the oak branches; climbing up is the only way to get them back. The oak crown is the one place the wisp is visible by day. Vesper's true den is below the hollow. The pool bottom holds a sunken chest and a drowning check.
@@ -189,13 +189,13 @@ z+3   [spire](view, rookery)
            |d
 z+2   [belfry](the bell, rope)
            |d
-z+1   [bell_tower](../../spec/stair)
+z+1   [bell_tower](stair)
            |d
 z 0   [chapel_nave]
            |d
-z-1   [crypt](../../spec/D)
+z-1   [crypt](D)
            |d
-z-2   [ossuary](../../spec/D)--e(H)--> flooded_gallery  (Barrow Downs, z-2)
+z-2   [ossuary](D)--e(H)--> flooded_gallery  (Barrow Downs, z-2)
 ```
 
 The bell is rung from the belfry, not the tower. The spire is the highest point in the cartridge; from it `scan` shows the whole village and the fen edge. The ossuary's hidden passage is the stealth route into the barrow that S18 and the Cutpurse guild care about.
@@ -215,15 +215,15 @@ Ground, z0:
 Vertical shafts:
 
 ```text
-z+1   [ridge_top](../../spec/view)                                                          [high_pass](view, ending overlook)
+z+1   [ridge_top](view)                                                          [high_pass](view, ending overlook)
            |d                                                                          |d
 z 0   [cairn_ridge]     [standing_stones]                        [wight_pit]     [barrow_pass]
                               |d                                      |d
-z-1                     [barrow_mouth](../../spec/L)-n-[barrow_passage](../../spec/T)-e-[pit_floor](../../spec/D)
+z-1                     [barrow_mouth](L)-n-[barrow_passage](T)-e-[pit_floor](D)
                                                   |n
-                        [hidden_treasury](../../spec/H)-e-[bone_gallery]
+                        [hidden_treasury](H)-e-[bone_gallery]
                                                   |d
-z-2                     [lower_gallery](../../spec/D)-e-[flooded_gallery](../../spec/W,D)--w(H)--> ossuary (Priory, z-2)
+z-2                     [lower_gallery](D)-e-[flooded_gallery](W,D)--w(H)--> ossuary (Priory, z-2)
                               |n
                         [kings_chamber]
                               |d
@@ -237,13 +237,13 @@ The barrow has three ways in: the locked mouth under the standing stones, the wi
 Ground, z0:
 
 ```text
-(east_gate)-e-[kings_road_west]-e-[kings_road_bridge](../../spec/toll)-e-[kings_road_east]-e-[harrowgate_gate]
+(east_gate)-e-[kings_road_west]-e-[kings_road_bridge](toll)-e-[kings_road_east]-e-[harrowgate_gate]
                                           |s                                              |s
-                                    [mine_road]     [library]-e-[apothecary]-e-[guildhall]-e-[market_square]-e-[moneylender]-e-[fence_alley](../../spec/H)
+                                    [mine_road]     [library]-e-[apothecary]-e-[guildhall]-e-[market_square]-e-[moneylender]-e-[fence_alley](H)
                                           |s                                              |s
                                     [iron_mine]                            [stables]-e-[armorer]-e-[gilded_boar]
                                                                                               |s
-                                                                                       [watch_house]-e-[jail](../../spec/L)
+                                                                                       [watch_house]-e-[jail](L)
 ```
 
 Vertical shafts, town:
@@ -251,11 +251,11 @@ Vertical shafts, town:
 ```text
 z+2   [observatory](view, moon)
            |d
-z+1   [reading_gallery]   [guild_quarters]   [gatehouse](../../spec/view)   [boar_rooms]   [watch_tower](../../spec/view)   [hayloft]
+z+1   [reading_gallery]   [guild_quarters]   [gatehouse](view)   [boar_rooms]   [watch_tower](view)   [hayloft]
            |d                  |d                 |d                  |d              |d                 |d
 z 0   [library]           [guildhall]        [harrowgate_gate]   [gilded_boar]   [watch_house]      [stables]   [jail]   [moneylender]   [fence_alley]   [kings_road_bridge]
                                                                       |d                                          |d          |d               |d               |d
-z-1                                                              [boar_cellar](../../spec/stores)                      [dungeon_cells](../../spec/L)--e(H)--[fence_cellar]   [money_vault](../../spec/L)   [under_bridge](D, smugglers)
+z-1                                                              [boar_cellar](stores)                      [dungeon_cells](L)--e(H)--[fence_cellar]   [money_vault](L)   [under_bridge](D, smugglers)
                                                                                                                                        |u
                                                                                                                                   (fence_alley)
 ```

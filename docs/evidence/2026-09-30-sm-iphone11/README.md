@@ -1,7 +1,7 @@
 # R6 SM phone smoke screen on the iPhone 11, 2026-09-30
 
 Result: the smoke screen ran on the iPhone 11 and kept its save across an app kill and relaunch,
-as the owner reported. This is **not** R6P gate evidence ([roadmap R6 SM](../../ROADMAP.md#proposed-r6-slices),
+as the owner reported. This is **not** R6P gate evidence ([roadmap R6 SM](../../archive/ROADMAP.md#proposed-r6-slices),
 [owner decision](../../archive/decisions/owner-decision-r6-smoke-2026-09-30.md)). No raw files were kept.
 
 Facts, by source:

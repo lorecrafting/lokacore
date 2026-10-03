@@ -11,6 +11,6 @@ R6P gate's job, not this one.
 
 Effect:
 
-- [ROADMAP S6b](../../ROADMAP.md#proposed-r6-slices) and its
+- [ROADMAP S6b](../ROADMAP.md#proposed-r6-slices) and its
   [runbook](../../evidence/2026-09-30-gate-r6-iphone11/README.md) use that definition; the headless
   reference is in `mobile/authority/local-story/smoke.test.ts`.

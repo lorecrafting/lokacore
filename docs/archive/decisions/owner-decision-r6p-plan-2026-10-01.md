@@ -8,7 +8,7 @@ asked for changes, then folded and re-checked by Opus) and two questions. The ow
 it and named the tester:
 
 - **Slices.** Six slices and the gate, not four: T, B, P3, P4, P5, P6, Gate R6P, in that order
-  ([ROADMAP, R6P slices](../../ROADMAP.md#r6p-slices)). T and B are the kernel carries that land before
+  ([ROADMAP, R6P slices](../ROADMAP.md#r6p-slices)). T and B are the kernel carries that land before
   the compiled Lantern. B is the only R6P slice that changes `kernel/ts/src/proposal.ts`, so it is
   the only one with an Astra review besides the gate.
 - **`selector_cardinality`.** Graceful lookups over the cap move to the R7/R8 for chapter one row.

@@ -13,7 +13,7 @@ pass before S3 merges (Gate R6 at the latest); S1 does not wait for it.
 
 Effect:
 
-- The [ROADMAP P1 row](../../ROADMAP.md#proposed-r6-slices) carries this sequencing. Related records:
+- The [ROADMAP P1 row](../ROADMAP.md#proposed-r6-slices) carries this sequencing. Related records:
   the [R6 plan record](owner-decision-r6-plan-2026-09-30.md) and the
   [one-phone decision](owner-decision-android-descope-2026-09-30.md). It keeps
   [ADR-074 §3](adr-074-ts-first-proposal.md#3-the-proposal)'s Node-plus-device host conformance;

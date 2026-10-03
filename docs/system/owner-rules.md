@@ -81,7 +81,7 @@ and not repeated here.
   keeps `docs/dev-evidence.jsonl` ([record](../archive/decisions/owner-decisions-adr-075-2026-09-25.md)).
 - Verification harness: invariants as registered data, deterministic simulation every CI run,
   fault simulation on real SQLite; owner attention goes to invariant lists and harness changes
-  ([record](../archive/decisions/owner-decision-roadmap-2026-09-24.md), [ROADMAP](../ROADMAP.md#verification-harness-adopted-2026-09-24)).
+  ([record](../archive/decisions/owner-decision-roadmap-2026-09-24.md), [ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
 - The due-job drain landed with the first real job; `real_elapsed` time is carried until a
   cartridge declares it ([record](../archive/decisions/owner-decision-s4-scope-2026-09-30.md)).
 - Saves: the app carries bundled releases newest first and reopens a save on its pin; a missing

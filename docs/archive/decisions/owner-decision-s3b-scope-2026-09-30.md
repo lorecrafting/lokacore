@@ -3,7 +3,7 @@
 Relayed by the PM (Claude Code), **(paraphrased)**: the wording is smoothed, not quoted. No
 checker can verify it against the chat.
 
-Question: [R6 S3b](../../ROADMAP.md#proposed-r6-slices) was planned as full local package
+Question: [R6 S3b](../ROADMAP.md#proposed-r6-slices) was planned as full local package
 management: release garbage collection, migration staging with a pre-migration recovery copy,
 and checks for active downloads and pending validated restores
 ([10 §§16, 31–32](../spec/10-mobile-commerce-release.md#16-local-package-management);
