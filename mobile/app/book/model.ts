@@ -16,7 +16,10 @@ export function group(buttons: Button[]) {
     look: buttons.find((b) => b.action_key === 'look' && !aimed(b)),
     exits: buttons.flatMap((b) => (dir(b) ? [{ direction: dir(b)!, button: b }] : [])),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
-    place: buttons.filter((b) => !aimed(b) && !dir(b) && !OWN.includes(b.action_key)),
+    // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
+    place: buttons.filter(
+      (b) => !aimed(b) && !dir(b) && !OWN.includes(b.action_key) && b.action_key !== 'scan',
+    ),
     on: (id: string) => buttons.filter((b) => b.target_ids.includes(id)),
   };
 }
@@ -75,6 +78,29 @@ export const branch = (t: number) => {
   const i = Math.floor(((Math.floor(t / 3600) + 1) % 24) / 2);
   const label = `Hour of the ${ANIMALS[i]}, ${STARTS[i % 6]} to ${STARTS[(i + 1) % 6]}`;
   return { glyph: '子丑寅卯辰巳午未申酉戌亥'[i]!, label };
+};
+
+// The NPC menu's state: who was tapped, or which choice's menu was dismissed, in `room`. It holds only
+// while the player stays in that room: a walk clears both, so a pending choice reopens its menu (with
+// Close) wherever the player is, and a tapped NPC does not reopen on return.
+export type MenuState = { room?: string; tapped?: string; dismissed?: string };
+export const menuTap = (v: GameView, id: string): MenuState => ({ room: v.place.id, tapped: id });
+// Dismissing sends nothing; only Close does.
+export const menuDone = (v: GameView): MenuState => ({
+  room: v.place.id,
+  dismissed: v.choice?.continuation_id,
+});
+// The hook stores this at every render, so a cleared state stays cleared on return.
+export const menuLive = (v: GameView, s: MenuState): MenuState =>
+  s.room === undefined || s.room === v.place.id ? s : {};
+// Whether the menu is open: an NPC tapped and still here, else a pending choice (a restored one
+// reopens it) until its menu was dismissed.
+export const menuOpen = (v: GameView, state: MenuState) => {
+  const s = menuLive(v, state);
+  return (
+    v.entities.some((e) => e.id === s.tapped) ||
+    (!!v.choice && v.choice.continuation_id !== s.dismissed)
+  );
 };
 
 // A first-run hint's "seen" flag in a key-value store (the shell's key-value store: its own file, not the

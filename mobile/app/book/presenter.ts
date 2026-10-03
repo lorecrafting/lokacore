@@ -87,18 +87,15 @@ function said(r: Reply, text: Say): string {
   return d.narration?.map((t) => text(t.key)).join(' ') || (OUTCOME[d.outcome] ?? '');
 }
 
-// The log after a press's echo: its answer if it has words, then the new place's name or who came
-// or went. A look is a read: its fresh page is the answer, so its echo goes too. ponytail: a look that settles a shown
-// pending leaves that pending line above (the status line's "save not confirmed" still clears).
-function answer(log: string[], reply: Reply, text: Say, comings: string[]) {
+// The log after a press: its answer if it has words, then the new place's name or who came or went.
+// Returns the answer line (none: ''), which the NPC menu shows too. A look says nothing: its fresh
+// page is the answer. ponytail: a look that settles a shown pending leaves that pending line above
+// (the status line's "save not confirmed" still clears).
+function answer(log: string[], reply: Reply, text: Say, comings: string[]): string {
   const line = said(reply, text);
-  const read =
-    reply.kind === 'saved' &&
-    reply.decision.kind === 'accepted' &&
-    reply.decision.outcome === 'looked';
-  if (read) log.pop();
-  else if (line) log.push(line);
+  if (line) log.push(line);
   log.push(...comings);
+  return line;
 }
 
 // After a move, the new place's name: its room log's heading. Else the NPCs that left or arrived
@@ -140,7 +137,7 @@ export function presenter(game: Game) {
   // shows it (06 §43).
   const last = game.lastNarration();
   const log = last ? [last.lines.map((t) => text(t.key)).join(' ')] : [];
-  // The label of the unconfirmed press, which any press retries: the echo and the fault name it.
+  // The label of the unconfirmed press, which any press retries: the fault line names it.
   let retry: string | undefined;
   let fault: string | undefined; // the last press's throw, shown with start over beside the retry
   return {
@@ -150,22 +147,23 @@ export function presenter(game: Game) {
       const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({ ...b, token }));
       return { view, text, buttons, log, pending: game.pending(), fault };
     },
-    press(b: Button): void {
+    /** Returns what the press said (none: ''), for the NPC menu. */
+    press(b: Button): string {
       const was = game.view().view; // the view before, for who came or went
       retry ??= b.label;
-      log.push(`> ${retry}`);
       let reply: Reply;
       try {
         reply = game.invoke(intentOf(b));
       } catch (e) {
         // A throw may follow a durable commit: the session keeps the attempt; a resend replays it.
         fault = (e as Error).message;
-        log.push(`(not confirmed: ${fault}; the next press retries ${retry})`);
-        return;
+        const line = `(not confirmed: ${fault}; the next press retries ${retry})`;
+        log.push(line);
+        return line;
       }
       fault = undefined;
       if (!game.pending()) retry = undefined;
-      answer(log, reply, text, comings(was, game.view().view, text));
+      return answer(log, reply, text, comings(was, game.view().view, text));
     },
     /** A start over that failed and kept this game says why in the log (none: it did not fail). */
     startOverFailed(why?: string) {

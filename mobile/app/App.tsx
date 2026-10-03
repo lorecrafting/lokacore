@@ -11,9 +11,14 @@ import Storage from 'expo-sqlite/kv-store';
 import { localSession } from '../authority/local-story/session';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import { fonts } from './book/paper.ts';
 import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';
 import { SaveError } from './SaveError';
+
+// The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.
+const fonts = {
+  IMFellEnglish: require('./book/fonts/IMFellEnglish.ttf'),
+  EBGaramond: require('./book/fonts/EBGaramond.ttf'),
+};
 
 // Opened once per process, kept on globalThis so a Fast Refresh does not open a second handle
 // (mobile lessons: a second handle on the same file crashes). A new file name: a save from before
@@ -48,7 +53,6 @@ const shell: Shell = {
       { text: 'Start over', style: 'destructive', onPress: go },
     ]),
   learned: hint(Storage, 'hint.learned'),
-  looked: hint(Storage, 'hint.looked'),
 };
 
 export default function App() {
