@@ -170,8 +170,13 @@ barrier) or `insufficient_resource` (the body cannot pay a move); `actions` of t
 actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each quest the player
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
-`resources`, each with current, maximum and a condition band from one fixed table of 11 bands
-by percentage of the range, `perfect_health` at 100 down to `dying` at 0 (`view.ts:80`, `:97`).
+`resources`, each with current, maximum, a condition band key and its tone (`normal`, `warning`
+or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
+`bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
+default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
+tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:80`, `:97`). The band is the
+first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
+minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`actions.ts:267`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes (`invariants.ts:264`, `:278`).

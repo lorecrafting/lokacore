@@ -48,12 +48,15 @@ and not repeated here.
 - Engine output is structured; each presenter owns its layout and wording; one `GameSession`
   boundary serves the TypeScript authority now and the Elixir Realm later; refusal words key on
   registered error codes ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
-- Default pools hp, ma, mv (DikuMUD-derived starts and gains), 1 mv per room until terrain costs,
-  regeneration per game hour derived from the clock; every v2 cartridge gets the pools
+- Default pools hp, ma, mv (DikuMUD-derived starts and gains), 1 mv per room by default (a
+  cartridge's `world.movement.cost` overrides it; terrain costs later), regeneration per game
+  hour derived from the clock; every v2 cartridge gets the pools
   ([record](../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
-- Condition bands: one table (04 §15), computed by the kernel, never a cartridge threshold; the UI
-  shows the phrase on hp and colours every resource; LegendMUD credited, never named in the UI
-  ([record](../archive/decisions/owner-decision-condition-bands-2026-10-01.md)).
+- Condition bands: computed by the kernel from 04 §15's table, the engine default, which a
+  cartridge may replace per pool or for all pools (bands with a tone; superseded "never a
+  cartridge threshold" by the [chapter-one plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md),
+  triage 21); the UI shows the phrase on hp and colours every resource; LegendMUD credited,
+  never named in the UI ([record](../archive/decisions/owner-decision-condition-bands-2026-10-01.md)).
 - Composability and emergence principles; every mechanic slice states what it composes with
   ([record](../archive/decisions/owner-decision-emergence-2026-09-25.md)).
 - Ids: IdSource UUIDv8 and the frozen numeric profile v1; CommandId reuses the recipe and

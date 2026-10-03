@@ -282,6 +282,8 @@ Everything the game uses, grouped the way a classic-MUD player recognizes it. Ea
 
 *Amendment 2026-09-25 ([owner decision](../decisions/owner-decision-hp-ma-mv-2026-09-25.md)):* every character has LegendMUD's three pools by default: HP, MA (mana) and MV (movement), starting maximums HP 20, MA 100, MV 82 (from DikuMUD) and regeneration per game hour HP 5, MA 4, MV 18, unless the cartridge overrides them. They replace this document's "HP, stamina, spirit". From R5, moving to another room costs 1 MV and is refused at 0 MV (terrain costs stay R8); the compiler gives every cartridge the pools unless it overrides them, and an artifact that does not lock `resource@1` has none; and the pools regenerate per game hour, derived from the clock.
 
+*Amendment 2026-10-02 (chapter-one slice c1-numbers; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 2, triage 21; [world parameters](../../decisions/owner-decision-world-parameters-2026-10-02.md) W1, W2):* amends the 2026-09-25 amendment's "moving to another room costs 1 MV": what a move costs is a world setting, cartridge.json `world.movement.cost {resource, amount}` (any declared pool, amount at least 1); without it a move costs 1 MV, the engine default. Per-exit and terrain costs stay later (§11 chapter three).
+
 *Amendment 2026-09-28 ([owner decision](../decisions/owner-decision-r5-deferred-mechanics-2026-09-28.md)):* `knock` and map discovery/`where` move from R5 to chapter-one work at R10. Open/close doors remain R5.
 
 ### 4.1 World and movement
