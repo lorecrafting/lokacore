@@ -10,6 +10,7 @@ A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`):
 | `facts.json` | `{"facts": {name: FactSpec}}`; a dotted name maps to a snake_case key, two names mapping to one key is `FACT_NAME_COLLISION` |
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
+| `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), each actor's value its `start` ([mechanics.md](mechanics.md#attributes1); `lib/loka/content/resources.ex:2`) |
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
@@ -47,6 +48,9 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   dialogue without a `quest`, on a choice without a `hand_over` (`OUTCOME_MISMATCH`); a recipe has a `failure` outcome exactly when it has a
   check (`content_dusk_test.exs`); `time_window` needs `schedule@1` and a non-empty window
   (`EMPTY_TIME_WINDOW`); a schedule needs `behavior@1` and a calendar `calendar@1`;
+- attributes (`attributes.json`, the artifact's `attributes`) need `attributes@1` in the lock, as
+  do the policy leaves `stat_compare` and `resource_compare`, whose `attribute` or `resource`
+  names an attribute or a pool of this cartridge (the compiler and the loader);
 - condition band tables (a pool's `bands`, `world.bands`): cuts strictly descending, the last
   0 and keys unique within the table, else `RESOURCE_SPEC_INVALID` at the table; each key has
   `band.<key>` in the catalog; `world.movement.cost` names a pool of this cartridge
@@ -95,9 +99,9 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
 `dialogue` (`:32`); without a command, so without a rule, `fact`, `policy`,
 `inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
-`target_resolution` (`:46`). The [feature map](../features.gen.md) is the authority for what
+`target_resolution`, `attributes` (`:46`). The [feature map](../features.gen.md) is the authority for what
 each one implements and where; `bin/features.exs --check` fails when a rule module exists
-without its row. The 19 registered capabilities it marks `not yet` may be named by a
+without its row. The 18 registered capabilities it marks `not yet` may be named by a
 cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.
 
 ## Text

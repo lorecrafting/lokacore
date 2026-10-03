@@ -68,6 +68,7 @@ its one declared scope: the actor's for `player`, the world's for `instance`
 (`fact.ts:21`); unset means its default; `fact_compare` compares equality. The host appends a
 `fact_changed {fact, old, new}` for each `fact.assign` that changes its value, at the assign's
 causal position (`fact.ts:108`); an unchanged assign emits nothing. Invariant `facts_typed`.
+The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1)'s.
 
 ## resource@1 (`kernel/ts/src/resource.ts`)
 
@@ -79,6 +80,22 @@ and is dropped when it changes nothing (`adjust`, `:39`; `rules/action_recipe.ts
 events. The engine pools are hp, ma, mv ([cartridge.md](cartridge.md#compiler)); the GameView
 shows each with a condition band and its tone from the pool's own `bands`, else the
 cartridge's `world.bands`, else the engine default table ([protocol.md](protocol.md#gameview)).
+
+## attributes@1 (`kernel/ts/src/policy.ts`)
+
+Ruleless, and no state. An attribute is a definition `AttributeSpec {key, start}` in the
+cartridge's `attributes` map (source `attributes.json`, [cartridge.md](cartridge.md#source-layout));
+the engine declares none, so the six 00 §4.3 stats are content. Every actor's value of an
+attribute is its `start`: nothing writes attributes yet, so no row, delta op or state hash
+carries them. The first writer (training, chapter three, or an ancestry modifier, LATER)
+decides whether a value belongs to the body or the character and how it is saved.
+`attributes@1` owns two 06 §21 leaves, each `{<ref>, at_least}` (a ResourceInt; "below" is
+`not`, a range `all`): `stat_compare {attribute, at_least}` holds when the actor's value is at
+least `at_least`; `resource_compare {resource, at_least}` when the current value of the pool
+on the actor's body, as [resource@1](#resource1) derives it and before the action's costs, is.
+Both fail closed: an actor without a body reads no pool, and the compiler and loader reject an
+unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILITY`). Not
+`resource@1`'s: a new op would take `resource@2`, re-deriving every v2 lock and hash.
 
 ## check@1 (`rules/action_recipe.ts:109`)
 
