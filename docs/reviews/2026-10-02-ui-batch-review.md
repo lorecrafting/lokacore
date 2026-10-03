@@ -144,3 +144,23 @@ is about 58 pt above the bottom edge, which clears the home indicator.
   - Acceptable for a presenter slice with no hook harness. Noted, not required.
 
 No Simulator re-walk: the code reading and shots 21 and 22 agree.
+
+## Codex Sol first review (575636b), verbatim
+
+CHANGES REQUESTED
+
+```text
+F1 | blocker | mobile/app/book/Menu.tsx:55
+Talk to Bram, press Done with the choice pending, then walk north. The dismissed continuation remains hidden, Bram is absent, and no control reopens the menu. GameView still offers close_choice, but the player cannot reach Close without returning or restarting. Keep a reopening route available for dismissed pending choices.
+
+F2 | should-fix | mobile/app/book/Menu.tsx:45
+Tap Bram without starting dialogue, walk north, then return south. The remembered tapped id survives leaving, so Bram’s menu reopens without another NPC tap despite there being no pending choice. Clear the remembered tap when leaving its room.
+```
+
+## Codex Sol fix round 1 re-check (38518a0), verbatim
+
+APPROVE
+
+```text
+no findings
+```
