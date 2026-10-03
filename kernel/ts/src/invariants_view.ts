@@ -12,7 +12,6 @@ type Any = any;
 // rule accept it: listed, it is never refused with a code they give (not_found aside: a foreign
 // actor's or world's command is the envelope's); not listed, it is never accepted.
 export const gameview_agrees_with_admission = ({ view, command, decision }: Any): boolean => {
-  const entry = advertised(view, command.payload);
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   const type = command.payload.type; // own keys only: an action may be keyed `constructor`
   if (DOOR_VERBS.includes(type)) {
@@ -20,6 +19,7 @@ export const gameview_agrees_with_admission = ({ view, command, decision }: Any)
     const listed = exit?.door?.actions.some((a: AdvertisedAction) => a.action_key === type);
     return listed ? !DOOR_CODES.includes(code) : decision.kind !== 'accepted';
   }
+  const entry = advertised(view, command.payload);
   const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
   if (!entry) return true;
   if (entry.available) return !shown.includes(code);
