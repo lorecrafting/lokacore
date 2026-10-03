@@ -143,20 +143,24 @@
       "ItemLocation",
       "CommandPayload",
       "EventPayload",
-      "Policy"
+      "Policy",
+      "ContentView"
     ],
     "modules": [
       "kernel/ts/src/policy.ts",
-      "kernel/ts/src/target.ts"
+      "kernel/ts/src/target.ts",
+      "kernel/ts/src/lookups.ts",
+      "kernel/ts/src/view.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/cartridge_items_hash.json"
+      "protocol/fixtures/cartridge_items_hash.json",
+      "protocol/fixtures/cartridge_locks_hash.json"
     ],
     "invariants": [
       "one_container_per_item",
       "containment_acyclic"
     ],
-    "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs"
+    "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs; C1 c1-locks (#135) custody: take through open containers, contents in the GameView"
   },
   "action_recipe": {
     "spec": "06 §19 ActionSet algebra, §20 ActionRecipe; 21 §7 ActionRecipe / ComposedAction; 05 §28; 04 §5.2; ADR-016; 21 §7 Check, Cost (time); 04 §5.0",
@@ -231,7 +235,7 @@
     "implemented_in": "R5 S6a wait, time_window; Early R7/R8 S durable jobs, the due-job drain of every explicit advance (wait, a recipe's duration), run_job and its job CommandId"
   },
   "barrier": {
-    "spec": "21 §5 Connection, Barrier; 05 §17, §25; 04 §5.3 Lifecycle transition, §7, §19; 00 §4.1",
+    "spec": "21 §5 Connection, Barrier; 05 §17, §25; 04 §5.3 Lifecycle transition, §7, §19; 00 §4.1 (amendment 2026-10-03: an item site)",
     "contracts": [
       "BarrierDefinition",
       "BarrierState",
@@ -240,23 +244,31 @@
       "EventPayload",
       "DeltaOp",
       "MutationTarget",
-      "Policy"
+      "Policy",
+      "ItemDefinition",
+      "EntityView",
+      "ContentView"
     ],
     "modules": [
       "kernel/ts/src/rules/movement.ts",
       "kernel/ts/src/policy.ts",
       "kernel/ts/src/compose.ts",
-      "kernel/ts/src/target.ts"
+      "kernel/ts/src/target.ts",
+      "kernel/ts/src/lookups.ts",
+      "kernel/ts/src/action_lists.ts",
+      "kernel/ts/src/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/composition.json",
-      "protocol/fixtures/cartridge_gate_hash.json"
+      "protocol/fixtures/cartridge_gate_hash.json",
+      "protocol/fixtures/cartridge_locks_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
-      "rejection_consumes_nothing"
+      "rejection_consumes_nothing",
+      "gameview_agrees_with_admission"
     ],
-    "implemented_in": "R5 S7 open, close, lock, unlock, barrier_state, closed and locked exits"
+    "implemented_in": "R5 S7 open, close, lock, unlock, barrier_state, closed and locked exits; C1 c1-locks (#135) a barrier on an item (container lid), the door verbs by target_id"
   },
   "quest": {
     "spec": "06 §1, §2, §3 Objective credit/causation policy, §4, §5, §43; 04 §5.2; 03 §12",

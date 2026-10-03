@@ -262,7 +262,8 @@ const pages = (sql: DatabaseSync) => Object.values(sql.prepare('PRAGMA page_coun
 // Breaks (the corpus's own footing): the driver or the authority drifting from answers checked by
 // hand against the fixtures. Seed 1716 (cartridge_details_hash.json): wait until 1 advances the
 // clock to 1; wait until 1 again is not later than now, so invalid_state, and keeps the revision;
-// looking at a detail changes nothing but the revision. Seed 240 (cartridge_dusk_hash.json): ring_bell lasts 60.
+// looking at a detail changes nothing but the revision. Seed 240 (cartridge_dusk_hash.json):
+// ring_bell lasts 60.
 test('hand-checked anchors', () => {
   const p = processOn(save(), 1716);
   const replies = [0, 1, 2].map((k) => p.send(k) as Extract<Reply, { kind: 'saved' }>);
