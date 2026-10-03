@@ -55,7 +55,7 @@ function app(path: string) {
       rmSync(path);
     },
     FERRY as never,
-    { newId: randomUUID },
+    { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}` },
   );
   const screen = () => at(c.game()!).screen();
   const press = (b: Button) => at(c.game()!).press(b);
@@ -305,7 +305,7 @@ test('a narration read that fails on a lock offers no Start over', () => {
     }),
     () => {},
     FERRY as never,
-    { newId: randomUUID },
+    { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}` },
   );
   const failed = c.failed()!;
   assert.deepEqual(

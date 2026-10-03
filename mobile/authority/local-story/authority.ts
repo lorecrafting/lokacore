@@ -7,17 +7,17 @@ import type {
   DecisionResult,
   ErrorCode,
   HostKind,
-  NarrationRecord,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
 import type { Identified } from '../../../kernel/ts/src/invocation.ts';
 import { validate } from '../../../kernel/ts/src/validate.ts';
-import { step } from '../../../kernel/ts/src/world.ts';
+import { newWorld, step } from '../../../kernel/ts/src/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta } from './store.ts';
-import { adopt, save, settle, type Story, type Trace } from './save.ts';
-import { catchUp, observe, traceCommand, type CommitState, type RunIds } from './trace.ts';
+import { adopt, budget, ids, narration, save, scope, settle, stale, token } from './save.ts';
+import type { Story, Trace } from './save.ts';
+import { catchUp, observe, traceCommand, type CommitState } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -37,13 +37,16 @@ export type Release = { content_hash: string; fresh: World };
  * What the host supplies besides the releases: the build's kernel version (ADR-075 RunIds) and a
  * fresh random UUID per call, for each new save's lineage and run ids and each story point report's
  * id; `binding` is the signed-in account/profile, read once when a run starts, which binds it
- * (23 §§4-5, §11; null, the default: a guest).
+ * (23 §§4-5, §11; null, the default: a guest). `random`, shaped like getRandomValues, draws each new
+ * lineage's world context and RNG seed (ADR-075 §§3-4); without it a new lineage takes the
+ * release's own fresh world.
  */
 export type Host = {
   kernel_version: string;
   newId: () => string;
   binding?: () => string | null;
   latency?: { host: HostKind; now: () => number }; // ms; each NEW decision's (11 §13), else none
+  random?: (words: Uint32Array) => Uint32Array;
 };
 const SAVE_VERSION = 1;
 const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
@@ -80,9 +83,10 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     const installed = releases.map((r) => r.content_hash);
     if (!release)
       return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
-    const loaded = load(db, release.fresh, () => first(release, host));
+    const base = saved ? pinned(release, saved.pin!) : drawn(release, host);
+    const loaded = base && load(db, base, () => first(release.content_hash, base, host));
     if (!loaded) return refuse({ kind: 'save_corrupt' as const });
-    Object.assign(s, { fresh: release.fresh, ...loaded });
+    Object.assign(s, { fresh: base, ...loaded });
   } catch (e) {
     if (!corrupt(e)) throw e;
     return refuse({ kind: 'save_corrupt' as const }); // SQLite cannot read the file
@@ -100,44 +104,34 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
 }
 
 /**
- * The latest committed narration in this story's receipts, shown again on reopen after a crash
- * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
- * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
+ * A new lineage's initial world (ADR-075 §§3-4): with `random`, the release's cartridge under a
+ * drawn v4 UUID context and a drawn seed (redrawn while all zero: RngState); else the release's.
  */
-function narration(s: Story): NarrationRecord | undefined {
-  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
-  const r = s.db.getFirstSync<{ command_id: string; lines: string }>(
-    `SELECT command_id, response -> '$.narration' AS lines FROM receipt WHERE scope = ?
-     AND json_array_length(response, '$.narration') > 0 ORDER BY revision DESC LIMIT 1`,
-    scope(s),
-  );
-  return r
-    ? ({ command_id: r.command_id, lines: JSON.parse(r.lines) } as NarrationRecord)
-    : undefined;
+function drawn({ fresh }: Release, { random }: Host): World {
+  if (!random) return fresh;
+  let seed: number[];
+  do seed = [...random(new Uint32Array(4))];
+  while (seed.every((w) => w === 0));
+  const w = random(new Uint32Array(4));
+  [w[1], w[2]] = [(w[1]! & 0xffff0fff) | 0x4000, (w[2]! & 0x3fffffff) | 0x80000000]; // v4, variant 10
+  const h = [...w].map((x) => x.toString(16).padStart(8, '0')).join('');
+  const context = `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  return newWorld(fresh.cartridge, context as never, seed as never);
 }
 
-// The run is in it, so an old run's token is never current again after newGame.
-const token = (s: Story) => `view:${s.meta.run_id}:${s.revision}`;
-const stale = (s: Story, view?: string) => !!view?.startsWith('view:') && view !== token(s);
-const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
-const ids = (s: Story): RunIds => ({
-  content_hash: s.meta.pin.content_hash,
-  kernel_version: s.host.kernel_version,
-  seed: s.meta.seed as number[],
-  run_id: s.meta.run_id,
-});
+/**
+ * A saved lineage's initial world: the release's cartridge under its pinned context (ADR-075 §4
+ * A4), or the release's own when the pin has none (a save from before c1-host); its rng is the
+ * head's once loaded. Undefined for a context that is not a WorldContextId (corrupt).
+ */
+function pinned({ fresh }: Release, { world_context_id: context }: Meta['pin']) {
+  if (context === undefined || context === fresh.context) return fresh;
+  if (validate('WorldContextId', context).length) return undefined;
+  return newWorld(fresh.cartridge, context as never, fresh.state.rng);
+}
 
-/** A budget fault's evaluation.budget_exceeded (04 §5.4): the run's ids, its command and revision. */
-const budget = (s: Story, command_id: string, limit: string) => ({
-  format: 'loka-obs-v1',
-  event: 'evaluation.budget_exceeded',
-  store: 'diagnostics',
-  ids: { ...ids(s), command_id, revision: s.revision },
-  data: { limit },
-});
-
-/** A new save's identity: no parent, its initial RNG, the release it pins (10 §32), its binding. */
-function first({ content_hash, fresh }: Release, host: Host): Meta {
+/** A new save's identity: no parent, its initial RNG and context, the release it pins (10 §32), its binding. */
+function first(content_hash: string, fresh: World, host: Host): Meta {
   const { id, version, requires } = fresh.cartridge.manifest;
   const pin = {
     cartridge_id: id,
@@ -145,6 +139,7 @@ function first({ content_hash, fresh }: Release, host: Host): Meta {
     content_hash,
     capability_lock: fresh.cartridge.lock,
     rule_ir: requires.rule_ir,
+    world_context_id: fresh.context,
     numeric_profile: null, // ponytail: neither kernel exports a profile version yet
     rng_profile: null,
   };
@@ -280,14 +275,15 @@ function newGame(s: Story) {
   // are lost with the run the player chose to abandon; a pre-write journal would make it authority.
   if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   const newest = s.releases[0];
-  const next = first(newest, s.host);
-  const replaced = replace(s.db, newest.fresh, next); // throws on a definite failure: none written
+  const world = drawn(newest, s.host);
+  const next = first(newest.content_hash, world, s.host);
+  const replaced = replace(s.db, world, next); // throws on a definite failure: none written
   // Settled like an unknown COMMIT even when committed, so memory never serves the old run after
   // the new one is saved: a failed read while adopting it fences every call until it is adopted.
   const fence = () => {
     const run = () => identityOf(s.db)?.run_id; // a rolled-back repair may leave no save table
     if (replaced || reconcile(s.db, run) === next.run_id) {
-      s.fresh = newest.fresh;
+      s.fresh = world;
       adopt(s);
       s.behind = !catchUp(s.db, ids(s), s.fresh.context);
     }

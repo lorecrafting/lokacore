@@ -4,11 +4,11 @@
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import { randomUUID } from 'expo-crypto';
+import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
 import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 import Storage from 'expo-sqlite/kv-store';
-import { localSession } from '../authority/local-story/session';
+import { KERNEL_ID, localSession } from '../authority/local-story/session';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
 import lantern from '../../protocol/fixtures/cartridge_lantern_hash.json';
@@ -29,6 +29,10 @@ const fonts = {
 // The build ships one playable story, the Lantern, in its own file (one save per story); the items
 // story's loka-save.db stays on the phone untouched. ponytail: no story picker until a second story.
 const NAME = 'loka-lantern.db';
+// The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
+// development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
+const commit = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? `${'0'.repeat(40)}-dirty`;
+const kernel_version = `${KERNEL_ID}@${commit}${__DEV__ && !commit.endsWith('-dirty') ? '-dirty' : ''}`;
 let db: SQLiteDatabase | undefined;
 const g = globalThis as { loka_session?: ReturnType<typeof localSession> };
 const session = (g.loka_session ??= localSession(
@@ -41,7 +45,12 @@ const session = (g.loka_session ??= localSession(
   lantern,
   // Each NEW decision's kernel.decision_latency (11 §13), on the iPhone (Android descoped): select
   // the actual platform before Android evidence resumes.
-  { newId: randomUUID, latency: { host: 'hermes_ios', now: () => performance.now() } },
+  {
+    newId: randomUUID,
+    latency: { host: 'hermes_ios', now: () => performance.now() },
+    kernel_version,
+    random: getRandomValues,
+  },
 ));
 
 // Start over destroys the save, so the player confirms it first (10 §31). The hints live here, not

@@ -48,7 +48,12 @@ const adapt = (sql: DatabaseSync) => ({
 });
 const processOn = (path: string, cartridge = LANTERN) => {
   const sql = new DatabaseSync(path);
-  const smoke = presenter(openGame(adapt(sql), cartridge, randomUUID));
+  const smoke = presenter(
+    openGame(adapt(sql), cartridge, {
+      newId: randomUUID,
+      kernel_version: `loka-kernel@${'0'.repeat(40)}`,
+    }),
+  );
   const screen = () => smoke.screen();
   const find = (label: string, from = screen()) =>
     from.buttons.find((b) => b.label === label) ?? assert.fail(label);
