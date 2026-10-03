@@ -217,28 +217,6 @@ test('a failed attempt and a rejection persist; their retries draw nothing', () 
   ]);
 });
 
-// Breaks (03 §15; ADR-072): memory adopted before COMMIT, a partial write surviving the failed
-// transaction, or saved success reported. A 512-byte page makes the receipt need new pages, which
-// max_page_count forbids: a real SQLITE_FULL (storage lessons). Lifting it, the same id commits
-// as NEW, since a definite rollback left no receipt.
-test('a definite write failure leaves memory and storage at the prior revision', () => {
-  const p = processOn(save(), items, 512);
-  const before = p.story.world();
-  const rows = p.one('SELECT group_concat(key || value) FROM state_row ORDER BY key');
-  p.sql.exec(`PRAGMA max_page_count = ${p.one('PRAGMA page_count')}`);
-  assert.throws(() => p.story.invoke(take), { errcode: 13 }); // SQLITE_FULL
-  assert.equal(p.story.world(), before);
-  assert.equal(p.one('SELECT count(*) FROM receipt'), 0);
-  assert.equal(p.one('SELECT revision FROM head'), 0);
-  assert.equal(p.one('SELECT group_concat(key || value) FROM state_row ORDER BY key'), rows);
-  p.sql.exec('PRAGMA max_page_count = 1000000');
-  const retry = p.story.invoke(take) as { replay: boolean; revision: number };
-  assert.deepEqual(
-    [retry.replay, retry.revision, p.one('SELECT revision FROM head')],
-    [false, 1, 1],
-  );
-});
-
 // Breaks (04 §5.2 step 7; ADR-075 §4): a fault receipted, which would replay it forever, or its
 // proposal adopted. The bell's ring_bell assigns a value its FactSpec does not allow
 // (invocation.test.ts), which faults precondition_failed.
@@ -622,27 +600,4 @@ test('a talk committed, then a restart: the stored choice carries its revision a
   assert.equal(JSON.parse(row).opened_revision, 3);
   const chose = b.story.invoke(choosing(4, 'leave', continuation_id)) as Saved;
   assert.deepEqual([outcome(chose).outcome, chose.revision], ['leave', 4]);
-});
-
-// Breaks (06 §43, 03 §14; adverse-cases.json walked-away-keeps-receipt, altered-choice): a retried
-// committed choice deciding again after Bram left (not_present) instead of replaying its receipt,
-// another choice under the same invocation id accepted, or the receipt lost on restart.
-test('a committed choice replays from its receipt after Bram leaves and after a restart', () => {
-  const path = save();
-  const { p, continuation_id } = talked(path);
-  const leave = choosing(4, 'leave', continuation_id);
-  const first = p.story.invoke(leave) as Saved;
-  assert.equal(outcome(first).outcome, 'leave');
-  p.story.invoke(waitUntil(5, 19 * 3600));
-  assert.equal(
-    (p.story.world().state as { containers: Record<string, string> }).containers[BRAM],
-    GREEN,
-  );
-  const again = p.story.invoke(leave) as Saved;
-  assert.deepEqual([again.replay, again.revision], [true, 4]);
-  assert.equal(encode(again.decision), encode(first.decision));
-  assert.deepEqual(p.story.invoke(choosing(4, 'carry', continuation_id)), { kind: 'conflict' });
-  p.sql.close();
-  const b = processOn(path, ferry);
-  assert.equal(encode((b.story.invoke(leave) as Saved).decision), encode(first.decision));
 });

@@ -98,8 +98,8 @@ The app shell imports the local authority's session controller
   (`:50`), and draws the book UI or the save-error screen.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
-  case (`:167`); the regression seeds plus 10,000 fresh sequences run in every `npm test`
-  (`kernel/ts/test/sim.test.ts:22`). Its proposals feed the Elixir compose differential.
+  case (`:167`); the regression seeds plus fresh sequences (10,000 in CI, 500 locally) run in every `npm test`
+  (`kernel/ts/test/sim.test.ts:24`). Its proposals feed the Elixir compose differential.
 - **Fault simulation** (`mobile/authority/local-story/faults.test.ts`): the simulator's
   sequences through the local authority on real SQLite with real faults (SQLITE_FULL, a failed
   COMMIT, SIGKILL just before or after COMMIT; `:4`).

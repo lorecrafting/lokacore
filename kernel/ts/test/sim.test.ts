@@ -1,5 +1,5 @@
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
-// r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences,
+// r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI (500 elsewhere),
 // each step keeping every registered invariant; determinism in and across processes; and red
 // controls, each a kernel planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
@@ -19,7 +19,9 @@ const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = re
   'kernel/ts/test/sim_seeds.json',
 );
 const seeds = SEEDS.seeds.map((s) => s.seed);
-const FRESH = 10_000;
+// CI (set by GitHub Actions) runs the full 10,000; locally 500, the regression seeds always run.
+// The test title names the count, so a CI run that lacks CI shows 500.
+const FRESH = process.env.CI ? 10_000 : 500;
 // Observation records of this run (playbacks' game traces included) go to its own directory.
 const OBS = (process.env.LOKA_OBS_DIR = mkdtempSync(join(tmpdir(), 'loka-obs-')));
 after(() => rmSync(OBS, { recursive: true, force: true }));
@@ -89,7 +91,7 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
   let steps = 0;
   for (const seed of [...seeds, ...Array.from({ length: FRESH }, (_, i) => first + i)]) {
     const o = simulate(seed);
-    if (o.failure) assert.fail(report(o));
+    if (o.failure) assert.fail(`fresh seeds ${first} to ${first + FRESH - 1}\n${report(o)}`);
     lengths[(o.commands.length - 1) >> 3]! += 1;
     steps += o.commands.length;
     for (const c of o.codes) codes.add(c);
@@ -102,7 +104,11 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
       `${lengths.join(' ')}; outcomes ${[...codes].sort().join(', ')}`,
   );
   const missing = [...PICKED, ...UNKNOWN].filter((x) => !seen.has(x));
-  assert.deepEqual([...REACHED.filter((c) => !codes.has(c)), ...missing], [], 'never reached');
+  assert.deepEqual(
+    [...REACHED.filter((c) => !codes.has(c)), ...missing],
+    [],
+    `never reached; fresh seeds ${first} to ${first + FRESH - 1}`,
+  );
   // budget_exceeded is among REACHED, yet no diagnostics record was written (this run's own dir).
   assert.equal(existsSync(`${OBS}/diagnostics`), false, 'recorded without a run');
 });

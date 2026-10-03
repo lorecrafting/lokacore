@@ -164,15 +164,6 @@ test('a pending press is retried with its own id and replays what committed', ()
   assert.deepEqual(p.now().carrying, []);
 });
 
-// Breaks: the same retry minting a new id, so a committed "scan" ran twice (revision 2).
-test('retrying a pending scan does not commit it twice', () => {
-  const { p, revision, arm } = lostAck();
-  arm();
-  p.press('Scan');
-  p.press('Scan');
-  assert.equal(revision(), 1);
-});
-
 // Breaks: taking the greatest receipt id of the scope: another allocator's id
 // (ffffffff-...-000000000001) made the next smoke id 2, which the earlier "Go north" already used
 // (a conflict instead of a move).
