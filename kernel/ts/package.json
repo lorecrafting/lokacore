@@ -8,7 +8,9 @@
   },
   "scripts": {
     "typecheck": "tsc && tsc -p test && tsc -p play",
-    "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"test/**/*.test.ts\""
+    "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"test/**/*.test.ts\"",
+    "test:nosim": "node --test --test-reporter=${TEST_REPORTER:-spec} $(find test -name '*.test.ts' ! -name sim.test.ts)",
+    "test:sim": "node --test --test-reporter=${TEST_REPORTER:-spec} test/sim.test.ts"
   },
   "devDependencies": {
     "@types/node": "24.13.6",

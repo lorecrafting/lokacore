@@ -60,12 +60,20 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,
   world-parameters) names exactly one tracked file and a line inside it
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
+- `bin/docs_only.sh <base> <after>` prints `skip` when every file changed in the range is `*.md` (not
+  `*.gen.md`, which the elixir drift checks cover), else `run` (also for a missing or non-ancestor
+  `<base>` or an empty diff). The `changes` job of `ci.yml` passes (`bin/ci_base.sh`) the newest ancestor of a pull request
+  head whose `elixir`, `typescript` and `sim` jobs all passed (GitHub API; none found or an API error
+  means `run`) and skips those three jobs on `skip`; pushes to main never skip. `lint` (with the docs
+  link check) always runs. Planted cases, in a throwaway repo: `bin/docs_only_red_controls.sh` (a
+  `.json` under `docs/`, a `.gen.md`, a code file renamed to `.md`, a mixed range, no `<base>`, a
+  non-ancestor `<base>` and an empty diff must say `run`; and a fake `gh` that fails on the run list or the job list must leave `ci_base.sh` with no base).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `mobile.yml` builds the native apps on pull requests that change native
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
   on pull requests that touch `mobile/` or `kernel/`. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
-  sets it; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
+  sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3); its Hermes replay sample (seeds 1-19) ran on the iPhone 11 in
   [R6P P6b](evidence/2026-10-02-r6p-iphone11/README.md) (ADR-074).

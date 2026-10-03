@@ -27,6 +27,8 @@ You are an independent reviewer. You authored none of the work under review. Rea
    capability code that names another mechanic or one piece of content is a finding unless
    the spec requires it (cartridge content names content by design).
 
+Do not run `bin/check_all.sh` right before pushing your record: the pre-push hook runs it.
+
 Token hygiene (docs/WORKFLOW.md): send check, test, push and pre-push output to a scratchpad file named for your slice; read only the exit status, the failures and the tail. Read diffs per hunk.
 
 Every finding has a severity (blocker / should-fix / nit, at most five nits), a
