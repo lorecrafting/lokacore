@@ -129,3 +129,26 @@ CHANGES REQUESTED
 R1 | blocker | kernel/ts/src/invariants_view.ts:19 at b1fe931
 The invariant equates action_key with payload.type, although cartridge actions may alias commands. Reproduced with a loader-valid `unbar` action resolving to `open`, and a room subtracting engine `open`: the closed north door lists `unbar`, and step accepts it, but the invariant returns false. Conversely, an incorrect `invalid_state` refusal returns true, hiding a regression. Match through the offered action’s resolved command rather than assuming its key equals the command type.
 ```
+
+## Fix round 1 re-check (da8d759)
+
+Scope: `ba340db..da8d759` (`invariants_view.ts`, `test/sim.ts`, `test/sim.test.ts`,
+protocol.md, world-parameters.md) and the invariant's direct callers (`invariants.ts` CHECKS;
+`check` callers `sim.ts` `violated`, `sim.test.ts`, `invariant_peer.ts`, `differential_peer.ts`,
+`containment.ts`). Kernel typecheck green; kernel suite 319 pass, 0 fail.
+
+- **Sol R1 (blocker): resolved.** `invariants_view.ts:26-29` matches a listed door action by
+  `resolves[action_key] === payload.type`; `sim.ts:238` builds `resolves` from
+  `resolved(before, before.character)`, the same world the view is read from. Only `sim.ts`
+  passes a view; the other `check` callers never reach the door branch with a view (unchanged).
+  Alias mutant (back to `a.action_key === type`): the new alias test fails. Second mutant
+  (key present in `resolves`, command not compared): the sim 500-sequence run and the
+  adopt_mismatch red control fail. Both red.
+- **F-1: resolved.** protocol.md `view.ts:38`, `:114`, `:133`; world-parameters W13 `:114`
+  (used `:138`); `invariants_view.ts:16`, `:42` each land on the cited code.
+- **F-2: resolved by R1** (PM reversed the carry ruling; no LATER row needed).
+- **N-1: resolved.** `DOOR_VERBS = Object.keys(MOVES)` (`invariants_view.ts:47`) and
+  `sim.ts:320` `Object.hasOwn(MOVES, …)`.
+- **Q-1: closed** (PM accepted as written).
+
+No new findings. **Verdict: APPROVE.**
