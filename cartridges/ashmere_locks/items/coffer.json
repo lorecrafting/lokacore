@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "coffer"
+  ],
+  "short": "item.coffer.short",
+  "room_line": "item.coffer.room",
+  "description": "item.coffer.description",
+  "location": {
+    "in": "item",
+    "item": "trunk"
+  },
+  "barrier": "coffer_lid"
+}

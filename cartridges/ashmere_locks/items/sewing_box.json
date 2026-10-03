@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "box",
+    "sewing_box"
+  ],
+  "short": "item.sewing_box.short",
+  "room_line": "item.sewing_box.room",
+  "description": "item.sewing_box.description",
+  "location": {
+    "in": "room",
+    "room": "inn_rooms"
+  },
+  "barrier": "box_lid"
+}

@@ -63,6 +63,10 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   give: ['item_id', 'recipient_id'],
   wear: ['item_id'],
   remove: ['item_id'],
+  open: ['target_id'],
+  close: ['target_id'],
+  lock: ['target_id'],
+  unlock: ['target_id'],
 };
 
 /**

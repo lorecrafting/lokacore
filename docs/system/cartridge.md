@@ -58,8 +58,15 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 - items and NPCs start somewhere real with no containment cycle and within capacity
   (`CONTAINMENT_CYCLE`, `CAPACITY_EXCEEDED`); details are reachable (`UNREACHABLE_DETAIL`);
 - barriers: each exit's barrier and its reciprocal face name the same one (`BARRIER_MISMATCH`);
-  no locked barrier's key is out of reach (`BARRIER_UNREACHABLE_KEY`;
-  `lib/loka/content/barriers.ex:2`);
+  an item's `barrier` (a container's lid, c1-locks) names a barrier (`UNRESOLVED_REFERENCE`)
+  that no exit and no other item names (`BARRIER_MISMATCH` at the item's `barrier`); no locked
+  barrier on an exit of a reachable room or on an item in reach has a key that is never in reach
+  (`BARRIER_UNREACHABLE_KEY`, also for a locked one with no `key_item`;
+  `lib/loka/content/barriers.ex:2`). Reach starts at the entry; an item is in reach when it
+  starts in a reached room or inside an item in reach whose barrier is absent, not locked, or
+  locked with its key in reach (never inside an NPC). The loader rejects only keys that can never
+  be reached (its own key inside a locked chest, circular keys); every other case is a runtime
+  refusal (barrier@1, containment@1);
 - story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
   one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
   `lib/loka/content/dialogues.ex:2`);
@@ -84,7 +91,8 @@ references (`kernel/ts/src/cartridge_refs.ts:155` and the `cartridge_*.ts` twins
 compiler's checks), and the installed kernel (`cartridge.ts:226`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
-An item's `slot` is a definition part owned by `equipment` (`UNDECLARED_CAPABILITY` when the
+An item's `barrier` is a reference to a barrier (barrier@1 owns the kind; a short key compiles
+to its full ref) and is checked as above in both the compiler and the loader. An item's `slot` is a definition part owned by `equipment` (`UNDECLARED_CAPABILITY` when the
 lock lacks it), in both the compiler and the loader. Compiled artifacts load in TypeScript with identical bytes, hash and lock
 (`test/loka/cartridge_cross_kernel_test.exs:113`); the loader corpus is
 `protocol/fixtures/cartridge_loader.json`.

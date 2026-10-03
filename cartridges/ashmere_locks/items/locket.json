@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "locket"
+  ],
+  "short": "item.locket.short",
+  "room_line": "item.locket.room",
+  "description": "item.locket.description",
+  "location": {
+    "in": "item",
+    "item": "coffer"
+  }
+}

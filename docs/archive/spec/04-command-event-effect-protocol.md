@@ -626,6 +626,8 @@ Host-only views—account catalog, entitlement, social realm presence, admin—r
 
 This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
 
+*Amendment 2026-10-03 (chapter-one slice c1-locks; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 6):* container semantic contents: an item with a barrier shows its state and the container verbs the actor may use on it now; an item without a lid or with an open one shows what is inside it in reach, at any depth, flattened with each item's direct container ([protocol](../../system/protocol.md#gameview)).
+
 ## 16. Snapshot, projection sequence, and freshness model
 
 On join/resync, server sends an authoritative semantic GameView snapshot.

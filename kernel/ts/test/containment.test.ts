@@ -26,6 +26,7 @@ const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2'; // 5: NPCs, then items in r
 const OIL = '6a70d262-b6ea-8b64-9809-ec7f79d1521e'; // 6: lamp_oil, in the satchel
 const LANTERN = '0f5f2329-bcff-82f4-948a-3d22a75fb068'; // 7: on the green
 const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1'; // 8: at the landing, capacity 1
+const OIL_VIEW = { id: OIL, name: 'item.lamp_oil.short', kind: 'item', container_id: SATCHEL };
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
 const EVENT = 'e2870386-6797-8a1b-8e1a-b2c028c16c49'; // IdSource [context, CMD, 0], Python
 const SEED = [1, 2, 3, 4];
@@ -74,6 +75,7 @@ test('a fresh world mints NPCs then items after the details and places each', ()
       name: 'item.satchel.short',
       kind: 'item',
       actions: [verb('take', 'room_contents')],
+      contents: [{ ...OIL_VIEW, actions: [verb('take', 'room_contents')] }],
     },
   ]);
   assert.deepEqual(view.inventory, []);
@@ -117,9 +119,19 @@ test('take proposes one transfer to the body and item_acquired, at the Python st
     hash(world.state as never),
     'fb828aedb07fd77bab6905d0707c214e7dc85f0d0f067e1f118cd6b237ccf06b',
   );
+  // A container without a barrier is open (c1-locks Q1): the oil comes out of the satchel.
+  const oil = step(fresh(), take(OIL), 0).decision;
+  assert.equal(oil.kind === 'accepted' && oil.outcome, 'taken');
+  assert.equal(oil.kind === 'accepted' && (oil.delta.ops[0] as never)['source_id'], SATCHEL);
   const held = ['drop', 'give'].map((v) => verb(v, 'inventory'));
   assert.deepEqual(gameView(world).inventory, [
-    { id: SATCHEL, name: 'item.satchel.short', kind: 'item', actions: held },
+    {
+      id: SATCHEL,
+      name: 'item.satchel.short',
+      kind: 'item',
+      actions: held,
+      contents: [{ ...OIL_VIEW, actions: [verb('take', 'room_contents')] }], // take's own TargetSpec
+    },
   ]);
 });
 
@@ -152,7 +164,6 @@ test('each bad take, drop and give is rejected with its code and consumes nothin
     [fresh(), take(POST), 'not_found'], // a detail is no entity
     [fresh(), take(BRAM), 'invalid_target'],
     [fresh(), take(LANTERN), 'not_present'], // on the green
-    [fresh(), take(OIL), 'not_present'], // inside the satchel, not in the room
     [holding, take(SATCHEL), 'invalid_state'], // already held
     [fresh(), drop(SATCHEL), 'not_owned'],
     [fresh(), give(SATCHEL, BRAM), 'not_owned'],

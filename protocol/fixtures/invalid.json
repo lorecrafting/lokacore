@@ -5419,6 +5419,90 @@
     ]
   },
   {
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "item.trunk.short",
+      "kind": "item",
+      "actions": [],
+      "state": "ajar",
+      "contents": [
+        {
+          "x": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/contents/0/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/contents/0/container_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/contents/0/id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/contents/0/kind",
+        "code": "missing_property"
+      },
+      {
+        "path": "/contents/0/name",
+        "code": "missing_property"
+      },
+      {
+        "path": "/contents/0/x",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/state",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "ContentView",
+    "value": {
+      "id": "X",
+      "name": "X",
+      "kind": "X",
+      "actions": [
+        {}
+      ],
+      "container_id": "X",
+      "state": "ajar"
+    },
+    "errors": [
+      {
+        "path": "/actions/0/available",
+        "code": "missing_property"
+      },
+      {
+        "path": "/container_id",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/id",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/kind",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/name",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/state",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
     "contract": "PendingChoice",
     "value": {},
     "errors": [
@@ -12233,10 +12317,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/direction",
-        "code": "missing_property"
-      },
-      {
         "path": "/x",
         "code": "unknown_property"
       }
@@ -12251,10 +12331,6 @@
     "errors": [
       {
         "path": "/actor_id",
-        "code": "missing_property"
-      },
-      {
-        "path": "/direction",
         "code": "missing_property"
       },
       {
@@ -12275,10 +12351,6 @@
         "code": "missing_property"
       },
       {
-        "path": "/direction",
-        "code": "missing_property"
-      },
-      {
         "path": "/x",
         "code": "unknown_property"
       }
@@ -12296,12 +12368,64 @@
         "code": "missing_property"
       },
       {
-        "path": "/direction",
-        "code": "missing_property"
-      },
-      {
         "path": "/x",
         "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "open",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "X"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "close",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "X"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "lock",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "X"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "unlock",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "X"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "pattern_mismatch"
       }
     ]
   },
@@ -14344,6 +14468,46 @@
       {
         "path": "/slot",
         "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "k",
+      "keywords": [
+        "k"
+      ],
+      "short": "s",
+      "room_line": "r",
+      "description": "d",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "r"
+        }
+      },
+      "barrier": {}
+    },
+    "errors": [
+      {
+        "path": "/barrier/cartridge_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/barrier/cartridge_version",
+        "code": "missing_property"
+      },
+      {
+        "path": "/barrier/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/barrier/kind",
+        "code": "missing_property"
       }
     ]
   },

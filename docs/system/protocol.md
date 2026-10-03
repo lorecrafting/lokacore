@@ -142,7 +142,10 @@ intersect; `:57`), then the answers to a pending choice (`choose`, `close_choice
 contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
 The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
-the GameView lists them only on the exits they act on, never with the place's actions.
+the GameView lists them only on the exits they act on and on the items with a barrier
+(containers, c1-locks), never with the place's actions. On an item each is advertised with the
+item's scope as its entity target and no input, so a client invokes it with `target_ids`
+`[item]` and resolve fills `target_id` (`kernel/ts/src/invocation.ts` `TARGETS`).
 `wear` and `remove` (equipment@1) take an `inventory` item target in the set (an engine verb's
 rule checks its own target); for a cartridge action resolving to `remove`, the `inventory` scope
 also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:234`). The GameView lists `wear` on a held
@@ -171,7 +174,7 @@ named by its keywords through `doors` (`:72`). A Command carries only ids, never
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:40`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:42`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
 barrier) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
@@ -181,7 +184,14 @@ whose barrier does not bar the way carries `sight` (the destination room id and 
 NPCs and items directly in it, in the order of `entities`), also when the move is unaffordable
 (04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`;
 `entities` in the room and `inventory` of the body, each with its short name, kind and the
-actions it accepts (NPCs first, then DefinitionRefString order); `equipment`, one entry per slot
+actions it accepts (NPCs first, then DefinitionRefString order); an item with a barrier also
+carries its `state` and the container verbs admission and barrier@1's check accept now, all
+available; an item without a barrier or with an open one carries `contents` when it holds an
+item: every item inside it in reach (containment@1 custody: no closed or locked lid on the way),
+at any depth, flattened in DefinitionRefString order, each with its `container_id` (its direct
+container), its `state` if it has a barrier, and as actions only `take` and its container verbs
+(a `ContentView`; a recursive view is not allowed in the schemas). An NPC's possessions and a
+worn item's contents are never shown (c1-locks); `equipment`, one entry per slot
 holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
 accepts (only those resolving to `remove`), absent when the world has no holder
 ([equipment@1](mechanics.md#equipment1-kerneltssrcrulesequipmentts)); `journal` (each quest the player
@@ -191,11 +201,13 @@ has an instance of, with state and title); `time` (the logical clock); the pendi
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`view.ts:125`, `:144`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view.ts:165`, `:184`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
-(`kernel/ts/src/action_lists.ts:29`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes, and for the door verbs and `wear`/`remove`, matched by the Command each listed action
-resolves to (a cartridge alias included): one listed on its exit or item is never refused with a
-code the view predicts, one not listed is never accepted, and none of `wear`/`remove` is a place action (`kernel/ts/src/invariants_view.ts:19`, `:50`).
+(`kernel/ts/src/action_lists.ts:31`). Invariant `gameview_agrees_with_admission` holds this for exits and
+recipes, and for the door and container verbs and `wear`/`remove`, matched by the Command each
+listed action resolves to (a cartridge alias included): one listed on its exit or item (a nested
+one in `contents` included) is never refused with a code the view predicts (`not_present`
+among them), one not listed is never accepted, and none of `wear`/`remove` is a place action; a
+`take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:26`, `:62`).

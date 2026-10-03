@@ -1,7 +1,13 @@
 // The GameView invariant of invariants.ts (registered in protocol/invariants.json): a STEP check
 // of the actor's view before a command against the decision on it; `resolves` maps each action key
 // of the actor's set to the Command type it resolves to (actions.ts resolved).
-import type { AdvertisedAction, EntityView, ExitView, GameView } from './contracts.gen.ts';
+import type {
+  AdvertisedAction,
+  ContentView,
+  EntityView,
+  ExitView,
+  GameView,
+} from './contracts.gen.ts';
 import { MOVES } from './rules/barrier.ts';
 import { VERBS as EQUIP_VERBS } from './rules/equipment.ts';
 
@@ -13,9 +19,10 @@ type Any = any;
 // unavailable is never accepted, and a refusal with such a code is the view's code. A door verb
 // (04 §15 as amended by c1-doors) is listed on its exit's door only when admission and the barrier
 // rule accept it, under any key that resolves to it: listed, it is never refused with a code they give (not_found aside: a foreign
-// actor's or world's command is the envelope's); not listed, it is never accepted. Likewise wear
+// actor's or world's command is the envelope's); not listed, it is never accepted. Likewise a door
+// verb on the item it targets (a container, c1-locks, nested ones in contents included), and wear
 // and remove (protocol.md GameView as amended by c1-equipment) on the item they name, and never
-// among the place's actions.
+// among the place's actions; a listed take is never refused not_present.
 export const gameview_agrees_with_admission = ({
   view,
   command,
@@ -28,9 +35,14 @@ export const gameview_agrees_with_admission = ({
     Object.hasOwn(resolves, a.action_key) && EQUIP_VERBS.includes(resolves[a.action_key]);
   if (view.actions?.some(equip)) return false; // a targetless wear or remove is never accepted
   if (DOOR_VERBS.includes(type) || EQUIP_VERBS.includes(type)) {
-    const actions = DOOR_VERBS.includes(type)
-      ? view.exits.find((e: ExitView) => e.direction === command.payload.direction)?.door?.actions
-      : entityView(view, command.payload.item_id)?.actions;
+    const { direction, target_id, item_id } = command.payload;
+    const actions = !DOOR_VERBS.includes(type)
+      ? entityView(view, item_id)?.actions
+      : (direction === undefined) === (target_id === undefined)
+        ? undefined // neither or both: never accepted
+        : direction !== undefined
+          ? view.exits.find((e: ExitView) => e.direction === direction)?.door?.actions
+          : entityView(view, target_id)?.actions;
     const listed = actions?.some(
       (a: AdvertisedAction) =>
         Object.hasOwn(resolves, a.action_key) && resolves[a.action_key] === type,
@@ -50,6 +62,7 @@ export const gameview_agrees_with_admission = ({
 const SHOWN: Readonly<Record<string, readonly string[]>> = {
   move: ['exit_closed', 'exit_locked', 'insufficient_resource'],
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
+  take: ['not_present'], // a listed take is in reach (c1-locks custody)
 };
 
 const DOOR_VERBS = Object.keys(MOVES);
@@ -59,6 +72,7 @@ const VERB_CODES = [
   'invalid_state',
   'exit_locked',
   'not_owned',
+  'not_present',
 ];
 
 function advertised(view: GameView, p: Any): ExitView | AdvertisedAction | undefined {
@@ -71,10 +85,11 @@ function advertised(view: GameView, p: Any): ExitView | AdvertisedAction | undef
   return entityView(view, id)?.actions.find((a) => a.action_key === p.type);
 }
 
-// The view's entry for an entity id: in the room, held, or worn.
-const entityView = (view: GameView, id: string): EntityView | undefined =>
+// The view's entry for an entity id: in the room, held (or inside either, c1-locks), or worn.
+const entityView = (view: GameView, id: string): EntityView | ContentView | undefined =>
   [
     ...view.entities,
     ...view.inventory,
+    ...[...view.entities, ...view.inventory].flatMap((e) => e.contents ?? []),
     ...(view.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].find((e) => e.id === id);

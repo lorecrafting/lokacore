@@ -2,6 +2,7 @@
 import type {
   AdvertisedAction,
   BandTable,
+  ContentView,
   EntityId,
   EntityView,
   ExitView,
@@ -14,7 +15,7 @@ import type {
 } from './contracts.gen.ts';
 import { lists } from './action_lists.ts';
 import { COMPASS, refString, type Entity, type QuestRow, type World } from './decision.ts';
-import { barrierState, exitOf } from './lookups.ts';
+import { barrierState, exitOf, opened } from './lookups.ts';
 import { choiceView } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
 import * as description_variant from './rules/description_variant.ts';
@@ -32,7 +33,8 @@ import { cmp } from './validate.ts';
  * the NPCs and items in the room and the items the player's body holds (03 §23), each named by
  * its short description with its actions (action_lists.ts lists: an item here by the room_contents
  * scope, an NPC by room_occupants, a held item by inventory; a talk only on its speaker), NPCs
- * first, then in DefinitionRefString order; and the journal, each quest the player has an instance of with its
+ * first, then in DefinitionRefString order, an item with its lid's state and what is in reach
+ * inside it (within; c1-locks); and the journal, each quest the player has an instance of with its
  * state and title (04 §15 quest journal state), in DefinitionRefString order; and the player's
  * pending choice, if any (dialogue.ts choiceView); and the body's resources with their bands (04 §15
  * as amended), absent when the cartridge has none.
@@ -40,22 +42,8 @@ import { cmp } from './validate.ts';
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
   const actions = lists(world, world.character);
-  const scope = { item: 'room_contents', npc: 'room_occupants' } as const;
-  const within = (
-    holder: EntityId,
-    of = (kind: Entity['kind'], id: string) =>
-      actions.of(holder === world.body ? 'inventory' : scope[kind], id),
-  ): EntityView[] =>
-    Object.entries(world.entities)
-      .filter(([id]) => world.state.containers[id] === holder)
-      .map(([id, e]) => ({
-        id: id as EntityId,
-        name: e.short,
-        kind: e.kind as Key,
-        actions: of(e.kind, id),
-      }));
   const equipment = Object.entries(world.slots).map(([slot, holder]) => {
-    const [item] = within(holder, (_, id) => actions.worn(id));
+    const [item] = within(world, actions, holder, actions.worn);
     return { slot: slot as SlotKey, ...(item && { item }) };
   });
   const room = world.rooms[here];
@@ -68,8 +56,8 @@ export function gameView(world: World): GameView {
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door),
     actions: actions.place,
-    entities: within(here),
-    inventory: within(world.body),
+    entities: within(world, actions, here),
+    inventory: within(world, actions, world.body),
     ...(equipment.length > 0 && { equipment }),
     journal: journal(world),
     time: world.state.clock,
@@ -77,6 +65,58 @@ export function gameView(world: World): GameView {
     ...(pools.length > 0 && { resources: pools }),
   };
 }
+
+// The entities directly in `holder` (the room, the body or a slot holder), each with its short
+// name, kind and actions (`worn`, else by scope: an item here by room_contents, an NPC by
+// room_occupants, a held item by inventory); an item also with its barrier's state and, unless
+// worn, its contents (c1-locks).
+function within(
+  world: World,
+  actions: Lists,
+  holder: EntityId,
+  worn?: (id: string) => AdvertisedAction[],
+): EntityView[] {
+  return Object.entries(world.entities)
+    .filter(([id]) => world.state.containers[id] === holder)
+    .map(([id, e]) => {
+      const scope = holder === world.body ? 'inventory' : SCOPE[e.kind];
+      const contents = e.kind === 'item' && !worn ? inside(world, actions, id, scope) : [];
+      return {
+        ...viewOf(world, id, e, worn ? worn(id) : actions.of(scope, id)),
+        ...(contents.length > 0 && { contents }),
+      };
+    });
+}
+
+const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
+
+// What item `box` holds in reach (every container from the item up to `box` opened, `box` too),
+// at any depth, in DefinitionRefString order, each with its direct container and only take and
+// its container verbs (ContentView; c1-locks).
+function inside(world: World, actions: Lists, box: string, scope: string): ContentView[] {
+  const under = (id: string) => {
+    for (let c = world.state.containers[id]; opened(world, c); c = world.state.containers[c])
+      if (c === box) return true;
+    return false;
+  };
+  return Object.entries(world.entities)
+    .filter(([id]) => under(id))
+    .map(([id, e]) => ({
+      ...viewOf(world, id, e, actions.of(scope, id, true)),
+      container_id: world.state.containers[id],
+    }));
+}
+
+// An entity as the view names it, with its barrier's state if it has one.
+const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]) => ({
+  id: id as EntityId,
+  name: e.short,
+  kind: e.kind as Key,
+  ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
+  actions,
+});
+
+type Lists = ReturnType<typeof lists>;
 
 // The exits of the body's room in compass order (movement.sight's): each unavailable with the
 // code movement would refuse it with, with its barrier's door, and with what is seen through it

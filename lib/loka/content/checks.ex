@@ -30,7 +30,7 @@ defmodule Loka.Content.Checks do
   threshold check or resource.adjust step (or of cartridge.json's world.movement.cost), a narration participant's or dialogue role's npc or item, a dialogue's npc and
   quest, a dialogue choice's fact.assign fact and accept, a story point trigger's dialogue, an exit's `to` and `barrier`, a barrier's
   `key_item`, a quest objective's `item_acquired`, a reaction trigger's fact or room, an item's location (its room,
-  npc or item, as `in` selects), an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
+  npc or item, as `in` selects) and barrier, an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
   `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
   """
   @spec expand(term(), map()) :: term()
@@ -66,6 +66,10 @@ defmodule Loka.Content.Checks do
   # An ItemLocation (`in` a kind, and that kind's field) or an NPC (its room_line a text key).
   def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
     do: Map.update!(loc, k, &ref(&1, k, m))
+
+  # An item's barrier (a container's lid, c1-locks); its location expands as above.
+  def expand(%{"barrier" => k, "location" => _} = item, m) when is_binary(k),
+    do: item |> Map.delete("barrier") |> expand(m) |> Map.put("barrier", ref(k, "barrier", m))
 
   def expand(%{"room" => _, "room_line" => t} = npc, m) when is_binary(t) do
     schedule = Map.get(npc, "daily_schedule", %{})

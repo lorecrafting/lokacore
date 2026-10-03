@@ -4,9 +4,9 @@
 // custody, cycle and capacity preconditions compose.ts checks against the overlay, and one
 // event. Ids come from target resolution and are re-validated here: no item (or recipient) by
 // that id is not_found; not an item (or, for give, not an NPC) invalid_target; an item that is
-// not in the actor's room (take) or a recipient elsewhere not_present; an item the actor does not
-// hold (drop, give) not_owned; an item already held (take) or a recipient at its capacity
-// invalid_state.
+// out of the actor's reach (take; lookups.ts reach, c1-locks custody) or a recipient elsewhere not_present;
+// an item the actor does not hold (drop, give) not_owned; an item already held (take) or a
+// recipient at its capacity invalid_state.
 import type { EntityId } from '../contracts.gen.ts';
 import {
   accepted,
@@ -20,6 +20,7 @@ import {
   type World,
 } from '../decision.ts';
 import { check } from '../invariants.ts';
+import { reach } from '../lookups.ts';
 
 export const decide: Rule<'containment'> = (world, command, mint) => {
   const p = command.payload;
@@ -41,7 +42,8 @@ export const decide: Rule<'containment'> = (world, command, mint) => {
     event(world, command, mint, 1, { type: 'item_acquired', item_id: p.item_id, holder_id }),
   ];
   if (p.type === 'take') {
-    if (at !== here) return rejected(at === body ? 'invalid_state' : 'not_present');
+    if (at === body) return rejected('invalid_state');
+    if (!reach(world, body, p.item_id)) return rejected('not_present');
     return accepted(world, 'taken', move(body), acquired(body));
   }
   if (at !== body) return rejected('not_owned');

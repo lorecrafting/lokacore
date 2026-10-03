@@ -32,7 +32,7 @@ export function normalize(text: string): string[] {
  * (invariant target_candidates_ordered). Over the contract's selector_cardinality candidates
  * it throws, never truncating (04 §5.3). ponytail: a loadable cartridge can reach that only
  * with over 1024 same-named items, NPCs and details in reach; the contract has no overflow
- * outcome to report it gracefully (DEFERRED, docs/ROADMAP.md R6P row).
+ * outcome to report it gracefully (DEFERRED, docs/ROADMAP.md "R7/R8 for chapter one" row).
  */
 export function resolve(world: World, actor: CharacterId, text: string): TargetResolution {
   const phrase = normalize(text).join('_');

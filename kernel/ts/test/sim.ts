@@ -31,7 +31,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 7;
+export const GENERATOR = 8;
 /** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
 /** invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -300,8 +300,9 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
 // A command the GameView offers, available or not: each place action (a recipe's perform, a
 // quest offer's accept_quest, a direction verb through each exit, wait to a boundary), each door
 // verb of the set through each exit (the GameView lists only the accepted ones, on their exits),
-// each wear and remove of the set on each held and worn item (likewise listed only where
-// accepted), each action on a listed entity, and look at each detail of the room.
+// and on each item in the room, held or inside one (c1-locks; listed only where accepted, on the
+// item), each wear and remove of the set on each held and worn item (likewise), each action on a
+// listed entity or an item inside one, and look at each detail of the room.
 function offered(world: World, g: Gen): Payload {
   const view = gameView(world);
   const set = resolved(world, world.character);
@@ -317,14 +318,19 @@ function offered(world: World, g: Gen): Payload {
     if (o.input.includes('until')) return [{ type: 'wait', until: g.pick(boundaries(world)) }];
     return [{ type: o.command }];
   });
+  const inside = [...view.entities, ...view.inventory].flatMap((e) => e.contents ?? []);
+  const items = [...view.entities, ...view.inventory, ...inside].filter((e) => e.kind === 'item');
   for (const o of Object.values(set))
     if (Object.hasOwn(MOVES, o.command))
-      options.push(...exits.map((direction) => ({ type: o.command, direction })));
+      options.push(
+        ...exits.map((direction) => ({ type: o.command, direction })),
+        ...items.map((e) => aimed(o.command, e.id, STALE)),
+      );
   const worn = (view.equipment ?? []).flatMap((slot) => (slot.item ? [slot.item] : []));
   for (const o of Object.values(set))
     if (o.command === 'wear' || o.command === 'remove')
       options.push(...[...view.inventory, ...worn].map((e) => aimed(o.command, e.id, STALE)));
-  for (const e of [...view.entities, ...view.inventory, ...worn])
+  for (const e of [...view.entities, ...view.inventory, ...worn, ...inside])
     for (const a of e.actions)
       options.push(aimed(set[a.action_key]!.command, e.id, g.pick([...npcs, STALE])));
   for (const [d, detail] of Object.entries(world.details))
@@ -334,7 +340,7 @@ function offered(world: World, g: Gen): Payload {
 
 // A command of `type` at entity `id`, by its payload's field; give's recipient `to`.
 const aimed = (type: string, id: string, to: string): Payload =>
-  type === 'look' || type === 'talk'
+  type === 'look' || type === 'talk' || Object.hasOwn(MOVES, type)
     ? { type, target_id: id }
     : { type, item_id: id, ...(type === 'give' && { recipient_id: to }) };
 

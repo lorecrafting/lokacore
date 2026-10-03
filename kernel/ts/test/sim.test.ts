@@ -60,6 +60,7 @@ const PICKED = [
   'gate',
   'green',
   'items',
+  'locks',
   'road',
   'rooms',
   'wear',
@@ -185,14 +186,15 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
     }),
   );
   assert.equal(f.id, 'containment_acyclic');
-  // move, take, drop; a drained start may need a wait first (which seed finds it depends on the
-  // demo cartridges).
-  assert.ok(f.shrunk.length <= 4 && types(f.shrunk).at(-1) === 'drop', f.text);
+  // moves to an item, take, drop; a drained start may need a wait first (which seed finds it
+  // depends on the demo cartridges: generator 8's seed 3 is lantern_proof, whose nearest item is
+  // three moves from the entry).
+  assert.ok(f.shrunk.length <= 5 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 7, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 8, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
-  assert.match(f.text, /shrunk from \d+ to [1-4] commands:\n/);
+  assert.match(f.text, /shrunk from \d+ to [1-5] commands:\n/);
 });
 
 // Breaks: job_complete_owned_by_run not checked per step, or blind to a job.complete in the

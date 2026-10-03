@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "letter"
+  ],
+  "short": "item.letter.short",
+  "room_line": "item.letter.room",
+  "description": "item.letter.description",
+  "location": {
+    "in": "item",
+    "item": "trunk"
+  }
+}

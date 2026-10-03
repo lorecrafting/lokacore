@@ -395,6 +395,8 @@ Shared mutable state for a logical door/gate/bridge/barricade:
 
 Bidirectional faces reference one barrier state unless explicitly modeled as independent.
 
+*Amendment 2026-10-03 (chapter-one slice c1-locks; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 6):* a barrier may sit on an item (a container's lid) instead of an exit; it then has one site: no exit and no other item names it. The door commands target the item ([mechanics](../../system/mechanics.md#barrier1-kerneltssrcrulesbarrierts)).
+
 ### Portal/Transition
 
 A connection whose destination may be another place, an instance entrance, cartridge port, deployment mount, or private scene transition.

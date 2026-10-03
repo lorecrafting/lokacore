@@ -69,7 +69,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Open the closed, unlocked barrier on the exit in `direction` (barrier@1).",
+          "description": "Open the closed, unlocked barrier on the exit in `direction`, or on the item `target_id` (a container's lid; exactly one of the two, else invalid_target) (barrier@1).",
           "type": "object",
           "properties": {
             "type": {
@@ -80,17 +80,19 @@
             },
             "direction": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
             "type",
-            "actor_id",
-            "direction"
+            "actor_id"
           ],
           "additionalProperties": false
         },
         {
-          "description": "Close the open barrier on the exit in `direction` (barrier@1).",
+          "description": "Close the open barrier on the exit in `direction`, or on the item `target_id` (exactly one of the two, else invalid_target) (barrier@1).",
           "type": "object",
           "properties": {
             "type": {
@@ -101,17 +103,19 @@
             },
             "direction": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
             "type",
-            "actor_id",
-            "direction"
+            "actor_id"
           ],
           "additionalProperties": false
         },
         {
-          "description": "Lock the closed barrier on the exit in `direction` with its key_item, which the actor holds (barrier@1).",
+          "description": "Lock the closed barrier on the exit in `direction`, or on the item `target_id` (exactly one of the two, else invalid_target), with its key_item, which the actor holds (barrier@1).",
           "type": "object",
           "properties": {
             "type": {
@@ -122,17 +126,19 @@
             },
             "direction": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
             "type",
-            "actor_id",
-            "direction"
+            "actor_id"
           ],
           "additionalProperties": false
         },
         {
-          "description": "Unlock the locked barrier on the exit in `direction` with its key_item, which the actor holds (barrier@1).",
+          "description": "Unlock the locked barrier on the exit in `direction`, or on the item `target_id` (exactly one of the two, else invalid_target), with its key_item, which the actor holds (barrier@1).",
           "type": "object",
           "properties": {
             "type": {
@@ -143,12 +149,14 @@
             },
             "direction": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
             "type",
-            "actor_id",
-            "direction"
+            "actor_id"
           ],
           "additionalProperties": false
         },
