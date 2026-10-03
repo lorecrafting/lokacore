@@ -63,7 +63,10 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
     throw refusal(e);
   }
   try {
-    story.narration();
+    const last = story.narration();
+    // a line that parses but is not text would throw in the presenter's draw, outside SaveError
+    if (last?.lines.some((t) => typeof (t as { key?: unknown } | null)?.key !== 'string'))
+      throw new Error('malformed JSON: a narration line without a key');
   } catch (e) {
     if (!/malformed JSON/.test(String(e))) throw e; // a full disk or I/O: the save may be intact
     throw refusal(e);
@@ -148,7 +151,8 @@ export function localSession(open: () => Db, remove: () => void, items: Bundled,
         if (newGame) return void reopen();
       } catch (e) {
         const { message } = e as Error;
-        if (!corrupt(e)) return s.game ? message : void fail({ ...s.failed, message });
+        if (!corrupt(e))
+          return s.game ? message : void fail({ ...s.failed, message, code: undefined });
       }
       try {
         [s.game, s.db] = [undefined, undefined]; // the handle goes with the file

@@ -332,6 +332,23 @@ for (const [what, damage] of [
     assert.equal(b.screen().view.place.title.key, 'room.ferry_landing.title');
   });
 
+// Breaks (review F1): a receipt whose narration holds a null line parses, so the open passes and the
+// presenter throws on `.key` while drawing; it must route to the save-error screen at open.
+test('a receipt narration line that is null: save_corrupt at open, Start over repairs it', () => {
+  const path = save();
+  const a = app(path);
+  a.talk();
+  a.leave();
+  a.sql().exec(
+    "UPDATE receipt SET response = json_set(response, '$.narration', json('[null]')) WHERE json_array_length(response, '$.narration') > 0",
+  );
+  a.sql().close();
+  const b = app(path);
+  assert.deepEqual([b.c.failed()?.kind, b.c.failed()?.replace], ['save_corrupt', false]);
+  b.c.startOver();
+  assert.equal(b.screen().view.place.title.key, 'room.ferry_landing.title');
+});
+
 // Breaks (R6P-A03; 03 §14 original outcome): a receipt whose response is not a DecisionResult
 // replayed as {kind: 'saved', replay: true, decision: null}, or taken as no receipt (decided again).
 test('a receipt response that is not a decision replays as a conflict', () => {
