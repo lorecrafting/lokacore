@@ -9,9 +9,11 @@ rows plus a receipt in one transaction, then adopts the result, then replies (AD
 
 `openStory(db, releases, host)` (`authority.ts:66`) takes the bundled releases newest first
 (each a content hash and a fresh world) and the host: its `kernel_version`, a random UUID per
-call (`newId`), an optional account binding read once when a run starts, and an optional clock
-for latency (`:42`). It opens the save on the release its pin names, or saves the newest
-release's fresh world at revision 0 as a new save. Refusals, nothing written:
+call (`newId`), an optional account binding read once when a run starts, an optional clock
+for latency, and an optional random source shaped like `getRandomValues` (`:42`). It opens the
+save on the release its pin names, or saves a fresh world of the newest release at revision 0 as
+a new save: with a random source, under a world context and RNG seed drawn for the new lineage
+(below), else the release's own fresh world. Refusals, nothing written:
 
 | Reply | When | New game offered |
 |---|---|---|
@@ -70,20 +72,31 @@ fenced; settling it moves play to the new run").
 | `head` | one row: `revision`, `clock`, `rng` |
 | `state_row` | `(section, key) → value`, the State sections as canonical JSON |
 | `receipt` | the receipts above; unique `(scope, invocation_id)` and `(scope, command_id)` |
-| `save` | one row: `format`, `lineage_id`, `run_id`, `parent` (null: every save is a new game), `seed` (the run's initial RNG), `pin` (cartridge id, version, content hash, capability lock, rule_ir; numeric and RNG profile null), `binding` (account or null) |
+| `save` | one row: `format`, `lineage_id`, `run_id`, `parent` (null: every save is a new game), `seed` (the run's initial RNG), `pin` (cartridge id, version, content hash, capability lock, rule_ir, `world_context_id`; numeric and RNG profile null), `binding` (account or null) |
 | `report` | story point reports: `report_id`, `lineage_id`, `binding`, `report`, `disposition` (pending, accepted, rejected, needs_attention), `acceptance`, `tried` |
 | `trace` | the game trace, `(ordinal, command_id, commit_state, record)` |
 | `observation` | capped diagnostics and operations records |
 
-Loading (`store.ts:86`) rebuilds the world from the release's fresh world plus the rows; only
-sections with rows exist, so the state hash matches a headless run (`smoke.test.ts`, the Gate
-R6 reference).
+The seed and the pin's `world_context_id` are the lineage's initial RngState and world
+context: every id of the initial world is minted from the context ([ADR-075](../archive/decisions/adr-075-observability-proposal.md) §3 `seed`, §4
+amendment A4; [10 §32](../archive/spec/10-mobile-commerce-release.md), a run pins its release). A
+save from before c1-host has no `world_context_id`; it is never rewritten. The format stays
+`loka-save-v1`, so a build from before c1-host opens a c1-host save under the release's own
+context and rebuilds wrong ids (dev reinstalls only; no app is released).
+
+Loading (`store.ts:86`) rebuilds the world from the release's cartridge under the pinned
+`world_context_id`, or from the release's own fresh world when the pin has none (a save from
+before c1-host), plus the rows: the head restores the saved RNG ([10 §31](../archive/spec/10-mobile-commerce-release.md)),
+so a reopen replays the same luck. A `world_context_id` that is not a WorldContextId is
+`save_corrupt`. Only sections with rows exist, so the state hash matches a headless run
+(`smoke.test.ts`, the Gate R6 reference). An app update that reopens an old save writes a new
+trace segment header, its kernel version differing ([ADR-075](../archive/decisions/adr-075-observability-proposal.md) §4 amendment R6 S2).
 
 ## New game
 
 `newGame` (`authority.ts:274`): after settling any fenced attempt, one transaction replaces the
-save with the fresh world at revision 0 under a new lineage and run (no parent) pinned to the
-newest release, drops every receipt (old invocation ids are new again) and recreates the `save`
+save with a fresh world of the newest release at revision 0 under a new lineage and run (no
+parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
 (`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
 the file, or the report table or its index, corrupt, `replace` throws (`store.ts:137`) and the
@@ -126,8 +139,12 @@ host supplies a clock, each NEW decision's `kernel.decision_latency` (`:216`).
 
 `session.ts` and `mobile/app/book/presenter.ts` are the controller under the book UI: the GameView, its text, the offered actions
 as buttons carrying the view token they were drawn from, and a log of the last 200 lines
-(`presenter.ts:145`); a press that throws is retried unchanged by the next press (`presenter.ts:153`, 03 §14). `session.ts` builds the
-fresh world with one fixed world context and RNG seed (`:23`, `:24`; see
-[DIFFERENCES.md](DIFFERENCES.md)) and a kernel version marked `-dirty` (`:27`). Refusal and
+(`presenter.ts:145`); a press that throws is retried unchanged by the next press (`presenter.ts:153`, 03 §14). The host gives
+`kernel_version` and the random source: the app passes expo-crypto's `getRandomValues` and
+`loka-kernel@<commit>`, the commit stamped by `mobile/app/metro.config.js` when Metro starts, with
+`-dirty` when the tree had changes ([ADR-075](../archive/decisions/adr-075-observability-proposal.md) §3, a dirty tree is never the bare commit) and always
+in a development build (its bundle can change after the stamp); with no stamp, the all-zero
+commit `-dirty`. CI checks the exported bundles of a clean tree carry the bare form
+(`.github/workflows/mobile-bundle.yml`). Refusal and
 outcome words live in `mobile/app/book/words.ts`
 ([owner rule](owner-rules.md#architecture-and-engine)).
