@@ -47,7 +47,7 @@ export function lists(world: World, actor: CharacterId) {
       listed(
         (a) =>
           door(a)
-            ? usable(world, actor, a, { target_id: id as EntityId })
+            ? lidded(world, id) && usable(world, actor, a, { target_id: id as EntityId })
             : nested
               ? !!a.engine && a.command === 'take'
               : a.target.kind === 'entity' &&
@@ -90,6 +90,11 @@ function advertise(
 }
 
 const door = (a: Offered) => Object.hasOwn(barrier.MOVES, a.command);
+// Only an item with a barrier can take a door verb; skips usable's admission for every other entity.
+const lidded = (world: World, id: string) => {
+  const e = world.entities[id];
+  return e?.kind === 'item' && e.barrier !== undefined;
+};
 // Never with the place: a targetless wear or remove is never accepted (its Command needs item_id).
 const equip = (a: Offered) => equipment.VERBS.includes(a.command);
 
