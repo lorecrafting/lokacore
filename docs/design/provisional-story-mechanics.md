@@ -8,9 +8,10 @@ claims about the running LegendMUD engine. Other unknowns, including spell conce
 skill success and arbitrary-level pool formulas, remain separate future design work.
 
 The [baseline decision](../decisions/owner-decision-legendmud-baseline-2026-10-03.md) supplies the
-planning direction. This proposal changes neither installed behavior nor the approved Gate C1
-scope. Before code, an approved slice must amend the relevant `docs/system` and any pinned
-contracts. All odds, coefficients, durations, thresholds and death policies below are
+planning direction. The [fixed-time decision](../decisions/owner-decision-fixed-time-2026-10-03.md)
+forbids player-driven time skips; timing here follows the fixed-rate clock. This proposal changes
+neither installed behavior nor the approved Gate C1 scope. Before code, an approved slice must amend
+the relevant `docs/system` and any pinned contracts. All odds, coefficients, durations, thresholds and death policies below are
 cartridge numbers under the [world-parameter rule](../system/owner-rules.md#architecture-and-engine).
 The field names and storage schema are not frozen here.
 
@@ -28,13 +29,20 @@ For the offline Story app, propose these initial time values:
 |---|---|---|
 | Combat round | 1/24 game hour | 3 seconds |
 | Recovery pulse | 1/12 game hour | 6 seconds |
-| Death penalty | 2 game hours | 144 seconds equivalent elapsed time; fast-forward allowed |
+| Death penalty | 2 game hours | 144 seconds at the target rate |
 
 The current 3600-unit hour would make those durations 150, 300 and 7200 logical units. This
 explicitly replaces the archived plan's literal three-*logical*-second rounds; it is not a new
 engine literal. The later time-model slice must reconcile these units before implementing combat.
 The 72-second hour is the target already carried by the
 [untimed-Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md), not current behavior.
+
+The six-second pulse is a recovery tick, not a universal world update. Combat rounds, recovery
+and scheduled NPC/world events have their own due times on one fixed-rate clock. The host drives
+that clock from elapsed time; player actions, resting and retrieval never add a jump to it.
+Use the existing due-job foundation and derived resources rather than scanning/writing every actor
+at each pulse. A future host clock driver is still needed; the current mobile proof has no live
+world heartbeat. Exact scheduler/storage vocabulary belongs to the implementation slice.
 
 Combat and recovery use the same logical clock. Pause the offline world in the background and
 while reading a full-page menu/dialogue; no combat or recovery time is credited for that pause.
@@ -148,13 +156,10 @@ whole pulse of rest. Leaving combat also cannot retroactively credit its non-rec
 The six-second pulse is the initial accrual/display cadence, not a loophole
 to select the final position for all elapsed time. Reopening a save cannot credit the same interval twice.
 
-At a safe refuge/camp with no hostile present or harmful periodic effect, offer a rest action that
-advances up to one game hour immediately while resting. Process intervening world jobs in order
-and stop at the first interruption/hostile arrival; no skipped danger or unbounded catch-up. The
-player may repeat the action to heal, paying game time rather than waiting through each pulse.
-This also advances the temporary death timer: both measure logical active-world time, including
-intentional fast-forward, and neither uses background wall time. It is part of the proposed later
-time/recovery slice, not a change to the current untimed proof.
+Resting changes the recovery rate while the fixed clock continues. There is no rest-for-an-hour,
+wait-until-healed, or other instant time skip. The temporary death timer follows the same clock;
+rest does not deduct additional time from it. The pause/background policy in section1 remains a
+proposal, and any paused interval credits neither recovery nor penalty expiry.
 
 This deliberately proposes a level-scaled percentage model in place of copying LegendHUB's
 level50 regeneration-point formulas into all levels. Keep its coefficients tunable and compare
@@ -197,7 +202,7 @@ The following death mechanics and values remain a proposal for that one ruleset:
    Separate protected nested items safely before transferring their containers; no item duplication.
 4. A cache has no expiry in offline play and NPCs cannot loot it. Further deaths do not overwrite
    earlier caches. Offer shrine recovery as a fallback: transfer all unrecovered items back to the
-   player, advance one game hour, and allow overload rather than discard items. This avoids a
+   player and allow overload rather than discard items. Retrieval does not jump the clock. This avoids a
    permanent lock when a corpse site becomes inaccessible, without requiring ghost mode first.
 5. Earn75% of ordinary combat XP for the next two game hours of active time, or until leveling.
    Quest/exploration rewards are unaffected. Another death refreshes the timer; penalties do not stack.
@@ -217,10 +222,11 @@ but the protection, fallback and exact penalties here are deliberate Loka adapta
 ## 7. First playtest and what can be tuned
 
 Initial targets: a fair ordinary fight lasts6–10 rounds (18–30 seconds); a chapter boss10–20 rounds;
-a resting character recovers from empty to full in roughly2–3 minutes of equivalent elapsed time
-around stat50, with safe-rest fast-forward available. Keep the
-targets provisional: tune HP, weapon ranges, accuracy/defense coefficients, crits, costs and recovery
-rates against actual chapter encounters, not a level50 builder example.
+a resting character recovers from empty to full in roughly2–3 minutes at the fixed rate
+around stat50. With real waiting required, this recovery target especially needs the first playtest;
+adjust the rate if it interrupts the story. Keep the targets provisional: tune HP, weapon ranges,
+accuracy/defense coefficients, crits, costs and recovery rates against actual chapter encounters,
+not a level50 builder example.
 
 Use the existing command/event traces to examine rounds per fight, effective landed-hit fraction,
 HP/MV left, rest time, load refusals, deaths and cache retrievals. Record context (actor level/stats,

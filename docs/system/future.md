@@ -14,6 +14,8 @@ Short list; each item links the plan it comes from. The open stages and their ca
 
 - The release uses [one shared difficulty](../decisions/owner-decision-single-difficulty-2026-10-03.md);
   the older ladder's selectable difficulty and separate death-mode rules are superseded.
+- The later time model follows the [fixed-time restriction](../decisions/owner-decision-fixed-time-2026-10-03.md):
+  clock progression is authority-driven elapsed time; gameplay actions offer no time skip.
 - Mechanical planning now follows the [LegendMUD baseline](../decisions/owner-decision-legendmud-baseline-2026-10-03.md),
   with its [sourced system reference](../reference/legendmud-system.md). Its reconciliation table
   governs character, resources, skills, guild/training gates, magic, combat and death before their
