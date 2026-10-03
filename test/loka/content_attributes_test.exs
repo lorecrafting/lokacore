@@ -124,4 +124,19 @@ defmodule Loka.ContentAttributesTest do
             "#{name}"
           )
   end
+
+  # Breaks: a v1 source's resource_compare resolved against the default pools, which only a v2
+  # artifact carries, so the compiler writes an artifact the loader rejects (refStage, any format).
+  test "a v1 cartridge's resource_compare names no pool", %{tmp_dir: dir} do
+    hello = "cartridges/ashmere_hello"
+    File.cp_r!(hello, dir)
+    m = JSON.decode!(File.read!(Path.join(hello, "cartridge.json")))
+    m = put_in(m, ["requires", "capabilities", "attributes"], 1)
+    File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
+    policy = %{"policy_version" => 1, "root" => pool("hp", 1)}
+    File.write!(Path.join(dir, "policies/village_arrived.json"), JSON.encode!(policy))
+    target = %{"target" => "ashmere_hello@0.0.1:resource/hp"}
+    path = "policies/village_arrived.root.resource"
+    assert Loka.Content.compile(dir) == {:error, [d("UNRESOLVED_REFERENCE", path, target)]}
+  end
 end

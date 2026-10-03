@@ -39,7 +39,7 @@ defmodule Loka.Content.Compiler do
 
   defp checks(manifest, defs, v2, located, registry) do
     Resources.check(manifest, defs, v2, located, registry) ++
-      Checks.check(manifest, defs, registry) ++
+      Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry) ++
       Checks.rooms(manifest, defs, v2, registry) ++
       Recipes.check(manifest, defs, v2, registry) ++
       Quests.check(manifest, defs, v2, registry) ++
