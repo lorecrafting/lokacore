@@ -257,7 +257,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Take an item into the actor's inventory.",
+          "description": "Wear a held item in its slot (equipment@1): move it from the actor's body into the body's holder for the item's slot (mechanics.md equipment@1).",
           "type": "object",
           "properties": {
             "type": {
@@ -278,7 +278,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Take an item into the actor's inventory.",
+          "description": "Remove a worn item (equipment@1): move it from its slot holder back into the actor's body.",
           "type": "object",
           "properties": {
             "type": {

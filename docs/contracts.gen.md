@@ -177,8 +177,8 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `take`: Take an item into the actor's inventory.
   - `drop`: Drop a held item into the current place.
   - `give`: Give a held item to another character in the same place (00 §4.4).
-  - `wear`: Take an item into the actor's inventory.
-  - `remove`: Take an item into the actor's inventory.
+  - `wear`: Wear a held item in its slot (equipment@1): move it from the actor's body into the body's holder for the item's slot (mechanics.md equipment@1).
+  - `remove`: Remove a worn item (equipment@1): move it from its slot holder back into the actor's body.
   - `perform`: Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.
   - `talk`: Talk to a character.
   - `accept_quest`: Activate an offered quest.
