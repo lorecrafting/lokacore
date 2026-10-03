@@ -4,7 +4,7 @@ defmodule Loka.Content.Compiler do
   Each stage runs on the parts the stages before it accepted, so one bad file does not hide
   the diagnostics of the others.
   """
-  alias Loka.Content.{Checks, Dialogues, Links, Quests, Reactions, Recipes, Resources}
+  alias Loka.Content.{Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires, Resources}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -87,7 +87,7 @@ defmodule Loka.Content.Compiler do
       [] ->
         {extra, manifest} = Map.split(m, ["entry", "calendar", "world"])
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
-        diags = Checks.requirements(rel, manifest, registry)
+        diags = Requires.check(rel, manifest, registry)
         {manifest, located, diags ++ calendar(manifest, extra["calendar"], registry)}
 
       diags ->

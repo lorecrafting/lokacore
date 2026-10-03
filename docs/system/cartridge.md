@@ -13,7 +13,7 @@ A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`):
 | `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
-its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:72`). Any other
+its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:35`). Any other
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
