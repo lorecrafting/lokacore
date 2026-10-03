@@ -1,6 +1,8 @@
 #!/bin/sh
 # Plant commits in a throwaway repo and require bin/docs_only.sh to say what is expected.
 set -eu
+# A git hook exports GIT_DIR and friends: without this the plants would land in the real repository.
+unset $(env | sed -n 's/^\(GIT_[A-Z_]*\)=.*/\1/p')
 script=$(cd "$(dirname "$0")" && pwd)/docs_only.sh
 d=$(mktemp -d)
 trap 'rm -rf "$d"' EXIT
