@@ -52,8 +52,9 @@ Report at the end of the slice, not at every step.
    at the limit the developer stops and returns partial findings.
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md; run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
-   (`/code-review medium`), both in the developer's worktree or on the PR number, never
-   the main checkout; fix what they find. A PR that adds or changes a schema also runs the
+   (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
+   docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
+   both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md). Commit, push, open
    the PR (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
    branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
