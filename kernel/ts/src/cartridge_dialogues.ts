@@ -22,7 +22,7 @@ import {
   type Diagnostic,
   type FactValue,
 } from './contracts.gen.ts';
-import { diag, step, type checkers, type Obj } from './cartridge_refs.ts';
+import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { same } from './compose.ts';
 import { refString } from './decision.ts';
 
@@ -51,8 +51,6 @@ export const uses = (c: Obj) =>
       `.cartridge.story_points${step(ref)}`,
     ]),
   ] as ['definition' | 'event', string, string][];
-
-type Checks = ReturnType<typeof checkers>;
 
 export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
   const { named, text } = checks;

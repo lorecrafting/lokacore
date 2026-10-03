@@ -5,9 +5,7 @@
 // objective names an item of this cartridge. Its policies are walked with every other policy
 // (cartridge_refs.ts nodes).
 import { CAPABILITY_OWNERS, type Diagnostic } from './contracts.gen.ts';
-import { diag, step, type checkers, type Obj } from './cartridge_refs.ts';
-
-type Checks = ReturnType<typeof checkers>;
+import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
 export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
   const taken = new Set([

@@ -119,6 +119,8 @@ const TEXT: Readonly<Record<string, string[]>> = {
 // a DefinitionRef naming a definition of `kind` in this cartridge's map of that kind; typedValue,
 // a value of this cartridge's fact that is not of its type (FACT_TYPE_MISMATCH, the FactType
 // check adopt uses; the fact's own absence is named's); text, a text key without a catalog entry.
+export type Checks = ReturnType<typeof checkers>;
+
 export function checkers(c: Obj, out: Diagnostic[]) {
   const { id, version } = c.manifest;
   const named = (r: Obj, kind: string, path: string) => {
@@ -196,7 +198,7 @@ export function refStage(c: Obj): Diagnostic[] {
 // Each resource's bounds hold its start (RESOURCE_SPEC_INVALID), each band table (a pool's,
 // the world's) is well formed (bands), and the world's move cost names a resource of this
 // cartridge.
-function pools(c: Obj, named: ReturnType<typeof checkers>['named']): Diagnostic[] {
+function pools(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj)) {
     const at = `.cartridge.resources${step(ref)}`;

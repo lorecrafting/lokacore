@@ -2,9 +2,7 @@
 // lib/loka/content/recipes.ex, and each room's action contribution.
 import { CAPABILITY_OWNERS, type Diagnostic } from './contracts.gen.ts';
 import { refString } from './decision.ts';
-import { diag, step, type checkers, type Obj } from './cartridge_refs.ts';
-
-type Checks = ReturnType<typeof checkers>;
+import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
 // one ActionSet identity) and its check's key no other recipe's check's (one check DefinitionRef),
