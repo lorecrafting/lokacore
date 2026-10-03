@@ -16,10 +16,10 @@ release's fresh world at revision 0 as a new save. Refusals, nothing written:
 | Reply | When | New game offered |
 |---|---|---|
 | `unsupported_save_format` | the `save` row's format is `loka-save-vN` with N above 1 (a newer app's; checked first) | no: the player updates the app |
-| `save_corrupt` | SQLite says the file is not a database or a page is malformed; the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables); a receipt response that is not a DecisionResult or a world whose first screen cannot be built (`smoke.ts:173`) | yes, in place; reports survive |
+| `save_corrupt` | SQLite says the file is not a database or a page is malformed; the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports survive |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The smoke controller adds two `save_corrupt` causes after a story opens: a receipt response that is not a DecisionResult, or a world whose first screen cannot be built (`smoke.ts:173`). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
@@ -31,7 +31,7 @@ digest, the resolved Command (null for a rejection before one existed), the revi
 for a rejection) and the DecisionResult. Replay (`authority.ts:167`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
-other known id is `conflict`. A fault gets no receipt (`:187`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `lantern.test.ts` (the frozen
+other known id is `conflict`. A fault gets no receipt (`:187`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
 Lantern traces and the 11 adverse cases).
 
 ## Replies

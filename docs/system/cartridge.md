@@ -70,7 +70,7 @@ cartridge and its hash, or the first diagnostic of the first failing stage (`:62
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:108`), the
 lock (`:156`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
 references (`kernel/ts/src/cartridge_refs.ts:153` and the `cartridge_*.ts` twins of the
-compiler's checks), and the installed kernel (`:224`: `CAPABILITY_NOT_INSTALLED`,
+compiler's checks), and the installed kernel (`cartridge.ts:224`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
 Compiled artifacts load in TypeScript with identical bytes, hash and lock
@@ -105,7 +105,7 @@ model strips them to prose until details are tappable (`mobile/app/book/model.ts
 ## Development cartridges
 
 `cartridges/ashmere_{hello,rooms,details,facts,items,bell,dusk,road,gate,errand,ferry,green}`
-each exercise one slice and carry replayable transcripts
+each exercise one slice; most carry replayable transcripts
 (`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
 `kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
 Ferryman's Lantern": four rooms, Bram, one lantern, one offered quest with a

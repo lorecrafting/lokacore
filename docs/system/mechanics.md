@@ -129,7 +129,7 @@ dialogue's quest resolves (above). Accepted, outcome the choice id, in one decis
 the choice's `fact.assign` steps, the quest's transitions and `quest_resolved`, `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
-whose trigger is this dialogue and choice (`:151`). `close_choice {continuation_id}`: the
+whose trigger is this dialogue and choice (`rules/dialogue.ts:151`). `close_choice {continuation_id}`: the
 actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`.
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
 contribution removes them (`dialogue.ts:149`). Only a dialogue's speaker, present in the room,

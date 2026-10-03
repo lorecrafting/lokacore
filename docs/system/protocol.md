@@ -75,7 +75,7 @@ storage half):
    (`quest.ts:47`), then each ReactionRule it triggers runs as its own writer group when its
    `when` holds (`reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
-   (`:253`). Deliveries, reaction depth and query steps are counted as they go.
+   (`proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
 7. **Adopt** (`proposal.ts:42`): a `fact.assign` outside its FactSpec faults
    `precondition_failed`; the whole proposal is checked against the budgets (`:60`); the delta
    composes (`compose.ts:93`) and the written rows, the RNG and each new continuation's
@@ -187,7 +187,7 @@ actions it accepts (NPCs first, then DefinitionRefString order); `journal` (each
 has an instance of, with state and title); `time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `dialogue.ts:78`); and
 `resources`, each with current, maximum and a condition band from one fixed table of 11 bands
-by percentage of the range, `perfect_health` at 100 down to `dying` at 0 (`:80`, `:97`).
+by percentage of the range, `perfect_health` at 100 down to `dying` at 0 (`view.ts:80`, `:97`).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`actions.ts:266`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes (`invariants.ts:264`, `:278`).
