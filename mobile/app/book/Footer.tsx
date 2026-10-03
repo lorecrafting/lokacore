@@ -4,7 +4,7 @@
 import { useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { gesture, ZOOM, type Ui } from './joystick.ts';
+import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
 import { body, paper } from './paper.ts';
@@ -27,7 +27,7 @@ export function Footer(p: Props) {
   const [note, setNote] = useState(''); // a closed exit's reason, kept after release until the next press
   const [tip, setTip] = useState(() => !p.learned.seen());
   const zoom = useRef(new Animated.Value(0)).current;
-  const knob = useRef(new Animated.ValueXY()).current;
+  const [knob, setKnob] = useState({ x: 0, y: 0 }); // your dot's offset, in zoomed px
   const now = useRef(p);
   now.current = p;
   const learn = () => (p.learned.see(), setTip(false)); // a walk, or a map tap
@@ -41,7 +41,7 @@ export function Footer(p: Props) {
     }
   };
   const openMap = () => (now.current.openMap(), learn());
-  const [pan] = useState(() => responder({ now, walk, openMap, setLit, setNote }, zoom, knob));
+  const [pan] = useState(() => responder({ now, walk, openMap, setLit, setNote }, zoom, setKnob));
   const e = p.exits.find((x) => x.direction === lit);
   const said = e ? `${e.direction}${e.available ? '' : ` · ${why(e, p.text)}`}` : note;
   return (
@@ -55,7 +55,7 @@ export function Footer(p: Props) {
           {...pan.panHandlers}
         >
           <MapDrawing exits={p.exits} lit={lit} zoom={zoom} knob={knob} />
-          <Said text={said} />
+          <Said text={said} side={sideOf(lit)} />
         </View>
         <View style={rule} />
       </View>
@@ -67,11 +67,11 @@ export function Footer(p: Props) {
 function responder(
   u: Omit<Ui<Props>, 'zoom' | 'knob'>,
   zoom: Animated.Value,
-  knob: Animated.ValueXY,
+  setKnob: (k: { x: number; y: number }) => void,
 ) {
   const to = (v: number) =>
     Animated.timing(zoom, { toValue: v, duration: 160, useNativeDriver: true }).start();
-  return PanResponder.create(gesture({ ...u, zoom: to, knob: (x, y) => knob.setValue({ x, y }) }));
+  return PanResponder.create(gesture({ ...u, zoom: to, knob: (x, y) => setKnob({ x, y }) }));
 }
 
 function Tip({ dismiss }: { dismiss: () => void }) {
@@ -92,21 +92,21 @@ function Tip({ dismiss }: { dismiss: () => void }) {
   );
 }
 
-// The lit exit's name (and why it is closed), or a closed exit's reason after release.
-function Said({ text }: { text: string }) {
+// The lit exit's name (and why it is closed), or a closed exit's reason after release, on the side
+// opposite the drag (joystick.ts `sideOf`); 44 px from the middle clears the zoomed exit rings.
+const AWAY = 28 + 14 * ZOOM + 8;
+const SPOT = {
+  above: { bottom: AWAY, left: -120, right: -120, textAlign: 'center' },
+  below: { top: AWAY, left: -120, right: -120, textAlign: 'center' },
+  left: { top: 19, right: AWAY, width: 120, textAlign: 'right' },
+  right: { top: 19, left: AWAY, width: 120, textAlign: 'left' },
+} as const;
+function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
   return (
     text !== '' && (
       <Text
         pointerEvents="none"
-        style={{
-          ...small,
-          position: 'absolute',
-          bottom: 28 + 14 * ZOOM + 8,
-          left: -120,
-          right: -120,
-          textAlign: 'center',
-          color: paper.fg,
-        }}
+        style={{ ...small, position: 'absolute', ...SPOT[side], color: paper.fg }}
       >
         {text}
       </Text>

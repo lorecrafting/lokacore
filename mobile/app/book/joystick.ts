@@ -19,6 +19,17 @@ export function pick(dx: number, dy: number, exits: string[]): string | null {
   return exits.includes(d) ? d : null;
 }
 
+const SIDE = {
+  north: 'below',
+  south: 'above',
+  east: 'left',
+  west: 'right',
+  up: 'below',
+  down: 'above',
+} as const;
+/** Where the label of the lit exit sits: opposite the drag, so the finger never hides it. A note kept after release (none lit) sits above. */
+export const sideOf = (lit: string | null) => SIDE[lit as keyof typeof SIDE] ?? 'above';
+
 const TAP_MS = 500;
 /** What the footer's gesture drives: the props now, the walk and the drawing (Footer.tsx). */
 export type Ui<P> = {

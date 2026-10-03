@@ -120,7 +120,7 @@ export function MapDrawing(p: {
   exits: readonly Exit[];
   lit: string | null;
   zoom: Animated.Value; // 0 at rest, 1 zoomed
-  knob: Animated.ValueXY; // your dot's offset from the middle, in zoomed px
+  knob: { x: number; y: number }; // your dot's offset from the middle, in zoomed px
 }) {
   const scale = p.zoom.interpolate({ inputRange: [0, 1], outputRange: [1 / U, 1] });
   return (
@@ -140,9 +140,8 @@ export function MapDrawing(p: {
           </Animated.View>
         ) : null,
       )}
-      <Animated.View style={{ transform: p.knob.getTranslateTransform() }}>
-        <Disc x={0} y={0} r={YOU} fill={paper.fg} />
-      </Animated.View>
+      {/* Placed by left/top, not a transform wrapper: that displaced the dot (mobile lessons, Polish O-1). */}
+      <Disc x={p.knob.x / U} y={p.knob.y / U} r={YOU} fill={paper.fg} />
     </Animated.View>
   );
 }

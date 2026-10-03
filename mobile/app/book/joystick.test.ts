@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { openGame } from '../../authority/local-story/session.ts';
-import { gesture, pick, ZOOM } from './joystick.ts';
+import { gesture, pick, sideOf, ZOOM } from './joystick.ts';
 import { presenter } from './presenter.ts';
 
 // Breaks: sectors off by one (east lit for a north drag, or a wrong quadrant edge), a quadrant
@@ -29,6 +29,24 @@ test('a drag inside the cancel radius points at nothing', () => {
 
 // Breaks: stair nodes drawn or hit when the exit is absent, up and down swapped, or a drag to the
 // stairs falling through to the east exit it passes.
+// Breaks (U6): a label on the dragged side, under the finger: each lit exit's label goes opposite
+// it (hand-set table); a note kept after release stays above.
+test('the label sits opposite the drag, and above for a kept note', () => {
+  const rows = [
+    ['north', 'below'],
+    ['south', 'above'],
+    ['east', 'left'],
+    ['west', 'right'],
+    ['up', 'below'],
+    ['down', 'above'],
+    [null, 'above'],
+  ] as const;
+  assert.deepEqual(
+    rows.map(([lit]) => sideOf(lit)),
+    rows.map(([, side]) => side),
+  );
+});
+
 test('stair nodes are reached by dragging out to them, only when the exit exists', () => {
   assert.equal(pick(31, -9, ['up', 'east']), 'up');
   assert.equal(pick(31, 9, ['down', 'east']), 'down');

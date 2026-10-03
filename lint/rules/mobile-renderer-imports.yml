@@ -7,25 +7,30 @@ ignores: ['**/*.test.ts']
 # Allowlists, not blocklists: every other form or name is flagged. ponytail: a new renderer file, or a new
 # React Native building block, needs adding here (one name in each regex).
 rule:
-  kind: string_fragment
-  inside: { matches: module-specifier }
   any:
-    - not:
-        regex: '^(react|react-native|\./(book/)?(fonts/[\w.-]+|Book|Footer|MapDrawing|Turn|SaveError|joystick|model|pages|paper|presenter|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
-    # react-native: only `import { A, B } from`, every name plain and on the list. A namespace, default,
-    # `{ default as X }`, aliased or string-named import, a re-export, require() or import() is flagged.
-    - regex: '^react-native$'
-      not:
-        inside:
-          stopBy: end
-          kind: import_statement
-          all:
-            - has: { stopBy: end, kind: named_imports }
-            - not:
-                has:
-                  stopBy: end
-                  any:
-                    - kind: namespace_import
-                    - { kind: identifier, inside: { kind: import_clause } }
-                    - kind: import_specifier
-                      not: { regex: '^(AccessibilityInfo|Animated|Button|Easing|PanResponder|Pressable|SafeAreaView|ScrollView|Text|View)$' }
+    # Every require(...) and import(...) call, whatever its argument (the shell, App.tsx, loads the fonts).
+    # ponytail: this guards accidental drift, not adversarial constructions (an aliased require).
+    - kind: call_expression
+      has: { field: function, regex: '^(import|require)$' }
+    - kind: string_fragment
+      inside: { matches: module-specifier }
+      any:
+        - not:
+            regex: '^(react|react-native|\./(book/)?(Book|Footer|MapDrawing|Menu|Turn|SaveError|joystick|model|pages|paper|presenter|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
+        # react-native: only `import { A, B } from`, every name plain and on the list. A namespace, default,
+        # `{ default as X }`, aliased or string-named import, a re-export, require() or import() is flagged.
+        - regex: '^react-native$'
+          not:
+            inside:
+              stopBy: end
+              kind: import_statement
+              all:
+                - has: { stopBy: end, kind: named_imports }
+                - not:
+                    has:
+                      stopBy: end
+                      any:
+                        - kind: namespace_import
+                        - { kind: identifier, inside: { kind: import_clause } }
+                        - kind: import_specifier
+                          not: { regex: '^(AccessibilityInfo|Animated|Button|Easing|PanResponder|Pressable|SafeAreaView|ScrollView|Text|View)$' }
