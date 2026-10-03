@@ -32,5 +32,15 @@ t run "$gen" "$ren" "a code file renamed to .md"
 t run "" "$md" "no before"
 t run "$other" "$md" "before not an ancestor"
 t run "$md" "$md" "empty diff"
+# bin/ci_base.sh: a fake gh answers one run with three green jobs, and fails at call $FAIL_AT.
+ci=$(dirname "$script")/ci_base.sh
+printf '%s\n' '#!/bin/sh' 'n=$(cat "$CNT" 2>/dev/null || echo 0); echo $((n + 1)) > "$CNT"' \
+  '[ "$((n + 1))" = "${FAIL_AT-0}" ] && exit 1' \
+  'case $2 in */jobs) echo 3 ;; *) echo 7 ;; esac' > fakegh
+chmod +x fakegh
+b() { rm -f cnt; got=$(GH=$PWD/fakegh CNT=$PWD/cnt REPO=o/r FAIL_AT=$2 "$ci" "$ren"); [ "$got" = "$1" ] || { echo "FAIL ci_base $3: want '$1', got '$got'"; fail=1; }; }
+b "$gen" 0 "no error: the parent"
+b "" 1 "error listing runs"
+b "" 2 "error reading jobs"
 [ "$fail" = 0 ] && echo "ok   docs_only: skip for .md only, run otherwise"
 exit "$fail"

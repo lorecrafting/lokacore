@@ -62,12 +62,12 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
 - `bin/docs_only.sh <base> <after>` prints `skip` when every file changed in the range is `*.md` (not
   `*.gen.md`, which the elixir drift checks cover), else `run` (also for a missing or non-ancestor
-  `<base>` or an empty diff). The `changes` job of `ci.yml` passes the newest ancestor of a pull request
+  `<base>` or an empty diff). The `changes` job of `ci.yml` passes (`bin/ci_base.sh`) the newest ancestor of a pull request
   head whose `elixir`, `typescript` and `sim` jobs all passed (GitHub API; none found or an API error
   means `run`) and skips those three jobs on `skip`; pushes to main never skip. `lint` (with the docs
   link check) always runs. Planted cases, in a throwaway repo: `bin/docs_only_red_controls.sh` (a
   `.json` under `docs/`, a `.gen.md`, a code file renamed to `.md`, a mixed range, no `<base>`, a
-  non-ancestor `<base>` and an empty diff must say `run`).
+  non-ancestor `<base>` and an empty diff must say `run`; and a fake `gh` that fails on the run list or the job list must leave `ci_base.sh` with no base).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `mobile.yml` builds the native apps on pull requests that change native
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
