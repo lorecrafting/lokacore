@@ -35,7 +35,6 @@ import {
   entries,
   event,
   has,
-  questOf,
   rejected,
   values,
   type ChoiceRow,
@@ -55,7 +54,7 @@ import {
   spokenBy,
 } from '../dialogue.ts';
 import { assigned } from '../fact.ts';
-import { activation, resolution } from '../quest.ts';
+import { acceptRefused, activation, resolution } from '../quest.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
   readonly payload: Extract<Parameters<Rule<'dialogue'>>[1]['payload'], { type: T }>;
@@ -134,7 +133,8 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
 }
 
 // The dialogue's quest resolving with outcome `choice_id`, or the option's accept activating its
-// quest: invalid_state when the actor already has an instance (the talk-time policy may be stale).
+// quest: invalid_state when accept_quest would refuse it (quest.ts acceptRefused; the talk-time
+// policy may be stale).
 function quest(
   world: World,
   actor: CharacterId,
@@ -146,7 +146,7 @@ function quest(
 ) {
   if (d.quest) return resolution(world, actor, d.quest, choice_id, 0, used);
   if (!accept) return undefined;
-  return questOf(world, actor, accept) ? 'invalid_state' : activation(mint, actor, accept);
+  return acceptRefused(world, actor, accept, used) ?? activation(mint, actor, accept);
 }
 
 // The option's hand_over: the bound item from the body to the bound NPC and its item_acquired.

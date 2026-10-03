@@ -27,6 +27,7 @@ import {
   type World,
 } from './decision.ts';
 import { holds } from './policy.ts';
+import { acceptRefused } from './quest.ts';
 import { cmp } from './validate.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
@@ -73,7 +74,8 @@ export function blocked(world: World, row: ChoiceRow): 'not_present' | 'not_owne
 /**
  * `actor`'s PendingChoice for the GameView (04 §14), if it has one: the dialogue's prompt, its
  * speaker's bound EntityId (from the row, never a name lookup), closable (06 §37), and each option
- * in the row's order, unavailable with blocked's code while it holds.
+ * in the row's order, unavailable with blocked's code while it holds, else an accept with
+ * acceptRefused's (choose refuses both).
  */
 export function choiceView(world: World, actor: CharacterId): PendingChoice | undefined {
   const found = pending(world, actor);
@@ -91,9 +93,10 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
     speaker_id: row.roles.find((r) => r.role === speaker)!.entity_id,
     closable: true,
     choices: row.choice_ids.map((choice_id) => {
-      const label = d.choices[choice_id]!.label;
-      return code
-        ? { available: false, choice_id, label, reason: { code } }
+      const { label, accept } = d.choices[choice_id]!;
+      const why = code ?? (accept && acceptRefused(world, actor, accept, { n: 0 }));
+      return why
+        ? { available: false, choice_id, label, reason: { code: why } }
         : { available: true, choice_id, label };
     }),
   };

@@ -41,8 +41,8 @@ const load = (f: (c: any) => void = () => {}) => {
   const artifact = `{"cartridge":${text},"content_hash":"${h}"}`;
   return loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
 };
-const world = (): World => {
-  const loaded = load();
+const world = (f?: (c: any) => void): World => {
+  const loaded = load(f);
   assert.ok(loaded.ok, JSON.stringify(loaded));
   return newWorld(loaded.cartridge as Cartridge, CONTEXT as World['context'], [1, 2, 3, 4]);
 };
@@ -59,6 +59,12 @@ const talk = (w: World) => {
   assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
   const pending = Object.values(s.world.state.choices!).find((c) => c.status === 'pending')!;
   return [s.world, pending.source.key] as const;
+};
+const REFUSED = {
+  available: false,
+  choice_id: 'accept',
+  label: 'quest.lantern.accept',
+  reason: { code: 'invalid_state' },
 };
 const accept = (w: World) =>
   run(w, {
@@ -99,9 +105,28 @@ test('a stale accept is invalid_state once the actor has an instance', () => {
   const [w] = talk(world());
   const s = run(w, { type: 'accept_quest', quest: ref('quest', 'lantern') });
   assert.equal(s.decision.kind, 'accepted');
+  assert.deepEqual(gameView(s.world).choice!.choices, [REFUSED]);
   const stale = accept(s.world);
   assert.deepEqual(stale.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.equal(stale.world, s.world);
+});
+
+// Breaks: choose of an accept skipping the quest's offer policy that accept_quest obeys, or the
+// GameView advertising that accept while step refuses it.
+test("an accept is invalid_state while its quest's offer policy fails", () => {
+  const [w] = talk(
+    world((c) => {
+      c.quests[`${F}:quest/lantern`].offer.policy.root = {
+        op: 'has_item',
+        item: ref('item', 'lantern'),
+      };
+    }),
+  );
+  assert.deepEqual(gameView(w).inventory, []);
+  assert.deepEqual(gameView(w).choice!.choices, [REFUSED]);
+  const s = accept(w);
+  assert.deepEqual(s.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+  assert.equal(s.world, w);
 });
 
 const fails = (f: (c: any) => void, code: string, path: string, data = {}) =>
@@ -118,7 +143,7 @@ const fails = (f: (c: any) => void, code: string, path: string, data = {}) =>
   });
 const offer = (c: any) => c.dialogues[`${F}:dialogue/bram_offer`];
 
-// Breaks (twin of test/loka/content_lantern_test.exs): the loader admitting an accept of a quest
+// Breaks (twin of test/loka/content_ferry_test.exs:267): the loader admitting an accept of a quest
 // that does not exist, an accept in a dialogue that also resolves a quest (accepting would resolve
 // it at once), or an accept with a hand_over (activation and acquisition in one decision fault
 // conflicting_write).

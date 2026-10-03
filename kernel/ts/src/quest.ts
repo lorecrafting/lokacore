@@ -36,6 +36,22 @@ export function activation(mint: Mint, actor: CharacterId, quest: DefinitionRef)
 }
 
 /**
+ * Why `actor` cannot accept `quest` now, as accept_quest's admission refuses it (actions.ts):
+ * invalid_state when the actor already has an instance or the quest's offer, if it declares one,
+ * has a policy that fails (target none). Each policy leaf it evaluates adds one to `steps`.
+ */
+export function acceptRefused(
+  world: World,
+  actor: CharacterId,
+  quest: DefinitionRef,
+  steps: Steps,
+) {
+  const offer = definition(world, quest).offer;
+  if (questOf(world, actor, quest) || (offer && !holds(world, actor, offer.policy.root, { steps })))
+    return 'invalid_state' as const;
+}
+
+/**
  * True when `actor`'s current_state objective of `quest` holds now (06 §43: evaluated on the
  * state at hand, never stored); false for a post_activation_event objective, which only an
  * event meets (earned). Each policy leaf it evaluates adds one to `steps` (04 §5.4).

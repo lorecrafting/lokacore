@@ -105,7 +105,7 @@ The narration is the outcome's `narration.actor` key with its participants pinne
 A quest starts through its offer, which is optional, or through a dialogue choice's `accept`
 (dialogue@1 below; [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
-accept action), withdrawn once the actor has an instance (`actions.ts:119`), so a second accept
+accept action), withdrawn once the actor has an instance (`actions.ts:132`), so a second accept
 and an undeclared quest are refused before the rule. Accepted: `quest.activate` at player scope and `quest_activated`; the outcome is
 `activated_with_possession` when a `current_state` objective already holds, else `activated`
 (nothing is stored for it). Objectives: `current_state` (a policy evaluated when needed, never
@@ -126,20 +126,22 @@ actor already having a pending choice, `invalid_state`. Accepted
 dialogue's roles bound to EntityIds in role-name order, the choice ids in key order, and
 `choice_opened`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
 actor's or not offering the choice `invalid_state`; a bound NPC not in the room `not_present`;
-a bound item not held `not_owned` (`dialogue.ts:65`; the GameView shows the same); then the
+a bound item not held `not_owned` (`dialogue.ts:66`; the GameView shows the same); then the
 dialogue's quest resolves (above), or the choice's `accept` activates its quest as
-`accept_quest` does, `invalid_state` when the actor already has an instance (the talk-time policy
-may be stale). Accepted, outcome the choice id, in one decision: the
+`accept_quest` does, `invalid_state` when `accept_quest` would be: the actor already has an
+instance, or the quest's offer, if declared, has a policy that fails (the talk-time policy may be
+stale; `quest.ts` `acceptRefused`). The GameView shows such an accept unavailable with the same
+code. Accepted, outcome the choice id, in one decision: the
 `hand_over` (an `entity.transfer` of the bound item to the bound NPC and `item_acquired`),
 the choice's `fact.assign` steps, the quest's transitions and `quest_resolved` (or the accepted
 quest's `quest.activate` and `quest_activated`), `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
-whose trigger is this dialogue and choice (`rules/dialogue.ts:151`). `close_choice {continuation_id}`: the
+whose trigger is this dialogue and choice (`rules/dialogue.ts:177`). `close_choice {continuation_id}`: the
 actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`.
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
-contribution removes them (`dialogue.ts:149`). Only a dialogue's speaker, present in the room,
-offers its talk (`:129`), one per dialogue under the dialogue's key, available while that
+contribution removes them (`dialogue.ts:151`). Only a dialogue's speaker, present in the room,
+offers its talk (`:138`), one per dialogue under the dialogue's key, available while that
 dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`.
