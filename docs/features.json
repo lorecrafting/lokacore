@@ -300,7 +300,7 @@
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal; C1 c1-journal (#PR) selected lifecycle and outcome journal text"
+    "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal; C1 c1-journal (#138) selected lifecycle and outcome journal text"
   },
   "behavior": {
     "spec": "06 §13 Behavior/schedule profiles; 21 §10",
