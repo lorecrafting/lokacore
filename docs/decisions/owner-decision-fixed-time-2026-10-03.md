@@ -20,7 +20,7 @@ The [mechanics proposal](../design/provisional-story-mechanics.md#1-time-and-com
 uses one clock for combat rounds, recovery ticks, scheduled events and temporary death penalties.
 Its individual timings remain proposed. The later [background-time decision](owner-decision-background-time-2026-10-03.md)
 supersedes background pausing: background elapsed time applies to the same clock and mechanics.
-Menu/dialogue pausing remains a separate proposed policy.
+Menu/dialogue clock behavior remains a separate unapproved proposal.
 
 The engine still needs internal logical-clock progression and its due-job processing. The existing
 `time.advance` mechanism is not removed by this gameplay restriction: a later authority clock
