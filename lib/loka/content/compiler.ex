@@ -4,7 +4,7 @@ defmodule Loka.Content.Compiler do
   Each stage runs on the parts the stages before it accepted, so one bad file does not hide
   the diagnostics of the others.
   """
-  alias Loka.Content.{Checks, Dialogues, Links, Quests, Reactions, Recipes, Resources}
+  alias Loka.Content.{Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires, Resources}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -26,7 +26,7 @@ defmodule Loka.Content.Compiler do
     {manifest, located, d1} = manifest(of(files, :manifest), registry)
     {defs, d2} = definitions(files, manifest)
     {text, d3} = text(of(files, :text))
-    v2 = v2(defs, located, text, of(files, :resources))
+    v2 = v2(defs, located, text, files)
 
     case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)]) do
       {warnings, []} -> {:ok, cartridge(manifest, defs, v2, located), warnings}
@@ -38,8 +38,8 @@ defmodule Loka.Content.Compiler do
   defp split(lists), do: lists |> Enum.concat() |> Enum.split_with(&(&1["severity"] == "warning"))
 
   defp checks(manifest, defs, v2, located, registry) do
-    Resources.check(manifest, defs, v2, located) ++
-      Checks.check(manifest, defs, registry) ++
+    Resources.check(manifest, defs, v2, located, registry) ++
+      Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry) ++
       Checks.rooms(manifest, defs, v2, registry) ++
       Recipes.check(manifest, defs, v2, registry) ++
       Quests.check(manifest, defs, v2, registry) ++
@@ -48,14 +48,15 @@ defmodule Loka.Content.Compiler do
   end
 
   # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, story points, an
-  # entry, a calendar or world, a text catalog or resources.json (CompiledCartridge).
-  defp v2(defs, {entry, settings}, text, resources) do
+  # entry, a calendar or world, a text catalog, resources.json or attributes.json (CompiledCartridge).
+  defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
          ~w(room item npc recipe barrier quest reaction dialogue story_point),
          &(defs[&1] != %{})
        ) or
          entry != nil or
-         settings != %{} or text != nil or resources != [],
+         settings != %{} or text != nil or
+         Enum.any?(files, &(elem(&1, 1) in [:resources, :attributes])),
        do: {entry, text || %{}}
   end
 
@@ -87,7 +88,7 @@ defmodule Loka.Content.Compiler do
       [] ->
         {extra, manifest} = Map.split(m, ["entry", "calendar", "world"])
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
-        diags = Checks.requirements(rel, manifest, registry)
+        diags = Requires.check(rel, manifest, registry)
         {manifest, located, diags ++ calendar(manifest, extra["calendar"], registry)}
 
       diags ->
@@ -127,8 +128,10 @@ defmodule Loka.Content.Compiler do
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
     {resources, d1} = Resources.load(of(files, :resources))
+    {attributes, d3} = Resources.attributes(of(files, :attributes))
     {defs, d2} = kinds(files)
-    {Map.merge(expanded(defs, m), %{"fact" => facts, "resource" => resources}), d0 ++ d1 ++ d2}
+    loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
+    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3}
   end
 
   # The one-file-per-definition kinds (@kinds) and their diagnostics.
@@ -272,13 +275,13 @@ defmodule Loka.Content.Compiler do
     }
   end
 
-  # items, npcs, recipes, barriers, quests, reactions, dialogues and story points are optional maps (CompiledCartridge): absent when empty. The
+  # items, npcs, recipes, barriers, quests, reactions, dialogues, story points and attributes are optional maps (CompiledCartridge): absent when empty. The
   # default pools are always there, with resource@1 (Resources).
   defp cartridge(m, defs, {entry, text}) do
     m = Resources.requires(m)
 
     optional =
-      for k <- ~w(item npc recipe barrier quest reaction dialogue story_point),
+      for k <- ~w(item npc recipe barrier quest reaction dialogue story_point attribute),
           defs[k] != %{},
           into: %{},
           do: {k <> "s", keyed(m, k, defs)}

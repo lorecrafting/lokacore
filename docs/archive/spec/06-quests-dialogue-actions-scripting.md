@@ -805,6 +805,8 @@ scope_matches
 
 `quest_state` refers to persisted QuestInstance lifecycle state. Availability is derived and therefore uses `quest_available`; named terminal branches use `quest_outcome`. Broad narrative truths use typed facts rather than generic string flags.
 
+*Amendment 2026-10-03 (chapter-one slice c1-attributes; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 3, triage 3, 9):* two leaves of this list exist. `stat_compare {attribute, at_least}` holds when the actor's value of the attribute (a DefinitionRef of kind `attribute`; 00 §4.3 amendment) is at least `at_least`; `resource_compare {resource, at_least}` holds when the current value of the resource on the actor's body (regenerated to the present, before any cost of the action is paid) is at least `at_least`. `at_least` is a ResourceInt; "below" is `not`, a range is `all`, so neither leaf has a comparator. Both are owned by `attributes@1`, not by `resource@1`: a new op on an installed capability version takes that capability's next version (policy.schema.json VersionedPolicy), and `resource@1` is in every v2 cartridge's lock, so `resource@2` would re-derive every v2 lock and content hash. A cartridge that uses either leaf locks `attributes` (`UNDECLARED_CAPABILITY` otherwise), as `check@1`'s threshold check already reads a pool it does not own.
+
 A policy evaluator is pure.
 
 Policy definitions may be reused by exits, actions, dialogue choices, builder operations, and publication rules where semantics match.

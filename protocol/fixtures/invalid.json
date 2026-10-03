@@ -13902,5 +13902,235 @@
         "code": "not_in_enum"
       }
     ]
+  },
+  {
+    "contract": "AttributeSpec",
+    "value": {},
+    "errors": [
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/start",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttributeSpec",
+    "value": {
+      "key": "str",
+      "start": 2147483648,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/start",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttributeSpec",
+    "value": {
+      "key": "str",
+      "start": -2147483649
+    },
+    "errors": [
+      {
+        "path": "/start",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "stat_compare"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/attribute",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "stat_compare",
+      "attribute": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "attribute",
+        "key": "str"
+      },
+      "at_least": 2147483648,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "stat_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "at_least": -2147483649
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/attribute",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resource",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "at_least": -2147483649,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "attribute": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "attribute",
+        "key": "str"
+      },
+      "at_least": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/attribute",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "attributes": {
+        "c@1.0.0:resource/x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/actions",
+        "code": "missing_property"
+      },
+      {
+        "path": "/attributes/c@1.0.0:resource~1x",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/attributes/c@1.0.0:resource~1x",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/entry",
+        "code": "missing_property"
+      },
+      {
+        "path": "/facts",
+        "code": "missing_property"
+      },
+      {
+        "path": "/lock",
+        "code": "missing_property"
+      },
+      {
+        "path": "/manifest",
+        "code": "missing_property"
+      },
+      {
+        "path": "/policies",
+        "code": "missing_property"
+      },
+      {
+        "path": "/rooms",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
   }
 ]
