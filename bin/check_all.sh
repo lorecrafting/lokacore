@@ -23,6 +23,7 @@ m ast-grep test --skip-snapshot-tests
 m ast-grep scan --error
 m bin/lint_red_controls.sh
 m elixir bin/check_docs.exs
+m bin/docs_red_controls.sh
 [ "${1-}" = --no-ts ] && exit 0
 for d in . kernel/ts mobile/app; do
   [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }

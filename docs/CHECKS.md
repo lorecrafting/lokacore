@@ -56,7 +56,10 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   matched (nominal ids, `Loka.Core.Contracts`), and requires each check to fail.
 - `elixir bin/check_docs.exs`: relative links resolve; every Markdown file is reachable
   by links from README.md, AGENTS.md or CLAUDE.md; AGENTS.md stays
-  within its word budget (it is loaded by every agent, every session).
+  within its word budget (it is loaded by every agent, every session); each `path:line` code
+  pointer in the live docs (AGENTS.md, docs/system, ROADMAP, CHECKS, WORKFLOW, lessons,
+  world-parameters) names exactly one tracked file and a line inside it
+  (`bin/docs_red_controls.sh` plants a missing file, a line past the end and an ambiguous name).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
   cancelled; `mobile.yml` builds the native apps on pull requests that change native
   inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
