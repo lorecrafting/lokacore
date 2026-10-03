@@ -166,3 +166,23 @@ process installed a different Loka build on it: the bundle had no `bram_offer` t
 showed the old offer place action. I discarded that run and redid the whole walk on a private
 simulator, deleted afterwards. On `polish-414`, I uninstalled the app once before that other
 install, so any save that was on it is gone.
+
+## Codex Sol reviews (gpt-6.1-sol), appended verbatim by the PM
+
+### First review (ea3cd6b)
+
+CHANGES REQUESTED
+
+```text
+F1 | blocker | kernel/ts/src/rules/dialogue.ts:149 at ea3cd6b
+Choice activation bypasses the quest’s offer policy. In a valid cartridge with offer.policy = has_item(lantern) and an always-available accept dialogue, an actor without the lantern gets invalid_state from accept_quest but successfully activates the same quest through choose. This path checks only whether an instance exists. Enforce any declared offer policy before activation.
+
+F2 | should-fix | kernel/ts/src/dialogue.ts:95 at ea3cd6b
+A stale accept choice is advertised as available. Open its dialogue, then activate the quest through its offer while the continuation remains pending. GameView still reports available:true for accept, although choosing it returns invalid_state. Include the per-option activation checks when calculating choice availability.
+```
+
+### Fix round 1 re-check (10e59e2)
+
+APPROVE
+
+No findings.
