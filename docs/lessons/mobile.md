@@ -28,6 +28,7 @@ Hard-won lessons for `mobile/` and physical-device runs.
   `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
 
 **Physical-device runs**
+- A slice's automated device rows run on a Release iOS Simulator build ([owner rule](../system/owner-rules.md)).
 - Until the first free product gate the only phone is the iPhone 11
   ([owner decision](../archive/decisions/owner-decision-android-descope-2026-09-30.md)). After
   that the owner can connect only one phone at a time: batch all work per phone; ask for a
