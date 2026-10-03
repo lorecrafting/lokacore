@@ -89,6 +89,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner decision: [engine output is structured; each presenter owns its layout and wording; a presenter-split slice after Gate R6P](owner-decision-presenter-split-2026-10-02.md).
 - Owner decision (paraphrased): [the Lantern has no wait and no schedule; the game clock stays; the later time model's target rate is LegendMUD's tick](owner-decision-untimed-lantern-2026-10-02.md).
 - Owner decision (paraphrased): [Bram's quest starts from a dialogue choice, not a place action; a normal slice after Gate R6P](owner-decision-quest-from-dialogue-2026-10-02.md).
+- Owner decision (paraphrased): [chapter-one content: prose base is the prototype text, `stays` child outcome, three endings, "light" word to chapter two, novice fixture at the cloister 19:00](owner-decision-chapter-one-content-2026-10-02.md).
 - Owner decision (paraphrased): [per-slice device rows on the iOS Simulator; the iPhone 11 at gates, releases and native, performance or touch changes](owner-decision-simulator-device-rows-2026-10-02.md).
 - Owner decision (paraphrased): [`/code-review` only on code or bulk docs edits, on a named target; the PM keeps the advisor at decision points](owner-decision-review-tools-2026-10-02.md).
 - Owner decision (paraphrased): [slimmer gates: the owner's play, one Astra audit of the riskiest code, a short checklist with one reviewer](owner-decision-slim-gates-2026-10-02.md).
