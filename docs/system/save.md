@@ -76,16 +76,17 @@ R6 reference).
 
 ## New game
 
-`newGame` (`authority.ts:274`): after settling any fenced attempt, one transaction replaces
-the save with the fresh world at revision 0 under a new lineage and run (no parent) pinned to
-the newest release, drops every receipt (old invocation ids are new again) and recreates the
-`save` and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace
-stay. If SQLite reports the file, or the report table or its index, corrupt, `replace` throws
-(`store.ts:137`) and the host's Start over deletes the whole file (`smoke.ts:292`), so pending
-reports and the trace are lost (`start_over.test.ts` "a corrupt … page: Start over gives a working
-save", "an intact report table survives Start over in place"; index-only damage is carried to R12,
-[ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an unknown
-COMMIT fences like an invocation's. The host confirms with the player first.
+`newGame` (`authority.ts:274`): after settling any fenced attempt, one transaction replaces the
+save with the fresh world at revision 0 under a new lineage and run (no parent) pinned to the
+newest release, drops every receipt (old invocation ids are new again) and recreates the `save`
+and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
+(`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
+the file, or the report table or its index, corrupt, `replace` throws (`store.ts:137`) and the
+host's Start over deletes the whole file (`smoke.ts:292`), so pending reports and the trace are
+lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
+the [R6P plan](../decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
+to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
+unknown COMMIT fences like an invocation's. The host confirms with the player first.
 
 ## Narration on reopen
 
