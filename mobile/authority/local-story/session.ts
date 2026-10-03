@@ -20,8 +20,9 @@ const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const SEED = [1, 2, 3, 4];
 const ID_PREFIX = '00000000-0000-4000-8000-';
 
-// The build's commit, its random source (required: every new game draws its own), ids and clock.
-type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version'> & Required<Pick<Host, 'random'>>;
+// The build's commit, its random source (lineage.test.ts proves the app path passes it; tests
+// without one play the template world), its ids and its clock.
+type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random'>;
 
 function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;

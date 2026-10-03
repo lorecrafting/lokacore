@@ -92,7 +92,7 @@ test('the app path passes the random source: the pinned context is not the templ
   openGame(adapt(sql), read('protocol/fixtures/cartridge_dusk_hash.json') as never, {
     newId: randomUUID,
     kernel_version: KERNEL,
-    random: getRandomValues as NonNullable<Host['random']>,
+    random: getRandomValues as Host['random'],
   });
   const pin = sql.prepare("SELECT pin ->> '$.world_context_id' AS c FROM save").get();
   assert.match(pin?.c as string, V4);
