@@ -7,7 +7,6 @@ import type {
   DecisionResult,
   ErrorCode,
   HostKind,
-  NarrationRecord,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/decision.ts';
 import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
@@ -16,8 +15,9 @@ import { validate } from '../../../kernel/ts/src/validate.ts';
 import { step } from '../../../kernel/ts/src/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta } from './store.ts';
-import { adopt, save, settle, type Story, type Trace } from './save.ts';
-import { catchUp, observe, traceCommand, type CommitState, type RunIds } from './trace.ts';
+import { adopt, budget, ids, narration, save, scope, settle, stale, token } from './save.ts';
+import type { Story, Trace } from './save.ts';
+import { catchUp, observe, traceCommand, type CommitState } from './trace.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -98,43 +98,6 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     token: () => token(s), // the view freshness token of the world() now shown
   };
 }
-
-/**
- * The latest committed narration in this story's receipts, shown again on reopen after a crash
- * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
- * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
- */
-function narration(s: Story): NarrationRecord | undefined {
-  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
-  const r = s.db.getFirstSync<{ command_id: string; lines: string }>(
-    `SELECT command_id, response -> '$.narration' AS lines FROM receipt WHERE scope = ?
-     AND json_array_length(response, '$.narration') > 0 ORDER BY revision DESC LIMIT 1`,
-    scope(s),
-  );
-  return r
-    ? ({ command_id: r.command_id, lines: JSON.parse(r.lines) } as NarrationRecord)
-    : undefined;
-}
-
-// The run is in it, so an old run's token is never current again after newGame.
-const token = (s: Story) => `view:${s.meta.run_id}:${s.revision}`;
-const stale = (s: Story, view?: string) => !!view?.startsWith('view:') && view !== token(s);
-const scope = (s: Story) => `story/${s.meta.lineage_id}/${s.world.character}`;
-const ids = (s: Story): RunIds => ({
-  content_hash: s.meta.pin.content_hash,
-  kernel_version: s.host.kernel_version,
-  seed: s.meta.seed as number[],
-  run_id: s.meta.run_id,
-});
-
-/** A budget fault's evaluation.budget_exceeded (04 §5.4): the run's ids, its command and revision. */
-const budget = (s: Story, command_id: string, limit: string) => ({
-  format: 'loka-obs-v1',
-  event: 'evaluation.budget_exceeded',
-  store: 'diagnostics',
-  ids: { ...ids(s), command_id, revision: s.revision },
-  data: { limit },
-});
 
 /** A new save's identity: no parent, its initial RNG, the release it pins (10 §32), its binding. */
 function first({ content_hash, fresh }: Release, host: Host): Meta {
