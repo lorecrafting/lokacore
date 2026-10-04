@@ -1,0 +1,12 @@
+{
+  "outcomes": {
+    "carry": {
+      "dialogue": "bram",
+      "choice": "take_it"
+    },
+    "leave": {
+      "dialogue": "bram",
+      "choice": "leave_it"
+    }
+  }
+}

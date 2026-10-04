@@ -18,7 +18,8 @@ defmodule Loka.Content.Dialogues do
   outcome (SCHEMA_VIOLATION too_few_items); each outcome's trigger names a dialogue of this
   cartridge and one of its choices (UNRESOLVED_REFERENCE), a site no other outcome names
   (DUPLICATE_DEFINITION), in a dialogue that resolves a quest, so its choice is made once
-  (OUTCOME_MISMATCH).
+  (OUTCOME_MISMATCH). Chapter titles and story-point/outcome references resolve; only the opening
+  marker is unconditional, and counted quest/choice triggers are unambiguous (mechanics.md Chapters).
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
@@ -30,11 +31,13 @@ defmodule Loka.Content.Dialogues do
 
   defp all(defs), do: for({_, {rel, [], d}} <- defs["dialogue"], do: {rel, d})
 
-  @doc "Diagnostics for the schema-valid dialogues of a v2 source with a valid manifest (else none)."
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  @doc "Diagnostics for dialogues, story points and chapter settings of a v2 source (else none)."
+  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}, [map()]) :: [
+          map()
+        ]
+  def check(m, _, v2, _, _) when m == nil or v2 == nil, do: []
 
-  def check(m, defs, {_, text}, registry) do
+  def check(m, defs, {_, text}, {_, settings}, registry) do
     caps = m["requires"]["capabilities"]
     keys = for kind <- ~w(action recipe quest), {_, {_, [], d}} <- defs[kind], do: d["key"]
 
@@ -47,7 +50,72 @@ defmodule Loka.Content.Dialogues do
       events: {caps, owners(registry, ["events"])}
     }
 
-    Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++ story_points(defs, ctx)
+    Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++
+      story_points(defs, ctx) ++
+      chapters(Map.get(settings, "chapters", []), ctx)
+  end
+
+  # Chapters derive only from unambiguous quest-resolving dialogue choices (mechanics.md).
+  defp chapters(chapters, ctx) do
+    chapters
+    |> Enum.with_index()
+    |> Enum.flat_map(fn {chapter, i} ->
+      steps = ["chapters", i]
+
+      texts("cartridge.json", [{steps ++ ["title"], chapter["title"]}], ctx.text) ++
+        chapter(chapter, i, steps, ctx)
+    end)
+  end
+
+  defp chapter(c, 0, steps, _) do
+    for field <- ~w(story_point outcome),
+        is_map_key(c, field),
+        do: diag("UNKNOWN_FIELD", at("cartridge.json", steps ++ [field]))
+  end
+
+  defp chapter(c, _, steps, ctx) do
+    if is_map_key(c, "story_point") do
+      reference("cartridge.json", steps, "story_point", c, ctx.m, ctx.defs) ++
+        case resolve(c["story_point"], "story_point", ctx.m, ctx.defs) do
+          {_, _, p} -> chapter_outcomes(c, p["outcomes"], steps, ctx)
+          _ -> []
+        end
+    else
+      [
+        diag("SCHEMA_VIOLATION", at("cartridge.json", steps ++ ["story_point"]), %{
+          "error" => "missing_property"
+        })
+      ]
+    end
+  end
+
+  defp chapter_outcomes(c, outcomes, steps, ctx) do
+    if is_map_key(c, "outcome") and not is_map_key(outcomes, c["outcome"]) do
+      [
+        diag("UNRESOLVED_REFERENCE", at("cartridge.json", steps ++ ["outcome"]), %{
+          "target" => c["outcome"]
+        })
+      ]
+    else
+      counted =
+        if is_map_key(c, "outcome"), do: [outcomes[c["outcome"]]], else: Map.values(outcomes)
+
+      if Enum.any?(counted, &ambiguous?(&1, ctx)),
+        do: [diag("OUTCOME_MISMATCH", at("cartridge.json", steps ++ ["story_point"]))],
+        else: []
+    end
+  end
+
+  defp ambiguous?(t, ctx) do
+    case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
+      {rel, _, %{"quest" => quest}} ->
+        Enum.any?(all(ctx.defs), fn {other, d} ->
+          other != rel and d["quest"] == quest and is_map_key(d["choices"], t["choice"])
+        end)
+
+      _ ->
+        false
+    end
   end
 
   defp story_points(defs, ctx) do

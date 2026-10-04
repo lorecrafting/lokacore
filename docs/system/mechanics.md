@@ -233,6 +233,31 @@ dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`.
 
+## Chapters (`kernel/ts/src/view.ts`)
+
+A cartridge may declare an ordered, non-empty `chapters` list of titles. The opening
+chapter (index 0) has neither `story_point` nor `outcome`; every later chapter names a
+story point and may select one of its outcomes. The current chapter is the highest
+reached index, else 0. GameView carries its `index` and `title` TextKey exactly when
+chapters are declared; the presenter can compare consecutive indices to show a title page.
+
+A chapter selecting outcome O of story point P is reached when the player's instance of
+the quest of O's trigger dialogue D is `resolved` with outcome C, where O's trigger is
+`{dialogue: D, choice: C}`. The story point outcome key and the dialogue choice id are
+different keys: the projection maps through the trigger. Without an `outcome`, any
+outcome of P reaching its trigger counts. An active or `objectives_complete` quest does
+not reach a chapter, even when its objective holds; another player's quest does not count.
+
+This derives only from existing quest state, with no persisted marker, op or event
+([chapter-one plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md),
+§3 slice 9 and §6; the owner's chapter-marker addition). It holds while story points
+come only from quest-resolving dialogue choices. Revisit with a persisted story-point
+record when another source appears. To keep this derivation unambiguous, a counted
+trigger is rejected if another dialogue resolves the same quest with the same choice id;
+[the compiler and loader check](cartridge.md#compiler) fails closed with the existing
+`OUTCOME_MISMATCH` code. This narrow check is the PM's continuing-workflow choice,
+not an explicit owner response to the chapter brief's Q4.
+
 ## narration@1
 
 Ruleless: a committed narration line binds its participants' EntityIds at commit (recipe

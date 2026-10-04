@@ -14976,5 +14976,217 @@
         "code": "pattern_mismatch"
       }
     ]
+  },
+  {
+    "contract": "Chapter",
+    "value": {},
+    "errors": [
+      {
+        "path": "/title",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Chapter",
+    "value": {
+      "title": "chapter.landing",
+      "extra": 0
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "manifest": {
+        "api_version": "loka/v3",
+        "id": "ashmere_chapters",
+        "version": "0.0.1",
+        "title": "Ashmere — Ferry",
+        "requires": {
+          "kernel_api": {
+            "at_least": "1.0",
+            "below": "2.0"
+          },
+          "content_schema": 1,
+          "rule_ir": 1,
+          "capabilities": {
+            "movement": 1,
+            "inspectable_detail": 1,
+            "description_variant": 1,
+            "containment": 1,
+            "policy": 1,
+            "action_recipe": 1,
+            "behavior": 1,
+            "calendar": 1,
+            "resource": 1,
+            "schedule": 1,
+            "fact": 1,
+            "quest": 1,
+            "dialogue": 1
+          },
+          "client_features": []
+        },
+        "supported_profiles": [
+          "offline_private"
+        ]
+      },
+      "lock": {
+        "format": "loka-capability-lock-v1",
+        "capabilities": {
+          "movement": 1,
+          "inspectable_detail": 1,
+          "description_variant": 1,
+          "containment": 1,
+          "policy": 1,
+          "action_recipe": 1,
+          "behavior": 1,
+          "calendar": 1,
+          "resource": 1,
+          "schedule": 1,
+          "fact": 1,
+          "quest": 1,
+          "dialogue": 1
+        }
+      },
+      "facts": {
+        "ashmere_chapters@0.0.1:fact/search_plan": {
+          "version": 1,
+          "value_type": {
+            "type": "enum",
+            "values": [
+              "undecided",
+              "player_led",
+              "party_led"
+            ],
+            "default": "undecided"
+          },
+          "scopes": [
+            "player"
+          ],
+          "meaning": "Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).",
+          "key": "search_plan"
+        }
+      },
+      "policies": {},
+      "actions": {},
+      "entry": {
+        "cartridge_id": "ashmere_chapters",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "ferry_landing"
+      },
+      "rooms": {},
+      "text": {},
+      "chapters": []
+    },
+    "errors": [
+      {
+        "path": "/chapters",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "ChapterView",
+    "value": {
+      "title": "chapter.landing"
+    },
+    "errors": [
+      {
+        "path": "/index",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ChapterView",
+    "value": {
+      "index": 0
+    },
+    "errors": [
+      {
+        "path": "/title",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ChapterView",
+    "value": {
+      "index": 0,
+      "title": "chapter.landing",
+      "extra": 0
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ChapterView",
+    "value": {
+      "index": -1,
+      "title": "chapter.landing"
+    },
+    "errors": [
+      {
+        "path": "/index",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ChapterView",
+    "value": {
+      "index": 0.5,
+      "title": "chapter.landing"
+    },
+    "errors": [
+      {
+        "path": "/index",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.title"
+        },
+        "description": {
+          "key": "room.description"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "chapter": {}
+    },
+    "errors": [
+      {
+        "path": "/chapter/index",
+        "code": "missing_property"
+      },
+      {
+        "path": "/chapter/title",
+        "code": "missing_property"
+      }
+    ]
   }
 ]

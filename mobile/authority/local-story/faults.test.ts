@@ -28,10 +28,10 @@ import { openStory, type Reply } from './authority.ts';
 // One seed per demo cartridge: bell, rooms, facts, items, dusk, details, road, errand (accepting
 // its quest), gate, ferry (running Bram's job), green (delivering a reaction), the proof
 // cartridge lantern_proof, wear (wearing an item), locks (opening or unlocking a container) and
-// rest (changing position), and journal (quest credit and custody) (sim.ts picks by seed among
-// the cartridge known answers, so a new cartridge remaps them). None emits an effect (no
+// rest (changing position), journal (quest credit and custody), and chapters (quest acceptance).
+// sim.ts picks by seed among the cartridge known answers, so a new cartridge remaps them. None emits an effect (no
 // outbox is built yet); every sequence commits several NEW commands.
-const SEEDS = [12, 24, 57, 20, 22, 34, 3, 1, 11, 4, 15, 6, 27, 7, 2, 36];
+const SEEDS = [50, 173, 11, 157, 507, 21, 3, 69, 651, 190, 101, 129, 4945, 13, 96, 135, 426];
 
 type Tap = (statement: string, run: () => unknown) => unknown;
 /** A process on `path` playing seed `seed`'s release; its ids count from 1, as in every run. */
@@ -261,12 +261,12 @@ for (const seed of SEEDS)
 const pages = (sql: DatabaseSync) => Object.values(sql.prepare('PRAGMA page_count').get()!)[0];
 
 // Breaks (the corpus's own footing): the driver or the authority drifting from answers checked by
-// hand against the fixtures. Seed 1716 (cartridge_details_hash.json): wait until 1 advances the
+// hand against the fixtures. Seed 16314 (cartridge_details_hash.json): wait until 1 advances the
 // clock to 1; wait until 1 again is not later than now, so invalid_state, and keeps the revision;
-// looking at a detail changes nothing but the revision. Seed 552 (cartridge_dusk_hash.json):
+// looking at a detail changes nothing but the revision. Seed 240 (cartridge_dusk_hash.json):
 // ring_bell lasts 60.
 test('hand-checked anchors', () => {
-  const p = processOn(save(), 1716);
+  const p = processOn(save(), 16314);
   const replies = [0, 1, 2].map((k) => p.send(k) as Extract<Reply, { kind: 'saved' }>);
   const shown = replies.map(({ revision, decision: d }) => {
     const { kind, outcome, error } = d as {
@@ -285,7 +285,7 @@ test('hand-checked anchors', () => {
     { ...p.sql.prepare('SELECT revision, clock FROM head').get() },
     { revision: 2, clock: 1 },
   );
-  const d = processOn(save(), 552);
+  const d = processOn(save(), 240);
   d.send(0);
   assert.deepEqual(
     { ...d.sql.prepare('SELECT revision, clock FROM head').get() },
@@ -298,16 +298,16 @@ test('hand-checked anchors', () => {
 // changed host clock differs from the reference). The app subscribes to no AppState, so
 // backgrounding dispatches nothing; the device gate (S6b) covers the phone.
 test('views, a reopen and a changed host clock leave the play_time clock and world as they were', () => {
-  const [, ref] = reference(1536);
+  const [, ref] = reference(16314);
   const path = save();
-  const p = processOn(path, 1536);
+  const p = processOn(path, 16314);
   p.send(0);
   for (let i = 0; i < 3; i++) p.story.world();
   at(p, ref[1]!);
   p.sql.close();
   mock.timers.enable({ apis: ['Date'], now: Date.UTC(2040, 0, 1) });
   try {
-    const q = processOn(path, 1536);
+    const q = processOn(path, 16314);
     at(q, ref[1]!);
     assert.equal(q.sql.prepare('SELECT clock FROM head').get()!.clock, 1);
     play(q, path, ref, 1);

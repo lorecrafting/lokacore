@@ -101,6 +101,10 @@ defmodule Loka.Content.Checks do
     d |> Map.drop(~w(npc quest)) |> expand(m) |> Map.merge(Map.put(q, "npc", ref(n, "npc", m)))
   end
 
+  # A chapter marker: its title and outcome are keys, its story point a reference.
+  def expand(%{"story_point" => p, "title" => t} = chapter, m) when is_binary(t),
+    do: Map.put(chapter, "story_point", ref(p, "story_point", m))
+
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v

@@ -6,7 +6,7 @@ A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`):
 
 | File | Holds |
 |---|---|
-| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room, `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) and `world {movement {cost {resource, amount}}, bands}`: what a move costs and the cartridge's default condition bands |
+| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room, `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) and `world {movement {cost {resource, amount}}, bands}`: what a move costs and the cartridge's default condition bands; optional `chapters [{title, story_point?, outcome?}]` ([Chapters](mechanics.md#chapters-kerneltssrcviewts)) |
 | `facts.json` | `{"facts": {name: FactSpec}}`; a dotted name maps to a snake_case key, two names mapping to one key is `FACT_NAME_COLLISION` |
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
@@ -83,6 +83,17 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 - story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
   one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
   `lib/loka/content/dialogues.ex:2`);
+- chapters: a non-empty ordered list; chapter 0 has neither `story_point` nor `outcome`
+  (`UNKNOWN_FIELD` at that member), and every later chapter has `story_point`
+  (`SCHEMA_VIOLATION`, `data.error: missing_property`, at that member); each title has a
+  catalog entry, each story point resolves and each selected outcome names one of its keys
+  (`UNRESOLVED_REFERENCE`, `data.target` the text key, full reference string or outcome key).
+  A counted trigger whose dialogue's quest and choice id are also named by another dialogue
+  is ambiguous (`OUTCOME_MISMATCH`, data `{}`, at `cartridge.chapters[i].story_point` in the
+  compiler, `.cartridge.chapters[i].story_point` at the loader's reference stage). Only the
+  selected outcome is counted when `outcome` is declared; otherwise all are. These checks
+  implement [Chapters](mechanics.md#chapters-kerneltssrcviewts), using the existing diagnostic
+  code, without changing dialogue or quest rules;
 - touch links in catalog strings: `[words]` links the thing whose text it is, and `[words]` followed by
   `(key)` a detail, item or NPC; an unresolved target is an error; a room description or room line without
   a link to its visible details or entity is a `TOUCH_LINK_MISSING` warning
@@ -137,6 +148,11 @@ replay never resolve a name again. Catalog strings carry the touch links above; 
 model strips them to prose until details are tappable (`mobile/app/book/model.ts:25`).
 
 ## Development cartridges
+
+`cartridges/ashmere_chapters` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewts):
+opening Landing, Dusk after either lantern story-point outcome, and Reeds after `carry`,
+whose trigger choice is `take_it` (the other choice is `leave_it`). This independent source
+has its own identity and frozen known answer; all preexisting cartridges remain unchanged.
 
 `cartridges/ashmere_journal` exercises [quest journal selection](mechanics.md#quest1-rulesquestts-kerneltssrcquestts):
 the Lantern's current possession changes its active text, while the oar's post-activation

@@ -382,7 +382,7 @@
     "implemented_in": "Early R7/R8 N a recipe narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   },
   "dialogue": {
-    "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3",
+    "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3; mechanics.md Chapters (C1 slice 9)",
     "contracts": [
       "DialogueDefinition",
       "DialogueRole",
@@ -392,7 +392,9 @@
       "CommandPayload",
       "EventPayload",
       "DeltaOp",
-      "MutationTarget"
+      "MutationTarget",
+      "Chapter",
+      "ChapterView"
     ],
     "modules": [
       "kernel/ts/src/dialogue.ts",
@@ -403,13 +405,14 @@
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json",
-      "protocol/fixtures/composition.json"
+      "protocol/fixtures/composition.json",
+      "protocol/fixtures/cartridge_chapters_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report"
+    "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report; C1 c1-chapters derived chapter markers"
   },
   "attributes": {
     "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",

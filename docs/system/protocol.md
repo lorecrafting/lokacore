@@ -177,7 +177,7 @@ named by its keywords through `doors` (`:72`). A Command carries only ids, never
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:47`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:48`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
 `exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
 barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
@@ -202,13 +202,15 @@ holder in slot-key order with its `slot` and, when one is worn, the `item` with 
 accepts (only those resolving to `remove`), absent when the world has no holder
 ([equipment@1](mechanics.md#equipment1-kerneltssrcrulesequipmentts)); `journal` (each quest the player
 has an instance of, with state and title, and optional `journal`, the selected TextKey
-from [quest@1](mechanics.md#quest1-rulesquestts-kerneltssrcquestts)); `time` (the logical clock); the pending `choice`
+from [quest@1](mechanics.md#quest1-rulesquestts-kerneltssrcquestts)); `chapter` (`{index, title}`, a non-negative declaration index and TextKey), present exactly
+when the cartridge declares chapters, selected by [Chapters](mechanics.md#chapters-kerneltssrcviewts);
+`time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
 `resources`, each with current, maximum, a condition band key and its tone (`normal`, `warning`
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view.ts:188`, `:207`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view.ts:211`, `:230`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
