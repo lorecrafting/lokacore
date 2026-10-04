@@ -1,0 +1,17 @@
+(node:52424) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[review-worktree]/mobile/app/sampler.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [review-worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ the app opens and replaces only its sampler save, preserving an existing Lantern save (71.643ms)
+✔ sampler invocation walk reaches all six rooms and resumes the carried ending at line two (71.817667ms)
+✔ leaving the lantern resolves with the fallback journal and no carried chapter or scene (4.657625ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 326.244917
+
+EXIT 0
