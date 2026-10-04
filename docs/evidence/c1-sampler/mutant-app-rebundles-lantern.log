@@ -1,0 +1,33 @@
+✖ the app opens and replaces only its sampler save, preserving an existing Lantern save (56.08975ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 262.406209
+
+✖ failing tests:
+
+test at mobile/app/sampler.test.ts:29:1
+✖ the app opens and replaces only its sampler save, preserving an existing Lantern save (56.08975ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'lantern_proof'
+  - 'ashmere_sampler'
+  
+      at TestContext.<anonymous> (file://<checkout>/mobile/app/sampler.test.ts:92:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'lantern_proof',
+    expected: 'ashmere_sampler',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

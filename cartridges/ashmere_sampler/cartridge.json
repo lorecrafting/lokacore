@@ -1,0 +1,100 @@
+{
+  "api_version": "loka/v3",
+  "id": "ashmere_sampler",
+  "version": "0.0.1",
+  "title": "Ashmere — Bram's Lantern",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.0",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "barrier": 1,
+      "equipment": 1,
+      "position": 1,
+      "policy": 1,
+      "fact": 1,
+      "quest": 1,
+      "dialogue": 1,
+      "scene": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "ferry_landing",
+  "chapters": [
+    {
+      "title": "chapter.lantern"
+    },
+    {
+      "title": "chapter.bank",
+      "story_point": "lantern_resolved",
+      "outcome": "carry"
+    }
+  ],
+  "world": {
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 90,
+        "key": "slightly_scratched",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 80,
+        "key": "few_bruises",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 70,
+        "key": "some_cuts",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 60,
+        "key": "several_wounds",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 50,
+        "key": "many_nasty_wounds",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 40,
+        "key": "bleeding_freely",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 30,
+        "key": "covered_in_blood",
+        "tone": "danger"
+      },
+      {
+        "at_percent": 20,
+        "key": "leaking_guts",
+        "tone": "danger"
+      },
+      {
+        "at_percent": 10,
+        "key": "almost_dead",
+        "tone": "danger"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ]
+  }
+}

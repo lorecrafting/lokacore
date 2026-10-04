@@ -1,0 +1,32 @@
+Compiling 33 files (.ex)
+Generated loka app
+Running ExUnit with seed: 976682, max_cases: 16
+
+
+
+  1) test the approved sampler compiles to its independent answer without warnings (Loka.ContentSamplerTest)
+     test/loka/content_sampler_test.exs:8
+     Assertion with == failed
+     code:  assert Loka.Content.compile("cartridges/ashmere_sampler") == {:ok, expected, []}
+     left:  {:error,
+             [
+               %{
+                 "code" => "BARRIER_UNREACHABLE_KEY",
+                 "data" => %{},
+                 "message_key" => "diagnostics.barrier_unreachable_key",
+                 "path" => "barriers/cellar_door",
+                 "severity" => "error",
+                 "suggested_capabilities" => []
+               }
+             ]}
+     right: {:ok,
+             "{\"cartridge\":{\"actions\":{},\"barriers\":{\"ashmere_sampler@0.0.1:barrier/cellar_door\":{\"initial\":\"locked\",\"key\":\"cellar_door\",\"key_item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"cellar_key\",\"kind\":\"item\"},\"keywords\":[\"door\",\"cellar_door\"],\"short\":\"barrier.cellar_door.short\"},\"ashmere_sampler@0.0.1:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"chapters\":[{\"title\":\"chapter.lantern\"},{\"outcome\":\"carry\",\"story_point\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"},\"title\":\"chapter.bank\"}],\"dialogues\":{\"ashmere_sampler@0.0.1:dialogue/bram\":{\"choices\":{\"leave_it\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]},\"take_it\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}},\"ashmere_sampler@0.0.1:dialogue/bram_offer\":{\"choices\":{\"accept\":{\"accept\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"label\":\"quest.lantern.accept\",\"narration\":\"narration.bram.accept\"}},\"key\":\"bram_offer\",\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"items\":[{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"objectives_complete\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"resolved\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"failed\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"abandoned\"}],\"op\":\"any\"},\"op\":\"not\"}},\"prompt\":\"dialogue.bram_offer.prompt\",\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"}}}},\"entry\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_sampler@0.0.1:fact/position\":{\"key\":\"position\",\"meaning\":\"The character's position (position@1): only its rule writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"standing\",\"type\":\"enum\",\"values\":[\"standing\",\"sitting\",\"resting\",\"sleeping\"]},\"version\":1},\"ashmere_sampler@0.0.1:fact/scene_lantern_kept\":{\"key\":\"scene_lantern_kept\",\"meaning\":\"Scene lantern_kept's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":0,\"maximum\":3,\"minimum\":-1,\"type\":\"int\"},\"version\":1},\"ashmere_sampler@0.0.1:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player keeps " <> ...,
+             []}
+     stacktrace:
+       test/loka/content_sampler_test.exs:10: (test)
+
+
+Finished in 0.03 seconds (0.03s async, 0.00s sync)
+
+Result: 0/1 passed
+Failed: 1 test
