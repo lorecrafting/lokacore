@@ -1,0 +1,10 @@
+{
+  "reason": "Privacy-only redaction of retained helper source; executable loader path is redacted in the public copy. Actual reviewer executions used the privately retained original, not this redacted capture.",
+  "changed_files": [
+    {
+      "file": "independent-ast.cjs",
+      "private_original_sha256": "3eddfa3a5685dac85f4811702088a7b4707cc4fab00f75644beb230c7846d077",
+      "public_redacted_sha256": "9a92ee44e07c7eeea01feefd5d079847c312bad67180c7cb43c8f71a535a9f17"
+    }
+  ]
+}
