@@ -11,3 +11,7 @@ PR [#149](https://github.com/lorecrafting/lokacore/pull/149); reviewed head `1ae
 - Personally queried exact-head GitHub CI: five completed SUCCESS jobs; no bundle job ran. Reviewed the complete documentation diff and whitespace check. Ponytail Review: Lean already. Identical union-merge duplicates for #146/#147 were removed from the review index during this record publication.
 
 No tests, mutations, builds, GUI or save actions. Native proof is inspected evidence, not this reviewer's execution. Closure remains conditional on this record's exact publication head passing all started checks and the gate merge; this verdict does not claim Gate C1 already passed.
+
+## Scoped lifecycle clarification
+
+**APPROVE** at `01782f760e24221b4ee80bbf6c6b7ecc8e523cc0`; no open findings. Independently confirmed the entire fix changes only the checklist's status pointer and closure heading. The valid ROADMAP C1 anchor supplies current status; stable closure requirements remain intact. No runtime or other evidence changed. Ponytail Review: Lean already. PM verified changes/lint SUCCESS, three expected docs-only skips and no bundle job; normal pre-push passed. No duplicate tests or broader review warranted. Gate passage still requires the publication-head checks and merge.
