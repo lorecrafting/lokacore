@@ -1,0 +1,62 @@
+(node:34739) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<local-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <local-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exit door actions keep their direction and remain separate from walking (1.324958ms)
+✔ worn items and reachable nested contents offer actions on their own ids (0.271958ms)
+✔ same-room actions retain projected item pages and remove pages hidden by a closed lid (0.171083ms)
+✖ chapter changes queue one title which survives scene lines and acknowledgement (0.873291ms)
+✔ band phrases and the hp accessibility label use the cartridge catalog (0.173834ms)
+✔ scene Continue and position verbs have dedicated groups (0.106959ms)
+(node:34740) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<local-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <local-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ talk by day offers one button per choice and Close; carry narrates (51.495791ms)
+✔ a second press from the same screen is a stale view and changes nothing (10.422375ms)
+✔ a reopen shows the last committed narration first; a fresh game none (26.29925ms)
+✔ walked away: the choices say why, Close leaves the quest open, the landing resolves it (28.473041ms)
+✔ the log has story words, never a kernel code, across both endings (53.31075ms)
+✔ an NPC who leaves while you stay is logged, and nothing else (25.4645ms)
+✔ closed answers and a stale answer give their reason in words, not their code (27.338ms)
+✔ the Lantern gate unlocks and opens through its projected exit buttons (21.263ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 13
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 391.31775
+
+✖ failing tests:
+
+test at book/c1.test.ts:126:1
+✖ chapter changes queue one title which survives scene lines and acknowledgement (0.873291ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     kind: 'chapter'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file://<local-path>
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { kind: 'chapter' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+EXIT=1

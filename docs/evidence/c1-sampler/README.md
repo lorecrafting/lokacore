@@ -78,20 +78,20 @@ the controlled walk/loader; [both actual red controls](band-mutations.json) were
   preserves wait(1), wait(1), look(detail); dusk 114 → 422 preserves ring_bell. Every
   literal expected outcome/revision/clock remains unchanged. The [focused real
   SQLite fault corpus](fault-tests.log) then passed all 19 tests, including both anchors.
-  Final ordinary pre-push and exact-head CI remain draft workflow checks.
+  Final ordinary pre-push passed; all six exact `fc5a6f1` CI checks passed, independently confirmed in the [review](../../reviews/2026-10-03-c1-sampler-review.md).
 
 Raw captures are redacted and hashed in [SHA256SUMS](SHA256SUMS), with
 [verification](SHA256SUMS.verify). These headless runs establish no native layout,
 menu fit, gestures or device persistence observation.
 
-## Acceptance remaining
+## Acceptance ledger
 
 | Requirement | Status |
 |---|---|
 | Approved identity/prose, independent artifact, dual loader, normal invocation and real SQLite reopen | Proven above |
-| Content-owned condition phrase/tone | Fresh ready/normal/catalog proven above; final touch phrase/tone proof pending |
-| Release Simulator sampler cartridge load/menu fit and kill/relaunch mid-scene with C1 presenter | Earlier touch review exercised the prior hash; a fresh combined Release proof is required for the supplemented hash, not supplied by these headless captures |
-| Independent primary and separate Sol review, exact-head CI | Pending draft PR workflow |
+| Content-owned condition phrase/tone | Fresh ready/normal/catalog proven above; final native phrase/normal tone and menu fit [proven](../c1-touch/README.md); warning/danger use controlled tests |
+| Release Simulator sampler cartridge load/menu fit and kill/relaunch mid-scene with C1 presenter | Final clean integrated `9732b0e` Release [proves](../c1-touch/README.md) the supplemented hash, menu fit and scene line-two relaunch with identical state/receipts |
+| Independent primary and separate Sol review, exact-head CI | [Primary APPROVE and separate Sol APPROVE](../../reviews/2026-10-03-c1-sampler-review.md); all six source-head CI checks passed |
 | Gate C1 owner's iPhone play and touch-to-visible-feedback | Gate work, not supplied by this headless slice |
 
 Self-review: Ponytail before implementation; Ponytail Review found no extra runtime
