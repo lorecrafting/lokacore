@@ -1,18 +1,22 @@
 // The local Story authority (07 §§8-9; 03 §§14-15; ADR-072; 10 §§31-32): the world in memory,
 // one SQLite save, and 03 §14's admission order. invoke is synchronous on one connection, so
 // commands run one at a time, as WorldInstance serializes them online (07 §8).
-import type { Json } from '../../../kernel/ts/src/canonical.ts';
+import type { Json } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type {
   Command,
   DecisionResult,
   ErrorCode,
   HostKind,
 } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/decision.ts';
-import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
-import type { Identified } from '../../../kernel/ts/src/invocation.ts';
-import { validate } from '../../../kernel/ts/src/validate.ts';
-import { newWorld, step } from '../../../kernel/ts/src/world.ts';
+import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
+import {
+  identify,
+  INTENT_DIGEST_VERSION,
+  resolve,
+} from '../../../kernel/ts/src/commands/invocation.ts';
+import type { Identified } from '../../../kernel/ts/src/commands/invocation.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
+import { newWorld, step } from '../../../kernel/ts/src/runtime/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
 import type { Captured, Db, Meta } from './store.ts';
 import { adopt, budget, ids, narration, save, scope, settle, stale, token } from './save.ts';

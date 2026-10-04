@@ -12,9 +12,9 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DefinitionRef, DomainEvent } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { encode } from '../src/canonical.ts';
-import { accepted, allocator } from '../src/decision.ts';
-import { admit, adopt, newWorld, step } from '../src/world.ts';
+import { encode } from '../src/foundation/canonical.ts';
+import { accepted, allocator } from '../src/runtime/decision.ts';
+import { admit, adopt, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -282,7 +282,7 @@ test('a root and its reactions share one query_steps budget', () => {
   assert.equal(enter(belfry(1024, all(17), slowMove(16384))), 'query_steps');
 });
 
-// Breaks: the limit lost when the proposal so far faults (proposal.ts now(), composed at the first
+// Breaks: the limit lost when the proposal so far faults (runtime/proposal.ts now(), composed at the first
 // reaction's delivery before adopt composes the whole), or an operations fault misnamed. A root of
 // 4097 one-second advances entering the belfry, one rule there.
 test('a root over the operations limit names it, found at its first delivery', () => {

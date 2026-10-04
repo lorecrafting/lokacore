@@ -1,7 +1,7 @@
 // One command through the kernel, as the trace.command entry and the decision-latency
 // metric it produces (ADR-075 §3, §4; 11 §13, §15), and one lookup (found).
 import { performance } from 'node:perf_hooks';
-import { hash } from '../src/canonical.ts';
+import { hash } from '../src/foundation/canonical.ts';
 import {
   LIMITS,
   type Command,
@@ -10,7 +10,7 @@ import {
   type TargetResolution,
 } from '../src/contracts.gen.ts';
 import { step, type World } from '../src/index.ts';
-import { resolve } from '../src/target.ts';
+import { resolve } from '../src/commands/target.ts';
 import { append, line, lookupWords } from './obs.ts';
 import { which } from './text.ts';
 

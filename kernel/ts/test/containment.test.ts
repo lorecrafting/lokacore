@@ -5,14 +5,14 @@
 // kernel's; outcomes and rejection codes are hand-written from the rule's header.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { hash } from '../src/canonical.ts';
+import { hash } from '../src/foundation/canonical.ts';
 import type { Command } from '../src/contracts.gen.ts';
-import { accepted, allocator } from '../src/decision.ts';
+import { accepted, allocator } from '../src/runtime/decision.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { describe } from '../src/rules/description_variant.ts';
-import { sight } from '../src/rules/movement.ts';
-import { resolve } from '../src/target.ts';
-import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
+import { describe } from '../src/mechanics/description_variant/rule.ts';
+import { sight } from '../src/mechanics/movement/rule.ts';
+import { resolve } from '../src/commands/target.ts';
+import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_items_hash.json');
@@ -45,7 +45,7 @@ const give = (item_id: string, recipient_id: string) =>
   cmd({ type: 'give', item_id, recipient_id });
 const move = (direction: string) => cmd({ type: 'move', direction });
 const run = (w: World, ...cs: Command[]) => cs.reduce((x, c) => step(x, c, 0).world, w);
-// An engine verb as the GameView advertises it on an entity (actions.ts).
+// An engine verb as the GameView advertises it on an entity (commands/actions.ts).
 const verb = (key: string, scope: string) => ({
   available: true,
   action_key: key,
@@ -209,7 +209,7 @@ test('containment_acyclic is linear in the items of one room', () => {
 });
 
 // Breaks: the declared capacities or the containment cycle check missing from the proposal
-// path (compose.ts), so a transfer the rule did not guard would commit.
+// path (foundation/compose.ts), so a transfer the rule did not guard would commit.
 test('a transfer past a capacity or into its own contents faults and commits nothing', () => {
   const w = fresh();
   const transfer = (entity_id: string, source_id: string, destination_id: string) => {

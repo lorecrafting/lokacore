@@ -16,8 +16,8 @@ import type {
   WornSlotView,
 } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
-import { gameView, step } from '../src/world.ts';
-import { check } from '../src/invariants.ts';
+import { gameView, step } from '../src/runtime/world.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
 

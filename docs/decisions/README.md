@@ -113,3 +113,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C1 dialogue and Contents polish](owner-decision-c1-dialogue-contents-polish-2026-10-03.md): stable scrolling NPC history with docked actions/Leave and status-entry Contents.
 
 - [Development sampler replacement and authentic Look](owner-decision-sampler-development-look-2026-10-03.md): owner building-phase save direction and bounded PM `0.0.2` adoption.
+
+- [TypeScript kernel layout](owner-decision-kernel-layout-2026-10-03.md): mechanical responsibility folders, colocated rules/lifecycle, preserved semantics and deterministic guards.

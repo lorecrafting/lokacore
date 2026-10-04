@@ -6,7 +6,7 @@ A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`):
 
 | File | Holds |
 |---|---|
-| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room, `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) and `world {movement {cost {resource, amount}}, bands}`: what a move costs and the cartridge's default condition bands; optional `chapters [{title, story_point?, outcome?}]` ([Chapters](mechanics.md#chapters-kerneltssrcviewts)) |
+| `cartridge.json` | the manifest: `api_version`, `id`, `version`, `title`, `requires` (`kernel_api {at_least, below}`, `content_schema`, `rule_ir`, `capabilities {key: version}`, `client_features`), `supported_profiles`, optional `entry` room, `calendar {start}` (`cartridges/lantern_proof/cartridge.json`) and `world {movement {cost {resource, amount}}, bands}`: what a move costs and the cartridge's default condition bands; optional `chapters [{title, story_point?, outcome?}]` ([Chapters](mechanics.md#chapters-kerneltssrcviewviewts)) |
 | `facts.json` | `{"facts": {name: FactSpec}}`; a dotted name maps to a snake_case key, two names mapping to one key is `FACT_NAME_COLLISION` |
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
@@ -62,7 +62,7 @@ the cartridge's own. The compiler validates authored capability versions before 
 dependency, and includes it in the effective requirements before checking content ownership.
 
 A cartridge requiring scene@1 gets one engine FactSpec per scene and fact@1, as
-specified byte-exactly in [scene@1](mechanics.md#scene1-rulesscenets). The compiler
+specified byte-exactly in [scene@1](mechanics.md#scene1-mechanicsscenerulets). The compiler
 validates authored requirements before adding this dependency. The source scene key
 is at most 58 characters, so `scene_<key>` remains a Key.
 
@@ -130,7 +130,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   is ambiguous (`OUTCOME_MISMATCH`, data `{}`, at `cartridge.chapters[i].story_point` in the
   compiler, `.cartridge.chapters[i].story_point` at the loader's reference stage). Only the
   selected outcome is counted when `outcome` is declared; otherwise all are. These checks
-  implement [Chapters](mechanics.md#chapters-kerneltssrcviewts), using the existing diagnostic
+  implement [Chapters](mechanics.md#chapters-kerneltssrcviewviewts), using the existing diagnostic
   code, without changing dialogue or quest rules;
 - touch links in catalog strings: `[words]` links the thing whose text it is, and `[words]` followed by
   `(key)` a detail, item or NPC; an unresolved target is an error; a room description or room line without
@@ -143,14 +143,14 @@ for the Lantern; `test/loka/content_*_test.exs`).
 
 ## Artifact and loader
 
-`loadCartridge(bytes, installed)` (`kernel/ts/src/cartridge.ts:48`) returns the decoded
+`loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:48`) returns the decoded
 cartridge and its hash, or the first diagnostic of the first failing stage (`:62`): size
 (`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: v1 or v2), the
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:110`), the
 lock (`:160`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
-references (`kernel/ts/src/cartridge_refs.ts:156` and the `cartridge_*.ts` twins of the
-compiler's checks), and the installed kernel (`cartridge.ts:229`: `CAPABILITY_NOT_INSTALLED`,
+references (`kernel/ts/src/content/cartridge_refs.ts:156` and the `cartridge_*.ts` twins of the
+compiler's checks), and the installed kernel (`content/cartridge.ts:229`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
 An item's `barrier` is a reference to a barrier (barrier@1 owns the kind; a short key compiles
@@ -158,17 +158,17 @@ to its full ref) and is checked as above in both the compiler and the loader. An
 lock lacks it), in both the compiler and the loader. Under position@1 the loader, at the
 reference stage, rejects the same writes and a position FactSpec missing or other than the
 engine's (`RESERVED_FACT`, at `.cartridge.facts["<id>@<version>:fact/position"]`;
-`kernel/ts/src/cartridge_position.ts`). Compiled artifacts load in TypeScript with identical bytes, hash and lock
+`kernel/ts/src/content/cartridge_position.ts`). Compiled artifacts load in TypeScript with identical bytes, hash and lock
 (`test/loka/cartridge_cross_kernel_test.exs:113`); the loader corpus is
 `protocol/fixtures/cartridge_loader.json`.
 
 A compiled cartridge is a CompiledCartridge ([contracts](../contracts.gen.md#cartridge-artifact-contracts-protocolcartridgeschemajson)):
 the manifest, lock and definition maps keyed by DefinitionRefString
-(`<id>@<version>:<kind>/<key>`; `cartridge.ts:110`).
+(`<id>@<version>:<kind>/<key>`; `content/cartridge.ts:110`).
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/world.ts:67`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
 `dialogue`, `equipment`, `position`, `scene` (`:35`); without a command, so without a rule, `fact`, `policy`,
@@ -181,23 +181,23 @@ cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.
 ## Text
 
 `Text` is `{key, bindings}`; a committed narration line may carry `participants`, each name
-bound to an EntityId at commit (`kernel/ts/src/rules/action_recipe.ts:89`), so redisplay and
+bound to an EntityId at commit (`kernel/ts/src/mechanics/action_recipe/rule.ts:89`), so redisplay and
 replay never resolve a name again. Catalog strings carry the touch links above; the phone's
 model strips them to prose until details are tappable (`mobile/app/book/model.ts:25`).
 
 ## Development cartridges
 
-`cartridges/ashmere_scene` exercises [modal scenes](mechanics.md#scene1-rulesscenets):
+`cartridges/ashmere_scene` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets):
 three narrate lines start on `lantern_resolved/carry`; a fact_changed reaction hears
 that the scene ended. Its source uses short story-point and fact references, and has
 an independent known answer; existing cartridges remain unchanged.
 
-`cartridges/ashmere_chapters` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewts):
+`cartridges/ashmere_chapters` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts):
 opening Landing, Dusk after either lantern story-point outcome, and Reeds after `carry`,
 whose trigger choice is `take_it` (the other choice is `leave_it`). This independent source
 has its own identity and frozen known answer; all preexisting cartridges remain unchanged.
 
-`cartridges/ashmere_journal` exercises [quest journal selection](mechanics.md#quest1-rulesquestts-kerneltssrcquestts):
+`cartridges/ashmere_journal` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets):
 the Lantern's current possession changes its active text, while the oar's post-activation
 acquisition keeps its earned text after drop; terminal states select an outcome text or their
 stage's fallback. `lantern_proof` stays byte-identical to preserve phone saves pinned to its

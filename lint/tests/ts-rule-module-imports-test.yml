@@ -1,9 +1,18 @@
 id: ts-rule-module-imports
 valid:
-  - "import { accepted, type Rule } from '../decision.ts';"
-  - "import type { Key } from '../contracts.gen.ts';"
+  - "import { accepted, type Rule } from '../../runtime/decision.ts';"
+  - "import type { Key } from '../../contracts.gen.ts';"
+  - "import { add } from '../../foundation/int.ts';"
+  - "import { refusal } from '../../commands/actions.ts';"
+  - "import { activation } from './lifecycle.ts';"
+  - "import { earned } from '../quest/lifecycle.ts';"
+  - "import { pay } from '../resource.ts';"
+  - "import { entered } from './behavior.ts';"
 invalid:
   - "import { readFileSync } from 'node:fs';"
-  - "import { decide } from './movement.ts';"
+  - "import { decide } from '../movement/rule.ts';"
+  - "export { decide } from './rule.ts';"
   - "import x from 'lodash';"
-  - "import { y } from '../../play/obs.ts';"
+  - "import { y } from '../../../play/obs.ts';"
+  - "import { x } from '../../index.ts';"
+  - "const t = require(`../movement/rule.ts`);"

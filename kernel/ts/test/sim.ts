@@ -10,19 +10,19 @@
 //   node kernel/ts/test/sim.ts <seed>...   prints each seed's digest and failure, if any
 import { createHash } from 'node:crypto';
 import { globSync, mkdirSync, writeFileSync } from 'node:fs';
-import { encode, hash } from '../src/canonical.ts';
-import { compose, key, same } from '../src/compose.ts';
+import { encode, hash } from '../src/foundation/canonical.ts';
+import { compose, key, same } from '../src/foundation/compose.ts';
 import type { Command, DecisionResult } from '../src/contracts.gen.ts';
-import { id } from '../src/id_source.ts';
+import { id } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
-import { check } from '../src/invariants.ts';
-import { resolved } from '../src/actions.ts';
-import { resourceRef } from '../src/resource.ts';
-import { MOVES } from '../src/rules/barrier.ts';
-import { next, type RngState } from '../src/rng.ts';
-import { utf8 } from '../src/sha256.ts';
-import { resolve } from '../src/target.ts';
-import { gameView, holds, row, step } from '../src/world.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { resolved } from '../src/commands/actions.ts';
+import { resourceRef } from '../src/mechanics/resource.ts';
+import { MOVES } from '../src/mechanics/barrier/rule.ts';
+import { next, type RngState } from '../src/foundation/rng.ts';
+import { utf8 } from '../src/foundation/sha256.ts';
+import { resolve } from '../src/commands/target.ts';
+import { gameView, holds, row, step } from '../src/runtime/world.ts';
 import { append, kernelVersion, line, ROOT } from '../play/obs.ts';
 import { decide } from '../play/run.ts';
 import { read } from './read.ts';
@@ -32,8 +32,8 @@ import { read } from './read.ts';
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
 export const GENERATOR = 14;
-/** Each registered invariant, by how a step checks it (world.ts holds on the world after it, */
-/** invariants.ts check on its observation), or why no step does. */
+/** Each registered invariant, by how a step checks it (runtime/world.ts holds on the world after it, */
+/** runtime/invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
   world: [
     'player_in_one_room',
@@ -201,7 +201,7 @@ function checked(kernel: Kernel, before: World, command: Command, revision: numb
 const kindCode = (d: Exclude<DecisionResult, { kind: 'accepted' }>) =>
   d.kind === 'rejected' ? d.error.code : `fault ${d.code}`;
 
-/** The state composition reads, as proposal.ts adopt builds it. */
+/** The state composition reads, as runtime/proposal.ts adopt builds it. */
 export const base = (w: World) => ({
   ...w.state,
   fact_defaults: w.factDefaults,
@@ -253,7 +253,7 @@ function violated(
 }
 
 // An accepted step's State is the State before with its delta's composed changes and its rng,
-// and nothing else (proposal.ts adopt); a delta that does not compose is never accepted. A simulator
+// and nothing else (runtime/proposal.ts adopt); a delta that does not compose is never accepted. A simulator
 // failure (adopt_mismatch), not a registered invariant.
 function adopted(before: World, decision: Accepted, after: World, revision: number): boolean {
   const result = compose(base(before) as never, decision.delta);
@@ -264,7 +264,7 @@ function adopted(before: World, decision: Accepted, after: World, revision: numb
     const at = row(target);
     if (at) want[at[0]] = { ...(want[at[0]] as object), [at[1]]: value };
   }
-  // A continuation opened here carries the revision its commit takes (proposal.ts adopt).
+  // A continuation opened here carries the revision its commit takes (runtime/proposal.ts adopt).
   for (const o of decision.delta.ops)
     if (o.op === 'choice.open') {
       const choices = want.choices as Record<string, object>;

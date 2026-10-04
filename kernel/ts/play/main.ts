@@ -7,15 +7,15 @@
 import { randomUUID, getRandomValues } from 'node:crypto';
 import { createReadStream, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
-import { decode, encode, hash, type Json } from '../src/canonical.ts';
+import { decode, encode, hash, type Json } from '../src/foundation/canonical.ts';
 import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts';
-import { commandId } from '../src/id_source.ts';
+import { commandId } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
-import { gameView } from '../src/view.ts';
-import { sha256Hex } from '../src/sha256.ts';
-import { validate } from '../src/validate.ts';
-import { doors, normalize } from '../src/target.ts';
-import { detailOf, resolved, type Offered } from '../src/actions.ts';
+import { gameView } from '../src/view/view.ts';
+import { sha256Hex } from '../src/foundation/sha256.ts';
+import { validate } from '../src/foundation/validate.ts';
+import { doors, normalize } from '../src/commands/target.ts';
+import { detailOf, resolved, type Offered } from '../src/commands/actions.ts';
 import { append, kernelVersion, line, redact } from './obs.ts';
 import {
   barrierAt,
@@ -192,7 +192,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
   return line(trace);
 }
 
-// Resolves the player's words (target.ts; 04 §17), and for give the recipient's: each unique
+// Resolves the player's words (commands/target.ts; 04 §17), and for give the recipient's: each unique
 // id goes into a look, take, drop or give Command; none and ambiguous build no Command.
 function lookup(r: Run, p: Extract<Parsed, { lookup: string }>) {
   const id = found(r, p.lookup);
@@ -231,7 +231,7 @@ function answer(r: Run, p: 'bye' | { choose: string }) {
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 
-// accept [words]: the quest offer of the player's ActionSet (actions.ts) whose label has the
+// accept [words]: the quest offer of the player's ActionSet (commands/actions.ts) whose label has the
 // words builds an accept_quest Command; several ask which (by label), none builds nothing.
 function accept(r: Run, words: string) {
   const offers = Object.values(resolved(r.world, r.world.character)).filter(
@@ -246,7 +246,7 @@ function accept(r: Run, words: string) {
 }
 
 // The recipes of the player's ActionSet with the longest leading phrase of the words as an
-// alias (actions.ts; 06 §20 aliases; two recipes may share one), and the words after it.
+// alias (commands/actions.ts; 06 §20 aliases; two recipes may share one), and the words after it.
 function recipe(r: Run, text: string): { perform: Offered[]; rest: string } | undefined {
   const words = text.trim().toLowerCase().split(/\s+/);
   const recipes = Object.values(resolved(r.world, r.world.character)).filter((a) => a.recipe);

@@ -6,9 +6,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { check } from '../src/invariants.ts';
-import { resolve } from '../src/target.ts';
-import { INSTALLED, newWorld, step } from '../src/world.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { resolve } from '../src/commands/target.ts';
+import { INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_details_hash.json');

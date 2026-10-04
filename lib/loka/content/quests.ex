@@ -1,7 +1,7 @@
 defmodule Loka.Content.Quests do
   @moduledoc """
   Quests in a v2 source (quest.schema.json QuestDefinition; 06 §2, §8), twin of
-  `kernel/ts/src/cartridge_quests.ts`: each quest's owning capability is required (quest@1, by
+  `kernel/ts/src/content/cartridge_quests.ts`: each quest's owning capability is required (quest@1, by
   its quest_activated, as a recipe's check by check@1's events), its key is no registered
   command's, action's or recipe's (DUPLICATE_DEFINITION: its offer is an ActionSet identity), its
   title, its offer's label (the offer is optional) and all journal texts have catalog entries

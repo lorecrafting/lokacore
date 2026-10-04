@@ -2,9 +2,9 @@
 // so they never pass through the code under test.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { decode, encode, hash } from '../src/canonical.ts';
+import { decode, encode, hash } from '../src/foundation/canonical.ts';
 import { DEFS } from '../src/contracts.gen.ts';
-import { validate, type Defs } from '../src/validate.ts';
+import { validate, type Defs } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
 import { DEFS as PROBE } from './subset.gen.ts';
 

@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { decode, encode, hash } from '../src/canonical.ts';
-import { add, divide, mul, sub } from '../src/int.ts';
-import { commandId, id, jobCommandId } from '../src/id_source.ts';
-import { next, uniform } from '../src/rng.ts';
+import { decode, encode, hash } from '../src/foundation/canonical.ts';
+import { add, divide, mul, sub } from '../src/foundation/int.ts';
+import { commandId, id, jobCommandId } from '../src/foundation/id_source.ts';
+import { next, uniform } from '../src/foundation/rng.ts';
 import { read } from './read.ts';
 
 function fixture(name: string, sha: string) {

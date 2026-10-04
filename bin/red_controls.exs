@@ -99,8 +99,8 @@ controls = [
        ~s({"$defs": {"RedControl": {"anyOf": [{"type": "string"}, {"type": "string"}]}}})
    }, ~w(mix compile --warnings-as-errors --force), "RedControl/anyOf: invalid"},
   {"features: a capability implemented without its feature map cells",
-   %{"kernel/ts/src/rules/skills.ts" => "export {};\n"}, ~w(elixir bin/features.exs --check),
-   "skills@1: missing spec"},
+   %{"kernel/ts/src/mechanics/skills/rule.ts" => "export {};\n"},
+   ~w(elixir bin/features.exs --check), "skills@1: missing spec"},
   {"features: a ruleless capability implemented without its feature map cells",
    %{
      "tmp/red-features.json" =>
@@ -112,6 +112,13 @@ controls = [
    ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"}
 ]
 
+# Refuse occupied paths before any control runs; exclusive creation also closes the race
+# between this preflight and a plant. Cleanup below owns only successfully created files.
+for {_, files, _, _} <- controls, {rel, _} <- files do
+  if File.exists?(Path.join(root, rel)),
+    do: raise("refusing to overwrite red-control file: #{rel}")
+end
+
 failures =
   for {name, files, [cmd | args], expected} <- controls, reduce: 0 do
     acc ->
@@ -119,7 +126,7 @@ failures =
         Enum.map(files, fn {rel, body} ->
           path = Path.join(root, rel)
           File.mkdir_p!(Path.dirname(path))
-          tap(path, &File.write!(&1, body))
+          tap(path, &File.write!(&1, body, [:exclusive]))
         end)
 
       {out, status} =
