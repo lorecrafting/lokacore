@@ -232,8 +232,10 @@ adjacent-sight projection, rule, content artifact or saved state
 
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
-`exits` in compass order, unavailable with `unsupported_capability` while a modal scene
-runs (before passage, position and fare), else `exit_closed`, `exit_locked` (a closed or locked
+`exits` in compass order, first checking Move against the actor's composed ActionSet with
+the exit's direction: `unsupported_capability` when no matching action remains (including
+while a modal scene runs), or `invalid_state` when every matching action's policy fails;
+then `exit_closed`, `exit_locked` (a closed or locked
 barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
 fare) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
 carries `door` (the barrier's short name, its state and the door verbs the actor may use on it
