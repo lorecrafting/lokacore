@@ -63,3 +63,31 @@ Independently verified all **55 inventoried artifact hashes**, exact inventory a
 Independently tallied schema sweep: **244 removals, 161 detected, 83 inherited survivors (56 type, 27 required), zero recorded errors**. The schema/generated diff changes ReplayIds prose only, leaving validation constraints and frozen fixtures intact. The report honestly limits its oracle and inherited coverage; expanding validation is unnecessary B1 scope.
 
 Author evidence uses real deferred-FK COMMIT failure separately from a successfully committed but lost response, plus actual process death. No simulated success is described as a failed COMMIT. Retained logs contain no absolute home paths. B2 lifecycle/UI/sampler integration, native compatibility and complete M1-B acceptance remain outside this review and are not claimed.
+
+## Separate Sol source review
+
+Requested model `gpt-6-sol`, read-only CLI; runtime model identity unverified. Exit 0. Reviewed the same source `a0dfaba044f5cbe004743233fa8e93388e5b6258`. Raw transcript stays private. Answer SHA-256 `a34037ac2c01c631626750f288a3a368406be2e4cc07adbcf31c92b6f9e9a813`; transcript SHA-256 `c6e96663d4ae10ee7d2db3f2c1ee8d936db5443f2f7a46a785e2a71bb8bd1d34`. Exact answer follows; this does not replace the primary verdict above.
+
+```text
+VERDICT: CHANGES REQUIRED
+Reviewed source a0dfaba against base 5fb97d4. Read-only review; I ran no checks.
+
+B1-01 — should-fix — mobile/authority/local-story/session.ts:119
+After action A returns catching_up, a press for different action B reuses A’s retained attempt. If that retry finishes, B’s call receives A’s saved result. While catch-up is retained, compare the new intent with the retained intent and return conflict for a different one; keep A available for completion.
+
+B1-02 — should-fix — kernel/ts/play/replay.ts:8
+A trace containing a valid header and elapsed record, followed by a malformed final line without a newline, drops that line during preflight. Replay executes the elapsed command before the final byte comparison fails. Reject a missing terminal newline before dispatch, or parse and validate the final line.
+
+B1-03 — should-fix — mobile/authority/local-story/elapsed-store.ts:29
+A v2 elapsed table with a missing column makes the SELECT throw instead of classifying the checkpoint as save_corrupt. Opening then offers no typed Start over; during reconciliation it can remain pending. Validate the table shape as checkpoint evidence while keeping operational read failures distinct.
+
+Ponytail Review: no removable machinery identified. The retained 55-artifact/23-control record is author evidence; earlier controls used bytes preceding final fixes. Its observation sweep reports 244 controls, 161 detected and 83 inherited survivors, without claiming full generator or type coverage.
+```
+
+## PM round-one fix scope
+
+The complete open list is primary M1B1-01 plus separate Sol B1-01, B1-02 and B1-03. The same developer receives them together. Review verdicts remain unchanged until scoped independent rechecks.
+
+Under the indexed autonomous mechanics delegation, PM selects an explicit shared-session clarification for B1-01: while an invocation is retained for clock catch-up, a different identified intent returns conflict without releasing the original attempt/reservation or issuing its result as the new action. A matching retry retains the original identity and completion context. Pending unknown-save retries keep the existing documented original-attempt behavior. The implementation amends the active shared Game/save contract and existing B1 adoption accordingly. This is a PM clarification, not an invented owner preference or an independent finding disposition.
+
+Only bounded validated invocation data is snapshotted; ordinary invalid-input admission remains intact. Trusted trace framing is rejected before dispatch. Checkpoint shape validation stays specific to the elapsed table; genuine operational read/rollback failures retain their existing semantics. No general serializer, save validator or native/UI scope is added.
