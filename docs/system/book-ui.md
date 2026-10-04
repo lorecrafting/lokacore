@@ -64,17 +64,21 @@ Live NPC results stay in their original detail, even when an unconfirmed save is
 another page. Ordinary renders or receipt retries do not duplicate committed history. Available
 choices/actions use the freshness token captured when their buttons were drawn.
 
-## Item details and pickup
+## Item details and Take/Drop
 
 Item details expose projected reachable contents and current legal item/container/equipment
 actions, plus local **Leave** back to World. The available brass lantern therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
 pickup event using the original projected item name: **You pick up a brass lantern.** for this
-sampler. This replaces the generic Taken fallback; authored narration takes precedence and
+sampler. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
+returns to World with the original projected name: **You drop a brass lantern.** Held items
+open their same item detail from Equipment & Inventory, with existing offered Drop/other actions
+and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
+These replace generic Taken/Dropped fallbacks; authored narration takes precedence and
 meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
-Retry retains original action/target context and appends a confirmed pickup only once.
+Retry retains original action/target context and appends each confirmed Take/Drop event only once.
 
-Successful Take is the specific exception to item-page retention. Other same-room item actions
+Successful Take/Drop are the specific exceptions to item-page retention. Other same-room item actions
 retain the page while that item remains projected; leaving the room or losing the item closes
 obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
 
