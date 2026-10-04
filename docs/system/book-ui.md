@@ -18,8 +18,8 @@ new implementation or Gate C1 acceptance. Touch acceptance follows
 
 World shows the current place heading, authored description, projected entities and meaningful
 consequences. Standalone exit directions, adjacent-sight listings and redundant navigation/
-Look headings are omitted using structured outcome/TextKeys, never English matching. As a
-bounded PM implementation choice following the inspected Give error, the World event log scopes
+Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
+explicit per-room clearing direction, the World event log scopes
 to the actual room: after a confirmed accepted action changes place, clear the old-room log
 before adding genuine new movement/quest/authored consequences. Attempts, pending/refused/stale
 results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
