@@ -137,9 +137,10 @@ const intentOf = ({ action_key, target_ids, input, token }: Button): Intent => (
 const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
   lines.filter((t) => t.key !== view.place.title.key && t.key !== view.place.description?.key);
 
+export type DetailLine = string | { text: string; event: true };
 type Logs = {
   log: string[];
-  details: Map<string, string[]>;
+  details: Map<string, DetailLine[]>;
   retry?: { button: Button; detail?: string; item?: string };
   narrationId?: string;
   returnWorld?: boolean;
@@ -155,7 +156,7 @@ function restoredLogs(game: Game, text: Say): Logs {
         .join(' ')
     : '';
   const log = restored && !view.choice ? [restored] : [];
-  const details = new Map<string, string[]>();
+  const details = new Map<string, DetailLine[]>();
   if (restored && view.choice) details.set(view.choice.speaker_id ?? 'conversation', [restored]);
   if (view.choice) {
     const id = view.choice.speaker_id ?? 'conversation';
@@ -169,15 +170,39 @@ function detailLines(s: Logs, id: string) {
   return s.details.get(id)!;
 }
 
+function journalChanged(was: GameView, now: GameView, detail: string) {
+  if (
+    !was.entities.some((e) => e.id === detail && e.kind === 'npc') &&
+    !(was.choice && (was.choice.speaker_id ?? 'conversation') === detail)
+  )
+    return false;
+  return (
+    was.journal.length !== now.journal.length ||
+    now.journal.some((q, i) => {
+      const prior = was.journal[i];
+      return (
+        !prior ||
+        q.state !== prior.state ||
+        q.title !== prior.title ||
+        q.journal !== prior.journal ||
+        q.quest.key !== prior.quest.key ||
+        q.quest.cartridge_id !== prior.quest.cartridge_id ||
+        q.quest.cartridge_version !== prior.quest.cartridge_version
+      );
+    })
+  );
+}
+
 function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
   const attempt = s.retry!;
   const now = game.view().view;
   const accepted =
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
-  s.returnWorld = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
+  const itemChanged = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
+  s.returnWorld = itemChanged || accepted?.outcome === 'choice_closed';
   const moved = !!accepted && was.place.id !== now.place.id;
   if (moved) s.log.length = 0;
-  const lines = attempt.detail && !s.returnWorld && !moved ? detailLines(s, attempt.detail) : s.log;
+  const lines = attempt.detail && !itemChanged && !moved ? detailLines(s, attempt.detail) : s.log;
   let retained: ReturnType<Game['lastNarration']>;
   try {
     retained = accepted?.narration?.length ? game.lastNarration() : undefined;
@@ -187,14 +212,16 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const repeated = !moved && retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
   const fallback =
-    s.returnWorld && attempt.item
+    itemChanged && attempt.item
       ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${attempt.item}.`
-      : accepted?.outcome === 'choice_closed' && lines === s.log
+      : accepted?.outcome === 'choice_closed'
         ? ''
         : undefined;
   const line = repeated ? '' : said(reply, text, now, fallback);
   if (line) lines.push(line);
   lines.push(...comings(was, now, text));
+  if (accepted && attempt.detail && journalChanged(was, now, attempt.detail))
+    detailLines(s, attempt.detail).push({ text: 'Journal updated', event: true });
   if (
     now.choice &&
     was.choice?.continuation_id !== now.choice.continuation_id &&

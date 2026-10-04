@@ -1,0 +1,50 @@
+(node:31677) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exits, the look title, place actions and a thing page come from the right buttons (1.491042ms)
+✔ position cycling skips absent offers and retains the offered freshness (0.16425ms)
+✔ a touch link is shown as its label (0.170625ms)
+✔ a choice's answers and Close are their own group, not place actions (0.144583ms)
+✔ the character label says the hp band and no other (0.196958ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.164667ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (0.191958ms)
+✔ the ending line shows once every quest is over (0.160208ms)
+✔ a closed exit's log line and a capitalised title (0.199292ms)
+✔ a move refused at 0 MV says the body is too exhausted (0.459041ms)
+✔ a hint survives a store that throws, for this session (0.407958ms)
+✔ the status line shows the double hour as its earthly branch (0.390417ms)
+(node:31678) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (68.495334ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (29.350458ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (45.664458ms)
+✔ only World position taps directly cycle the offered states with captured freshness (22.070958ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (16.416458ms)
+✔ only confirmed pickup returns World, including a retry from another page (22.302542ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (15.973875ms)
+✔ inventory Drop returns World with one named event only after confirmation (19.122375ms)
+✔ other item actions retain their detail and World consequences (9.962125ms)
+(node:31679) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (2.955125ms)
+✔ journal cues belong only to changed NPC histories (0.486292ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.213916ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.283375ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.198791ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.229375ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.127708ms)
+✔ the log stops growing in one room, its last line the latest answer (1.449875ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.150625ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 747.621292

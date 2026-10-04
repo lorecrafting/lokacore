@@ -10,15 +10,7 @@ export type Thing =
   GameView['entities'][number] | NonNullable<GameView['entities'][number]['contents']>[number];
 export type Page =
   | {
-      kind:
-        | 'contents'
-        | 'character'
-        | 'journal'
-        | 'carrying'
-        | 'map'
-        | 'settings'
-        | 'chapter'
-        | 'position';
+      kind: 'contents' | 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'chapter';
     }
   | { kind: 'thing'; id: string }
   | { kind: 'dialogue'; speaker?: string };
@@ -26,6 +18,18 @@ export type Page =
 export const npcPage = (page: Page | undefined, view: GameView) =>
   page?.kind === 'dialogue' ||
   (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
+
+const POSITIONS = ['standing', 'sitting', 'resting', 'sleeping'];
+const POSITION_ACTIONS = ['stand', 'sit', 'rest', 'sleep'];
+export function nextPosition(position: GameView['position'], actions: Button[]) {
+  const at = POSITIONS.indexOf(position ?? '');
+  if (at < 0) return;
+  for (let step = 1; step < 4; step++) {
+    const next = POSITION_ACTIONS[(at + step) % 4];
+    const offered = actions.find((b) => b.action_key === next);
+    if (offered) return offered;
+  }
+}
 
 // Only projected items: contents are already flattened and filtered for reach by the engine.
 export const things = (v: GameView): Thing[] =>

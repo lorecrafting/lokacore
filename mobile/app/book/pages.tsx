@@ -18,6 +18,7 @@ export const band = (tone: Pool['tone']): string =>
 export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
 export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
 export const note = { ...prose, color: paper.dim };
+export const scrollPaper = { backgroundColor: paper.bg };
 
 export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
   return (
@@ -73,7 +74,7 @@ export function RoomPage(p: {
           title
         )}
       </View>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }}>
+      <ScrollView style={[{ flex: 1 }, scrollPaper]} contentContainerStyle={{ padding: 24 }}>
         <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
         <Here view={p.view} text={p.text} open={p.open} />
         {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
@@ -107,7 +108,7 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
 
 export function Sheet({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <ScrollView contentContainerStyle={{ padding: 24, gap: 8 }}>
+    <ScrollView style={scrollPaper} contentContainerStyle={{ padding: 24, gap: 8 }}>
       <Text style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
         {title}
       </Text>
@@ -127,6 +128,7 @@ export function ThingPage(p: {
 }) {
   return (
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
+      {p.thing?.description && <Text style={prose}>{plain(p.text(p.thing.description))}</Text>}
       {p.thing?.state && <Text style={note}>{cap(p.thing.state)}</Text>}
       {p.actions.length === 0 && p.contents.length === 0 && (
         <Text style={note}>Nothing to do here.</Text>

@@ -1,0 +1,175 @@
+(node:31642) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exits, the look title, place actions and a thing page come from the right buttons (2.231792ms)
+✔ position cycling skips absent offers and retains the offered freshness (0.262666ms)
+✔ a touch link is shown as its label (0.72375ms)
+✔ a choice's answers and Close are their own group, not place actions (0.308417ms)
+✔ the character label says the hp band and no other (0.364083ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.479791ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (0.318291ms)
+✔ the ending line shows once every quest is over (0.381458ms)
+✔ a closed exit's log line and a capitalised title (0.418375ms)
+✔ a move refused at 0 MV says the body is too exhausted (0.228834ms)
+✔ a hint survives a store that throws, for this session (0.211959ms)
+✔ the status line shows the double hour as its earthly branch (0.298042ms)
+(node:31643) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (83.762167ms)
+✖ a postcommit narration read fault preserves the saved result and clears retry context (18.595708ms)
+✖ NPC history has distinct journal events and one confirmed Leave after the scrolling log (33.438875ms)
+✔ only World position taps directly cycle the offered states with captured freshness (27.094416ms)
+✖ an NPC choice retried from the world keeps its result in the original detail (16.998583ms)
+✔ only confirmed pickup returns World, including a retry from another page (22.867208ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (15.0265ms)
+✔ inventory Drop returns World with one named event only after confirmation (18.839417ms)
+✔ other item actions retain their detail and World consequences (10.044792ms)
+✔ reviewer projected descriptions and matching Leave preserve honest old views (7.875834ms)
+(node:31644) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (4.061584ms)
+✖ journal cues belong only to changed NPC histories (1.513167ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.2195ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.298667ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.228458ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.472417ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.200125ms)
+✔ the log stops growing in one room, its last line the latest answer (1.74325ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.17225ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 27
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 857.125625
+
+✖ failing tests:
+
+test at book/polish.test.ts:203:1
+✖ a postcommit narration read fault preserves the saved result and clears retry context (18.595708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"',
+      "You say you'll fetch it. Bram nods toward the path north.",
+  -   {
+  -     event: true,
+  -     text: 'Journal updated'
+  -   }
+    ]
+  
+      at TestContext.<anonymous> (file:///private[review]/mobile/app/book/polish.test.ts:213:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"', "You say you'll fetch it. Bram nods toward the path north." ],
+    expected: [ "You say you'll fetch it. Bram nods toward the path north.", { text: 'Journal updated', event: true } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at book/polish.test.ts:242:1
+✖ NPC history has distinct journal events and one confirmed Leave after the scrolling log (33.438875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"',
+      'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"',
+      'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"',
+      "You say you'll fetch it. Bram nods toward the path north.",
+  -   {
+  -     event: true,
+  -     text: 'Journal updated'
+  -   }
+    ]
+  
+      at TestContext.<anonymous> (file:///private[review]/mobile/app/book/polish.test.ts:284:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"', 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"', 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"', "You say you'll fetch it. Bram nods toward the path north." ],
+    expected: [ 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"', 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"', 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"', "You say you'll fetch it. Bram nods toward the path north.", { text: 'Journal updated', event: true } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at book/polish.test.ts:346:1
+✖ an NPC choice retried from the world keeps its result in the original detail (16.998583ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   "(not confirmed: attempt to write a readonly database; the next press retries Offer to fetch Bram's lantern)",
+      "You say you'll fetch it. Bram nods toward the path north.",
+  -   {
+  -     event: true,
+  -     text: 'Journal updated'
+  -   }
+    ]
+  
+      at TestContext.<anonymous> (file:///private[review]/mobile/app/book/polish.test.ts:369:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ "(not confirmed: attempt to write a readonly database; the next press retries Offer to fetch Bram's lantern)", "You say you'll fetch it. Bram nods toward the path north." ],
+    expected: [ "You say you'll fetch it. Bram nods toward the path north.", { text: 'Journal updated', event: true } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at book/presenter.test.ts:86:1
+✖ journal cues belong only to changed NPC histories (1.513167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'Opened.',
+  -   {
+  -     event: true,
+  -     text: 'Journal updated'
+  -   },
+      'Opened.'
+    ]
+  
+      at TestContext.<anonymous> (file:///private[review]/mobile/app/book/presenter.test.ts:113:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Opened.', 'Opened.' ],
+    expected: [ 'Opened.', { text: 'Journal updated', event: true }, 'Opened.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

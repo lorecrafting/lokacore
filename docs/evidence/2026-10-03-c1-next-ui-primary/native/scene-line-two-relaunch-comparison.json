@@ -1,0 +1,8 @@
+{
+  "head": true,
+  "state_rows_sha256": true,
+  "receipt_metadata_sha256": true,
+  "receipt_count": true,
+  "scene_facts": true,
+  "pin": true
+}

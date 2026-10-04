@@ -28,15 +28,24 @@ const accepted = (outcome: string) =>
   ({ kind: 'saved', decision: { kind: 'accepted', outcome } as DecisionResult }) as Reply;
 const north = { label: 'Go north', action_key: 'move', target_ids: [], input: {} };
 
-// Breaks: a valid pending/refused item reply asks the book to leave detail as if custody changed.
-test('pending and refused Take/Drop retain detail routing and unchanged custody', () => {
-  for (const action of ['take', 'drop']) {
+// Breaks: a pending/refused item or Leave reply leaves detail as if the action committed.
+test('pending and refused Take/Drop/Leave retain detail routing and unchanged custody', () => {
+  for (const action of ['take', 'drop', 'close_choice']) {
     for (const pending of [true, false]) {
       const item = { id: 'lantern', kind: 'item', name: 'item.lantern', actions: [] };
+      const context = action === 'close_choice' ? 'bram' : 'lantern';
       const view = {
         ...(VIEW as object),
         inventory: action === 'drop' ? [item] : [],
         entities: action === 'take' ? [item] : [],
+        ...(action === 'close_choice' && {
+          choice: {
+            continuation_id: 'choice-1',
+            speaker_id: 'bram',
+            prompt: { key: 'choice.prompt' },
+            choices: [],
+          },
+        }),
       } as never;
       const p = presenter({
         ...game(() =>
@@ -50,16 +59,63 @@ test('pending and refused Take/Drop retain detail routing and unchanged custody'
         view: () => ({ view, token: 'view:r:0' }),
         pending: () => pending,
       });
-      p.press({ label: action, action_key: action, target_ids: ['lantern'], input: {} });
+      p.press(
+        {
+          label: action,
+          action_key: action,
+          target_ids: action === 'close_choice' ? [] : ['lantern'],
+          input: action === 'close_choice' ? { continuation_id: 'choice-1' } : {},
+          token: 'view:r:0',
+        },
+        context,
+      );
       assert.equal(p.screen().returnWorld, false);
       assert.equal(p.screen().view, view);
       assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
-      assert.deepEqual(p.screen().log, [
+      assert.deepEqual(p.screen().log, []);
+      assert.deepEqual(p.screen().detail(context).slice(-1), [
         pending
           ? '(pending: not confirmed saved; press any button to retry it)'
           : "You can't do that: not here.",
       ]);
     }
+  }
+});
+
+// Breaks: an item quest consequence is classified as NPC dialogue, or an unchanged journal repeats a cue.
+test('journal cues belong only to changed NPC histories', () => {
+  for (const kind of ['npc', 'item']) {
+    let view = {
+      ...(VIEW as object),
+      entities: [{ id: 'target', kind, name: 'target', actions: [] }],
+    } as never;
+    const p = presenter({
+      ...game(() => accepted('opened')),
+      view: () => ({ view, token: 'view:r:0' }),
+      invoke: () => {
+        view = {
+          ...(view as object),
+          journal: [
+            {
+              state: 'active',
+              title: 'quest.title',
+              journal: 'quest.journal',
+              quest: { key: 'lantern', cartridge_id: 'test', cartridge_version: '1' },
+            },
+          ],
+        } as never;
+        return accepted('opened');
+      },
+    });
+    const button = { label: 'Open', action_key: 'open', target_ids: ['target'], input: {} };
+    p.press(button, 'target');
+    p.press(button, 'target');
+    assert.deepEqual(
+      p.screen().detail('target'),
+      kind === 'npc'
+        ? ['Opened.', { text: 'Journal updated', event: true }, 'Opened.']
+        : ['Opened.', 'Opened.'],
+    );
   }
 });
 

@@ -12,10 +12,11 @@ import {
   conversation,
   initialPages,
   npcPage,
+  nextPosition,
   type Hint,
   type Page,
 } from './model.ts';
-import { ContentsPage, NpcPage, PositionPage, type Section } from './Menu.tsx';
+import { ContentsPage, NpcPage, type Section } from './Menu.tsx';
 import { body, paper } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import {
@@ -64,8 +65,8 @@ export default function Book(p: BookProps) {
     const after = pr.screen();
     let next = pagesAfter(stack, view, after.view);
     if (after.returnWorld && next === stack) next = [];
-    if (next === stack && npcPage(stack.at(-1), view) && !view.scene && !after.view.scene)
-      redraw((n) => n + 1);
+    const inline = npcPage(stack.at(-1), view) || group([b]).position.length > 0;
+    if (next === stack && inline && !view.scene && !after.view.scene) redraw((n) => n + 1);
     else go(next, 1);
   };
   const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1));
@@ -128,6 +129,7 @@ type BottomProps = {
 
 function Bottom(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
+  const position = nextPosition(view.position, p.g.position);
   return (
     <View style={{ padding: 8 }}>
       {!view.scene &&
@@ -151,11 +153,7 @@ function Bottom(p: BottomProps) {
         position={view.position}
         text={text}
         locked={!!view.scene}
-        openPosition={
-          !p.page && !view.scene && p.g.position.length
-            ? () => p.open({ kind: 'position' })
-            : undefined
-        }
+        openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
         pending={pending}
         open={() => p.open({ kind: 'contents' })}
       />
@@ -227,8 +225,6 @@ function Body(p: BodyProps) {
       />
     );
   if (page.kind === 'dialogue') return <NpcDetail {...p} speaker={page.speaker} />;
-  if (page.kind === 'position')
-    return <PositionPage current={view.position} actions={p.g.position} press={p.press} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
   if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
   if (page.kind === 'character')

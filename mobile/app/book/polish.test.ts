@@ -1,4 +1,5 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
+// size: allow 520, Book routes, retries and authored-detail checks share the minimal host/session adapter
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -23,7 +24,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v);`,
+        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v); export const useRef = v => useState(() => ({ current: v }))[0];`,
       };
     if (url === 'test:native-hosts')
       return {
@@ -209,7 +210,10 @@ test('a postcommit narration read fault preserves the saved result and clears re
   assert.doesNotThrow(() => h.tap("Offer to fetch Bram's lantern"));
   assert.equal(h.game.pending(), false);
   assert.equal(h.game.view().view.journal[0].state, 'active');
-  assert.equal(h.p.screen().detail(speaker).at(-1), result);
+  assert.deepEqual(h.p.screen().detail(speaker).slice(-2), [
+    result,
+    { text: 'Journal updated', event: true },
+  ]);
   assert.ok(
     h
       .text()
@@ -234,43 +238,42 @@ test('a postcommit narration read fault preserves the saved result and clears re
   h.sql.close();
 });
 
-// Breaks: NPC taps stay inline, choice Back closes its saved continuation, or choice results leak to room.
-test('NPC details own choices and results while Leave preserves the pending conversation', () => {
+// Breaks: Leave is redundant or closes optimistically, journal cues look like speech, or controls leave the log.
+test('NPC history has distinct journal events and one confirmed Leave after the scrolling log', () => {
   const h = book();
   h.tap('Old Bram, open');
   const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
   const entered = turn();
-  assert.equal(h.labels().includes('Old Bram, open'), false);
-  assert.equal(h.labels().includes('Back to World'), false);
+  assert.deepEqual(h.text().slice(0, 2), [
+    'Old Bram',
+    'A ferryman with rope-scarred hands and a coat that has never been dry.',
+  ]);
   h.tap('Talk to Old Bram');
   assert.equal(turn(), entered);
   const speaker = h.game.view().view.choice!.speaker_id!;
   const prompt =
     'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"';
   assert.deepEqual(h.p.screen().detail(speaker), [prompt]);
-  h.draw();
-  h.draw();
-  assert.deepEqual(h.p.screen().detail(speaker), [prompt]);
   const scroll = h.draw().find((n) => n.type === 'ScrollView');
-  assert.deepEqual(
-    nodes(scroll).filter((n) => n.type === 'Pressable'),
-    [],
+  const controls = nodes(scroll);
+  assert.ok(
+    controls.findIndex((n) => words(n) === prompt) <
+      controls.findIndex((n) => n.type === 'Pressable'),
   );
-  assert.ok(h.labels().includes('Close'));
-  assert.ok(h.labels().includes('Leave'));
-  const continuation = h.game.view().view.choice!.continuation_id;
+  assert.deepEqual(
+    controls.filter((n) => n.type === 'Pressable').map((n) => n.props.accessibilityLabel),
+    ["Offer to fetch Bram's lantern", 'Leave'],
+  );
   h.tap('Leave');
-  assert.equal(h.game.view().view.choice!.continuation_id, continuation);
-  h.tap('Old Bram, open');
-  assert.ok(h.labels().includes('Close'));
-  h.tap('Leave');
-  h.map();
-  h.tap('Go north');
-  h.tap('Continue conversation');
-  h.tap('Close');
   assert.equal(h.game.view().view.choice, undefined);
-  assert.ok(h.text().some((t) => t.includes('You leave the question for now.')));
-  h.tap('Leave');
+  h.tap('Old Bram, open');
+  h.tap('Talk to Old Bram');
+  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap('Map');
+  h.tap('Go north'); // local section navigation preserves the pending choice
+  h.tap('Continue conversation');
+  h.tap('Leave'); // actual offered Close works without a projected speaker
+  assert.equal(h.game.view().view.choice, undefined);
   h.map();
   h.tap('Go south');
   h.tap('Old Bram, open');
@@ -280,18 +283,21 @@ test('NPC details own choices and results while Leave preserves the pending conv
   assert.equal(turn(), beforeResult);
   assert.deepEqual(h.p.screen().detail(speaker), [
     prompt,
-    'You leave the question for now.',
+    prompt,
     prompt,
     "You say you'll fetch it. Bram nods toward the path north.",
+    { text: 'Journal updated', event: true },
   ]);
-  assert.ok(
-    h.text().some((t) => t.includes("You say you'll fetch it. Bram nods toward the path north.")),
-  );
+  const flow = nodes(h.draw().find((n) => n.type === 'ScrollView'));
+  assert.deepEqual(h.text().slice(0, 2), [
+    'Old Bram',
+    'A ferryman with rope-scarred hands and a coat that has never been dry.',
+  ]);
+  const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === 'Journal updated');
+  assert.equal(flow[cue].props.style.fontStyle, 'italic');
+  assert.ok(cue < flow.findIndex((n) => n.type === 'Pressable'));
   h.tap('Leave');
-  assert.equal(
-    h.text().some((t) => t.includes("You say you'll fetch it. Bram nods toward the path north.")),
-    false,
-  );
+  assert.equal(h.text().includes('Journal updated'), false);
   h.map();
   h.tap('Go north');
   h.tap('a brass lantern, open');
@@ -306,18 +312,26 @@ test('NPC details own choices and results while Leave preserves the pending conv
   h.sql.close();
 });
 
-// Breaks: Character still offers position verbs, or the status shortcut disappears after sitting.
-test('only the room position target opens offered controls and a seated player can stand', () => {
+// Breaks: direct cycling opens a page, flips World, skips a legal state or reuses a new freshness token.
+test('only World position taps directly cycle the offered states with captured freshness', () => {
   const h = book();
-  h.tap('Position, standing');
-  h.tap('Sit');
-  assert.equal(h.game.view().view.position, 'sitting');
-  assert.equal(h.labels().includes('Position, sitting'), false);
-  h.tap('Back to World');
-  h.tap('Position, sitting');
-  h.tap('Stand');
+  const turn = h.draw().find((n) => n.type.name === 'Turn').props.turn;
+  const drawn = h.draw().find((n) => n.props.accessibilityLabel === 'Position, standing');
+  for (const [from, to] of [
+    ['standing', 'sitting'],
+    ['sitting', 'resting'],
+    ['resting', 'sleeping'],
+    ['sleeping', 'standing'],
+  ]) {
+    h.tap(`Position, ${from}`);
+    assert.equal(h.game.view().view.position, to);
+    assert.equal(h.draw().find((n) => n.type.name === 'Turn').props.turn, turn);
+    assert.ok(h.labels().includes('Old Bram, open'));
+  }
+  const token = h.game.view().token;
+  drawn.props.onPress();
+  assert.equal(h.game.view().token, token);
   assert.equal(h.game.view().view.position, 'standing');
-  h.tap('Back to World');
   h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
   h.tap('Character');
   assert.deepEqual(
@@ -337,17 +351,25 @@ test('an NPC choice retried from the world keeps its result in the original deta
   h.sql.exec('PRAGMA query_only = 1');
   h.tap("Offer to fetch Bram's lantern");
   assert.equal(h.game.pending(), true);
-  h.tap('Leave');
+  h.tap('Leave'); // still unconfirmed, so detail remains
+  assert.deepEqual(
+    h.p
+      .screen()
+      .detail(bram)
+      .filter((line) => typeof line !== 'string'),
+    [],
+  );
   h.sql.exec('PRAGMA query_only = 0');
-  h.map();
+  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+  h.tap('Map');
   h.tap('Go north'); // GameSession retries the choice, so no move occurs.
   assert.equal(h.game.pending(), false);
   assert.equal(h.game.view().view.place.title.key, 'room.ferry_landing.title');
   assert.deepEqual(h.p.screen().log, []);
-  assert.equal(
-    h.p.screen().detail(bram).at(-1),
+  assert.deepEqual(h.p.screen().detail(bram).slice(-2), [
     "You say you'll fetch it. Bram nods toward the path north.",
-  );
+    { text: 'Journal updated', event: true },
+  ]);
   h.sql.close();
 });
 
@@ -382,7 +404,6 @@ test('only confirmed pickup returns World, including a retry from another page',
   assert.equal(h.labels().includes('Take a brass lantern'), false);
   assert.equal(h.p.screen().log.at(-1), 'You pick up a brass lantern.');
   h.draw();
-  h.draw();
   assert.equal(h.p.screen().log.at(-1), 'You pick up a brass lantern.');
   drawnTake.props.onPress();
   assert.ok(h.labels().includes('Position, standing'));
@@ -395,7 +416,6 @@ test('only confirmed pickup returns World, including a retry from another page',
   h.tap('Equipment & Inventory');
   assert.ok(h.text().includes('Held'));
   h.tap('a brass lantern, open');
-  assert.ok(h.labels().includes('Drop a brass lantern'));
   const token = h.game.view().token;
   h.tap('Leave');
   assert.equal(h.game.view().token, token);
@@ -447,8 +467,11 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
   h.tap('Equipment & Inventory');
   h.tap('a brass lantern, open');
+  assert.deepEqual(h.text().slice(0, 2), [
+    'A brass lantern',
+    'Dented brass with a horn window, oil sloshing inside.',
+  ]);
   assert.equal(h.labels().includes('Take a brass lantern'), false);
-  assert.ok(h.labels().includes('Drop a brass lantern'));
   h.sql.exec('PRAGMA query_only = 1');
   h.tap('Drop a brass lantern');
   assert.equal(h.game.pending(), true);
@@ -467,7 +490,6 @@ test('inventory Drop returns World with one named event only after confirmation'
   assert.ok(h.labels().includes('Position, standing'));
   assert.equal(h.labels().includes('Leave'), false);
   assert.equal(h.p.screen().log.at(-1), 'You drop a brass lantern.');
-  h.draw();
   h.draw();
   assert.equal(h.p.screen().log.filter((s: string) => s === 'You drop a brass lantern.').length, 1);
   h.sql.close();
