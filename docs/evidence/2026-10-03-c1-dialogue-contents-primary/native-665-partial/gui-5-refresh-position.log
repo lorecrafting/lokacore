@@ -1,0 +1,9 @@
+22 button Description: Look, Well Lane, Secondary Actions: Cancel
+23 text Secondary Actions: Cancel, Description: A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east.
+24 button Description: a brass lantern, open, Secondary Actions: Cancel
+25 text Description: You drop a brass lantern., Secondary Actions: Cancel
+26 button Description: Map, Secondary Actions: Cancel, activate, Go east, Go south
+27 button Description: Position, standing, Secondary Actions: Cancel
+28 button Description: Contents, Character, hp 20 of 20, is in perfect health, ma 100 of 100, mv 79 of 82, Secondary Actions: Cancel
+29 text Description: Hour of the Rat, eleven to one, Secondary Actions: Cancel
+33 button Rotate Left

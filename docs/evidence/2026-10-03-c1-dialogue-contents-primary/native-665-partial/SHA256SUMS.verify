@@ -1,0 +1,13 @@
+after-look.json: OK
+gui-1-chapter-dismiss.log: OK
+gui-2-map-tip-dismiss.log: OK
+gui-3-actual-title-look.log: OK
+gui-4-fresh-after-user-change.log: OK
+gui-5-refresh-position.log: OK
+gui-6-world-position.log: OK
+release-build-proof.txt: OK
+release-build-status.json: OK
+release-start.json: OK
+release-start.png: OK
+world-fresh.json: OK
+world-fresh.png: OK
