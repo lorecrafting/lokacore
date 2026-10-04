@@ -10,6 +10,7 @@ Agents: start with [AGENTS.md](AGENTS.md).
 
 - [docs/ROADMAP.md](docs/ROADMAP.md): where the work stands and what comes next.
 - [docs/system/](docs/system/README.md): what the code does now, checked against the code and tests (the source of truth with `protocol/` and the fixtures); [owner decisions](docs/decisions/README.md).
+- [Builder's guide](docs/BUILDERS-GUIDE.md): today's cartridge and blueprint authoring workflow, examples and installed limits.
 - [docs/spec/](docs/spec/README.md): frozen fixtures, release scope, the import record. [docs/archive/](docs/archive/README.md): the specification packet and older records, history.
 - [docs/WORKFLOW.md](docs/WORKFLOW.md): how a slice is built and reviewed; [review records](docs/reviews/README.md).
 - [protocol/](protocol/README.md): the frozen contracts both kernels validate against.

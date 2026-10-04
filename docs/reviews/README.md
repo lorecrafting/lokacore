@@ -203,3 +203,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [CI simulator parallelism: retain the full deterministic workload in two workers](2026-10-04-ci-sim-parallel-review.md): PR #163 at `20d7d116a4adfb99f421d38450849b1812316249`, APPROVE (no findings; 18 tests pass, seven mutations red, serial/worker seeds and aggregates agree, OBS reproduction checked).
 
 - [M5-A entity-specific persisted NPC HP](2026-10-04-m5-a-npc-hp-review.md): PR #165 at `b8d0d5f51fd144b885f8967e333cadb417622445`, APPROVE; no findings.
+- [Blueprint vocabulary and Builder's Guide](2026-10-04-blueprint-guide-review.md): PR #166 at `f0772da`, CHANGES REQUIRED (F1: nine mechanics fragments miss their headings); scoped fix `35893eb`, APPROVE, F1 closed; independent Bell compile and six-command replay pass.
