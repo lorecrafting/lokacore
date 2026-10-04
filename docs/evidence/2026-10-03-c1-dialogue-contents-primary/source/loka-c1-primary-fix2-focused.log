@@ -1,0 +1,67 @@
+(node:58731) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of <private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (46.292459ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (16.298041ms)
+✔ NPC details own choices and results while Leave preserves the pending conversation (28.293208ms)
+✔ only the room position target opens offered controls and a seated player can stand (9.342667ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (8.829917ms)
+✔ only confirmed pickup returns World, including a retry from another page (13.707209ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (8.8725ms)
+✔ inventory Drop returns World with one named event only after confirmation (12.327667ms)
+✔ other item actions retain their detail and World consequences (6.523667ms)
+(node:58732) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of <private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop retain detail routing and unchanged custody (17.849291ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.168083ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.186625ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.148042ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.17475ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.083292ms)
+✔ the log stops growing in one room, its last line the latest answer (7.553709ms)
+✔ the save-error line says a pending start over in words and shows any other message (5.730541ms)
+(node:58733) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of <private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ talk by day offers one button per choice and Close; carry narrates (47.8935ms)
+✔ a second press from the same screen is a stale view and changes nothing (11.942875ms)
+✔ a reopen shows the last committed narration first; a fresh game none (26.838958ms)
+✔ walked away: the choices say why, Close leaves the quest open, the landing resolves it (33.178708ms)
+✔ the log has story words, never a kernel code, across both endings (63.9725ms)
+✔ an NPC who leaves while you stay is logged, and nothing else (35.864666ms)
+✔ closed answers and a stale answer give their reason in words, not their code (27.194625ms)
+✔ the Lantern gate unlocks and opens through its projected exit buttons (21.215666ms)
+(node:58734) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of <private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a scripted session survives a restart and plays on (31.029917ms)
+✔ an invalid press before a save does not make the next id collide after a restart (10.310167ms)
+✔ an unknown COMMIT shows pending, not a success; a restart shows what committed (9.813875ms)
+✔ a pending press is retried with its own id and replays what committed (7.224042ms)
+✔ a same-scope receipt from another allocator does not move the id counter (10.174125ms)
+✔ a failed write is not claimed unsaved; the next press retries it (6.633667ms)
+✔ a read error after a durable commit does not commit the press twice (5.594209ms)
+✔ a confirmed receipt that is not a decision is a conflict and ends the attempt (10.167083ms)
+✔ start over replaces a file that does not open with a fresh game (19.879792ms)
+✔ start over of a damaged identity keeps the file and its old run (11.171791ms)
+✔ a damaged receipt index fails the open with start over, which gives a fresh game (12.366041ms)
+✔ a newer app's save is never started over (6.909417ms)
+✔ a start over whose delete failed can be tried again (4.555375ms)
+✔ an open that fails but not as corrupt is never started over (4.978833ms)
+✔ a start over that fails during play keeps the game and its retry (5.047458ms)
+✔ a pending start over leaves no game to play until it settles (8.929ms)
+✔ the gate tap script ends at its declared state, wherever the kills fall (39.827542ms)
+﹣ the save copied from the phone equals the reference (0.056125ms) # SKIP
+ℹ tests 43
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 628.227084
