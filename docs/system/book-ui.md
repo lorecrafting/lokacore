@@ -106,16 +106,18 @@ An absent pending speaker uses its actual continuation without invented NPC data
 stay in their original detail even when retried elsewhere. Available choices/actions use the
 freshness token captured when drawn; scenes and queued chapters retain precedence.
 
-**Description dependency:** at baseline `665b3ff`, EntityView/ContentView do not project authored
-descriptions. Rendering NPC/item descriptions requires a separately coordinated kernel/GameView
-amendment. Preserve existing cartridge prose; do not derive keys from names or manufacture prose.
+Descriptions use the explicit optional EntityView/ContentView `description` TextKey under the
+[projection amendment](../decisions/pm-decision-description-projection-2026-10-03.md). Current
+NPC/item room, held, worn and reachable-content projections supply their authored binding;
+resolve that key using the existing cartridge text boundary. Older snapshots without the field
+and absent speakers get no invented body, inferred name suffix or substituted room-line text.
 Player descriptions are required when real player entities/descriptions are projected; there is
-currently no player-presence UI. This gap does not block independent journal/Leave/position work.
+currently no player-presence UI.
 
 ## Item details and Take/Drop
 
 Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
-taps resolve the same detail; item pages show the projected name/barrier state, directly nested
+taps resolve the same detail; item pages show the projected name, authored description before actions, barrier state, directly nested
 reachable contents and current legal item/container/equipment actions, plus local **Leave** back to World. The available brass lantern therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
 pickup event using the original projected item name: **You pick up a brass lantern.** for this
