@@ -135,3 +135,19 @@ Reviewed the fix diff and its direct authority/store/session/replay callers with
 All **55 original**, **28 round-one** and **4 correction** artifact hashes and exact inventories verify; all retained verification OK counts agree. Original artifacts and both original inventory files remain byte-identical against a0dfaba. All **23 final current-source manifest** entries match b1795fa after restoration. The eight round-one controls each retain old exit 0/new exit 1 with corresponding old-green/new-failing logs and source-restored hashes matching current source. Inspected the distinction between actual denied-ROLLBACK closure, proven schema damage, genuinely failed COMMIT and successful COMMIT with lost response.
 
 The earlier 73-test run remains historical and is not labeled final-byte proof. Current 53-test author proof and the later legacy-play correction have explicit scopes; the original 21-entry manifest also stays historical. No retained absolute home paths were found. Native/B2 integration and complete M1-B acceptance remain outside scope. Historical verdicts above are preserved; only this section states round-one dispositions.
+
+## Scoped round-one supplemental format check
+
+Source remains `b1795facd8b2e32fdcf076332c80ad769633412b`. PM requested one additional direct-caller scenario in the newly changed recovery guard; no broad review or completed checks were repeated. The active save opening table refuses higher loka-save-vN formats without writes or a new-game offer. The loaded managed-run clarification permits the session's own v1→v2 transition, not arbitrary format changes.
+
+**Supplemental verdict: CHANGES REQUIRED. Open blockers M1B1-R1-01 and M1B1-R1-02; the four original findings remain closed.**
+
+### M1B1-R1-02 — blocker — same-run newer format is overwritten by loaded elapsed recovery
+
+Source location: `mobile/authority/local-story/authority.ts:200` at the same reviewed SHA. With recoveryHeader undefined after a successful opening, the condition accepts any current format as long as the run matches. It does not limit this exception to a supported unchanged format or the legitimate own v1→v2 upgrade.
+
+Independent actual-node:sqlite scenario: open the controlled elapsed host, whose durable header is `loka-save-v2`, run `aaaaaaaa-0000-4000-8000-000000000002`. Update only its format to `loka-save-v3`, preserving that run, then call the already-open Game's newGame. It returns `replaced` and persists `loka-save-v1`, run `aaaaaaaa-0000-4000-8000-000000000004`. The old session therefore destroys a newer app's unsupported save despite the active save table's no-new-game rule. This is not permitted by the narrow own-upgrade clarification.
+
+Restrict the loaded-run exception to supported transitions, refusing the same-run unsupported header without any writes. Extend existing recovery/unsupported-format behavior coverage with this single loaded-elapsed case and literal unchanged header/progress assertions; retain the valid own v1→v2 upgrade and explicit legacy v1 behavior. No new generic format framework is needed.
+
+Only this controlled SQLite scenario ran; no source mutation, suite, dependency install, build, native or owner-save operation occurred. The earlier scoped checks, independent red controls and artifact/hash verification remain as recorded. This corrects the earlier source assessment that newer-format refusal was preserved on all affected direct callers.
