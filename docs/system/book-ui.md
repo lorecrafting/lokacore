@@ -93,5 +93,10 @@ is bounded in this presenter session and adds no persistence schema.
 Attack/skill controls wait until GameView offers them; there are no placeholders or invented
 character data. Live world-clock, reading-time safety and interruption integration remains
 future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
-The reported unsupported-capability movement message is under diagnosis; it does not authorize
-hiding real errors or changing engine/content. Further owner playtest polish precedes mechanics.
+Give needs both item and recipient targets. The current touch item-action projection supplies
+only its item target, so it must not offer or dispatch that incomplete Give. Complete offered
+Give invocations remain valid; engine mechanics are unchanged. Touch recipient selection is an
+explicit carry: implement it when a touch flow can supply a recipient from actual projected
+valid targets, with its own approved scope. The inspected unsupported-capability rejection was
+one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
+rather than hiding errors or clearing the log. Carries remain in the [roadmap](../ROADMAP.md). Further owner playtest polish precedes mechanics.
