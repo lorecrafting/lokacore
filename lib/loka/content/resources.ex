@@ -109,7 +109,7 @@ defmodule Loka.Content.Resources do
 
     for {_, {rel, [], %{"hp" => hp}}} <- defs["npc"],
         d <-
-          if(hp["minimum"] <= hp["start"] and hp["start"] <= hp["maximum"],
+          if(start_in_bounds?(hp),
             do: [],
             else: [diag("RESOURCE_SPEC_INVALID", at(rel, ["hp"]))]
           ) ++
@@ -229,7 +229,7 @@ defmodule Loka.Content.Resources do
   defp spec(rel, k, fields) do
     value = @defaults |> Map.get(k, %{}) |> Map.merge(fields) |> Map.put("key", k)
 
-    ordered = value["minimum"] <= value["start"] and value["start"] <= value["maximum"]
+    ordered = start_in_bounds?(value)
 
     case diags(rel, ["resources", k], fields, value) do
       [] ->
@@ -248,6 +248,9 @@ defmodule Loka.Content.Resources do
         {:error, diags}
     end
   end
+
+  defp start_in_bounds?(value),
+    do: value["minimum"] <= value["start"] and value["start"] <= value["maximum"]
 
   # An authored key is UNKNOWN_FIELD (the name is the key); the name must be a Key.
   defp diags(rel, steps, fields, value, contract \\ "ResourceSpec") do

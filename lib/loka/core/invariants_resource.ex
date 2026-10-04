@@ -70,12 +70,16 @@ defmodule Loka.Core.InvariantsResource do
 
     if spec != nil and spec["regen"] == nil and
          (required == nil or override_row?(row, spec, s["clock"])) do
-      row = row || %{"value" => spec["start"], "at" => 0}
+      legacy_current(row, spec, s["clock"])
+    end
+  end
 
-      if is_integer(row["value"]) and is_integer(row["at"]) do
-        ticks = Integer.floor_div(s["clock"], 3600) - Integer.floor_div(row["at"], 3600)
-        min(spec["maximum"], row["value"] + spec["gain"] * ticks)
-      end
+  defp legacy_current(row, spec, clock) do
+    row = row || %{"value" => spec["start"], "at" => 0}
+
+    if is_integer(row["value"]) and is_integer(row["at"]) do
+      ticks = Integer.floor_div(clock, 3600) - Integer.floor_div(row["at"], 3600)
+      min(spec["maximum"], row["value"] + spec["gain"] * ticks)
     end
   end
 
