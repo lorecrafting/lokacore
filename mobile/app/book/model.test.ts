@@ -11,6 +11,7 @@ import {
   group,
   hint,
   initialPages,
+  nextPosition,
   plain,
   refused,
   said,
@@ -51,6 +52,14 @@ test('exits, the look title, place actions and a thing page come from the right 
     ['take a leather satchel'],
   );
   assert.deepEqual(g.on('bram-1'), []);
+});
+
+// Breaks: direct cycling stops at the unavailable next state instead of the next legal offer.
+test('position cycling skips absent offers and retains the offered freshness', () => {
+  const rest = { label: 'Rest', action_key: 'rest', target_ids: [], input: {}, token: 'view:r:7' };
+  assert.deepEqual(nextPosition('standing', [rest]), rest);
+  assert.equal(nextPosition('standing', []), undefined);
+  assert.equal(nextPosition(undefined, [rest]), undefined);
 });
 
 // Breaks: raw link syntax shown (Ferry Landing's "[mooring post](mooring_post)"), or a greedy
