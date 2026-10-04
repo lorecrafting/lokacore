@@ -180,3 +180,38 @@ PM applies the existing explicit corrupt-file recovery policy: known SQLite NOTA
 The loaded managed session's supported own v1-to-v2 transition is narrow. A newer unsupported format must remain refused without writes or a new game, including a same-run header; malformed-format drift is not a valid replacement merely because its run ID and parsed pin exist. Classify changed malformed witnesses as save_corrupt without writing, while retaining valid different-run stale protection and the supported upgrade path. Preserve explicit v1 authority behavior. All format/header checks stay within the existing recovery boundary, not a new save-validation framework.
 
 Add only the actual uncovered regressions and distinct red controls needed for these three cases, after the old same-layer suite demonstrates the gap. Keep historical inventories unchanged and append honest current-source/final-check evidence. Normal pre-push is the final full check; exact pushed-head CI and concurrent primary/Sol scoped rechecks remain required before merge.
+
+## Primary scoped round-two final recheck
+
+Published source: `2d5b3cd6dddfd825aec63ef6ca8d360f9e328785`. Requirements derived before reading fix code from the remaining findings and explicit Save/B1 recovery clarification:
+
+- A proven SQLite NOTADB/corrupt-page refusal has no invented loaded metadata or header witness. Explicit recovery proves closure, propagates still-proven corruption to the existing confirmed host file-removal path, and keeps genuine operational reads/rollback failures pending.
+- A newly readable header cannot be destroyed under the old unreadable-file offer: supported valid identity is stale; malformed identity is corrupt; newer format remains unsupported, all without writes.
+- Loaded elapsed recovery permits only unchanged supported format or its own same-run v1→v2 upgrade. Same-run v3 refuses without writes. Malformed changed format is corrupt before considering a differing valid run; supported valid replacement stays stale.
+- Preserve the original four dispositions and explicit v1 behavior; scope is changed recovery guards and direct callers only, with independent red controls and honest current/historical evidence verification. B2 integration is outside scope.
+
+**Final scoped verdict: APPROVE. No open findings.** Original M1B1-01/B1-01/B1-02 retain their prior closed dispositions; B1-03's remaining Sol-R1-01 classification and both round-one primary blockers are closed below. Historical verdicts and failure scenarios remain unchanged above.
+
+### Final dispositions at 2d5b3c
+
+- **M1B1-R1-01 closed:** `authority.ts:97` records only actual SQLite opening corruption, without an invented metadata/run/header witness; `:189` guards unloaded metadata. `:194` reconciles to prove closure before current-header inspection. Still-proven corruption is re-raised at `:214` to the existing explicit localSession removal/reopen path. Actual elapsed NOTADB and corrupted-head files now recover to working v2, clock/target 64800, wall10000, remainder0 and a saved Look. Operational SELECT and ROLLBACK denial remain pending. A now-readable valid supported replacement is stale and untouched, including when actual localSession Start over reopens it.
+- **M1B1-R1-02 closed:** `authority.ts:197` refuses higher format before replacement permission. `:202-205` permits only equal supported format or the loaded session's own v1→v2 transition under the same run. Controlled same-run v3, malformed format and v2→v1 drift leave original head, checkpoint and receipt intact; v3 reopens unsupported with no new-game offer. Own v1 upgrade and explicit v1 authority remain covered.
+- **Sol-R1-01 / remaining B1-03 closed:** `authority.ts:209` gives malformed format precedence over valid differing-run classification. The controlled refused missing-column save with changed valid run/pin and malformed format returns save_corrupt without writes; subsequent v3 returns unsupported. Supported valid differing-run replacement stays stale. Typed missing-column handling remains unchanged from the earlier fix.
+
+Only the changed authority/format helper, evidence flag and direct store/transaction/session/driver callers were rechecked. The optional expected-run change in changedRun handles the genuinely absent witness without guessing a UUID; existing callers still pass their known run. No core rewrite or broader review was needed. B2 lifecycle/consumer policy remains outside scope.
+
+Ponytail Review and correctness pass: **Lean already; no complexity finding.** The tiny shared format predicate reuses the existing opening rule at recovery. One evidence flag distinguishes proven corruption from uncertainty; existing reconcile, identity, typed recovery and localSession boundaries do the work. No dependency, general validator, test-only production hook or whole-World work was introduced.
+
+### Final focused checks and independent red controls
+
+- Pinned-toolchain local-story elapsed-driver/session/faults/observe/start_over/recovery/saves/elapsed plus kernel play/transcripts: **exit 0, 114/114 passed**, no skips. Covers original reservation/cyclic admission/catch-up/receipt/completion and replay assertions, real SQLite fault/process-kill behavior, plus all remaining recovery dispositions.
+- Independent mutant 1 swallowed the still-proven closed corruption error. Actual elapsed NOTADB/head-page explicit recovery case failed, **exit 1**.
+- Independent mutant 2 granted same-run loaded permission before format inspection. Actual newer/malformed loaded-format preservation case failed, **exit 1**.
+- Restored exact source bytes in finally blocks. Targeted restored NOTADB/head-page recovery, newly readable replacement with real denied reads/ROLLBACK, newer/malformed header refusal, malformed-format precedence and supported v1 upgrade/closure cases: **exit 0, 5/5 passed**. Recomputed all 24 final-source hashes after restoration: no mismatch.
+- Root PM independently reports normal final author pre-push/push exit 0 and all six CI jobs successful on this exact pushed source, last sim at 14:48:52 UTC. Those are PM verification; no full check_all/pre-push/native/device/owner-save operation was rerun by this reviewer.
+
+### Final evidence audit
+
+All **55 original / 28 round-one / 4 correction / 19 round-two** inventoried artifacts independently hash correctly, inventories agree exactly, and retained verification OK counts match. All earlier artifacts and inventory/verification files are byte-identical against b1795fa. All **24 current source-manifest** entries match the reviewed source. Four round-two controls have paired old exit0/new exit1 logs and restored source hashes matching current authority bytes; their specific edits and failures are retained. No retained absolute home paths were found.
+
+The four controls are distinct: absent-meta protection, proof flag/newly readable authorization, loaded format permission, and malformed-format classification priority. Actual NOTADB and page damage, native denied SELECT/ROLLBACK, genuinely failed COMMIT and lost acknowledgement remain separate behaviors. Earlier focused counts and manifests remain historical; the final 114-test run is independently rerun on this head. No native compatibility, B2 integration or complete M1-B acceptance is claimed.
