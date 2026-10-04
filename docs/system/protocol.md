@@ -3,7 +3,8 @@
 ## Contracts
 
 `protocol/*.schema.json` is a closed JSON Schema 2020-12 subset (`lib/loka/core/contracts/schema.ex:2`);
-anything outside it fails compilation and generation. Both kernels validate values against the
+anything outside it fails compilation and generation. Nullable scalar unions are supported
+for explicit absent custody and unknown death attribution (M5-B). Both kernels validate values against the
 flattened contracts with the same paths and error codes (`lib/loka/core/contracts.ex:69`,
 `kernel/ts/src/foundation/validate.ts:51`; codes in `protocol/error_registry.json`). Every contract's
 `examples` must validate and `protocol/fixtures/invalid.json` must fail with exactly the listed
@@ -308,3 +309,27 @@ measured=false grants no authority. Generic traces without elapsed keep independ
 simulator run identity. No clock is sampled. Capped prefixes/nonfresh/fault-rich segment limits
 remain; byte-identical replay and derived receipt recovery remain required.
 See [save](save.md#durable-elapsed-sessions).
+
+## Durable corpse creation (M5-B)
+
+`entity.create {writer_group, identity}` writes one immutable `entity` target keyed by
+`identity.id` into optional State `created`. The identity is an `EntityIdentity` with death
+origin `{kind: "death", victim_id, event_id, owner_id}`; owner is the body's CharacterId
+for a player corpse and null for an NPC corpse. Shared corpses omit scope/audience.
+The pinned `known_entities` observation maps every room, body, authored entity, detail
+and slot holder to its kind (the body also has `owner_id`); `corpse_templates` maps
+canonical template DefinitionRefs to `player` or `npc`. Neither observation is hashed.
+Creation requires a fresh ID across saved and pinned identities, a matching template
+and known victim/owner, and a contract-valid identity.
+
+The immediately following op must be `entity.transfer` with that ID, `source_id: null`,
+the same writer group and an existing room destination. It writes only containment.
+Absent-source transfer is otherwise refused; duplicate creation/placement, an orphan
+creation or a mismatched group faults the whole sequence. Ordinary transfers preserve
+their existing source, cycle and capacity guards. Independent precondition and
+one-container checks require the same creation/placement proof. Numeric-v1 and prior
+fixtures stay unchanged; the additive `corpse_creation.json` supplement pins this surface.
+
+Adoption and intermediate proposal reads hydrate created entities from their pinned
+templates. Only a changed derived entity map is copied; unrelated state changes
+retain it and the existing capacity map. Authored `entityIds` never gains template entries.

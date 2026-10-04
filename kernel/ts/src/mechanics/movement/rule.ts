@@ -1,3 +1,4 @@
+import { living } from '../death/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
 // A direction outside the compass is invalid_target; a compass direction without an exit here
 // is not_found, and one through a closed or locked barrier (barrier@1) exit_closed or exit_locked
@@ -91,7 +92,8 @@ export function sight(world: World, body: EntityId) {
     const barred = passage(world, room, direction);
     if (barred) return { direction, code: barred };
     const there = world.roomIds[refString(exitTo(room, direction)!)];
-    const at = (id: string): id is EntityId => world.state.containers[id] === there;
+    const at = (id: string): id is EntityId =>
+      world.state.containers[id] === there && living(world, id);
     return { direction, room: there, entities: keys(world.entities).filter(at) };
   });
 }

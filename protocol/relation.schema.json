@@ -68,6 +68,37 @@
             "by"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "death"
+            },
+            "victim_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "event_id": {
+              "$ref": "event.schema.json#/$defs/EventId"
+            },
+            "owner_id": {
+              "anyOf": [
+                {
+                  "$ref": "identity.schema.json#/$defs/CharacterId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "victim_id",
+            "event_id",
+            "owner_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

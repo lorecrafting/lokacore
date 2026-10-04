@@ -1,3 +1,4 @@
+import { living } from '../death/shared.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
 // (mechanics/dialogue/rule.ts), admission (commands/actions.ts) and the GameView (view/view.ts) share: a dialogue's
 // definition, its talk's bound roles, the actor's pending choice, and why a choice of it cannot be
@@ -67,7 +68,8 @@ export function blocked(world: World, row: ChoiceRow): 'not_present' | 'not_owne
   const body = bodyOf(world, row.actor_id);
   const at = (r: RoleBinding) => world.state.containers[r.entity_id];
   const of = (kind: string) => row.roles.filter((r) => world.entities[r.entity_id]?.kind === kind);
-  if (of('npc').some((r) => at(r) !== world.state.containers[body!])) return 'not_present';
+  if (of('npc').some((r) => !living(world, r.entity_id) || at(r) !== world.state.containers[body!]))
+    return 'not_present';
   if (of('item').some((r) => at(r) !== body)) return 'not_owned';
 }
 
@@ -105,7 +107,12 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
 /** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
 const spoken = (world: World, target: EntityId | undefined) =>
   Object.values(world.cartridge.dialogues ?? {})
-    .filter((d) => world.entityIds[refString(d.npc)] === target)
+    .filter(
+      (d) =>
+        target !== undefined &&
+        living(world, target) &&
+        world.entityIds[refString(d.npc)] === target,
+    )
     .sort((a, b) => cmp(a.key, b.key));
 
 /** Whether `target` speaks any dialogue (else its talk is not_found). */
@@ -139,7 +146,7 @@ export function talks(world: World, actor: CharacterId): [string, Offered][] {
   const here = world.state.containers[bodyOf(world, actor)!];
   return Object.values(world.cartridge.dialogues ?? {}).flatMap(({ key, npc, policy }) => {
     const speaker = world.entityIds[refString(npc)]!;
-    if (world.state.containers[speaker] !== here) return [];
+    if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
     const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
     const talk = { key, label: 'action.talk' as TextKey, target, input: [], priority: 0, policy };
     return [[key, { ...talk, command: 'talk' as Key, speaker }]];

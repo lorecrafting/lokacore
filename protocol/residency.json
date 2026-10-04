@@ -51,7 +51,8 @@
     "key": "state_delta_composition",
     "residency": "portable_semantic_foundation",
     "fixtures": [
-      "protocol/fixtures/composition.json"
+      "protocol/fixtures/composition.json",
+      "protocol/fixtures/corpse_creation.json"
     ]
   },
   {
@@ -69,7 +70,9 @@
   {
     "key": "receipts",
     "residency": "authority_host_coordination",
-    "fixtures": ["protocol/fixtures/intent_digest.json"]
+    "fixtures": [
+      "protocol/fixtures/intent_digest.json"
+    ]
   },
   {
     "key": "transactions",

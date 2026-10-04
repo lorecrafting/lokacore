@@ -72,6 +72,7 @@ function lockout(c: Obj): Diagnostic[] {
     grew = false;
     const reach = (set: Set<string>, ref: string) => !set.has(ref) && (set.add(ref), (grew = true));
     for (const [ref, i] of items) {
+      if (i.location.in === 'template') continue;
       const at = refString(i.location[i.location.in]);
       const inside = i.location.in === 'item' && keys.has(at) && open(c.items[at].barrier);
       if ((i.location.in === 'room' && rooms.has(at)) || inside) reach(keys, ref);

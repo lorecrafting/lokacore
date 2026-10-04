@@ -266,3 +266,16 @@ a higher loka-save-vN returns unsupported_save_format without writes/new game; m
 returns save_corrupt. For changed refused-opening witnesses, malformed format is classified
 before valid differing run/pin; a valid differing supported run remains stale. This is a bounded
 recovery-header check, not a general save validator. Explicit v1 authority behavior stays intact.
+
+## Created corpse rows (M5-B)
+
+State `created` identity rows and containment use the existing changed-row transaction
+with head, RNG and receipt. No corpse table or separate commit exists. Receipt replay
+allocates nothing; subsequent genuine fatal occurrences preserve previous corpses.
+Load/reconciliation validates identity shape, pinned corpse template, known victim and
+owner, ID collisions, room custody and reachable acyclic custody before hydrating derived
+entities. Invalid rows are `save_corrupt`, without repairs or skipped possessions.
+Forced death custody does not apply a voluntary carrying ceiling. Unknown COMMIT
+continues fencing input and elapsed work until the existing reconciliation confirms
+all prior or all next rows. The API1.5 content requirement and exact release pin are the
+compatibility gates; this addition uses existing save-v2 rows without a format bump.

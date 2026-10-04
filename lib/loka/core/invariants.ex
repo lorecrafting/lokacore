@@ -27,13 +27,9 @@ defmodule Loka.Core.Invariants do
   }
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
   @spec check(String.t(), map()) :: boolean()
-  def check("one_container_per_item", %{"state" => s, "result" => r}) do
-    moved = moved(r)
-    ids = Enum.map(moved, &elem(&1, 0))
-    containers = Map.get(s, "containers", %{})
-
-    ids == Enum.uniq(ids) and
-      Enum.all?(moved, fn {e, c} -> is_binary(c) and Map.has_key?(containers, e) end)
+  def check("one_container_per_item", %{"state" => s, "result" => r} = observation) do
+    ops = get_in(observation, ["delta", "ops"]) || []
+    Loka.Core.InvariantsCreation.custody?(s, ops, r)
   end
 
   def check("containment_acyclic", %{"state" => s, "result" => r}) do
@@ -99,7 +95,8 @@ defmodule Loka.Core.Invariants do
   end
 
   defp preconditions_hold?(s, ops, result) do
-    if not is_integer(s["clock"]), do: false, else: replay_preconditions(s, ops, result)
+    is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
+      replay_preconditions(s, ops, result)
   end
 
   defp replay_preconditions(s, ops, result) do
@@ -253,6 +250,7 @@ defmodule Loka.Core.Invariants do
   # Each op reads one value of its target and leaves another: the fact value, the container,
   # the quest state, the continuation or job status, the clock.
   defp link(%{"op" => "fact.assign"} = op), do: {op["expected"], op["value"]}
+  defp link(%{"op" => "entity.create", "identity" => i}), do: {nil, i}
   defp link(%{"op" => "entity.transfer"} = op), do: {op["source_id"], op["destination_id"]}
   defp link(%{"op" => "quest.activate"}), do: {nil, "active"}
   defp link(%{"op" => "quest.transition"} = op), do: {op["from"], op["to"]}
@@ -270,6 +268,9 @@ defmodule Loka.Core.Invariants do
     with nil <- get_in(s, ["facts", Compose.key(Compose.target(op))]),
          do: get_in(s, ["fact_defaults", Compose.key(op["fact"])])
   end
+
+  defp initial(%{"op" => "entity.create", "identity" => i}, s),
+    do: get_in(s, ["created", i["id"]])
 
   defp initial(%{"op" => "entity.transfer", "entity_id" => e}, s),
     do: get_in(s, ["containers", e])

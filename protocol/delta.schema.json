@@ -169,6 +169,26 @@
           "additionalProperties": false
         },
         {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "entity.create"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "identity": {
+              "$ref": "relation.schema.json#/$defs/EntityIdentity"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "identity"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Conserved transfer. Target: containment (entity_id). Preconditions: the entity is in source_id; destination_id is not the entity or inside it; destination capacity holds (03 §23: one container per entity).",
           "type": "object",
           "properties": {
@@ -182,7 +202,14 @@
               "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "source_id": {
-              "$ref": "identity.schema.json#/$defs/EntityId"
+              "anyOf": [
+                {
+                  "$ref": "identity.schema.json#/$defs/EntityId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
             },
             "destination_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
@@ -855,6 +882,22 @@
           "required": [
             "kind",
             "barrier"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "entity"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "entity_id"
           ],
           "additionalProperties": false
         }

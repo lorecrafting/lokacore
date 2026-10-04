@@ -1,3 +1,4 @@
+import { living } from '../mechanics/death/shared.ts';
 // The player's GameView (04 §14; 00 §4.10), read from a World.
 import type {
   AdvertisedAction,
@@ -92,7 +93,7 @@ function within(
   worn?: (id: string) => AdvertisedAction[],
 ): EntityView[] {
   return Object.entries(world.entities)
-    .filter(([id]) => world.state.containers[id] === holder)
+    .filter(([id]) => world.state.containers[id] === holder && living(world, id))
     .map(([id, e]) => {
       const scope = holder === world.body ? 'inventory' : SCOPE[e.kind];
       const contents = e.kind === 'item' && !worn ? inside(world, actions, id, scope) : [];
@@ -110,7 +111,11 @@ const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
 // its container verbs (ContentView; c1-locks).
 function inside(world: World, actions: Lists, box: string, scope: string): ContentView[] {
   const under = (id: string) => {
-    for (let c = world.state.containers[id]; opened(world, c); c = world.state.containers[c])
+    for (
+      let c = world.state.containers[id];
+      opened(world, c, world.body);
+      c = world.state.containers[c]
+    )
       if (c === box) return true;
     return false;
   };

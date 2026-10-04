@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.7'
+VERSION = '0.0.8'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -17,8 +17,8 @@ def quest_state(state):
     return dict(op='quest_state', quest=ref('quest', 'lantern'), state=state)
 def definition(name, **parts):
     return dict(key=name, **parts)
-caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.4', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior', 'death'], 1)
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.5', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
 v['facts'] = {
@@ -47,6 +47,8 @@ for name, grams in [('lantern', 2000), ('wool_cloak', 3000), ('brass_key', 100),
     v['items'][key('item', name)]['mass_grams'] = grams
 v['items'][key('item', 'trunk')]['barrier'] = ref('barrier', 'trunk_lid')
 v['items'][key('item', 'wool_cloak')]['slot'] = 'cloak'
+for name in ['player_corpse', 'rat_corpse']:
+    v['items'][key('item', name)] = definition(name, keywords=['corpse', name], short=f'item.{name}.short', room_line=f'item.{name}.room', description=f'item.{name}.description', location=dict(**{'in': 'template'}), mass_grams=0)
 v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'), daily_schedule={'6': ref('room', 'ferry_landing'), '19': ref('room', 'drowned_lantern')})}
 # Five authored finite passive rats; numeric values are literal PM-approved inputs.
 for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5']:
@@ -85,6 +87,7 @@ v['world'] = {'bands': [
 ]}
 v['world']['carry'] = dict(max_grams=12000)
 v['world']['movement'] = dict(cost=dict(resource=ref('resource', 'mv'), amount=1))
+v['world']['death'] = dict(player_corpse=ref('item', 'player_corpse'), npc_corpse=ref('item', 'rat_corpse'), shrine=ref('room', 'chapel_nave'), restore=dict(hp=10, mv=100))
 v['text'] = json.loads(Path('cartridges/ashmere_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()

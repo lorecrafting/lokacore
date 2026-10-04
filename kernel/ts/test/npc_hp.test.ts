@@ -11,7 +11,7 @@ import { admit, adopt } from '../src/runtime/proposal.ts';
 import { adjust, level, pay, resourceRef, resourceSpec } from '../src/mechanics/resource.ts';
 import { read } from './read.ts';
 
-const kat = read('protocol/fixtures/cartridge_sampler_hash.json');
+const kat = read('protocol/fixtures/sampler_v007_hash.json');
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
 const command = {
   id: 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b' as Command['id'],

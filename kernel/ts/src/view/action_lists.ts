@@ -58,6 +58,7 @@ export function lists(world: World, actor: CharacterId) {
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
       .filter((a) => fits(a) && here(a) && !MODAL.includes(a.command))
+      .filter((a) => movable(world, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .map((a) => advertise(world, actor, a, take, id, scope));
@@ -142,5 +143,13 @@ function usable(world: World, actor: CharacterId, a: Offered, site: barrier.Site
   return (
     !refusal(world, payload, steps, a.key) &&
     typeof barrier.transition(world, actor, a.command, site, steps) !== 'string'
+  );
+}
+
+function movable(world: World, a: Offered, id?: string): boolean {
+  return (
+    !id ||
+    !world.state.created?.[id] ||
+    !['take', 'drop', 'give', 'wear', 'remove'].includes(a.command)
   );
 }

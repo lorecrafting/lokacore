@@ -994,6 +994,9 @@
             "max_grams"
           ],
           "additionalProperties": false
+        },
+        "death": {
+          "$ref": "cartridge.schema.json#/$defs/DeathSettings"
         }
       },
       "additionalProperties": false,
@@ -1051,6 +1054,74 @@
             "key": "lantern_resolved"
           },
           "outcome": "carry"
+        }
+      ]
+    },
+    "DeathSettings": {
+      "type": "object",
+      "properties": {
+        "player_corpse": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "npc_corpse": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "shrine": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "restore": {
+          "type": "object",
+          "properties": {
+            "hp": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "mv": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "hp",
+            "mv"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "player_corpse",
+        "npc_corpse",
+        "shrine",
+        "restore"
+      ],
+      "additionalProperties": false,
+      "description": "Fixed corpse templates, same-body return room and pool restoration; requires death@1 and kernel API1.5 (docs/system/cartridge.md).",
+      "examples": [
+        {
+          "player_corpse": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "player_corpse"
+          },
+          "npc_corpse": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "rat_corpse"
+          },
+          "shrine": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "shrine"
+          },
+          "restore": {
+            "hp": 10,
+            "mv": 100
+          }
         }
       ]
     }

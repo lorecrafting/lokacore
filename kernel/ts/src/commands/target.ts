@@ -1,3 +1,4 @@
+import { living } from '../mechanics/death/shared.ts';
 // Target resolution (21 §7 TargetSpec / TargetResolution; 04 §17-§18; 14 §R5): the authority's
 // Search over what a player names, run before any Command is built, so a Command carries only
 // the resolved id and never the player's words.
@@ -58,7 +59,7 @@ export function resolve(world: World, actor: CharacterId, text: string): TargetR
  */
 export function present(world: World, actor: CharacterId, id: string): boolean {
   const body = bodyOf(world, actor);
-  if (body === undefined) return false;
+  if (body === undefined || !living(world, id)) return false;
   const here = world.state.containers[body];
   const d = world.details[id];
   return d ? d.room === here : [here, body].includes(world.state.containers[id]);

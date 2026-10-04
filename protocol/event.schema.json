@@ -478,6 +478,55 @@
           ],
           "additionalProperties": false,
           "description": "The last continue ends a scene; causal position 2 leaves fact_changed at 1. No scene_started in the modal subset."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "entity_died"
+            },
+            "victim_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "room_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "killer_id": {
+              "anyOf": [
+                {
+                  "$ref": "identity.schema.json#/$defs/EntityId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "credited_character_id": {
+              "anyOf": [
+                {
+                  "$ref": "identity.schema.json#/$defs/CharacterId"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "corpse_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "victim_definition": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "type",
+            "victim_id",
+            "room_id",
+            "killer_id",
+            "credited_character_id",
+            "corpse_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

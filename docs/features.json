@@ -511,5 +511,31 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "C1 c1-scenes-modal: modal narrate/await_ack/end; story-point start once, persisted line, continue-only admission and scene_ended"
+  },
+  "death": {
+    "spec": "docs/system/mechanics.md death@1; docs/system/protocol.md durable corpse creation (M5-B)",
+    "contracts": [
+      "EntityIdentity",
+      "EntityOrigin",
+      "DeltaOp",
+      "MutationTarget",
+      "DeathSettings",
+      "EventPayload"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/death/sequence.ts",
+      "kernel/ts/src/runtime/created.ts",
+      "kernel/ts/src/content/cartridge_death.ts",
+      "lib/loka/content/death.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/corpse_creation.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "one_container_per_item",
+      "containment_acyclic"
+    ],
+    "implemented_in": "M5-B prerequisite corpse/shrine foundation; live lethal producer and native consumer proof carried to M6"
   }
 }
