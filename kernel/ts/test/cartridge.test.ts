@@ -1,6 +1,7 @@
 // Cartridge loader (protocol/cartridge.schema.json DiagnosticCode). Expected values are the
 // frozen fixtures, read with JSON.parse, and hand-written literals; never the loader's output.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { loadCartridge, type Installed } from '../src/content/cartridge.ts';
 import { read } from './read.ts';
@@ -25,6 +26,48 @@ const diagnostic = (code: string, path: string, data: object) => ({
   data,
   suggested_capabilities: [],
 });
+const sorted = (v: any): any =>
+  Array.isArray(v)
+    ? v.map(sorted)
+    : v && typeof v === 'object'
+      ? Object.fromEntries(
+          Object.keys(v)
+            .sort()
+            .map((k) => [k, sorted(v[k])]),
+        )
+      : v;
+const withFactType = (value_type: object) => {
+  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
+  cartridge.facts['ashmere_hello@0.0.1:fact/village_arrived'].value_type = value_type;
+  const text = JSON.stringify(sorted(cartridge));
+  const content_hash = createHash('sha256').update(text).digest('hex');
+  return loadCartridge(
+    bytes(JSON.stringify({ cartridge: sorted(cartridge), content_hash })),
+    installed,
+  );
+};
+
+// Breaks: an artifact bypasses the compiler and boots with an impossible enum default.
+test('the loader rejects an enum fact default outside its values', () =>
+  assert.deepEqual(withFactType({ type: 'enum', values: ['missing'], default: 'rescued' }), {
+    ok: false,
+    diagnostic: diagnostic(
+      'FACT_DEFAULT_INVALID',
+      '.cartridge.facts["ashmere_hello@0.0.1:fact/village_arrived"].value_type.default',
+      {},
+    ),
+  }));
+
+// Breaks: an artifact bypasses the compiler and boots with an out-of-bounds numeric default.
+test('the loader rejects a bounded integer fact default outside its bounds', () =>
+  assert.deepEqual(withFactType({ type: 'int', minimum: 0, maximum: 1, default: 2 }), {
+    ok: false,
+    diagnostic: diagnostic(
+      'FACT_DEFAULT_INVALID',
+      '.cartridge.facts["ashmere_hello@0.0.1:fact/village_arrived"].value_type.default',
+      {},
+    ),
+  }));
 
 // Breaks: the hash is taken over other bytes (the artifact, a re-ordered encoding), or a valid
 // artifact is rejected by some stage.
