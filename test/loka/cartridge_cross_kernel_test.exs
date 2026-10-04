@@ -214,7 +214,7 @@ defmodule Loka.CartridgeCrossKernelTest do
     tmp_dir: tmp
   } do
     out = Path.join(tmp, "carrying.artifact.json")
-    kat = JSON.decode!(File.read!("protocol/fixtures/cartridge_sampler_v006_hash.json"))
+    kat = JSON.decode!(File.read!("protocol/fixtures/sampler_v006_hash.json"))
     File.write!(out, ~s({"cartridge":#{kat["canonical"]},"content_hash":"#{kat["sha256"]}"}))
     input = Path.join(tmp, "api-peer.json")
 
