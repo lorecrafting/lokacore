@@ -255,10 +255,13 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
     'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"';
   assert.deepEqual(h.p.screen().detail(speaker), [prompt]);
   const scroll = h.draw().find((n) => n.type === 'ScrollView');
+  const controls = nodes(scroll);
+  assert.ok(
+    controls.findIndex((n) => words(n) === prompt) <
+      controls.findIndex((n) => n.type === 'Pressable'),
+  );
   assert.deepEqual(
-    nodes(scroll)
-      .filter((n) => n.type === 'Pressable')
-      .map((n) => n.props.accessibilityLabel),
+    controls.filter((n) => n.type === 'Pressable').map((n) => n.props.accessibilityLabel),
     ["Offer to fetch Bram's lantern", 'Leave'],
   );
   h.tap('Leave');
@@ -292,7 +295,7 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   ]);
   const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === 'Journal updated');
   assert.equal(flow[cue].props.style.fontStyle, 'italic');
-  assert.ok(cue < flow.findIndex((n) => n.props.accessibilityLabel === 'Leave'));
+  assert.ok(cue < flow.findIndex((n) => n.type === 'Pressable'));
   h.tap('Leave');
   assert.equal(h.text().includes('Journal updated'), false);
   h.map();
