@@ -190,3 +190,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [M1-B2 lifecycle and confirmed Book consumer](2026-10-04-m1-b2-lifecycle-review.md): PR #155 at `cca22b6`, fresh independent primary APPROVE; no findings, two independent mutants red/exactly restored, focused App/Book/SQLite and compiler/parity controls green; all 69 evidence hashes/all 11 final native production hashes match.
 
 - [Legend mechanics reconciliation](2026-10-04-legend-mechanics-reconciliation-review.md): PR #136 at `549d707`, primary APPROVE; primary scoped round-one at `7e9313e`, APPROVE, current-status correction verified; separate Sol review/disposition remains distinct in the record.
+
+- [Primitive composition guide and dated audit](2026-10-04-primitive-composition-review.md): PR #158 at `9ba477f`, independent docs-only APPROVE; bounded consumer permission, 112-row inventory, original/public evidence integrity and static-proof limits verified; no findings.
