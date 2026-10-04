@@ -263,6 +263,50 @@ not an explicit owner response to the chapter brief's Q4.
 Ruleless: a committed narration line binds its participants' EntityIds at commit (recipe
 narration and dialogue choices above); no `narration.emit` consequence, no acknowledgement.
 
+## scene@1 (`rules/scene.ts`)
+
+Dated implementation amendment, 2026-10-03: the installed subset of archived 06
+§33–§37 and 21 §3.6 is a modal text sequence in `current_world`, as needed by 00a §9
+and the approved [C1 plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md).
+A SceneDefinition has `on {story_point, outcome}`, `control: modal`, and n ≥ 1
+`narrate {text}` steps followed by `await_ack`, then `end`. It is not skippable and
+never replays. Other control modes, overlays/dreams, dialogue/choice, role bindings,
+checkpoints and consequence beats, and a quest objective on `scene_ended` remain later.
+
+For scene key k, the compiler adds `<id>@<ver>:fact/scene_<k>` exactly as follows
+(only `<k>` and `<n>` substitute; `1..n` is literal, n counts narrates):
+
+```json
+{"key": "scene_<k>", "version": 1, "value_type": {"type": "int", "minimum": -1, "maximum": <n>, "default": 0}, "scopes": ["player"], "meaning": "Scene <k>'s line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it."}
+```
+
+The fact is absent until changed: 0 means not started, 1..n the line shown, −1 ended.
+Content may read it but cannot author or assign it ([compiler](cartridge.md#compiler)).
+At `story_point_reached` matching `on`, the proposal's reaction delivery appends a
+scene start after authored reactions, in scene-key order: `when` fact equals 0,
+`apply` fact := 1. This reuses the existing delivery budgets, FIFO and writer groups;
+scene starts require scene@1 alone, never reaction@1. There is no `scene_started`.
+The guarded start is part of the triggering command's atomic proposal, after its
+choice closes. Duplicate delivery or receipt retry never restarts an ended scene.
+
+While the actor's scene fact is in 1..n, the resolved ActionSet is replaced by only
+`continue` (target none, empty input, `action.continue`). Normal admission refuses
+all other commands with `unsupported_capability`, through invocation or direct
+Command alike, before effects or clock changes. Every exit advertises the same
+refusal. The GameView includes `scene {scene, line, index, count}` exactly while
+running; line is the current narrate TextKey, index is one-based and count is n.
+
+`continue` at i < n returns `continued`, one fact.assign `expected: i, value: i+1`,
+no rule event. At n it returns `ended`, one assign `expected: n, value: -1`, and
+`scene_ended {scene}` at position 2, leaving position 1 for the host's fact_changed.
+The final continue acknowledges the last line and runs end: await_ack adds no wait.
+All continuation uses the command's actor. No running scene is the rule's defensive
+`invalid_state`; ordinary admission refuses continue as `unsupported_capability`.
+SCENE-01 is covered by a headless authority reopen at line 2; Simulator rendering
+and kill evidence waits for c1-touch. SCENE-03 and QUESTSCENE-01's start-once half
+are in this slice. A stale fresh-id double tap can advance an unseen line; a later
+line-bearing continue command will guard that when c1-touch establishes the input.
+
 ## reaction@1 (`kernel/ts/src/reaction.ts`)
 
 Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its fact or
@@ -270,7 +314,8 @@ Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its 
 proposal so far at the event's logical time; when it holds, its `apply` is a sequence of
 `fact.assign` at the actor's scope as its own writer group (`:44`); the `fact_changed` they
 emit trigger further rules, FIFO, to quiescence, within the deliveries, `reaction_depth` and
-`query_steps` budgets.
+`query_steps` budgets. Matching [scene starts](#scene1-rulesscenets) follow authored
+rules in scene-key order, using the same delivery machinery.
 
 ## schedule@1, behavior@1, calendar@1 (`rules/schedule.ts`, `kernel/ts/src/behavior.ts`)
 
@@ -294,3 +339,7 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`behavio
 - **Composes-with**: a choice composes quest and containment, a recipe composes check, a job
   composes movement (`decision.ts:179`); facts, containment, barriers, resources and the clock
   are the shared vocabulary every mechanic reads through the same policy leaves.
+  Scene starts read story_point_reached and write only their own facts; modal ActionSet
+  replacement restricts position, equipment and door verbs without edits to those rules.
+  Policies/reactions may read scene facts. The one direct coupling, reaction → scene,
+  is limited to event start delivery until a second capability needs this hook.

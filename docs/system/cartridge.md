@@ -11,7 +11,7 @@ A cartridge source is a directory of JSON files (`lib/loka/content.ex:2`):
 | `text.json` | the TextCatalog: key → string |
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), each actor's value its `start` ([mechanics.md](mechanics.md#attributes1); `lib/loka/content/resources.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key` |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/` | one file per definition, `<key>.json`, the frozen shape without `key` |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). Any other
@@ -41,6 +41,11 @@ rule writes it."}`, and `fact@1` in its requires and lock, since its rule's `fac
 `fact_changed` (`lib/loka/content/position.ex`). Without position@1 a fact named `position` is
 the cartridge's own. The compiler validates authored capability versions before adding this
 dependency, and includes it in the effective requirements before checking content ownership.
+
+A cartridge requiring scene@1 gets one engine FactSpec per scene and fact@1, as
+specified byte-exactly in [scene@1](mechanics.md#scene1-rulesscenets). The compiler
+validates authored requirements before adding this dependency. The source scene key
+is at most 58 characters, so `scene_<key>` remains a Key.
 
 What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 `protocol/cartridge.schema.json` DiagnosticCode):
@@ -80,6 +85,20 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   (`facts.facts.position`) and a `fact.assign` of it in a recipe outcome, a reaction's `apply` or
   a dialogue choice are `RESERVED_FACT` (at the fact, `recipes/nap.outcomes.success.sequence[0].fact`);
   reading it is allowed;
+- scenes: each `on.story_point` resolves and its `on.outcome` names one of that point's
+  keys; every narrate text is catalogued (`UNRESOLVED_REFERENCE`, data.target the full
+  story-point reference string, outcome key or text key). Steps must be narrate×n
+  (n ≥ 1), await_ack, end: the first misplaced `.steps[i].type` is SCHEMA_VIOLATION
+  with data.error `not_in_enum`; closed SceneStep schema rejects unknown step types
+  as `unknown_variant` before this ordered check. No steps minimum count preempts it.
+  Two scenes naming the same story-point/outcome are DUPLICATE_DEFINITION, data `{}`,
+  at each colliding scene's `on` in the compiler (`scenes/<key>.on`), and at the first
+  collision in DefinitionRefString order in the loader
+  (`.cartridge.scenes["<id>@<ver>:scene/<key>"].on`). Under scene@1, an authored
+  `scene_<key>` fact (`facts.facts.scene_<key>`) and each recipe, reaction or dialogue
+  fact.assign of it are RESERVED_FACT at the same write-site paths as position;
+  fact_compare and reaction on.fact reads remain legal. The loader rejects missing or
+  noncanonical engine Scene FactSpecs as RESERVED_FACT at their fact map key;
 - story points: each outcome's trigger names a dialogue and one of its choices, no two outcomes
   one site, in a dialogue that resolves a quest (`OUTCOME_MISMATCH`;
   `lib/loka/content/dialogues.ex:2`);
@@ -133,11 +152,11 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 `INSTALLED` (`kernel/ts/src/world.ts:65`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
-`dialogue`, `equipment`, `position` (`:34`); without a command, so without a rule, `fact`, `policy`,
+`dialogue`, `equipment`, `position`, `scene` (`:34`); without a command, so without a rule, `fact`, `policy`,
 `inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
 `target_resolution`, `attributes` (`:50`). The [feature map](../features.gen.md) is the authority for what
 each one implements and where; `bin/features.exs --check` fails when a rule module exists
-without its row. The 16 registered capabilities it marks `not yet` may be named by a
+without its row. The 15 registered capabilities it marks `not yet` may be named by a
 cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.
 
 ## Text
@@ -148,6 +167,11 @@ replay never resolve a name again. Catalog strings carry the touch links above; 
 model strips them to prose until details are tappable (`mobile/app/book/model.ts:25`).
 
 ## Development cartridges
+
+`cartridges/ashmere_scene` exercises [modal scenes](mechanics.md#scene1-rulesscenets):
+three narrate lines start on `lantern_resolved/carry`; a fact_changed reaction hears
+that the scene ended. Its source uses short story-point and fact references, and has
+an independent known answer; existing cartridges remain unchanged.
 
 `cartridges/ashmere_chapters` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewts):
 opening Landing, Dusk after either lantern story-point outcome, and Reeds after `carry`,
