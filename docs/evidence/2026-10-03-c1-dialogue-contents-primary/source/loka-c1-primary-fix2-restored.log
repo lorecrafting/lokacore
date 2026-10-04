@@ -1,0 +1,21 @@
+(node:58904) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of <private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (43.051125ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (16.01975ms)
+✔ NPC details own choices and results while Leave preserves the pending conversation (27.852291ms)
+✔ only the room position target opens offered controls and a seated player can stand (9.436959ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (8.77625ms)
+✔ only confirmed pickup returns World, including a retry from another page (13.42175ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (9.378625ms)
+✔ inventory Drop returns World with one named event only after confirmation (12.884459ms)
+✔ other item actions retain their detail and World consequences (6.1765ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 485.611333

@@ -135,9 +135,9 @@ function readerActions(
   };
 }
 
-// One line: the time as its earthly branch, then the character button, which shows the body's
+// One line: the time as its earthly branch, then the resource button, which shows the body's
 // resources coloured by band when GameView carries them (the room-view status line, an owner-
-// ruled departure) and opens the Character page, the way to Journal, Carrying and Settings.
+// ruled departure) and opens Contents, the index of the existing book sections.
 type StatusProps = {
   time: number;
   resources?: readonly Pool[];
@@ -167,7 +167,7 @@ export function Status(p: StatusProps) {
       <Pressable
         disabled={p.locked}
         accessibilityRole="button"
-        accessibilityLabel={p.resources ? said(p.resources, p.text) : 'character'}
+        accessibilityLabel={p.resources ? `Contents, ${said(p.resources, p.text)}` : 'Contents'}
         onPress={p.open}
         style={{ minHeight: 44, justifyContent: 'center' }}
       >

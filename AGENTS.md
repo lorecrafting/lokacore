@@ -12,10 +12,10 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 
 ## Specification (source of truth)
 
-- [docs/system/](docs/system/README.md), [protocol/](protocol/README.md) and the conformance
-  fixtures say what exists. A change amends `docs/system` first, then the code, in one PR
-  citing the governing section (or an archived plan). If they disagree,
-  stop and ask ([known differences](docs/system/DIFFERENCES.md)).
+- [docs/system/](docs/system/README.md), [Book UI](docs/system/book-ui.md),
+  [protocol/](protocol/README.md) and conformance fixtures define the system.
+  Amend `docs/system` before code, in one PR citing the governing section or archived plan.
+  If they disagree, stop and ask ([known differences](docs/system/DIFFERENCES.md)).
 - [Owner rules in force](docs/system/owner-rules.md): a new decision adds its record to
   [docs/decisions/](docs/decisions/README.md) and a line there.
 - [docs/archive/](docs/archive/README.md): old specs, decisions, reviews and roadmap rows.

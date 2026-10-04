@@ -40,6 +40,14 @@ export function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
   );
 }
 
+export function Leave(p: { leave: () => void }) {
+  return (
+    <Tap label="Leave" onPress={p.leave}>
+      <Text style={{ ...prose, color: paper.accent }}>Leave</Text>
+    </Tap>
+  );
+}
+
 // The place: its title (a tap looks), description, who and what is here, its own actions (an
 // offered quest among them) and the log. NPCs open full details, as items do.
 export function RoomPage(p: {
@@ -55,27 +63,31 @@ export function RoomPage(p: {
     <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.text(p.view.place.title.key)}</Text>
   );
   return (
-    <ScrollView contentContainerStyle={{ padding: 24 }}>
-      {p.g.look ? (
-        <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
-          {title}
-        </Tap>
-      ) : (
-        title
-      )}
-      <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
-      <Here view={p.view} text={p.text} open={p.open} />
-      {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
-        <Tap label="Continue conversation" onPress={p.openChoice}>
-          <Text style={{ ...prose, color: paper.accent }}>Continue conversation</Text>
-        </Tap>
-      )}
-      {p.g.place.map((b) => (
-        <Act key={b.label} b={b} press={p.press} />
-      ))}
-      {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
-      {ended(p.view) !== '' && <Text style={{ ...note, marginTop: 12 }}>{ended(p.view)}</Text>}
-    </ScrollView>
+    <View style={{ flex: 1 }}>
+      <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
+        {p.g.look ? (
+          <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
+            {title}
+          </Tap>
+        ) : (
+          title
+        )}
+      </View>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }}>
+        <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
+        <Here view={p.view} text={p.text} open={p.open} />
+        {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
+          <Tap label="Continue conversation" onPress={p.openChoice}>
+            <Text style={{ ...prose, color: paper.accent }}>Continue conversation</Text>
+          </Tap>
+        )}
+        {p.g.place.map((b) => (
+          <Act key={b.label} b={b} press={p.press} />
+        ))}
+        {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
+        {ended(p.view) !== '' && <Text style={{ ...note, marginTop: 12 }}>{ended(p.view)}</Text>}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -111,6 +123,7 @@ export function ThingPage(p: {
   press: (b: Button) => void;
   contents: Thing[];
   open: (id: string) => void;
+  leave: () => void;
 }) {
   return (
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
@@ -121,6 +134,7 @@ export function ThingPage(p: {
       {p.actions.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
       ))}
+      <Leave leave={p.leave} />
       {p.contents.length > 0 && <Text style={titleStyle}>Inside</Text>}
       {p.contents.map((e) => (
         <Tap key={e.id} label={`${p.text(e.name)}, open`} onPress={() => p.open(e.id)}>
@@ -131,13 +145,10 @@ export function ThingPage(p: {
   );
 }
 
-// The way into the other pages (U3): Journal, Carrying and Settings are opened from here.
-export type More = 'journal' | 'carrying' | 'settings';
 export function CharacterPage(p: {
   resources?: readonly Pool[];
   position?: GameView['position'];
   text: Say;
-  open: (k: More) => void;
 }) {
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
   const { resources = [] } = p;
@@ -149,11 +160,6 @@ export function CharacterPage(p: {
         <Text key={r.resource.key} style={{ ...prose, color: band(r.tone) }}>
           {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
         </Text>
-      ))}
-      {(['journal', 'carrying', 'settings'] as const).map((k) => (
-        <Tap key={k} label={cap(k)} onPress={() => p.open(k)}>
-          <Text style={{ ...prose, color: paper.accent }}>{cap(k)}</Text>
-        </Tap>
       ))}
     </Sheet>
   );
@@ -181,7 +187,7 @@ export function CarryingPage(p: {
   open: (id: string) => void;
 }) {
   return (
-    <Sheet title="Carrying">
+    <Sheet title="Equipment & Inventory">
       <Text style={titleStyle}>Held</Text>
       {p.items.length === 0 && <Text style={note}>You are carrying nothing.</Text>}
       {p.items.map((e) => (

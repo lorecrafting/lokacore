@@ -112,36 +112,8 @@ view, with the freshness token captured when the button was drawn. Cartridge tex
 resource-band phrases (`band.<key>`), journal text, chapter titles and scene lines; projected
 resource tones map to the paper palette without presenter thresholds.
 
-The room shows its heading, authored description, entities and meaningful consequence log;
-standalone exit directions, adjacent-sight listings and repeated navigation headings are omitted.
-Map retains each exit's movement, adjacent sight and legal door actions. Carrying
-separates held items from worn slots; item pages expose projected reachable contents and
-legal container/equipment actions. Same-room item actions retain the open page while its
-item remains projected; leaving the room or losing that item closes it. Position is shown
-in the status line. Only the room's position label is tappable: it opens a page of the
-currently offered stand/sit/rest/sleep actions. Character and other details show position only
-as information; modal scenes expose no position shortcut.
-
-NPC taps open full details using projected names and actions. Their pending dialogue, choices
-and live results are drawn there; there is no inline room panel. Returning to the world does
-not close a saved choice: the projected speaker can be tapped again, or a conversation entry
-opens the saved choice when the speaker is absent. All detail returns say **Back to World**
-and clear the page stack to the world. Item pages retain their existing reachable contents.
-The host-neutral retained narration has no action/target context. As a bounded PM recovery
-choice, an unclassified restored consequence remains in the world log rather than being
-guessed or lost; a restored pending choice uses its actual speaker detail. Retained title/
-description TextKeys already rendered in the room are omitted structurally. Live NPC
-results remain scoped to that detail, including when a pending save is retried elsewhere.
-This supersedes the inline NPC menu and Character position controls under the
-[playtest polish direction](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md).
-
-A declared chapter opens a title page on launch and when its index changes, once per
-presenter session. A running modal scene takes precedence, drawing its persisted current
-line and only its offered Continue action; ordinary book controls and NPC menus are hidden.
-A simultaneously reached chapter title waits until the scene ends. Dismissing a chapter
-page changes only presentation. World-clock, safety and interruption integration remains
-future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
-Touch and Simulator acceptance follows [C1 slice 12](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
+Views, controls, history, return destinations and modal priority are specified once in
+[Book UI](book-ui.md).
 
 ## Observability
 
