@@ -69,3 +69,24 @@ checks green; normal review-record hooks provide their own subsequent validation
 Ponytail Review: **Lean already. Ship.** Existing resource targets/rows, schema seams,
 independent checkers and transactions are reused. No new dependency, mutable spec table,
 whole-state action-path copy, unused stat framework or content-specific portable rule.
+
+## Separate Sol second opinion
+
+Independent read-only second review of the same source head, appended verbatim:
+
+```text
+APPROVE — b8d0d5f51fd144b885f8967e333cadb417622445
+
+No actionable findings. Entity-specific birth rows, effective bounds, composition/precondition twins, changed-row persistence, pinned reopen, malformed-row rejection, and unknown-COMMIT reconciliation align with the amended specification.
+
+Validation: 24 targeted tests passed at the exact head across:
+- kernel/ts/test/npc_hp.test.ts
+- kernel/ts/test/compose.test.ts
+- mobile/authority/local-story/npc-hp.test.ts
+- mobile/authority/local-story/resource-recovery.test.ts
+
+Includes real SQLite FULL, failed COMMIT, lost acknowledgement, and M2 movement recovery coverage.
+
+Ponytail review: no unnecessary machinery identified.
+Owner checkout preserved; no edits or review record created.
+```
