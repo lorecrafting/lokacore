@@ -26,6 +26,7 @@ export type Story = {
   // The fence of a new game whose COMMIT outcome is unknown, and its run.
   game?: { fence: () => undefined; run_id: string } | undefined;
   elapsed?: Checkpoint;
+  corruptFile?: boolean; // actual SQLite corruption while opening, never an invented identity
   recoveryHeader?: { format: string; run_id?: string } | null;
   beforeWorld?: World;
   beforeToken?: string;

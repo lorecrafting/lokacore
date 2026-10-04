@@ -70,3 +70,18 @@ A loaded managed elapsed session binds its valid known run even while upgrading 
 its first checkpoint. That run comparison permits its own v1→v2 format transition; refused
 openings instead use the raw header witness above. Explicit v1 authority without clocks keeps
 its existing behavior.
+
+Round-two recovery clarification: genuinely proven SQLite NOTADB/page corruption during opening
+is distinct from an operational header-read error. No loaded metadata or header/run witness is
+invented for that refusal. Explicit Start over first proves transaction closure. If SQLite still
+proves the file corrupt, the existing confirmed host file-removal path applies; failed closure or
+operational reads remain pending. If the header has become readable, the old corrupt-file offer
+cannot destructively recover it or silently adopt a new witness: a valid supported run is stale,
+a malformed header is corrupt, and a newer unsupported format stays refused, all without writes.
+
+Loaded managed recovery accepts only its unchanged supported format or its own v1→v2 upgrade
+under the same known run. Arbitrary same-run format drift does not grant replacement permission:
+a higher loka-save-vN returns unsupported_save_format without writes/new game; malformed drift
+returns save_corrupt. For changed refused-opening witnesses, malformed format is classified
+before valid differing run/pin; a valid differing supported run remains stale. This is a bounded
+recovery-header check, not a general save validator. Explicit v1 authority behavior stays intact.

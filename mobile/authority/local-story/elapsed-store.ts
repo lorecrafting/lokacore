@@ -5,6 +5,12 @@ export type Checkpoint = { run_id: string; wall_ms: number; remainder: number; t
 const TABLE = `CREATE TABLE IF NOT EXISTS elapsed (one INTEGER PRIMARY KEY CHECK (one = 1),
   run_id TEXT NOT NULL, wall_ms INTEGER NOT NULL, remainder INTEGER NOT NULL,
   target INTEGER NOT NULL) STRICT`;
+export const formatProblem = (format?: string) =>
+  Number(/^loka-save-v([1-9][0-9]*)$/.exec(format ?? '')?.[1]) > 2
+    ? ('unsupported_save_format' as const)
+    : !['loka-save-v1', 'loka-save-v2'].includes(format ?? '')
+      ? ('save_corrupt' as const)
+      : undefined;
 export const natural = (n: number) => Number.isSafeInteger(n) && n >= 0;
 
 export function readElapsed(db: Db, run: string, head: number): Checkpoint | undefined {
@@ -88,8 +94,11 @@ export class ElapsedRecoveryError extends Error {
     this.kind = kind;
   }
 }
-export function changedRun(meta: { run_id?: string; pin?: unknown } | undefined, expected: string) {
-  if (meta?.run_id === expected) return;
+export function changedRun(
+  meta: { run_id?: string; pin?: unknown } | undefined,
+  expected: string | undefined,
+) {
+  if (expected !== undefined && meta?.run_id === expected) return;
   const valid = meta?.pin && !validate('StoryRunId', meta.run_id).length;
   return new ElapsedRecoveryError(
     valid ? 'stale_view' : 'save_corrupt',

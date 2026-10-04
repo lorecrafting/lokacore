@@ -13,7 +13,7 @@ import { adopt, ids, narration, token } from './save.ts';
 import type { Story } from './save.ts';
 import type { ElapsedStatus } from '../../packages/game-view/session.ts';
 import { ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
-import { ElapsedRecoveryError, changedRun } from './elapsed-store.ts';
+import { ElapsedRecoveryError, changedRun, formatProblem } from './elapsed-store.ts';
 import { invoke, cancel } from './invocation.ts';
 import { catchUp } from './trace.ts';
 import { elapsed, fenced, type Elapsed } from './delivery.ts';
@@ -49,8 +49,7 @@ export type Host = {
   latency?: { host: HostKind; now: () => number }; // ms; each NEW decision's (11 §13), else none
   random?: (words: Uint32Array) => Uint32Array;
 };
-const SAVE_VERSION = 2;
-const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
+const SAVE_FORMAT = 'loka-save-v2';
 
 /**
  * The story saved in `db`, on the installed release its pin names (10 §32, OFF-11), or the newest
@@ -76,14 +75,14 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     if (saved?.format === SAVE_FORMAT || (host.time && fresh.cartridge.manifest.time_policy))
       s.recoveryHeader = saved ? { format: saved.format, run_id: saved.run_id } : null;
     const format = saved?.format; // a higher loka-save-vN: a newer app's; other than ours: corrupt
-    if (Number(/^loka-save-v([1-9][0-9]*)$/.exec(format ?? '')?.[1]) > SAVE_VERSION)
+    const problem = formatProblem(format);
+    if (problem === 'unsupported_save_format')
       return {
         kind: 'unsupported_save_format' as const,
         format,
         supported: ['loka-save-v1', SAVE_FORMAT],
       };
-    if (saved && (!['loka-save-v1', SAVE_FORMAT].includes(format!) || !saved.pin))
-      return refuse({ kind: 'save_corrupt' as const });
+    if (saved && (problem || !saved.pin)) return refuse({ kind: 'save_corrupt' as const });
     const release = saved
       ? releases.find((r) => r.content_hash === saved.pin!.content_hash)
       : releases[0]; // no save row: a new save, or half a save that load reports corrupt
@@ -97,6 +96,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     s.recoveryHeader = undefined;
   } catch (e) {
     if (!(e instanceof ElapsedRecoveryError) && !corrupt(e)) throw e;
+    s.corruptFile = !(e instanceof ElapsedRecoveryError) && corrupt(e);
     return refuse({ kind: 'save_corrupt' as const }); // SQLite cannot read the file
   }
   return opened(s);
@@ -186,26 +186,32 @@ function replaceable(s: Story) {
   const expected =
     s.recoveryHeader !== undefined
       ? s.recoveryHeader
-      : s.elapsed || (s.host.time && s.world.cartridge.manifest.time_policy)
+      : s.meta && (s.elapsed || (s.host.time && s.world.cartridge.manifest.time_policy))
         ? { format: s.meta.format, run_id: s.meta.run_id }
         : undefined;
-  if (expected === undefined) return 'ready' as const;
+  if (expected === undefined && !s.corruptFile) return 'ready' as const;
   try {
     return reconcile(s.db, () => {
       const current = identityOf(s.db);
+      const problem = current && formatProblem(current.format);
+      if (problem === 'unsupported_save_format') return problem;
       if (
         (!current && expected === null) ||
         (current &&
           expected &&
-          (s.recoveryHeader === undefined || current.format === expected.format) &&
+          (current.format === expected.format ||
+            (s.recoveryHeader === undefined &&
+              expected.format === 'loka-save-v1' &&
+              current.format === SAVE_FORMAT)) &&
           current.run_id === expected.run_id)
       )
         return 'ready' as const;
-      const kind = changedRun(current, expected?.run_id ?? '')?.kind ?? 'save_corrupt';
+      const kind = problem ?? changedRun(current, expected?.run_id)?.kind ?? 'save_corrupt';
       s.blocked = new ElapsedRecoveryError(kind, 'save header changed; reopen before recovery');
       return kind;
     });
-  } catch {
+  } catch (e) {
+    if (s.corruptFile && corrupt(e)) throw e; // closed and still corrupt: confirmed host file recovery
     return 'pending' as const; // the header or transaction closure remains unknown
   }
 }
@@ -235,6 +241,7 @@ function newGame(s: Story) {
       s.fresh = world;
       adopt(s);
       s.recoveryHeader = undefined;
+      s.corruptFile = undefined;
       s.behind = !catchUp(s.db, ids(s), s.fresh.context);
     }
     return undefined;

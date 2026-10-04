@@ -173,3 +173,72 @@ test('corrupt elapsed recovery binds valid, malformed, and absent original heade
     a.sql.close();
   }
 });
+
+// Breaks: loaded elapsed recovery accepts arbitrary same-run format drift and overwrites a newer or malformed save.
+test('loaded elapsed recovery refuses newer and malformed same-run formats without writes', () => {
+  for (const [format, kind] of [
+    ['loka-save-v3', 'unsupported_save_format'],
+    ['broken-format', 'save_corrupt'],
+    ['loka-save-v1', 'save_corrupt'],
+  ]) {
+    const a = elapsedHost();
+    assert.equal(
+      a.game.invoke({ action_key: 'look' as never, target_ids: [], input: {} }).kind,
+      'saved',
+    );
+    a.sql.prepare('UPDATE save SET format = ?').run(format!);
+    assert.equal(a.game.newGame().kind, kind);
+    assert.deepEqual(
+      { ...a.sql.prepare('SELECT format, run_id FROM save').get() },
+      { format, run_id: 'aaaaaaaa-0000-4000-8000-000000000002' },
+    );
+    assert.deepEqual(
+      { ...a.sql.prepare('SELECT revision, clock FROM head').get() },
+      { revision: 1, clock: 64800 },
+    );
+    assert.deepEqual(checkpoint(a.sql), { wall_ms: 10000, remainder: 0, target: 64800 });
+    assert.equal(receipts(a.sql), 1);
+    if (format === 'loka-save-v3') {
+      const c = localSession(
+        () => a.db,
+        () => assert.fail('must not remove a readable save'),
+        a.bundle,
+        a.host,
+      );
+      assert.equal(c.failed()?.kind, 'unsupported_save_format');
+      assert.equal(c.failed()?.startOver, false);
+    }
+    a.sql.close();
+  }
+});
+
+// Breaks: a changed malformed header with valid different run/pin is classified as a valid replacement.
+test('changed refused elapsed header classifies malformed before differing valid run and preserves newer formats', () => {
+  const a = elapsedHost();
+  a.sql.exec('ALTER TABLE elapsed DROP COLUMN target');
+  let old: any;
+  assert.throws(
+    () => openGame(a.db, a.bundle, a.host),
+    (e: any) => {
+      old = e.cause;
+      return old.kind === 'save_corrupt';
+    },
+  );
+  a.sql.exec(
+    "UPDATE save SET format = 'broken-format', run_id = 'bbbbbbbb-0000-4000-8000-000000000001'",
+  );
+  assert.equal(old.newGame().kind, 'save_corrupt');
+  assert.deepEqual(
+    { ...a.sql.prepare('SELECT format, run_id FROM save').get() },
+    { format: 'broken-format', run_id: 'bbbbbbbb-0000-4000-8000-000000000001' },
+  );
+  a.sql.exec("UPDATE save SET format = 'loka-save-v3'");
+  assert.equal(old.newGame().kind, 'unsupported_save_format');
+  assert.equal(a.sql.prepare('SELECT format FROM save').get()!.format, 'loka-save-v3');
+  assert.deepEqual(
+    { ...a.sql.prepare('SELECT revision, clock FROM head').get() },
+    { revision: 0, clock: 64800 },
+  );
+  assert.equal(receipts(a.sql), 0);
+  a.sql.close();
+});

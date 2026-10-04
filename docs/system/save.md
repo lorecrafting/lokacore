@@ -7,7 +7,7 @@ rows plus a receipt in one transaction, then adopts the result, then replies (AD
 
 ## Opening a story
 
-`openStory(db, releases, host)` (`authority.ts:70`) takes the bundled releases newest first
+`openStory(db, releases, host)` (`authority.ts:69`) takes the bundled releases newest first
 (each a content hash and a fresh world) and the host: its `kernel_version`, a random UUID per
 call (`newId`), an optional account binding read once when a run starts, an optional clock
 for latency, and an optional random source shaped like `getRandomValues` (`:44`). It opens the
@@ -28,7 +28,7 @@ newest", "a save of an unknown format is refused with nothing written and no new
 
 ## Receipts
 
-Scope `story/<lineage_id>/<character>` (`save.ts:135`). A receipt (`store.ts:32`) stores
+Scope `story/<lineage_id>/<character>` (`save.ts:137`). A receipt (`store.ts:32`) stores
 the invocation id, the CommandId, actor, `intent_digest_version` (`loka-intent-v1`) and intent
 digest, the resolved Command (null for a rejection before one existed), the revision (unchanged
 for a rejection) and the DecisionResult. Replay (`mobile/authority/local-story/invocation.ts:50`): a known invocation id
@@ -57,7 +57,7 @@ accepted decision the head (revision, clock, RNG) and the state rows its delta t
 then always the receipt. `transaction` (`:265`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
 committed; a failed write rolls back and throws; a failed COMMIT, or a ROLLBACK that leaves the
 transaction open, returns false: the outcome is unknown. Then the story is **fenced**
-(`save.ts:39`): every call answers `pending` until `reconcile` (`transaction.ts:10`) rolls back and
+(`save.ts:41`): every call answers `pending` until `reconcile` (`transaction.ts:10`) rolls back and
 reads the receipt (committed: memory adopts the saved head; not there: the attempt failed).
 Memory never serves a state the store did not confirm. Tests: `faults.test.ts` (every fault
 leaves the prior or next revision), `saves.test.ts` ("a new game whose COMMIT is unknown is
@@ -94,7 +94,7 @@ trace segment header, its kernel version differing ([ADR-075](../archive/decisio
 
 ## New game
 
-`newGame` (`authority.ts:213`): after settling any fenced attempt, one transaction replaces the
+`newGame` (`authority.ts:219`): after settling any fenced attempt, one transaction replaces the
 save with a fresh world of the newest release at revision 0 under a new lineage and run (no
 parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
@@ -132,7 +132,7 @@ digest and RNG state; the commit outcome and committed events), written after th
 transaction in its own; a write failure is swallowed and caught up later from the receipts
 (`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
-newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:145`) and, when the
+newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:146`) and, when the
 host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:137`).
 
 ## The session controller and the phone
@@ -221,3 +221,18 @@ A loaded managed elapsed session binds its valid known run even while upgrading 
 its first checkpoint. That run comparison permits its own v1→v2 format transition; refused
 openings instead use the raw header witness above. Explicit v1 authority without clocks keeps
 its existing behavior.
+
+Round-two recovery clarification: genuinely proven SQLite NOTADB/page corruption during opening
+is distinct from an operational header-read error. No loaded metadata or header/run witness is
+invented for that refusal. Explicit Start over first proves transaction closure. If SQLite still
+proves the file corrupt, the existing confirmed host file-removal path applies; failed closure or
+operational reads remain pending. If the header has become readable, the old corrupt-file offer
+cannot destructively recover it or silently adopt a new witness: a valid supported run is stale,
+a malformed header is corrupt, and a newer unsupported format stays refused, all without writes.
+
+Loaded managed recovery accepts only its unchanged supported format or its own v1→v2 upgrade
+under the same known run. Arbitrary same-run format drift does not grant replacement permission:
+a higher loka-save-vN returns unsupported_save_format without writes/new game; malformed drift
+returns save_corrupt. For changed refused-opening witnesses, malformed format is classified
+before valid differing run/pin; a valid differing supported run remains stale. This is a bounded
+recovery-header check, not a general save validator. Explicit v1 authority behavior stays intact.
