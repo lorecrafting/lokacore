@@ -15,7 +15,8 @@ Planned selections do not change these installed clauses; each consumer amends t
 
 `newWorld(cartridge, context, seed)` (`kernel/ts/src/runtime/fresh.ts:26`) mints ids under the nil
 CommandId in a fixed order: the player's CharacterId, its body, each room (DefinitionRefString
-order), each room's details, each NPC, each item, then one job per NPC with a daily schedule,
+order), each room's details, one instance from each NPC [blueprint](glossary.md), one from each
+item blueprint, then one job per NPC with a daily schedule,
 then one slot holder per distinct `slot` some item declares, in slot-key order (UTF-8 bytes;
 [equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). A holder is an entity inside the
 body with capacity 1; it is not in `entities`, so no command targets it and no view lists it.
