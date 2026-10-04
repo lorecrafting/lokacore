@@ -216,3 +216,12 @@ test('new API gate and narrow hydration reject invalid provenance/custody', () =
     assert.equal(hydrate(fresh, state, true), undefined);
   }
 });
+
+// Break: missing explicit NPC HP silently projects a living NPC instead of rejecting corruption.
+test('living projection refuses a missing required NPC HP row', () => {
+  const w = controlled();
+  const rat = entity(w, 'npc/cellar_rat_1');
+  const resources = { ...w.state.resources };
+  delete resources[key({ kind: 'resource', entity_id: rat, resource: resourceRef(w, 'hp') })];
+  assert.throws(() => gameView({ ...w, state: { ...w.state, resources } }), /precondition_failed/);
+});

@@ -218,7 +218,7 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   assert.ok(f.shrunk.length <= 5 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 14, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 15, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-5] commands:\n/);
 });
