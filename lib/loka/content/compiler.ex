@@ -81,15 +81,7 @@ defmodule Loka.Content.Compiler do
   defp manifest([{rel, m}], registry) do
     defs = source_defs()
 
-    file =
-      defs["CartridgeManifest"]
-      |> put_in(["properties", "entry"], %{"$ref" => "DefinitionRef"})
-      |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
-      |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
-      |> put_in(
-        ["properties", "chapters"],
-        get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties", "chapters"])
-      )
+    file = manifest_file(defs)
 
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
@@ -102,6 +94,17 @@ defmodule Loka.Content.Compiler do
       diags ->
         {nil, {nil, %{}}, diags}
     end
+  end
+
+  defp manifest_file(defs) do
+    defs["CartridgeManifest"]
+    |> put_in(["properties", "entry"], %{"$ref" => "DefinitionRef"})
+    |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
+    |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
+    |> put_in(
+      ["properties", "chapters"],
+      get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties", "chapters"])
+    )
   end
 
   # cartridge.json's calendar, world and chapters, short references expanded.
