@@ -126,8 +126,8 @@ and not repeated here.
   departures, no spec amendment ([record](../archive/decisions/owner-decision-sm2-scope-2026-10-01.md)).
 - Narration binds its participants at commit; no `narration.emit`, no acknowledgement
   ([record](../archive/decisions/owner-decision-narrow-n-2026-10-01.md)).
-- Open, not decided: the ADR-074 route at its trigger; the owner leans to a shared foundation with
-  separate Realm rules under new keys ([leaning](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md)).
+- Story-to-Realm learning, shared mechanics/interaction and replaceable story content follow the
+  [owner direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md); the first Realm activity, unchanged-cartridge hosting and formal ADR-074 route remain open.
 
 ## Process
 
