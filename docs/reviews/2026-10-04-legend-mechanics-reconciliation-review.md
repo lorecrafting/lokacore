@@ -48,3 +48,11 @@ I inadvertently ran the read-only `git diff --check` despite the no-check instru
 ```
 
 PM disposition: **Sol-LEGEND-R1-01 OPEN**, accepted for the narrow round-one current-status correction. Primary approval above is retained at its reviewed source; this separate open finding prevents merge until the correction, scoped independent rechecks and exact-head CI are complete. No policy or historical wording change is authorized.
+
+## Primary scoped round-one recheck — 2026-10-04
+
+Reviewed fix head: `7e9313e000e0bf2085a0e7cc792cd68ef4a4316a`; prior primary head: `549d707a65d7c66a61439201dc9ddd35e50d2cc3`. **Primary scoped verdict: APPROVE.** No new primary findings. This recheck addresses only Sol-LEGEND-R1-01, the changed current-status cell and directly related status references; it does not reopen the full review or determine the separate Sol recheck verdict.
+
+**Primary disposition for Sol-LEGEND-R1-01: correction verified.** The sole source correction at [reconciliation line 20](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md) now states A/B1/B2 merged and M1-C planned. It agrees with ROADMAP line 28 and independently queried PR #155, merged at `2026-10-04T17:18:06Z` with merge commit `e1b90dca77303dbdbd5bc58284fb67282c3f21e6`. The earlier inspected-main account at line 11 is unchanged and remains historical; the policy, contracts and future boundaries are unchanged. The initial primary pass overlooked the stale cell in the table labeled current; the separate review correctly distinguished it from the historical account.
+
+Independently queried PR #136 at this exact fix head: `changes` and `lint` completed SUCCESS; `elixir`, `typescript` and `sim` completed SKIPPED for the documentation-only update. No job is pending. Applied the installed Ponytail/Ponytail Review criteria to the one-cell correction: Lean already. Ship. Light lane only; no dependency installation, build, runtime test, mutation, native/Simulator or save operation. Normal documentation commit hooks cover this append/index. The historical Sol OPEN disposition above remains the record of that round; the PM owns the separate Sol answer and combined closure/publication.
