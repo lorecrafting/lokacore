@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -28,7 +28,11 @@ v['actions'] = {}
 # Literal reciprocal geometry; barrier faces share one reference.
 geometry = {
     'ferry_landing': [('north', 'well_lane', None)],
-    'well_lane': [('south', 'ferry_landing', None), ('east', 'drowned_lantern', None)],
+    'well_lane': [('south', 'ferry_landing', None), ('east', 'drowned_lantern', None), ('north', 'village_green', None)],
+    'village_green': [('north', 'north_gate', None), ('south', 'well_lane', None)],
+    'north_gate': [('south', 'village_green', None), ('north', 'chapel_steps', None)],
+    'chapel_steps': [('south', 'north_gate', None), ('north', 'chapel_nave', None)],
+    'chapel_nave': [('south', 'chapel_steps', None)],
     'drowned_lantern': [('west', 'well_lane', None), ('up', 'inn_rooms', None), ('down', 'lantern_cellar', 'cellar_door')],
     'inn_rooms': [('down', 'drowned_lantern', None), ('up', 'inn_attic', None)],
     'inn_attic': [('down', 'inn_rooms', None)],
@@ -67,10 +71,10 @@ v['world'] = {'bands': [
 v['text'] = json.loads(Path('cartridges/ashmere_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
-fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the adopted 57 story strings plus 11 reused UI labels are copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
+fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the preserved adopted catalog and eight approved prototype-derived room strings are copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
 Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed numeric-profile allocation order: character, body, six rooms, Bram, six items, cloak holder.
+# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram, six items, cloak holder.
 names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/bram'] + ['item/'+row[0] for row in items] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):

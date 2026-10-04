@@ -13,6 +13,7 @@ and not repeated here.
 - NPC/item views carry explicit authored full descriptions; the compatible optional wire field is always populated by current projections ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
 
 - The current unreleased sampler may replace its previous development runtime release; the bounded `0.0.2` Look repair independently rederives its known answer while other fixtures stay frozen ([record](../decisions/owner-decision-sampler-development-look-2026-10-03.md)).
+- The development sampler chapel approach follows the [delegated PM content selection](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md).
 - NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
 - C1 room output stays focused; NPCs open full details, section detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
 
