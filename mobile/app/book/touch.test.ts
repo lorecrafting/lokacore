@@ -158,7 +158,7 @@ test('the log has story words, never a kernel code, across both endings', () => 
     ['Take a brass lantern'],
   );
   a.tap('Take a brass lantern');
-  assert.equal(a.screen().log.at(-1), 'Taken.');
+  assert.equal(a.screen().log.at(-1), 'You pick up a brass lantern.');
   const look = a.find('Look');
   const before = [...a.screen().log];
   a.smoke.press(look);

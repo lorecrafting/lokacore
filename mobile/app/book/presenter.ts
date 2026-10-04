@@ -66,7 +66,9 @@ function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       })),
   );
   const held = things(v).flatMap((e) =>
-    e.actions.filter((a) => a.available).map((a) => button(a, ` ${text(e.name)}`, e.id)),
+    e.actions
+      .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
+      .map((a) => button(a, ` ${text(e.name)}`, e.id)),
   );
   return [
     ...place.map((a) => button(a, '')),
@@ -84,7 +86,7 @@ function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
 
 // What one press answers: the narration or the outcome's words (words.ts; none: '') of an accepted
 // command, else the refusal in words. Never a raw outcome code.
-function said(r: Reply, text: Say, view: GameView): string {
+function said(r: Reply, text: Say, view: GameView, fallback?: string): string {
   if (r.kind === 'pending') return '(pending: not confirmed saved; press any button to retry it)';
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
   if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
@@ -96,18 +98,7 @@ function said(r: Reply, text: Say, view: GameView): string {
   if (d.kind === 'fault') return '';
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
-  return shown.map((t) => text(t.key)).join(' ') || (OUTCOME[d.outcome] ?? '');
-}
-
-// A press answers in its world or NPC detail log; genuine same-room NPC arrivals/departures remain.
-// Returns the answer line (none: ''). A look says nothing: its fresh
-// page is the answer. ponytail: a look that settles a shown pending leaves that pending line above
-// (the status line's "save not confirmed" still clears).
-function answer(log: string[], reply: Reply, text: Say, comings: string[], view: GameView): string {
-  const line = said(reply, text, view);
-  if (line) log.push(line);
-  log.push(...comings);
-  return line;
+  return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 
 // Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
@@ -149,7 +140,9 @@ const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: Ga
 type Logs = {
   log: string[];
   details: Map<string, string[]>;
-  retry?: { label: string; detail?: string };
+  retry?: { button: Button; detail?: string; item?: string };
+  narrationId?: string;
+  returnWorld?: boolean;
   fault?: string;
 };
 
@@ -164,31 +157,70 @@ function restoredLogs(game: Game, text: Say): Logs {
   const log = restored && !view.choice ? [restored] : [];
   const details = new Map<string, string[]>();
   if (restored && view.choice) details.set(view.choice.speaker_id ?? 'conversation', [restored]);
-  return { log, details };
+  if (view.choice) {
+    const id = view.choice.speaker_id ?? 'conversation';
+    details.set(id, [...(details.get(id) ?? []), text(view.choice.prompt.key)]);
+  }
+  return { log, details, narrationId: last?.command_id };
+}
+
+function detailLines(s: Logs, id: string) {
+  if (!s.details.has(id)) s.details.set(id, []);
+  return s.details.get(id)!;
+}
+
+function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
+  const attempt = s.retry!;
+  const now = game.view().view;
+  const accepted =
+    reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
+  s.returnWorld = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
+  const moved = !!accepted && was.place.id !== now.place.id;
+  if (moved) s.log.length = 0;
+  const lines = attempt.detail && !s.returnWorld && !moved ? detailLines(s, attempt.detail) : s.log;
+  const retained = accepted?.narration?.length ? game.lastNarration() : undefined;
+  const repeated = !moved && retained && retained.command_id === s.narrationId;
+  if (retained) s.narrationId = retained.command_id;
+  const fallback =
+    s.returnWorld && attempt.item
+      ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${attempt.item}.`
+      : accepted?.outcome === 'choice_closed' && lines === s.log
+        ? ''
+        : undefined;
+  const line = repeated ? '' : said(reply, text, now, fallback);
+  if (line) lines.push(line);
+  lines.push(...comings(was, now, text));
+  if (
+    now.choice &&
+    was.choice?.continuation_id !== now.choice.continuation_id &&
+    !accepted?.narration?.some((line) => line.key === now.choice!.prompt.key)
+  )
+    detailLines(s, now.choice.speaker_id ?? 'conversation').push(text(now.choice.prompt.key));
+  return line;
 }
 
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
+  s.returnWorld = false;
+  // A complete Give remains legal; the current item-only touch button cannot supply its recipient.
+  if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
-  s.retry ??= { label: b.label, detail };
-  let lines = s.log;
-  if (s.retry.detail) {
-    if (!s.details.has(s.retry.detail)) s.details.set(s.retry.detail, []);
-    lines = s.details.get(s.retry.detail)!;
-  }
+  const item = ['take', 'drop'].includes(b.action_key)
+    ? things(was).find((e) => e.id === b.target_ids[0])
+    : undefined;
+  s.retry ??= { button: b, detail, item: item && text(item.name) };
   let reply: Reply;
   try {
     reply = game.invoke(intentOf(b));
   } catch (e) {
     s.fault = (e as Error).message;
-    const line = `(not confirmed: ${s.fault}; the next press retries ${s.retry.label})`;
-    lines.push(line);
+    const line = `(not confirmed: ${s.fault}; the next press retries ${s.retry.button.label})`;
+    (s.retry.detail ? detailLines(s, s.retry.detail) : s.log).push(line);
     return line;
   }
   s.fault = undefined;
+  const line = received(game, reply, was, s, text);
   if (!game.pending()) s.retry = undefined;
-  const now = game.view().view;
-  if (was.place.id !== now.place.id) lines = s.log;
-  return answer(lines, reply, text, comings(was, now, text), now);
+  return line;
 }
 
 /** World/detail logs, buttons and presses for one game. */
@@ -209,6 +241,7 @@ export function presenter(game: Game) {
         detail: (id: string) => s.details.get(id) ?? [],
         pending: game.pending(),
         fault: s.fault,
+        returnWorld: s.returnWorld,
       };
     },
     // A pending retry keeps the original detail, even when retried from the world.

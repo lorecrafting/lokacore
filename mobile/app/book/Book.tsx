@@ -11,10 +11,11 @@ import {
   things,
   conversation,
   initialPages,
+  npcPage,
   type Hint,
   type Page,
 } from './model.ts';
-import { NpcPage, PositionPage } from './Menu.tsx';
+import { ContentsPage, NpcPage, PositionPage, type Section } from './Menu.tsx';
 import { body, paper } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import {
@@ -27,7 +28,6 @@ import {
   ScenePage,
   SettingsPage,
   ThingPage,
-  type More,
 } from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
@@ -58,9 +58,15 @@ export default function Book(p: BookProps) {
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
   const press = (b: Button, detail?: string) => {
-    const said = pr.press(b, detail);
-    go(pagesAfter(stack, view, pr.screen().view), 1);
-    return said;
+    const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
+    pr.press(b, detail);
+    if (stale) return redraw((n) => n + 1);
+    const after = pr.screen();
+    let next = pagesAfter(stack, view, after.view);
+    if (after.returnWorld && next === stack) next = [];
+    if (next === stack && npcPage(stack.at(-1), view) && !view.scene && !after.view.scene)
+      redraw((n) => n + 1);
+    else go(next, 1);
   };
   const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1));
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
@@ -83,7 +89,7 @@ type ViewProps = {
   stack: Page[];
   flip: { turn: number; dir: 1 | -1 };
   go: (pages: Page[], dir: 1 | -1) => void;
-  press: (b: Button, detail?: string) => string;
+  press: (b: Button, detail?: string) => void;
   refused: (line: string) => void;
   startOver: () => void;
   shell: Shell;
@@ -126,7 +132,9 @@ function Bottom(p: BottomProps) {
     <View style={{ padding: 8 }}>
       {!view.scene &&
         (p.page ? (
-          <Back onPress={p.world} />
+          p.page.kind === 'thing' || p.page.kind === 'dialogue' ? null : (
+            <Back onPress={p.world} />
+          )
         ) : (
           <Footer
             exits={view.exits}
@@ -149,7 +157,7 @@ function Bottom(p: BottomProps) {
             : undefined
         }
         pending={pending}
-        open={() => p.open({ kind: 'character' })}
+        open={() => p.open({ kind: 'contents' })}
       />
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
@@ -191,10 +199,11 @@ type BodyProps = {
   page?: Page;
   screen: Screen;
   g: ReturnType<typeof group>;
-  press: (b: Button, detail?: string) => string;
+  press: (b: Button, detail?: string) => void;
   open: (p: Page) => void;
   startOver: () => void;
   chapterDone: () => void;
+  world: () => void;
 };
 
 function Body(p: BodyProps) {
@@ -221,15 +230,9 @@ function Body(p: BodyProps) {
   if (page.kind === 'position')
     return <PositionPage current={view.position} actions={p.g.position} press={p.press} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
+  if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
   if (page.kind === 'character')
-    return (
-      <CharacterPage
-        resources={view.resources}
-        position={view.position}
-        text={text}
-        open={(kind: More) => p.open({ kind })}
-      />
-    );
+    return <CharacterPage resources={view.resources} position={view.position} text={text} />;
   if (page.kind === 'map') return <MapPage view={view} text={text} g={p.g} press={p.press} />;
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;
   if (page.kind === 'journal') return <JournalPage view={view} text={text} />;
@@ -242,8 +245,9 @@ function Item(p: {
   id: string;
   screen: Screen;
   g: ReturnType<typeof group>;
-  press: (b: Button, detail?: string) => string;
+  press: (b: Button, detail?: string) => void;
   open: (p: Page) => void;
+  world: () => void;
 }) {
   const items = things(p.screen.view);
   const thing = items.find((e) => e.id === p.id);
@@ -256,6 +260,7 @@ function Item(p: {
       press={p.press}
       contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
       open={(id) => p.open({ kind: 'thing', id })}
+      leave={p.world}
     />
   );
 }
@@ -263,9 +268,10 @@ function Item(p: {
 function NpcDetail(p: {
   screen: Screen;
   g: ReturnType<typeof group>;
-  press: (b: Button, detail?: string) => string;
+  press: (b: Button, detail?: string) => void;
   npc?: ReturnType<typeof things>[number];
   speaker?: string;
+  world: () => void;
 }) {
   const { view, text } = p.screen;
   const npc = p.npc ?? view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
@@ -278,6 +284,7 @@ function NpcDetail(p: {
       g={p.g}
       log={p.screen.detail(id)}
       press={(b) => p.press(b, id)}
+      leave={p.world}
     />
   );
 }

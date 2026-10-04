@@ -81,7 +81,7 @@ test('a scripted session survives a restart and plays on', () => {
   ]);
   a.press('Take a leather satchel');
   assert.deepEqual(a.now().carrying, ['a leather satchel']);
-  assert.deepEqual(a.now().log, ['Taken.']);
+  assert.deepEqual(a.now().log, ['You pick up a leather satchel.']);
   a.press('Go north');
   assert.equal(a.now().place, 'Village Green');
   a.sql.close();
@@ -164,7 +164,7 @@ test('a pending press is retried with its own id and replays what committed', ()
   p.press('Go north');
   assert.equal(p.now().pending, true);
   p.press('Take a leather satchel'); // another button: still retries the north
-  assert.deepEqual(p.now().log, [PENDING]);
+  assert.deepEqual(p.now().log, []);
   assert.equal(p.now().pending, false);
   assert.equal(p.now().place, 'Village Green');
   assert.deepEqual(p.now().carrying, []);
@@ -244,7 +244,7 @@ test('a confirmed receipt that is not a decision is a conflict and ends the atte
   p.press('Scan'); // settles, finds the receipt, which is not a decision
   assert.equal(p.now().pending, false);
   p.press('Go north');
-  assert.equal(p.now().log.at(-1), '(conflict)');
+  assert.deepEqual(p.now().log, []);
   assert.equal(p.now().place, 'Village Green');
 });
 
@@ -403,7 +403,7 @@ test('a start over that fails during play keeps the game and its retry', () => {
   assert.equal(a.c.failed(), undefined); // a cached failure would outlive the play's recovery
   a.sql().exec('PRAGMA query_only = 0');
   a.press('Scan');
-  assert.equal(a.now().log.at(-1), '(start over: attempt to write a readonly database)');
+  assert.deepEqual(a.now().log, []);
   assert.equal(a.now().place, 'Village Green');
 });
 

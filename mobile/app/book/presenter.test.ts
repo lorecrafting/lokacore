@@ -42,6 +42,109 @@ test('recovery removes the current heading but retains an unclassified consequen
   assert.deepEqual(presenter(restored).screen().log, ['The lantern is yours to carry now.']);
 });
 
+// Breaks: an old rejection follows accepted movement, or reset happens after the new authored result.
+test('confirmed room change clears old history before adding new authored consequences', () => {
+  let view = VIEW;
+  let calls = 0;
+  const g = {
+    ...game(() => accepted('looked')),
+    view: () => ({ view, token: 'view:r:0' }),
+    text: (key: string) =>
+      key === 'move.consequence' ? 'The gate closes behind you.' : 'New room',
+    invoke: (): Reply => {
+      if (calls++ === 0)
+        return {
+          kind: 'saved',
+          decision: { kind: 'rejected', error: { code: 'unsupported_capability' } },
+        } as Reply;
+      if (calls === 2) return { kind: 'stale_view' };
+      view = { ...(VIEW as object), place: { id: 'new', title: { key: 'new.title' } } } as never;
+      return {
+        kind: 'saved',
+        decision: {
+          kind: 'accepted',
+          outcome: 'moved',
+          narration: [{ key: 'new.title' }, { key: 'move.consequence' }],
+        },
+      } as Reply;
+    },
+  };
+  const p = presenter(g);
+  p.press(north);
+  assert.deepEqual(p.screen().log, ["You can't do that: unsupported capability."]);
+  p.press(north);
+  assert.deepEqual(p.screen().log, [
+    "You can't do that: unsupported capability.",
+    'The page had changed; here it is again.',
+  ]);
+  p.press(north);
+  assert.deepEqual(p.screen().log, ['The gate closes behind you.']);
+});
+
+// Breaks: routine Close echoes on World, or suppressing it also discards a genuine authored consequence.
+test('World omits the routine Close fallback while retaining authored consequences', () => {
+  assert.deepEqual(presenter(game(() => accepted('choice_closed'))).screen().log, []);
+  const p = presenter(game(() => accepted('choice_closed')));
+  p.press(north);
+  assert.deepEqual(p.screen().log, []);
+  const authored = presenter({
+    ...game(
+      () =>
+        ({
+          kind: 'saved',
+          decision: {
+            kind: 'accepted',
+            outcome: 'choice_closed',
+            narration: [{ key: 'quest.changed' }],
+          },
+        }) as Reply,
+    ),
+    text: () => 'Bram nods toward the path north.',
+  });
+  authored.press(north);
+  assert.deepEqual(authored.screen().log, ['Bram nods toward the path north.']);
+});
+
+// Breaks: a durable choice result already restored into detail is appended again when its receipt settles.
+test('a restored committed narration is not duplicated by its pending receipt retry', () => {
+  const choice = {
+    speaker_id: 'bram',
+    prompt: { key: 'prompt' },
+    continuation_id: 'continuation',
+    choices: [],
+    closable: true,
+  };
+  let pending = true;
+  const g = {
+    ...game(() => accepted('choice_closed')),
+    view: () => ({
+      view: { ...(VIEW as object), choice: pending ? choice : undefined } as never,
+      token: 'view:r:0',
+    }),
+    pending: () => pending,
+    text: (key: string) =>
+      key === 'prompt' ? 'Would you fetch it?' : 'Bram nods toward the path north.',
+    lastNarration: () => ({ command_id: 'committed-choice', lines: [{ key: 'quest.changed' }] }),
+    invoke: (): Reply => {
+      pending = false;
+      return {
+        kind: 'saved',
+        decision: {
+          kind: 'accepted',
+          outcome: 'choice_closed',
+          narration: [{ key: 'quest.changed' }],
+        },
+      } as Reply;
+    },
+  };
+  const p = presenter(g);
+  p.press({ label: 'Close', action_key: 'close_choice', target_ids: [], input: {} }, 'bram');
+  assert.deepEqual(p.screen().detail('bram'), [
+    'Bram nods toward the path north.',
+    'Would you fetch it?',
+  ]);
+});
+
 // Breaks (R6P rerun N-1): an authority rejection worded "You can't do that: too exhausted." because
 // it skips the sentence a refused drag uses for the same code.
 test('a move rejected for want of MV says the body is too exhausted', () => {
