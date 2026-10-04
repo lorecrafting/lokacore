@@ -35,3 +35,23 @@ Ponytail Review: Lean already. Ship. No added machinery or redundant tests.
 
 These documentation fixes preserve the reviewed content and evidence. The source-head
 verdict above remains CHANGES REQUIRED until the reviewer verifies both dispositions.
+
+## Cross-vendor source review (PM-supplied verbatim answer)
+
+Reviewed source: `88a400a3d09a9ce808c4ee75b981a52f7e7b8a09`. Requested model:
+`gpt-6-sol`; runtime model identity was not exposed. PM recorded exit status 0
+(session 78203). Answer SHA-256, independently verified before insertion:
+`7cece32c6f492490ff5819928856540088cb10476dd7322b75e60b4c1f838f4d`.
+PM-retained private raw transcript SHA-256:
+`c11fcd2cba8ad3147efefe7776cfbe867aff630e09f4c901a09f5885091afab2`.
+The private transcript and paths are not part of this record. N1 overlaps M5C-01;
+the primary source verdict remains unchanged pending its narrow fix recheck.
+
+```text
+Verdict: APPROVE WITH NOTES — PR #152 at 88a400a3d09a9ce808c4ee75b981a52f7e7b8a09
+Model provenance: gpt-6-sol requested; runtime model identity is not exposed to me.
+
+N1 nit — docs/system/book-ui.md:24: The active Book UI spec calls 0.0.2 the current sampler. A maintainer using it to verify Look would select the old release; this HEAD pins 0.0.3.
+
+Ponytail Review: Lean already. Ship.
+```
