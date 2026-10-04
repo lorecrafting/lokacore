@@ -102,3 +102,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner decision (paraphrased): [prioritize touch interaction; de-emphasize loka play UX and typed synonyms](owner-decision-touch-priority-2026-10-03.md).
 
 - [C1 mechanics continuation](owner-decision-c1-mechanics-continuation-2026-10-03.md): PM selects bounded independent Codex reviews under the owner's delegated workflow.
+
+- Owner decision: [world time continues during reading; intentional timed choices and protection or escape while controls are restricted](owner-decision-reading-time-2026-10-03.md).

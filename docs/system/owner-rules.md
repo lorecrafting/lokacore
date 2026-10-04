@@ -8,6 +8,7 @@ and not repeated here.
 
 ## Product and scope
 
+- World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
 - Finish and merge PR #137, then continue the approved game mechanics; touch UI is deprioritized
   ([record](../decisions/owner-decision-touch-priority-2026-10-03.md#latest-priority-mechanics-after-pr-137)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
