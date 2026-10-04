@@ -151,3 +151,32 @@ Independent actual-node:sqlite scenario: open the controlled elapsed host, whose
 Restrict the loaded-run exception to supported transitions, refusing the same-run unsupported header without any writes. Extend existing recovery/unsupported-format behavior coverage with this single loaded-elapsed case and literal unchanged header/progress assertions; retain the valid own v1→v2 upgrade and explicit legacy v1 behavior. No new generic format framework is needed.
 
 Only this controlled SQLite scenario ran; no source mutation, suite, dependency install, build, native or owner-save operation occurred. The earlier scoped checks, independent red controls and artifact/hash verification remain as recorded. This corrects the earlier source assessment that newer-format refusal was preserved on all affected direct callers.
+
+## Separate Sol round-one fix recheck
+
+Requested model `gpt-6-sol`, read-only CLI; runtime model identity unverified. Exit 0. Exact fixed source `b1795facd8b2e32fdcf076332c80ad769633412b`. Raw transcript remains private. Answer SHA-256 `c6cce8838262255ba1f412bc5e5f41081611e844beb56356b55f7c73723c894c`; transcript SHA-256 `743eb48f72f52278ce46ff89e67503291dab1364564f1bde48bc303f557bc5fd`. Exact answer follows; the primary scoped verdict and original historical findings remain unchanged.
+
+```text
+VERDICT: CHANGES REQUIRED
+Source: b1795facd8b2e32fdcf076332c80ad769633412b
+Checks run here: no tests or builds. Read-only comparison found all 22 round-one and 23 final source-manifest hashes matching; retained red-control and test logs were inspected, not rerun.
+
+M1B1-01 CLOSED — session.ts:104-122 retains a validated, bounded copy. The retained control covers caller mutation, saved completion at 864000, and a successful next input.
+B1-01 CLOSED — invocation.ts:24-46 conflicts a different identified intent during catching_up while preserving the held attempt; the pending path keeps original-attempt retry behavior.
+B1-02 CLOSED — replay.ts:7-8 rejects an unterminated trace before main.ts:300 draws or dispatches. The retained complete legacy replay case remains green.
+B1-03 OPEN — elapsed-store.ts:29-43 classifies missing columns as typed corruption, and authority.ts:180-210 guards recovery after closure. One required classification remains wrong.
+
+New finding, should-fix — authority.ts:204 and elapsed-store.ts:91-96: after a refused opening, change the save header to a different valid run ID but a malformed format, leaving its pin intact. The recovery guard refuses replacement, but changedRun returns stale_view because it checks run ID and pin, not format. The active PM decision requires save_corrupt for a changed malformed header witness, with no write. The retained recovery test covers a malformed original format and a changed invalid run ID, but not this changed-format case.
+
+Ponytail Review: Lean already; no removable machinery identified.
+```
+
+## PM round-two fix scope
+
+The complete remaining list is primary M1B1-R1-01 (corrupt-file opening without loaded metadata), primary M1B1-R1-02 (same-run newer save format overwritten), and separate Sol's B1-03 classification finding, tracked as Sol-R1-01 (a changed malformed-format witness with a valid differing run misclassified stale). The primary closed the original four at its tested scope; Sol's remaining classification is independently retained, not overridden. The same developer receives the complete list together.
+
+PM applies the existing explicit corrupt-file recovery policy: known SQLite NOTADB/page corruption is distinct from an operational header-read uncertainty. Preserve the confirmed host recovery path for that proven corruption without inventing a metadata/run/header witness or dereferencing unloaded metadata. Genuine operational read or rollback failure remains non-destructive pending. A newly readable valid replacement must remain protected; the old authorization never silently adopts a new witness. Amend the active durable-elapsed paragraph and existing PM policy to make this distinction explicit alongside the existing corrupt-file clause. No automatic reset or general validator is authorized.
+
+The loaded managed session's supported own v1-to-v2 transition is narrow. A newer unsupported format must remain refused without writes or a new game, including a same-run header; malformed-format drift is not a valid replacement merely because its run ID and parsed pin exist. Classify changed malformed witnesses as save_corrupt without writing, while retaining valid different-run stale protection and the supported upgrade path. Preserve explicit v1 authority behavior. All format/header checks stay within the existing recovery boundary, not a new save-validation framework.
+
+Add only the actual uncovered regressions and distinct red controls needed for these three cases, after the old same-layer suite demonstrates the gap. Keep historical inventories unchanged and append honest current-source/final-check evidence. Normal pre-push is the final full check; exact pushed-head CI and concurrent primary/Sol scoped rechecks remain required before merge.
