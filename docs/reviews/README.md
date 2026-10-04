@@ -178,3 +178,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [2026-10-03 kernel layout review](2026-10-03-kernel-layout-review.md) — PR #146, behavior-preserving responsibility grouping.
 - [2026-10-03 C1 sampler Look review](2026-10-03-c1-sampler-look-review.md) — PR #145, current-development capability repair.
 - [C1 dialogue, Contents and pickup polish](2026-10-03-c1-dialogue-contents-polish-review.md): PR #144, source `665b3ff6`, APPROVE; composed native checkpoint on reviewed PR148 `0e49963f`, APPROVE WITH NOTES (owner-deferred UI-FUZZ-01); F1/F2/F3 closed, three separate Sol answers verbatim, original665 full native historically incomplete; owner-phone response and whole Gate C1 closure separate.
+
+- [M1–M23 mechanics continuation plan](2026-10-03-mechanics-continuation-plan-review.md): independent docs-only APPROVE at `a4dbb57`, planned queue and delegated policies; no implementation claimed.
