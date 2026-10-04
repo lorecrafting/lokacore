@@ -18,6 +18,14 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
+The phone bundles `ashmere_sampler@0.0.1` in `loka-ashmere-sampler.db`, under the
+[approved sampler scope](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#11-c1-sampler-the-gate-story-q2)
+and [identity/prose record](../decisions/owner-decision-sampler-batch-2026-10-03.md).
+Its six rooms reuse Ashmere geography and prototype prose; its lantern errand,
+chapter transition and landing scene demonstrate the installed mechanics. The
+Lantern source, release pins and `loka-lantern.db` save remain available unchanged;
+the app opens only the sampler file and offers no story picker.
+
 ## Compiler
 
 `mix loka.compile <source dir> <artifact path>` (`lib/mix/tasks/loka.compile.ex:12`) writes

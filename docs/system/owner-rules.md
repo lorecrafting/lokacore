@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Sampler identity and complete prose follow the [owner delegation and PM selections](../decisions/owner-decision-sampler-batch-2026-10-03.md).
+
 - World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
 - Resume the approved C1 touch presenter alongside useful parallel mechanics planning and sampler preparation
   ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md)).
