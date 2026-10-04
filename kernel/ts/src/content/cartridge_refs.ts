@@ -124,6 +124,9 @@ export type Checks = ReturnType<typeof checkers>;
 
 export function checkers(c: Obj, out: Diagnostic[]) {
   const { id, version } = c.manifest;
+  for (const [ref, fact] of Object.entries(c.facts as Obj))
+    if (!typed(fact.value_type.default, fact.value_type))
+      out.push(diag('FACT_DEFAULT_INVALID', `.cartridge.facts${step(ref)}.value_type.default`));
   const named = (r: Obj, kind: string, path: string) => {
     const target = refString(r as DefinitionRef);
     const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === kind;
@@ -142,20 +145,9 @@ export function checkers(c: Obj, out: Diagnostic[]) {
   return { named, typedValue, text };
 }
 
-// Every fact_compare names a fact of this cartridge with a value of its type, every has_item
-// an item of it, every barrier_state a barrier of it, every quest_state a quest of it, every
-// stat_compare an attribute and every resource_compare a resource of it (the kernel reads them; any format, since v1 action policies are evaluated too),
-// and no time_window is empty (EMPTY_TIME_WINDOW). v2: the entry, every exit and every room an
-// NPC starts in or names in its daily schedule name a room of this cartridge, an exit's barrier
-// a barrier of it, which each exit of its destination back to its room names too
-// (BARRIER_MISMATCH), a barrier's key_item an item of it, every text key a room, a detail, an
-// NPC, an item, a barrier, a variant, an action or a recipe uses has a catalog entry, every
-// touch link names what it may (content/cartridge_links.ts), every detail's first alias is its own and
-// typable, items and NPCs start where containment allows, recipes and rooms' action
-// contributions name what exists (recipes), quests, reactions and dialogues are coherent
-// (content/cartridge_quests.ts, content/cartridge_reactions.ts, content/cartridge_dialogues.ts), each resource's
-// bounds hold its start (RESOURCE_SPEC_INVALID), each band table is well formed (bands) and the
-// world's move cost names a resource of this cartridge.
+// In both formats, validate fact defaults and policy references, typed comparisons and windows.
+// In v2 also validate entry, exits, NPC and item locations, text and touch links, barriers,
+// action contributions, quests, reactions, dialogues, resource bounds and movement cost.
 // size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];

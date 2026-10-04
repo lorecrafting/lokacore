@@ -195,6 +195,8 @@ references (`kernel/ts/src/content/cartridge_refs.ts:156` and the `cartridge_*.t
 compiler's checks), and the installed kernel (`content/cartridge.ts:229`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
+The reference stage rejects a fact default outside its declared enum values or integer bounds
+as `FACT_DEFAULT_INVALID` at `.cartridge.facts[<ref>].value_type.default`, in v1 and v2.
 An item's `barrier` is a reference to a barrier (barrier@1 owns the kind; a short key compiles
 to its full ref) and is checked as above in both the compiler and the loader. An item's `slot` is a definition part owned by `equipment` (`UNDECLARED_CAPABILITY` when the
 lock lacks it), in both the compiler and the loader. Under position@1 the loader, at the
