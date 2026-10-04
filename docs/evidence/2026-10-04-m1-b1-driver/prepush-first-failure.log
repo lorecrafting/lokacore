@@ -1,0 +1,190 @@
+Resolving Hex dependencies...
+Resolution completed in 0.013s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+==> boundary
+Compiling 15 files (.ex)
+Generated boundary app
+
+02:48:10.705 [info] Compiling file system watcher for Mac...
+
+02:48:11.383 [info] Done.
+==> file_system
+Compiling 7 files (.ex)
+Generated file_system app
+==> bunt
+Compiling 2 files (.ex)
+Generated bunt app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> credo
+Compiling 257 files (.ex)
+Generated credo app
+==> loka
+Compiling 33 files (.ex)
+Generated loka app
+No cycles found
+Running ExUnit with seed: 666164, max_cases: 16
+
+....................................................................................................................................................................................................................................................................
+Finished in 2.1 seconds (2.0s async, 0.04s sync)
+
+Result: 260 passed
+Checking 67 source files (this might take a while) ...
+
+Please report incorrect results: https://github.com/rrrene/credo/issues
+
+Analysis took 0.03 seconds (0.02s to load, 0.01s running 4 checks on 67 files)
+832 mods/funs, found no issues.
+
+Use `mix credo explain` to explain issues, `mix credo --help` for options.
+lib/loka/core/compose.ex:1: info: size: allow 315, the delta algebra stays one module like its twin kernel/ts/src/foundation/compose.ts
+ok   boundary: web reaches store (only platform may)
+ok   boundary: core calls an undeclared external app
+ok   types: a PartyId where a CharacterId is matched (03 §6)
+ok   xref: dependency cycle
+ok   xref: compile-connected edge
+ok   credo: cyclomatic complexity 10
+ok   credo: nesting 3
+ok   credo: ABC size 31
+ok   credo: arity 7
+ok   contracts: schema changed without regenerating the TypeScript
+ok   contracts: schema changed without regenerating the docs
+ok   contracts: unsupported keyword fails compilation
+ok   contracts: unsupported keyword fails generation
+ok   contracts: a map with declared properties fails compilation
+ok   contracts: anyOf with overlapping types fails compilation
+ok   features: a capability implemented without its feature map cells
+ok   features: a ruleless capability implemented without its feature map cells
+ok   features: a transcript added without regenerating the feature map
+ok   docs: AGENTS.md over its word budget
+ok   contracts: elixir host adapter without a differential (ADR-074)
+ok   size: limits and allow markers
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+Running 14 tests
+
+----------- Case Details -----------
+PASS mobile-realm-no-story  .........
+PASS mobile-renderer-imports  ..................................
+PASS ts-foundation-imports  .........
+PASS ts-rule-registration  .......
+PASS ts-rule-module-pure  ..........................
+PASS ts-rule-module-imports  ...............
+PASS mobile-shared-no-authority  .........
+PASS mobile-authority-no-display-text  ....................
+PASS mobile-session-contracts-only  .......
+PASS ts-kernel-pure  ............
+PASS elixir-kernel-pure  .....................................
+PASS ts-rule-module-location  .........
+PASS mobile-story-no-realm  ..........
+PASS mobile-kernel-via-local-story  ........
+
+test result: ok. 14 passed; 0 failed;
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+ok   elixir-kernel-pure
+ok   mobile-authority-no-display-text
+ok   mobile-kernel-via-local-story
+ok   mobile-realm-no-story
+ok   mobile-renderer-imports
+ok   mobile-session-contracts-only
+ok   mobile-shared-no-authority
+ok   mobile-story-no-realm
+ok   ts-foundation-imports
+ok   ts-kernel-pure
+ok   ts-rule-module-imports
+ok   ts-rule-module-location
+ok   ts-rule-module-pure
+ok   ts-rule-registration
+ok   docs_only: skip for .md only, run otherwise
+344 docs, 0 broken link(s), 0 unreachable
+ok   docs: stale code pointers
+
+> loka-kernel@0.0.0 typecheck
+> tsc && tsc -p test && tsc -p play
+
+
+> loka-kernel@0.0.0 test
+> node --test --test-reporter=${TEST_REPORTER:-spec} "test/**/*.test.ts"
+
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+....................
+................
+ok   kernel tsc rejects host and Node APIs
+ok   typecheck covers the tests
+ok   typecheck covers play/
+ok   step cannot skip admit()
+kernel/ts/play/main.ts:2: info: size: allow 315, one terminal session: its loop, each command's dispatch and the replay
+kernel/ts/test/dialogue.test.ts:1: info: size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
+mobile/app/book/polish.test.ts:2: info: size: allow 520, Book routes, retries and authored-detail checks share the minimal host/session adapter
+mobile/authority/local-story/local_story.test.ts:1: info: size: allow 650, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions, narration, choices) shares this harness
+mobile/authority/local-story/saves.test.ts:1: info: size: allow 560, every save-open outcome shares this file's one-process harness
+ok   ts size: limits and allow markers
+Checking formatting...
+All matched files use Prettier code style!
+
+> loka-app@0.0.0 test
+> node --test --test-reporter=${TEST_REPORTER:-spec} "../authority/**/*.test.ts" "book/*.test.ts" "*.test.ts"
+
+....................
+....................
+....................
+....................
+....................
+....................
+.................X..
+....................
+....................
+....................
+....................
+
+
+Failed tests:
+
+✖ a newer app's save is never started over (11.587833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'save_corrupt'
+  - 'unsupported_save_format'
+  
+      at TestContext.<anonymous> (file://[private-path]:362:10)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'save_corrupt',
+    expected: 'unsupported_save_format',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+error: failed to push some refs to 'github.com:lorecrafting/lokacore.git'

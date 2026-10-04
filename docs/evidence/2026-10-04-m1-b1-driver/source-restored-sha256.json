@@ -18,5 +18,6 @@
   "mobile/authority/local-story/store.ts": "6560672abc5bc4aa8f2092c566093fc0247ec894e1e6800cee85413e40a15960",
   "mobile/authority/local-story/transaction.ts": "3306a997595348a54de7cf0398a3b6f269bec8b4e9e69d163e2b0f30e9b63db4",
   "mobile/packages/game-view/session.ts": "d2895ea5ac68ebea4f03370b9dc7eb15e382ade0b8c6eb1b80dafe4d79aac619",
-  "protocol/observation.schema.json": "5d6060ba7c07f1be52af3b1767ac6f87cb626f858e2f3808f53ce7bf1d1edb5a"
+  "protocol/observation.schema.json": "5d6060ba7c07f1be52af3b1767ac6f87cb626f858e2f3808f53ce7bf1d1edb5a",
+  "mobile/authority/local-story/smoke.test.ts": "cf1f2e0836034c2f1d44fecdebb6d8ed49478b8d9d9e2af0961cf33e2d5b3016"
 }

@@ -33,3 +33,7 @@ Ponytail Review: no removable machinery remains. One local driver uses existing 
 B2 still owns actual lifecycle/UI/sampler consumption. No native compatibility/device proof, owner save, resource/calendar algebra, proposal cancellation change, broad trace migration or M1-B completion is claimed. Arithmetic uses exact checked Number decomposition without reducing the accepted safe profile.
 
 Retained outputs are redacted before hashing. `SHA256SUMS` and its verification are beside the artifacts; neither hashes itself. Existing `docs/evidence/** -whitespace` protects their bytes.
+
+## Final publication check correction
+
+The first normal pre-push passed the nonmobile checks and failed the existing smoke test that still used v2 as an unsupported future save. Its input now uses v3, preserving the literal unsupported/no-reset assertions; the targeted case passes (`future-format-restored.log`). Remaining v2 test mentions are actual supported-format expectations. `prepush-first-failure.log` retains the real failure; a normal final pre-push rerun is required. No hook bypass or runtime relaxation was used.

@@ -6,6 +6,7 @@ detached-checkpoint-old.log: OK
 evidence-guard-new.log: OK
 evidence-guard-old.log: OK
 focused-green.log: OK
+future-format-restored.log: OK
 gameplay-run-new.log: OK
 gameplay-run-old.log: OK
 gameplay-witness-new.log: OK
@@ -19,6 +20,7 @@ missing-anchor-old.log: OK
 mutations.json: OK
 naive-product-new.log: OK
 naive-product-old.log: OK
+prepush-first-failure.log: OK
 private-input-new.log: OK
 private-input-old.log: OK
 release-reservation-new.log: OK

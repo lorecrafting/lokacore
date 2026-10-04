@@ -355,7 +355,7 @@ test("a newer app's save is never started over", () => {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
   const a = processOn(path);
   a.press('Take a leather satchel');
-  a.sql.exec("UPDATE save SET format = 'loka-save-v2'");
+  a.sql.exec("UPDATE save SET format = 'loka-save-v3'");
   a.sql.close();
   const before = readFileSync(path);
   const b = app(path);
