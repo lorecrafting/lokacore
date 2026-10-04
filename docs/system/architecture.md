@@ -104,6 +104,28 @@ The app shell imports the local authority's session controller
   sequences through the local authority on real SQLite with real faults (SQLITE_FULL, a failed
   COMMIT, SIGKILL just before or after COMMIT; `:4`).
 
+## Book presenter
+
+The phone book consumes the host-neutral [GameSession](../decisions/owner-decision-presenter-split-2026-10-02.md)
+boundary and [GameView](protocol.md#gameview); it sends only the actions offered by that
+view, with the freshness token captured when the button was drawn. Cartridge text supplies
+resource-band phrases (`band.<key>`), journal text, chapter titles and scene lines; projected
+resource tones map to the paper palette without presenter thresholds.
+
+The room and Map pages show each exit's adjacent sight and legal door actions. Carrying
+separates held items from worn slots; item pages expose projected reachable contents and
+legal container/equipment actions. Same-room item actions retain the open page while its
+item remains projected; leaving the room or losing that item closes it. Position is shown
+in the status line, with the offered stand/sit/rest/sleep controls on Character.
+
+A declared chapter opens a title page on launch and when its index changes, once per
+presenter session. A running modal scene takes precedence, drawing its persisted current
+line and only its offered Continue action; ordinary book controls and NPC menus are hidden.
+A simultaneously reached chapter title waits until the scene ends. Dismissing a chapter
+page changes only presentation. World-clock, safety and interruption integration remains
+future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
+Touch and Simulator acceptance follows [C1 slice 12](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
+
 ## Observability
 
 One record format `loka-obs-v1` with a registered event name and store
