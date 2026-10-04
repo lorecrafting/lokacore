@@ -1,0 +1,11 @@
+✔ the app opens and replaces only its sampler save, preserving an existing Lantern save (68.168291ms)
+✔ sampler invocation walk reaches all six rooms and resumes the carried ending at line two (62.880708ms)
+✔ leaving the lantern resolves with the fallback journal and no carried chapter or scene (4.579416ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 316.53325

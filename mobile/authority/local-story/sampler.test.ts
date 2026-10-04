@@ -105,6 +105,12 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
     assert.deepEqual(p.view().chapter, { index: 0, title: 'chapter.lantern' });
     assert.deepEqual(p.view().journal, []);
     assert.equal(p.view().scene, undefined);
+    // Breaks: the sampler omits Look's capability or a no-target Look becomes an examine.
+    assert.ok(p.view().actions.some((a) => a.action_key === 'look'));
+    const looked = p.invoke('look');
+    assert.equal((looked.reply.decision as { outcome: string }).outcome, 'looked');
+    assert.equal(p.view().place.title.key, 'room.ferry_landing.title');
+    assert.equal(p.view().place.description.key, 'room.ferry_landing.description');
     assert.equal(p.view().exits[0].sight?.entities[0].name, 'item.lantern.short');
     p.invoke('bram_offer', {}, 'bram');
     assert.equal(p.view().choice!.prompt.key, 'dialogue.bram_offer.prompt');
@@ -215,8 +221,8 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
       .prepare('SELECT record FROM trace ORDER BY rowid')
       .all()
       .map((r) => JSON.parse(r.record as string));
-    assert.equal(records.filter((r) => r.event === 'trace.command').length, 36);
-    assert.equal(sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 36);
+    assert.equal(records.filter((r) => r.event === 'trace.command').length, 37);
+    assert.equal(sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 37);
   } finally {
     sql.close();
     rmSync(dir, { recursive: true, force: true });

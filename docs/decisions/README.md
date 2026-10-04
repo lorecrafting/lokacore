@@ -110,3 +110,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - PM ruling: [sampler condition-band acceptance repair using existing labels and default settings](pm-decision-sampler-bands-2026-10-03.md).
 
 - [C1 playtest polish](owner-decision-c1-playtest-polish-2026-10-03.md): clean room output, full NPC details, Back to World and room-status position controls.
+
+- [Development sampler replacement and authentic Look](owner-decision-sampler-development-look-2026-10-03.md): owner building-phase save direction and bounded PM `0.0.2` adoption.

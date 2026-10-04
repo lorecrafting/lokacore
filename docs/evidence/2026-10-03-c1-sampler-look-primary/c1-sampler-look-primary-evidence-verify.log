@@ -29,3 +29,5 @@ look-mutant-missing-cap.log: OK
 look-oracle.log: OK
 look-restored.log: OK
 look-sim.log: OK
+
+EXIT 0
