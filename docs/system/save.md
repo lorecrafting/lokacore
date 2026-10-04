@@ -150,6 +150,10 @@ bundle never keeps an older one. Refusal and
 outcome words live in `mobile/app/book/words.ts`
 ([owner rule](owner-rules.md#architecture-and-engine)).
 
+## Planned combat/death persistence (M4/M5)
+
+**Planned until M5/M6 implementation.** The [planned first encounter](../spec/conformance/first-encounter.md#actual-foundation-gaps-to-resolve-in-m5) requires entity-specific NPC HP and saved dynamic corpse identity/initial custody before lethal combat. M5 must extend changed-row adoption/save/reopen atomically with receipts and reconcile uncertain commits before input; a transient World.entities mutation is insufficient. Final fields/operation syntax are not frozen or implemented by M4-A.
+
 ## M1-A trusted elapsed receipts
 
 The open authority also exposes trusted `elapsed({expected_run_id, from, until})` and `runId()`, for an authority driver, never a player invocation. No timer or anchor storage is installed in A. After settling the existing fence, compare expected_run_id with the current durable save run before receipt lookup: mismatch returns `stale_view` without writes.

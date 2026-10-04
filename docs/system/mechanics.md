@@ -352,6 +352,10 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`mechani
   Policies/reactions may read scene facts. The one direct coupling, reaction → scene,
   is limited to event start delivery until a second capability needs this hook.
 
+## Planned first combat contract (M4-A)
+
+**Planned until M5/M6 implementation.** The [M4-A first-encounter contract](../spec/conformance/first-encounter.md), under its [PM adoption](../decisions/pm-decision-first-encounter-2026-10-03.md), governs later M5/M6 work. It specifies one real cellar rat, conditional RNG, alternating opportunities, immediate deterministic flee and death-before-revival closure. This is planned, not an installed capability. Exact schemas/ownership and executable rules follow the consuming implementation PRs.
+
 ## M1-A elapsed authority time
 
 [Contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md). `manifest.time_policy.profile = real_elapsed` disables player Wait and recipe time skips; omitted policy retains legacy behavior. `stepElapsed(world, command, revision)` admits only schedule-owned `elapsed {actor_id, run_id, from, until}`. It validates schema and derived CommandId, rejects nil ID (`permission_denied`), wrong world/actor (`not_found`), and refuses wrong derived ID (`permission_denied`), wrong profile or interval (`invalid_state`). A valid interval has `from == world.state.clock`, `until > from`. Accepted outcome `elapsed` contains one root `time.advance`, no own narration/event/RNG; the existing proposal supplies due jobs, reactions, owned events and all budgets. Faults adopt nothing. Normal `step` refuses elapsed (`permission_denied`) even if supplied a forged ActionSet action. Scenes retain Continue-only player admission while this trusted path advances time.

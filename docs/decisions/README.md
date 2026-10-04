@@ -126,3 +126,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
 
 - [M1-A elapsed authority contract](pm-decision-m1-a-elapsed-contract-2026-10-04.md).
+- PM first-consumer decision: [M4-A cellar encounter, RNG/escape/death policies and M5 prerequisites](pm-decision-first-encounter-2026-10-03.md).
