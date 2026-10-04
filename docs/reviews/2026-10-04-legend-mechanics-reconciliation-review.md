@@ -31,3 +31,20 @@ Ponytail and Ponytail Review applied from the installed skills: **Lean already. 
 ## Limits and handoff
 
 Light lane only: read-only Git/GitHub queries, document/arithmetic checks and this review-record commit. No dependency install, compilation, broad test run, mutant, native/Simulator interaction, save change or owner-checkout operation was needed for this Markdown-only PR. Future controls are requirements for later consuming briefs, not tests claimed here. The complete historical web source set and private Legend game engine were not freshly reverified; the reference preserves its evidence labels, pinned level-50 proxy and unknown equations. Normal documentation commit hooks validate this record/index; the PM appends the separate Sol answer and handles publication.
+
+## Separate requested Sol review — round 1
+
+PM-owned read-only CLI session `47539` terminated with EXIT0. Requested model `gpt-6-sol`, high reasoning; runtime model identity is unverified. Reviewed head `549d707a65d7c66a61439201dc9ddd35e50d2cc3`. The following answer is appended verbatim; the answer SHA-256 is `f36cc29cda6840d60fe934e940d96f4b59c20ef152056cbf0a43e388605215c5`, and the event-log SHA-256 is `67e6425c37b039df0770eb67c1a22088cc16f12a87cc534ccc2472c1cb150521`.
+
+```text
+CHANGES REQUIRED
+
+Sol-LEGEND-R1-01 — should-fix — docs/decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md:20
+The table labeled “Current mechanics policy” says M1-B2 is in progress, while docs/ROADMAP.md:28 and the base commit record #155 as merged. A developer using this table to plan M1-C could treat completed lifecycle work as an unmet dependency. Update the current status; line 11 may remain as a clearly dated account of the earlier inspection.
+
+Scope: Independent read-only review of the 16 Markdown files against the stated base, owner records, chapter content and merged M1 contracts. Ponytail Review found no unnecessary machinery. Tests and runtime behavior were not verified; the runtime model identity is unverified.
+
+I inadvertently ran the read-only `git diff --check` despite the no-check instruction. It exited 0; no files were changed.
+```
+
+PM disposition: **Sol-LEGEND-R1-01 OPEN**, accepted for the narrow round-one current-status correction. Primary approval above is retained at its reviewed source; this separate open finding prevents merge until the correction, scoped independent rechecks and exact-head CI are complete. No policy or historical wording change is authorized.
