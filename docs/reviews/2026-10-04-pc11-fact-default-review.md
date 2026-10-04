@@ -58,3 +58,33 @@ fixture rewrite is needed.
 
 Ponytail Review: **Lean already. Ship.** The three-line production guard reuses the
 existing validator. No complexity findings; this does not override PC11-R1.
+
+## Fix round 1 — v2 default regression protection
+
+Fix head reviewed: `5e669b0c6df87566b138473819970dad7451518e`. Same independent
+reviewer; scope limited to PC11-R1, the changed test helper and its direct loader call.
+
+**APPROVE. PC11-R1 closed; no open findings.**
+
+The added test at `kernel/ts/test/cartridge.test.ts:77` builds a controlled ordinary
+v2 enum fact with values `['missing']` and default `'rescued'`, using the existing v2
+fixture and an independently recomputed standard-library hash. Its expected diagnostic
+code and path are literals. The small shared artifact loader helper preserves the v1
+enum and bounded-integer cases; adding the fixture's `resource` capability ensures
+that bypassed semantic validation cannot hide behind installed-capability rejection.
+Production code and frozen fixtures are unchanged.
+
+Independent validation in a fresh detached worktree:
+
+- Baseline loader suite: 77 passed, zero failed.
+- Reapplied the exact surviving mutation from PC11-R1: prefix the default guard with
+  `c.format === 'loka-cartridge-v1' &&`. Loader suite exited 1: exactly the new v2
+  test failed, with the previous 76 tests still passing.
+- Restored production source: loader suite passed 77/77; working tree clean before
+  adding this review update.
+- Rechecked the direct `loadCartridge` call and reference-stage placement: both formats
+  still reach default validation, with schema/hash validation preceding it.
+
+Scoped Ponytail Review: **Lean already. Ship.** One regression test and reused artifact
+construction close the finding without new production machinery. Final exact-head CI
+and any main-branch reconciliation remain the PM's merge prerequisites.
