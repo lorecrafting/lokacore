@@ -12,9 +12,9 @@ import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import type { RngState, WorldContextId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
-import { encode } from '../../../kernel/ts/src/canonical.ts';
-import { validate } from '../../../kernel/ts/src/validate.ts';
-import { INSTALLED } from '../../../kernel/ts/src/world.ts';
+import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
+import { INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory } from './authority.ts';
 

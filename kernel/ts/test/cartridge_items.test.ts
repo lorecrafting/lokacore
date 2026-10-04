@@ -5,8 +5,8 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { loadCartridge } from '../src/cartridge.ts';
-import { INSTALLED } from '../src/world.ts';
+import { loadCartridge } from '../src/content/cartridge.ts';
+import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_items_hash.json');

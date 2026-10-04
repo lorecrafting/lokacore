@@ -1,0 +1,12 @@
+id: ts-foundation-imports
+valid:
+  - "import { sha256Hex } from './sha256.ts';"
+  - "import type { DeltaOp } from '../contracts.gen.ts';"
+invalid:
+  - "import type { World } from '../runtime/decision.ts';"
+  - "export { step } from '../runtime/world.ts';"
+  - "import { decide } from '../mechanics/movement/rule.ts';"
+  - "import { loadCartridge } from '../index.ts';"
+  - "import { encode } from '../../outside.ts';"
+  - "import { readFileSync } from 'node:fs';"
+  - "const t = require(`../runtime/world.ts`);"

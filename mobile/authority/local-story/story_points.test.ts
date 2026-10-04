@@ -12,15 +12,15 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
-import { encode, hash } from '../../../kernel/ts/src/canonical.ts';
+import { encode, hash } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type {
   StoryPointReport,
   RngState,
   WorldContextId,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
-import { validate } from '../../../kernel/ts/src/validate.ts';
-import { INSTALLED } from '../../../kernel/ts/src/world.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
+import { INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Saved } from './authority.ts';
 import { deliver } from './progress.ts';

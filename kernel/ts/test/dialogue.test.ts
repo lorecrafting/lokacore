@@ -14,8 +14,8 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { encode } from '../src/canonical.ts';
-import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { encode } from '../src/foundation/canonical.ts';
+import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { decide } from '../play/run.ts';
 import { read } from './read.ts';
 
@@ -161,7 +161,7 @@ test('the GameView shows the pending choice; a dropped lantern makes both option
 });
 
 // Breaks: a talk advertised on every NPC in the room though it accepts only its speaker, or
-// admitted for another NPC (actions.ts accepts; the rule would then answer invalid_state).
+// admitted for another NPC (commands/actions.ts accepts; the rule would then answer invalid_state).
 test('the talk is listed on and accepts its speaker only', () => {
   const w = world((c) => {
     const npc = c.npcs[`${F}:npc/bram`];
@@ -278,7 +278,7 @@ test('leave hands the lantern to Bram, sets party_led and resolves quest and cho
     [5, 'story_point_reached'],
   ]);
   // IdSource ordinals under OTHER in Python hashlib: the rule mints 0-3 in emission order (the
-  // story point last), then the host its fact_changed (fact.ts factChanged), 4.
+  // story point last), then the host its fact_changed (mechanics/fact.ts factChanged), 4.
   assert.deepEqual(
     decision.events.map((e: { id: string }) => e.id),
     [

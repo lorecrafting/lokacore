@@ -1,10 +1,10 @@
 // Delayed delivery of the save's story point reports to the progress platform (23 §§4-5; 03 §26).
-import { encode, hash } from '../../../kernel/ts/src/canonical.ts';
+import { encode, hash } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type {
   StoryPointAcceptance,
   StoryPointReport,
 } from '../../../kernel/ts/src/contracts.gen.ts';
-import { validate } from '../../../kernel/ts/src/validate.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { reconcile, transaction, type Db } from './store.ts';
 
 /** The platform's answer to one report for `account` (23 §5); rejects when it is unreachable. */

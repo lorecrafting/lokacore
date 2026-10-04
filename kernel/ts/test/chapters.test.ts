@@ -2,12 +2,12 @@
 // and triggers (mechanics.md Chapters). The story-point key carry differs from choice take_it.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { hash } from '../src/canonical.ts';
-import { refStage } from '../src/cartridge_refs.ts';
+import { hash } from '../src/foundation/canonical.ts';
+import { refStage } from '../src/content/cartridge_refs.ts';
 import type { CharacterId, Command, Key } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { identify, resolve } from '../src/invocation.ts';
-import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
+import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const world = (name = 'chapters', edit: (c: any) => void = () => {}): World => {

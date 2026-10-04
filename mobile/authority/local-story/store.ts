@@ -3,12 +3,12 @@
 // The row schema is the implementation's (ADR-072: "the per-row schema is an R2+ design task").
 // Every write is one transaction opened and committed here, never by a driver helper (mobile
 // lessons).
-import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
-import { target } from '../../../kernel/ts/src/compose.ts';
+import { encode, type Json } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { target } from '../../../kernel/ts/src/foundation/compose.ts';
 import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/decision.ts';
-import { validate } from '../../../kernel/ts/src/validate.ts';
-import { row } from '../../../kernel/ts/src/world.ts';
+import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
+import { row } from '../../../kernel/ts/src/runtime/world.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
 export type Db = {

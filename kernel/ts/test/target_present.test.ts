@@ -8,12 +8,12 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { EntityId } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
-import { resolve } from '../src/invocation.ts';
-import { holds } from '../src/policy.ts';
-import { gameView } from '../src/world.ts';
+import { resolve } from '../src/commands/invocation.ts';
+import { holds } from '../src/mechanics/policy.ts';
+import { gameView } from '../src/runtime/world.ts';
 import { accept, after, at, chat, CID, F, PRESENT, shown, stepped, world } from './ferry_probe.ts';
 
-// The talk invocation of `action_key` on `target`, resolved (invocation.ts) and stepped.
+// The talk invocation of `action_key` on `target`, resolved (commands/invocation.ts) and stepped.
 const invoked = (w: World, action_key: string, target: EntityId) => {
   const invocation = { action_key, actor_id: w.character, target_ids: [target], input: {} };
   const c = resolve(w, { invocation, command_id: CID } as never);

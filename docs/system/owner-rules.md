@@ -42,7 +42,7 @@ and not repeated here.
   ([record](../archive/decisions/owner-decision-early-r7r8-plan-2026-10-01.md)).
 - `scene@1`'s modal text subset is now needed by the approved chapter-one
   [plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md), implemented as
-  [scene facts](mechanics.md#scene1-rulesscenets); the durable choice remains dialogue's
+  [scene facts](mechanics.md#scene1-mechanicsscenerulets); the durable choice remains dialogue's
   continuation row ([earlier record](../archive/decisions/owner-decision-split-d-2026-10-01.md)).
 - Puppeting comes later; rules read the actor from the command, never the player
   ([record](../archive/decisions/owner-decision-puppeting-2026-09-25.md)). Player-written descriptions
@@ -52,6 +52,8 @@ and not repeated here.
 - The owner is the human-proof tester for now ([record](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md)).
 
 ## Architecture and engine
+
+- The TypeScript kernel uses the responsibility folders and colocated rule helpers in [architecture.md](architecture.md#typescript-kernel), preserving semantics and deterministic ownership/purity guards ([record](../decisions/owner-decision-kernel-layout-2026-10-03.md)).
 
 - The engine owns mechanics; cartridges own numbers and world settings; no game-world value is a
   literal in the engine or a presenter. The inventory of values still to move:
@@ -135,7 +137,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Gates are slim: the owner's play when there is something touchable, one codex Astra audit of the
   riskiest code, and a short checklist with one reviewer; no Opus-plus-Astra double review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
-- Reviews: codex Astra only on the gate audit and `proposal.ts` changes; Sol on other core and
+- Reviews: codex Astra only on the gate audit and `runtime/proposal.ts` changes; Sol on other core and
   contract first reviews and every fix re-check; Fable only as codex's stand-in (and, by exception,
   the docs compaction); Opus drafts briefs; the PM keeps one persistent worktree
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md),

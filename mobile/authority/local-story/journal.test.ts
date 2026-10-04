@@ -8,8 +8,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import type { Command, Key, WorldContextId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
-import { identify, resolve } from '../../../kernel/ts/src/invocation.ts';
-import { gameView, INSTALLED, step } from '../../../kernel/ts/src/world.ts';
+import { identify, resolve } from '../../../kernel/ts/src/commands/invocation.ts';
+import { gameView, INSTALLED, step } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Saved } from './authority.ts';
 

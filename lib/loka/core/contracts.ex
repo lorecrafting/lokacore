@@ -2,7 +2,7 @@ defmodule Loka.Core.Contracts do
   @moduledoc """
   Validates JSON values against the contracts in `protocol/*.schema.json` (spec 04 §12,
   14 §R3), read at compile time and checked against the closed schema subset
-  (`Loka.Core.Contracts.Schema`). `kernel/ts/src/validate.ts` is the TypeScript twin: same
+  (`Loka.Core.Contracts.Schema`). `kernel/ts/src/foundation/validate.ts` is the TypeScript twin: same
   paths, same codes (`protocol/error_registry.json`).
 
   Values must come from `Loka.Core.Canonical.decode/1` (the frozen numeric profile). The

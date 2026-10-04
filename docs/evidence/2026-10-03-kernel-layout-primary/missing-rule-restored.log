@@ -1,0 +1,23 @@
+✔ the known answer loads with its hash, as its hand-written value (12.104167ms)
+✔ the carry ending lands in its variant and ends Bram's talk (17.1755ms)
+✔ the leave ending lands in its variant and ends Bram's talk (5.454584ms)
+✔ at 06:00 the west gate is locked (2.706333ms)
+✔ the old gate lists unlock only with the lantern, and each exit shows what lies beyond (3.968125ms)
+✔ a fresh world mints IdSource ids and puts the player in the entry room (2.650417ms)
+✔ a body out of mv waits an hour and moves again (11.396ms)
+✔ move north proposes one transfer and entity_entered_room, and commits it (0.526292ms)
+✔ a scripted walk visits the expected rooms and rejects the known bad moves (2.01ms)
+✔ look is accepted with an empty delta and leaves the state unchanged (0.384792ms)
+✔ unknown capabilities and other actors are rejected before any rule (0.446208ms)
+✔ the movement invariants fail on a broken world (0.4355ms)
+✔ the delta digest construction matches the Python known answer (0.588333ms)
+✔ a foreign event faults unowned_event, and a rule mutating the world throws (1.360417ms)
+✔ INSTALLED is each rule module and each implemented ruleless capability (3.864542ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 188.74225

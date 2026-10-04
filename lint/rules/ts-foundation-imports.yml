@@ -1,0 +1,9 @@
+id: ts-foundation-imports
+language: tsx
+severity: error
+message: Foundation imports only foundation modules and root generated contracts (docs/system/architecture.md TypeScript kernel); world/runtime, mechanics, commands, view, content and host APIs stay outside this boundary.
+files: [kernel/ts/src/foundation/**]
+rule:
+  any: [{ kind: string }, { kind: template_string }]
+  matches: module-specifier
+  not: { regex: "^['\"](\\./[a-z0-9_]+\\.ts|\\.\\./contracts\\.gen\\.ts)['\"]$" }

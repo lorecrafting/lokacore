@@ -7,13 +7,13 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { apply, type ActionSet } from '../src/actions.ts';
-import { hash } from '../src/canonical.ts';
+import { apply, type ActionSet } from '../src/commands/actions.ts';
+import { hash } from '../src/foundation/canonical.ts';
 import type { Command } from '../src/contracts.gen.ts';
-import { accepted, allocator } from '../src/decision.ts';
+import { accepted, allocator } from '../src/runtime/decision.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { describe } from '../src/rules/description_variant.ts';
-import { admit, adopt, gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { describe } from '../src/mechanics/description_variant/rule.ts';
+import { admit, adopt, gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_bell_hash.json');

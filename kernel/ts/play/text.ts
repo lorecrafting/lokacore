@@ -3,14 +3,14 @@
 // definitions carry no aliases yet (action.schema.json), so the aliases live here.
 import type { Cartridge, World } from '../src/index.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
-import { key } from '../src/compose.ts';
-import { COMPASS, refString } from '../src/decision.ts';
-import { exitOf } from '../src/lookups.ts';
+import { key } from '../src/foundation/compose.ts';
+import { COMPASS, refString } from '../src/runtime/decision.ts';
+import { exitOf } from '../src/mechanics/lookups.ts';
 import { gameView } from '../src/index.ts';
-import { describe } from '../src/rules/description_variant.ts';
-import { sight } from '../src/rules/movement.ts';
-import { normalize } from '../src/target.ts';
-import { level, resourceRef } from '../src/resource.ts';
+import { describe } from '../src/mechanics/description_variant/rule.ts';
+import { sight } from '../src/mechanics/movement/rule.ts';
+import { normalize } from '../src/commands/target.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
 
 /**
  * A Command's payload without its actor, a lookup (the player's words after the verb, which
@@ -65,7 +65,7 @@ const VERBS: Record<string, 'take' | 'drop' | 'give' | 'talk'> = {
 
 /**
  * `look`/`l`, `look`/`l`/`examine`/`x` <words> (a lookup; `look at the post` and `look post`
- * alike, target.ts normalize), `get`/`take` <words>, `drop` <words>, `give` <words> `to`
+ * alike, commands/target.ts normalize), `get`/`take` <words>, `drop` <words>, `give` <words> `to`
  * <words>, `open`/`close`/`lock`/`unlock` <a direction, its initial, or words naming a door>,
  * `scan`, `inventory`/`i`, `accept` [words of its label] (a quest offer), `talk` <words>,
  * `choose` <choice id> and `bye` (the pending choice: choose an option or close it), `journal`/`j`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
@@ -236,7 +236,7 @@ export const clock = (t: number): string => {
 
 /**
  * The DikuMUD-style status line, `hp 20/20  ma 100/100  mv 82/82  day 1, 00:00`: each default
- * pool the cartridge declares (current/maximum, resource.ts), then the time; empty for a
+ * pool the cartridge declares (current/maximum, mechanics/resource.ts), then the time; empty for a
  * cartridge without the pools.
  */
 export function status(world: World): string {

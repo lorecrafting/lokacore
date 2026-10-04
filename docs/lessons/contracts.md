@@ -17,10 +17,10 @@ file covers: [the protocol map](../../protocol/README.md).
   explicitly (`{:character_id, id}`) in every domain function head.
 - Rules take the actor from the command (`payload.actor_id`), never from `world.character`;
   only the admission boundary and hosts should name the player. An actor's body comes from
-  `bodyOf(world, actor)` in `kernel/ts/src/decision.ts`, the one place that still assumes one
+  `bodyOf(world, actor)` in `kernel/ts/src/runtime/decision.ts`, the one place that still assumes one
   body per world; `event()` takes the actor from the command. Before admission accepts a
   second actor, `bodyOf` must change, as must `give` accepting only an NPC as recipient
-  (`rules/containment.ts`) and the invariant `player_in_one_room`, which checks the one body. A rule that assumes "the actor is the player" blocks puppeting and NPC-issued
+  (`mechanics/containment/rule.ts`) and the invariant `player_in_one_room`, which checks the one body. A rule that assumes "the actor is the player" blocks puppeting and NPC-issued
   commands
   ([owner decision](../archive/decisions/owner-decision-puppeting-2026-09-25.md)).
 - Cartridge source accepts a short reference (a Key) at every DefinitionRef, but only the
@@ -29,9 +29,9 @@ file covers: [the protocol map](../../protocol/README.md).
   loader rejects
   ([owner decision](../archive/decisions/owner-decision-short-refs-2026-09-25.md)).
 - A command reaches its rule only if an action of the actor's ActionSet resolves to it and
-  accepts its target and input (`refusal` in `kernel/ts/src/actions.ts`; an engine verb's rule
+  accepts its target and input (`refusal` in `kernel/ts/src/commands/actions.ts`; an engine verb's rule
   is its own contract): a new player verb needs its entry in `VERBS` there, or `step` rejects
   it `unsupported_capability`. A cartridge action that overrides an engine verb narrows that
   verb to exactly its own spec: overriding `look` with a no-target spec also disables examine.
   A rule that emits events after a `fact.assign` leaves that assign's causal position free; the
-  host puts its `fact_changed` there (`factChanged` in `kernel/ts/src/fact.ts`).
+  host puts its `fact_changed` there (`factChanged` in `kernel/ts/src/mechanics/fact.ts`).

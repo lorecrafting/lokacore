@@ -2,7 +2,7 @@
 // each followed by its trace.command entries, as canonical JSON rows in the save's trace table.
 // Derived, never authority: written after the gameplay transaction, in its own, and a trace
 // failure never reaches the game.
-import { encode, hash } from '../../../kernel/ts/src/canonical.ts';
+import { encode, hash } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { rollback, transaction, type Db } from './store.ts';
 

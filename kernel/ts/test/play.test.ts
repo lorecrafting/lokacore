@@ -9,8 +9,8 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir, userInfo } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { encode } from '../src/canonical.ts';
-import { validate } from '../src/validate.ts';
+import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { line, ROOT } from '../play/obs.ts';
 import { read } from './read.ts';
 

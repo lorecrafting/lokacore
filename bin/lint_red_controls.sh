@@ -4,19 +4,22 @@
 set -u
 cd "$(dirname "$0")/.."
 # Mobile plants are .tsx and the kernel plant is .ts, so both file types are proven covered.
-planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts kernel/ts/src/rules/red_control.ts mobile/packages/ui/red_control.tsx
+planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts kernel/ts/src/foundation/red_control.ts mobile/packages/ui/red_control.tsx
 mobile/features/story/red_control.tsx mobile/features/realm/red_control.tsx
 mobile/authority/local-story/red_control.ts mobile/app/book/red_control.tsx"
 mkdir -p lib/loka/core
-cp kernel/ts/src/world.ts kernel/ts/src/world.ts.red
+cp kernel/ts/src/runtime/world.ts kernel/ts/src/runtime/world.ts.red
+cp kernel/ts/src/mechanics/movement/rule.ts kernel/ts/src/mechanics/movement/rule.ts.red
 cp mobile/packages/game-view/session.ts mobile/packages/game-view/session.ts.red
-trap 'rm -f $planted; rmdir lib/loka/core 2>/dev/null; mv kernel/ts/src/world.ts.red kernel/ts/src/world.ts; mv mobile/packages/game-view/session.ts.red mobile/packages/game-view/session.ts' EXIT
+trap 'rm -f $planted; rmdir lib/loka/core 2>/dev/null; mv kernel/ts/src/runtime/world.ts.red kernel/ts/src/runtime/world.ts; mv kernel/ts/src/mechanics/movement/rule.ts.red kernel/ts/src/mechanics/movement/rule.ts; mv mobile/packages/game-view/session.ts.red mobile/packages/game-view/session.ts' EXIT
 echo 'defmodule Loka.Core.RedControl do def x, do: File.read!("x") end' > lib/loka/core/red_control.ex
 printf 'export const t = Date.now();\nexport const decide = () => 0;\n' > kernel/ts/src/red_control.ts
 # Astra's A2 counterexamples too: an aliased Object.assign, Function I/O, JSON.parse any.
-printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.state.clock = 1; };\nconst { assign } = Object;\nFunction('x')();\nconst p = JSON.parse('{}');\n" > kernel/ts/src/rules/red_control.ts
+printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.state.clock = 1; };\nconst { assign } = Object;\nFunction('x')();\nconst p = JSON.parse('{}');\n" >> kernel/ts/src/mechanics/movement/rule.ts
+# Foundation must not import the runtime, even as types.
+printf "import type { World } from '../runtime/decision.ts';\n" > kernel/ts/src/foundation/red_control.ts
 # Review F2: an inline rule registered in RULES.
-sed -i.bak 's/  movement: movement.decide,/  movement: (w) => w,/' kernel/ts/src/world.ts && rm kernel/ts/src/world.ts.bak
+sed -i.bak 's/  movement: movement.decide,/  movement: (w) => w,/' kernel/ts/src/runtime/world.ts && rm kernel/ts/src/runtime/world.ts.bak
 # The shared and realm plants are a template-literal require and a require.resolve only, so their
 # rules are reported only if module-specifier sees those forms.
 echo "const a = require(\`../../authority/local-story\`);" > mobile/packages/ui/red_control.tsx

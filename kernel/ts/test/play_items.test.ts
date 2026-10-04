@@ -8,7 +8,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { encode } from '../src/canonical.ts';
+import { encode } from '../src/foundation/canonical.ts';
 import { ROOT } from '../play/obs.ts';
 import { read } from './read.ts';
 

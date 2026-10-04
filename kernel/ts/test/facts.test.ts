@@ -6,14 +6,14 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { hash } from '../src/canonical.ts';
-import { key } from '../src/compose.ts';
+import { hash } from '../src/foundation/canonical.ts';
+import { key } from '../src/foundation/compose.ts';
 import type { CharacterId, Command, Policy } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { holds as condition } from '../src/policy.ts';
-import { describe } from '../src/rules/description_variant.ts';
-import { accepted, allocator, event } from '../src/decision.ts';
-import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
+import { holds as condition } from '../src/mechanics/policy.ts';
+import { describe } from '../src/mechanics/description_variant/rule.ts';
+import { accepted, allocator, event } from '../src/runtime/decision.ts';
+import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_facts_hash.json');
@@ -46,7 +46,7 @@ const SET = {
 } as never;
 
 // Sets facts as a rule will: an accepted decision with fact.assign ops, admitted, composed and
-// adopted (proposal.ts adopt).
+// adopted (runtime/proposal.ts adopt).
 type Assign = [key: string, scope: object, expected: unknown, value: unknown];
 function set(w: World, ...assigns: Assign[]): World {
   const ops = assigns.map(([key, scope, expected, value]) => ({

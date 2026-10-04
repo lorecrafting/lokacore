@@ -19,10 +19,10 @@ echo "export const n: number = 'x';" > play/red_control.ts
 if npm run typecheck >/dev/null 2>&1; then echo "typecheck accepted a type error in play/"; exit 1; fi
 echo "ok   typecheck covers play/"
 rm play/red_control.ts
-# Deleting admit() from step's path must not typecheck (Admitted brand, src/world.ts).
-cp src/world.ts src/world.ts.orig
-trap 'mv -f src/world.ts.orig src/world.ts' EXIT
-sed -i.bak 's/admit(owner, \(rule([^)]*)\))/\1/' src/world.ts && rm src/world.ts.bak
-if cmp -s src/world.ts src/world.ts.orig; then echo "admit plant did not apply"; exit 1; fi
+# Deleting admit() from step's path must not typecheck (Admitted brand, src/runtime/world.ts).
+cp src/runtime/world.ts src/runtime/world.ts.orig
+trap 'mv -f src/runtime/world.ts.orig src/runtime/world.ts' EXIT
+sed -i.bak 's/admit(owner, \(rule([^)]*)\))/\1/' src/runtime/world.ts && rm src/runtime/world.ts.bak
+if cmp -s src/runtime/world.ts src/runtime/world.ts.orig; then echo "admit plant did not apply"; exit 1; fi
 if npx tsc >/dev/null; then echo "tsc accepted step without admit()"; exit 1; fi
 echo "ok   step cannot skip admit()"
