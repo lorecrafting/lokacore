@@ -14,7 +14,8 @@ test('portable creation/custody literals and independent success proof', () => {
     const observation = { state: c.state, delta, result: c.expected };
     for (const id of ['delta_preconditions_hold', 'one_container_per_item'])
       assert.equal(check(id, observation), true, `${c.id}: ${id}`);
-    if (c.expected.fault)
+
+    if (c.expected.fault && !c.counterfeit)
       assert.equal(
         check('delta_preconditions_hold', {
           ...observation,
@@ -30,4 +31,15 @@ test('portable creation/custody literals and independent success proof', () => {
 test('new contract trust boundaries', () => {
   for (const c of fixture.contracts)
     assert.equal(validate(c.contract, c.value).length === 0, c.valid, c.id);
+});
+
+// Break: matching result rows mask a missing independent owner/template provenance guard.
+test('independent invariants reject counterfeit success with matching identity rows', () => {
+  for (const c of fixture.cases.filter((c: any) => c.counterfeit))
+    for (const id of ['delta_preconditions_hold', 'one_container_per_item'])
+      assert.equal(
+        check(id, { state: c.state, delta: { ops: c.ops }, result: c.counterfeit }),
+        false,
+        `${c.id}: ${id}`,
+      );
 });

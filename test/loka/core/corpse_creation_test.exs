@@ -13,7 +13,7 @@ defmodule Loka.Core.CorpseCreationTest do
       for check <- ~w(delta_preconditions_hold one_container_per_item),
           do: assert(Invariants.check(check, observation), c["id"])
 
-      if c["expected"]["fault"] do
+      if c["expected"]["fault"] && !c["counterfeit"] do
         fabricated = hd(@fixture["cases"])["expected"]
 
         refute Invariants.check("delta_preconditions_hold", %{
@@ -29,5 +29,20 @@ defmodule Loka.Core.CorpseCreationTest do
   test "new contract trust boundaries" do
     for c <- @fixture["contracts"],
         do: assert(Contracts.validate(c["contract"], c["value"]) == :ok == c["valid"], c["id"])
+  end
+
+  # Break: matching rows mask a missing independent owner/template provenance guard.
+  test "independent invariants reject counterfeit success with matching identity rows" do
+    for c <- @fixture["cases"],
+        c["counterfeit"],
+        check <- ~w(delta_preconditions_hold one_container_per_item) do
+      observation = %{
+        "state" => c["state"],
+        "delta" => %{"ops" => c["ops"]},
+        "result" => c["counterfeit"]
+      }
+
+      assert Invariants.check(check, observation) == false, "#{c["id"]}: #{check}"
+    end
   end
 end

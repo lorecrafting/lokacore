@@ -225,3 +225,43 @@ test('living projection refuses a missing required NPC HP row', () => {
   delete resources[key({ kind: 'resource', entity_id: rat, resource: resourceRef(w, 'hp') })];
   assert.throws(() => gameView({ ...w, state: { ...w.state, resources } }), /precondition_failed/);
 });
+
+// Break: root enumeration/reversal changes delta order although final custody is identical.
+// The fixture inserts trunk (d68b...) before cloak (2603...); expected UUIDs are independent
+// Python SHA-256/IdSource literals, with cloak before trunk in the required order.
+test('fatal transfer delta orders unsorted roots between initial placement and return', () => {
+  const { sequence } = fatal(controlled());
+  assert.deepEqual(
+    sequence.ops.filter((op) => op.op === 'entity.transfer'),
+    [
+      {
+        op: 'entity.transfer',
+        writer_group: 0,
+        entity_id: 'b718d867-4d0d-8ec9-b4fa-fa5d7edca054',
+        source_id: null,
+        destination_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+      },
+      {
+        op: 'entity.transfer',
+        writer_group: 0,
+        entity_id: '2603d738-5a68-83d2-93fe-8e50819f9741',
+        source_id: 'b59d54de-ea10-84e1-964c-16d1c776e738',
+        destination_id: 'b718d867-4d0d-8ec9-b4fa-fa5d7edca054',
+      },
+      {
+        op: 'entity.transfer',
+        writer_group: 0,
+        entity_id: 'd68b48e6-93a5-8899-81ec-808f7be333f8',
+        source_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+        destination_id: 'b718d867-4d0d-8ec9-b4fa-fa5d7edca054',
+      },
+      {
+        op: 'entity.transfer',
+        writer_group: 0,
+        entity_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+        source_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+        destination_id: '1a7c3699-2844-8a55-b29f-eac079c7bf50',
+      },
+    ],
+  );
+});
