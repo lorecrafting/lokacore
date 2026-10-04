@@ -72,11 +72,14 @@ and [actual verification output](evidence/2026-10-03-c1-gate-audit-carry-forward
   ending decision; its planning input is corrected without changing any capability
   or feature row. Book UI links the canonical acceptance/carry record. Historical decisions, reviews, captures and archive remain unedited.
 
+Supporting PRs #144, #146, #147 and #148 have merged into main with their
+published reviews; this gate draft integrates status head
+`bf973c56196c5f15e16b2542bb71dc35e7457bc3`. Runtime bytes remain identical to the
+reviewed composed #148 source. This records completed support merges, not gate closure.
+
 ## Conditions still required before closure
 
-- #144, #146 and #147 have merged into main with their published reviews.
-  #148's final published head still needs verified green CI and its main merge.
-- Exact integrated head and all started CI jobs verified green by the PM.
+- Exact gate head and all started CI jobs verified green by the PM.
 - One fresh checklist reviewer confirms proofs, audit carry-forward, carry stages
   and live-doc tidy; append its short verdict in the review index.
 - Gate PR merged; only then mark Gate C1 passed in ROADMAP and the handoff state.
