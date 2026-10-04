@@ -21,3 +21,11 @@ oracle.log: OK
 owner-prose-batch.txt: OK
 provenance.json: OK
 seed-remap.json: OK
+look-amendment.json: OK
+look-compiler.log: OK
+look-faults.log: OK
+look-focused.log: OK
+look-mutant-missing-cap.log: OK
+look-oracle.log: OK
+look-restored.log: OK
+look-sim.log: OK

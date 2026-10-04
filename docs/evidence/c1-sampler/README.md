@@ -7,7 +7,37 @@ It adds content using the current [compiler/loader](../../system/cartridge.md),
 [mechanics](../../system/mechanics.md) and [save](../../system/save.md) contracts.
 No rule, schema, protocol command, clock behavior or story picker changes.
 
-## Source and independent answer
+## Current development Look repair
+
+The [owner development direction and PM adoption](../../decisions/owner-decision-sampler-development-look-2026-10-03.md)
+replace the current unreleased sampler with `ashmere_sampler@0.0.2`. The independently
+rederived [fixture](../../../protocol/fixtures/cartridge_sampler_hash.json) has content hash
+`813fdf67dab4a1276362b2e3bdad08de8ae51b06d89f2e53bd64de0b1d001caa`
+and artifact size 16,635 bytes. [Amendment verification](look-amendment.json) confirms
+only version/reference versions and `description_variant@1` manifest/lock declarations
+changed; the other 22 sampler source files, all story/UI labels and nineteen older
+cartridge sources/fixtures remain byte-exact. The original prose batch remains immutable.
+
+The [independent oracle](look-oracle.log), [compiler and cross-loader](look-compiler.log)
+(three passes), and [restored gameplay/App/SQLite checks](look-restored.log) (three passes)
+verify this artifact. Real no-target Look is offered and accepted as `looked` with the
+authored room title/description; the same walk still restricts the modal scene to Continue
+and reopens real SQLite at line two. Removing the capability from both manifest and lock
+and rehashing the fixture [actually fails](look-mutant-missing-cap.log) the offered-Look
+assertion; restoration passes. Existing App binding/filename and authority/session
+algorithms are unchanged. [Focused fault checks](look-faults.log) retain their frozen
+answers without seed remapping; generator 14 declares the changed sampler offers while
+pool order and seed inputs remain unchanged. [Simulation checks](look-sim.log) pass all
+seventeen cases with their regression seeds unchanged.
+
+Ponytail Review: lean already; no new production machinery, dependencies or abstractions.
+Correctness self-review checked the actual semantic delta, immutable sources/fixtures,
+normal Look admission, modal restrictions, persisted replay and the changed App pin.
+Fresh independent review, exact-head CI and combined Release Simulator proof for this
+new hash are pending. The `0.0.1` source review and native rows below are historical proof,
+not evidence for the new Look artifact.
+
+## Historical source and independent answer (`0.0.1`)
 
 At `2b4c9d6`, all 23 source JSON files matched the approved author's final snapshot
 byte for byte. The [PM band acceptance repair](../../decisions/pm-decision-sampler-bands-2026-10-03.md)
@@ -29,18 +59,18 @@ The [Python oracle](../../../test/loka/cartridge_sampler_hash.py) independently
 assembles literal approved semantics, compiler-owned facts/resources and reference
 expansion. Only the adopted story strings and reused UI labels are copied from source; the
 world-band table is independently hand-declared. Python stdlib
-canonical encoding/hash produces the [fixture](../../../protocol/fixtures/cartridge_sampler_hash.json),
+canonical encoding/hash produces the historical fixture retained in Git at `7845f9b`,
 content hash `5631ddf63007b837bef1e91dfb71fcfb8d31847257210c5de1caa5b198a771b5`.
 The actual Elixir compiler matches the expected artifact byte for byte (16,587 bytes),
 and the TypeScript loader accepts those bytes with the same hash and lock.
-The [current oracle output](band-oracle.log) also independently derives initial IDs using the
+The [band-repair oracle output](band-oracle.log) also independently derives initial IDs using the
 [numeric profile](../../spec/conformance/numeric-profile.md); the normal walk uses
 those literal target IDs and checks the actor and cloak holder.
 All 19 prior fixture files and existing sources remain unchanged.
 
-## Actual checks
+## Historical checks (`0.0.1`)
 
-The initial proof logs below describe `2b4c9d6` before the band repair. Current
+The initial proof logs below describe `2b4c9d6` before the band repair. Band-repair
 [compiler/cross-loader checks](band-compiler-tests.log) pass three tests, and
 [gameplay/SQLite/App checks](band-focused.log) pass three tests with the new hash.
 Fresh HP projects `ready`/`normal` with the exact catalog phrase “is in perfect health.”
