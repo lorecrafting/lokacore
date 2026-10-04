@@ -13,7 +13,7 @@ import { adopt, ids, narration, token } from './save.ts';
 import type { Story } from './save.ts';
 import type { ElapsedStatus } from '../../packages/game-view/session.ts';
 import { ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
-import { ElapsedRecoveryError } from './elapsed-store.ts';
+import { ElapsedRecoveryError, changedRun } from './elapsed-store.ts';
 import { invoke, cancel } from './invocation.ts';
 import { catchUp } from './trace.ts';
 import { elapsed, fenced, type Elapsed } from './delivery.ts';
@@ -73,6 +73,8 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
   const refuse = <T>(r: T) => ({ ...r, newGame: () => newGame(s) }); // ponytail: no migration yet
   try {
     const saved = identityOf(db);
+    if (saved?.format === SAVE_FORMAT || (host.time && fresh.cartridge.manifest.time_policy))
+      s.recoveryHeader = saved ? { format: saved.format, run_id: saved.run_id } : null;
     const format = saved?.format; // a higher loka-save-vN: a newer app's; other than ours: corrupt
     if (Number(/^loka-save-v([1-9][0-9]*)$/.exec(format ?? '')?.[1]) > SAVE_VERSION)
       return {
@@ -92,8 +94,9 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     const loaded = base && load(db, base, () => first(release.content_hash, base, host));
     if (!loaded) return refuse({ kind: 'save_corrupt' as const });
     Object.assign(s, { fresh: base, ...loaded });
+    s.recoveryHeader = undefined;
   } catch (e) {
-    if (!corrupt(e)) throw e;
+    if (!(e instanceof ElapsedRecoveryError) && !corrupt(e)) throw e;
     return refuse({ kind: 'save_corrupt' as const }); // SQLite cannot read the file
   }
   return opened(s);
@@ -174,19 +177,43 @@ function first(content_hash: string, fresh: World, host: Host): Meta {
   return { format: 'loka-save-v1', lineage_id, run_id, parent: null, seed, pin, binding };
 }
 
-function replaceable(s: Story): boolean {
+function replaceable(s: Story) {
   try {
-    return !fenced(s);
+    if (fenced(s)) return 'pending' as const;
   } catch (e) {
     if (!(e instanceof ElapsedRecoveryError)) throw e;
-    reconcile(s.db, () => undefined); // terminal classification never permits an open transaction reset
-    return true;
+  }
+  const expected =
+    s.recoveryHeader !== undefined
+      ? s.recoveryHeader
+      : s.elapsed || (s.host.time && s.world.cartridge.manifest.time_policy)
+        ? { format: s.meta.format, run_id: s.meta.run_id }
+        : undefined;
+  if (expected === undefined) return 'ready' as const;
+  try {
+    return reconcile(s.db, () => {
+      const current = identityOf(s.db);
+      if (
+        (!current && expected === null) ||
+        (current &&
+          expected &&
+          (s.recoveryHeader === undefined || current.format === expected.format) &&
+          current.run_id === expected.run_id)
+      )
+        return 'ready' as const;
+      const kind = changedRun(current, expected?.run_id ?? '')?.kind ?? 'save_corrupt';
+      s.blocked = new ElapsedRecoveryError(kind, 'save header changed; reopen before recovery');
+      return kind;
+    });
+  } catch {
+    return 'pending' as const; // the header or transaction closure remains unknown
   }
 }
 
 function newGame(s: Story) {
   const retried = s.fence && s.fence === s.game?.fence ? s.game.run_id : undefined;
-  if (!replaceable(s)) return { kind: 'pending' } as const;
+  const recovery = replaceable(s);
+  if (recovery !== 'ready') return { kind: recovery };
   if (s.blocked?.kind === 'stale_view') return { kind: 'stale_view' } as const;
   s.blocked = undefined;
   s.fence = undefined;
@@ -207,6 +234,7 @@ function newGame(s: Story) {
     if (replaced || reconcile(s.db, run) === next.run_id) {
       s.fresh = world;
       adopt(s);
+      s.recoveryHeader = undefined;
       s.behind = !catchUp(s.db, ids(s), s.fresh.context);
     }
     return undefined;

@@ -52,3 +52,5 @@ Each future new test names one plausible break and uses literal independent resu
 Target Hermes compatibility proof, if scheduled for the arithmetic choice, uses root PM's separate controlled Simulator/test-save lane under existing autonomous authorization; no new owner permission. Preserve owner-installed13/13 and older saves, never operate/reset the existing owner Simulator. No source/native work is authorized or performed by this drafting task.
 
 Developer proof inventory: [B1 evidence](../evidence/2026-10-04-m1-b1-driver/README.md); independent review and exact source CI remain required.
+
+Round-one fixes and controls: [current proof inventory](../evidence/2026-10-04-m1-b1-driver/round1/README.md).

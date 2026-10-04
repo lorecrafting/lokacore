@@ -273,6 +273,10 @@ test('a real committed elapsed then ordinary local trace replays identically wit
     assert.match(rejected.stderr, /run differs from trace header/);
     assert.doesNotMatch(rejected.stdout, /\[state /); // preflight precedes any execution
   }
+  writeFileSync(trace, records.map((r) => encode(r)).join('\n') + '\n{malformed');
+  const unterminated = replay();
+  assert.equal(unterminated.status, 1);
+  assert.doesNotMatch(unterminated.stdout, /\[state /);
   const loaded = loadCartridge(
     new TextEncoder().encode(readFileSyncForReplay(artifact, 'utf8')),
     INSTALLED,

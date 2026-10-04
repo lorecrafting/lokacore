@@ -1,0 +1,55 @@
+✔ base1000 accounting preserves exact safe boundary quotients and rejects target overflow (1.187ms)
+✔ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (32.821542ms)
+✔ negative wall resume rebases without credit then credits the next 20ms (5.087833ms)
+✔ a fixed 36hour horizon commits all four daily boundaries in order (6.762041ms)
+✔ sixteen segments yield and one reserved input completes at its original finite horizon (16.998ms)
+✔ a current choice crossing departure refuses presence while Leave still closes its continuation (7.113125ms)
+✔ preexisting stale input does not account time and synchronous success emits no completion (4.483458ms)
+✔ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (7.574791ms)
+✔ an elapsed managed session without clocks fails with a typed refusal (4.373042ms)
+✔ resume extends durable target debt rather than a lagging head (12.007917ms)
+✔ unexpected closed checkpoint evidence blocks play as corrupt until confirmed Start over (6.128208ms)
+✔ a valid durable replacement invalidates an old fenced clock and input without writes (8.501875ms)
+✔ malformed v2 checkpoints and heads refuse without rewriting their progress (47.411208ms)
+✔ a managed v1 upgrade starts its durable account at the actual opening clocks (5.155417ms)
+✔ a committed unknown elapsed segment with corrupt checkpoint completes its input as blocked (3.295375ms)
+✔ a valid replacement during unknown positive elapsed invalidates the old pending input (6.941833ms)
+✔ a private reservation rejects another intent and retains its original bounded input (10.327792ms)
+✔ terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (4.856375ms)
+✔ a budget fault is one valid observation of its limit, with the ReplayIds of its decision (9.626042ms)
+✔ a failing observation sink changes no reply, revision, storage or retry (9.044792ms)
+✔ an older save gains the sink untouched, and the sink keeps the newest 1000 records (240.111667ms)
+✔ each NEW decision, accepted, rejected or fault, is one kernel.decision_latency (16.078042ms)
+✔ a clock changes no reply or durable state when a COMMIT is held, then committed (5.782417ms)
+✔ a real committed elapsed then ordinary local trace replays identically with header run preflight (578.243708ms)
+✔ a pending start over whose retry fails shows that error, not "not confirmed" (16.996416ms)
+✔ catch-up conflicts preserve the original attempt and matching retries keep its identity (25.691125ms)
+✖ invalid and cyclic shared input refuses before snapshot or elapsed sampling (4.463875ms)
+✔ missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (14.533667ms)
+✔ corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (38.787958ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 28
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1362.912875
+
+✖ failing tests:
+
+test at mobile/authority/local-story/session.test.ts:78:1
+✖ invalid and cyclic shared input refuses before snapshot or elapsed sampling (4.463875ms)
+  Error: invalid_canonical
+      at notCanonical (file://[private-path]:179:9)
+      at write (file://[private-path]:188:58)
+      at write (file://[private-path]:205:7)
+      at write (file://[private-path]:205:7)
+      at write (file://[private-path]:205:7)
+      at write (file://[private-path]:205:7)
+      at write (file://[private-path]:205:7)
+      at write (file://[private-path]:205:7)
+      at write (file://[private-path]:205:7)
+      at write (file://[private-path]:205:7) {
+    code: 'invalid_canonical'
+  }

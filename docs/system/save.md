@@ -22,7 +22,7 @@ a new save: with a random source, under a world context and RNG seed drawn for t
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:157`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`mobile/authority/local-story/session.ts:55`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:60`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`mobile/authority/local-story/session.ts:60`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:71`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
@@ -31,7 +31,7 @@ newest", "a save of an unknown format is refused with nothing written and no new
 Scope `story/<lineage_id>/<character>` (`save.ts:135`). A receipt (`store.ts:32`) stores
 the invocation id, the CommandId, actor, `intent_digest_version` (`loka-intent-v1`) and intent
 digest, the resolved Command (null for a rejection before one existed), the revision (unchanged
-for a rejection) and the DecisionResult. Replay (`mobile/authority/local-story/invocation.ts:19`): a known invocation id
+for a rejection) and the DecisionResult. Replay (`mobile/authority/local-story/invocation.ts:50`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
 other known id is `conflict`. A fault gets no receipt (`:174`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
@@ -94,13 +94,13 @@ trace segment header, its kernel version differing ([ADR-075](../archive/decisio
 
 ## New game
 
-`newGame` (`authority.ts:187`): after settling any fenced attempt, one transaction replaces the
+`newGame` (`authority.ts:213`): after settling any fenced attempt, one transaction replaces the
 save with a fresh world of the newest release at revision 0 under a new lineage and run (no
 parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
 (`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
 the file, or the report table or its index, corrupt, `replace` throws (`store.ts:165`) and the
-host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:154`), so pending reports and the trace are
+host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:279`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
 to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
@@ -132,8 +132,8 @@ digest and RNG state; the commit outcome and committed events), written after th
 transaction in its own; a write failure is swallowed and caught up later from the receipts
 (`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
-newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:110`) and, when the
-host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:105`).
+newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:145`) and, when the
+host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:137`).
 
 ## The session controller and the phone
 
@@ -190,16 +190,34 @@ retains its identified intent/digest/run. Once its horizon settles, resolution u
 targets against confirmed state without checking its own prerequisite revisions as stale.
 Preexisting stale input still refuses. Departed speaker answers refuse presence while existing
 actor-owned continuation close remains valid. The session retains one attempt until terminal
-completion; catching_up is distinct from pending unknown COMMIT.
+completion; catching_up is distinct from pending unknown COMMIT. The retained session intent
+is a private bounded snapshot. Different identified intent during catching_up conflicts without
+releasing it; unknown-save pending retains the existing original-attempt retry behavior
+([shared boundary](book-ui.md#shared-elapsed-statuscompletion-boundary)).
 
 Supported local elapsed replay follows the [trusted replay contract](protocol.md#trusted-local-elapsed-replay).
 
 Both gameplay and administrative reconciliation check durable run before receipt access.
 After a transaction is proved closed, malformed/missing/unexpected same-run checkpoint
-evidence is terminal host `save_corrupt`, not permanent pending. The managed Game pauses
+evidence, including missing elapsed-table columns, is terminal host `save_corrupt`, not permanent
+pending. The managed Game pauses
 clock/input continuation, retains the last confirmed projection as blocked, surfaces typed
 recovery status/reply, and permits only explicitly confirmed Start over after closing the
 transaction. Low-level explicit authority entry may propagate the one local typed recovery
 error. Actual SQLite read/rollback failures retain pending/unknown semantics. A valid different
 durable run invalidates the old session as stale/replaced; it never corrupts or overwrites
 that replacement or accesses its receipts through the old continuation.
+
+An elapsed session or refused opening binds explicit Start over to its observed durable header:
+retain the original format/run-id scalar witness and distinguish no row from a row, without
+inventing a valid run id. After transaction closure is proved, re-read that witness before any
+destructive recovery. An unchanged witness permits recovery of that same refused save; a newly
+present valid differing run returns `stale_view` and stays intact. A changed malformed witness
+returns `save_corrupt` without writing: reopen to obtain a fresh recovery offer. Header read or
+rollback failure remains `pending`; the old authorization never silently adopts a new witness.
+This guard applies to elapsed saves and preserves explicit v1 authority behavior.
+
+A loaded managed elapsed session binds its valid known run even while upgrading v1 before
+its first checkpoint. That run comparison permits its own v1→v2 format transition; refused
+openings instead use the raw header witness above. Explicit v1 authority without clocks keeps
+its existing behavior.

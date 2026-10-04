@@ -49,3 +49,24 @@ transaction. Low-level explicit authority entry may propagate the one local type
 error. Actual SQLite read/rollback failures retain pending/unknown semantics. A valid different
 durable run invalidates the old session as stale/replaced; it never corrupts or overwrites
 that replacement or accesses its receipts through the old continuation.
+
+Round-one PM clarification: shared-session retention snapshots only bounded validated
+invocation data. During clock catching_up, different identified intent conflicts without
+releasing the original attempt/status; matching retries keep original identity/context.
+Unknown-save pending keeps the existing original-attempt retry behavior. Full replay framing
+must be complete before dispatch. Missing elapsed-table columns are terminal checkpoint
+evidence after closure; operational SQLite failures retain their existing semantics.
+
+An elapsed session or refused opening binds explicit Start over to its observed durable header:
+retain the original format/run-id scalar witness and distinguish no row from a row, without
+inventing a valid run id. After transaction closure is proved, re-read that witness before any
+destructive recovery. An unchanged witness permits recovery of that same refused save; a newly
+present valid differing run returns `stale_view` and stays intact. A changed malformed witness
+returns `save_corrupt` without writing: reopen to obtain a fresh recovery offer. Header read or
+rollback failure remains `pending`; the old authorization never silently adopts a new witness.
+This guard applies to elapsed saves and preserves explicit v1 authority behavior.
+
+A loaded managed elapsed session binds its valid known run even while upgrading v1 before
+its first checkpoint. That run comparison permits its own v1→v2 format transition; refused
+openings instead use the raw header witness above. Explicit v1 authority without clocks keeps
+its existing behavior.

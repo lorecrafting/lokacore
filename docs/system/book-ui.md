@@ -190,3 +190,9 @@ terminal completion of the retained invocation, with identity and settled pre-co
 Immediate terminal calls are not repeated as completion notifications. Catching up means time
 settlement; pending means an unknown save. B2 consumes these notifications in actual lifecycle
 and rendering flows; this shared contract alone adds no phone timer/UI integration.
+
+The session snapshots only validated bounded invocation data, including target_ids and input,
+so caller mutation cannot change the retained attempt or its completion context. During
+catching_up, a different identified intent returns conflict while the original attempt and
+status remain retained; a matching retry uses its original identity/context. Pending unknown
+save retries keep the existing original-attempt behavior for any subsequent press.

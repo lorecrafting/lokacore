@@ -252,7 +252,8 @@ never refused `invalid_state` or `unsupported_capability`; a
 ## Trusted local elapsed replay
 
 For supported fresh single-header traces containing elapsed, replay binds the semantic durable
-save run from the header, validates every record run and elapsed payload run before execution,
+save run from the header, requires complete newline-terminated NDJSON, validates every record
+run and elapsed payload run before any drawing/execution,
 and selects stepElapsed only on the replay entry. Ordinary commands stay on player step;
 measured=false grants no authority. Generic traces without elapsed keep independent CLI or
 simulator run identity. No clock is sampled. Capped prefixes/nonfresh/fault-rich segment limits

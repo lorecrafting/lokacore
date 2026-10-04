@@ -28,6 +28,14 @@ export function readElapsed(db: Db, run: string, head: number): Checkpoint | und
 }
 export function elapsedRows(db: Db): (Checkpoint & { one: number })[] {
   if (!db.getFirstSync('SELECT 1 FROM sqlite_master WHERE name = ?', 'elapsed')) return [];
+  const columns = db.getAllSync<{ name: string }>('PRAGMA table_info(elapsed)');
+  if (
+    columns.length !== 5 ||
+    !['one', 'run_id', 'wall_ms', 'remainder', 'target'].every((name) =>
+      columns.some((c) => c.name === name),
+    )
+  )
+    throw new ElapsedRecoveryError('save_corrupt', 'malformed elapsed checkpoint columns');
   return db.getAllSync<Checkpoint & { one: number }>(`SELECT run_id,
     CASE WHEN typeof(one) = 'integer' THEN CAST(one AS REAL) END AS one,
     CASE WHEN typeof(wall_ms) = 'integer' THEN CAST(wall_ms AS REAL) END AS wall_ms,

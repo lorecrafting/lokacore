@@ -36,9 +36,9 @@ function metadata(s: Story, row: Checkpoint): ElapsedStatus {
   s.fence = () =>
     reconcile(s.db, () => {
       const meta = identityOf(s.db);
-      const got = readElapsed(s.db, row.run_id, s.world.state.clock);
       const changed = changedRun(meta, row.run_id);
       if (changed) throw changed;
+      const got = readElapsed(s.db, row.run_id, s.world.state.clock);
       if (meta!.format === 'loka-save-v2' && sameCheckpoint(got, row)) adopt(s);
       else if (
         meta!.format !== format ||

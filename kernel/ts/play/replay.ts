@@ -5,6 +5,7 @@ import { validate } from '../src/foundation/validate.ts';
 
 export function replayRecords(path: string, content_hash: string) {
   const file = readFileSync(path, 'utf8');
+  if (!file.endsWith('\n')) throw new Error('trace must end with a newline');
   const records = file
     .split('\n')
     .slice(0, -1)

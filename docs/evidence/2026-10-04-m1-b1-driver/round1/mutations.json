@@ -1,0 +1,114 @@
+[
+  {
+    "mutation": "caller_snapshot",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "sixteen segments yield and one reserved input completes at its original finite horizon (12.353042ms)",
+      "failing tests:",
+      "sixteen segments yield and one reserved input completes at its original finite horizon (12.353042ms)"
+    ],
+    "source_restored": true,
+    "source": "mobile/authority/local-story/invocation.ts",
+    "restored_sha256": "73e1347306c554404fd752fbb4a2574574d8544288b78d2b58556ea4729b477f"
+  },
+  {
+    "mutation": "catchup_conflict",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "catch-up conflicts preserve the original attempt and matching retries keep its identity (22.941083ms)",
+      "failing tests:",
+      "catch-up conflicts preserve the original attempt and matching retries keep its identity (22.941083ms)"
+    ],
+    "source_restored": true,
+    "source": "mobile/authority/local-story/invocation.ts",
+    "restored_sha256": "73e1347306c554404fd752fbb4a2574574d8544288b78d2b58556ea4729b477f"
+  },
+  {
+    "mutation": "invalid_snapshot_gate",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "invalid and cyclic shared input refuses before snapshot or elapsed sampling (4.463875ms)",
+      "failing tests:",
+      "invalid and cyclic shared input refuses before snapshot or elapsed sampling (4.463875ms)"
+    ],
+    "source_restored": true,
+    "source": "mobile/authority/local-story/invocation.ts",
+    "restored_sha256": "73e1347306c554404fd752fbb4a2574574d8544288b78d2b58556ea4729b477f"
+  },
+  {
+    "mutation": "trace_framing",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "a real committed elapsed then ordinary local trace replays identically with header run preflight (579.321042ms)",
+      "failing tests:",
+      "a real committed elapsed then ordinary local trace replays identically with header run preflight (579.321042ms)"
+    ],
+    "source_restored": true,
+    "source": "kernel/ts/play/replay.ts",
+    "restored_sha256": "57404aff425f99d3415d72d2b09252554d9bcd0ff2567ba6c4692e54b18fa95e"
+  },
+  {
+    "mutation": "checkpoint_columns",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "malformed v2 checkpoints and heads refuse without rewriting their progress (4.769375ms)",
+      "terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (5.317ms)",
+      "missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (4.64375ms)",
+      "corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (6.055709ms)",
+      "failing tests:",
+      "malformed v2 checkpoints and heads refuse without rewriting their progress (4.769375ms)",
+      "terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (5.317ms)",
+      "missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (4.64375ms)",
+      "corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (6.055709ms)"
+    ],
+    "source_restored": true,
+    "source": "mobile/authority/local-story/elapsed-store.ts",
+    "restored_sha256": "bcba269fc7969e6ebc330718135f2b6b7e7c4d1707d9b49fb9b5ff6163bde60d"
+  },
+  {
+    "mutation": "recovery_witness_guard",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (4.713875ms)",
+      "corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (10.5165ms)",
+      "failing tests:",
+      "terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (4.713875ms)",
+      "corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (10.5165ms)"
+    ],
+    "source_restored": true,
+    "source": "mobile/authority/local-story/authority.ts",
+    "restored_sha256": "1d35cab61de5af132502ca67167956ddfc9666d822d70b413281e51a680d68ce"
+  },
+  {
+    "mutation": "terminal_closure",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (4.906833ms)",
+      "failing tests:",
+      "terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (4.906833ms)"
+    ],
+    "source_restored": true,
+    "source": "mobile/authority/local-story/authority.ts",
+    "restored_sha256": "1d35cab61de5af132502ca67167956ddfc9666d822d70b413281e51a680d68ce"
+  },
+  {
+    "mutation": "refused_header_capture",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (7.653125ms)",
+      "failing tests:",
+      "corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (7.653125ms)"
+    ],
+    "source_restored": true,
+    "source": "mobile/authority/local-story/authority.ts",
+    "restored_sha256": "1d35cab61de5af132502ca67167956ddfc9666d822d70b413281e51a680d68ce"
+  }
+]

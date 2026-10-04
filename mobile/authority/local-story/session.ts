@@ -17,6 +17,11 @@ import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import type { Failed, Game, GameSession, Intent, Reply } from '../../packages/game-view/session.ts';
 import { openStory, type Host } from './authority.ts';
 import { corrupt, type Db } from './store.ts';
+import {
+  sessionInvoke,
+  SESSION_ID_PREFIX as ID_PREFIX,
+  type SessionAttempt,
+} from './invocation.ts';
 
 /** A cartridge fixture: its canonical JSON text and content hash. */
 export type Bundled = { canonical: string; sha256: string };
@@ -25,7 +30,6 @@ export type Bundled = { canonical: string; sha256: string };
 // pin names no context).
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const SEED = [1, 2, 3, 4];
-const ID_PREFIX = '00000000-0000-4000-8000-';
 
 // The build's commit, its random source (lineage.test.ts proves the app path passes it; tests
 // without one play the template world), its ids and its clock.
@@ -97,8 +101,7 @@ function managedGame(
   cartridge: Cartridge,
   db: Db,
 ) {
-  let retry: (Intent & { invocation_id: string; actor_id: never }) | undefined;
-  let sent = lastId(db);
+  const held: SessionAttempt = { catching: false, sent: lastId(db) };
   const listeners = new Set<(update: GameSubscription) => void>();
   const emit = (update: GameSubscription) => {
     for (const listener of listeners) listener(update);
@@ -106,23 +109,17 @@ function managedGame(
   const projection = (): Projection => ({ view: gameView(story.world()), token: story.token() });
   const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
   const attempt = (): Reply => {
-    const reply = attemptStory(story, retry);
-    if (terminal(reply)) retry = undefined;
+    const reply = attemptStory(story, held.invocation);
+    held.catching = reply.kind === 'catching_up';
+    if (terminal(reply)) held.invocation = undefined;
     return reply;
   };
-  const pending = () => retry;
+  const pending = () => held.invocation;
   const before = (): Projection => ({
     view: gameView(story.beforeWorld()),
     token: story.beforeToken(),
   });
-  const invoke = (intent: Intent) => {
-    retry ??= {
-      ...intent,
-      invocation_id: `${ID_PREFIX}${(++sent).toString(16).padStart(12, '0')}`,
-      actor_id: story.world().character as never,
-    };
-    return attempt();
-  };
+  const invoke = (intent: Intent) => sessionInvoke(held, story.world().character, intent, attempt);
   const game = sharedGame(story, cartridge, projection, listeners, pending, invoke);
   story.onAdvance((status) => emit({ kind: 'state', projection: projection(), status }));
   return Object.assign(game, {

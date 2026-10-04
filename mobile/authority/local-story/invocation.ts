@@ -14,6 +14,37 @@ import { fenced, traceAfter, reached } from './delivery.ts';
 import { budget, ids, save, scope, stale, token, type Story, type Trace } from './save.ts';
 import { receipt } from './store.ts';
 import { observe } from './trace.ts';
+import type { ActionInvocation } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { Intent, Reply as SharedReply } from '../../packages/game-view/session.ts';
+export const SESSION_ID_PREFIX = '00000000-0000-4000-8000-';
+export type SessionAttempt = { invocation?: ActionInvocation; catching: boolean; sent: number };
+const copied = (i: ActionInvocation) => decode(encode(i as never)) as unknown as ActionInvocation;
+
+/** The shared session retains only validated bounded data; an unknown save retries its original. */
+export function sessionInvoke(
+  held: SessionAttempt,
+  actor_id: ActionInvocation['actor_id'],
+  intent: Intent,
+  attempt: () => SharedReply,
+): SharedReply {
+  if (held.invocation && !held.catching) return attempt();
+  const value = {
+    ...intent,
+    actor_id,
+    invocation_id:
+      held.invocation?.invocation_id ??
+      (`${SESSION_ID_PREFIX}${(++held.sent).toString(16).padStart(12, '0')}` as ActionInvocation['invocation_id']),
+  };
+  const errors = validate('ActionInvocation', value);
+  if (held.invocation) {
+    if (errors.length) return { kind: 'invalid' };
+    if (intentBytes(value) !== intentBytes(held.invocation)) return { kind: 'conflict' };
+  } else held.invocation = errors.length ? value : copied(value);
+  return attempt();
+}
+const intentBytes = (i: ActionInvocation) =>
+  encode([i.action_key, i.actor_id, i.target_ids, i.input] as never);
+
 type Reservation = { id: Identified; run_id: string; target: number };
 const reservations = new WeakMap<Story, Reservation>();
 export function invoke(s: Story, value: unknown, driver?: ClockDriver): Reply {
@@ -50,7 +81,7 @@ function reserved(s: Story, id: Identified, driver?: ClockDriver): Reply {
   if (driver) {
     if (!held) {
       // Copy only bounded intent data so callers cannot mutate a preflighted reservation.
-      const privateId = { ...id, invocation: decode(encode(i as never)) as unknown as typeof i };
+      const privateId = { ...id, invocation: copied(i) };
       reservations.set(s, { id: privateId, run_id: s.meta.run_id, target: -1 });
     }
     const reserved = reservations.get(s)!;

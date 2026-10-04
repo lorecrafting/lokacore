@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { constants } from 'node:sqlite';
 import { accounted } from './elapsed-store.ts';
 import { openStory } from './authority.ts';
 import { openGame } from './session.ts';
@@ -96,12 +97,15 @@ test('sixteen segments yield and one reserved input completes at its original fi
   a.game.subscribe((u) => updates.push(u));
   a.clock.wall += 15984000;
   a.clock.mono = 15984000;
-  const reply = a.game.invoke({ ...LOOK, view_freshness_token: a.game.view().token });
+  const press = { ...LOOK, target_ids: [], input: {}, view_freshness_token: a.game.view().token };
+  const reply = a.game.invoke(press);
   assert.equal(reply.kind, 'catching_up');
   const id = a.game.pendingInvocation();
   assert.equal(a.game.view().view.time, 712800);
   assert.equal(receipts(a.sql), 16);
   assert.deepEqual(checkpoint(a.sql), { wall_ms: 15994000, remainder: 0, target: 864000 });
+  press.target_ids.push('dddddddd-0000-4000-8000-000000000001' as never);
+  (press.input as any).direction = { nested: 'mutated' };
   a.clock.wall += 100000;
   a.clock.mono += 100000;
   assert.equal(a.game.pulse().kind, 'ready');
@@ -112,6 +116,9 @@ test('sixteen segments yield and one reserved input completes at its original fi
   assert.equal(completed[0]!.before.view.time, 864000);
   assert.equal(completed[0]!.reply.kind, 'saved');
   assert.equal(a.game.pending(), false);
+  assert.deepEqual(completed[0]!.intent.target_ids, []);
+  assert.deepEqual(Object.keys(completed[0]!.intent.input), []);
+  assert.equal(a.game.invoke(LOOK).kind, 'saved');
   a.game.pulse('drain');
   assert.equal(updates.filter((u) => u.kind === 'completion').length, 1);
   a.sql.close();
@@ -306,6 +313,7 @@ test('a valid durable replacement invalidates an old fenced clock and input with
 // Breaks: v2 row bounds/run/head corruption is used as elapsed evidence or repaired by another initialization.
 test('malformed v2 checkpoints and heads refuse without rewriting their progress', () => {
   for (const change of [
+    'ALTER TABLE elapsed DROP COLUMN target',
     'UPDATE elapsed SET remainder = 1000',
     'UPDATE elapsed SET target = 64799',
     "UPDATE elapsed SET run_id = 'bbbbbbbb-0000-4000-8000-000000000001'",
@@ -430,5 +438,57 @@ test('a private reservation rejects another intent and retains its original boun
   assert.equal(result.kind, 'saved');
   assert.equal(result.kind === 'saved' && (result.decision as any).kind, 'accepted');
   assert.equal(story.world().state.clock, 864000);
+  a.sql.close();
+});
+
+// Breaks: terminal upgrade recovery without a prior checkpoint replaces a save while SQLite refuses transaction closure.
+test('terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over', () => {
+  const a = elapsedHost();
+  a.sql.exec("UPDATE save SET format = 'loka-save-v1'; DROP TABLE elapsed");
+  const loaded = loadCartridge(
+    new TextEncoder().encode(
+      `{"cartridge":${a.bundle.canonical},"content_hash":"${a.bundle.sha256}"}`,
+    ),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok);
+  const fresh = newWorld(
+    loaded.cartridge as never,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  const story = openStory(a.db, [{ content_hash: a.bundle.sha256, fresh }], a.host);
+  assert.equal(story.kind, 'open');
+  if (story.kind !== 'open') return;
+  assert.equal(story.clockStatus().kind, 'pending');
+  a.fault.reads = false;
+  a.sql.exec('ALTER TABLE elapsed DROP COLUMN target');
+  assert.throws(
+    () => story.pulse('resume', story.runId()),
+    (e: any) => e.kind === 'save_corrupt',
+  );
+  a.sql.exec('BEGIN; UPDATE head SET clock = 64801');
+  a.sql.setAuthorizer((action, operation) =>
+    action === constants.SQLITE_TRANSACTION && operation === 'ROLLBACK'
+      ? constants.SQLITE_DENY
+      : constants.SQLITE_OK,
+  );
+  assert.equal(story.newGame().kind, 'pending');
+  assert.equal(a.sql.isTransaction, true);
+  assert.equal(story.world().state.clock, 64800);
+  assert.equal(
+    a.sql.prepare('SELECT run_id FROM save').get()!.run_id,
+    'aaaaaaaa-0000-4000-8000-000000000002',
+  );
+  assert.equal(receipts(a.sql), 0);
+  a.sql.setAuthorizer(null);
+  a.sql.exec('ROLLBACK');
+  assert.equal(story.newGame().kind, 'replaced');
+  assert.equal(
+    a.sql.prepare('SELECT run_id FROM save').get()!.run_id,
+    'aaaaaaaa-0000-4000-8000-000000000004',
+  );
   a.sql.close();
 });
