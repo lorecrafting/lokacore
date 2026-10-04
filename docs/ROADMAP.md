@@ -43,8 +43,8 @@ Owner-approved, in this order, one at a time; each slice's scope and acceptance 
 | c1-chapters | `c1-chapters` | done | [#139](https://github.com/lorecrafting/lokacore/pull/139) |
 | c1-scenes-modal | `c1-scenes-modal` | done | [#140](https://github.com/lorecrafting/lokacore/pull/140) |
 | c1-sampler | `c1-sampler` | done | [#142](https://github.com/lorecrafting/lokacore/pull/142) |
-| c1-touch | `c1-touch` | in progress | [#141](https://github.com/lorecrafting/lokacore/pull/141) |
-| Gate C1 | `c1-gate` | planned | |
+| c1-touch | `c1-touch` | done | [#141](https://github.com/lorecrafting/lokacore/pull/141) |
+| Gate C1 | `c1-gate` | in progress | |
 
 ## C1 scene carries
 
