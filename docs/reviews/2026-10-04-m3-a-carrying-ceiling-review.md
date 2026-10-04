@@ -118,3 +118,71 @@ Equality mutation (> to >=): test command EXIT 1, nested-equality regression fai
 Controlled cyclic-world probe: predicate containment_cycle; direct rule timed out at 2 seconds.
 Ponytail Review: no over-engineering findings. Exact source restored; detached review worktree removed.
 ```
+
+
+## Fix round 1 — scoped primary verdict: APPROVE
+
+Reviewed source head: `20b55042a5e3ce67deaa85b7c38b223dd2e03dd2`.
+Scope: M3-1, its fix diff, shared reach's direct callers, and the new real SQLite
+save/load regression. Settled portions of the original review were not reopened.
+
+**M3-1 resolved; no open findings.** Shared `reach()` now tracks visited ancestors
+and charges each custody edge to the supplied query counter. Take propagates
+`containment_cycle` and `budget_exceeded` as faults before event allocation.
+Projected Take uses the same bounded reach and carrying counter; only established
+boolean reach results are cached. The barrier rule's item lookup propagates a
+reach error explicitly, and its rule converts these two errors to faults. The
+projection's barrier caller still treats string errors as unavailable.
+
+Closed lids and non-item holders retain their `not_present` precedence before
+ancestry beyond the obstruction is inspected. Already-held, missing and non-item
+Take targets retain their earlier checks. The accompanying specification changes
+state the shared reach budget and fault behavior; they do not weaken M3-1's
+required cycle defense.
+
+Independent focused validation (`mise exec --`):
+
+| Command | Result |
+|---|---|
+| `node --test --test-reporter=spec test/containment.test.ts test/equipment.test.ts test/barriers.test.ts test/locks.test.ts` from `kernel/ts` | Exit 0; 45 passed |
+| `node --test --test-reporter=spec mobile/authority/local-story/carrying-reach.test.ts mobile/app/book/polish.test.ts mobile/app/sampler.test.ts` | Exit 0; 22 passed |
+| Same new save/load regression alone after restoring the mutant | Exit 0; 5 passed |
+
+Mutation control: temporarily removed both the visited-cycle guard and query-step
+guard from shared reach. The new suite exited 1: each real saved-cycle consumer
+(Take step, projected Take list, item-barrier rule) hit its five-second subprocess
+timeout, and the spent-budget test also failed (4 failures). Original bytes were
+restored in `finally`; the new suite then passed, and `git diff --exit-code`
+confirmed no implementation difference. This demonstrates that the regression
+catches the original unbounded walk through actual callers, not only the helper.
+
+Ponytail Review: the fix stays in the existing shared walk and its callers, with
+one necessary projection cache to preserve established results after exhaustion.
+No new dependency, storage framework or unrelated abstraction. No complexity
+finding. No owner save, simulator or native artifact was touched.
+
+This verdict approves the reviewed source fix. The PM must still verify every
+started CI job green on the final pushed head before merging.
+
+### Fix round 1 — cross-vendor review
+
+Separate Sol fix recheck at the same source head, reproduced verbatim:
+
+```text
+APPROVE
+PR159 — voluntary carrying ceiling; scoped M3-1 fix recheck.
+Reviewed source head: 20b55042a5e3ce67deaa85b7c38b223dd2e03dd2
+
+M3-1 CLOSED. Shared reach terminates cycles and meters custody edges before carrying admission. Take returns typed containment_cycle/budget_exceeded faults; projected Take offers expose those codes. Barrier admission explicitly handles reach errors and preserves fault classification. Target/direct-held checks and closed-ancestor not_present precedence remain intact. AST caller inspection found all three runtime reach consumers updated.
+
+Findings: noopen.
+
+Validation (mise exec --):
+Validation correction: the earlier singular barrier.test.ts argument omitted the barrier suite; the corrected command below was rerun at this same head.
+node --test mobile/authority/local-story/carrying-reach.test.ts kernel/ts/test/{containment,barriers,equipment}.test.ts mobile/app/book/polish.test.ts: EXIT 0, 58 passed, including real SQLite-restored cycle checks.
+npm --prefix kernel/ts run typecheck: EXIT 0.
+Barrier error-propagation removal: EXIT 1, cycle and spent-budget regressions failed.
+Projection reach-cache bypass: EXIT 1, exhausted-counter cached-reach regression failed.
+Both mutants restored; repeated focused checks EXIT 0; git diff --exit-code EXIT 0. Detached review worktree removed.
+Ponytail Review: no over-engineering findings. This is a scoped source review; CI completion remains the PM gate.
+```
