@@ -99,6 +99,15 @@ any committed candidate into memory. The existing no-read-open-transaction fence
 unknown-COMMIT handling remain required. Opted metadata is JSON in existing changed
 rows and needs no format beyond the reviewed `loka-save-v2` elapsed format.
 
+Explicit NPC HP overrides also require their exact legacy-shaped rows on load, validated
+against each entity's pinned effective bounds and saved clock, as specified in
+[resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets). Missing or malformed rows
+are `save_corrupt`, without fallback repair. Reopen derives the immutable spec map from
+the pinned cartridge and context before loading rows; reconciled adoption uses this same
+validation. HP writes persist complete resulting row JSON through the existing changed-row
+transaction with head and receipt; no new table, save format or migration is introduced.
+
+
 An app update that reopens an old save writes a new
 trace segment header, its kernel version differing ([ADR-075](../archive/decisions/adr-075-observability-proposal.md) §4 amendment R6 S2).
 

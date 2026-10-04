@@ -1,3 +1,4 @@
+import { validOverrideRow } from '../../../kernel/ts/src/foundation/resource.ts';
 import { transaction } from './transaction.ts';
 export { transaction, reconcile, rollback } from './transaction.ts';
 import {
@@ -93,6 +94,7 @@ const whole = (m: Record<string, Json>) =>
  * or lacks a field play relies on: the head's numbers, the receipt scope and replay ids (03 §14),
  * the binding (null: a guest) (OFF-07). A corrupt save is reported, never replaced by `fresh`.
  */
+// size: allow 45, one save-load boundary checks elapsed and required pinned resource rows
 export function load(db: Db, fresh: World, first: () => Meta) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
@@ -126,6 +128,9 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
     if (recoveryFault(world)) return undefined;
+    for (const [target, spec] of Object.entries(world.entityResourceSpecs))
+      if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))
+        return undefined;
     return saved(world, h.revision, { ...m, parent, seed, pin } as Meta, db);
   } catch (e) {
     if (e instanceof SyntaxError) return undefined;

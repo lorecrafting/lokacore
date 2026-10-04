@@ -132,7 +132,7 @@ defmodule Loka.Core.Invariants do
 
     spec =
       if op["op"] == "resource.adjust",
-        do: get_in(s, ["resource_specs", Compose.key(op["resource"])])
+        do: Loka.Core.InvariantsResource.spec(op, s)
 
     if spec != nil and spec["regen"] != nil do
       before = Map.get_lazy(resources, k, fn -> get_in(s, ["resources", k]) end)

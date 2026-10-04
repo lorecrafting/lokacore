@@ -1,6 +1,6 @@
 // A fresh world from a loaded loka-cartridge-v2 artifact (03 §1, §3, §23; numeric profile,
 // Initial world ids), split from runtime/world.ts, which re-exports newWorld.
-import type { CharacterId, EntityId, WorldContextId } from '../contracts.gen.ts';
+import type { CharacterId, EntityId, ResourceSpec, WorldContextId } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
 import { refString, type Cartridge, type Detail, type Entity, type World } from './decision.ts';
 import { firstJobs } from '../mechanics/schedule/behavior.ts';
@@ -40,11 +40,10 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   containers[body] = roomIds[refString(cartridge.entry)];
   const clock = cartridge.calendar?.start ?? 0;
   const jobs = firstJobs(cartridge, clock, mint);
-  // The loader admits a slot only under equipment@1, so a world without it mints no holder.
   const slotKeys = [...new Set(Object.values(cartridge.items ?? {}).flatMap((i) => i.slot ?? []))];
   const slots = Object.fromEntries(slotKeys.sort(cmp).map((k) => [k, mint()]));
   for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
-  const resources = started(cartridge, body, clock);
+  const { resources, entityResourceSpecs } = started(cartridge, body, clock, entities);
   return {
     cartridge,
     context,
@@ -59,6 +58,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     slots,
     factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
     resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
+    entityResourceSpecs,
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
     attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
     state: { clock, containers, rng: seed, ...written({ jobs, resources }) },
@@ -111,11 +111,10 @@ function place(
   };
 }
 
-// The body's resources stored at their start values at `clock` (resource.schema.json ResourceSpec
-// start: a new body's value), by canonical resource target text.
-function started(cartridge: Cartridge, body: EntityId, clock: number) {
+// Birth resource rows by canonical target: player start values and explicitly authored NPC HP.
+function started(cartridge: Cartridge, body: EntityId, clock: number, entities: World['entities']) {
   const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
-  return Object.fromEntries(
+  const resources = Object.fromEntries(
     Object.values(cartridge.resources ?? {})
       .filter((s) => clock !== 0 || s.regen)
       .map((s) => {
@@ -128,6 +127,15 @@ function started(cartridge: Cartridge, body: EntityId, clock: number) {
         return [key({ kind: 'resource', resource, entity_id: body }), row];
       }),
   );
+  const entityResourceSpecs: Record<string, ResourceSpec> = {};
+  for (const [entity_id, e] of Object.entries(entities)) {
+    if (e.kind !== 'npc' || !e.hp) continue;
+    const resource = { cartridge_id, cartridge_version, kind: 'resource', key: 'hp' };
+    const target = key({ kind: 'resource', resource, entity_id });
+    entityResourceSpecs[target] = { key: 'hp' as ResourceSpec['key'], ...e.hp };
+    resources[target] = { value: e.hp.start, at: clock };
+  }
+  return { resources, entityResourceSpecs };
 }
 
 // The sections that have rows: a world that writes none keeps its earlier state hash.

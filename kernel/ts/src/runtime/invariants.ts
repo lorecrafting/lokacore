@@ -1,7 +1,7 @@
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
 // after STEP read one kernel step and are TypeScript only (rules are TypeScript, ADR-074).
-import { recovered } from './invariants_resource.ts';
+import { recovered, legacyInitial, effectiveSpec } from './invariants_resource.ts';
 import type { Json } from '../foundation/canonical.ts';
 import { key, same, target, type Result } from '../foundation/compose.ts';
 import { CAPABILITY_OWNERS, EVALUATION_FAULTS, type DeltaOp } from '../contracts.gen.ts';
@@ -59,18 +59,7 @@ function initial(op: Any, s: Any): Json | undefined {
   if (family === 'cooldown') return s.cooldowns?.[key(target(op))];
   if (family === 'barrier')
     return s.barriers?.[key(target(op))] ?? s.barrier_initial?.[key(op.barrier)];
-  if (family === 'resource') {
-    const spec = s.resource_specs?.[key(op.resource)];
-    const row = s.resources?.[key(target(op))];
-    if (!spec || spec.regen) return undefined;
-    const before = row ?? { value: spec.start, at: 0 };
-    return Number.isInteger(before.value) && Number.isInteger(before.at)
-      ? Math.min(
-          spec.maximum,
-          before.value + spec.gain * (Math.floor(s.clock / 3600) - Math.floor(before.at / 3600)),
-        )
-      : undefined;
-  }
+  if (family === 'resource') return legacyInitial(op, s);
   return s.clock;
 }
 
@@ -146,7 +135,7 @@ function extra(
     case 'time.advance':
       return op.to > op.from;
     case 'resource.adjust': {
-      const spec = s.resource_specs?.[key(op.resource)];
+      const spec = effectiveSpec(op, s);
       return (
         spec !== undefined &&
         Number.isInteger(op.to) &&
@@ -210,7 +199,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
       const k = key(target(op));
       const [need, give] = link(op);
       if (op.op === 'resource.adjust') {
-        const spec = state.resource_specs?.[key(op.resource)];
+        const spec = effectiveSpec(op, state);
         if (spec?.regen) {
           const before = resources.has(k) ? resources.get(k) : state.resources?.[k];
           const after = recovered(op, spec, before, state.clock);

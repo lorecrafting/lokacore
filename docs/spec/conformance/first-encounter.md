@@ -45,4 +45,10 @@ Start S2, even round, rat HP6/player HP2 sleeping. Rat first: `5927040 % 100 = 4
 
 ## Actual foundation gaps to resolve in M5
 
-At the inspected C1 baseline, [State/World](../../../kernel/ts/src/runtime/decision.ts) stores state sections but derives entity maps from definitions; [save reopen](../../../mobile/authority/local-story/store.ts) spreads fresh definitions plus saved state. Inserting a corpse only into World.entities therefore is insufficient. [Resource lookup](../../../kernel/ts/src/mechanics/resource.ts) selects one spec by resource definition, not an entity-specific override. M5 must define durable created identity/initial custody and actor-specific HP consistently across lookup, adoption, changed-row save and both affected foundation implementations, preserving legacy profiles. The required chapel topology is [00a §2](../../archive/spec/00a-chapter-one-content.md#2-room-graph); M5 owns its actual content integration. No creation-op syntax is frozen here.
+[State/World](../../../kernel/ts/src/runtime/decision.ts) derives entity maps from pinned definitions;
+[save reopen](../../../mobile/authority/local-story/store.ts) combines those definitions with saved
+state. M5-A provides five finite passive cellar rats and entity-specific persisted HP through
+[resource@1](../../system/mechanics.md#resource1-kerneltssrcmechanicsresourcets), with no attack
+or death producer. Dynamic corpse identity and initial custody remain M5-B prerequisites:
+inserting a corpse only into World.entities is insufficient. The chapel route already reaches
+chapel_nave; shrine restoration remains pending. No creation-op syntax is frozen here.

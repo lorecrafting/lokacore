@@ -1,0 +1,1671 @@
+{
+  "description": "Independent literal entity-resource precedence, required rows and schema controls; M5-A prerequisite only.",
+  "cases": [
+    {
+      "id": "rat-bounds-override-global-max",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 7
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "rat-minimum",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": -1
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "rat-write",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "10000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "value": 5,
+              "at": 64800
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-writer-overlay",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 5,
+          "to": 3
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "10000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "value": 3,
+              "at": 64800
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "later-rat-fault-discards-first-write",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000002",
+          "from": 6,
+          "to": 7
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000002"
+          }
+        }
+      }
+    },
+    {
+      "id": "zero-gain-keeps-5",
+      "state": {
+        "clock": 68400,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 5,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 5,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "10000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "value": 5,
+              "at": 68400
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "zero-gain-keeps-0",
+      "state": {
+        "clock": 68400,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 0,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "10000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "value": 0,
+              "at": 68400
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "required-row-missing",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-too-high",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 7,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-too-low",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": -1,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-future",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64801
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-boolean-time",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": true
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-fraction-time",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 0.5
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-unsafe-time",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 9007199254740992
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-position-metadata",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800,
+            "rate": 0
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "required-row-fraction-value",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 5.5,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "legacy-global-six-to-seven",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 7
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "10000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "value": 7,
+              "at": 64800
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "override-is-resource-specific",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          },
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"ma\",\"kind\":\"resource\"}": {
+            "key": "ma",
+            "minimum": 0,
+            "maximum": 100,
+            "start": 7,
+            "gain": 0
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"ma\",\"kind\":\"resource\"}}": {
+            "value": 3,
+            "at": 64800
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "ma"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 3,
+          "to": 8
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "ma"
+              },
+              "entity_id": "10000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "value": 8,
+              "at": 64800
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "required-row-negative-time",
+      "state": {
+        "clock": 64800,
+        "resource_specs": {
+          "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 10,
+            "start": 10,
+            "gain": 5
+          }
+        },
+        "entity_resource_specs": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "key": "hp",
+            "minimum": 0,
+            "maximum": 6,
+            "start": 6,
+            "gain": 0
+          }
+        },
+        "resources": {
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000002\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": 64800
+          },
+          "{\"entity_id\":\"10000000-0000-4000-8000-000000000001\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+            "value": 6,
+            "at": -1
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "10000000-0000-4000-8000-000000000001",
+          "from": 6,
+          "to": 5
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "10000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    }
+  ],
+  "contracts": [
+    {
+      "id": "valid",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": true
+    },
+    {
+      "id": "missing-minimum",
+      "value": {
+        "maximum": 6,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "minimum--2147483649",
+      "value": {
+        "minimum": -2147483649,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "minimum-2147483648",
+      "value": {
+        "minimum": 2147483648,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "minimum-True",
+      "value": {
+        "minimum": true,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "minimum-0.5",
+      "value": {
+        "minimum": 0.5,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "missing-maximum",
+      "value": {
+        "minimum": 0,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "maximum--2147483649",
+      "value": {
+        "minimum": 0,
+        "maximum": -2147483649,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "maximum-2147483648",
+      "value": {
+        "minimum": 0,
+        "maximum": 2147483648,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "maximum-True",
+      "value": {
+        "minimum": 0,
+        "maximum": true,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "maximum-0.5",
+      "value": {
+        "minimum": 0,
+        "maximum": 0.5,
+        "start": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "missing-start",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "start--2147483649",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": -2147483649,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "start-2147483648",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 2147483648,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "start-True",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": true,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "start-0.5",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 0.5,
+        "gain": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "missing-gain",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6
+      },
+      "valid": false
+    },
+    {
+      "id": "gain--1",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": -1
+      },
+      "valid": false
+    },
+    {
+      "id": "gain-2147483648",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": 2147483648
+      },
+      "valid": false
+    },
+    {
+      "id": "gain-True",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": true
+      },
+      "valid": false
+    },
+    {
+      "id": "gain-0.5",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0.5
+      },
+      "valid": false
+    },
+    {
+      "id": "extra-regen",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0,
+        "regen": {}
+      },
+      "valid": false
+    },
+    {
+      "id": "extra-bands",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0,
+        "bands": {}
+      },
+      "valid": false
+    },
+    {
+      "id": "extra-key",
+      "value": {
+        "minimum": 0,
+        "maximum": 6,
+        "start": 6,
+        "gain": 0,
+        "key": {}
+      },
+      "valid": false
+    },
+    {
+      "id": "not-object-0",
+      "value": null,
+      "valid": false
+    },
+    {
+      "id": "not-object-1",
+      "value": [],
+      "valid": false
+    },
+    {
+      "id": "not-object-2",
+      "value": true,
+      "valid": false
+    }
+  ]
+}

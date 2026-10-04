@@ -1,4 +1,4 @@
-// size: allow 330, one reference stage preserves diagnostic ordering including carrying opt-in
+// size: allow 340, one reference stage preserves diagnostic ordering including carrying and NPC HP opt-ins
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -240,9 +240,28 @@ function pools(c: Obj, named: Checks['named']): Diagnostic[] {
     }
     if (s.bands) out.push(...bands(c, s.bands, `${at}.bands`));
   }
+  out.push(...npcHp(c));
   if (c.world?.bands) out.push(...bands(c, c.world.bands, '.cartridge.world.bands'));
   const cost = c.world?.movement?.cost;
   if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');
+  return out;
+}
+
+function npcHp(c: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  for (const [ref, npc] of Object.entries(c.npcs ?? {}) as [string, Obj][]) {
+    if (!npc.hp) continue;
+    const at = `.cartridge.npcs${step(ref)}.hp`;
+    if (!(npc.hp.minimum <= npc.hp.start && npc.hp.start <= npc.hp.maximum))
+      out.push(diag('RESOURCE_SPEC_INVALID', at));
+    const api = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
+    if (api[0] < 1 || (api[0] === 1 && api[1] < 4))
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
+    if (!Object.values(c.resources ?? {}).some((s: any) => s.key === 'hp'))
+      out.push(diag('RESOURCE_SPEC_INVALID', at));
+  }
   return out;
 }
 

@@ -36,5 +36,6 @@ export const base = (world: World) =>
     fact_defaults: world.factDefaults,
     capacities: world.capacities,
     resource_specs: world.resourceSpecs,
+    entity_resource_specs: world.entityResourceSpecs,
     barrier_initial: world.barrierInitial,
   }) as unknown as Parameters<typeof compose>[0];
