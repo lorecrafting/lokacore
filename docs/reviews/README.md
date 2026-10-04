@@ -191,3 +191,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [M2-A position recovery](2026-10-04-m2-a-position-recovery-review.md): PR #156 at `051bd6d`, primary/Astra CHANGES REQUIRED (M2A-01/A1: authored stored-rate check survives deletion in both independent invariants); scoped fix round 1 at `25a37c6`, primary APPROVE, M2A-01/A1 closed, both individual guard removals now red and restored TS10/Elixir12 suites pass; separate Sol scoped APPROVE, no open findings.
 - [Legend mechanics reconciliation](2026-10-04-legend-mechanics-reconciliation-review.md): PR #136 at `549d707`, primary APPROVE; primary scoped round-one at `7e9313e`, APPROVE, current-status correction verified; separate Sol review/disposition remains distinct in the record.
+
+- [Later-story plan publication](2026-10-04-later-story-plan-review.md): PR #157 at `c236ffe`, fresh independent docs-only APPROVE; no findings, future policies/ending selectors and planned MC coverage verified; implementation remains future work.
