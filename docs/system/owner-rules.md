@@ -8,7 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
-- C1 room output stays focused; NPCs open full details, detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
+- NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls and Leave; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
+- C1 room output stays focused; NPCs open full details, other detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
 
 - The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); substantive story prose remains subject to batch approval.
 - Sampler identity and complete prose follow the [owner delegation and PM selections](../decisions/owner-decision-sampler-batch-2026-10-03.md).
