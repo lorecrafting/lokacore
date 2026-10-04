@@ -10,6 +10,7 @@ import {
   newWorld,
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
+import type { Command } from '../../../kernel/ts/src/contracts.gen.ts';
 import { accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import { admit, adopt } from '../../../kernel/ts/src/runtime/proposal.ts';
 import {
@@ -75,15 +76,16 @@ const setup = (path = ':memory:') => {
   if (id.kind !== 'identified') throw new Error('invalid conformance identity');
   const command = {
     id: id.command_id,
+    world_context_id: fresh.context,
     payload: { type: 'look', actor_id: fresh.character },
-  } as const;
+  } as const satisfies Command;
   const next = adopt(
     story.world,
     admit(
       'resource',
       accepted(story.world, 'adjusted', [adjust(story.world, rat, hp, -1, {}).op], []),
     ),
-    command as never,
+    command,
     () => {
       throw new Error('unexpected allocation');
     },
