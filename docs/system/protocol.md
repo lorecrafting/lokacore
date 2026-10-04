@@ -128,7 +128,10 @@ A `DomainEvent` (`kernel/ts/src/decision.ts:227`) has an IdSource id, the world,
 the actor, the world's logical time, a one-based causal `position`, and the command as
 `causation_id` and `correlation_id`. A job's `entity_entered_room` is at instance scope and the
 job's due time, caused by the `run_job` (`behavior.ts:58`); the proposal renumbers positions and
-correlates everything to the player's command (`proposal.ts:183`).
+correlates everything to the player's command (`proposal.ts:183`). The modal scene subset
+emits `scene_ended {scene}` on the final continue at position 2, leaving position 1
+for its line fact's fact_changed; start is the fact's 0→1 change, with no scene_started
+([scene@1](mechanics.md#scene1-rulesscenets)).
 
 ## ActionSet and admission
 
@@ -179,7 +182,8 @@ named by its keywords through `doors` (`:72`). A Command carries only ids, never
 
 `gameView` (`kernel/ts/src/view.ts:48`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
-`exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
+`exits` in compass order, unavailable with `unsupported_capability` while a modal scene
+runs (before passage, position and fare), else `exit_closed`, `exit_locked` (a closed or locked
 barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
 fare) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
 carries `door` (the barrier's short name, its state and the door verbs the actor may use on it
@@ -204,6 +208,8 @@ accepts (only those resolving to `remove`), absent when the world has no holder
 has an instance of, with state and title, and optional `journal`, the selected TextKey
 from [quest@1](mechanics.md#quest1-rulesquestts-kerneltssrcquestts)); `chapter` (`{index, title}`, a non-negative declaration index and TextKey), present exactly
 when the cartridge declares chapters, selected by [Chapters](mechanics.md#chapters-kerneltssrcviewts);
+`scene` (`{scene, line, index, count}`, DefinitionRef, TextKey, one-based shown line and
+narrate count), present exactly while [scene@1](mechanics.md#scene1-rulesscenets) runs;
 `time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
 `resources`, each with current, maximum, a condition band key and its tone (`normal`, `warning`
@@ -223,5 +229,5 @@ position invocation (`stand`, `sit`, `rest`, `sleep`) checks its selected `actio
 the observation supplies it: an available matching place action is never refused
 `invalid_state`, and an unavailable or absent one is never accepted. Without an action key,
 any available place action resolving to that command qualifies. An available exit's move is
-never refused `invalid_state`; a
+never refused `invalid_state` or `unsupported_capability`; a
 `take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:29`, `:76`).
