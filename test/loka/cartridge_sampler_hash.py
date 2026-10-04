@@ -50,10 +50,24 @@ v['dialogues'] = {
     key('dialogue', 'bram_offer'): definition('bram_offer', npc=ref('npc', 'bram'), policy=policy(dict(op='not', item=dict(op='any', items=[quest_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']]))), prompt='dialogue.bram_offer.prompt', roles=roles, choices=dict(accept=dict(label='quest.lantern.accept', narration='narration.bram.accept', accept=ref('quest', 'lantern'))))}
 v['story_points'] = {key('story_point', 'lantern_resolved'): definition('lantern_resolved', outcomes={outcome: dict(dialogue=ref('dialogue', 'bram'), choice=choice) for outcome, choice in [('carry', 'take_it'), ('leave', 'leave_it')]})}
 v['scenes'] = {key('scene', 'lantern_kept'): definition('lantern_kept', on=dict(story_point=ref('story_point', 'lantern_resolved'), outcome='carry'), control='modal', steps=[dict(type='narrate', text=f'scene.lantern_kept.{line}') for line in ['bram', 'brass', 'river']] + [dict(type='await_ack'), dict(type='end')])}
+# PM acceptance repair: hand-literal baseline table, independently declared.
+v['world'] = {'bands': [
+    {'at_percent': 100, 'key': 'ready', 'tone': 'normal'},
+    {'at_percent': 90, 'key': 'slightly_scratched', 'tone': 'normal'},
+    {'at_percent': 80, 'key': 'few_bruises', 'tone': 'normal'},
+    {'at_percent': 70, 'key': 'some_cuts', 'tone': 'warning'},
+    {'at_percent': 60, 'key': 'several_wounds', 'tone': 'warning'},
+    {'at_percent': 50, 'key': 'many_nasty_wounds', 'tone': 'warning'},
+    {'at_percent': 40, 'key': 'bleeding_freely', 'tone': 'warning'},
+    {'at_percent': 30, 'key': 'covered_in_blood', 'tone': 'danger'},
+    {'at_percent': 20, 'key': 'leaking_guts', 'tone': 'danger'},
+    {'at_percent': 10, 'key': 'almost_dead', 'tone': 'danger'},
+    {'at_percent': 0, 'key': 'dying', 'tone': 'danger'},
+]}
 v['text'] = json.loads(Path('cartridges/ashmere_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
-fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the adopted 57-string catalog is copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
+fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the adopted 57 story strings plus 11 reused UI labels are copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
 Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
 # Reviewed numeric-profile allocation order: character, body, six rooms, Bram, six items, cloak holder.

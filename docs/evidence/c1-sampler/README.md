@@ -9,30 +9,44 @@ No rule, schema, protocol command, clock behavior or story picker changes.
 
 ## Source and independent answer
 
-The 23 source JSON files match the approved author's final snapshot byte for byte.
-The [catalog](../../../cartridges/ashmere_sampler/text.json) SHA-256 is
+At `2b4c9d6`, all 23 source JSON files matched the approved author's final snapshot
+byte for byte. The [PM band acceptance repair](../../decisions/pm-decision-sampler-bands-2026-10-03.md)
+supplements only `cartridge.json` (baseline `world.bands`) and `text.json` (eleven
+exact existing UI phrases). The other 21 source files and all 57 adopted story
+values remain unchanged. The current [catalog](../../../cartridges/ashmere_sampler/text.json)
+SHA-256 is `04b109f2dd02bbc6308c8c96f56f95496c2b0fca9c8a0a759292640318f0d64a`.
+The original 57-string catalog SHA-256 was
 `c9625cf219728e27efb27923ed302d02cfed51df1fa099239db6ffb76285808b`.
 The exact owner-presented [prose batch](owner-prose-batch.txt) is retained as historical
 raw text; its pending-approval/readiness statements describe preparation before the
 linked delegation. Its SHA-256 is
 `05e8865400e5a5c1cdac8669a972d87d7561fd6d1c32bb0c2543446a29967288`.
 [Author provenance](provenance.json) distinguishes prototype reuse, adaptation and
-new microquest text. Those origin claims are author evidence; the implementation
+new microquest text; its PM supplement records the two source-file additions. Those origin claims are author evidence; the implementation
 verifies the adopted file bytes, not a new inspection of the prototype.
 
 The [Python oracle](../../../test/loka/cartridge_sampler_hash.py) independently
 assembles literal approved semantics, compiler-owned facts/resources and reference
-expansion. Only the adopted text catalog is copied from source. Python stdlib
+expansion. Only the adopted story strings and reused UI labels are copied from source; the
+world-band table is independently hand-declared. Python stdlib
 canonical encoding/hash produces the [fixture](../../../protocol/fixtures/cartridge_sampler_hash.json),
-content hash `0e66807306404138bd5dcb07893f3ef1d6edff7a2141d4c2c38753f8f70b4e55`.
-The actual Elixir compiler matches the expected artifact byte for byte (15,519 bytes),
+content hash `5631ddf63007b837bef1e91dfb71fcfb8d31847257210c5de1caa5b198a771b5`.
+The actual Elixir compiler matches the expected artifact byte for byte (16,587 bytes),
 and the TypeScript loader accepts those bytes with the same hash and lock.
-The [oracle output](oracle.log) also independently derives initial IDs using the
+The [current oracle output](band-oracle.log) also independently derives initial IDs using the
 [numeric profile](../../spec/conformance/numeric-profile.md); the normal walk uses
 those literal target IDs and checks the actor and cloak holder.
 All 19 prior fixture files and existing sources remain unchanged.
 
 ## Actual checks
+
+The initial proof logs below describe `2b4c9d6` before the band repair. Current
+[compiler/cross-loader checks](band-compiler-tests.log) pass three tests, and
+[gameplay/SQLite/App checks](band-focused.log) pass three tests with the new hash.
+Fresh HP projects `ready`/`normal` with the exact catalog phrase “is in perfect health.”
+[Removing the table](band-mutant-missing-band-table.log) and
+[removing its top-band text](band-mutant-missing-band-text.log) separately fail
+the controlled walk/loader; [both actual red controls](band-mutations.json) were restored.
 
 - `mise exec -- mix test test/loka/content_sampler_test.exs test/loka/cartridge_cross_kernel_test.exs`:
   [three tests passed](compiler-tests.log); independent compiler answer and actual
@@ -75,7 +89,8 @@ menu fit, gestures or device persistence observation.
 | Requirement | Status |
 |---|---|
 | Approved identity/prose, independent artifact, dual loader, normal invocation and real SQLite reopen | Proven above |
-| Release Simulator sampler cartridge load/menu fit and kill/relaunch mid-scene with C1 presenter | Pending coordinated integration with c1-touch; no native proof claimed |
+| Content-owned condition phrase/tone | Fresh ready/normal/catalog proven above; final touch phrase/tone proof pending |
+| Release Simulator sampler cartridge load/menu fit and kill/relaunch mid-scene with C1 presenter | Earlier touch review exercised the prior hash; a fresh combined Release proof is required for the supplemented hash, not supplied by these headless captures |
 | Independent primary and separate Sol review, exact-head CI | Pending draft PR workflow |
 | Gate C1 owner's iPhone play and touch-to-visible-feedback | Gate work, not supplied by this headless slice |
 

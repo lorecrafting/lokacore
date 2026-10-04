@@ -55,5 +55,16 @@
   "scene.lantern_kept.brass": "You turn the brass lantern in your hand. Its dented side is cool against your palm.",
   "scene.lantern_kept.river": "The reeds stir. The river keeps sliding past the landing, the color of strong tea.",
   "action.talk": "Talk to",
-  "action.continue": "Continue"
+  "action.continue": "Continue",
+  "band.ready": "is in perfect health",
+  "band.slightly_scratched": "is slightly scratched",
+  "band.few_bruises": "has a few bruises",
+  "band.some_cuts": "has some cuts",
+  "band.several_wounds": "has several wounds",
+  "band.many_nasty_wounds": "has many nasty wounds",
+  "band.bleeding_freely": "is bleeding freely",
+  "band.covered_in_blood": "is covered in blood",
+  "band.leaking_guts": "is leaking guts",
+  "band.almost_dead": "is almost dead",
+  "band.dying": "is DYING"
 }

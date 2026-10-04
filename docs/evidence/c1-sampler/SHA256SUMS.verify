@@ -1,3 +1,9 @@
+band-compiler-tests.log: OK
+band-focused.log: OK
+band-mutant-missing-band-table.log: OK
+band-mutant-missing-band-text.log: OK
+band-mutations.json: OK
+band-oracle.log: OK
 compiler-tests.log: OK
 fault-seed-remap.json: OK
 fault-tests.log: OK

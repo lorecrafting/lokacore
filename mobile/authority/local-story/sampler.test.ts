@@ -97,6 +97,10 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
     let p = open(sql);
     assert.equal(fresh.character, 'bd595711-ea5f-89a5-abb0-046cd349d2f9');
     assert.equal(fresh.slots.cloak, '251e7a71-b5ad-8d22-858b-533e52cc5415');
+    // Breaks: missing authored bands fall back to perfect_health, or the band label is absent.
+    const hp = p.view().resources!.find((r) => r.resource.key === 'hp')!;
+    assert.deepEqual([hp.band, hp.tone], ['ready', 'normal']);
+    assert.equal(p.o.world().cartridge.text['band.ready'], 'is in perfect health');
     assert.equal(p.view().position, 'standing');
     assert.deepEqual(p.view().chapter, { index: 0, title: 'chapter.lantern' });
     assert.deepEqual(p.view().journal, []);

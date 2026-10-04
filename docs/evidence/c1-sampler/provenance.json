@@ -56,7 +56,18 @@
     "scene.lantern_kept.brass": "newly authored scene line; prototype brass lantern is object base",
     "scene.lantern_kept.river": "newly authored scene line; adapted prototype landing river image",
     "action.talk": "reused lantern_proof/text.json",
-    "action.continue": "newly authored continuation label; provisional settled scene key"
+    "action.continue": "newly authored continuation label; provisional settled scene key",
+    "band.ready": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.slightly_scratched": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.few_bruises": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.some_cuts": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.several_wounds": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.many_nasty_wounds": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.bleeding_freely": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.covered_in_blood": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.leaking_guts": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.almost_dead": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose",
+    "band.dying": "reused exact legacy UI phrase, mobile/app/book/pages.tsx:16 at 2b4c9d6; PM acceptance repair, not new story prose"
   },
   "before": {
     "room.drowned_lantern.description": "The inn is low and warm and smells of peat smoke and spilled ale. The {hearth|hearth} is big enough to stand in. {board|The rumor board} is thick with pinned notes, and {bar|Maud’s bar} runs along the back wall.",
@@ -118,5 +129,23 @@
     "device_result": null,
     "independent_review_verdict": null
   },
-  "historical_provenance_note": "Pending labels and before values record authoring/presentation history; complete catalog is now adopted under the external delegated-PM approval checkpoint."
+  "historical_provenance_note": "Pending labels and before values record authoring/presentation history; complete catalog is now adopted under the external delegated-PM approval checkpoint.",
+  "pm_band_supplement": {
+    "record": "docs/decisions/pm-decision-sampler-bands-2026-10-03.md",
+    "finding": "SAMP-BAND-01",
+    "prior_head": "2b4c9d673c9e365408993a2f032295e8bfb4c0b0",
+    "supplemented_source_files": [
+      "cartridge.json",
+      "text.json"
+    ],
+    "unchanged_other_source_files": 21,
+    "unchanged_adopted_story_strings": 57,
+    "reused_ui_labels": 11,
+    "table_origin": "kernel/ts/src/view.ts:216 at 2b4c9d6; identical eleven default cuts/tones and all keys except top ready",
+    "label_origin": "mobile/app/book/pages.tsx:16 at 2b4c9d6; exact legacy phrases",
+    "original_catalog_sha256": "c9625cf219728e27efb27923ed302d02cfed51df1fa099239db6ffb76285808b",
+    "supplemented_catalog_sha256": "04b109f2dd02bbc6308c8c96f56f95496c2b0fca9c8a0a759292640318f0d64a",
+    "original_owner_batch_unchanged": true,
+    "new_owner_prose_approval_claimed": false
+  }
 }

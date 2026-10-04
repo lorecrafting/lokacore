@@ -1,0 +1,12 @@
+[
+  {
+    "mutation": "missing-band-table",
+    "exit_status": 1,
+    "detected": true
+  },
+  {
+    "mutation": "missing-band-text",
+    "exit_status": 1,
+    "detected": true
+  }
+]

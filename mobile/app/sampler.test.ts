@@ -100,7 +100,7 @@ test('the app opens and replaces only its sampler save, preserving an existing L
     assert.equal(pin().cartridge_id, 'ashmere_sampler');
     assert.equal(
       pin().content_hash,
-      '0e66807306404138bd5dcb07893f3ef1d6edff7a2141d4c2c38753f8f70b4e55',
+      '5631ddf63007b837bef1e91dfb71fcfb8d31847257210c5de1caa5b198a771b5',
     );
     assert.equal(globals.loka_session!.startOver(), undefined);
     assert.equal(pin().cartridge_id, 'ashmere_sampler');
