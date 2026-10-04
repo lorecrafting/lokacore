@@ -1,0 +1,48 @@
+(node:19153) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (49.054375ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (17.613917ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (31.705625ms)
+✔ only World position taps directly cycle the offered states with captured freshness (15.648958ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (10.907125ms)
+✔ only confirmed pickup returns World, including a retry from another page (15.537291ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (11.159834ms)
+✔ inventory Drop returns World with one named event only after confirmation (13.441125ms)
+✔ other item actions retain their detail and World consequences (6.873375ms)
+✔ elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips (13.944333ms)
+✖ delayed Take returns once with its original item name after a conflicting tap (14.09025ms)
+✔ delayed actual quest completion adds one authored result and Journal updated in original history (18.211291ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 11
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 523.383
+
+✖ failing tests:
+
+test at mobile/app/book/polish.test.ts:604:1
+✖ delayed Take returns once with its original item name after a conflicting tap (14.09025ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file://<worktree>/mobile/app/book/polish.test.ts:626:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

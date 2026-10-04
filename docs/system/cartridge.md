@@ -18,7 +18,11 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_sampler@0.0.3` in `loka-ashmere-sampler.db`, under the
+The phone bundles `ashmere_sampler@0.0.4` in `loka-ashmere-sampler.db`. This elapsed release
+requires kernel API1.1, declares real_elapsed rate50/start64800, and schedules Bram at
+Ferry Landing from06:00 and the Drowned Lantern from19:00, under the
+[B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md). Its compiled artifact matches
+the independent sampler answer; earlier ten-room content and prose remain. The story is under the
 [approved sampler scope](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#11-c1-sampler-the-gate-story-q2)
 and [identity/prose record](../decisions/owner-decision-sampler-batch-2026-10-03.md).
 Its ten rooms reuse Ashmere geography and prototype prose; its lantern errand,

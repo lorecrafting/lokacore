@@ -35,6 +35,8 @@ const game = (view: GameView): Game => ({
   view: () => ({ view, token: 'view:drawn' }),
   invoke: () => ({ kind: 'stale_view' }),
   pending: () => false,
+  pendingInvocation: () => undefined,
+  subscribe: () => () => {},
   text: (key) => ({ 'door.gate': 'the gate', 'item.coat': 'a coat' })[key],
   lastNarration: () => undefined,
 });

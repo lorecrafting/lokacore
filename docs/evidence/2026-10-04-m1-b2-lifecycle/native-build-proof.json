@@ -1,0 +1,20 @@
+{
+  "configuration": "Release",
+  "code_signing_allowed": false,
+  "build_exit": 0,
+  "final_warm_build_exit": 0,
+  "final_native_smoke_exit": 0,
+  "source_base_commit": "8420b2e810a32fda1d826fd8019c42ad36618cf7",
+  "publication_base_commit": "6d53e8a12aae2550e47ad11232d68128e8356625",
+  "source_uncommitted_at_capture": true,
+  "source_inputs": "native-source-sha256.json",
+  "hermes_bundle_sha256": "3f34c37fc1189fd0a6e35b19083f070a91097411b7d04ba4f31a595b9913a6e4",
+  "hermes_bundle_header_hex": "c61fbc03c103191f",
+  "cartridge_id": "ashmere_sampler",
+  "cartridge_version": "0.0.4",
+  "kernel_api_minimum": "1.1",
+  "cartridge_content_hash": "3a667d1b38c66026eda4597879be24b0eec9cb7c61a26b92757e2ad9f31036d6",
+  "independent_review": null,
+  "exact_head_ci": null,
+  "full_pre_push": null
+}

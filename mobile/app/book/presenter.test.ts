@@ -20,6 +20,15 @@ const game = (reply: (n: number) => Reply): Game => {
     view: () => ({ view: VIEW, token: 'view:r:0' }),
     invoke: () => reply(n++),
     pending: () => false,
+    pendingInvocation: () => undefined,
+    subscribe: (listener) => {
+      listener({
+        kind: 'state',
+        projection: { view: VIEW, token: 'view:r:0' },
+        status: { kind: 'ready' },
+      });
+      return () => {};
+    },
     text: () => undefined,
     lastNarration: () => undefined,
   };
@@ -73,11 +82,15 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
       assert.equal(p.screen().view, view);
       assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
       assert.deepEqual(p.screen().log, []);
-      assert.deepEqual(p.screen().detail(context).slice(-1), [
+      assert.equal(p.screen().pending, pending);
+      assert.deepEqual(
+        p.screen().detail(context).slice(-1),
         pending
-          ? '(pending: not confirmed saved; press any button to retry it)'
-          : "You can't do that: not here.",
-      ]);
+          ? action === 'close_choice'
+            ? ['choice.prompt']
+            : []
+          : ["You can't do that: not here."],
+      );
     }
   }
 });

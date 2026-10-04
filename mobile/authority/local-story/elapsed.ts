@@ -68,6 +68,7 @@ function boundary(s: Story, target: number): number {
 
 export class ClockDriver {
   private baseline?: number;
+  private resumeNeeded = false;
   private run: string;
   private status: ElapsedStatus = READY;
   private candidate?: { row: Checkpoint; mono: number; pause: boolean };
@@ -102,13 +103,15 @@ export class ClockDriver {
       target: this.s.world.state.clock,
       remainder: 0,
     };
+    const resumed = this.resumeNeeded || mode === 'resume';
     const d = !this.s.elapsed
       ? 0
-      : mode !== 'resume' && this.baseline !== undefined
+      : !resumed && this.baseline !== undefined
         ? mono - this.baseline
         : Math.max(0, wall - old.wall_ms);
     const rate = this.s.world.cartridge.manifest.time_policy!.rate;
     this.candidate = { row: accounted(old, d, rate, wall), mono, pause: mode === 'pause' };
+    if (resumed) this.resumeNeeded = false;
   }
   private advance(row: Checkpoint): ElapsedStatus {
     const reply = elapsed(
@@ -153,8 +156,12 @@ export class ClockDriver {
     checkRun(this.s);
     return true;
   }
+  requestResume(expected: string) {
+    if (expected === this.s.meta.run_id) this.resumeNeeded = true;
+  }
   pulse(mode: Pulse, expected: string): ElapsedStatus {
     const retained = !!this.candidate;
+    if (mode === 'resume') this.requestResume(expected);
     if (expected !== this.s.meta.run_id) return { kind: 'replaced' };
     if (!this.check(expected)) return { kind: 'pending' };
     this.confirmed();
@@ -166,12 +173,16 @@ export class ClockDriver {
       this.capture(mode);
     return (this.status = this.drain());
   }
-  reserve(expected: string): ElapsedStatus {
-    if (expected !== this.s.meta.run_id) return { kind: 'replaced' };
-    if (!this.check(expected)) return { kind: 'pending' };
+  reserve(expected: string): { status: ElapsedStatus; target?: number } {
+    if (expected !== this.s.meta.run_id) return { status: { kind: 'replaced' } };
+    if (!this.check(expected)) return { status: { kind: 'pending' } };
     this.confirmed();
+    // Prerequisite work gets this turn's budget; a new invocation must capture its own horizon later.
+    if (this.candidate || this.target() > this.s.world.state.clock)
+      return { status: (this.status = this.drain()) };
     this.capture('active');
-    return (this.status = this.drain());
+    const target = this.target();
+    return { status: (this.status = this.drain()), target };
   }
   state(): ElapsedStatus {
     if (this.s.blocked)

@@ -3,16 +3,15 @@
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
 // 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
 import type {
-  ActionInput,
-  EntityId,
   Game,
   GameView,
-  Intent,
-  Key,
   Reply,
+  ElapsedStatus,
+  GameSubscription,
+  Projection,
 } from '../../packages/game-view/session.ts';
-import { OUTCOME, reason, SENTENCE } from './words.ts';
-import { things } from './model.ts';
+import { comings, replyLine, withoutHeading } from './words.ts';
+import { buttonsOf, intentOf, things } from './model.ts';
 
 /**
  * A tappable action: its text and the intent it sends (the session adds id and actor), with the
@@ -27,91 +26,6 @@ export type Button = {
 };
 
 type Say = (key: string) => string;
-type Press = Omit<Button, 'token'>;
-
-// The pending choice's available answers and its Close (06 §43: never a trap).
-function asked(v: GameView, label: Say): Press[] {
-  const c = v.choice;
-  const answer = (o: { choice_id: string; label: string }) => ({
-    label: label(o.label),
-    action_key: 'choose',
-    target_ids: [],
-    input: { choice_id: o.choice_id, continuation_id: c!.continuation_id },
-  });
-  return [
-    ...(c?.choices.filter((o) => o.available) ?? []).map(answer),
-    ...(c?.closable
-      ? [{ label: 'Close', action_key: 'close_choice', target_ids: [], input: {} }]
-      : []),
-  ];
-}
-
-// The view's available actions as buttons: place actions that need no input, each open exit as a
-// move, each entity's or held item's actions aimed at it, then the pending choice's.
-function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
-  const button = (a: { action_key: string; label: string }, name: string, id?: string) => ({
-    label: `${label(a.label)}${name}`,
-    action_key: a.action_key,
-    target_ids: id ? [id] : [],
-    input: {},
-  });
-  const place = v.actions.filter((a) => a.available && !a.input.length && a.target.kind === 'none');
-  const moves = v.exits.filter((e) => e.available);
-  const doors = v.exits.flatMap((e) =>
-    (e.door?.actions ?? [])
-      .filter((a) => a.available)
-      .map((a) => ({
-        ...button(a, ` ${text(e.door!.name)} (${e.direction})`),
-        input: { direction: e.direction },
-      })),
-  );
-  const held = things(v).flatMap((e) =>
-    e.actions
-      .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
-      .map((a) => button(a, ` ${text(e.name)}`, e.id)),
-  );
-  return [
-    ...place.map((a) => button(a, '')),
-    ...moves.map((e) => ({
-      label: `Go ${e.direction}`,
-      action_key: 'move',
-      target_ids: [],
-      input: { direction: e.direction },
-    })),
-    ...doors,
-    ...held,
-    ...asked(v, label),
-  ];
-}
-
-// What one press answers: the narration or the outcome's words (words.ts; none: '') of an accepted
-// command, else the refusal in words. Never a raw outcome code.
-function said(r: Reply, text: Say, view: GameView, fallback?: string): string {
-  if (r.kind === 'pending') return '(pending: not confirmed saved; press any button to retry it)';
-  if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
-  if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
-  const d = r.decision;
-  if (d.kind === 'rejected') {
-    const { code } = d.error; // the same sentence as a refused drag (model.ts `refused`)
-    return SENTENCE[code] ?? `You can't do that: ${reason(code)}.`;
-  }
-  if (d.kind === 'fault') return '';
-  const lines = d.narration ?? [];
-  const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
-  return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
-}
-
-// Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
-// still have a meaningful status line. ponytail: inferred from the view; kernel schedule narration replaces it.
-function comings(was: GameView, now: GameView, text: Say): string[] {
-  if (was.place.id !== now.place.id) return [];
-  const gone = (a: GameView, b: GameView) =>
-    a.entities.filter((e) => e.kind === 'npc' && !b.entities.some((f) => f.id === e.id));
-  return [
-    ...gone(was, now).map((e) => `${text(e.name)} leaves.`),
-    ...gone(now, was).map((e) => `${text(e.name)} arrives.`),
-  ];
-}
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -125,23 +39,14 @@ const sayers = (g: Game): { text: Say; label: Say } => ({
       .replace(/^./, (a) => a.toUpperCase()),
 });
 
-// The button's plain strings are the wire's branded ones: a button is built from the view's own keys.
-const intentOf = ({ action_key, target_ids, input, token }: Button): Intent => ({
-  action_key: action_key as Key,
-  target_ids: target_ids as EntityId[],
-  input: input as ActionInput,
-  ...(token && { view_freshness_token: token }),
-});
-
-// Compare structured TextKeys, never rendered English. Authored non-navigation consequences stay.
-const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
-  lines.filter((t) => t.key !== view.place.title.key && t.key !== view.place.description?.key);
-
 export type DetailLine = string | { text: string; event: true };
 type Logs = {
   log: string[];
   details: Map<string, DetailLine[]>;
-  retry?: { button: Button; detail?: string; item?: string };
+  retry?: { button: Button; detail?: string; item?: string; invocation?: string };
+  projection: Projection;
+  status: ElapsedStatus;
+  recovered?: boolean;
   narrationId?: string;
   returnWorld?: boolean;
   fault?: string;
@@ -162,7 +67,13 @@ function restoredLogs(game: Game, text: Say): Logs {
     const id = view.choice.speaker_id ?? 'conversation';
     details.set(id, [...(details.get(id) ?? []), text(view.choice.prompt.key)]);
   }
-  return { log, details, narrationId: last?.command_id };
+  return {
+    log,
+    details,
+    narrationId: last?.command_id,
+    projection: game.view(),
+    status: { kind: 'ready' },
+  };
 }
 
 function detailLines(s: Logs, id: string) {
@@ -217,7 +128,7 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
       : accepted?.outcome === 'choice_closed'
         ? ''
         : undefined;
-  const line = repeated ? '' : said(reply, text, now, fallback);
+  const line = repeated ? '' : replyLine(reply, text, now, fallback);
   if (line) lines.push(line);
   lines.push(...comings(was, now, text));
   if (accepted && attempt.detail && journalChanged(was, now, attempt.detail))
@@ -231,28 +142,115 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   return line;
 }
 
-function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
+function background(
+  game: Game,
+  update: Extract<GameSubscription, { kind: 'state' }>,
+  s: Logs,
+  text: Say,
+) {
+  s.status = update.status;
   s.returnWorld = false;
-  // A complete Give remains legal; the current item-only touch button cannot supply its recipient.
+  if (update.status.kind === 'error') s.fault = update.status.message;
+  if (update.status.kind === 'fault') s.fault = `Time stopped: ${update.status.code}`;
+  if (update.status.kind === 'replaced') s.fault = 'This game has been replaced; reopen it.';
+  if (s.projection.token === update.projection.token) return;
+  const was = s.projection.view,
+    now = update.projection.view;
+  if (was.place.id !== now.place.id) s.log.length = 0;
+  s.log.push(...comings(was, now, text));
+  s.projection = update.projection;
+  let last: ReturnType<Game['lastNarration']>;
+  try {
+    last = game.lastNarration();
+  } catch (e) {
+    s.fault = (e as Error).message;
+    return;
+  }
+  if (last && last.command_id !== s.narrationId) {
+    const line = withoutHeading(last.lines, now)
+      .map((t) => text(t.key))
+      .join(' ');
+    if (line)
+      (now.choice ? detailLines(s, now.choice.speaker_id ?? 'conversation') : s.log).push(line);
+    s.narrationId = last.command_id;
+  }
+}
+
+const confirmed = (reply: Reply) =>
+  reply.kind === 'saved' && ['accepted', 'rejected'].includes(reply.decision.kind);
+
+function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
+  s.fault =
+    reply.kind === 'save_corrupt'
+      ? reply.message
+      : reply.kind === 'fault'
+        ? `Time stopped: ${reply.code}`
+        : reply.kind === 'saved' && reply.decision.kind === 'fault'
+          ? `Time stopped: ${reply.decision.code}`
+          : undefined;
+  const line = s.fault ? '' : received(game, reply, was, s, text);
+  if (s.fault) s.returnWorld = false;
+  s.projection = game.view();
+  s.status =
+    reply.kind === 'save_corrupt'
+      ? { kind: 'error', reason: 'save_corrupt', message: reply.message }
+      : reply.kind === 'fault'
+        ? reply
+        : reply.kind === 'saved' && reply.decision.kind === 'fault'
+          ? { kind: 'fault', code: reply.decision.code }
+          : { kind: 'ready' };
+  s.recovered = confirmed(reply) && !s.fault;
+  s.retry = undefined;
+  return line;
+}
+
+function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
+  s.returnWorld = s.recovered = false;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
   const item = ['take', 'drop'].includes(b.action_key)
     ? things(was).find((e) => e.id === b.target_ids[0])
     : undefined;
-  s.retry ??= { button: b, detail, item: item && text(item.name) };
+  s.retry ??= {
+    button: { ...b, target_ids: [...b.target_ids], input: { ...b.input } },
+    detail,
+    item: item && text(item.name),
+  };
   let reply: Reply;
   try {
     reply = game.invoke(intentOf(b));
   } catch (e) {
     s.fault = (e as Error).message;
-    const line = `(not confirmed: ${s.fault}; the next press retries ${s.retry.button.label})`;
-    (s.retry.detail ? detailLines(s, s.retry.detail) : s.log).push(line);
+    s.status = { kind: 'error', message: s.fault };
+    s.retry.invocation = game.pendingInvocation();
+    return '';
+  }
+  if (game.pending() && reply.kind !== 'pending' && reply.kind !== 'catching_up') {
+    const line = replyLine(reply, text, game.view().view);
+    if (line) (detail ? detailLines(s, detail) : s.log).push(line);
     return line;
   }
-  s.fault = undefined;
-  const line = received(game, reply, was, s, text);
-  if (!game.pending()) s.retry = undefined;
-  return line;
+  if (reply.kind === 'pending' || reply.kind === 'catching_up') {
+    s.retry.invocation =
+      reply.kind === 'catching_up' ? reply.invocation_id : game.pendingInvocation();
+    s.recovered = reply.kind === 'catching_up' && ['ready', 'catching_up'].includes(s.status.kind);
+    s.status = { kind: reply.kind };
+    if (s.recovered) s.fault = undefined;
+    return '';
+  }
+  // Prerequisite state notifications have already consumed ambient changes at the settled frame.
+  return finished(game, reply, s.projection.view, s, text);
+}
+
+function updated(game: Game, update: GameSubscription, s: Logs, text: Say): boolean {
+  s.recovered = false;
+  if (update.kind === 'state') {
+    background(game, update, s, text);
+    return false;
+  }
+  if (!s.retry || update.invocation_id !== s.retry.invocation) return false;
+  finished(game, update.reply, update.before.view, s, text);
+  return true;
 }
 
 /** World/detail logs, buttons and presses for one game. */
@@ -271,11 +269,14 @@ export function presenter(game: Game) {
         buttons,
         log: s.log,
         detail: (id: string) => s.details.get(id) ?? [],
-        pending: game.pending(),
+        pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
+        catchingUp: s.status.kind === 'catching_up',
         fault: s.fault,
         returnWorld: s.returnWorld,
       };
     },
+    update: (update: GameSubscription) => updated(game, update, s, text),
+    recovered: () => !!s.recovered,
     // A pending retry keeps the original detail, even when retried from the world.
     press: (b: Button, detail?: string) => pressed(game, b, detail, s, text),
     startOverFailed(why?: string) {

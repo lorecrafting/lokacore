@@ -169,7 +169,7 @@ need later native before/after proof; no unsupported prop, native plugin or depe
 
 Other-player presence requires a real projection and UI scope; no fabricated player rows.
 Attack/skill controls wait until GameView offers them; there are no placeholders or invented
-character data. Live world-clock, reading-time safety and interruption integration remains
+character data. Reading-time safety and interruption integration remains
 future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
 Give needs both item and recipient targets. The current touch item-action projection supplies
 only its item target, so it must not offer or dispatch that incomplete Give. Complete offered
@@ -188,8 +188,24 @@ rather than hiding errors or clearing same-room history. Carries remain in the [
 Game offers typed state updates (confirmed projection and elapsed/catch-up/save status) and
 terminal completion of the retained invocation, with identity and settled pre-command view.
 Immediate terminal calls are not repeated as completion notifications. Catching up means time
-settlement; pending means an unknown save. B2 consumes these notifications in actual lifecycle
-and rendering flows; this shared contract alone adds no phone timer/UI integration.
+settlement; pending means an unknown save. The Book consumes one subscription per Game with cleanup/lifetime guards. Each confirmed
+boundary processes ambient arrivals/departures and new narration once, including consecutive
+boundaries in one React batch. Ordinary background updates redraw without a page flip, preserve
+same-room detail/scroll and chapter acknowledgment, and clear action-only return routing.
+They never fabricate an action result, pickup echo or Journal updated event.
+
+Terminal completion must match the original retained invocation and bounded Button/detail/item
+context. Compare with its settled pre-command projection. Synchronous invokes can emit
+prerequisite states first; use that confirmed settled observer frame so ambient changes already
+shown are not repeated. Consume each terminal result once, without retaining a World or growing
+completion ledger. When an open thing matches the pending speaker and that NPC departs, retain
+the route as Conversation with speaker-keyed history and the real targetless Leave; unrelated
+vanished things and player movement keep ordinary route removal. No NPC is invented.
+
+The existing save-not-confirmed status reflects unknown save state, independently of a retained
+clock attempt. A separate catching-up note describes time settlement. Errors keep the confirmed
+view and existing recovery affordance. The Book reports confirmed recovery to the App through
+its Shell callback; [App lifecycle](architecture.md#elapsed-session-driver) owns wakeups.
 
 The session snapshots only validated bounded invocation data, including target_ids and input,
 so caller mutation cannot change the retained attempt or its completion context. During

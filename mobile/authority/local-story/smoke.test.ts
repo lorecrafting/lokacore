@@ -15,7 +15,6 @@ import type { Game } from '../../packages/game-view/session.ts';
 import { localSession, openGame } from './session.ts';
 import type { Db } from './store.ts';
 
-const PENDING = '(pending: not confirmed saved; press any button to retry it)';
 type P = (string | number | null)[];
 const ITEMS = read('protocol/fixtures/cartridge_items_hash.json') as never;
 const adapt = (
@@ -125,7 +124,7 @@ test('an unknown COMMIT shows pending, not a success; a restart shows what commi
   });
   arm = true;
   a.press('Take a leather satchel');
-  assert.deepEqual(a.now().log, [PENDING]);
+  assert.deepEqual(a.now().log, []);
   assert.equal(a.now().pending, true);
   assert.deepEqual(a.now().carrying, []);
   const b = processOn(path);
@@ -188,7 +187,7 @@ test('a same-scope receipt from another allocator does not move the id counter',
 });
 
 // Breaks: a throw shown as "not saved" with the retry cleared (a read error can follow a durable
-// commit), or a throw that leaves no log line or a retry that is not resent. A real SQLITE_FULL
+// commit), hides the visible fault, or clears the original retry. A real SQLITE_FULL
 // (512-byte page, max_page_count clamped); lifting the clamp, the next press resends "Go north".
 test('a failed write is not claimed unsaved; the next press retries it', () => {
   const p = processOn(join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db'), undefined, 512);
@@ -197,11 +196,11 @@ test('a failed write is not claimed unsaved; the next press retries it', () => {
   p.press('Go north');
   assert.equal(p.now().pending, true);
   assert.match(p.now().fault!, /full/i);
-  assert.match(p.now().log[0], /^\(not confirmed: .*full.*retries Go north\)$/i);
+  assert.deepEqual(p.now().log, []);
   assert.equal(one('SELECT revision FROM head'), 0);
   p.sql.exec('PRAGMA max_page_count = 1000000');
   p.press('Scan');
-  assert.deepEqual(p.now().log.slice(1), []);
+  assert.deepEqual(p.now().log, []);
   assert.equal(p.now().place, 'Village Green');
   assert.equal(p.now().pending, false);
   assert.equal(p.now().fault, undefined); // a stale fault would keep offering start over

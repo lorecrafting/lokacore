@@ -2,9 +2,19 @@
 import { useRef } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, plain, why, type group } from './model.ts';
-import type { Button, DetailLine } from './presenter.ts';
-import { Act, Leave, note, prose, Sheet, Tap, titleStyle, type Thing } from './pages.tsx';
+import { absent, cap, plain, things, why, type group, type Page } from './model.ts';
+import type { Button, DetailLine, presenter } from './presenter.ts';
+import {
+  Act,
+  Leave,
+  note,
+  prose,
+  Sheet,
+  Tap,
+  ThingPage,
+  titleStyle,
+  type Thing,
+} from './pages.tsx';
 import { paper } from './paper.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -97,5 +107,53 @@ export function ContentsPage(p: { open: (section: Section) => void }) {
         </Tap>
       ))}
     </Sheet>
+  );
+}
+
+type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
+
+export function Item(p: {
+  id: string;
+  screen: Screen;
+  g: ReturnType<typeof group>;
+  press: (b: Button, detail?: string) => void;
+  open: (p: Page) => void;
+  world: () => void;
+}) {
+  const items = things(p.screen.view);
+  const thing = items.find((e) => e.id === p.id);
+  return (
+    <ThingPage
+      thing={thing}
+      text={p.screen.text}
+      actions={p.g.on(p.id)}
+      press={p.press}
+      contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
+      open={(id) => p.open({ kind: 'thing', id })}
+      leave={p.world}
+    />
+  );
+}
+
+export function NpcDetail(p: {
+  screen: Screen;
+  g: ReturnType<typeof group>;
+  press: (b: Button, detail?: string) => void;
+  speaker?: string;
+  world: () => void;
+}) {
+  const { view, text } = p.screen;
+  const npc = view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
+  const id = npc?.id ?? p.speaker ?? view.choice?.speaker_id ?? 'conversation';
+  return (
+    <NpcPage
+      view={view}
+      npc={npc}
+      text={text}
+      g={p.g}
+      log={p.screen.detail(id)}
+      press={(b) => p.press(b, id)}
+      leave={p.world}
+    />
   );
 }

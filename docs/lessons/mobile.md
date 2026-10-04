@@ -34,7 +34,8 @@ Hard-won lessons for `mobile/` and physical-device runs.
   that the owner can connect only one phone at a time: batch all work per phone; ask for a
   swap only when needed.
 - A locked screen stops the app's JS. Check the lock state before a run; keep the app in
-  the foreground; treat a lock or backgrounding as an invalid run.
+  the foreground; treat a lock or backgrounding as an invalid foreground performance run. A deliberate
+  lifecycle test instead records the inactive interval and verifies saved absence on resume.
 - Every wait on a device needs a timeout (for example 120 s per launch, a 10 minute
   progress watchdog). An unbounded `until grep …` loop hung for minutes once.
 - The Android logcat ring buffer keeps lines from earlier runs; a stale progress marker
@@ -55,17 +56,12 @@ Hard-won lessons for `mobile/` and physical-device runs.
 - agent-device: its daemon keeps the environment it first started with; after setting
   `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save; for a
   fresh start, uninstall and reinstall the app.
-- The walk on a fresh Release build (the Lantern, Ferry Landing): `press 'label="Got it"' --settle`
-  (the map tip; wait 2 s after `open`, an early press misses). Bram is a context menu: `press 'label="Bram the ferryman, open"'`
-  opens it, `press 'label="Talk to Bram the ferryman"'` shows the choice in it (the answers and Close), then
-  `press "label=\"Offer to fetch Bram's lantern\"" --settle` accepts the quest (the result line is in the room log);
-  `press 'label="Done"'` hides the menu (a pending choice shows it again in the next room);
-  `press 'label="Map"' --settle`. Journal, Carrying and Settings are taps on the Character
-  page: `press` the status line's button (its label starts "Character, hp ..."; copy it from `snapshot -i`).
-  A selector with spaces is one shell argument, quotes inside. The footer map takes a raw
-  `gesture pan 207 781 0 -55 5000` (north; 55 px is about 21 map units); take a mid-drag shot with
-  `xcrun simctl io <udid> screenshot` while that runs in the background (`agent-device screenshot` waits for the
-  pan). `scroll` does not move the book's pages; a raw `swipe 200 600 200 250` does.
+- The current validated Release walk follows [Book navigation](../system/book-ui.md) and
+  [M1-B2 native evidence](../evidence/2026-10-04-m1-b2-lifecycle/README.md), including status
+  Contents, full NPC details, Conversation/Leave after departure, and saved continuation
+  recovery. Copy exact current labels from `snapshot -i`; selectors with spaces are one
+  shell argument, with their quotes inside. Keep map gestures below the scrolling page;
+  use a page-text `gesture pan` for the reading scroll.
 - A ScrollView drawn over other content blurs its text on iOS 27 (the system scroll edge effect); the NPC menu
   is a plain View for that reason.
 - An `Animated.View` with a `transform` around the footer map's dot displaced the dot after the map tip went and

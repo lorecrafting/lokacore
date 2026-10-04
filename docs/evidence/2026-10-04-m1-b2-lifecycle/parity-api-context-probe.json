@@ -1,0 +1,19 @@
+{
+  "1.0": {
+    "diagnostic": {
+      "code": "KERNEL_API_UNSUPPORTED",
+      "data": {
+        "installed": "1.0"
+      },
+      "message_key": "diagnostics.kernel_api_unsupported",
+      "path": ".cartridge.manifest.requires.kernel_api",
+      "severity": "error",
+      "suggested_capabilities": []
+    },
+    "all_nine_bytes_hash_lock_equal": false
+  },
+  "1.1": {
+    "diagnostic": null,
+    "all_nine_bytes_hash_lock_equal": true
+  }
+}
