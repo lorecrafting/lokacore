@@ -47,8 +47,11 @@ native-stable-choice-before-kill.json: OK
 native-stable-choice-killed.json: OK
 native-stable-choice-reopened.json: OK
 native-ui.log: OK
+parity-api-context-focused.log: OK
+parity-api-context-probe.json: OK
 precommit-display-text.log: OK
 precommit-import-boundary.log: OK
+prepush-api-context-failed.log: OK
 relocation-focused-corrected.log: OK
 relocation-focused-final.log: OK
 relocation-kernel-types-corrected.log: OK

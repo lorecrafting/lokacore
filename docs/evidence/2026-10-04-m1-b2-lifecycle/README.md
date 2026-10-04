@@ -81,3 +81,12 @@ and [size check](helper-size-final.log) passed (EXIT0). The [eight structural ca
 [original hook failure](precommit-import-boundary.log), [second hook failure](precommit-display-text.log)
 and [size failure](relocation-size-failed.log) are retained. Production source hashes are unchanged,
 so no further native build was needed.
+
+The first normal full pre-push run failed the existing cross-kernel artifact parity test:
+its shared peer input declared API1.0, so the current sampler correctly returned
+`KERNEL_API_UNSUPPORTED`. The [actual peer probe](parity-api-context-probe.json) shows API1.1
+loads all nine artifacts with identical bytes, hashes and locks. Only that test's peer input
+now declares API1.1; all other API1.0 contexts and artifact expectations remain unchanged.
+The [focused parity suite](parity-api-context-focused.log) passed (EXIT0); the
+[first pre-push failure](prepush-api-context-failed.log) is retained. No production or native
+source changed.
