@@ -128,6 +128,7 @@ export function ThingPage(p: {
 }) {
   return (
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
+      {p.thing?.description && <Text style={prose}>{plain(p.text(p.thing.description))}</Text>}
       {p.thing?.state && <Text style={note}>{cap(p.thing.state)}</Text>}
       {p.actions.length === 0 && p.contents.length === 0 && (
         <Text style={note}>Nothing to do here.</Text>

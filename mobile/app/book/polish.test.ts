@@ -1,4 +1,5 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
+// size: allow 520, Book routes, retries and authored-detail checks share the minimal host/session adapter
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -243,6 +244,10 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   h.tap('Old Bram, open');
   const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
   const entered = turn();
+  assert.deepEqual(h.text().slice(0, 2), [
+    'Old Bram',
+    'A ferryman with rope-scarred hands and a coat that has never been dry.',
+  ]);
   h.tap('Talk to Old Bram');
   assert.equal(turn(), entered);
   const speaker = h.game.view().view.choice!.speaker_id!;
@@ -281,6 +286,10 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
     { text: 'Journal updated', event: true },
   ]);
   const flow = nodes(h.draw().find((n) => n.type === 'ScrollView'));
+  assert.deepEqual(h.text().slice(0, 2), [
+    'Old Bram',
+    'A ferryman with rope-scarred hands and a coat that has never been dry.',
+  ]);
   const cue = flow.findIndex((n) => n.type === 'Text' && words(n) === 'Journal updated');
   assert.equal(flow[cue].props.style.fontStyle, 'italic');
   assert.ok(cue < flow.findIndex((n) => n.props.accessibilityLabel === 'Leave'));
@@ -455,6 +464,10 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
   h.tap('Equipment & Inventory');
   h.tap('a brass lantern, open');
+  assert.deepEqual(h.text().slice(0, 2), [
+    'A brass lantern',
+    'Dented brass with a horn window, oil sloshing inside.',
+  ]);
   assert.equal(h.labels().includes('Take a brass lantern'), false);
   h.sql.exec('PRAGMA query_only = 1');
   h.tap('Drop a brass lantern');

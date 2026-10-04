@@ -2,7 +2,7 @@
 import { useRef } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, why, type group } from './model.ts';
+import { absent, cap, plain, why, type group } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { Act, Leave, note, prose, Sheet, Tap, titleStyle, type Thing } from './pages.tsx';
 import { paper } from './paper.ts';
@@ -35,7 +35,7 @@ function Choice(p: {
   );
 }
 
-export function NpcPage(p: {
+type NpcProps = {
   view: GameView;
   npc?: Thing;
   text: Say;
@@ -43,12 +43,15 @@ export function NpcPage(p: {
   press: (b: Button) => void;
   log: DetailLine[];
   leave: () => void;
-}) {
+};
+
+export function NpcPage(p: NpcProps) {
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const actions = p.npc ? p.g.on(p.npc.id) : [];
   const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
   const scroll = useRef<ScrollView>(null);
+  const description = p.npc?.description;
   return (
     <ScrollView
       ref={scroll}
@@ -61,6 +64,7 @@ export function NpcPage(p: {
       <Text style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
         {p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       </Text>
+      {description && <Text style={prose}>{plain(p.text(description))}</Text>}
       {p.log.map((line, i) => (
         <Text key={i} style={typeof line === 'string' ? prose : { ...note, fontStyle: 'italic' }}>
           {typeof line === 'string' ? line : line.text}
