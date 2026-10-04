@@ -1,0 +1,48 @@
+✔ every contract has examples and every example validates (7.728458ms)
+✖ invalid fixtures fail with exactly the listed errors (13.974792ms)
+✔ the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable (0.632417ms)
+✔ the capability lock encodes and hashes to the independent known answer (0.752667ms)
+✔ a declared __proto__ property survives generation (0.069542ms)
+✔ values outside the canonical profile are rejected at decode, before validation (0.3985ms)
+✔ a recursive Policy at the depth cap (0.846541ms)
+✔ narration at 64 and 65 lines (0.542ms)
+✔ ambiguous candidates at 1024 and 1025 (1.998833ms)
+✔ every composition-profile limit is a valid BudgetExceeded (0.407833ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 114.284917
+
+✖ failing tests:
+
+test at kernel/ts/test/validate.test.ts:21:1
+✖ invalid fixtures fail with exactly the listed errors (13.974792ms)
+  AssertionError [ERR_ASSERTION]: ContentView {"id":"d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a","name":"item.brass_key.short","kind":"item","description":"","actions":[],"container_id":"d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b"}
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     code: 'pattern_mismatch',
+  -     path: '/description'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/validate.test.ts:23:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { path: '/description', code: 'pattern_mismatch' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

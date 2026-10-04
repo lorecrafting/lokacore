@@ -1,0 +1,42 @@
+✔ a fresh world mints NPCs then items after the details and places each (3.028834ms)
+✔ take proposes one transfer to the body and item_acquired, at the Python state hash (2.407333ms)
+✔ drop leaves the item in the room with item_dropped; give hands it to the NPC (2.796ms)
+✔ each bad take, drop and give is rejected with its code and consumes nothing (2.63275ms)
+✔ the containment invariants fail on a broken world (1.778459ms)
+✔ containment_acyclic is linear in the items of one room (36.298334ms)
+✔ a transfer past a capacity or into its own contents faults and commits nothing (0.492125ms)
+✔ has_item holds for an item the actor carries, also inside a carried container (0.557042ms)
+✔ target resolution names items and NPCs in the room and items the actor holds (0.634459ms)
+✔ look with a target_id examines an item or NPC here or held, else not_present (1.253125ms)
+✔ scan lists the NPCs and items in each room beyond, and changes nothing (0.335542ms)
+✔ a fresh world mints one holder per declared slot after the job, in slot-key order (14.518584ms)
+✔ a cartridge with equipment@1 but no slot keeps its ids and fresh state (10.348625ms)
+✔ wear and remove by invocation, with their refusals (8.090833ms)
+✔ the GameView lists the slots in order and wear and remove only where step accepts them (3.967583ms)
+✔ a worn item cannot be dropped, given or taken (2.56625ms)
+✔ two items in one holder fail containment_acyclic (1.505042ms)
+✔ a cartridge remove and its alias list on and remove a worn item (3.451792ms)
+✔ a targetless wear alias is not listed, and the invariant refuses a view listing it (2.161959ms)
+✔ the chapter walk: lids opened, unlocked and closed by invocation, take through them (49.217ms)
+✔ a door verb names exactly one barrier: each bad shape is refused with its code (10.594291ms)
+✔ a key inside a held, locked trunk still unlocks it (has_item unchanged) (6.341ms)
+✔ the GameView shows a lid, the verbs step accepts on it and what is in reach inside (6.732458ms)
+✔ the loader rejects only keys that can never be reached, and checks an item barrier (14.13075ms)
+✔ every contract has examples and every example validates (38.242583ms)
+✔ invalid fixtures fail with exactly the listed errors (30.591042ms)
+✔ the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable (1.3795ms)
+✔ the capability lock encodes and hashes to the independent known answer (0.891875ms)
+✔ a declared __proto__ property survives generation (0.085458ms)
+✔ values outside the canonical profile are rejected at decode, before validation (0.425416ms)
+✔ a recursive Policy at the depth cap (0.922583ms)
+✔ narration at 64 and 65 lines (0.624708ms)
+✔ ambiguous candidates at 1024 and 1025 (2.532708ms)
+✔ every composition-profile limit is a valid BudgetExceeded (0.584917ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 276.792084

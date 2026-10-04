@@ -26,7 +26,13 @@ const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2'; // 5: NPCs, then items in r
 const OIL = '6a70d262-b6ea-8b64-9809-ec7f79d1521e'; // 6: lamp_oil, in the satchel
 const LANTERN = '0f5f2329-bcff-82f4-948a-3d22a75fb068'; // 7: on the green
 const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1'; // 8: at the landing, capacity 1
-const OIL_VIEW = { id: OIL, name: 'item.lamp_oil.short', kind: 'item', container_id: SATCHEL };
+const OIL_VIEW = {
+  id: OIL,
+  name: 'item.lamp_oil.short',
+  description: 'item.lamp_oil.description',
+  kind: 'item',
+  container_id: SATCHEL,
+};
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
 const EVENT = 'e2870386-6797-8a1b-8e1a-b2c028c16c49'; // IdSource [context, CMD, 0], Python
 const SEED = [1, 2, 3, 4];
@@ -69,10 +75,17 @@ test('a fresh world mints NPCs then items after the details and places each', ()
   assert.deepEqual(w.capacities, { [BRAM]: 1, [SATCHEL]: 1 });
   const view = gameView(w);
   assert.deepEqual(view.entities, [
-    { id: BRAM, name: 'npc.bram.short', kind: 'npc', actions: [] },
+    {
+      id: BRAM,
+      name: 'npc.bram.short',
+      description: 'npc.bram.description',
+      kind: 'npc',
+      actions: [],
+    },
     {
       id: SATCHEL,
       name: 'item.satchel.short',
+      description: 'item.satchel.description',
       kind: 'item',
       actions: [verb('take', 'room_contents')],
       contents: [{ ...OIL_VIEW, actions: [verb('take', 'room_contents')] }],
@@ -128,6 +141,7 @@ test('take proposes one transfer to the body and item_acquired, at the Python st
     {
       id: SATCHEL,
       name: 'item.satchel.short',
+      description: 'item.satchel.description',
       kind: 'item',
       actions: held,
       contents: [{ ...OIL_VIEW, actions: [verb('take', 'room_contents')] }], // take's own TargetSpec

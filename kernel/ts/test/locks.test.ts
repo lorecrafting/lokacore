@@ -196,6 +196,7 @@ test('the GameView shows a lid, the verbs step accepts on it and what is in reac
   assert.deepEqual(entity(gameView(w), BOX), {
     id: BOX,
     name: 'item.sewing_box.short',
+    description: 'item.sewing_box.description',
     kind: 'item',
     state: 'closed',
     actions: [verb('open'), verb('take')],
@@ -203,6 +204,7 @@ test('the GameView shows a lid, the verbs step accepts on it and what is in reac
   assert.deepEqual(entity(gameView(w), MAUD), {
     id: MAUD,
     name: 'npc.maud.short',
+    description: 'npc.maud.description',
     kind: 'npc',
     actions: [],
   });
@@ -210,6 +212,7 @@ test('the GameView shows a lid, the verbs step accepts on it and what is in reac
   assert.deepEqual(entity(gameView(open), BOX), {
     id: BOX,
     name: 'item.sewing_box.short',
+    description: 'item.sewing_box.description',
     kind: 'item',
     state: 'open',
     actions: [verb('close'), verb('take')],
@@ -217,6 +220,7 @@ test('the GameView shows a lid, the verbs step accepts on it and what is in reac
       {
         id: KEY,
         name: 'item.brass_key.short',
+        description: 'item.brass_key.description',
         kind: 'item',
         container_id: BOX,
         actions: [verb('take')],
@@ -234,6 +238,7 @@ test('the GameView shows a lid, the verbs step accepts on it and what is in reac
   const item = (id: string, key: string, container_id: string, more = {}) => ({
     id,
     name: `item.${key}.short`,
+    description: `item.${key}.description`,
     kind: 'item',
     container_id,
     ...more,

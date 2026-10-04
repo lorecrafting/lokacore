@@ -186,6 +186,15 @@ named by its keywords through `doors` (`:72`). A Command carries only ids, never
 
 ## GameView
 
+EntityView and ContentView have optional `description: TextKey` on the wire, retaining
+`loka-gameview-v1` and accepting older snapshots without it. Current NPC/item projection
+always copies the required authored entity definition's `description` directly, including
+room, held, worn and reachable-container paths. It never infers a key from the short name,
+uses a room line or selects a room-line variant as full body prose. Presenters localize
+that explicit key; an older view without it has no invented description. This changes no
+adjacent-sight projection, rule, content artifact or saved state
+([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
+
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
 `exits` in compass order, unavailable with `unsupported_capability` while a modal scene
@@ -199,14 +208,16 @@ NPCs and items directly in it, in the order of `entities`), also when the move i
 (04 §15 as amended by c1-doors); `actions` of the place, without the door verbs, `wear` or `remove`,
 nor the current position's verb; `position`, the actor's position, present exactly when the
 cartridge locks `position@1` (04 §15 as amended by c1-position);
-`entities` in the room and `inventory` of the body, each with its short name, kind and the
+`entities` in the room and `inventory` of the body, each with its short name, explicit
+full-description TextKey, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order); an item with a barrier also
 carries its `state` and the container verbs admission and barrier@1's check accept now, all
 available; an item without a barrier or with an open one carries `contents` when it holds an
 item: every item inside it in reach (containment@1 custody: no closed or locked lid on the way),
 at any depth, flattened in DefinitionRefString order, each with its `container_id` (its direct
 container), its `state` if it has a barrier, and as actions only `take` and its container verbs
-(a `ContentView`; a recursive view is not allowed in the schemas). An NPC's possessions and a
+(a `ContentView`, also with its explicit full-description TextKey; a recursive view is not
+allowed in the schemas). An NPC's possessions and a
 worn item's contents are never shown (c1-locks); `equipment`, one entry per slot
 holder in slot-key order with its `slot` and, when one is worn, the `item` with the actions it
 accepts (only those resolving to `remove`), absent when the world has no holder

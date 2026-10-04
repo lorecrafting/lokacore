@@ -1,0 +1,7 @@
+{
+  "scope": "Generated TextKey reference relaxed to unrestricted string; no generator/Mix invocation",
+  "statuses": {
+    "EntityView": 1,
+    "ContentView": 1
+  }
+}
