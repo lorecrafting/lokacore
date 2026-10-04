@@ -153,7 +153,19 @@ test('room is focused while Map retains directions and every detail returns to t
   assert.ok(words(roomScroll).includes('Reeds crowd a slick wooden landing'));
   assert.ok(nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram, open'));
   assert.ok(h.text().includes('Ferry Landing'));
-  assert.equal(h.labels().includes('Look, Ferry Landing'), false); // sampler offers no Look
+  const drawnLook = h.draw().find((n) => n.props.accessibilityLabel === 'Look, Ferry Landing');
+  assert.ok(drawnLook);
+  const receipts = () => h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+  assert.equal(receipts(), 0);
+  const token = h.game.view().token;
+  h.tap('Look, Ferry Landing');
+  assert.equal(receipts(), 1);
+  assert.notEqual(h.game.view().token, token);
+  assert.equal(h.game.view().view.place.title.key, 'room.ferry_landing.title');
+  assert.deepEqual(h.p.screen().log, []);
+  drawnLook.props.onPress(); // this captured title has the pre-Look freshness token
+  assert.equal(receipts(), 1);
+  assert.deepEqual(h.p.screen().log, ['The page had changed; here it is again.']);
   assert.ok(h.labels().includes('Old Bram, open'));
   assert.equal(h.text().includes('North'), false);
   assert.equal(h.text().includes('Beyond north: Well Lane — a brass lantern.'), false);
