@@ -71,6 +71,6 @@ Short list; each item links the plan it comes from. The open stages and their ca
   authority, Realm Mode, co-op instances, shards; specs [07](../archive/spec/07-offline-storypacks-to-mmo.md),
   [19](../archive/spec/19-quest-sharing-instancing-capacity.md), [11](../archive/spec/11-security-observability-operations.md).
 - The ADR-074 trigger and route ([ADR-074](../archive/decisions/adr-074-ts-first-proposal.md),
-  [owner leaning](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md)); the effect outbox
+  [current owner direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md)); the effect outbox
   ([03 §16](../archive/spec/03-domain-state-persistence.md)); a networked `loka play` (R14), puppeting
   and player-written descriptions ([ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
