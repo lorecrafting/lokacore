@@ -9,8 +9,8 @@ and not repeated here.
 ## Product and scope
 
 - World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
-- Finish and merge PR #137, then continue the approved game mechanics; touch UI is deprioritized
-  ([record](../decisions/owner-decision-touch-priority-2026-10-03.md#latest-priority-mechanics-after-pr-137)).
+- Resume the approved C1 touch presenter alongside useful parallel mechanics planning and sampler preparation
+  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms
@@ -104,6 +104,9 @@ and not repeated here.
   separate Realm rules under new keys ([leaning](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md)).
 
 ## Process
+
+- PM selects fresh independent Codex primary plus separate Sol review for the resumed C1 touch slice under the owner's delegated workflow while Opus quota is unavailable; required Simulator interaction evidence remains
+  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md#pm-execution-choices-under-existing-delegation)).
 
 - For remaining C1 mechanics (journal, chapters, scenes-modal, sampler), the PM selects a fresh
   independent Codex primary plus separate Sol while Claude quota prevents Opus, under the
