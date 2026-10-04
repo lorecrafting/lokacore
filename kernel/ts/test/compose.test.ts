@@ -4,9 +4,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { encode, type Json } from '../src/foundation/canonical.ts';
-import { compose, key, LIMIT_ORDER, type State } from '../src/foundation/compose.ts';
+import { compose, current, key, LIMIT_ORDER, type State } from '../src/foundation/compose.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { read } from './read.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 const fixture = read('protocol/fixtures/composition.json');
 const limits = read('docs/spec/conformance/composition-profile.json').limits;
@@ -247,4 +248,100 @@ test('a malformed barrier state faults precondition_failed', () => {
     [at('toString'), 'toString'],
   ] as const)
     assert.equal(encode(compose(s as never, { ops: [op(from)] } as never) as Json), encode(fault));
+});
+
+// Breaks: old-rate settlement, fraction retention/cap reset, zero rate, unsafe absence or malformed metadata.
+test('opted recovery literal rows and independent metadata replay', () => {
+  const fixture = read('protocol/fixtures/resource_recovery.json');
+  for (const c of fixture.cases) {
+    const spec = c.spec ?? fixture.spec;
+    const s: State = {
+      clock: c.clock,
+      resource_specs: { [key(fixture.resource)]: spec },
+      resources: c.row === null ? {} : { [key(fixture.target)]: c.row },
+    };
+    const ops = c.ops.map((op: object) => ({
+      op: 'resource.adjust',
+      writer_group: 0,
+      resource: fixture.resource,
+      entity_id: fixture.target.entity_id,
+      ...op,
+    }));
+    if (c.advance !== undefined)
+      ops.push({ op: 'time.advance', writer_group: 0, from: c.clock, to: c.advance });
+    const delta = { ops };
+    assert.deepEqual(compose(s, delta), c.expected, c.id);
+    assert.equal(
+      check('delta_preconditions_hold', { state: s, delta, result: c.expected }),
+      true,
+      c.id,
+    );
+    if ('fault' in c.expected) {
+      assert.equal(
+        check('delta_preconditions_hold', {
+          state: s,
+          delta,
+          result: {
+            changes: [
+              { target: fixture.target, value: { value: 0, at: c.clock, rate: 2, remainder: 0 } },
+            ],
+          },
+        }),
+        false,
+        `${c.id}: independent malformed-success control`,
+      );
+    } else {
+      const expectedRow = c.expected.changes[0].value;
+      assert.equal(
+        check('delta_preconditions_hold', {
+          state: s,
+          delta,
+          result: {
+            changes: [{ target: fixture.target, value: { ...expectedRow, remainder: -1 } }],
+          },
+        }),
+        false,
+        `${c.id}: independent wrong-fraction control`,
+      );
+      if (c.query) {
+        const before = structuredClone(expectedRow);
+        assert.equal(current(expectedRow, spec, c.query.at), c.query.value, c.id);
+        assert.deepEqual(expectedRow, before, `${c.id}: query preserves row`);
+      }
+    }
+  }
+});
+
+// Breaks: independent replay accepts an unauthored stored rate when the next rate is authored.
+test('independent recovery replay rejects an unauthored stored rate', () => {
+  const fixture = read('protocol/fixtures/resource_recovery.json');
+  const state: State = {
+    clock: 64803,
+    resource_specs: { [key(fixture.resource)]: fixture.spec },
+    resources: { [key(fixture.target)]: { value: 0, at: 64800, rate: 3, remainder: 0 } },
+  };
+  const delta = {
+    ops: [
+      {
+        op: 'resource.adjust',
+        writer_group: 0,
+        resource: fixture.resource,
+        entity_id: fixture.target.entity_id,
+        from: 0,
+        to: 0,
+        next_rate: 2,
+      },
+    ],
+  };
+  // Without stored-rate validation, 3 elapsed ticks at rate 3 yield value 0 and remainder 9.
+  const result = {
+    changes: [{ target: fixture.target, value: { value: 0, at: 64803, rate: 2, remainder: 9 } }],
+  };
+  assert.equal(check('delta_preconditions_hold', { state, delta, result }), false);
+});
+
+// Breaks: optional recovery schemas accept omitted table fields, unsafe/negative rates or malformed intervals.
+test('recovery schema trust-boundary literals', () => {
+  for (const c of read('protocol/fixtures/resource_recovery.json').contracts)
+    assert.deepEqual(validate(c.contract, c.value), c.errors, c.id);
 });

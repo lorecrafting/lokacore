@@ -21,7 +21,8 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * schedule's first listed hour strictly after that time (mechanics/schedule/behavior.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
  * and no fact set. A world that starts after 0 stores the body's resources at their start values
- * at that time, since an unset resource regenerates from time 0 (foundation/compose.ts current).
+ * at that time, since an unset legacy resource regenerates from time 0. Opted rows also
+ * exist at clock zero, with standing rate and no fractional credit.
  */
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
@@ -43,7 +44,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const slotKeys = [...new Set(Object.values(cartridge.items ?? {}).flatMap((i) => i.slot ?? []))];
   const slots = Object.fromEntries(slotKeys.sort(cmp).map((k) => [k, mint()]));
   for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
-  const resources = clock ? started(cartridge, body, clock) : {};
+  const resources = started(cartridge, body, clock);
   return {
     cartridge,
     context,
@@ -115,10 +116,17 @@ function place(
 function started(cartridge: Cartridge, body: EntityId, clock: number) {
   const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
   return Object.fromEntries(
-    Object.values(cartridge.resources ?? {}).map((s) => {
-      const resource = { cartridge_id, cartridge_version, kind: 'resource', key: s.key };
-      return [key({ kind: 'resource', resource, entity_id: body }), { value: s.start, at: clock }];
-    }),
+    Object.values(cartridge.resources ?? {})
+      .filter((s) => clock !== 0 || s.regen)
+      .map((s) => {
+        const resource = { cartridge_id, cartridge_version, kind: 'resource', key: s.key };
+        const row = {
+          value: s.start,
+          at: clock,
+          ...(s.regen && { rate: s.regen.by_position.standing, remainder: 0 }),
+        };
+        return [key({ kind: 'resource', resource, entity_id: body }), row];
+      }),
   );
 }
 

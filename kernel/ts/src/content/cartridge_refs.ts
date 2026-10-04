@@ -204,6 +204,27 @@ function pools(c: Obj, named: Checks['named']): Diagnostic[] {
     const at = `.cartridge.resources${step(ref)}`;
     if (!(s.minimum <= s.start && s.start <= s.maximum))
       out.push(diag('RESOURCE_SPEC_INVALID', at));
+    if (s.regen) {
+      const { every, by_position } = s.regen;
+      if (
+        every >
+        Math.floor(
+          Number.MAX_SAFE_INTEGER / (Math.max(...(Object.values(by_position) as number[])) + 1),
+        )
+      )
+        out.push(diag('RESOURCE_SPEC_INVALID', `${at}.regen`));
+      if (c.lock.capabilities.position !== 1)
+        out.push(
+          diag('UNDECLARED_CAPABILITY', `${at}.regen`, { capability: 'position' }, ['position@1']),
+        );
+      if (c.manifest.time_policy?.profile !== 'real_elapsed')
+        out.push(diag('INVALID_TIME_POLICY', `${at}.regen`));
+      const api = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
+      if (api[0] < 1 || (api[0] === 1 && api[1] < 2))
+        out.push(
+          diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+        );
+    }
     if (s.bands) out.push(...bands(c, s.bands, `${at}.bands`));
   }
   if (c.world?.bands) out.push(...bands(c, c.world.bands, '.cartridge.world.bands'));

@@ -111,8 +111,9 @@ const NIL = '00000000-0000-0000-0000-000000000000';
 const STALE = id(SIM, 'stale', 0); // an id no world of this run mints
 
 // One start in four drains the body's pools to a boundary (its minimum, one above, or 10, the
-// largest cost), as spending could leave them. ponytail: at time 0 through the state, since 82
-// moves do not fit in 64 steps; such a start has no `loka play` transcript (play starts fresh).
+// largest cost), as spending could leave them. Legacy starts retain time 0; opted starts keep
+// their valid birth metadata. ponytail: authored through state since 82 moves do not fit in
+// 64 steps; such a start has no `loka play` transcript (play starts fresh).
 function begin(seed: number, g: Gen) {
   const loaded = g.pick(CARTRIDGES);
   const rng = [g.draw(), g.draw(), g.draw(), (g.draw() | 1) >>> 0];
@@ -122,11 +123,9 @@ function begin(seed: number, g: Gen) {
     const resource = resourceRef(world, spec.key);
     const pick = g.pick([spec.minimum, spec.minimum + 1, 10]);
     const value = Math.max(spec.minimum, Math.min(pick, spec.maximum)); // within the bounds
-    return [
-      key({ kind: 'resource', resource, entity_id: world.body }),
-      { value, at: 0 },
-      spec.key,
-    ] as const;
+    const target = key({ kind: 'resource', resource, entity_id: world.body });
+    const row = spec.regen ? { ...world.state.resources![target]!, value } : { value, at: 0 };
+    return [target, row, spec.key] as const;
   });
   const state = { ...world.state, resources: Object.fromEntries(rows) };
   const drained = rows.map(([, { value }, k]) => `${k} ${value}`).join(', ');

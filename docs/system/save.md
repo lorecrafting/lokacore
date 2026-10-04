@@ -89,7 +89,17 @@ Loading (`store.ts:95`) rebuilds the world from the release's cartridge under th
 before c1-host), plus the rows: the head restores the saved RNG ([10 §31](../archive/spec/10-mobile-commerce-release.md)),
 so a reopen replays the same luck. A `world_context_id` that is not a WorldContextId is
 `save_corrupt`. Only sections with rows exist, so the state hash matches a headless run
-(`smoke.test.ts`, the Gate R6 reference). An app update that reopens an old save writes a new
+(`smoke.test.ts`, the Gate R6 reference). Opted recovery player-body rows are required
+and checked at this load boundary against the saved clock and the player's saved/default
+position, using [resource@1's row contract](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
+Missing rows, malformed value/time/rate/remainder, full pools with fractional credit,
+or an authored rate that disagrees with that position are `save_corrupt`; storage is
+not repaired or rewritten. Reconciled adoption calls the same load path, before adopting
+any committed candidate into memory. The existing no-read-open-transaction fence and
+unknown-COMMIT handling remain required. Opted metadata is JSON in existing changed
+rows and needs no format beyond the reviewed `loka-save-v2` elapsed format.
+
+An app update that reopens an old save writes a new
 trace segment header, its kernel version differing ([ADR-075](../archive/decisions/adr-075-observability-proposal.md) §4 amendment R6 S2).
 
 ## New game

@@ -2,6 +2,7 @@
 // moduledoc states the base-state shape and the semantics. The base is read, never copied:
 // writes go to an overlay keyed by canonical target text.
 import { encode, type Json } from './canonical.ts';
+import { adjusted, type Stored } from './resource.ts';
 import {
   LIMITS,
   type DeltaOp,
@@ -76,19 +77,7 @@ export function target(op: DeltaOp): MutationTarget {
   }
 }
 
-/** A resource's stored row: its value and the time it was stored (delta.schema.json). */
-export type Stored = { readonly value: number; readonly at: number };
-
-/**
- * A resource's current value at `now` (ResourceSpec regeneration): the stored value (start at
- * time 0 when unset) plus gain for each hour boundary crossed since it was stored, stopping at
- * maximum. A product past 2^53 is inexact but still above maximum, so the result is exact.
- */
-export function current(row: Stored | undefined, spec: ResourceSpec, now: number): number {
-  const { value, at } = row ?? { value: spec.start, at: 0 };
-  const ticks = Math.floor(now / 3600) - Math.floor(at / 3600);
-  return Math.min(spec.maximum, value + spec.gain * ticks);
-}
+export { current, type Stored } from './resource.ts';
 
 export function compose(state: State, delta: StateDelta): Result {
   const { ops } = delta;
@@ -176,7 +165,7 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
     case 'resource.adjust':
-      return adjusted(op, row as Stored | undefined, ctx);
+      return adjustResource(op, row, ctx);
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
     case 'barrier.transition': {
@@ -189,16 +178,17 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   }
 }
 
-// `from` is the resource's current (regenerated) value and `to` within its spec's bounds.
-function adjusted(op: DeltaOp & { op: 'resource.adjust' }, row: Stored | undefined, ctx: Ctx) {
-  const spec = get(section(ctx.state, 'resource_specs'), key(op.resource)) as
-    ResourceSpec | undefined;
-  const ok =
-    spec !== undefined &&
-    current(row, spec, ctx.state.clock) === op.from &&
-    op.to >= spec.minimum &&
-    op.to <= spec.maximum;
-  return check(ok, { value: op.to, at: ctx.state.clock });
+function adjustResource(
+  op: DeltaOp & { op: 'resource.adjust' },
+  row: Json | undefined,
+  ctx: Ctx,
+): Outcome {
+  return adjusted(
+    op,
+    row as Stored | undefined,
+    get(section(ctx.state, 'resource_specs'), key(op.resource)) as ResourceSpec | undefined,
+    ctx.state.clock,
+  );
 }
 
 function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined): Outcome {

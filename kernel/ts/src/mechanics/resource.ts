@@ -1,13 +1,19 @@
-// resource@1 (21 §4 Resource; resource.schema.json ResourceSpec): a body's current resource
-// values, derived from the stored row and the clock (foundation/compose.ts current: regeneration by hour
-// boundary, stopping at maximum), and the resource.adjust ops that pay costs and apply steps.
-// resource@1 emits no events and owns no command, so no rule: movement and action_recipe call
-// this. ponytail: regeneration has no position bonus or hunger penalty yet (00 §4.2); those join
-// with positions (R7) and needs (R8) as extra gain terms here.
-import { current, key } from '../foundation/compose.ts';
-import type { DefinitionRef, DeltaOp, EntityId, Key, RecipeCost } from '../contracts.gen.ts';
+// resource@1: pure resource queries and exact adjustments. Legacy gain crosses hour
+// boundaries; opted recovery settles the old stored position rate and fractional credit.
+import { current, key, same } from '../foundation/compose.ts';
+import type {
+  DefinitionRef,
+  DeltaOp,
+  EntityId,
+  Key,
+  MutationTarget,
+  RecipeCost,
+  ResourceRegen,
+} from '../contracts.gen.ts';
 import type { World } from '../runtime/decision.ts';
 import { add } from '../foundation/int.ts';
+import { fact, positionOf } from './position/shared.ts';
+import { cmp } from '../foundation/validate.ts';
 
 type Adjust = Extract<DeltaOp, { op: 'resource.adjust' }>;
 /** A decision's resource values so far, by canonical resource target text. */
@@ -78,4 +84,61 @@ export function pay(
     levels = paid.levels;
   }
   return { ops, levels };
+}
+
+/** Zero-amount position adjustments in authored DefinitionRef order, including unchanged values. */
+export function recoveryAdjustments(
+  world: World,
+  entity: EntityId,
+  position: keyof ResourceRegen['by_position'],
+): Adjust[] {
+  return Object.entries(world.cartridge.resources ?? {})
+    .sort(([a], [b]) => cmp(a, b))
+    .flatMap(([, spec]) =>
+      spec.regen
+        ? [
+            {
+              ...adjust(world, entity, resourceRef(world, spec.key), 0, {}).op,
+              next_rate: spec.regen.by_position[position],
+            },
+          ]
+        : [],
+    );
+}
+
+/** Final RPG agreement: only touched opted player pools, or all when position is written. */
+export function recoveryFault(world: World, ops?: readonly DeltaOp[]): MutationTarget | undefined {
+  const positionWritten = ops?.some(
+    (o) =>
+      o.op === 'fact.assign' &&
+      same(o.fact, fact(world)) &&
+      o.scope.kind === 'player' &&
+      o.scope.character_id === world.character,
+  );
+  const touched = new Set(
+    ops?.flatMap((o) =>
+      o.op === 'resource.adjust' && o.entity_id === world.body ? [key(o.resource)] : [],
+    ),
+  );
+  if (ops && !positionWritten && touched.size === 0) return undefined;
+  for (const [, spec] of Object.entries(world.cartridge.resources ?? {}).sort(([a], [b]) =>
+    cmp(a, b),
+  )) {
+    if (!spec.regen) continue;
+    const resource = resourceRef(world, spec.key);
+    if (ops && !positionWritten && !touched.has(key(resource))) continue;
+    const target: MutationTarget = { kind: 'resource', resource, entity_id: world.body };
+    const row = world.state.resources?.[key(target)];
+    const position = positionOf(world, world.character);
+    const rate =
+      typeof position === 'string'
+        ? spec.regen.by_position[position as keyof typeof spec.regen.by_position]
+        : undefined;
+    if (
+      rate === undefined ||
+      row?.rate !== rate ||
+      !Number.isFinite(current(row, spec, world.state.clock))
+    )
+      return target;
+  }
 }

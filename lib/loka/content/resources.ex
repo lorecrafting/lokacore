@@ -7,7 +7,7 @@ defmodule Loka.Content.Resources do
   resource@1 and schedule@1 (`requires/1`), with or without the file. `attributes.json`, the
   cartridge's attributes (attributes@1), loads here too (`attributes/1`), the same way.
   """
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, schema: 4]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, schema: 4]
   alias Loka.Content.Refs
   alias Loka.Core.Contracts
 
@@ -93,14 +93,59 @@ defmodule Loka.Content.Resources do
           [map()]
   def check(m, defs, {_, text}, {_, settings}, registry) when m != nil do
     world = Map.get(settings, "world", %{})
-    pools = for {_, {rel, steps, %{"bands" => b}}} <- defs["resource"], do: {rel, steps, b}
-    own = if world["bands"], do: [{"cartridge.json", ["world"], world["bands"]}], else: []
 
-    Enum.flat_map(own ++ pools, &table(&1, text)) ++
-      cost(m, defs, world) ++ owned(m, defs["attribute"], registry)
+    Enum.flat_map(tables(defs, world), &table(&1, text)) ++
+      cost(m, defs, world) ++
+      owned(m, defs["attribute"], registry) ++ recovery(m, defs["resource"])
   end
 
   def check(_, _, _, _, _), do: []
+
+  defp tables(defs, world) do
+    pools = for {_, {rel, steps, %{"bands" => b}}} <- defs["resource"], do: {rel, steps, b}
+    own = if world["bands"], do: [{"cartridge.json", ["world"], world["bands"]}], else: []
+    own ++ pools
+  end
+
+  defp residual_bound?(%{"regen" => %{"every" => every, "by_position" => rates}}),
+    do: every <= div(9_007_199_254_740_991, Enum.max(Map.values(rates)) + 1)
+
+  defp residual_bound?(_), do: true
+
+  defp recovery(m, resources) do
+    for {_, {rel, steps, %{"regen" => _}}} <- resources,
+        diagnostic <- recovery_requires(m, at(rel, steps ++ ["regen"])),
+        do: diagnostic
+  end
+
+  defp recovery_requires(m, path) do
+    position =
+      if m["requires"]["capabilities"]["position"] == 1,
+        do: [],
+        else: [diag("UNDECLARED_CAPABILITY", path, %{"capability" => "position"}, ["position@1"])]
+
+    elapsed =
+      if get_in(m, ["time_policy", "profile"]) == "real_elapsed",
+        do: [],
+        else: [diag("INVALID_TIME_POLICY", path)]
+
+    version =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    api =
+      if version >= [1, 2],
+        do: [],
+        else: [
+          diag(
+            "KERNEL_API_RANGE_INVALID",
+            at("cartridge.json", ["requires", "kernel_api", "at_least"])
+          )
+        ]
+
+    position ++ elapsed ++ api
+  end
 
   defp cost(m, defs, %{"movement" => %{"cost" => cost}}),
     do: Refs.reference("cartridge.json", ["world", "movement", "cost"], "resource", cost, m, defs)
@@ -168,9 +213,20 @@ defmodule Loka.Content.Resources do
     ordered = value["minimum"] <= value["start"] and value["start"] <= value["maximum"]
 
     case diags(rel, ["resources", k], fields, value) do
-      [] when ordered -> {:ok, value}
-      [] -> {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k]))]}
-      diags -> {:error, diags}
+      [] ->
+        cond do
+          not ordered ->
+            {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k]))]}
+
+          not residual_bound?(value) ->
+            {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k, "regen"]))]}
+
+          true ->
+            {:ok, value}
+        end
+
+      diags ->
+        {:error, diags}
     end
   end
 

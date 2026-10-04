@@ -18,11 +18,13 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_sampler@0.0.4` in `loka-ashmere-sampler.db`. This elapsed release
-requires kernel API1.1, declares real_elapsed rate50/start64800, and schedules Bram at
+The phone bundles `ashmere_sampler@0.0.5` in `loka-ashmere-sampler.db`. This elapsed release
+requires kernel API1.2, declares real_elapsed rate50/start64800, and schedules Bram at
 Ferry Landing from06:00 and the Drowned Lantern from19:00, under the
-[B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md). Its compiled artifact matches
-the independent sampler answer; earlier ten-room content and prose remain. The story is under the
+[B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md). Its MV pool starts at82, pays1 per move, and recovers18 per3600 logical seconds
+standing/sitting or36 resting/sleeping under the
+[M2 adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
+Its compiled artifact matches the independent sampler answer; earlier ten-room content and prose remain. The story is under the
 [approved sampler scope](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#11-c1-sampler-the-gate-story-q2)
 and [identity/prose record](../decisions/owner-decision-sampler-batch-2026-10-03.md).
 Its ten rooms reuse Ashmere geography and prototype prose; its lantern errand,
@@ -63,6 +65,18 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
 and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the
 compiler writes `world` and `bands` only where the source authors them.
+
+A ResourceSpec may opt into `regen {every, by_position}`. `every` is a positive safe integer;
+`by_position` requires all four keys `standing`, `sitting`, `resting`, `sleeping`, each a
+nonnegative ResourceInt gain per interval (zero allowed). Both compiler and loader enforce
+`every <= floor(9007199254740991 / (max_authored_rate + 1))` (`RESOURCE_SPEC_INVALID` at
+the pool's `regen`) and require `position@1` (`UNDECLARED_CAPABILITY` at `regen`),
+`time_policy.profile=real_elapsed` (`INVALID_TIME_POLICY` at `regen`), and an additive
+recovery API lower bound1.2 (`KERNEL_API_RANGE_INVALID` at
+`requires.kernel_api.at_least`). `gain` remains required for
+legacy compatibility and is ignored for opted recovery; no new capability or numeric
+profile version is introduced. The current sampler consumes this opt-in under the
+[M2 adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
 A cartridge whose manifest requires `position@1` gets the engine fact
 `<id>@<version>:fact/position`, exactly `{"key": "position", "version": 1, "value_type":
 {"type": "enum", "values": ["standing", "sitting", "resting", "sleeping"], "default":
@@ -179,7 +193,7 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.1, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.2, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
 `dialogue`, `equipment`, `position`, `scene` (`:35`); without a command, so without a rule, `fact`, `policy`,
@@ -228,6 +242,6 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.1; old fixture requirement ranges remain unchanged.
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.2; old fixture requirement ranges remain unchanged.
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
