@@ -56,6 +56,15 @@ All 19 prior fixture files and existing sources remain unchanged.
   [wrong bundle](mutant-app-rebundles-lantern.log).
 - [Generator 12 → 13 input remap](seed-remap.json) preserves each inherited source,
   first command and full/drained resource representative. No gameplay answer changes.
+- The [initial ordinary pre-push](initial-prepush.log) passed Elixir (254 tests), kernel
+  checks/typechecks/red controls and formatting, then failed two existing mobile
+  fault-anchor tests because the fixture pool changed their selected cartridges.
+  The [fault input remap](fault-seed-remap.json) preserves all 17 original sources,
+  first-command types and full/drained resource profiles. Details 16314 → 61998
+  preserves wait(1), wait(1), look(detail); dusk 114 → 422 preserves ring_bell. Every
+  literal expected outcome/revision/clock remains unchanged. The [focused real
+  SQLite fault corpus](fault-tests.log) then passed all 19 tests, including both anchors.
+  Final ordinary pre-push and exact-head CI remain draft workflow checks.
 
 Raw captures are redacted and hashed in [SHA256SUMS](SHA256SUMS), with
 [verification](SHA256SUMS.verify). These headless runs establish no native layout,

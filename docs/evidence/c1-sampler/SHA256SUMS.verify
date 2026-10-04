@@ -1,5 +1,8 @@
 compiler-tests.log: OK
+fault-seed-remap.json: OK
+fault-tests.log: OK
 focused.log: OK
+initial-prepush.log: OK
 mutant-app-rebundles-lantern.log: OK
 mutant-app-reuses-lantern-save.log: OK
 mutant-missing-equipment-capability.log: OK
