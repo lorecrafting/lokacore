@@ -24,3 +24,10 @@ batched native preview after recovery and carrying; physical-device work remains
 
 Normal primary review, separate Sol re-check and fresh Astra implementation review of
 proposal-loop changes remain required. Planning advice is not implementation approval.
+
+PM scope amendment from actual prepush failure: generator14 seed1791136864905
+exposed simulator drained rows authored as `{value, at:0}` despite the sampler's recovery
+opt-in. The simulator may preserve newWorld's valid opted birth metadata while changing
+only value; legacy drained rows remain exact. Record this seed through the existing seed
+mechanism and demonstrate the old authoring red control. Draws, order, generator version,
+validation and fixture answers remain unchanged. No general simulator work is authorized.

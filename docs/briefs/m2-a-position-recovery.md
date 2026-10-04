@@ -63,3 +63,11 @@ Correctness review fixed rule purity through the existing resource seam, retaine
 position rates, and kept independent arithmetic separate from composition. Source-size
 checks, focused kernel/mobile type checks, opted/legacy behavior, compiler/peer/API and
 all mobile authority/App tests pass. The final broad check is the required prepush hook.
+
+Actual first prepush failed at generator14 seed1791136864905 because its drained opted MV
+row discarded birth rate/remainder. The [PM scope amendment](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md)
+permits only preserving the opted birth metadata while changing value, plus the existing
+regression-seed record. Legacy authoring, draws, order and generator version stay unchanged.
+The existing regression test passes with the fix, fails EXIT1 with the old
+`{value,at:0}` authoring, and passes after restoration; typecheck also passes.
+The narrow fix receives a justified normal prepush retry. The failed run remains evidence, not a flake or a validation exemption.
