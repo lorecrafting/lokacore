@@ -115,3 +115,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Development sampler replacement and authentic Look](owner-decision-sampler-development-look-2026-10-03.md): owner building-phase save direction and bounded PM `0.0.2` adoption.
 
 - [TypeScript kernel layout](owner-decision-kernel-layout-2026-10-03.md): mechanical responsibility folders, colocated rules/lifecycle, preserved semantics and deterministic guards.
+
+- [Explicit entity descriptions in GameView](pm-decision-description-projection-2026-10-03.md): optional shared view fields, current explicit projection guarantee and bounded validation scope.
