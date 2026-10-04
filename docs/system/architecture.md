@@ -112,11 +112,23 @@ view, with the freshness token captured when the button was drawn. Cartridge tex
 resource-band phrases (`band.<key>`), journal text, chapter titles and scene lines; projected
 resource tones map to the paper palette without presenter thresholds.
 
-The room and Map pages show each exit's adjacent sight and legal door actions. Carrying
+The room shows its heading, authored description, entities and meaningful consequence log;
+standalone exit directions, adjacent-sight listings and repeated navigation headings are omitted.
+Map retains each exit's movement, adjacent sight and legal door actions. Carrying
 separates held items from worn slots; item pages expose projected reachable contents and
 legal container/equipment actions. Same-room item actions retain the open page while its
 item remains projected; leaving the room or losing that item closes it. Position is shown
-in the status line, with the offered stand/sit/rest/sleep controls on Character.
+in the status line. Only the room's position label is tappable: it opens a page of the
+currently offered stand/sit/rest/sleep actions. Character and other details show position only
+as information; modal scenes expose no position shortcut.
+
+NPC taps open full details using projected names and actions. Their pending dialogue, choices
+and live results are drawn there; there is no inline room panel. Returning to the world does
+not close a saved choice: the projected speaker can be tapped again, or a conversation entry
+opens the saved choice when the speaker is absent. All detail returns say **Back to World**
+and clear the page stack to the world. Item pages retain their existing reachable contents.
+This supersedes the inline NPC menu and Character position controls under the
+[playtest polish direction](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md).
 
 A declared chapter opens a title page on launch and when its index changes, once per
 presenter session. A running modal scene takes precedence, drawing its persisted current
