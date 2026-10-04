@@ -7,7 +7,8 @@ authority, content, receipts or save formats.
 
 Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-2026-10-03.md),
 [room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md), and
-[dialogue, Contents and pickup polish](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md).
+[dialogue, Contents and pickup polish](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md),
+and [journal, Leave, position and detail-flow polish](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md).
 Original feedback lives in those records; independent reviews and retained interaction proof
 are indexed in [reviews](../reviews/README.md). This round follows
 [PR #143](https://github.com/lorecrafting/lokacore/pull/143); authorization does not claim its
@@ -45,10 +46,13 @@ palette without presenter thresholds. Status shows the hp band phrase only on hp
 projected resource, and shows the game clock as its earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
 
-Only World's current-position label is a distinct position tap target. It opens only the
-currently offered stand/sit/rest/sleep actions, including Stand when nonstanding. Position
-in all details is informational. The position target does not open Contents, and modal scenes
-expose no position shortcut. Movement admission remains kernel-owned.
+Only World's current-position label is a distinct position tap target. Each tap directly invokes
+the next currently offered legal action in standing → sitting → resting → sleeping → standing
+order, skipping unavailable/absent actions. If none is offered, position stays informational.
+The button retains its drawn freshness token; pending/refused/stale results never advance the
+shown position optimistically. This opens no detail page or Contents and does not turn the
+ordinary World page. Position in all details is informational; modal scenes expose no position
+shortcut. Movement and position admission remain kernel-owned.
 
 ## Minimap, Map and presentation controls
 
@@ -68,31 +72,45 @@ exits and unavailable reasons, adjacent authored sight/entity names, door names/
 currently offered door/place actions. It invents no discovered multiroom coordinate map.
 
 Full detail openings turn the arriving page forward; local World return turns backward. Ordinary
-NPC results are the stable-route exception below. The existing paper palette, bundled IM Fell
+NPC results and direct position changes are stable-route exceptions below. The existing paper palette, bundled IM Fell
 English/EB Garamond fonts, explicit button labels/roles, section headings and minimum 44px button
-height remain. Controls and status stay outside the body scroll, respecting the safe area.
+height remain. World minimap and status stay outside the body scroll, respecting the safe area.
 Implementation details live in [book](../../mobile/app/book/Book.tsx),
 [pages](../../mobile/app/book/pages.tsx) and [paper](../../mobile/app/book/paper.ts).
 
 ## NPC dialogue and action details
 
-Tapping an NPC opens full details using only its projected name and actions. Meaningful authored
-prompts/results append chronologically to a bounded presenter-session dialogue/action history.
-The log alone scrolls above bottom-anchored currently offered choices/actions. Ordinary same-room
-NPC actions retain the route, mounted scroll area and animation token; they do not flip the book
-or reset scrolling for each result. There is no overlaid room panel or saved transcript.
+Tapping an NPC opens full details using its actual projected name, authored description and
+actions. Description comes first. Talk/Leave/other offered actions follow it initially; as
+dialogue grows, the offered controls sit immediately after the latest chronological dialogue/
+event entry **inside** the scrolling content. This supersedes the viewport-bottom dock. The
+ordinary long log remains scrollable, and newly appended results keep current options reachable.
+Same-room NPC actions retain the route, mounted scroll area and animation token; they do not
+flip the book or reset scrolling for each result. There is no overlay or saved transcript.
 
-**Leave** sits in that action area and clears the stack to World without a game command or
-movement. It preserves a pending saved choice. It replaces the NPC/conversation Back bar;
-section pages retain Back to World. The actual offered **Close** dialogue action remains distinct
-from Leave and follows its engine semantics. Routine `choice_closed` output adds no generic
-World exit echo; meaningful authored/quest consequences and genuine rejection/faults remain.
+After a confirmed accepted NPC action changes the actual projected journal, append the neutral
+italic **Journal updated** event within that NPC's chronological history, visually distinct from
+authored dialogue. Preserve meaningful authored narration. Pending/refused/stale/fault results
+add no false event; rerenders and receipt retry do not duplicate it. This is local presenter
+metadata, not story prose, a new game event or transcript persistence.
 
-After Leave, a projected speaker can be tapped again. If the pending choice's actual speaker
-is absent, a conversation entry opens its projected choices/Close without invented NPC data.
-Live NPC results stay in their original detail, even when an unconfirmed save is retried from
-another page. Ordinary renders or receipt retries do not duplicate committed history. Available
-choices/actions use the freshness token captured when their buttons were drawn.
+There is one **Leave** control and no separate Close. When a matching `close_choice` is actually
+offered, Leave invokes it with its captured token and returns to World only after confirmation.
+An unconfirmed/refused/faulted close retains the detail and honest save/error UI; a retry keeps
+its original context. Without a matching closable choice, Leave is local World navigation and
+preserves any unmatched saved choice. Routine `choice_closed` fallback narration is suppressed
+structurally; meaningful authored/quest consequences and genuine errors remain. Sections retain
+Back to World. Item Leave remains local navigation.
+
+An absent pending speaker uses its actual continuation without invented NPC data. Live results
+stay in their original detail even when retried elsewhere. Available choices/actions use the
+freshness token captured when drawn; scenes and queued chapters retain precedence.
+
+**Description dependency:** at baseline `665b3ff`, EntityView/ContentView do not project authored
+descriptions. Rendering NPC/item descriptions requires a separately coordinated kernel/GameView
+amendment. Preserve existing cartridge prose; do not derive keys from names or manufacture prose.
+Player descriptions are required when real player entities/descriptions are projected; there is
+currently no player-presence UI. This gap does not block independent journal/Leave/position work.
 
 ## Item details and Take/Drop
 
@@ -135,6 +153,14 @@ requires destructive confirmation; failure retains the existing game/retry, whil
 replacement remounts the book. Save-open errors expose only existing permitted recovery. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
+
+## Text clarity
+
+Scrolling content must remain readable with the existing authored text, fonts and fixed title.
+Source/screenshot diagnosis found body blur at fresh revision 0 before Take; the owner's timing
+remains a report, not proof that pickup caused it. Opaque scrolling surfaces and removing a
+settled page's persistent 3D transform are supported UI candidates. Actual cause and resolution
+need later native before/after proof; no unsupported prop, native plugin or dependency patch.
 
 ## Future boundaries
 

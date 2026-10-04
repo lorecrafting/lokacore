@@ -156,3 +156,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   `docs/system` first, then the code. `docs/archive/` is history, read when a task needs it; new
   decision records go in `docs/decisions/` and add a line here
   ([record](../decisions/owner-decision-docs-compaction-2026-10-02.md#decisions-for-the-move-2026-10-02)).
+
+- Latest Book UI polish supersedes the earlier fixed viewport-bottom NPC dock, pending-choice-preserving Leave and position detail page; follow [Book UI](book-ui.md) and the [new record](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md). Description projection is coordinated separately; no invented player presence or description keys.
