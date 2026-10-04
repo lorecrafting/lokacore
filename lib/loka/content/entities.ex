@@ -4,13 +4,50 @@ defmodule Loka.Content.Entities do
   variants, their text keys, the variants' conditions, and where they start (containment:
   no cycle, capacity). Ownership and location references are `Loka.Content.Checks.rooms/4`.
   """
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
 
   @text ~w(short room_line description)
 
   @doc "The schema-valid NPCs and items as `{kind, rel, definition}`."
   @spec all(map()) :: [{String.t(), String.t(), map()}]
   def all(defs), do: for(k <- ~w(npc item), {_, {rel, [], e}} <- defs[k], do: {k, rel, e})
+
+  @doc "Authored carrying requires complete item masses, containment and API 1.3."
+  @spec carry(map() | nil, map(), {term(), map()}) :: [map()]
+  def carry(m, defs, {_, %{"world" => %{"carry" => _}}}) when m != nil do
+    owner =
+      if m["requires"]["capabilities"]["containment"] == 1,
+        do: [],
+        else: [
+          diag(
+            "UNDECLARED_CAPABILITY",
+            "cartridge.world.carry",
+            %{"capability" => "containment"},
+            [
+              "containment@1"
+            ]
+          )
+        ]
+
+    version =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    api =
+      if version < [1, 3],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+
+    masses =
+      for {"item", rel, e} <- all(defs),
+          not is_map_key(e, "mass_grams"),
+          do: diag("SCHEMA_VIOLATION", at(rel, ["mass_grams"]), %{"error" => "missing_property"})
+
+    masses ++ owner ++ api
+  end
+
+  def carry(_, _, _), do: []
 
   @doc """
   An entity, each of its room-line variants, an NPC's daily schedule and an item's slot, as

@@ -1,3 +1,4 @@
+// size: allow 330, one reference stage preserves diagnostic ordering including carrying opt-in
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -155,6 +156,7 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 // (content/cartridge_quests.ts, content/cartridge_reactions.ts, content/cartridge_dialogues.ts), each resource's
 // bounds hold its start (RESOURCE_SPEC_INVALID), each band table is well formed (bands) and the
 // world's move cost names a resource of this cartridge.
+// size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
 export function refStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const check = checkers(c, out);
@@ -184,6 +186,25 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
     const { in: k } = i.location;
     named(i.location[k], k, `.cartridge.items${step(ref)}.location.${k}`);
+    if (c.world?.carry !== undefined && !Object.hasOwn(i, 'mass_grams'))
+      out.push(
+        diag('SCHEMA_VIOLATION', `.cartridge.items${step(ref)}.mass_grams`, {
+          error: 'missing_property',
+        }),
+      );
+  }
+  if (c.world?.carry !== undefined) {
+    if (c.lock.capabilities.containment !== 1)
+      out.push(
+        diag('UNDECLARED_CAPABILITY', '.cartridge.world.carry', { capability: 'containment' }, [
+          'containment@1',
+        ]),
+      );
+    const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
+    if (major < 1 || (major === 1 && minor < 3))
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
   }
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);

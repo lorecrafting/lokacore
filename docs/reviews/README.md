@@ -196,3 +196,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Later-story plan publication](2026-10-04-later-story-plan-review.md): PR #157 at `c236ffe`, fresh independent docs-only APPROVE; no findings, future policies/ending selectors and planned MC coverage verified; implementation remains future work.
 
 - [PC01 exit admission projection](2026-10-04-pc01-exit-projection-review.md): PR #160 at `120549f`, CHANGES REQUIRED (blocker EXIT-1: policy-refusal bypass survives all 405 kernel tests); fix `c5f0b8e`, APPROVE (EXIT-1 closed by a loaded movement-policy regression, exact mutant red).
+- [M3-A carrying ceiling](2026-10-04-m3-a-carrying-ceiling-review.md): PR #159 at `4bd3895`, CHANGES REQUIRED; fix `20b5504`, APPROVE.

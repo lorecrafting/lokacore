@@ -191,7 +191,7 @@ defmodule Loka.CartridgeCrossKernelTest do
 
     File.write!(
       input,
-      JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", "1.2"), "paths" => paths})
+      JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", "1.3"), "paths" => paths})
     )
 
     {stdout, 0} = System.cmd("node", [@peer, input])
@@ -209,16 +209,16 @@ defmodule Loka.CartridgeCrossKernelTest do
     end
   end
 
-  # Breaks: compiled opted content accidentally remains loadable by API1.1 or API1.2 rejects its own consumer.
-  test "the actual recovery consumer requires API1.2 in the direct TypeScript caller", %{
+  # Breaks: carrying content loads below API1.3 or API1.3 rejects its actual consumer.
+  test "the actual carrying consumer requires API1.3 in the direct TypeScript caller", %{
     tmp_dir: tmp
   } do
-    out = Path.join(tmp, "recovery.artifact.json")
+    out = Path.join(tmp, "carrying.artifact.json")
     compile("cartridges/ashmere_sampler", out)
     assert_received {:exit, :ok}
     input = Path.join(tmp, "api-peer.json")
 
-    for {api, accepted} <- [{"1.1", false}, {"1.2", true}] do
+    for {api, accepted} <- [{"1.1", false}, {"1.2", false}, {"1.3", true}] do
       File.write!(
         input,
         JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", api), "paths" => [out]})

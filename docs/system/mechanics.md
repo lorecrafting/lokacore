@@ -83,6 +83,38 @@ A worn item ([equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)) is 
 not directly in the body: `drop` and `give` of it are `not_owned`, `take` is `not_present`
 (the rule is unchanged; remove it first).
 
+With authored [`world.carry`](cartridge.md#carrying-settings-and-item-mass), only a voluntary
+positive-load Take has a carrying ceiling. After the existing target, directly-held and reach
+checks, a candidate whose custody already reaches the actor's body is neutral. Otherwise its
+subtree includes its own shell and every nested item, even behind closed or locked lids. A
+zero-mass subtree is neutral; for a positive subtree, Take refuses `too_heavy` exactly when
+current load plus that subtree exceeds `carry.max_grams` (equality fits). Current load counts
+every item EntityId whose custody reaches the body once, including worn items under slot
+holders; body, rooms, NPCs and slot holders have no mass. Definitions supply mass, not reach or
+barrier state. Distinct instances of one definition count separately.
+
+The shared reach prerequisite charges each custody edge to the same query counter and
+terminates on a repeated ancestor with `containment_cycle` or exhaustion with `budget_exceeded`.
+A closed lid or non-item holder still refuses `not_present` before inspecting ancestry beyond it.
+Take propagates reach failures as evaluation faults; projected Take offers expose the same code.
+Item-barrier admission also propagates these faults instead of treating an error as reachable.
+
+The shared carrying predicate uses one ephemeral context per decision or `lists()` projection,
+and derives a parent-to-children map from custody rows only when an external subtree must be measured.
+Iterative traversal memoizes subtree totals by EntityId. Every inspected custody row/node and
+slot-holder entry charges the existing `Steps` counter before inspection and accumulation; cache hits do not
+traverse again. Decision admission and carrying share that counter. Relevant malformed mass
+faults `precondition_failed`; a relevant custody cycle faults `containment_cycle`. Exceeding
+`query_steps` faults `budget_exceeded` before allocating any event or transfer. At its frozen
+32768 limit and the 2147483647 item-mass bound, a successful combined traversal sums at most
+70368744144896 grams, below the safe-integer bound; totals use checked addition.
+
+Drop, Give, Wear/Remove and conserved forced transfers retain their existing admission rules.
+There is no global overload invariant: an overloaded body can take a zero-mass subtree,
+extract its own reachable child and rearrange worn gear, then Remove and Drop to shed load.
+Without a carry setting, legacy carrying behavior is unchanged. This mechanic composes custody, equipment,
+cartridge definitions and the existing conserved transfer; it introduces no persisted load.
+
 ## equipment@1 (`kernel/ts/src/mechanics/equipment/rule.ts`)
 
 An item may declare one `slot` (`SlotKey`: `head`, `neck`, `body`, `cloak`, `arms`, `hands`,

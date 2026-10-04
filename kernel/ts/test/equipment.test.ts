@@ -335,3 +335,43 @@ test('a targetless wear alias is not listed, and the invariant refuses a view li
     false,
   );
 });
+
+// Breaks: omitting/duplicating worn mass, charging neutral equipment transfers, or counting a
+// Remove as weight loss. Lantern 2000 + cloak 3000 = 5000, worn or held; a 100g key exceeds it.
+test('worn gear counts once and Remove then Drop provides a carrying escape', () => {
+  const base = wear();
+  const mass: Record<string, number> = {
+    cellar_key: 100,
+    lantern: 2000,
+    leather_cap: 0,
+    straw_hat: 0,
+    wool_cloak: 3000,
+  };
+  let w: World = {
+    ...base,
+    cartridge: {
+      ...base.cartridge,
+      world: { ...base.cartridge.world, carry: { max_grams: 5000 } },
+    },
+    entities: Object.fromEntries(
+      Object.entries(base.entities).map(([id, e]) => [
+        id,
+        e.kind === 'item' ? { ...e, mass_grams: mass[e.key] } : e,
+      ]),
+    ),
+  };
+  w = accepted(accepted(w, 'take', LANTERN).world, 'take', CLOAK).world;
+  w = accepted(w, 'wear', CLOAK).world;
+  refused(w, 'drop', CLOAK, 'not_owned');
+  refused(w, 'take', KEY, 'too_heavy');
+  const equality: World = {
+    ...w,
+    cartridge: { ...w.cartridge, world: { ...w.cartridge.world, carry: { max_grams: 5100 } } },
+  };
+  accepted(equality, 'take', KEY); // 5100 including the worn cloak exactly once
+  w = accepted(w, 'remove', CLOAK).world;
+  refused(w, 'take', KEY, 'too_heavy');
+  w = accepted(w, 'drop', CLOAK).world;
+  w = accepted(w, 'take', KEY).world; // 2100, below 5000
+  assert.equal(w.state.containers[KEY], BODY);
+});

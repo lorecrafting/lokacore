@@ -194,3 +194,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
 
 - Exact fractional recovery, the final player rate/position guard and opted Save validation follow the [M2-A PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
+
+- Carrying admission follows the [M3-A PM selection](../decisions/pm-decision-m3-a-carrying-ceiling-2026-10-04.md) under mechanics delegation.
