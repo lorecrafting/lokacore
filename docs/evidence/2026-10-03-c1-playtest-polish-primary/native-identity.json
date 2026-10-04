@@ -1,0 +1,31 @@
+{
+  "pin": {
+    "capability_lock": {
+      "capabilities": {
+        "barrier": 1,
+        "containment": 1,
+        "dialogue": 1,
+        "equipment": 1,
+        "fact": 1,
+        "movement": 1,
+        "policy": 1,
+        "position": 1,
+        "quest": 1,
+        "resource": 1,
+        "scene": 1,
+        "schedule": 1
+      },
+      "format": "loka-capability-lock-v1"
+    },
+    "cartridge_id": "ashmere_sampler",
+    "cartridge_version": "0.0.1",
+    "content_hash": "5631ddf63007b837bef1e91dfb71fcfb8d31847257210c5de1caa5b198a771b5",
+    "numeric_profile": null,
+    "rng_profile": null,
+    "rule_ir": 1
+  },
+  "source": "9f18cb91fb331fc725d31cbfba2ac2fc38dab829",
+  "configuration": "Release",
+  "signing": false,
+  "kernel_version": "loka-kernel@9f18cb91fb331fc725d31cbfba2ac2fc38dab829"
+}
