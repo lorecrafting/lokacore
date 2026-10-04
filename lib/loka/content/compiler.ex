@@ -245,11 +245,12 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  # An error at /key is the inserted key's, already reported against Key.
+  # Discard only key errors already reported against Key; definitions may narrow it.
   defp body(rel, steps, contract, value) do
     Enum.reject(
       validated(rel, steps, contract, value),
-      &(&1["path"] == at(rel, steps ++ ["key"]))
+      &(&1["path"] == at(rel, steps ++ ["key"]) and
+          validated(rel, steps, "Key", value["key"]) != [])
     )
   end
 

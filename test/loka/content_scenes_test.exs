@@ -46,6 +46,37 @@ defmodule Loka.ContentScenesTest do
     assert compile(dir, %{"scenes/bell_rung.json" => full}) == {:ok, @expected, []}
   end
 
+  # Breaks: generic Key accepts filenames whose scene_ fact prefix exceeds Key's limit,
+  # or a boundary fix rejects the longest valid scene key or duplicates generic diagnostics.
+  test "scene filenames retain their stricter key limit", %{tmp_dir: dir} do
+    for {length, suffix} <- [{58, nil}, {59, ".key"}, {64, ".key"}, {65, ""}] do
+      source = Path.join(dir, Integer.to_string(length))
+      File.cp_r!(@src, source)
+      File.rm!(Path.join(source, "reactions/bell_after.json"))
+      key = String.duplicate("k", length)
+
+      File.rename!(
+        Path.join(source, "scenes/bell_rung.json"),
+        Path.join(source, "scenes/#{key}.json")
+      )
+
+      case suffix do
+        nil ->
+          assert {:ok, artifact, []} = Loka.Content.compile(source)
+          compiled = JSON.decode!(artifact)
+          assert :ok = Loka.Core.Contracts.validate("CartridgeArtifact", compiled)
+          spec = compiled["cartridge"]["facts"]["ashmere_scene@0.0.1:fact/scene_#{key}"]
+
+          assert spec["key"] == "scene_" <> key
+
+        _ ->
+          assert Loka.Content.compile(source) ==
+                   {:error,
+                    [d("SCHEMA_VIOLATION", "scenes/" <> key <> suffix, %{"error" => "too_long"})]}
+      end
+    end
+  end
+
   # Breaks: schema-valid steps out of sequence or unresolved trigger/text are admitted.
   test "scene subset and trigger references fail closed", %{tmp_dir: dir} do
     s = src("scenes/bell_rung.json")
