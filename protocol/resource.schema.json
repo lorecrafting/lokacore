@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Resource contracts",
-  "description": "ResourceSpec (21 §4 Resource; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources), owned by resource@1.",
+  "description": "ResourceSpec (21 \u00a74 Resource; 00 \u00a74 amendment, \u00a74.2 Regeneration, \u00a74.3 Resources), owned by resource@1.",
   "$defs": {
     "ResourceInt": {
       "description": "A resource bound, value or amount: a 32-bit signed integer, so that every derived value (regeneration, costs, adjustments) stays exact in every kernel's arithmetic.",
@@ -16,7 +16,7 @@
       ]
     },
     "ResourceSpec": {
-      "description": "A typed bounded integer resource each body holds (21 §4 Resource), keyed in CompiledCartridge.resources by DefinitionRefString of kind resource: inclusive bounds minimum <= start <= maximum (RESOURCE_SPEC_INVALID otherwise), start its value on a new body, and gain its regeneration per game hour: each hour boundary the clock crosses (floor(time / 3600) increases) adds gain, stopping at maximum; that stop is the regeneration rule, never a clamp of an adjustment (delta.schema.json resource.adjust). The value is derived, never ticked (02 derived state): it is stored only when written. A body's resources belong to the body, not the character driving it (owner decision on puppeting). Keys hp, ma and mv are the engine's default pools (00 §4 amendment, DikuMUD): the compiler adds them to every loka-cartridge-v2 cartridge, with resource@1 and schedule@1 (whose wait lets an exhausted body regenerate), as hp 0..20 start 20 gain 5, ma 0..100 start 100 gain 4 and mv 0..82 start 82 gain 18, each field overridable in the source's resources.json; mv is the pool a move pays 1 from (movement@1), in a cartridge that declares it, unless the cartridge's world.movement.cost (cartridge.schema.json WorldSettings) names another cost. bands, when present, is this pool's condition band table (BandTable); absent, the pool takes the cartridge's world.bands, else the engine default table (04 §15 as amended 2026-10-02). The compiler writes bands only where the source authors them. resource@1 emits no events.",
+      "description": "A typed bounded integer resource each body holds (21 \u00a74 Resource), keyed in CompiledCartridge.resources by DefinitionRefString of kind resource: inclusive bounds minimum <= start <= maximum (RESOURCE_SPEC_INVALID otherwise), start its value on a new body, and gain its regeneration per game hour: each hour boundary the clock crosses (floor(time / 3600) increases) adds gain, stopping at maximum; that stop is the regeneration rule, never a clamp of an adjustment (delta.schema.json resource.adjust). The value is derived, never ticked (02 derived state): it is stored only when written. A body's resources belong to the body, not the character driving it (owner decision on puppeting). Keys hp, ma and mv are the engine's default pools (00 \u00a74 amendment, DikuMUD): the compiler adds them to every loka-cartridge-v2 cartridge, with resource@1 and schedule@1 (whose wait lets an exhausted body regenerate), as hp 0..20 start 20 gain 5, ma 0..100 start 100 gain 4 and mv 0..82 start 82 gain 18, each field overridable in the source's resources.json; mv is the pool a move pays 1 from (movement@1), in a cartridge that declares it, unless the cartridge's world.movement.cost (cartridge.schema.json WorldSettings) names another cost. bands, when present, is this pool's condition band table (BandTable); absent, the pool takes the cartridge's world.bands, else the engine default table (04 \u00a715 as amended 2026-10-02). The compiler writes bands only where the source authors them. resource@1 emits no events. Optional regen replaces hourly gain with exact fractional elapsed settlement using the old stored rate; queries never write. See active mechanics.md resource@1 and protocol.md Composition.",
       "type": "object",
       "properties": {
         "key": {
@@ -38,6 +38,9 @@
         },
         "bands": {
           "$ref": "#/$defs/BandTable"
+        },
+        "regen": {
+          "$ref": "#/$defs/ResourceRegen"
         }
       },
       "required": [
@@ -88,11 +91,27 @@
               "tone": "danger"
             }
           ]
+        },
+        {
+          "key": "mv",
+          "minimum": 0,
+          "maximum": 10,
+          "start": 0,
+          "gain": 2,
+          "regen": {
+            "every": 10,
+            "by_position": {
+              "standing": 2,
+              "sitting": 0,
+              "resting": 4,
+              "sleeping": 4
+            }
+          }
         }
       ]
     },
     "BandTone": {
-      "description": "A condition band's tone (04 §15 as amended 2026-10-02): how serious the band is; each presenter maps it to its own colour.",
+      "description": "A condition band's tone (04 \u00a715 as amended 2026-10-02): how serious the band is; each presenter maps it to its own colour.",
       "type": "string",
       "enum": [
         "normal",
@@ -136,7 +155,7 @@
       ]
     },
     "BandTable": {
-      "description": "A condition band table (04 §15 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler and loader report a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.",
+      "description": "A condition band table (04 \u00a715 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler and loader report a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/ConditionBand"
@@ -161,6 +180,64 @@
             "tone": "danger"
           }
         ]
+      ]
+    },
+    "ResourceRegen": {
+      "description": "Optional exact fractional recovery by stored position rate. Requires position@1, real_elapsed and the recovery API. Compiler/loader additionally require every <= floor(MAX_SAFE/(maximum authored rate+1)).",
+      "type": "object",
+      "properties": {
+        "every": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "by_position": {
+          "type": "object",
+          "properties": {
+            "standing": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sitting": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "resting": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "sleeping": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "standing",
+            "sitting",
+            "resting",
+            "sleeping"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "every",
+        "by_position"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "every": 10,
+          "by_position": {
+            "standing": 2,
+            "sitting": 0,
+            "resting": 4,
+            "sleeping": 4
+          }
+        }
       ]
     }
   }

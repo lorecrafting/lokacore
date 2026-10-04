@@ -74,5 +74,9 @@
   "room.chapel_steps.title": "Chapel Steps",
   "room.chapel_steps.description": "Wide stone steps, worn into dips, climb to the chapel door. An alms bowl sits on the top step.",
   "room.chapel_nave.title": "Chapel Nave",
-  "room.chapel_nave.description": "The nave is cold and high. A fresco covers the east wall, and the altar is plain stone."
+  "room.chapel_nave.description": "The nave is cold and high. A fresco covers the east wall, and the altar is plain stone.",
+  "band.mv_ready": "is ready to travel",
+  "band.steady": "moves steadily",
+  "band.tired": "is tired",
+  "band.exhausted": "is exhausted"
 }

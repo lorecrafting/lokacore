@@ -1,0 +1,1753 @@
+{
+  "description": "Independent M2 literal supplement; legacy composition.json remains frozen. Each id names the distinct break. Expected rows are hand-checked PM acceptance answers.",
+  "resource": {
+    "cartridge_id": "recovery",
+    "cartridge_version": "0.1.0",
+    "kind": "resource",
+    "key": "mv"
+  },
+  "target": {
+    "kind": "resource",
+    "resource": {
+      "cartridge_id": "recovery",
+      "cartridge_version": "0.1.0",
+      "kind": "resource",
+      "key": "mv"
+    },
+    "entity_id": "11111111-2222-4333-8444-555555555555"
+  },
+  "spec": {
+    "key": "mv",
+    "minimum": 0,
+    "maximum": 10,
+    "start": 0,
+    "gain": 2,
+    "regen": {
+      "every": 10,
+      "by_position": {
+        "standing": 2,
+        "sitting": 2,
+        "resting": 4,
+        "sleeping": 4
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "old-rate-before-Rest-even-with-unchanged-value",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0,
+          "next_rate": 4
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 0,
+              "at": 64803,
+              "rate": 4,
+              "remainder": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "Stand-keeps-earned-fraction",
+      "clock": 64805,
+      "row": {
+        "value": 0,
+        "at": 64803,
+        "rate": 4,
+        "remainder": 6
+      },
+      "ops": [
+        {
+          "from": 1,
+          "to": 1,
+          "next_rate": 2
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 1,
+              "at": 64805,
+              "rate": 2,
+              "remainder": 4
+            }
+          }
+        ]
+      },
+      "query": {
+        "at": 64808,
+        "value": 2
+      }
+    },
+    {
+      "id": "spend-keeps-fraction-below-full",
+      "clock": 64805,
+      "row": {
+        "value": 1,
+        "at": 64805,
+        "rate": 2,
+        "remainder": 4
+      },
+      "ops": [
+        {
+          "from": 1,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 0,
+              "at": 64805,
+              "rate": 2,
+              "remainder": 4
+            }
+          }
+        ]
+      },
+      "query": {
+        "at": 64808,
+        "value": 1
+      }
+    },
+    {
+      "id": "same-rate-Sit-still-settles-metadata",
+      "clock": 64806,
+      "row": {
+        "value": 1,
+        "at": 64805,
+        "rate": 2,
+        "remainder": 4
+      },
+      "ops": [
+        {
+          "from": 1,
+          "to": 1,
+          "next_rate": 2
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 1,
+              "at": 64806,
+              "rate": 2,
+              "remainder": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "Sleep-after-Sit",
+      "clock": 64808,
+      "row": {
+        "value": 1,
+        "at": 64806,
+        "rate": 2,
+        "remainder": 6
+      },
+      "ops": [
+        {
+          "from": 2,
+          "to": 2,
+          "next_rate": 4
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 2,
+              "at": 64808,
+              "rate": 4,
+              "remainder": 0
+            }
+          }
+        ]
+      },
+      "query": {
+        "at": 64811,
+        "value": 3
+      }
+    },
+    {
+      "id": "equal-Sleep-Rest-rates-retain-fraction",
+      "clock": 64809,
+      "row": {
+        "value": 2,
+        "at": 64808,
+        "rate": 4,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 2,
+          "to": 2,
+          "next_rate": 4
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 2,
+              "at": 64809,
+              "rate": 4,
+              "remainder": 4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "zero-next-rate-is-not-prior-rate",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0,
+          "next_rate": 0
+        }
+      ],
+      "spec": {
+        "key": "mv",
+        "minimum": 0,
+        "maximum": 10,
+        "start": 0,
+        "gain": 2,
+        "regen": {
+          "every": 10,
+          "by_position": {
+            "standing": 2,
+            "sitting": 0,
+            "resting": 4,
+            "sleeping": 4
+          }
+        }
+      },
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 0,
+              "at": 64803,
+              "rate": 0,
+              "remainder": 6
+            }
+          }
+        ]
+      },
+      "query": {
+        "at": 64903,
+        "value": 0
+      }
+    },
+    {
+      "id": "zero-rate-preserves-fraction-before-Rest",
+      "clock": 64903,
+      "row": {
+        "value": 0,
+        "at": 64803,
+        "rate": 0,
+        "remainder": 6
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0,
+          "next_rate": 4
+        }
+      ],
+      "spec": {
+        "key": "mv",
+        "minimum": 0,
+        "maximum": 10,
+        "start": 0,
+        "gain": 2,
+        "regen": {
+          "every": 10,
+          "by_position": {
+            "standing": 2,
+            "sitting": 0,
+            "resting": 4,
+            "sleeping": 4
+          }
+        }
+      },
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 0,
+              "at": 64903,
+              "rate": 4,
+              "remainder": 6
+            }
+          }
+        ]
+      },
+      "query": {
+        "at": 64904,
+        "value": 1
+      }
+    },
+    {
+      "id": "capped-credit-does-not-survive-spend",
+      "clock": 64806,
+      "row": {
+        "value": 9,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 10,
+          "to": 7
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 7,
+              "at": 64806,
+              "rate": 2,
+              "remainder": 0
+            }
+          }
+        ]
+      },
+      "query": {
+        "at": 64807,
+        "value": 7
+      }
+    },
+    {
+      "id": "explicit-fill-clears-fraction",
+      "clock": 64800,
+      "row": {
+        "value": 9,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 9
+      },
+      "ops": [
+        {
+          "from": 9,
+          "to": 10
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 10,
+              "at": 64800,
+              "rate": 2,
+              "remainder": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-writer-costs-use-row-overlay",
+      "clock": 64805,
+      "row": {
+        "value": 3,
+        "at": 64805,
+        "rate": 2,
+        "remainder": 4
+      },
+      "ops": [
+        {
+          "from": 3,
+          "to": 2
+        },
+        {
+          "from": 2,
+          "to": 1
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 1,
+              "at": 64805,
+              "rate": 2,
+              "remainder": 4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "resource-settlement-uses-base-clock-not-advance-horizon",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0,
+          "next_rate": 4
+        }
+      ],
+      "advance": 64808,
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 0,
+              "at": 64803,
+              "rate": 4,
+              "remainder": 6
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 64808
+          }
+        ]
+      }
+    },
+    {
+      "id": "long-absence-caps-before-unsafe-product",
+      "clock": 9007199254740991,
+      "row": {
+        "value": -2147483648,
+        "at": 0,
+        "rate": 2147483647,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 2147483647,
+          "to": 2147483647
+        }
+      ],
+      "spec": {
+        "key": "mv",
+        "minimum": -2147483648,
+        "maximum": 2147483647,
+        "start": -2147483648,
+        "gain": 2,
+        "regen": {
+          "every": 1,
+          "by_position": {
+            "standing": 2147483647,
+            "sitting": 0,
+            "resting": 2147483647,
+            "sleeping": 2147483647
+          }
+        }
+      },
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 2147483647,
+              "at": 9007199254740991,
+              "rate": 2147483647,
+              "remainder": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "long-absence-zero-rate-never-divides-by-zero",
+      "clock": 9007199254740991,
+      "row": {
+        "value": -2147483648,
+        "at": 0,
+        "rate": 0,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": -2147483648,
+          "to": -2147483648
+        }
+      ],
+      "spec": {
+        "key": "mv",
+        "minimum": -2147483648,
+        "maximum": 2147483647,
+        "start": -2147483648,
+        "gain": 2,
+        "regen": {
+          "every": 1,
+          "by_position": {
+            "standing": 2147483647,
+            "sitting": 0,
+            "resting": 2147483647,
+            "sleeping": 2147483647
+          }
+        }
+      },
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": -2147483648,
+              "at": 9007199254740991,
+              "rate": 0,
+              "remainder": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "zero-sized-pool-has-no-hidden-credit",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "spec": {
+        "key": "mv",
+        "minimum": 0,
+        "maximum": 0,
+        "start": 0,
+        "gain": 2,
+        "regen": {
+          "every": 10,
+          "by_position": {
+            "standing": 2,
+            "sitting": 2,
+            "resting": 4,
+            "sleeping": 4
+          }
+        }
+      },
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 0,
+              "at": 64803,
+              "rate": 2,
+              "remainder": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "missing-opted-row-is-not-free-recovery",
+      "clock": 64803,
+      "row": null,
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "fraction-at-every-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 10
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "future-at-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64804,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "unlisted-rate-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 3,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "boolean-rate-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": true,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "fractional-value-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0.5,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "unsafe-at-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 9007199254740992,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "full-pool-fraction-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 10,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 1
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "boolean-fraction-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": false
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "fractional-remainder-is-corruption",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0.5
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "unlisted-next-rate-fails",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0,
+          "next_rate": 3
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "boolean-next-rate-fails",
+      "clock": 64803,
+      "row": {
+        "value": 0,
+        "at": 64800,
+        "rate": 2,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 0,
+          "to": 0,
+          "next_rate": false
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "recovery",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "mv"
+            },
+            "entity_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "long-interval-preserves-fraction-without-unsafe-dt-rate-product",
+      "clock": 9007199254740991,
+      "spec": {
+        "key": "mv",
+        "minimum": 0,
+        "maximum": 20,
+        "start": 0,
+        "gain": 3,
+        "regen": {
+          "every": 2251799813685247,
+          "by_position": {
+            "standing": 3,
+            "sitting": 0,
+            "resting": 3,
+            "sleeping": 3
+          }
+        }
+      },
+      "row": {
+        "value": 0,
+        "at": 0,
+        "rate": 3,
+        "remainder": 0
+      },
+      "ops": [
+        {
+          "from": 12,
+          "to": 12
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "recovery",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "mv"
+              },
+              "entity_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "value": 12,
+              "at": 9007199254740991,
+              "rate": 3,
+              "remainder": 9
+            }
+          }
+        ]
+      },
+      "query": {
+        "at": 9007199254740991,
+        "value": 12
+      }
+    }
+  ],
+  "contracts": [
+    {
+      "id": "zero-authored-rate-is-valid",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": []
+    },
+    {
+      "id": "required-every",
+      "contract": "ResourceRegen",
+      "value": {
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/every",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "id": "required-by_position",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10
+      },
+      "errors": [
+        {
+          "path": "/by_position",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "id": "every-0",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 0,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/every",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "id": "every-9007199254740992",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 9007199254740992,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/every",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "every-0.5",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 0.5,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/every",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "every-True",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": true,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/every",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "required-standing",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/standing",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "id": "standing--1",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": -1,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/standing",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "id": "standing-2147483648",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2147483648,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/standing",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "id": "required-sitting",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sitting",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "id": "sitting--1",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": -1,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sitting",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "id": "sitting-2147483648",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 2147483648,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sitting",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "id": "required-resting",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/resting",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "id": "resting--1",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": -1,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/resting",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "id": "resting-2147483648",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 2147483648,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/resting",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "id": "required-sleeping",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sleeping",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "id": "sleeping--1",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": -1
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sleeping",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "id": "sleeping-2147483648",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 2147483648
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sleeping",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "id": "unknown-regen-field",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4
+        },
+        "unexpected": 0
+      },
+      "errors": [
+        {
+          "path": "/unexpected",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "id": "unknown-position-rate",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 0,
+          "resting": 4,
+          "sleeping": 4,
+          "unexpected": 0
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/unexpected",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "id": "next-rate--1",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "resource.adjust",
+        "writer_group": 0,
+        "resource": {
+          "cartridge_id": "recovery",
+          "cartridge_version": "0.1.0",
+          "kind": "resource",
+          "key": "mv"
+        },
+        "entity_id": "11111111-2222-4333-8444-555555555555",
+        "from": 0,
+        "to": 0,
+        "next_rate": -1
+      },
+      "errors": [
+        {
+          "path": "/next_rate",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "id": "next-rate-2147483648",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "resource.adjust",
+        "writer_group": 0,
+        "resource": {
+          "cartridge_id": "recovery",
+          "cartridge_version": "0.1.0",
+          "kind": "resource",
+          "key": "mv"
+        },
+        "entity_id": "11111111-2222-4333-8444-555555555555",
+        "from": 0,
+        "to": 0,
+        "next_rate": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/next_rate",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "id": "boolean-standing",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": false,
+          "sitting": 2,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/standing",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "boolean-sitting",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": false,
+          "resting": 4,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sitting",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "boolean-resting",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 2,
+          "resting": false,
+          "sleeping": 4
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/resting",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "boolean-sleeping",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": {
+          "standing": 2,
+          "sitting": 2,
+          "resting": 4,
+          "sleeping": false
+        }
+      },
+      "errors": [
+        {
+          "path": "/by_position/sleeping",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "regen-is-an-object",
+      "contract": "ResourceRegen",
+      "value": [],
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "rates-are-an-object",
+      "contract": "ResourceRegen",
+      "value": {
+        "every": 10,
+        "by_position": []
+      },
+      "errors": [
+        {
+          "path": "/by_position",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "boolean-next-rate",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "resource.adjust",
+        "writer_group": 0,
+        "resource": {
+          "cartridge_id": "recovery",
+          "cartridge_version": "0.1.0",
+          "kind": "resource",
+          "key": "mv"
+        },
+        "entity_id": "11111111-2222-4333-8444-555555555555",
+        "from": 0,
+        "to": 0,
+        "next_rate": false
+      },
+      "errors": [
+        {
+          "path": "/next_rate",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "id": "fractional-next-rate",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "resource.adjust",
+        "writer_group": 0,
+        "resource": {
+          "cartridge_id": "recovery",
+          "cartridge_version": "0.1.0",
+          "kind": "resource",
+          "key": "mv"
+        },
+        "entity_id": "11111111-2222-4333-8444-555555555555",
+        "from": 0,
+        "to": 0,
+        "next_rate": 0.5
+      },
+      "errors": [
+        {
+          "path": "/next_rate",
+          "code": "invalid_type"
+        }
+      ]
+    }
+  ]
+}

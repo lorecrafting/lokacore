@@ -21,6 +21,7 @@ import { sequence, triggered } from '../mechanics/reaction.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { utf8 } from '../foundation/sha256.ts';
 import { cmp } from '../foundation/validate.ts';
+import { recoveryFault } from '../mechanics/resource.ts';
 
 // limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
 export type Stepped = { decision: DecisionResult; world: World; limit?: Limit };
@@ -62,6 +63,9 @@ export function adopt(
   if (spent) return faulted(BUDGET, world, spent);
   const applied = apply(world, out.delta.ops);
   if ('fault' in applied) return faulted(applied.fault, world, applied.limit);
+  const resource = recoveryFault({ ...world, state: applied.state }, out.delta.ops);
+  if (resource)
+    return { decision: { kind: 'fault', code: 'precondition_failed', target: resource }, world };
   let choices = applied.state.choices;
   for (const o of out.delta.ops)
     if (o.op === 'choice.open') {

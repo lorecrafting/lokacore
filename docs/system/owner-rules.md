@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Later Ashmere conflicts follow the [PM-selected future policy](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md); implementation and publication review remain pending, with no active M15/schema change.
+
 - One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
   ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).
 - Fixed time; no player-driven time skips. The later time model follows elapsed time, and rest or
@@ -190,3 +192,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.
 - App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
+
+- Exact fractional recovery, the final player rate/position guard and opted Save validation follow the [M2-A PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).

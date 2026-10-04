@@ -63,9 +63,16 @@ storage half):
    (`runtime/proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
 7. **Adopt** (`runtime/proposal.ts:42`): a `fact.assign` outside its FactSpec faults
    `precondition_failed`; the whole proposal is checked against the budgets (`:60`); the delta
-   composes (`foundation/compose.ts:93`) and the written rows, the RNG and each new continuation's
-   `opened_revision` (the revision this commit will take) become the new state. A fault
-   discards all of it.
+   composes (`foundation/compose.ts:82`) and the written rows, the RNG and each new continuation's
+   `opened_revision` (the revision this commit will take) become the new state. After successful
+   speculative apply, before returning accepted, check touched opted player-body resource
+   rows against the final player position. A player position assignment also checks every
+   opted player pool, including any omitted by the proposal. A missing required row or a
+   rate differing from that final position's authored rate faults `precondition_failed`,
+   attached to the affected resource target, and retains the prior World. This RPG agreement
+   check does not add actor context to portable composition, run on proposal prefixes or
+   scan unrelated state rows; time-only proposals need no resource write or agreement scan.
+   A fault discards all of it.
 
 A `DecisionResult` is `accepted` (`outcome`, `delta.ops`, `events`, `effects` (always empty
 today), `rng`, optional `narration` lines), `rejected` (`error.code`, a gameplay code) or
@@ -75,9 +82,9 @@ clock or costs (invariant `rejection_consumes_nothing`, `kernel/ts/src/runtime/i
 
 ## Composition
 
-`compose` (`kernel/ts/src/foundation/compose.ts:93`; twin `lib/loka/core/compose.ex:59`, whose moduledoc
+`compose` (`kernel/ts/src/foundation/compose.ts:82`; twin `lib/loka/core/compose.ex:59`, whose moduledoc
 states the base-state shape) applies ops in order to an overlay over the committed state. Each
-op has one MutationTarget (`foundation/compose.ts:49`); a second writer group on a target already written
+op has one MutationTarget (`foundation/compose.ts:50`); a second writer group on a target already written
 faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 
 | Op | Target | Precondition |
@@ -94,12 +101,20 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 | `barrier.transition` | barrier | `from` is the state; the transition is legal (`:32`; [mechanics](mechanics.md#barrier1-kerneltssrcmechanicsbarrierrulets)) |
 
 A resource's `from` is its regenerated value ([resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets));
-unset means `start` at time 0 (`:87`). The result is the
+unset means `start` at time 0 for legacy pools (`:87`). Opted recovery requires the row
+and metadata validation in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
+Optional `resource.adjust.next_rate` is legal only for an opted pool and must be a
+nonnegative ResourceInt member of its authored position table, including zero. Settle the
+old rate against the committed **base clock**, check `from` and bounded `to`, then store
+`to`, the base clock, the next rate (or retain the old rate), and the settled remainder
+(zero when `to == maximum`). Successive same-writer costs use the row overlay, preserving
+metadata. Independent `delta_preconditions_hold` replays these rows and preconditions
+without using composition's settlement helper or result as its expected answer. The result is the
 written rows sorted by canonical target text, which the host commits.
 
 **State** (`kernel/ts/src/runtime/decision.ts:47`): `clock`, `containers` (entity → container),
 `rng`, and the sections written so far, each keyed by canonical target text or id: `facts`,
-`resources` (`{value, at}`), `cooldowns`, `barriers`, `quests` (`{quest, scope, state,
+`resources` (`{value, at}` for legacy, `{value, at, rate, remainder}` for opted recovery), `cooldowns`, `barriers`, `quests` (`{quest, scope, state,
 outcome?}`), `jobs` (`{job, due_time, status}`), `choices` (the `choice.open` fields plus
 `status`, `opened_revision`, `choice_id?`). An unwritten section is absent, so a world that
 never writes one keeps its state hash.
@@ -108,7 +123,7 @@ never writes one keeps its state hash.
 
 The eleven composition-profile limits and their values are `LIMITS`
 (`kernel/ts/src/contracts.gen.ts:366`, generated from `protocol/`). One aggregate budget spans admission, the rule and the whole proposal; the first exhausted limit in
-that order names the fault (`foundation/compose.ts:130`, `:141`), returned beside the decision and
+that order names the fault (`foundation/compose.ts:119`, `:130`), returned beside the decision and
 observed as `evaluation.budget_exceeded`, never in the result (`runtime/proposal.ts:26`). Every policy
 leaf evaluated adds one query step (`mechanics/policy.ts:32`).
 
