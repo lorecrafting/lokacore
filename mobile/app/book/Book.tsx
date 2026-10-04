@@ -4,22 +4,20 @@
 import { useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
-import { Footer } from './Footer.tsx';
+import { Footer, Status } from './Footer.tsx';
 import {
-  branch,
   group,
   pagesAfter,
-  said,
   things,
+  conversation,
+  initialPages,
   type Hint,
   type Page,
-  type Pool,
 } from './model.ts';
-import { Menu, useMenu } from './Menu.tsx';
+import { NpcPage, PositionPage } from './Menu.tsx';
 import { body, paper } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import {
-  band,
   CarryingPage,
   CharacterPage,
   ChapterPage,
@@ -40,9 +38,8 @@ export type Shell = { confirm: (go: () => void) => void; learned: Hint };
 
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
-// Pressing turns to a fresh room page with the answer in the log; the log restarts at the new
-// place's heading on a place change, not on the tapped button (a pending retry may run another
-// action). A press that threw shows its fault with Start over.
+// Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
+// original presentation context, and a throw shows its fault beside Start over.
 type BookProps = {
   game: Game;
   shell: Shell;
@@ -51,61 +48,85 @@ type BookProps = {
 
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
-  const [stack, setStack] = useState<Page[]>(() =>
-    pr.screen().view.chapter ? [{ kind: 'chapter' }] : [],
-  );
+  const [stack, setStack] = useState<Page[]>(() => initialPages(pr.screen().view));
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
   const screen = pr.screen();
-  const { view, buttons } = screen;
-  const menu = useMenu(view);
-  const g = group(buttons);
+  const { view } = screen;
   const go = (next: Page[], dir: 1 | -1) => {
     setStack(next);
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
-  const press = (b: Button) => {
-    const placeId = view.place.id;
-    const said = pr.press(b);
-    const { log, view: now } = pr.screen(); // a new room's log starts at its heading
-    if (now.place.id !== placeId) log.splice(0, log.length - 1);
-    go(pagesAfter(stack, view, now), 1);
-    return said; // the NPC menu shows it
+  const press = (b: Button, detail?: string) => {
+    const said = pr.press(b, detail);
+    go(pagesAfter(stack, view, pr.screen().view), 1);
+    return said;
   };
-  const page = stack.at(-1);
-  const open = (p: Page) => go([...stack, p], 1);
-  const walk = (d: string) => press(g.exits.find((e) => e.direction === d)!.button);
-  const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1)); // no page turn
+  const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1));
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
-  const ctx = { screen, g, press, walk, refused, open, menu, startOver, shell: p.shell };
+  return (
+    <BookView
+      screen={screen}
+      stack={stack}
+      flip={flip}
+      go={go}
+      press={press}
+      refused={refused}
+      startOver={startOver}
+      shell={p.shell}
+    />
+  );
+}
+
+type ViewProps = {
+  screen: Screen;
+  stack: Page[];
+  flip: { turn: number; dir: 1 | -1 };
+  go: (pages: Page[], dir: 1 | -1) => void;
+  press: (b: Button, detail?: string) => string;
+  refused: (line: string) => void;
+  startOver: () => void;
+  shell: Shell;
+};
+
+// The drawing and route callbacks stay separate from the shell's React state and animation.
+export function BookView(p: ViewProps) {
+  const g = group(p.screen.buttons);
+  const page = p.stack.at(-1);
+  const open = (page: Page) => p.go([...p.stack, page], 1);
+  const walk = (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button);
+  const ctx = { ...p, g, open, walk, world: () => p.go([], -1) };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
-      <Turn turn={flip.turn} dir={flip.dir}>
-        <Body {...ctx} page={page} chapterDone={() => go([], 1)} />
+      <Turn turn={p.flip.turn} dir={p.flip.dir}>
+        <Body {...ctx} page={page} chapterDone={() => p.go([], 1)} />
       </Turn>
-      <Bottom {...ctx} back={page && (() => go(stack.slice(0, -1), -1))} />
+      <Bottom {...ctx} page={page} />
     </SafeAreaView>
   );
 }
 
 // The footer (or Back on a page), the status line and a press's fault.
-function Bottom(p: {
+type BottomProps = {
   screen: Screen;
   g: ReturnType<typeof group>;
   press: (b: Button) => void;
   walk: (direction: string) => void;
   refused: (line: string) => void;
   open: (p: Page) => void;
-  back?: () => void;
+  page?: Page;
+  world: () => void;
   startOver: () => void;
   shell: Shell;
-}) {
+};
+
+function Bottom(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
   return (
     <View style={{ padding: 8 }}>
       {!view.scene &&
-        (p.back ? (
-          <Back onPress={p.back} />
+        (p.page ? (
+          <Back onPress={p.world} />
         ) : (
           <Footer
             exits={view.exits}
@@ -122,6 +143,11 @@ function Bottom(p: {
         position={view.position}
         text={text}
         locked={!!view.scene}
+        openPosition={
+          !p.page && !view.scene && p.g.position.length
+            ? () => p.open({ kind: 'position' })
+            : undefined
+        }
         pending={pending}
         open={() => p.open({ kind: 'character' })}
       />
@@ -129,66 +155,6 @@ function Bottom(p: {
     </View>
   );
 }
-
-// One line: the time as its earthly branch, then the character button, which shows the body's
-// resources coloured by band when GameView carries them (the room-view status line, an owner-
-// ruled departure) and opens the Character page, the way to Journal, Carrying and Settings.
-type StatusProps = {
-  time: number;
-  resources?: readonly Pool[];
-  position?: Screen['view']['position'];
-  text: (key: string) => string;
-  locked: boolean;
-  pending: boolean;
-  open: () => void;
-};
-
-function Status(p: StatusProps) {
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        alignItems: 'center',
-        columnGap: 14,
-      }}
-    >
-      <Text style={{ ...small, color: paper.dim }} accessibilityLabel={branch(p.time).label}>
-        {branch(p.time).glyph}
-      </Text>
-      {p.position && (
-        <Text style={{ ...small, color: paper.dim }} accessibilityLabel={`Position, ${p.position}`}>
-          {p.position}
-        </Text>
-      )}
-      <Pressable
-        disabled={p.locked}
-        accessibilityRole="button"
-        accessibilityLabel={p.resources ? said(p.resources, p.text) : 'character'}
-        onPress={p.open}
-        style={{ minHeight: 44, justifyContent: 'center' }}
-      >
-        <Text style={{ ...small, color: paper.accent }}>
-          {p.resources ? shown(p.resources) : 'character'}
-        </Text>
-      </Pressable>
-      {p.pending && (
-        <Text style={{ ...small, color: paper.dim, width: '100%', textAlign: 'center' }}>
-          save not confirmed
-        </Text>
-      )}
-    </View>
-  );
-}
-
-// The resources as the status line shows them (coloured by band); its label is model.ts `said`.
-const shown = (rs: readonly Pool[]) =>
-  rs.map((r, i) => (
-    <Text key={r.resource.key} style={{ color: band(r.tone) }}>
-      {`${i ? '  ' : ''}${r.resource.key} ${r.current}/${r.maximum}`}
-    </Text>
-  ));
 
 type Screen = ReturnType<Presenter['screen']>;
 
@@ -212,11 +178,11 @@ function Back({ onPress }: { onPress: () => void }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Back"
+      accessibilityLabel="Back to World"
       onPress={onPress}
       style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
     >
-      <Text style={{ ...small, fontSize: 17, color: paper.fg }}>back</Text>
+      <Text style={{ ...small, fontSize: 17, color: paper.fg }}>Back to World</Text>
     </Pressable>
   );
 }
@@ -225,9 +191,8 @@ type BodyProps = {
   page?: Page;
   screen: Screen;
   g: ReturnType<typeof group>;
-  press: (b: Button) => string;
+  press: (b: Button, detail?: string) => string;
   open: (p: Page) => void;
-  menu: ReturnType<typeof useMenu>;
   startOver: () => void;
   chapterDone: () => void;
 };
@@ -240,15 +205,21 @@ function Body(p: BodyProps) {
   if (page?.kind === 'chapter' && view.chapter)
     return <ChapterPage title={text(view.chapter.title)} done={p.chapterDone} />;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
-  const tap = (id: string) =>
-    view.entities.find((e) => e.id === id)?.kind === 'npc' ? p.menu.tap(id) : openThing(id);
   if (!page)
     return (
-      <>
-        <RoomPage view={view} text={text} log={log} g={p.g} press={p.press} open={tap} />
-        <Menu view={view} text={text} g={p.g} press={p.press} menu={p.menu} />
-      </>
+      <RoomPage
+        view={view}
+        text={text}
+        log={log}
+        g={p.g}
+        press={p.press}
+        open={openThing}
+        openChoice={() => p.open(conversation(view))}
+      />
     );
+  if (page.kind === 'dialogue') return <NpcDetail {...p} speaker={page.speaker} />;
+  if (page.kind === 'position')
+    return <PositionPage current={view.position} actions={p.g.position} press={p.press} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
   if (page.kind === 'character')
     return (
@@ -256,8 +227,6 @@ function Body(p: BodyProps) {
         resources={view.resources}
         position={view.position}
         text={text}
-        actions={p.g.position}
-        press={p.press}
         open={(kind: More) => p.open({ kind })}
       />
     );
@@ -273,18 +242,42 @@ function Item(p: {
   id: string;
   screen: Screen;
   g: ReturnType<typeof group>;
-  press: (b: Button) => void;
+  press: (b: Button, detail?: string) => string;
   open: (p: Page) => void;
 }) {
   const items = things(p.screen.view);
+  const thing = items.find((e) => e.id === p.id);
+  if (thing?.kind === 'npc') return <NpcDetail {...p} npc={thing} />;
   return (
     <ThingPage
-      thing={items.find((e) => e.id === p.id)}
+      thing={thing}
       text={p.screen.text}
       actions={p.g.on(p.id)}
       press={p.press}
       contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
       open={(id) => p.open({ kind: 'thing', id })}
+    />
+  );
+}
+
+function NpcDetail(p: {
+  screen: Screen;
+  g: ReturnType<typeof group>;
+  press: (b: Button, detail?: string) => string;
+  npc?: ReturnType<typeof things>[number];
+  speaker?: string;
+}) {
+  const { view, text } = p.screen;
+  const npc = p.npc ?? view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
+  const id = npc?.id ?? p.speaker ?? view.choice?.speaker_id ?? 'conversation';
+  return (
+    <NpcPage
+      view={view}
+      npc={npc}
+      text={text}
+      g={p.g}
+      log={p.screen.detail(id)}
+      press={(b) => p.press(b, id)}
     />
   );
 }

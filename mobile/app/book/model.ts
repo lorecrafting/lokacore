@@ -9,8 +9,11 @@ export type Exit = { direction: string; button: Button };
 export type Thing =
   GameView['entities'][number] | NonNullable<GameView['entities'][number]['contents']>[number];
 export type Page =
-  | { kind: 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'chapter' }
-  | { kind: 'thing'; id: string };
+  | {
+      kind: 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'chapter' | 'position';
+    }
+  | { kind: 'thing'; id: string }
+  | { kind: 'dialogue'; speaker?: string };
 
 // Only projected items: contents are already flattened and filtered for reach by the engine.
 export const things = (v: GameView): Thing[] =>
@@ -116,28 +119,14 @@ export const branch = (t: number) => {
   return { glyph: '子丑寅卯辰巳午未申酉戌亥'[i]!, label };
 };
 
-// The NPC menu's state: who was tapped, or which choice's menu was dismissed, in `room`. It holds only
-// while the player stays in that room: a walk clears both, so a pending choice reopens its menu (with
-// Close) wherever the player is, and a tapped NPC does not reopen on return.
-export type MenuState = { room?: string; tapped?: string; dismissed?: string };
-export const menuTap = (v: GameView, id: string): MenuState => ({ room: v.place.id, tapped: id });
-// Dismissing sends nothing; only Close does.
-export const menuDone = (v: GameView): MenuState => ({
-  room: v.place.id,
-  dismissed: v.choice?.continuation_id,
-});
-// The hook stores this at every render, so a cleared state stays cleared on return.
-export const menuLive = (v: GameView, s: MenuState): MenuState =>
-  s.room === undefined || s.room === v.place.id ? s : {};
-// Whether the menu is open: an NPC tapped and still here, else a pending choice (a restored one
-// reopens it) until its menu was dismissed.
-export const menuOpen = (v: GameView, state: MenuState) => {
-  const s = menuLive(v, state);
-  return (
-    v.entities.some((e) => e.id === s.tapped) ||
-    (!!v.choice && v.choice.continuation_id !== s.dismissed)
-  );
-};
+export const initialPages = (v: GameView): Page[] =>
+  v.chapter ? [{ kind: 'chapter' }] : v.choice ? [conversation(v)] : [];
+
+// Recover only the actual saved choice: a projected speaker has an ordinary entity page.
+export const conversation = (v: GameView): Page =>
+  v.entities.some((e) => e.id === v.choice?.speaker_id)
+    ? { kind: 'thing', id: v.choice!.speaker_id! }
+    : { kind: 'dialogue', speaker: v.choice?.speaker_id };
 
 // A first-run hint's "seen" flag in a key-value store (the shell's key-value store: its own file, not the
 // save). A store that throws falls back to this session's memory: a hint never stops the book.
