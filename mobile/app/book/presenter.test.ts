@@ -28,6 +28,214 @@ const accepted = (outcome: string) =>
   ({ kind: 'saved', decision: { kind: 'accepted', outcome } as DecisionResult }) as Reply;
 const north = { label: 'Go north', action_key: 'move', target_ids: [], input: {} };
 
+// Breaks: a pending/refused item or Leave reply leaves detail as if the action committed.
+test('pending and refused Take/Drop/Leave retain detail routing and unchanged custody', () => {
+  for (const action of ['take', 'drop', 'close_choice']) {
+    for (const pending of [true, false]) {
+      const item = { id: 'lantern', kind: 'item', name: 'item.lantern', actions: [] };
+      const context = action === 'close_choice' ? 'bram' : 'lantern';
+      const view = {
+        ...(VIEW as object),
+        inventory: action === 'drop' ? [item] : [],
+        entities: action === 'take' ? [item] : [],
+        ...(action === 'close_choice' && {
+          choice: {
+            continuation_id: 'choice-1',
+            speaker_id: 'bram',
+            prompt: { key: 'choice.prompt' },
+            choices: [],
+          },
+        }),
+      } as never;
+      const p = presenter({
+        ...game(() =>
+          pending
+            ? { kind: 'pending' }
+            : ({
+                kind: 'saved',
+                decision: { kind: 'rejected', error: { code: 'not_present' } },
+              } as Reply),
+        ),
+        view: () => ({ view, token: 'view:r:0' }),
+        pending: () => pending,
+      });
+      p.press(
+        {
+          label: action,
+          action_key: action,
+          target_ids: action === 'close_choice' ? [] : ['lantern'],
+          input: action === 'close_choice' ? { continuation_id: 'choice-1' } : {},
+          token: 'view:r:0',
+        },
+        context,
+      );
+      assert.equal(p.screen().returnWorld, false);
+      assert.equal(p.screen().view, view);
+      assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
+      assert.deepEqual(p.screen().log, []);
+      assert.deepEqual(p.screen().detail(context).slice(-1), [
+        pending
+          ? '(pending: not confirmed saved; press any button to retry it)'
+          : "You can't do that: not here.",
+      ]);
+    }
+  }
+});
+
+// Breaks: an item quest consequence is classified as NPC dialogue, or an unchanged journal repeats a cue.
+test('journal cues belong only to changed NPC histories', () => {
+  for (const kind of ['npc', 'item']) {
+    let view = {
+      ...(VIEW as object),
+      entities: [{ id: 'target', kind, name: 'target', actions: [] }],
+    } as never;
+    const p = presenter({
+      ...game(() => accepted('opened')),
+      view: () => ({ view, token: 'view:r:0' }),
+      invoke: () => {
+        view = {
+          ...(view as object),
+          journal: [
+            {
+              state: 'active',
+              title: 'quest.title',
+              journal: 'quest.journal',
+              quest: { key: 'lantern', cartridge_id: 'test', cartridge_version: '1' },
+            },
+          ],
+        } as never;
+        return accepted('opened');
+      },
+    });
+    const button = { label: 'Open', action_key: 'open', target_ids: ['target'], input: {} };
+    p.press(button, 'target');
+    p.press(button, 'target');
+    assert.deepEqual(
+      p.screen().detail('target'),
+      kind === 'npc'
+        ? ['Opened.', { text: 'Journal updated', event: true }, 'Opened.']
+        : ['Opened.', 'Opened.'],
+    );
+  }
+});
+
+// Breaks: recovery guesses that retained narration was navigation and drops an authored consequence.
+test('recovery removes the current heading but retains an unclassified consequence', () => {
+  const restored = {
+    ...game(() => accepted('looked')),
+    lastNarration: () => ({
+      command_id: 'saved-command',
+      lines: [{ key: 'place.title' }, { key: 'quest.consequence' }],
+    }),
+    text: (key: string) =>
+      key === 'quest.consequence' ? 'The lantern is yours to carry now.' : 'Ferry Landing',
+  };
+  assert.deepEqual(presenter(restored).screen().log, ['The lantern is yours to carry now.']);
+});
+
+// Breaks: an old rejection follows accepted movement, or reset happens after the new authored result.
+test('confirmed room change clears old history before adding new authored consequences', () => {
+  let view = VIEW;
+  let calls = 0;
+  const g = {
+    ...game(() => accepted('looked')),
+    view: () => ({ view, token: 'view:r:0' }),
+    text: (key: string) =>
+      key === 'move.consequence' ? 'The gate closes behind you.' : 'New room',
+    invoke: (): Reply => {
+      if (calls++ === 0)
+        return {
+          kind: 'saved',
+          decision: { kind: 'rejected', error: { code: 'unsupported_capability' } },
+        } as Reply;
+      if (calls === 2) return { kind: 'stale_view' };
+      view = { ...(VIEW as object), place: { id: 'new', title: { key: 'new.title' } } } as never;
+      return {
+        kind: 'saved',
+        decision: {
+          kind: 'accepted',
+          outcome: 'moved',
+          narration: [{ key: 'new.title' }, { key: 'move.consequence' }],
+        },
+      } as Reply;
+    },
+  };
+  const p = presenter(g);
+  p.press(north);
+  assert.deepEqual(p.screen().log, ["You can't do that: unsupported capability."]);
+  p.press(north);
+  assert.deepEqual(p.screen().log, [
+    "You can't do that: unsupported capability.",
+    'The page had changed; here it is again.',
+  ]);
+  p.press(north);
+  assert.deepEqual(p.screen().log, ['The gate closes behind you.']);
+});
+
+// Breaks: routine Close echoes on World, or suppressing it also discards a genuine authored consequence.
+test('World omits the routine Close fallback while retaining authored consequences', () => {
+  assert.deepEqual(presenter(game(() => accepted('choice_closed'))).screen().log, []);
+  const p = presenter(game(() => accepted('choice_closed')));
+  p.press(north);
+  assert.deepEqual(p.screen().log, []);
+  const authored = presenter({
+    ...game(
+      () =>
+        ({
+          kind: 'saved',
+          decision: {
+            kind: 'accepted',
+            outcome: 'choice_closed',
+            narration: [{ key: 'quest.changed' }],
+          },
+        }) as Reply,
+    ),
+    text: () => 'Bram nods toward the path north.',
+  });
+  authored.press(north);
+  assert.deepEqual(authored.screen().log, ['Bram nods toward the path north.']);
+});
+
+// Breaks: a durable choice result already restored into detail is appended again when its receipt settles.
+test('a restored committed narration is not duplicated by its pending receipt retry', () => {
+  const choice = {
+    speaker_id: 'bram',
+    prompt: { key: 'prompt' },
+    continuation_id: 'continuation',
+    choices: [],
+    closable: true,
+  };
+  let pending = true;
+  const g = {
+    ...game(() => accepted('choice_closed')),
+    view: () => ({
+      view: { ...(VIEW as object), choice: pending ? choice : undefined } as never,
+      token: 'view:r:0',
+    }),
+    pending: () => pending,
+    text: (key: string) =>
+      key === 'prompt' ? 'Would you fetch it?' : 'Bram nods toward the path north.',
+    lastNarration: () => ({ command_id: 'committed-choice', lines: [{ key: 'quest.changed' }] }),
+    invoke: (): Reply => {
+      pending = false;
+      return {
+        kind: 'saved',
+        decision: {
+          kind: 'accepted',
+          outcome: 'choice_closed',
+          narration: [{ key: 'quest.changed' }],
+        },
+      } as Reply;
+    },
+  };
+  const p = presenter(g);
+  p.press({ label: 'Close', action_key: 'close_choice', target_ids: [], input: {} }, 'bram');
+  assert.deepEqual(p.screen().detail('bram'), [
+    'Bram nods toward the path north.',
+    'Would you fetch it?',
+  ]);
+});
+
 // Breaks (R6P rerun N-1): an authority rejection worded "You can't do that: too exhausted." because
 // it skips the sentence a refused drag uses for the same code.
 test('a move rejected for want of MV says the body is too exhausted', () => {
@@ -41,7 +249,7 @@ test('a move rejected for want of MV says the body is too exhausted', () => {
 test('the log stops growing in one room, its last line the latest answer', () => {
   const p = presenter(game((n) => accepted(n % 2 ? 'dropped' : 'taken')));
   const cycles = () => {
-    for (let i = 0; i < 150; i++) [north, north].map(p.press);
+    for (let i = 0; i < 150; i++) [north, north].map((b) => p.press(b));
     return p.screen().log;
   };
   const [once, log] = [cycles().length, cycles()];

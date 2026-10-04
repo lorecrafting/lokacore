@@ -1,0 +1,18 @@
+{
+  "pr": 144,
+  "head": "7a2a140ecdadf33a0684124862bcf178a52b64fb",
+  "model_requested": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "exit_status": 0,
+  "independent_read_only": true,
+  "raw_capture_retained_private": true,
+  "redacted_log_sha256": "6f327a60c90a6f2a7cc5bfcb318c07652a79c7fceba1a78e4b433022b79d2a5e",
+  "answer_sha256": "ceb329757234831d9225f4928836e0a7c6285229114db71868889559944fbf8d",
+  "verdict": "CHANGESREQUIRED",
+  "open_findings": 1,
+  "input_redacted_log_sha256": "ffa0d884a16fca579a278229e8109e0d0fa44251bdfd7d91f34bf42abfd7cb17",
+  "answer_preserved_verbatim": true,
+  "publication_privacy_redaction": true,
+  "redacted_log_retained_private": true,
+  "redacted_log_artifact": "c1-dialogue-publication-sol-initial-redacted.log"
+}

@@ -1,23 +1,22 @@
+import type { identify } from '../../../kernel/ts/src/commands/invocation.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 // The local Story authority (07 §§8-9; 03 §§14-15; ADR-072; 10 §§31-32): the world in memory,
 // one SQLite save, and 03 §14's admission order. invoke is synchronous on one connection, so
 // commands run one at a time, as WorldInstance serializes them online (07 §8).
-import type { Json } from '../../../kernel/ts/src/canonical.ts';
-import type {
-  Command,
-  DecisionResult,
-  ErrorCode,
-  HostKind,
-} from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/decision.ts';
-import { identify, INTENT_DIGEST_VERSION, resolve } from '../../../kernel/ts/src/invocation.ts';
-import type { Identified } from '../../../kernel/ts/src/invocation.ts';
-import { validate } from '../../../kernel/ts/src/validate.ts';
-import { newWorld, step } from '../../../kernel/ts/src/world.ts';
-import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
-import type { Captured, Db, Meta } from './store.ts';
-import { adopt, budget, ids, narration, save, scope, settle, stale, token } from './save.ts';
-import type { Story, Trace } from './save.ts';
-import { catchUp, observe, traceCommand, type CommitState } from './trace.ts';
+import type { Json } from '../../../kernel/ts/src/foundation/canonical.ts';
+import type { ErrorCode, HostKind } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { newWorld } from '../../../kernel/ts/src/runtime/world.ts';
+import { corrupt, identityOf, load, reconcile, replace } from './store.ts';
+import type { Db, Meta } from './store.ts';
+import { adopt, ids, narration, token } from './save.ts';
+import type { Story } from './save.ts';
+import type { ElapsedStatus } from '../../packages/game-view/session.ts';
+import { ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
+import { ElapsedRecoveryError, changedRun, formatProblem } from './elapsed-store.ts';
+import { invoke, cancel } from './invocation.ts';
+import { catchUp } from './trace.ts';
+import { elapsed, fenced, type Elapsed } from './delivery.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -26,6 +25,7 @@ export type Reply =
   | Exclude<ReturnType<typeof identify>, { kind: 'identified' }>
   | { kind: 'conflict' }
   | { kind: 'fault'; code: ErrorCode }
+  | { kind: 'catching_up'; invocation_id: string }
   | { kind: 'pending' } // COMMIT outcome unknown: retry the same invocation later (03 §§14-15)
   | { kind: 'stale_view' } // a NEW invocation made against an older view (04 §16): no receipt
   | Saved;
@@ -45,11 +45,11 @@ export type Host = {
   kernel_version: string;
   newId: () => string;
   binding?: () => string | null;
+  time?: Clocks;
   latency?: { host: HostKind; now: () => number }; // ms; each NEW decision's (11 §13), else none
   random?: (words: Uint32Array) => Uint32Array;
 };
-const SAVE_VERSION = 1;
-const SAVE_FORMAT = `loka-save-v${SAVE_VERSION}`;
+const SAVE_FORMAT = 'loka-save-v2';
 
 /**
  * The story saved in `db`, on the installed release its pin names (10 §32, OFF-11), or the newest
@@ -72,11 +72,17 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
   const refuse = <T>(r: T) => ({ ...r, newGame: () => newGame(s) }); // ponytail: no migration yet
   try {
     const saved = identityOf(db);
+    if (saved?.format === SAVE_FORMAT || (host.time && fresh.cartridge.manifest.time_policy))
+      s.recoveryHeader = saved ? { format: saved.format, run_id: saved.run_id } : null;
     const format = saved?.format; // a higher loka-save-vN: a newer app's; other than ours: corrupt
-    if (Number(/^loka-save-v([1-9][0-9]*)$/.exec(format ?? '')?.[1]) > SAVE_VERSION)
-      return { kind: 'unsupported_save_format' as const, format, supported: [SAVE_FORMAT] };
-    if (saved && (format !== SAVE_FORMAT || !saved.pin))
-      return refuse({ kind: 'save_corrupt' as const });
+    const problem = formatProblem(format);
+    if (problem === 'unsupported_save_format')
+      return {
+        kind: 'unsupported_save_format' as const,
+        format,
+        supported: ['loka-save-v1', SAVE_FORMAT],
+      };
+    if (saved && (problem || !saved.pin)) return refuse({ kind: 'save_corrupt' as const });
     const release = saved
       ? releases.find((r) => r.content_hash === saved.pin!.content_hash)
       : releases[0]; // no save row: a new save, or half a save that load reports corrupt
@@ -87,16 +93,38 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     const loaded = base && load(db, base, () => first(release.content_hash, base, host));
     if (!loaded) return refuse({ kind: 'save_corrupt' as const });
     Object.assign(s, { fresh: base, ...loaded });
+    s.recoveryHeader = undefined;
   } catch (e) {
-    if (!corrupt(e)) throw e;
+    if (!(e instanceof ElapsedRecoveryError) && !corrupt(e)) throw e;
+    s.corruptFile = !(e instanceof ElapsedRecoveryError) && corrupt(e);
     return refuse({ kind: 'save_corrupt' as const }); // SQLite cannot read the file
   }
-  s.behind = !catchUp(db, ids(s), s.fresh.context);
+  return opened(s);
+}
+
+function opened(s: Story) {
+  let changed = (_status: ElapsedStatus) => {};
+  const driver =
+    s.world.cartridge.manifest.time_policy && s.host.time
+      ? new ClockDriver(s, s.host.time, (status) => changed(status))
+      : undefined;
+  driver?.pulse('resume', s.meta.run_id);
+  s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
   return {
     kind: 'open' as const,
     world: () => s.world,
-    invoke: (value: unknown) => invoke(s, value),
+    beforeWorld: () => s.beforeWorld ?? s.world,
+    beforeToken: () => s.beforeToken ?? token(s),
+    clockStatus: () => driver?.state() ?? { kind: 'ready' as const },
+    invoke: (value: unknown) => invoke(s, value, driver),
+    onAdvance: (listener: typeof changed) => {
+      changed = listener;
+    },
+    pulse: (mode: Pulse, expected: string) =>
+      driver?.pulse(mode, expected) ?? { kind: 'ready' as const },
+    elapsed: (evidence: Elapsed) => elapsed(s, evidence),
+    runId: () => s.meta.run_id,
     newGame: () => newGame(s),
     narration: () => narration(s),
     token: () => token(s), // the view freshness token of the world() now shown
@@ -146,134 +174,61 @@ function first(content_hash: string, fresh: World, host: Host): Meta {
   const [lineage_id, run_id] = [host.newId(), host.newId()];
   const seed = fresh.state.rng as never;
   const binding = host.binding?.() ?? null;
-  return { format: SAVE_FORMAT, lineage_id, run_id, parent: null, seed, pin, binding };
+  return { format: 'loka-save-v1', lineage_id, run_id, parent: null, seed, pin, binding };
 }
 
-/** True while a fenced attempt's outcome is still unknown; otherwise settles it first. */
-function fenced(s: Story): boolean {
+function replaceable(s: Story) {
   try {
-    if (s.fence) settle(s);
-    return false;
-  } catch {
-    return true;
+    if (fenced(s)) return 'pending' as const;
+  } catch (e) {
+    if (!(e instanceof ElapsedRecoveryError)) throw e;
+  }
+  const expected =
+    s.recoveryHeader !== undefined
+      ? s.recoveryHeader
+      : s.meta && (s.elapsed || (s.host.time && s.world.cartridge.manifest.time_policy))
+        ? { format: s.meta.format, run_id: s.meta.run_id }
+        : undefined;
+  if (expected === undefined && !s.corruptFile) return 'ready' as const;
+  try {
+    return reconcile(s.db, () => {
+      const current = identityOf(s.db);
+      const problem = current && formatProblem(current.format);
+      if (problem === 'unsupported_save_format') return problem;
+      if (
+        (!current && expected === null) ||
+        (current &&
+          expected &&
+          (current.format === expected.format ||
+            (s.recoveryHeader === undefined &&
+              expected.format === 'loka-save-v1' &&
+              current.format === SAVE_FORMAT)) &&
+          current.run_id === expected.run_id)
+      )
+        return 'ready' as const;
+      const kind = problem ?? changedRun(current, expected?.run_id)?.kind ?? 'save_corrupt';
+      s.blocked = new ElapsedRecoveryError(kind, 'save header changed; reopen before recovery');
+      return kind;
+    });
+  } catch (e) {
+    if (s.corruptFile && corrupt(e)) throw e; // closed and still corrupt: confirmed host file recovery
+    return 'pending' as const; // the header or transaction closure remains unknown
   }
 }
 
-function invoke(s: Story, value: unknown): Reply {
-  if (fenced(s)) return { kind: 'pending' };
-  const id = identify(scope(s), s.world.character, value);
-  if (id.kind !== 'identified') return id;
-  const { invocation: i, command_id, intent_digest } = id;
-  const old = receipt(s.db, scope(s), i.invocation_id);
-  // ponytail: one digest version; a receipt of another fails closed until a second exists.
-  const same = old?.intent_digest_version === INTENT_DIGEST_VERSION;
-  if (old) {
-    const intact = !validate('DecisionResult', old.response).length; // never decided again
-    if (!same || !intact || old.intent_digest !== intent_digest) return { kind: 'conflict' };
-    return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
-  }
-  if (stale(s, i.view_freshness_token)) return { kind: 'stale_view' };
-  const { command, next, timed } = decided(s, id);
-  const d = next.decision;
-  // A rejection before a Command existed has no trace entry: TraceEntry needs the Command.
-  const trace: Trace = (at, ...states) => {
-    if (!('kind' in command)) traceAfter(s, command, d, at, states);
-  };
-  if (d.kind === 'fault') {
-    trace(s.revision, 'unavailable');
-    if (next.limit) observe(s.db, budget(s, command_id, next.limit));
-    return timed({ kind: 'fault', code: d.code });
-  }
-  // ponytail: no rule emits effects yet; the outbox (03 §16) comes with the first that does.
-  if (d.kind === 'accepted' && d.effects.length) throw new Error('effect outbox not built');
-  const r = { scope: scope(s), invocation_id: i.invocation_id, command_id, actor_id: i.actor_id };
-  const reply = save(s, next, trace, reached(s, d, s.revision + 1), {
-    ...r,
-    intent_digest_version: INTENT_DIGEST_VERSION,
-    intent_digest,
-    command: 'kind' in command ? null : (command as never),
-    revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
-    response: d as never,
-  });
-  return timed(reply); // not if pending: the sink's transaction would roll back the open COMMIT
-}
-
-// A NEW invocation resolved and decided (03 §14); `timed` observes how long (11 §13) if clocked.
-function decided(s: Story, id: Identified) {
-  const t0 = s.host.latency?.now();
-  const command = resolve(s.world, id);
-  const next: ReturnType<typeof step> =
-    'kind' in command
-      ? { world: s.world, decision: command }
-      : step(s.world, command, s.revision + 1, id.invocation.action_key);
-  const value = s.host.latency && Math.round((s.host.latency.now() - t0!) * 1000);
-  const { kernel_version, run_id } = ids(s);
-  const head = { format: 'loka-obs-v1', event: 'kernel.decision_latency', store: 'operations' };
-  const timed = (reply: Reply) => {
-    if (s.host.latency && reply.kind !== 'pending')
-      observe(s.db, {
-        ...head,
-        ids: { kernel_version, host: s.host.latency.host, run_id, command_id: id.command_id },
-        data: { state: 'observed', value },
-      });
-    return reply;
-  };
-  return { command, next, timed };
-}
-
-/**
- * The pending reports of the story points an accepted decision reaches, its story_point_reached
- * events (23 §§3-5; 03 §26), each with its id allocated once here and committed with the
- * decision, its run, lineage, release and the run's binding. A receipt replay never comes here,
- * so it adds no second report. A report that is not a StoryPointReport (a bad host id) throws
- * before anything is stored.
- */
-function reached(s: Story, d: DecisionResult, observed_revision: number): Captured[] {
-  if (d.kind !== 'accepted') return [];
-  const { cartridge_id, cartridge_version, content_hash } = s.meta.pin;
-  const release = { cartridge_id, cartridge_version, cartridge_hash: content_hash } as never;
-  return d.events.flatMap(({ payload: p }) => {
-    if (p.type !== 'story_point_reached') return [];
-    const { lineage_id, run_id, binding } = s.meta;
-    const m = { story_point: p.story_point.key, outcome: p.outcome };
-    const report = { report_id: s.host.newId(), run_id, release, observed_revision, ...m };
-    if (validate('StoryPointReport', report).length) throw new Error('not a StoryPointReport');
-    return [{ lineage_id, binding, report: report as never }];
-  });
-}
-
-/**
- * Traces a command after its commit. A trace that is behind catches up first (all but this
- * command), or this entry is skipped, so ordinals follow the commits (ADR-075 §4: the Commands by
- * ordinal replay); a skipped committed entry is caught up later from its receipt.
- */
-function traceAfter(
-  s: Story,
-  command: Command,
-  d: DecisionResult,
-  at: number,
-  states: CommitState[],
-) {
-  if (s.behind && (s.behind = !catchUp(s.db, ids(s), s.fresh.context, command.id))) return;
-  const written = traceCommand(s.db, ids(s), command, d, at, states);
-  if (!written && states.includes('committed')) s.behind = true;
-}
-
-/**
- * Replaces the save with a new game (10 §31, one save per story; the host has the player confirm
- * first): after settling any fenced attempt, in one transaction, the fresh world at revision 0, a
- * new lineage and run with no parent pinned to the newest release (10 §32), and no receipts (the
- * old lineage's would otherwise answer its invocation ids). Memory adopts it only after the commit,
- * and the new run's trace opens with its header. An unknown COMMIT fences like an invocation's.
- */
 function newGame(s: Story) {
   const retried = s.fence && s.fence === s.game?.fence ? s.game.run_id : undefined;
-  if (fenced(s)) return { kind: 'pending' } as const;
+  const recovery = replaceable(s);
+  if (recovery !== 'ready') return { kind: recovery };
+  if (s.blocked?.kind === 'stale_view') return { kind: 'stale_view' } as const;
+  s.blocked = undefined;
+  s.fence = undefined;
   if (retried && s.meta?.run_id === retried) return { kind: 'replaced' } as const; // not twice
   // Best effort before its receipts go (the trace is derived and never blocks the player): the
   // old run's missed entries can be recovered only from them. ponytail: if this catch-up fails they
   // are lost with the run the player chose to abandon; a pre-write journal would make it authority.
   if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
+  cancel(s);
   const newest = s.releases[0];
   const world = drawn(newest, s.host);
   const next = first(newest.content_hash, world, s.host);
@@ -285,6 +240,8 @@ function newGame(s: Story) {
     if (replaced || reconcile(s.db, run) === next.run_id) {
       s.fresh = world;
       adopt(s);
+      s.recoveryHeader = undefined;
+      s.corruptFile = undefined;
       s.behind = !catchUp(s.db, ids(s), s.fresh.context);
     }
     return undefined;

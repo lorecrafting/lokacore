@@ -1,0 +1,14 @@
+{
+  "head": "0e49963f893192d193fac65851aa882be0f597b8",
+  "clean": true,
+  "focused_three_pass": 30,
+  "focused_with_independent_pass": 31,
+  "mutants_red": {
+    "journal-missing-cue": 1,
+    "leave-local-with-offer": 1,
+    "description-missing": 1,
+    "position-freshness-lost": 1
+  },
+  "native": "PENDING",
+  "initial_independent_red": "Reviewer fixture lacked projected NPC; corrected coherent view then GREEN before mutants."
+}

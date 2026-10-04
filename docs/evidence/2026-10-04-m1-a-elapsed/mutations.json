@@ -1,0 +1,114 @@
+[
+  [
+    "id-run",
+    "kernel/ts/src/foundation/id_source.ts",
+    "uuid(encode(['loka-elapsed-command-v1', runId, worldContextId, from, until]))",
+    "uuid(encode(['loka-elapsed-command-v1', '', worldContextId, from, until]))",
+    "kernel"
+  ],
+  [
+    "trusted-id",
+    "kernel/ts/src/runtime/world.ts",
+    "if (command.id !== elapsedCommandId(p.run_id, world.context, p.from, p.until))",
+    "if (false)",
+    "kernel"
+  ],
+  [
+    "player-elapsed",
+    "kernel/ts/src/runtime/world.ts",
+    "if (command.payload.type === 'elapsed') return { decision: rejected('permission_denied'), world };",
+    "",
+    "kernel"
+  ],
+  [
+    "elapsed-from",
+    "kernel/ts/src/mechanics/schedule/rule.ts",
+    "payload.from !== world.state.clock",
+    "false",
+    "kernel"
+  ],
+  [
+    "wait-offer",
+    "kernel/ts/src/commands/actions.ts",
+    " && !(verb === 'wait' && world.cartridge.manifest.time_policy)",
+    "",
+    "kernel"
+  ],
+  [
+    "wait-admit",
+    "kernel/ts/src/commands/actions.ts",
+    "if (payload.type === 'wait' && world.cartridge.manifest.time_policy)",
+    "if (false)",
+    "kernel"
+  ],
+  [
+    "loader-duration",
+    "kernel/ts/src/content/cartridge.ts",
+    "if (c.manifest.time_policy && r.duration)",
+    "if (false)",
+    "kernel"
+  ],
+  [
+    "loader-command",
+    "kernel/ts/src/content/cartridge.ts",
+    "if (a.command === 'elapsed' || (a.command === 'wait' && c.manifest.time_policy))",
+    "if (false)",
+    "kernel"
+  ],
+  [
+    "loader-api",
+    "kernel/ts/src/content/cartridge.ts",
+    "if (apiCmp(c.manifest.requires.kernel_api.at_least, '1.1') < 0)",
+    "if (false)",
+    "kernel"
+  ],
+  [
+    "host-run",
+    "mobile/authority/local-story/delivery.ts",
+    "if (evidence.expected_run_id !== s.meta.run_id) return { kind: 'stale_view' };",
+    "",
+    "authority"
+  ],
+  [
+    "host-replay",
+    "mobile/authority/local-story/delivery.ts",
+    "if (old) {",
+    "if (false) {",
+    "authority"
+  ],
+  [
+    "host-fence",
+    "mobile/authority/local-story/delivery.ts",
+    "if (fenced(s)) return { kind: 'pending' };",
+    "",
+    "authority"
+  ],
+  [
+    "trusted-schema",
+    "kernel/ts/src/runtime/world.ts",
+    "validate('Command', command).length || command.payload.type !== 'elapsed'",
+    "command.payload.type !== 'elapsed'",
+    "kernel"
+  ],
+  [
+    "id-invalid",
+    "kernel/ts/src/foundation/id_source.ts",
+    "typeof runId !== 'string' || typeof worldContextId !== 'string'",
+    "false",
+    "kernel"
+  ],
+  [
+    "id-ordinal",
+    "kernel/ts/src/foundation/id_source.ts",
+    "![from, until].every((n) => Number.isSafeInteger(n) && n >= 0)",
+    "false",
+    "kernel"
+  ],
+  [
+    "player-clock-charge",
+    "kernel/ts/src/mechanics/movement/rule.ts",
+    "return accepted(world, 'moved', ops, [event(world, command, mint, 1, entered)]);",
+    "return accepted(world, 'moved', world.cartridge.manifest.time_policy ? [...ops, { op: 'time.advance', writer_group: 0, from: world.state.clock, to: world.state.clock + 1 }] : ops, [event(world, command, mint, 1, entered)]);",
+    "kernel"
+  ]
+]

@@ -1,0 +1,19 @@
+{
+  "kernel/ts/src/commands/actions.ts": "ddd7231eaf8633b9e0771f893dcc929bb7efd9b716e8c2d404fe93f77d0c6727",
+  "kernel/ts/src/content/cartridge.ts": "a5d722ed3941dcf046c2cd0ec8b481fc8ef4e1ee4ad9ad832f411ae7b877982e",
+  "kernel/ts/src/foundation/id_source.ts": "ebdde31c276d2771a435b64b0b9c40854cd175132c355bf752878dfeb1e072ed",
+  "kernel/ts/src/mechanics/movement/rule.ts": "0ea262b1460226eeb15694cf3c63b1c2bcf786a9d48ba8e1a81baa57f5ee420e",
+  "kernel/ts/src/mechanics/schedule/rule.ts": "736bf88bc7648b07d9511cc471108b14a60de8d97d46a843761b439efbb89080",
+  "kernel/ts/src/runtime/world.ts": "6641141e44fc33d233f6fd6adfae60b60c917d1b3982d82c9729eec8f291da9e",
+  "lib/loka/content/checks.ex": "1ce57e2778ac10207d99d3c86bbdf6a187005eb126f3c7f403d63b0c3df7d3ac",
+  "lib/loka/content/recipes.ex": "e2be36d13ef3b57ce0e35676732d7d88d61b61c1dfa3f20de59d1df836c46a69",
+  "lib/loka/content/requires.ex": "ae925cf65ab6f39b9780dc60694ff11f6de5871ac0d3e8366747b4f568383e4b",
+  "lib/loka/core/id_source.ex": "9c4aa59e876b9c382f6cd4d72f8364b6d8bc7995ece9862b963c204aea9d32b0",
+  "mobile/authority/local-story/delivery.ts": "0a826ad82dd1d9cd1d74e4601188ec2080c698ca102ac08c903c3a6aa62d564a",
+  "protocol/manifest.schema.json": "b0742ef8576ba2b155a5a8df28b0102e855091d31a64afdd550a51b9664e79ce",
+  "protocol/command.schema.json": "67a30068dc72a24c1612dc50ca61ac7c78cad8282f0bab59f55f7252faacbff2",
+  "kernel/ts/src/contracts.gen.ts": "4763005cd3f9724f1e11f888a3a67717c59906eb2708b4f688f6c1489e84d4ee",
+  "docs/contracts.gen.md": "5d705008af1259cd7e3cef9786048318ebe7ff0ed7b39d3c91365e77374caba6",
+  "docs/residency.gen.json": "8c16c6d10d5b9cec26e3fc714be409e460554644c8dc62061acc13e35c4ea573",
+  "mobile/authority/local-story/elapsed.test.ts": "54d3f660f8665408e95a50e82c3a7d96146f43f38e9f29787b047d4540919bd6"
+}

@@ -16,8 +16,8 @@ import type {
   WornSlotView,
 } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
-import { gameView, step } from '../src/world.ts';
-import { check } from '../src/invariants.ts';
+import { gameView, step } from '../src/runtime/world.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
 
@@ -52,6 +52,7 @@ const REACHED = [
 // the bug class of the regression seeds): each must turn up in the fresh sequences.
 const PICKED = [
   'bell',
+  'chapters',
   'details',
   'dusk',
   'errand',
@@ -60,9 +61,13 @@ const PICKED = [
   'gate',
   'green',
   'items',
+  'journal',
   'locks',
+  'rest',
   'road',
+  'scene',
   'rooms',
+  'sampler',
   'wear',
 ].map((c) => `ashmere_${c}`);
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
@@ -187,12 +192,11 @@ test('red control: a planted rule bug (drop puts the item inside itself) is foun
   );
   assert.equal(f.id, 'containment_acyclic');
   // moves to an item, take, drop; a drained start may need a wait first (which seed finds it
-  // depends on the demo cartridges: generator 8's seed 3 is lantern_proof, whose nearest item is
-  // three moves from the entry).
+  // depends on the demo cartridges; lantern_proof's nearest item is three moves from the entry).
   assert.ok(f.shrunk.length <= 5 && types(f.shrunk).at(-1) === 'drop', f.text);
   assert.match(
     f.text,
-    /^simulation failure: containment_acyclic .*\ngenerator 8, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
+    /^simulation failure: containment_acyclic .*\ngenerator 14, seed (\d+).*\nreproduce .*: node kernel\/ts\/test\/sim.ts \1\n/,
   );
   assert.match(f.text, /shrunk from \d+ to [1-5] commands:\n/);
 });

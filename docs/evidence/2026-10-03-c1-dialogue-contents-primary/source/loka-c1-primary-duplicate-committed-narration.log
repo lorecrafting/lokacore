@@ -1,0 +1,48 @@
+(node:34862) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of <private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ recovery removes the current heading but retains an unclassified consequence (0.9695ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.333083ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.136292ms)
+✖ a restored committed narration is not duplicated by its pending receipt retry (0.728791ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.107625ms)
+✔ the log stops growing in one room, its last line the latest answer (0.821375ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.08425ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 80.658208
+
+✖ failing tests:
+
+test at mobile/app/book/presenter.test.ts:109:1
+✖ a restored committed narration is not duplicated by its pending receipt retry (0.728791ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'Bram nods toward the path north.',
+      'Would you fetch it?',
+  +   'Bram nods toward the path north.'
+    ]
+  
+      at TestContext.<anonymous> (<private-path>)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Bram nods toward the path north.', 'Would you fetch it?', 'Bram nods toward the path north.' ],
+    expected: [ 'Bram nods toward the path north.', 'Would you fetch it?' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

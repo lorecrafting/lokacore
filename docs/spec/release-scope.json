@@ -11,8 +11,8 @@
   "chapter_one": {
     "rooms": 57,
     "quests": 10,
-    "endings": 2,
-    "source": "00a-chapter-one-content.md"
+    "endings": 3,
+    "source": "docs/decisions/owner-decision-chapter-one-content-2026-10-02.md"
   },
   "always_gates": [
     "STATIC",
@@ -200,7 +200,8 @@
       "phase": "R7",
       "gates": [
         "SCENE"
-      ]
+      ],
+      "installed_subset": "Modal current_world narrate\u00d7n, await_ack, end; story-point outcome start once, persisted line fact, continue-only admission, scene_ended. Other scene modes/steps and quest completion hooks remain later."
     },
     {
       "id": "action_recipe@1",

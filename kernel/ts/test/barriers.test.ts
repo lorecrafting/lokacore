@@ -10,9 +10,9 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { describe } from '../src/rules/description_variant.ts';
-import { doors } from '../src/target.ts';
-import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { describe } from '../src/mechanics/description_variant/rule.ts';
+import { doors } from '../src/commands/target.ts';
+import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -216,7 +216,7 @@ test('moves through closed and locked exits are refused, and the GameView says w
   const w = world();
   refused(w, move('north'), 'exit_closed');
   refused(w, move('east'), 'exit_locked');
-  // Exits list in the RoomDefinition exits order (view.ts): east before north.
+  // Exits list in the RoomDefinition exits order (view/view.ts): east before north.
   assert.deepEqual(exits(w), [
     {
       available: false,

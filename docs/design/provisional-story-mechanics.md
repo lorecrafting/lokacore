@@ -1,5 +1,16 @@
 # Proposed Loka mechanics for gaps in LegendMUD evidence
 
+**Current status, 2026-10-04:** the [PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md) governs current planning. The original proposal below remains a dated set of alternatives; its formulas are not adopted requirements.
+
+| Original section | Current disposition |
+|---|---|
+| §1 time/pacing | M1 elapsed contracts, reading-time direction and the M4 first-fight contract supersede its open clock/menu/termination and queued-Flee proposals. |
+| §§2–3 resolver | First fight is M4's untrained/unarmed profile, with no defense, critical, gear or derived-stat engine. Larger formulas remain unadopted alternatives. |
+| §4 recovery | Planned M2 selects MV-only piecewise 18/36 per 3600 (2×), no implicit combat suppression. MV82 resting takes 164 real seconds at rate 50; future MV100 takes 200. Its all-pool/stat-scaled 4× model is superseded for this consumer. |
+| §5 load | Planned M3 selects a 12000g positive-Take ceiling, not STR load bands or penalties. |
+| §6 death | Planned M4/M5 uses all-held/worn durable corpse custody and safe chapel return. Protected caches/XP penalties are unadopted; recovery barriers follow the reconciliation's route/fallback gate. |
+| §7 tuning | Historical targets remain provisional; tune the selected consumers against real play rather than adopt the alternatives by implication. |
+
 **Proposal, 2026-10-03 — not approved implementation requirements.** The owner asked for sensible
 starting mechanics that can be rebalanced after the initial game is built. These are Loka design
 choices for five requested gaps in the [LegendMUD reference](../reference/legendmud-system.md):

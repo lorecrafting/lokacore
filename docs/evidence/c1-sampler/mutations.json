@@ -1,0 +1,37 @@
+[
+  {
+    "mutation": "missing-equipment-capability",
+    "exit_status": 2,
+    "detected": true
+  },
+  {
+    "mutation": "unreachable-cellar-key",
+    "exit_status": 2,
+    "detected": true
+  },
+  {
+    "mutation": "wrong-point-choice",
+    "exit_status": 1,
+    "detected": true
+  },
+  {
+    "mutation": "wrong-cloak-slot",
+    "exit_status": 1,
+    "detected": true
+  },
+  {
+    "mutation": "missing-scene-start",
+    "exit_status": 1,
+    "detected": true
+  },
+  {
+    "mutation": "app-reuses-lantern-save",
+    "exit_status": 1,
+    "detected": true
+  },
+  {
+    "mutation": "app-rebundles-lantern",
+    "exit_status": 1,
+    "detected": true
+  }
+]

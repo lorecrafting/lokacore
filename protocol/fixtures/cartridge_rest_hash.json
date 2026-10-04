@@ -1,0 +1,158 @@
+{
+  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/ashmere_rest (chapter-one slice c1-position; 05 §11; CartridgeArtifact.content_hash): position@1 with movement@1 and barrier@1, two rooms joined north/south through inn_door (closed, no key_item): inn_common the entry and inn_rooms. Assembled by hand from the source files and cartridge.md Compiler (manifest without entry plus fact@1, which position@1 adds, and resource@1 and schedule@1, the lock, the engine FactSpec literal at ashmere_rest@0.0.1:fact/position, empty policies and actions, each room and the barrier with key added and short references expanded, the default pools hp 0..20 start 20 gain 5, ma 0..100 start 100 gain 4, mv 0..82 start 82 gain 18, entry, text), its canonical bytes by Python json.dumps(sort_keys=True, separators=(',', ':'), ensure_ascii=False) and sha256 by hashlib, never by the kernels; for these values (small integers only, no control characters, one non-ASCII character) Python's output is the loka-numeric-v1 encoding. Fresh-world ids under context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f (kernel/ts/test/position.test.ts): ordinal 0 the character, 1 the body, 2 inn_common, 3 inn_rooms; each is i(n) of the Python in cartridge_wear_hash.json.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_rest",
+      "version": "0.0.1",
+      "title": "Ashmere — Rest",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "barrier": 1,
+          "position": 1,
+          "fact": 1,
+          "resource": 1,
+          "schedule": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "barrier": 1,
+        "position": 1,
+        "fact": 1,
+        "resource": 1,
+        "schedule": 1
+      }
+    },
+    "facts": {
+      "ashmere_rest@0.0.1:fact/position": {
+        "key": "position",
+        "version": 1,
+        "value_type": {
+          "type": "enum",
+          "values": [
+            "standing",
+            "sitting",
+            "resting",
+            "sleeping"
+          ],
+          "default": "standing"
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "The character's position (position@1): only its rule writes it."
+      }
+    },
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_rest@0.0.1:room/inn_common": {
+        "title": "room.inn_common.title",
+        "description": "room.inn_common.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_rest",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "inn_rooms"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_rest",
+              "cartridge_version": "0.0.1",
+              "kind": "barrier",
+              "key": "inn_door"
+            }
+          }
+        },
+        "key": "inn_common"
+      },
+      "ashmere_rest@0.0.1:room/inn_rooms": {
+        "title": "room.inn_rooms.title",
+        "description": "room.inn_rooms.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_rest",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "inn_common"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_rest",
+              "cartridge_version": "0.0.1",
+              "kind": "barrier",
+              "key": "inn_door"
+            }
+          }
+        },
+        "key": "inn_rooms"
+      }
+    },
+    "barriers": {
+      "ashmere_rest@0.0.1:barrier/inn_door": {
+        "keywords": [
+          "door",
+          "inn_door"
+        ],
+        "short": "barrier.inn_door.short",
+        "initial": "closed",
+        "key": "inn_door"
+      }
+    },
+    "resources": {
+      "ashmere_rest@0.0.1:resource/hp": {
+        "gain": 5,
+        "key": "hp",
+        "maximum": 20,
+        "minimum": 0,
+        "start": 20
+      },
+      "ashmere_rest@0.0.1:resource/ma": {
+        "gain": 4,
+        "key": "ma",
+        "maximum": 100,
+        "minimum": 0,
+        "start": 100
+      },
+      "ashmere_rest@0.0.1:resource/mv": {
+        "gain": 18,
+        "key": "mv",
+        "maximum": 82,
+        "minimum": 0,
+        "start": 82
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_rest",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "inn_common"
+    },
+    "text": {
+      "room.inn_common.title": "The Common Room",
+      "room.inn_common.description": "Benches by a low fire. A door leads north to the rooms.",
+      "room.inn_rooms.title": "The Inn's Rooms",
+      "room.inn_rooms.description": "A narrow passage of doors.",
+      "barrier.inn_door.short": "the door to the rooms"
+    }
+  },
+  "canonical": "{\"actions\":{},\"barriers\":{\"ashmere_rest@0.0.1:barrier/inn_door\":{\"initial\":\"closed\",\"key\":\"inn_door\",\"keywords\":[\"door\",\"inn_door\"],\"short\":\"barrier.inn_door.short\"}},\"entry\":{\"cartridge_id\":\"ashmere_rest\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_common\",\"kind\":\"room\"},\"facts\":{\"ashmere_rest@0.0.1:fact/position\":{\"key\":\"position\",\"meaning\":\"The character's position (position@1): only its rule writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"standing\",\"type\":\"enum\",\"values\":[\"standing\",\"sitting\",\"resting\",\"sleeping\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"barrier\":1,\"fact\":1,\"movement\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_rest\",\"requires\":{\"capabilities\":{\"barrier\":1,\"fact\":1,\"movement\":1,\"position\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Rest\",\"version\":\"0.0.1\"},\"policies\":{},\"resources\":{\"ashmere_rest@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_rest@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_rest@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_rest@0.0.1:room/inn_common\":{\"description\":\"room.inn_common.description\",\"exits\":{\"north\":{\"barrier\":{\"cartridge_id\":\"ashmere_rest\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_rest\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_common\",\"title\":\"room.inn_common.title\"},\"ashmere_rest@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"south\":{\"barrier\":{\"cartridge_id\":\"ashmere_rest\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_rest\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_common\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"title\":\"room.inn_rooms.title\"}},\"text\":{\"barrier.inn_door.short\":\"the door to the rooms\",\"room.inn_common.description\":\"Benches by a low fire. A door leads north to the rooms.\",\"room.inn_common.title\":\"The Common Room\",\"room.inn_rooms.description\":\"A narrow passage of doors.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}}",
+  "sha256": "54950826152db53659e9fdda58316820982f3dc754bc539548c8041d0f578d27"
+}

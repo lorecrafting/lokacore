@@ -1,0 +1,44 @@
+[
+  [
+    "ex-api",
+    "lib/loka/content/requires.ex",
+    "version(m[\"requires\"][\"kernel_api\"][\"at_least\"]) < [1, 1]",
+    "false"
+  ],
+  [
+    "ex-owner",
+    "lib/loka/content/requires.ex",
+    "is_map_key(m[\"requires\"][\"capabilities\"], \"schedule\")",
+    "true"
+  ],
+  [
+    "ex-actions",
+    "lib/loka/content/checks.ex",
+    "name not in [\"run_job\", \"elapsed\"] and\n         not (elapsed? and name == \"wait\")",
+    "name != \"run_job\" and (elapsed? or not elapsed?)"
+  ],
+  [
+    "ex-duration",
+    "lib/loka/content/recipes.ex",
+    "m[\"time_policy\"] != nil and r[\"duration\"] != nil",
+    "false and m[\"time_policy\"] != nil and r[\"duration\"] != nil"
+  ],
+  [
+    "ex-id-run",
+    "lib/loka/core/id_source.ex",
+    "[\"loka-elapsed-command-v1\", run_id, world_context_id, from, until]",
+    "[\"loka-elapsed-command-v1\", \"\", world_context_id, from, until]"
+  ],
+  [
+    "ex-id-invalid",
+    "lib/loka/core/id_source.ex",
+    "not (is_binary(run_id) and is_binary(world_context_id))",
+    "false"
+  ],
+  [
+    "ex-id-ordinal",
+    "lib/loka/core/id_source.ex",
+    "not (is_safe_integer(from) and from >= 0 and is_safe_integer(until) and until >= 0)",
+    "false"
+  ]
+]

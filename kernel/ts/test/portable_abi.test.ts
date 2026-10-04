@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { decode, encode, hash } from '../src/canonical.ts';
-import { add, divide, mul, sub } from '../src/int.ts';
-import { commandId, id, jobCommandId } from '../src/id_source.ts';
-import { next, uniform } from '../src/rng.ts';
+import { decode, encode, hash } from '../src/foundation/canonical.ts';
+import { add, divide, mul, sub } from '../src/foundation/int.ts';
+import { commandId, elapsedCommandId, id, jobCommandId } from '../src/foundation/id_source.ts';
+import { next, uniform } from '../src/foundation/rng.ts';
 import { read } from './read.ts';
 
 function fixture(name: string, sha: string) {
@@ -241,4 +241,34 @@ test('job CommandId rejects bad input', () => {
   assert.throws(() => jobCommandId(null as never, 0), code('invalid_id'));
   assert.throws(() => jobCommandId('j', -1), code('invalid_ordinal'));
   assert.throws(() => jobCommandId('j', 1.5), code('invalid_ordinal'));
+});
+
+// Breaks: elapsed identity dropping durable run/world, swapping endpoints or sharing another domain.
+test('elapsed CommandId matches independently frozen run/world/interval vectors', () => {
+  for (const c of read('protocol/fixtures/elapsed_command_id.json')) {
+    assert.equal(elapsedCommandId(c.run_id, c.world_context_id, c.from, c.until), c.command_id);
+    assert.equal(
+      encode(['loka-elapsed-command-v1', c.run_id, c.world_context_id, c.from, c.until]),
+      c.canonical,
+    );
+    assert.equal(
+      hash(['loka-elapsed-command-v1', c.run_id, c.world_context_id, c.from, c.until]),
+      c.sha256,
+    );
+  }
+});
+// Breaks: the elapsed ID domain silently hashes malformed identity or unsafe interval operands.
+test('elapsed CommandId rejects malformed identity and interval operands', () => {
+  assert.throws(() => elapsedCommandId(1 as never, 'world', 0, 1), code('invalid_id'));
+  assert.throws(() => elapsedCommandId('run', null as never, 0, 1), code('invalid_id'));
+  for (const bad of [-1, 9007199254740992, 1.5, true]) {
+    assert.throws(
+      () => elapsedCommandId('run', 'world', bad as number, 1),
+      code('invalid_ordinal'),
+    );
+    assert.throws(
+      () => elapsedCommandId('run', 'world', 0, bad as number),
+      code('invalid_ordinal'),
+    );
+  }
 });

@@ -17,24 +17,24 @@ a new save: with a random source, under a world context and RNG seed drawn for t
 
 | Reply | When | New game offered |
 |---|---|---|
-| `unsupported_save_format` | the `save` row's format is `loka-save-vN` with N above 1 (a newer app's; checked first) | no: the player updates the app |
+| `unsupported_save_format` | the `save` row's format is `loka-save-vN` with N above 2 (a newer app's; checked first) | no: the player updates the app |
 | `save_corrupt` | the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports and the trace survive |
-| `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:129`) | yes, but `newGame` throws: the host deletes the file (below) |
+| `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:157`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`mobile/authority/local-story/session.ts:55`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:60`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`mobile/authority/local-story/session.ts:60`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:71`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
 ## Receipts
 
-Scope `story/<lineage_id>/<character>` (`save.ts:101`). A receipt (`store.ts:23`) stores
+Scope `story/<lineage_id>/<character>` (`save.ts:137`). A receipt (`store.ts:32`) stores
 the invocation id, the CommandId, actor, `intent_digest_version` (`loka-intent-v1`) and intent
 digest, the resolved Command (null for a rejection before one existed), the revision (unchanged
-for a rejection) and the DecisionResult. Replay (`authority.ts:162`): a known invocation id
+for a rejection) and the DecisionResult. Replay (`mobile/authority/local-story/invocation.ts:50`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
-other known id is `conflict`. A fault gets no receipt (`:182`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
+other known id is `conflict`. A fault gets no receipt (`:174`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
 Lantern traces and the 11 adverse cases). The latter projects kernel values onto the traces'
 vocabulary by the R6P P4b mapping ([archived ROADMAP](../archive/ROADMAP.md), R6P row) as
 changed by Quest from dialogue: action `activate` is gone; action `talk` with no target is the
@@ -44,7 +44,7 @@ and `bram` choices, and narration ids follow them; outcome `accept` is the kerne
 
 ## Replies
 
-`Reply` (`authority.ts:25`): `invalid`, `unauthorized`, `conflict`, `fault {code}`,
+`Reply` (`authority.ts:24`): `invalid`, `unauthorized`, `conflict`, `fault {code}`,
 `pending` (a COMMIT whose outcome is unknown; retry the same invocation), `stale_view` (a NEW
 invocation whose `view_freshness_token` starts with `view:` and is not the current
 `view:<run_id>:<revision>`, `:121`; any other token is not checked), or `saved {replay, revision, decision}`. A failed commit throws with memory and
@@ -52,12 +52,12 @@ storage unchanged.
 
 ## Commit, fence, reconcile
 
-`commit` (`store.ts:210`) writes in one transaction: pending story point reports, and for an
+`commit` (`store.ts:245`) writes in one transaction: pending story point reports, and for an
 accepted decision the head (revision, clock, RNG) and the state rows its delta targets wrote,
 then always the receipt. `transaction` (`:265`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
 committed; a failed write rolls back and throws; a failed COMMIT, or a ROLLBACK that leaves the
 transaction open, returns false: the outcome is unknown. Then the story is **fenced**
-(`save.ts:28`): every call answers `pending` until `reconcile` (`store.ts:254`) rolls back and
+(`save.ts:41`): every call answers `pending` until `reconcile` (`transaction.ts:10`) rolls back and
 reads the receipt (committed: memory adopts the saved head; not there: the attempt failed).
 Memory never serves a state the store did not confirm. Tests: `faults.test.ts` (every fault
 leaves the prior or next revision), `saves.test.ts` ("a new game whose COMMIT is unknown is
@@ -65,7 +65,7 @@ fenced; settling it moves play to the new run").
 
 ## The save file (`loka-save-v1`)
 
-`store.ts:37`, STRICT tables:
+`store.ts:46`, STRICT tables:
 
 | Table | Rows |
 |---|---|
@@ -84,7 +84,7 @@ save from before c1-host has no `world_context_id`; it is never rewritten. The f
 `loka-save-v1`, so a build from before c1-host opens a c1-host save under the release's own
 context and rebuilds wrong ids (dev reinstalls only; no app is released).
 
-Loading (`store.ts:86`) rebuilds the world from the release's cartridge under the pinned
+Loading (`store.ts:95`) rebuilds the world from the release's cartridge under the pinned
 `world_context_id`, or from the release's own fresh world when the pin has none (a save from
 before c1-host), plus the rows: the head restores the saved RNG ([10 §31](../archive/spec/10-mobile-commerce-release.md)),
 so a reopen replays the same luck. A `world_context_id` that is not a WorldContextId is
@@ -94,13 +94,13 @@ trace segment header, its kernel version differing ([ADR-075](../archive/decisio
 
 ## New game
 
-`newGame` (`authority.ts:269`): after settling any fenced attempt, one transaction replaces the
+`newGame` (`authority.ts:219`): after settling any fenced attempt, one transaction replaces the
 save with a fresh world of the newest release at revision 0 under a new lineage and run (no
 parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
 (`start_over.test.ts` "an intact report table survives Start over in place"). If SQLite reports
-the file, or the report table or its index, corrupt, `replace` throws (`store.ts:137`) and the
-host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:154`), so pending reports and the trace are
+the file, or the report table or its index, corrupt, `replace` throws (`store.ts:165`) and the
+host's Start over deletes the whole file (`mobile/authority/local-story/session.ts:279`), so pending reports and the trace are
 lost (`start_over.test.ts` "a corrupt … page: Start over gives a working save"; a PM decision in
 the [R6P plan](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md); index-only damage is carried
 to R12, [ROADMAP](../ROADMAP.md#slices) SM2 row, P4A-2). Memory adopts only after the commit; an
@@ -117,7 +117,7 @@ receipts").
 
 An accepted decision's `story_point_reached` events become pending `report` rows committed
 with the decision, each with a host id, the run, lineage, release and the run's binding
-(`authority.ts:231`); a replay adds none; a malformed report throws before anything is stored.
+(`delivery.ts:96`); a replay adds none; a malformed report throws before anything is stored.
 `deliver(db, submit, limit)` (`progress.ts:22`) sends pending reports with a binding (a
 guest's wait), least tried first; the answer must be a StoryPointAcceptance of this report for
 this account; `accepted` or `rejected` with a matching payload digest is stored as itself, else
@@ -132,8 +132,8 @@ digest and RNG state; the commit outcome and committed events), written after th
 transaction in its own; a write failure is swallowed and caught up later from the receipts
 (`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
-newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:110`) and, when the
-host supplies a clock, each NEW decision's `kernel.decision_latency` (`authority.ts:209-211`).
+newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:146`) and, when the
+host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:137`).
 
 ## The session controller and the phone
 
@@ -149,3 +149,90 @@ commit `-dirty`. CI checks the exported bundles of a clean tree carry the bare c
 bundle never keeps an older one. Refusal and
 outcome words live in `mobile/app/book/words.ts`
 ([owner rule](owner-rules.md#architecture-and-engine)).
+
+## Planned combat/death persistence (M4/M5)
+
+**Planned until M5/M6 implementation.** The [planned first encounter](../spec/conformance/first-encounter.md#actual-foundation-gaps-to-resolve-in-m5) requires entity-specific NPC HP and saved dynamic corpse identity/initial custody before lethal combat. M5 must extend changed-row adoption/save/reopen atomically with receipts and reconcile uncertain commits before input; a transient World.entities mutation is insufficient. Final fields/operation syntax are not frozen or implemented by M4-A.
+
+## M1-A trusted elapsed receipts
+
+The open authority also exposes trusted `elapsed({expected_run_id, from, until})` and `runId()`, for an authority driver, never a player invocation. No timer or anchor storage is installed in A. After settling the existing fence, compare expected_run_id with the current durable save run before receipt lookup: mismatch returns `stale_view` without writes.
+
+For a matching run, build its actor/world-bound elapsed Command and deterministic domain CommandId. That UUID is the receipt invocation key in the existing save scope. `loka-elapsed-intent-v1` hashes the full canonical Command. Matching receipt/version/digest validates and replays the original response/revision before current-clock admission; altered or malformed stored receipts conflict. Malformed JSON in a stored command or response returns `conflict`; only JSON `SyntaxError` is classified this way, while genuine SQLite read failures remain storage errors. The existing receipt-integrity limitation remains in [known differences](DIFFERENCES.md). A new command passes `stepElapsed`, then the same changed-row/receipt transaction, adoption, reports and trace. Faults have no receipt; failed/unknown COMMIT keeps existing rollback/fence/reconcile behavior for both trusted and player delivery. New-game replacement keeps old callbacks stale even if the release template world context is reused. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
+
+## Durable elapsed sessions
+
+[B1 adoption](../decisions/pm-decision-m1-b1-durable-elapsed-2026-10-04.md).
+The local session requires wall/monotonic sampling for an elapsed profile. A STRICT singleton
+`elapsed` checkpoint stores run, accounted wall milliseconds, remainder in 0..999 and target
+at least confirmed head; debt is derived. Driver-managed saves use v2, legacy play-time v1. Low-level explicit-target authority
+conformance may remain v1 without OS clocks. An explicit trusted v2 advance raises its target
+atomically to at least the accepted head, preserving wall/remainder.
+A same-pin elapsed v1 upgrade initializes at its saved clock without prior credit. Missing
+pins stay refused; no save is retargeted. A managed elapsed session without clock functions refuses
+`elapsed_clock_missing`, before writing an invented anchor. Missing/malformed v2 checkpoints are corrupt.
+
+Accounting uses exact checked integer arithmetic, retaining fractions and existing target debt.
+Active monotonic samples are floored absolute milliseconds; resume credits positive wall gaps
+once and durably rebases negative gaps without rewind. Each captured horizon settles at the
+earliest pending job boundary, yielding after 16 commits. Already-due jobs/faults surface
+recovery and retain debt. Sampling never extends a reserved input’s finite horizon.
+
+Each accepted segment atomically saves checkpoint/head/changed rows/receipt before adoption.
+Fraction-only accounting, initialization and wall rebases use metadata-only transactions:
+no command, receipt, revision or trace. These run only after gameplay fences settle. Unknown
+outcomes fence input/time; closed-transaction exact prior/candidate plus run witnesses resolve
+metadata outcomes. Reconciliation reloads checkpoint and world together; no failed candidate
+is resampled. New-game replacement cancels the old run’s driver/reservation.
+
+A current input replays receipts before sampling and checks initial freshness, then privately
+retains its identified intent/digest/run. Once its horizon settles, resolution uses the same
+targets against confirmed state without checking its own prerequisite revisions as stale.
+Preexisting stale input still refuses. Departed speaker answers refuse presence while existing
+actor-owned continuation close remains valid. The session retains one attempt until terminal
+completion; catching_up is distinct from pending unknown COMMIT. The retained session intent
+is a private bounded snapshot. Different identified intent during catching_up conflicts without
+releasing it; unknown-save pending retains the existing original-attempt retry behavior
+([shared boundary](book-ui.md#shared-elapsed-statuscompletion-boundary)).
+
+Supported local elapsed replay follows the [trusted replay contract](protocol.md#trusted-local-elapsed-replay).
+
+Both gameplay and administrative reconciliation check durable run before receipt access.
+After a transaction is proved closed, malformed/missing/unexpected same-run checkpoint
+evidence, including missing elapsed-table columns, is terminal host `save_corrupt`, not permanent
+pending. The managed Game pauses
+clock/input continuation, retains the last confirmed projection as blocked, surfaces typed
+recovery status/reply, and permits only explicitly confirmed Start over after closing the
+transaction. Low-level explicit authority entry may propagate the one local typed recovery
+error. Actual SQLite read/rollback failures retain pending/unknown semantics. A valid different
+durable run invalidates the old session as stale/replaced; it never corrupts or overwrites
+that replacement or accesses its receipts through the old continuation.
+
+An elapsed session or refused opening binds explicit Start over to its observed durable header:
+retain the original format/run-id scalar witness and distinguish no row from a row, without
+inventing a valid run id. After transaction closure is proved, re-read that witness before any
+destructive recovery. An unchanged witness permits recovery of that same refused save; a newly
+present valid differing run returns `stale_view` and stays intact. A changed malformed witness
+returns `save_corrupt` without writing: reopen to obtain a fresh recovery offer. Header read or
+rollback failure remains `pending`; the old authorization never silently adopts a new witness.
+This guard applies to elapsed saves and preserves explicit v1 authority behavior.
+
+A loaded managed elapsed session binds its valid known run even while upgrading v1 before
+its first checkpoint. That run comparison permits its own v1→v2 format transition; refused
+openings instead use the raw header witness above. Explicit v1 authority without clocks keeps
+its existing behavior.
+
+Round-two recovery clarification: genuinely proven SQLite NOTADB/page corruption during opening
+is distinct from an operational header-read error. No loaded metadata or header/run witness is
+invented for that refusal. Explicit Start over first proves transaction closure. If SQLite still
+proves the file corrupt, the existing confirmed host file-removal path applies; failed closure or
+operational reads remain pending. If the header has become readable, the old corrupt-file offer
+cannot destructively recover it or silently adopt a new witness: a valid supported run is stale,
+a malformed header is corrupt, and a newer unsupported format stays refused, all without writes.
+
+Loaded managed recovery accepts only its unchanged supported format or its own v1→v2 upgrade
+under the same known run. Arbitrary same-run format drift does not grant replacement permission:
+a higher loka-save-vN returns unsupported_save_format without writes/new game; malformed drift
+returns save_corrupt. For changed refused-opening witnesses, malformed format is classified
+before valid differing run/pin; a valid differing supported run remains stale. This is a bounded
+recovery-header check, not a general save validator. Explicit v1 authority behavior stays intact.

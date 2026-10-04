@@ -1,3 +1,9 @@
+import {
+  elapsedHost,
+  checkpoint as elapsedCheckpoint,
+  receipts as elapsedReceipts,
+} from '../../../kernel/ts/test/elapsed_host.ts';
+import { writeFileSync } from 'node:fs';
 // The fault corpus (14 §R6; OFF-03..07; 03 §§14-15; ADR-072): the kernel simulator's seeded command
 // sequences (kernel/ts/test/sim.ts) played through the local authority on real SQLite (node:sqlite,
 // the phone's rollback journal, no WAL), with real faults: SQLITE_FULL from a clamped
@@ -17,20 +23,23 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { mock, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { resolved } from '../../../kernel/ts/src/actions.ts';
-import { encode } from '../../../kernel/ts/src/canonical.ts';
+import { resolved } from '../../../kernel/ts/src/commands/actions.ts';
+import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type { Command } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/decision.ts';
+import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { append } from '../../../kernel/ts/play/obs.ts';
 import { simulate } from '../../../kernel/ts/test/sim.ts';
 import { openStory, type Reply } from './authority.ts';
 
-// One seed per demo cartridge: bell, rooms, facts, items, dusk, details, road, errand (accepting
+// Inherited cartridge representatives: bell, rooms, facts, items, dusk, details, road, errand (accepting
 // its quest), gate, ferry (running Bram's job), green (delivering a reaction), the proof
-// cartridge lantern_proof, wear (wearing an item) and locks (opening or unlocking a container)
-// (sim.ts picks by seed among the cartridge known answers, so a new cartridge remaps them). None
-// emits an effect (no outbox is built yet); every sequence commits several NEW commands.
-const SEEDS = [2, 8, 35, 9, 14, 1, 46, 34, 10, 29, 15, 3, 7, 12];
+// cartridge lantern_proof, wear (wearing an item), locks (opening or unlocking a container) and
+// rest (changing position), journal (quest credit and custody), and chapters (quest acceptance).
+// sim.ts picks by seed among the cartridge known answers, so a new cartridge remaps them. None emits an effect (no
+// outbox is built yet); every sequence commits several NEW commands.
+const SEEDS = [
+  12, 366, 30636, 300, 622, 9633, 2841, 454, 172, 49, 211, 1595, 337982, 105497, 81, 130, 54,
+];
 
 type Tap = (statement: string, run: () => unknown) => unknown;
 /** A process on `path` playing seed `seed`'s release; its ids count from 1, as in every run. */
@@ -260,12 +269,12 @@ for (const seed of SEEDS)
 const pages = (sql: DatabaseSync) => Object.values(sql.prepare('PRAGMA page_count').get()!)[0];
 
 // Breaks (the corpus's own footing): the driver or the authority drifting from answers checked by
-// hand against the fixtures. Seed 1716 (cartridge_details_hash.json): wait until 1 advances the
+// hand against the fixtures. Seed 61998 (cartridge_details_hash.json): wait until 1 advances the
 // clock to 1; wait until 1 again is not later than now, so invalid_state, and keeps the revision;
-// looking at a detail changes nothing but the revision. Seed 240 (cartridge_dusk_hash.json):
+// looking at a detail changes nothing but the revision. Seed 422 (cartridge_dusk_hash.json):
 // ring_bell lasts 60.
 test('hand-checked anchors', () => {
-  const p = processOn(save(), 1716);
+  const p = processOn(save(), 61998);
   const replies = [0, 1, 2].map((k) => p.send(k) as Extract<Reply, { kind: 'saved' }>);
   const shown = replies.map(({ revision, decision: d }) => {
     const { kind, outcome, error } = d as {
@@ -284,7 +293,7 @@ test('hand-checked anchors', () => {
     { ...p.sql.prepare('SELECT revision, clock FROM head').get() },
     { revision: 2, clock: 1 },
   );
-  const d = processOn(save(), 240);
+  const d = processOn(save(), 422);
   d.send(0);
   assert.deepEqual(
     { ...d.sql.prepare('SELECT revision, clock FROM head').get() },
@@ -297,20 +306,193 @@ test('hand-checked anchors', () => {
 // changed host clock differs from the reference). The app subscribes to no AppState, so
 // backgrounding dispatches nothing; the device gate (S6b) covers the phone.
 test('views, a reopen and a changed host clock leave the play_time clock and world as they were', () => {
-  const [, ref] = reference(13);
+  const [, ref] = reference(61998);
   const path = save();
-  const p = processOn(path, 13);
+  const p = processOn(path, 61998);
   p.send(0);
   for (let i = 0; i < 3; i++) p.story.world();
   at(p, ref[1]!);
   p.sql.close();
   mock.timers.enable({ apis: ['Date'], now: Date.UTC(2040, 0, 1) });
   try {
-    const q = processOn(path, 13);
+    const q = processOn(path, 61998);
     at(q, ref[1]!);
     assert.equal(q.sql.prepare('SELECT clock FROM head').get()!.clock, 1);
     play(q, path, ref, 1);
   } finally {
     mock.timers.reset();
+  }
+});
+
+// Breaks: a failed or committed-but-unknown metadata account is guessed, rebased twice, or unfenced before confirmation.
+test('backward-anchor metadata accounts reconcile exact prior or next real SQLite evidence', () => {
+  for (const kind of ['failed', 'lost'] as const) {
+    const a = elapsedHost();
+    a.sql.exec(
+      'PRAGMA foreign_keys = ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+    );
+    a.fault.kind = kind;
+    a.fault.armed = true;
+    a.clock.wall = 9000;
+    assert.equal(a.game.pulse('resume').kind, 'pending');
+    assert.equal(a.game.view().view.time, 64800);
+    assert.equal(elapsedReceipts(a.sql), 0);
+    assert.deepEqual(elapsedCheckpoint(a.sql), {
+      wall_ms: kind === 'lost' ? 9000 : 10000,
+      remainder: 0,
+      target: 64800,
+    });
+    a.fault.reads = false;
+    // The retained account uses wall9000, despite later sampling evidence changing.
+    a.clock.wall = 9020;
+    assert.equal(a.game.pulse('resume').kind, 'ready');
+    assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 9000, remainder: 0, target: 64800 });
+    assert.equal(a.game.pulse('resume').kind, 'ready');
+    assert.equal(a.game.view().view.time, 64801);
+    a.sql.close();
+  }
+});
+
+// Breaks: an elapsed checkpoint escapes a rolled-back gameplay commit or uncertain memory serves the next head prematurely.
+test('failed and lost-ack positive elapsed commits reconcile head receipt and checkpoint together', () => {
+  for (const kind of ['failed', 'lost'] as const) {
+    const a = elapsedHost();
+    a.sql.exec(
+      'PRAGMA foreign_keys = ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+    );
+    a.fault.kind = kind;
+    a.fault.armed = true;
+    a.clock.wall = 10020;
+    a.clock.mono = 20;
+    assert.equal(a.game.pulse().kind, 'pending');
+    assert.equal(a.game.view().view.time, 64800);
+    assert.equal(elapsedReceipts(a.sql), kind === 'lost' ? 1 : 0);
+    assert.deepEqual(elapsedCheckpoint(a.sql), {
+      wall_ms: kind === 'lost' ? 10020 : 10000,
+      remainder: 0,
+      target: kind === 'lost' ? 64801 : 64800,
+    });
+    a.fault.reads = false;
+    a.clock.wall = 10040;
+    a.clock.mono = 40;
+    assert.equal(a.game.pulse('drain').kind, 'ready');
+    assert.equal(a.game.view().view.time, 64801);
+    assert.equal(elapsedReceipts(a.sql), 1);
+    assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 10020, remainder: 0, target: 64801 });
+    a.sql.close();
+  }
+});
+
+// Breaks: SQLITE_FULL adopts clock/checkpoint despite no receipt, or a retry resamples and credits twice.
+test('real SQLITE_FULL rolls back elapsed evidence and retries its unchanged candidate', () => {
+  const a = elapsedHost();
+  const n = a.sql.prepare('PRAGMA page_count').get()!.page_count;
+  a.sql.exec(`PRAGMA max_page_count = ${n}`);
+  a.clock.wall = 10020;
+  a.clock.mono = 20;
+  assert.equal(a.game.pulse().kind, 'error');
+  assert.equal(a.game.view().view.time, 64800);
+  assert.equal(elapsedReceipts(a.sql), 0);
+  assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 10000, remainder: 0, target: 64800 });
+  a.sql.exec('PRAGMA max_page_count = 1073741823');
+  a.clock.wall = 10100;
+  a.clock.mono = 100;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(a.game.view().view.time, 64801);
+  assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 10020, remainder: 0, target: 64801 });
+  a.sql.close();
+});
+
+// Breaks: timer retry samples before receipt replay, duplicates completion, or keeps a completed reservation.
+test('a timer completes an unknown player receipt before sampling and emits it once', () => {
+  const a = elapsedHost(),
+    completions: object[] = [];
+  a.game.subscribe((u) => {
+    if (u.kind === 'completion') completions.push(u);
+  });
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  const look = { action_key: 'look' as never, target_ids: [], input: {} };
+  assert.equal(a.game.invoke(look).kind, 'pending');
+  a.fault.reads = false;
+  a.host.time.wall = () => {
+    throw new Error('must not sample before replay');
+  };
+  a.host.time.monotonic = a.host.time.wall;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(completions.length, 1);
+  assert.equal(elapsedReceipts(a.sql), 1);
+  a.game.pulse('drain');
+  assert.equal(completions.length, 1);
+  a.host.time.wall = () => a.clock.wall;
+  a.host.time.monotonic = () => a.clock.mono;
+  assert.equal(a.game.invoke(look).kind, 'saved');
+  assert.equal(elapsedReceipts(a.sql), 2);
+  a.sql.close();
+});
+
+const ELAPSED_KILL = `
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
+const { openGame } = await import(process.argv[1]);
+const bundle = JSON.parse(readFileSync(process.argv[2], 'utf8'));
+const sql = new DatabaseSync(process.argv[3]);
+let counting = false, operation = 0;
+const mode = process.argv[4];
+const db = {
+ execSync(q) {
+  const n = counting ? ++operation : 0;
+  if (n === 3 && mode === 'before') { if (!sql.isTransaction) throw Error('expected open'); process.kill(process.pid, 'SIGKILL'); }
+  sql.exec(q);
+  if (n === 3 && mode === 'after') { if (sql.isTransaction) throw Error('expected closed'); process.kill(process.pid, 'SIGKILL'); }
+ },
+ runSync: (q,...p) => sql.prepare(q).run(...p),
+ getFirstSync: (q,...p) => sql.prepare(q).get(...p) ?? null,
+ getAllSync: (q,...p) => sql.prepare(q).all(...p),
+ isInTransactionSync: () => sql.isTransaction,
+};
+let wall=10000, mono=0;
+const game=openGame(db,bundle,{kernel_version:'loka-kernel@'+'0'.repeat(40),newId:()=>{throw Error('unexpected new run');},time:{wall:()=>wall,monotonic:()=>mono}});
+wall=2602000;mono=2592000;counting=true;game.pulse();throw Error('kill not reached');
+`;
+
+// Breaks: death at the actual COMMIT boundary loses durable debt or duplicates the first schedule receipt on reopen.
+test('process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once', () => {
+  for (const mode of ['before', 'after']) {
+    const path = save(),
+      a = elapsedHost(path),
+      bundle = `${path}.bundle`;
+    writeFileSync(bundle, JSON.stringify(a.bundle));
+    a.sql.close();
+    const child = spawnSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '--eval',
+        ELAPSED_KILL,
+        new URL('./session.ts', import.meta.url).href,
+        bundle,
+        path,
+        mode,
+      ],
+      { encoding: 'utf8', timeout: 10000 },
+    );
+    assert.equal(child.signal, 'SIGKILL', child.stderr);
+    const sql = new DatabaseSync(path);
+    assert.equal(
+      sql.prepare('SELECT clock FROM head').get()!.clock,
+      mode === 'before' ? 64800 : 68400,
+    );
+    assert.equal(elapsedReceipts(sql), mode === 'before' ? 0 : 1);
+    assert.deepEqual(elapsedCheckpoint(sql), {
+      wall_ms: mode === 'before' ? 10000 : 2602000,
+      remainder: 0,
+      target: mode === 'before' ? 64800 : 194400,
+    });
+    sql.close();
+    const b = elapsedHost(path, { wall: 2602000, mono: 2592000 });
+    assert.equal(b.game.view().view.time, 194400);
+    assert.equal(elapsedReceipts(b.sql), 4);
+    b.sql.close();
   }
 });

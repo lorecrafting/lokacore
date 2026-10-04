@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "trunk"
+  ],
+  "short": "item.trunk.short",
+  "room_line": "item.trunk.room",
+  "description": "item.trunk.description",
+  "location": {
+    "in": "room",
+    "room": "inn_attic"
+  },
+  "barrier": "trunk_lid"
+}

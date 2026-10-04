@@ -1,0 +1,4 @@
+** (ArgumentError) protocol/ outside the schema subset:
+manifest.schema.json#/$defs/TimePolicy/type: invalid
+    lib/loka/core/contracts/schema.ex:57: Loka.Core.Contracts.Schema.flatten!/1
+    lib/loka/core/contracts.ex:36: (module)

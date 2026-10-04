@@ -1,10 +1,10 @@
 // Invariant peer for test/loka/core/registries_test.exs: prints, as a JSON array, the ids of
-// argv[2] (a JSON array) that a TypeScript check knows, invariants.ts check (observations) or
-// world.ts holds (a world). Each throws `unknown invariant <id>` for any other id; a known
+// argv[2] (a JSON array) that a TypeScript check knows, runtime/invariants.ts check (observations) or
+// runtime/world.ts holds (a world). Each throws `unknown invariant <id>` for any other id; a known
 // check given an empty observation or world returns or throws something else.
-import { check } from '../src/invariants.ts';
+import { check } from '../src/runtime/invariants.ts';
 import type { World } from '../src/index.ts';
-import { holds } from '../src/world.ts';
+import { holds } from '../src/runtime/world.ts';
 
 const knows = (f: () => unknown) => {
   try {

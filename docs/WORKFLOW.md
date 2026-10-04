@@ -17,7 +17,7 @@ reviewed once, with a narrow fix check, by a reviewer on the highest Opus.
 **Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
 our own independent review, never instead of it: the PM may add it to any slice beyond
 docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only; `-m` Astra on the gate audit and on changes to
-`kernel/ts/src/proposal.ts`, Sol for every other review and every fix re-check;
+`kernel/ts/src/runtime/proposal.ts`, Sol for every other review and every fix re-check;
 [owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the

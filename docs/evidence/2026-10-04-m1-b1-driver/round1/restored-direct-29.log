@@ -1,0 +1,37 @@
+✔ seed 12: every fault leaves the prior or next revision and the run ends unchanged (1024.304416ms)
+✔ seed 366: every fault leaves the prior or next revision and the run ends unchanged (680.032917ms)
+✔ seed 30636: every fault leaves the prior or next revision and the run ends unchanged (768.300375ms)
+✔ seed 300: every fault leaves the prior or next revision and the run ends unchanged (904.059042ms)
+✔ seed 622: every fault leaves the prior or next revision and the run ends unchanged (646.664333ms)
+✔ seed 9633: every fault leaves the prior or next revision and the run ends unchanged (852.932667ms)
+✔ seed 2841: every fault leaves the prior or next revision and the run ends unchanged (644.526417ms)
+✔ seed 454: every fault leaves the prior or next revision and the run ends unchanged (843.149125ms)
+✔ seed 172: every fault leaves the prior or next revision and the run ends unchanged (692.022ms)
+✔ seed 49: every fault leaves the prior or next revision and the run ends unchanged (906.107542ms)
+✔ seed 211: every fault leaves the prior or next revision and the run ends unchanged (927.933083ms)
+✔ seed 1595: every fault leaves the prior or next revision and the run ends unchanged (878.301125ms)
+✔ seed 337982: every fault leaves the prior or next revision and the run ends unchanged (895.180667ms)
+✔ seed 105497: every fault leaves the prior or next revision and the run ends unchanged (733.740334ms)
+✔ seed 81: every fault leaves the prior or next revision and the run ends unchanged (994.256ms)
+✔ seed 130: every fault leaves the prior or next revision and the run ends unchanged (835.679292ms)
+✔ seed 54: every fault leaves the prior or next revision and the run ends unchanged (849.687084ms)
+✔ hand-checked anchors (19.185875ms)
+✔ views, a reopen and a changed host clock leave the play_time clock and world as they were (68.327333ms)
+✔ backward-anchor metadata accounts reconcile exact prior or next real SQLite evidence (7.97225ms)
+✔ failed and lost-ack positive elapsed commits reconcile head receipt and checkpoint together (5.99625ms)
+✔ real SQLITE_FULL rolls back elapsed evidence and retries its unchanged candidate (2.9595ms)
+✔ a timer completes an unknown player receipt before sampling and emits it once (3.456833ms)
+✔ process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once (254.701709ms)
+✔ a pending start over whose retry fails shows that error, not "not confirmed" (12.949291ms)
+✔ catch-up conflicts preserve the original attempt and matching retries keep its identity (26.47575ms)
+✔ invalid and cyclic shared input refuses before snapshot or elapsed sampling (5.715208ms)
+✔ missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (14.345542ms)
+✔ corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (26.776417ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14640.769709

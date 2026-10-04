@@ -1,7 +1,7 @@
 defmodule Loka.Content.Barriers do
   @moduledoc """
   Barriers in a v2 source (room.schema.json BarrierDefinition, Connection.barrier; 21 §5
-  Barrier; 05 §17, §25), twin of `kernel/ts/src/cartridge_barriers.ts`: each barrier's owning
+  Barrier; 05 §17, §25), twin of `kernel/ts/src/content/cartridge_barriers.ts`: each barrier's owning
   capability is required and its key_item names an item; each exit's barrier names a barrier,
   and an exit with a barrier and its reciprocal face (the destination's exit in the opposite
   direction, when that leads back) name the same one (BARRIER_MISMATCH); an item's barrier (a

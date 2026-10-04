@@ -2,7 +2,9 @@
 
 Research retrieved **2026-10-03**. This describes LegendMUD and the limits of its public evidence.
 Loka's adoption and reconciliation rules live in the
-[owner decision](../decisions/owner-decision-legendmud-baseline-2026-10-03.md).
+[owner decision](../decisions/owner-decision-legendmud-baseline-2026-10-03.md). The
+[current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md) governs later
+Loka selections; this pointer does not reverify the reference’s original source set.
 
 ## How to read the evidence
 

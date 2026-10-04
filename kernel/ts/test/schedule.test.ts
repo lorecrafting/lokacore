@@ -14,10 +14,10 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { decode, encode } from '../src/canonical.ts';
-import { accepted, allocator } from '../src/decision.ts';
-import { admit, adopt, newWorld, step } from '../src/world.ts';
-import { validate } from '../src/validate.ts';
+import { decode, encode } from '../src/foundation/canonical.ts';
+import { accepted, allocator } from '../src/runtime/decision.ts';
+import { admit, adopt, newWorld, step } from '../src/runtime/world.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -368,7 +368,7 @@ test('the loader checks schedule rooms and the schedule and calendar owners', ()
 });
 
 // Narration participants (Early R7/R8 N; 06 §43 "pinned text keys and bindings"): ferry's
-// coil_rope names the actor and Bram. BODY is ordinal 1 under the nil CommandId (fresh.ts).
+// coil_rope names the actor and Bram. BODY is ordinal 1 under the nil CommandId (runtime/fresh.ts).
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157';
 const COIL = `.cartridge.recipes["${F}:recipe/coil_rope"].outcomes.success.narration.participants`;
 const coil = (c: any) => c.recipes[`${F}:recipe/coil_rope`].outcomes.success.narration;

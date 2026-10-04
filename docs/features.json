@@ -26,7 +26,7 @@
       "TargetUnresolved"
     ],
     "modules": [
-      "kernel/ts/src/target.ts"
+      "kernel/ts/src/commands/target.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_details_hash.json",
@@ -44,8 +44,8 @@
       "Alias"
     ],
     "modules": [
-      "kernel/ts/src/world.ts",
-      "kernel/ts/src/target.ts"
+      "kernel/ts/src/runtime/world.ts",
+      "kernel/ts/src/commands/target.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_details_hash.json"
@@ -62,8 +62,8 @@
       "TargetResolution"
     ],
     "modules": [
-      "kernel/ts/src/target.ts",
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/commands/target.ts",
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_hash.json"
@@ -80,7 +80,7 @@
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_facts_hash.json"
@@ -99,8 +99,8 @@
       "ScopedFact"
     ],
     "modules": [
-      "kernel/ts/src/fact.ts",
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/mechanics/fact.ts",
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_facts_hash.json"
@@ -121,9 +121,9 @@
       "GameView"
     ],
     "modules": [
-      "kernel/ts/src/resource.ts",
-      "kernel/ts/src/compose.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/mechanics/resource.ts",
+      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/composition.json",
@@ -147,10 +147,10 @@
       "ContentView"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/target.ts",
-      "kernel/ts/src/lookups.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/commands/target.ts",
+      "kernel/ts/src/mechanics/lookups.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_items_hash.json",
@@ -174,8 +174,8 @@
       "RecipeCheck"
     ],
     "modules": [
-      "kernel/ts/src/actions.ts",
-      "kernel/ts/src/fact.ts"
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/mechanics/fact.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_bell_hash.json",
@@ -196,8 +196,8 @@
       "ActionRecipe"
     ],
     "modules": [
-      "kernel/ts/src/rules/action_recipe.ts",
-      "kernel/ts/src/rng.ts"
+      "kernel/ts/src/mechanics/action_recipe/rule.ts",
+      "kernel/ts/src/foundation/rng.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_dusk_hash.json"
@@ -218,9 +218,9 @@
       "MutationTarget"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/world.ts",
-      "kernel/ts/src/id_source.ts"
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/runtime/world.ts",
+      "kernel/ts/src/foundation/id_source.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_dusk_hash.json",
@@ -250,13 +250,13 @@
       "ContentView"
     ],
     "modules": [
-      "kernel/ts/src/rules/movement.ts",
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/compose.ts",
-      "kernel/ts/src/target.ts",
-      "kernel/ts/src/lookups.ts",
-      "kernel/ts/src/action_lists.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/mechanics/movement/rule.ts",
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/commands/target.ts",
+      "kernel/ts/src/mechanics/lookups.ts",
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/composition.json",
@@ -275,6 +275,7 @@
     "contracts": [
       "QuestDefinition",
       "QuestObjective",
+      "QuestJournal",
       "QuestState",
       "QuestView",
       "CommandPayload",
@@ -284,21 +285,22 @@
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/quest.ts",
-      "kernel/ts/src/actions.ts",
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/view.ts",
-      "kernel/ts/src/cartridge_quests.ts"
+      "kernel/ts/src/mechanics/quest/lifecycle.ts",
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/view/view.ts",
+      "kernel/ts/src/content/cartridge_quests.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_errand_hash.json",
+      "protocol/fixtures/cartridge_journal_hash.json",
       "protocol/fixtures/composition.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal"
+    "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal; C1 c1-journal (#138) selected lifecycle and outcome journal text"
   },
   "behavior": {
     "spec": "06 §13 Behavior/schedule profiles; 21 §10",
@@ -306,8 +308,8 @@
       "NpcDefinition"
     ],
     "modules": [
-      "kernel/ts/src/behavior.ts",
-      "kernel/ts/src/rules/schedule.ts"
+      "kernel/ts/src/mechanics/schedule/behavior.ts",
+      "kernel/ts/src/mechanics/schedule/rule.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -325,7 +327,7 @@
       "LogicalTime"
     ],
     "modules": [
-      "kernel/ts/src/world.ts"
+      "kernel/ts/src/runtime/world.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -344,11 +346,11 @@
       "EventPayload"
     ],
     "modules": [
-      "kernel/ts/src/reaction.ts",
-      "kernel/ts/src/proposal.ts",
-      "kernel/ts/src/world.ts",
-      "kernel/ts/src/compose.ts",
-      "kernel/ts/src/cartridge_refs.ts"
+      "kernel/ts/src/mechanics/reaction.ts",
+      "kernel/ts/src/runtime/proposal.ts",
+      "kernel/ts/src/runtime/world.ts",
+      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/content/cartridge_refs.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_green_hash.json"
@@ -368,8 +370,8 @@
       "DecisionResult"
     ],
     "modules": [
-      "kernel/ts/src/rules/action_recipe.ts",
-      "kernel/ts/src/cartridge_refs.ts"
+      "kernel/ts/src/mechanics/action_recipe/rule.ts",
+      "kernel/ts/src/content/cartridge_refs.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -380,7 +382,7 @@
     "implemented_in": "Early R7/R8 N a recipe narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   },
   "dialogue": {
-    "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3",
+    "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3; mechanics.md Chapters (C1 slice 9)",
     "contracts": [
       "DialogueDefinition",
       "DialogueRole",
@@ -390,24 +392,27 @@
       "CommandPayload",
       "EventPayload",
       "DeltaOp",
-      "MutationTarget"
+      "MutationTarget",
+      "Chapter",
+      "ChapterView"
     ],
     "modules": [
-      "kernel/ts/src/dialogue.ts",
-      "kernel/ts/src/actions.ts",
-      "kernel/ts/src/proposal.ts",
-      "kernel/ts/src/view.ts",
-      "kernel/ts/src/cartridge_dialogues.ts"
+      "kernel/ts/src/mechanics/dialogue/shared.ts",
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/runtime/proposal.ts",
+      "kernel/ts/src/view/view.ts",
+      "kernel/ts/src/content/cartridge_dialogues.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json",
-      "protocol/fixtures/composition.json"
+      "protocol/fixtures/composition.json",
+      "protocol/fixtures/cartridge_chapters_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
       "rejection_consumes_nothing"
     ],
-    "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report"
+    "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report; C1 c1-chapters derived chapter markers"
   },
   "attributes": {
     "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
@@ -416,7 +421,7 @@
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_loader.json"
@@ -436,9 +441,9 @@
       "GameView"
     ],
     "modules": [
-      "kernel/ts/src/fresh.ts",
-      "kernel/ts/src/action_lists.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/runtime/fresh.ts",
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_wear_hash.json",
@@ -450,5 +455,56 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "C1 c1-equipment (#134) twelve slots as holders in the body; wear and remove"
+  },
+  "position": {
+    "spec": "21 §28 position@1 (amendment 2026-10-03); 00 §4.3 Positions (amendment 2026-10-03)",
+    "contracts": [
+      "CommandPayload",
+      "GameView",
+      "FactSpec",
+      "DiagnosticCode"
+    ],
+    "modules": [
+      "kernel/ts/src/content/cartridge_position.ts",
+      "kernel/ts/src/mechanics/position/shared.ts",
+      "lib/loka/content/position.ex",
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/view/view.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_rest_hash.json"
+    ],
+    "invariants": [
+      "facts_typed",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "C1 c1-position (#137) stand, sit, rest and sleep; move needs standing"
+  },
+  "scene": {
+    "spec": "06 §35/§37 modal text subset (amendment 2026-10-03); 21 §3.6; 00a §9; mechanics.md scene@1",
+    "contracts": [
+      "SceneDefinition",
+      "SceneStep",
+      "SceneView",
+      "CommandPayload",
+      "EventPayload",
+      "FactSpec"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/scene/shared.ts",
+      "kernel/ts/src/mechanics/reaction.ts",
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/view/view.ts",
+      "kernel/ts/src/content/cartridge_scenes.ts",
+      "lib/loka/content/scenes.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_scene_hash.json"
+    ],
+    "invariants": [
+      "facts_typed",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "C1 c1-scenes-modal: modal narrate/await_ack/end; story-point start once, persisted line, continue-only admission and scene_ended"
   }
 }

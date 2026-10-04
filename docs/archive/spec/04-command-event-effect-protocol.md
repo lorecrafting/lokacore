@@ -567,6 +567,8 @@ Internal component state is not dumped wholesale to mobile.
 
 ## 15. Portable game-view projection
 
+*Amendment 2026-10-03 (chapter-one slice c1-journal; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 8):* quest journal state includes optional selected journal text, computed by [quest@1](../../system/mechanics.md#quest1-rulesquestts-kerneltssrcquestts), exposed as `QuestView.journal` in [GameView](../../system/protocol.md#gameview).
+
 Game-semantic view construction that must match offline and online SHOULD be defined once over portable committed state and cartridge definitions.
 
 Realm-only capabilities MAY contribute additional Realm-only GameView fields/actions through registered pure projection evaluators on the server. Those evaluators use the same typed GameView schema, deterministic ordering, policy checks, and fail-closed capability registry; they do not cause React Native to reimplement Realm rules. A portable cartridge hosted online must still project the same portable semantics for equivalent portable state.
@@ -627,6 +629,8 @@ Host-only views—account catalog, entitlement, social realm presence, admin—r
 This avoids a second semantic fork where the server and offline client disagree about what the player can see/do.
 
 *Amendment 2026-10-03 (chapter-one slice c1-locks; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 6):* container semantic contents: an item with a barrier shows its state and the container verbs the actor may use on it now; an item without a lid or with an open one shows what is inside it in reach, at any depth, flattened with each item's direct container ([protocol](../../system/protocol.md#gameview)).
+
+*Amendment 2026-10-03 (chapter-one slice c1-position; [plan](../../decisions/owner-decision-chapter-one-plan-2026-10-02.md) §3 slice 7):* the GameView carries the actor's `position` when the cartridge locks `position@1`, lists the position verbs except the current one with the place's actions, and shows an exit `invalid_state` while the actor is not standing ([protocol](../../system/protocol.md#gameview)).
 
 ## 16. Snapshot, projection sequence, and freshness model
 

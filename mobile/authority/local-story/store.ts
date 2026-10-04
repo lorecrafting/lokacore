@@ -1,14 +1,23 @@
+import { transaction } from './transaction.ts';
+export { transaction, reconcile, rollback } from './transaction.ts';
+import {
+  loadElapsed,
+  natural,
+  writeElapsed,
+  changedRun,
+  type Checkpoint,
+} from './elapsed-store.ts';
 // The local Story save in SQLite (07 §9; 03 §§14-15; ADR-072; 10 §§31-32): the current state as
 // rows, the head (revision, clock, RNG), the save's identity and pin, and the command receipts.
 // The row schema is the implementation's (ADR-072: "the per-row schema is an R2+ design task").
 // Every write is one transaction opened and committed here, never by a driver helper (mobile
 // lessons).
-import { encode, type Json } from '../../../kernel/ts/src/canonical.ts';
-import { target } from '../../../kernel/ts/src/compose.ts';
+import { encode, type Json } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { target } from '../../../kernel/ts/src/foundation/compose.ts';
 import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/decision.ts';
-import { validate } from '../../../kernel/ts/src/validate.ts';
-import { row } from '../../../kernel/ts/src/world.ts';
+import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
+import { row } from '../../../kernel/ts/src/runtime/world.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
 export type Db = {
@@ -102,9 +111,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   db.execSync(SCHEMA); // a whole save: adds only a derived table it lacks (trace, report, observation)
   // ponytail: a corrupt receipt page fails here, at open, only on the path to its first row.
   db.getFirstSync('SELECT * FROM receipt LIMIT 1'); // the table, not its index
-  type Head = { revision?: number; clock?: number; rng?: string };
-  const h = db.getFirstSync<Head>('SELECT * FROM head')!; // any columns: a damaged one is corrupt
   const m = db.getFirstSync<Record<string, Json>>('SELECT * FROM save')!;
+  const h = headOf(db, m.format);
   // Only sections with rows, so a world that never wrote one keeps its state hash (decision.ts).
   const state: Record<string, Record<string, unknown>> = { containers: {} };
   type Row = { section: string; key: string; value: string };
@@ -116,11 +124,31 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
-    return { world, revision: h.revision, meta: { ...m, parent, seed, pin } as Meta };
+    return saved(world, h.revision, { ...m, parent, seed, pin } as Meta, db);
   } catch (e) {
     if (e instanceof SyntaxError) return undefined;
     throw e;
   }
+}
+
+function headOf(db: Db, format: Json) {
+  type Head = { revision?: number; clock?: number; rng?: string };
+  const query =
+    format === 'loka-save-v2'
+      ? `SELECT rng,
+      CASE WHEN typeof(revision) = 'integer' THEN CAST(revision AS REAL) END AS revision,
+      CASE WHEN typeof(clock) = 'integer' THEN CAST(clock AS REAL) END AS clock FROM head`
+      : 'SELECT * FROM head';
+  return db.getFirstSync<Head>(query)!; // v2 unsafe SQLite integers must reach host validation
+}
+
+function saved(world: World, revision: number, meta: Meta, db: Db) {
+  if (
+    meta.format === 'loka-save-v2' &&
+    (!natural(revision) || !world.cartridge.manifest.time_policy)
+  )
+    throw new SyntaxError('malformed elapsed head');
+  return { world, revision, meta, elapsed: loadElapsed(db, meta, world.state.clock) };
 }
 
 // ponytail: SQLite's own messages for SQLITE_NOTADB and SQLITE_CORRUPT, as node:sqlite reports
@@ -157,8 +185,15 @@ export function replace(db: Db, fresh: World, meta: Meta): boolean {
       ...json,
       binding,
     );
+    db.execSync('DROP TABLE IF EXISTS elapsed');
     db.runSync('DELETE FROM receipt');
   });
+}
+
+export function persistElapsed(db: Db, row: Checkpoint) {
+  const changed = changedRun(identityOf(db), row.run_id);
+  if (changed) throw changed;
+  writeElapsed(db, row);
 }
 
 /**
@@ -213,8 +248,10 @@ export function commit(
   decision: DecisionResult,
   r: Receipt,
   reports: Captured[],
+  elapsed?: Checkpoint,
 ): boolean {
   return transaction(db, () => {
+    if (elapsed) persistElapsed(db, elapsed);
     for (const c of reports)
       db.runSync(
         "INSERT INTO report (report_id, lineage_id, binding, report, disposition) VALUES (?, ?, ?, ?, 'pending')",
@@ -243,54 +280,4 @@ export function commit(
       encode(r.response),
     );
   });
-}
-
-/**
- * `read()` (a receipt, the run id) once the outcome of a failed COMMIT is settled (03 §15), or a
- * throw while it is not. After ROLLBACK leaves the one connection outside a transaction, the
- * attempt can no longer commit, so what `read` misses is a confirmed non-commit; inside one, a
- * read would see the attempt's own uncommitted writes.
- */
-export function reconcile<T>(db: Db, read: () => T): T {
-  if (!rollback(db)) throw new Error('transaction still open; outcome unknown');
-  return read();
-}
-
-/**
- * Runs `writes` and COMMIT in one transaction: true once committed; throws, rolled back, when a
- * write fails; false, after trying ROLLBACK, when COMMIT itself fails (not proof of rollback,
- * 03 §15) or when a failed write's ROLLBACK leaves the transaction open (its uncommitted rows
- * would read as saved). Either false is settled by `reconcile` before the next decision.
- */
-export function transaction(db: Db, writes: () => void): boolean {
-  // A failed trace or delivery write, or an unknown gameplay COMMIT before a delivery write, can
-  // leave one open here: rolled back, as reconcile would (a delivery's acknowledgement is resent).
-  if (db.isInTransactionSync()) db.execSync('ROLLBACK');
-  db.execSync('BEGIN IMMEDIATE');
-  try {
-    writes();
-  } catch (e) {
-    // SQLite may already have rolled back (SQLITE_FULL); the original error is the one to raise.
-    if (rollback(db)) throw e;
-    return false;
-  }
-  try {
-    db.execSync('COMMIT');
-    return true;
-  } catch {
-    rollback(db); // a COMMIT that failed with the transaction open leaves it open
-    return false;
-  }
-}
-
-/** Tries ROLLBACK; true only when the connection answers that no transaction is open after it. */
-export function rollback(db: Db): boolean {
-  try {
-    db.execSync('ROLLBACK');
-  } catch {}
-  try {
-    return !db.isInTransactionSync();
-  } catch {
-    return false; // a broken connection: unknown
-  }
 }

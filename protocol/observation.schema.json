@@ -169,7 +169,7 @@
       ]
     },
     "ReplayIds": {
-      "description": "The correlation ids of a record that must reproduce by deterministic replay (09 §2): the cartridge hash, the code revision, the run's initial RNG state, the run (a save lineage; for the simulator, one sequence), the command, and the authority revision the command was decided against. Local ids only: no host, device, account or time.",
+      "description": "The correlation ids of a record that must reproduce by deterministic replay (09 §2): the cartridge hash, the code revision, the run's initial RNG state, the run (the durable local save run; for CLI/simulator producers, their independent execution or sequence run), the command, and the authority revision the command was decided against. Local ids only: no host, device, account or time.",
       "type": "object",
       "properties": {
         "content_hash": {

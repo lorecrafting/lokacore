@@ -1,5 +1,9 @@
 # Owner decision: LegendMUD mechanical baseline — 2026-10-03
 
+**Current-status pointer, 2026-10-04:** the original wording and provenance remain preserved.
+Later adopted mechanics and scope follow the [current PM reconciliation](pm-decision-legend-mechanics-reconciliation-2026-10-04.md);
+its selections do not alter the owner quotations below.
+
 ## Owner words
 
 Recorded by Codex from this session, verbatim:

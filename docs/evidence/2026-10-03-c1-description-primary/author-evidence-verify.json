@@ -1,0 +1,14 @@
+{
+  "head": "1f4e27ad0b6c33fda92250d85ae02490a26500b9",
+  "sha256_pass": [
+    "focused.log",
+    "frozen.json",
+    "generated-check.log",
+    "mutant-ContentView-textkey.log",
+    "mutant-EntityView-textkey.log",
+    "mutant-inferred-key.log",
+    "mutant-omission.log",
+    "mutant-wrong-field.log",
+    "restored.log"
+  ]
+}

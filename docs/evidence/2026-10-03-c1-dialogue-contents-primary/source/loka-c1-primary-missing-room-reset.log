@@ -1,0 +1,48 @@
+(node:34860) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of <private-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <private-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ recovery removes the current heading but retains an unclassified consequence (1.199583ms)
+✖ confirmed room change clears old history before adding new authored consequences (1.055208ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.156042ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.24325ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.131875ms)
+✔ the log stops growing in one room, its last line the latest answer (0.878666ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.093ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 83.117583
+
+✖ failing tests:
+
+test at mobile/app/book/presenter.test.ts:46:1
+✖ confirmed room change clears old history before adding new authored consequences (1.055208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   "You can't do that: unsupported capability.",
+  +   'The page had changed; here it is again.',
+      'The gate closes behind you.'
+    ]
+  
+      at TestContext.<anonymous> (<private-path>)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ "You can't do that: unsupported capability.", 'The page had changed; here it is again.', 'The gate closes behind you.' ],
+    expected: [ 'The gate closes behind you.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

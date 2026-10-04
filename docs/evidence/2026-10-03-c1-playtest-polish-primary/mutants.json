@@ -1,0 +1,44 @@
+[
+  [
+    "back-world",
+    1,
+    [
+      "\u2716 room is focused while Map retains directions and every detail returns to the world (26.927209ms)",
+      "\u2716 failing tests:",
+      "\u2716 room is focused while Map retains directions and every detail returns to the world (26.927209ms)"
+    ]
+  ],
+  [
+    "position-detail",
+    1,
+    [
+      "\u2716 only the room position target opens offered controls and a seated player can stand (7.128916ms)",
+      "\u2716 failing tests:",
+      "\u2716 only the room position target opens offered controls and a seated player can stand (7.128916ms)"
+    ]
+  ],
+  [
+    "retry-context",
+    1,
+    [
+      "\u2716 NPC details own choices and results while Back preserves the pending conversation (17.851ms)",
+      "\u2716 an NPC choice retried from the world keeps its result in the original detail (9.29775ms)",
+      "\u2716 failing tests:",
+      "\u2716 NPC details own choices and results while Back preserves the pending conversation (17.851ms)"
+    ]
+  ],
+  [
+    "old UI-only loader",
+    1,
+    [
+      "Error: Cannot find module 'typescript'",
+      "\u2716 book/polish.test.ts (112.932125ms)",
+      "\u2716 failing tests:",
+      "\u2716 book/polish.test.ts (112.932125ms)"
+    ]
+  ],
+  [
+    "restored/new loader",
+    0
+  ]
+]

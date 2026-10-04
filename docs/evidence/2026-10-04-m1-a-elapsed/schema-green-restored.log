@@ -1,0 +1,18 @@
+✔ every contract has examples and every example validates (8.002792ms)
+✔ invalid fixtures fail with exactly the listed errors (12.871708ms)
+✔ the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable (0.707875ms)
+✔ the capability lock encodes and hashes to the independent known answer (0.772417ms)
+✔ a declared __proto__ property survives generation (0.069834ms)
+✔ values outside the canonical profile are rejected at decode, before validation (0.387ms)
+✔ a recursive Policy at the depth cap (0.819042ms)
+✔ narration at 64 and 65 lines (0.54025ms)
+✔ ambiguous candidates at 1024 and 1025 (2.20025ms)
+✔ every composition-profile limit is a valid BudgetExceeded (0.255416ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 111.215625

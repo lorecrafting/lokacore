@@ -9,13 +9,13 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DefinitionRef, EntityId, GameView } from '../src/contracts.gen.ts';
-import { encode } from '../src/canonical.ts';
+import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { resolved } from '../src/actions.ts';
-import { identify, resolve } from '../src/invocation.ts';
-import { check } from '../src/invariants.ts';
-import { holds as policyHolds } from '../src/policy.ts';
-import { gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
+import { resolved } from '../src/commands/actions.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { holds as policyHolds } from '../src/mechanics/policy.ts';
+import { gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -191,9 +191,17 @@ test('wear and remove by invocation, with their refusals', () => {
 });
 
 // Breaks: the view listing a worn item in the inventory, wear on a taken slot or an unslotted item,
-// remove on a held item, drop or give on a worn one, or the slots out of slot-key order.
+// remove on a held item, drop or give on a worn one, slots out of slot-key order, or descriptions
+// omitted/derived from short names rather than carried from explicit room/held/worn definitions.
 test('the GameView lists the slots in order and wear and remove only where step accepts them', () => {
-  let w = wear();
+  let w = world('cartridge_wear_hash.json', (c) => {
+    c.items[`${W}:item/leather_cap`].description = 'catalog.cap_body';
+    c.text['catalog.cap_body'] = c.text['item.leather_cap.description'];
+  });
+  assert.equal(
+    gameView(w).entities.find((e) => e.id === BRAM)!.description,
+    'npc.bram.description',
+  );
   for (const item of [CAP, HAT, KEY, LANTERN]) w = accepted(w, 'take', item).world;
   assert.deepEqual(keys(gameView(w).inventory), {
     [KEY]: ['drop', 'give'],
@@ -201,6 +209,7 @@ test('the GameView lists the slots in order and wear and remove only where step 
     [CAP]: ['drop', 'give', 'wear'],
     [HAT]: ['drop', 'give', 'wear'],
   });
+  assert.equal(gameView(w).inventory.find((e) => e.id === CAP)!.description, 'catalog.cap_body');
   w = accepted(w, 'wear', CAP).world;
   const view = gameView(w);
   assert.deepEqual(keys(view.inventory), {
@@ -219,7 +228,13 @@ test('the GameView lists the slots in order and wear and remove only where step 
     { slot: 'cloak' },
     {
       slot: 'head',
-      item: { id: CAP, name: 'item.leather_cap.short', kind: 'item', actions: [remove] },
+      item: {
+        id: CAP,
+        name: 'item.leather_cap.short',
+        description: 'catalog.cap_body',
+        kind: 'item',
+        actions: [remove],
+      },
     },
     { slot: 'light' },
   ]);

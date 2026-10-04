@@ -1,0 +1,44 @@
+✔ base1000 accounting preserves exact safe boundary quotients and rejects target overflow (0.999792ms)
+✔ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (24.625917ms)
+✔ negative wall resume rebases without credit then credits the next 20ms (4.977542ms)
+✔ a fixed 36hour horizon commits all four daily boundaries in order (6.095083ms)
+✔ sixteen segments yield and one reserved input completes at its original finite horizon (13.456833ms)
+✔ a current choice crossing departure refuses presence while Leave still closes its continuation (6.091792ms)
+✔ preexisting stale input does not account time and synchronous success emits no completion (3.864292ms)
+✔ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (6.703208ms)
+✖ an elapsed managed session without clocks fails with a typed refusal (4.627ms)
+✔ resume extends durable target debt rather than a lagging head (9.403ms)
+✔ unexpected closed checkpoint evidence blocks play as corrupt until confirmed Start over (5.604833ms)
+✔ a valid durable replacement invalidates an old fenced clock and input without writes (6.753375ms)
+✔ malformed v2 checkpoints and heads refuse without rewriting their progress (28.328417ms)
+✔ a managed v1 upgrade starts its durable account at the actual opening clocks (3.886291ms)
+✔ a committed unknown elapsed segment with corrupt checkpoint completes its input as blocked (3.301833ms)
+✔ a valid replacement during unknown positive elapsed invalidates the old pending input (6.405666ms)
+✔ a private reservation rejects another intent and retains its original bounded input (9.988375ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 16
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 266.77875
+
+✖ failing tests:
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:222:1
+✖ an elapsed managed session without clocks fails with a typed refusal (4.627ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file://[private-path]:224:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'throws',
+    diff: 'simple'
+  }

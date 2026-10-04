@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { encode, hash, type Json } from '../../../kernel/ts/src/canonical.ts';
+import { encode, hash, type Json } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type {
   ContinuationId,
   DecisionResult,
@@ -22,10 +22,10 @@ import type {
   NarrationRecord,
   StoryPointReport,
 } from '../../../kernel/ts/src/contracts.gen.ts';
-import { refString, type World } from '../../../kernel/ts/src/decision.ts';
-import { value } from '../../../kernel/ts/src/fact.ts';
+import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
-import { gameView, INSTALLED } from '../../../kernel/ts/src/world.ts';
+import { gameView, INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Reply } from './authority.ts';
 import { deliver } from './progress.ts';

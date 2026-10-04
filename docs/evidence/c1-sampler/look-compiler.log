@@ -1,0 +1,28 @@
+==> boundary
+Compiling 15 files (.ex)
+Generated boundary app
+
+20:40:30.040 [info] Compiling file system watcher for Mac...
+
+20:40:30.868 [info] Done.
+==> file_system
+Compiling 7 files (.ex)
+Generated file_system app
+==> bunt
+Compiling 2 files (.ex)
+Generated bunt app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> credo
+Compiling 257 files (.ex)
+Generated credo app
+==> loka
+Compiling 33 files (.ex)
+Generated loka app
+Running ExUnit with seed: 372586, max_cases: 16
+
+...
+Finished in 0.3 seconds (0.3s async, 0.00s sync)
+
+Result: 3 passed

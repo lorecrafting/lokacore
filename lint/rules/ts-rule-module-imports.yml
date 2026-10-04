@@ -1,9 +1,10 @@
 id: ts-rule-module-imports
 language: tsx
 severity: error
-message: A rule module imports only kernel modules (../*.ts), never I/O, a package or another rule module; its capability's commands and events come through the typed Rule contract (kernel/ts/src/decision.ts).
-files: [kernel/ts/src/rules/**]
+message: A rule module imports only kernel helpers in foundation/runtime/commands and mechanics, never I/O, a package or another rule module; its capability's commands and events come through the typed Rule contract (kernel/ts/src/runtime/decision.ts).
+files: [kernel/ts/src/mechanics/*/rule.ts]
 rule:
-  kind: string
+  any: [{ kind: string }, { kind: template_string }]
   matches: module-specifier
-  not: { regex: "^['\"]\\.\\./[a-z_.]+\\.ts['\"]$" }
+  not:
+    regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"

@@ -13,6 +13,12 @@ export const detail = (f: Failed) =>
 export const OUTCOME: Record<string, string> = {
   taken: 'Taken.',
   dropped: 'Dropped.',
+  opened: 'Opened.',
+  closed: 'Closed.',
+  locked: 'Locked.',
+  unlocked: 'Unlocked.',
+  worn: 'You put it on.',
+  removed: 'You take it off.',
   activated: 'You take on the task. It is in your journal.',
   activated_with_possession: 'You take on the task. It is in your journal.',
   choice_closed: 'You leave the question for now.',

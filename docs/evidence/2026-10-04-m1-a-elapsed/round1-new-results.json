@@ -1,0 +1,17 @@
+[
+  {
+    "mutant": "decode-guard",
+    "new_exit": 1,
+    "original_sha256": "0a826ad82dd1d9cd1d74e4601188ec2080c698ca102ac08c903c3a6aa62d564a"
+  },
+  {
+    "mutant": "storage-catch-all",
+    "new_exit": 1,
+    "original_sha256": "0a826ad82dd1d9cd1d74e4601188ec2080c698ca102ac08c903c3a6aa62d564a"
+  },
+  {
+    "mutant": "real-sqlite-fence",
+    "new_exit": 1,
+    "original_sha256": "0a826ad82dd1d9cd1d74e4601188ec2080c698ca102ac08c903c3a6aa62d564a"
+  }
+]

@@ -6,6 +6,8 @@ Short list; each item links the plan it comes from. The open stages and their ca
 
 ## Next
 
+- **M mechanics continuation**: [official M1–M23 queue](../NEXT-MECHANICS.md), [adopted clock/chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md) and first [M1-A brief](../briefs/m1-a-clock.md), under delegated PM authority.
+
 - **R7/R8 for chapter one**: 12 slices and Gate C1 ([record](../decisions/owner-decision-chapter-one-plan-2026-10-02.md);
   what stays LATER, with its trigger, is in the record's §2 triage table).
 - **Playtest and tune** ([record](../archive/decisions/owner-decision-playtest-2026-09-25.md)).
@@ -17,15 +19,15 @@ Short list; each item links the plan it comes from. The open stages and their ca
 - The later time model follows the [fixed-time restriction](../decisions/owner-decision-fixed-time-2026-10-03.md):
   clock progression is authority-driven elapsed time; gameplay actions offer no time skip.
 - Mechanical planning now follows the [LegendMUD baseline](../decisions/owner-decision-legendmud-baseline-2026-10-03.md),
-  with its [sourced system reference](../reference/legendmud-system.md). Its reconciliation table
-  governs character, resources, skills, guild/training gates, magic, combat and death before their
-  implementation slices; it adds nothing to the current Gate C1 scope.
-  A [provisional Story-mechanics proposal](../design/provisional-story-mechanics.md) supplies candidate
-  rules for dodge/parry, attack resolution, recovery, encumbrance and death; its values and
-  departures await approval before implementation.
+  with its [sourced system reference](../reference/legendmud-system.md). The
+  [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
+  selects bounded consumers, recovery-route gates and chapter handoff/finale ordering. The
+  [provisional Story-mechanics proposal](../design/provisional-story-mechanics.md) retains dated,
+  unadopted alternatives; it does not override the current M1/M2/M3/M4/M5 choices. Each consuming
+  implementation amends active clauses and contracts first.
 - Capabilities registered but not installed, with the slice that first needs them:
-  [feature map](../features.gen.md), [release scope](../spec/release-scope.md) (full chapter one
-  is 57 rooms, 10 quests, two endings).
+  [feature map](../features.gen.md), [release scope](../spec/release-scope.md); chapter-one
+  endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
 - Mechanics: [00 §4](../archive/spec/00-first-cartridge-design.md#4-feature-list) (movement, time,
   character, items, combat, economy, NPCs, quests, social, touch UI) and
   [00 §11](../archive/spec/00-first-cartridge-design.md#11-release-ladder-three-chapters-one-world) (the

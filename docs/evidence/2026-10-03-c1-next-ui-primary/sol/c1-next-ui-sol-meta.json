@@ -1,0 +1,13 @@
+{
+  "pr": 148,
+  "head": "0e49963f893192d193fac65851aa882be0f597b8",
+  "model_requested": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "exit_status": 0,
+  "independent_read_only": true,
+  "redacted_log_sha256": "579984867b1b5f5757283b182c22155952f37450a65ec8bebd132b50dc47ade8",
+  "answer_sha256": "8110c6335fb86ed6043086cb04a7b43ab6b8a7f9c637f778e4cfe236d767c664",
+  "verdict": "APPROVE",
+  "open_findings": 0,
+  "raw_capture_retained_private": true
+}

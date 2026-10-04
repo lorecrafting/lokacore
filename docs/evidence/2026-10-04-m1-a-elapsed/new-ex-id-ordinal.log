@@ -1,0 +1,37 @@
+Compiling 33 files (.ex)
+Generated loka app
+Running ExUnit with seed: 923085, max_cases: 16
+
+...
+
+  1) test elapsed CommandId rejects malformed identity and interval operands (Loka.Core.PortableAbiTest)
+     test/loka/core/portable_abi_test.exs:279
+     Assertion with == failed
+     code:  assert IdSource.elapsed_command_id("run", "world", bad, 1) == {:error, :invalid_ordinal}
+     left:  {:ok, "fa730880-2724-8ddb-b08c-51988694a16b"}
+     right: {:error, :invalid_ordinal}
+     stacktrace:
+       test/loka/core/portable_abi_test.exs:284: anonymous fn/1 in Loka.Core.PortableAbiTest."test elapsed CommandId rejects malformed identity and interval operands"/1
+       (elixir 1.20.4) lib/enum.ex:1725: Enum."-map/2-lists^map/1-1-"/2
+       test/loka/core/portable_abi_test.exs:283: (test)
+
+..........................................
+Finished in 0.4 seconds (0.4s async, 0.00s sync)
+
+Result: 45/46 passed
+Failed: 1 test
+    warning: this clause in cond will never match:
+
+        false
+
+    since it has type:
+
+        false
+
+    type warning found at:
+    │
+ 62 │       false ->
+    │             ~
+    │
+    └─ lib/loka/core/id_source.ex:62:13: Loka.Core.IdSource.elapsed_command_id/4
+

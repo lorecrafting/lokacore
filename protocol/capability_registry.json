@@ -150,7 +150,13 @@
     "key": "position",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "rest",
+      "sit",
+      "sleep",
+      "stand"
+    ]
   },
   {
     "key": "skills",
@@ -225,7 +231,16 @@
     "key": "scene",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "continue"
+    ],
+    "events": [
+      "scene_ended"
+    ],
+    "definitions": [
+      "scene"
+    ]
   },
   {
     "key": "action_recipe",
@@ -268,7 +283,8 @@
     "residency": "portable_capability",
     "commands": [
       "wait",
-      "run_job"
+      "run_job",
+      "elapsed"
     ],
     "policies": [
       "time_window"

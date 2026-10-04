@@ -1,0 +1,11 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace Loka.xcworkspace -scheme Loka -configuration Release -sdk iphonesimulator -destination "generic/platform=iOS Simulator" -arch arm64 -derivedDataPath <private-path> ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO build
+
+Build settings from command line:
+    ARCHS = arm64
+    CODE_SIGNING_ALLOWED = NO
+    ONLY_ACTIVE_ARCH = YES
+    SDKROOT = iphonesimulator27.0
+
+2026-10-03 22:17:47.445 xcodebuild[31425:102542609] Writing error result bundle to [PRIVATE_PATH]
+xcodebuild: error: destination implies architecture, architecture must not also be specified.

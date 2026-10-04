@@ -14,6 +14,21 @@ and not repeated here.
   retrieval does not jump the clock ([record](../decisions/owner-decision-fixed-time-2026-10-03.md)).
 - Backgrounding does not pause the world; the later time model preserves elapsed combat, recovery
   and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
+- Close C1 after its reviewed checklist and merges under the owner's Simulator acceptance; deferred UI work remains tracked at the next UI checkpoint ([record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md)).
+
+- NPC/item views carry explicit authored full descriptions; the compatible optional wire field is always populated by current projections ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
+
+- The current unreleased sampler may replace its previous development runtime release; the bounded `0.0.2` Look repair independently rederives its known answer while other fixtures stay frozen ([record](../decisions/owner-decision-sampler-development-look-2026-10-03.md)).
+- The development sampler chapel approach follows the [delegated PM content selection](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md).
+- NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
+- C1 room output stays focused; NPCs open full details, section detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
+
+- The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); substantive story prose remains subject to batch approval.
+- Sampler identity and complete prose follow the [owner delegation and PM selections](../decisions/owner-decision-sampler-batch-2026-10-03.md).
+
+- World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
+- Resume the approved C1 touch presenter alongside useful parallel mechanics planning and sampler preparation
+  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
   store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
 - One save per story, no manual bookmarks; a new game replaces the save after the player confirms
@@ -36,8 +51,10 @@ and not repeated here.
   ([record](../archive/decisions/owner-decision-r5-deferred-mechanics-2026-09-28.md)); the R5 deferrals
   land in R7/R8 for chapter one, after R6P and before R10
   ([record](../archive/decisions/owner-decision-early-r7r8-plan-2026-10-01.md)).
-- `scene@1` is not built until chapter-one content needs scenes; the durable choice is dialogue's
-  continuation row ([record](../archive/decisions/owner-decision-split-d-2026-10-01.md)).
+- `scene@1`'s modal text subset is now needed by the approved chapter-one
+  [plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md), implemented as
+  [scene facts](mechanics.md#scene1-mechanicsscenerulets); the durable choice remains dialogue's
+  continuation row ([earlier record](../archive/decisions/owner-decision-split-d-2026-10-01.md)).
 - Puppeting comes later; rules read the actor from the command, never the player
   ([record](../archive/decisions/owner-decision-puppeting-2026-09-25.md)). Player-written descriptions
   come with the online work ([record](../archive/decisions/owner-decisions-r5-s4-2026-09-25.md)).
@@ -48,8 +65,11 @@ and not repeated here.
 ## Architecture and engine
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
-  rule before each implementation slice. The current chapter-one gate scope stays unchanged
-  ([record and planning carry](../decisions/owner-decision-legendmud-baseline-2026-10-03.md)).
+  rule before each concrete consumer; adopted adaptations and historical proposals follow the
+  [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
+  ([original direction](../decisions/owner-decision-legendmud-baseline-2026-10-03.md)).
+- The TypeScript kernel uses the responsibility folders and colocated rule helpers in [architecture.md](architecture.md#typescript-kernel), preserving semantics and deterministic ownership/purity guards ([record](../decisions/owner-decision-kernel-layout-2026-10-03.md)).
+
 - The engine owns mechanics; cartridges own numbers and world settings; no game-world value is a
   literal in the engine or a presenter. The inventory of values still to move:
   [world-parameters.md](../world-parameters.md)
@@ -110,11 +130,24 @@ and not repeated here.
 
 ## Process
 
+- The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Astra and assign useful parallel work without waiting for owner input; normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
+
+- PM selects fresh independent Codex primary plus separate Sol review for the resumed C1 touch slice under the owner's delegated workflow while Opus quota is unavailable; required Simulator interaction evidence remains
+  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md#pm-execution-choices-under-existing-delegation)).
+
+- For remaining C1 mechanics (journal, chapters, scenes-modal, sampler), the PM selects a fresh
+  independent Codex primary plus separate Sol while Claude quota prevents Opus, under the
+  owner's delegated workflow; default policy otherwise remains in force
+  ([record](../decisions/owner-decision-c1-mechanics-continuation-2026-10-03.md)).
+
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
 - Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
 - A fresh agent of any vendor that authored none of the work is an independent reviewer
   ([record](../archive/decisions/owner-decision-reviewers-2026-09-24.md)).
+- For c1-position PR #137 only, a fresh independent Codex agent replaces the primary Opus
+  reviewer; all other review and merge requirements remain in force
+  ([record](../decisions/owner-decision-c1-position-codex-review-2026-10-03.md)).
 - Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green
   ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM runs a slice to its
   merge and escalates hard calls up a ladder before the owner
@@ -122,7 +155,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Gates are slim: the owner's play when there is something touchable, one codex Astra audit of the
   riskiest code, and a short checklist with one reviewer; no Opus-plus-Astra double review of a
   docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
-- Reviews: codex Astra only on the gate audit and `proposal.ts` changes; Sol on other core and
+- Reviews: codex Astra only on the gate audit and `runtime/proposal.ts` changes; Sol on other core and
   contract first reviews and every fix re-check; Fable only as codex's stand-in (and, by exception,
   the docs compaction); Opus drafts briefs; the PM keeps one persistent worktree
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md),
@@ -143,3 +176,17 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   `docs/system` first, then the code. `docs/archive/` is history, read when a task needs it; new
   decision records go in `docs/decisions/` and add a line here
   ([record](../decisions/owner-decision-docs-compaction-2026-10-02.md#decisions-for-the-move-2026-10-02)).
+
+- Latest Book UI polish supersedes the earlier fixed viewport-bottom NPC dock, pending-choice-preserving Leave and position detail page; follow [Book UI](book-ui.md) and the [new record](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md). Description projection is coordinated separately; no invented player presence or description keys.
+
+- PM adoption under autonomous mechanics authority: [M1–M23 queue, clock/safety and chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md); each implementation still amends active specs and follows reviewed delivery.
+
+- PM decision under mechanics delegation: [first cellar encounter](../decisions/pm-decision-first-encounter-2026-10-03.md), planned contract before M5/M6; new combat equations are not silently inherited from draft PR #136.
+
+- Elapsed cartridge policy and trusted receipt delivery use the [M1-A PM contract](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md); legacy play-time behavior stays frozen.
+
+- Driver-managed elapsed saves, reserved input and replay follow the [M1-B1 PM adoption](../decisions/pm-decision-m1-b1-durable-elapsed-2026-10-04.md).
+
+- PM reconciliation under mechanics delegation: [current Legend/M mechanics and chapter selections](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md); original owner records and provisional alternatives remain dated history.
+
+- Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.

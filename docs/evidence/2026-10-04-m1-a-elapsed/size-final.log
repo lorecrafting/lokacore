@@ -1,0 +1,5 @@
+kernel/ts/play/main.ts:1: info: size: allow 315, one terminal session: its loop, each command's dispatch and the replay
+kernel/ts/test/dialogue.test.ts:1: info: size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
+mobile/app/book/polish.test.ts:2: info: size: allow 520, Book routes, retries and authored-detail checks share the minimal host/session adapter
+mobile/authority/local-story/local_story.test.ts:1: info: size: allow 650, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions, narration, choices) shares this harness
+mobile/authority/local-story/saves.test.ts:1: info: size: allow 560, every save-open outcome shares this file's one-process harness

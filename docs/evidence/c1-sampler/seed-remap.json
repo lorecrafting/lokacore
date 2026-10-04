@@ -1,0 +1,22 @@
+{
+  "generator_before": 12,
+  "generator_after": 13,
+  "basis": "observed simulations; input-only remap with unchanged expected behaviors",
+  "representatives": [
+    {
+      "old_seed": 3,
+      "new_seed": 432,
+      "source": "ashmere_wear",
+      "first_command": "__proto__",
+      "resources": "full"
+    },
+    {
+      "old_seed": 1,
+      "new_seed": 35225,
+      "source": "ashmere_rooms",
+      "first_command": "move",
+      "resources": "hp 10, ma 10, mv 0",
+      "also_issues": "toString"
+    }
+  ]
+}

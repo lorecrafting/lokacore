@@ -389,7 +389,7 @@
       ]
     },
     "EntityView": {
-      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions.",
+      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "type": "object",
       "properties": {
         "id": {
@@ -415,6 +415,9 @@
           "items": {
             "$ref": "#/$defs/ContentView"
           }
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -485,11 +488,18 @@
               ]
             }
           ]
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "npc.wren.name",
+          "kind": "npc",
+          "description": "portrait.wren",
+          "actions": []
         }
       ]
     },
     "ContentView": {
-      "description": "An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now.",
+      "description": "An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "type": "object",
       "properties": {
         "id": {
@@ -512,6 +522,9 @@
           "items": {
             "$ref": "#/$defs/AdvertisedAction"
           }
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -542,6 +555,14 @@
               "input": []
             }
           ]
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "item.brass_key.short",
+          "kind": "item",
+          "description": "item.brass_key.description",
+          "actions": [],
+          "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b"
         }
       ]
     },
@@ -662,7 +683,7 @@
       ]
     },
     "QuestView": {
-      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal).",
+      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
       "type": "object",
       "properties": {
         "quest": {
@@ -672,6 +693,9 @@
           "$ref": "policy.schema.json#/$defs/QuestState"
         },
         "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "journal": {
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
@@ -691,6 +715,17 @@
           },
           "state": "active",
           "title": "quest.find_the_child.title"
+        },
+        {
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_child"
+          },
+          "state": "active",
+          "title": "quest.find_the_child.title",
+          "journal": "quest.find_the_child.active"
         }
       ]
     },
@@ -773,7 +808,7 @@
       ]
     },
     "GameView": {
-      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field). Map, shop and other surfaces join with their capabilities.",
+      "description": "One actor's semantic view (04 §14, §15): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 §4.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.",
       "type": "object",
       "properties": {
         "actor_id": {
@@ -812,6 +847,10 @@
             "$ref": "#/$defs/WornSlotView"
           }
         },
+        "position": {
+          "description": "The actor's position (position@1: standing, sitting, resting or sleeping; the engine fact's value, mechanics.md position@1); present exactly when the cartridge locks position@1, an optional field: the snapshot format stays.",
+          "$ref": "action.schema.json#/$defs/Key"
+        },
         "journal": {
           "type": "array",
           "items": {
@@ -829,6 +868,13 @@
         },
         "time": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "chapter": {
+          "description": "Present exactly when the cartridge declares chapters.",
+          "$ref": "#/$defs/ChapterView"
+        },
+        "scene": {
+          "$ref": "#/$defs/SceneView"
         }
       },
       "required": [
@@ -940,6 +986,7 @@
               ]
             }
           ],
+          "position": "standing",
           "equipment": [
             {
               "slot": "head",
@@ -979,7 +1026,11 @@
               "title": "quest.find_the_child.title"
             }
           ],
-          "time": 18
+          "time": 18,
+          "chapter": {
+            "index": 0,
+            "title": "chapter.landing"
+          }
         },
         {
           "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
@@ -1365,6 +1416,74 @@
               }
             }
           ]
+        }
+      ]
+    },
+    "ChapterView": {
+      "description": "The highest reached chapter declaration, else the opening chapter (mechanics.md Chapters); derived from the player quest state, never persisted.",
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "index",
+        "title"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "index": 0,
+          "title": "chapter.landing"
+        },
+        {
+          "index": 2,
+          "title": "chapter.reeds"
+        }
+      ]
+    },
+    "SceneView": {
+      "type": "object",
+      "properties": {
+        "scene": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "line": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "scene",
+        "line",
+        "index",
+        "count"
+      ],
+      "additionalProperties": false,
+      "description": "Present iff a modal scene runs: its current narrate TextKey, one-based index and narrate count.",
+      "examples": [
+        {
+          "scene": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "scene",
+            "key": "bell_rung"
+          },
+          "line": "scene.bell_rung.bell",
+          "index": 1,
+          "count": 3
         }
       ]
     }

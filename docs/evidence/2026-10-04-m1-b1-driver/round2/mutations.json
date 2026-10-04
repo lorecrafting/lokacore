@@ -1,0 +1,84 @@
+[
+  {
+    "mutation": "unloaded_meta_guard",
+    "source": "mobile/authority/local-story/authority.ts",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "elapsed NOTADB and page corruption recover only through explicit working Start over (3.94125ms)",
+      "unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (7.528458ms)",
+      "failing tests:",
+      "elapsed NOTADB and page corruption recover only through explicit working Start over (3.94125ms)",
+      "unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (7.528458ms)"
+    ],
+    "source_restored": true,
+    "restored_sha256": "8fa0309c3aaa914015823ed48ce8ee3972c3c6996e2c7f89a49ed9c35a41fc1e",
+    "edits": [
+      [
+        "s.meta && (s.elapsed || (s.host.time && s.world.cartridge.manifest.time_policy))",
+        "s.elapsed || (s.host.time && s.world.cartridge.manifest.time_policy)"
+      ]
+    ]
+  },
+  {
+    "mutation": "proven_corruption_permission",
+    "source": "mobile/authority/local-story/authority.ts",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (6.853917ms)",
+      "failing tests:",
+      "unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (6.853917ms)"
+    ],
+    "source_restored": true,
+    "restored_sha256": "8fa0309c3aaa914015823ed48ce8ee3972c3c6996e2c7f89a49ed9c35a41fc1e",
+    "edits": [
+      [
+        "s.corruptFile = !(e instanceof ElapsedRecoveryError) && corrupt(e)",
+        "s.corruptFile = false"
+      ]
+    ]
+  },
+  {
+    "mutation": "loaded_format_guard",
+    "source": "mobile/authority/local-story/authority.ts",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "loaded elapsed recovery refuses newer and malformed same-run formats without writes (4.193291ms)",
+      "failing tests:",
+      "loaded elapsed recovery refuses newer and malformed same-run formats without writes (4.193291ms)"
+    ],
+    "source_restored": true,
+    "restored_sha256": "8fa0309c3aaa914015823ed48ce8ee3972c3c6996e2c7f89a49ed9c35a41fc1e",
+    "edits": [
+      [
+        "if (problem === 'unsupported_save_format') return problem;",
+        "if (problem === 'unsupported_save_format' && s.recoveryHeader !== undefined) return problem;"
+      ],
+      [
+        "(current.format === expected.format ||\n            (s.recoveryHeader === undefined &&\n              expected.format === 'loka-save-v1' &&\n              current.format === SAVE_FORMAT))",
+        "(s.recoveryHeader === undefined || current.format === expected.format)"
+      ]
+    ]
+  },
+  {
+    "mutation": "malformed_header_priority",
+    "source": "mobile/authority/local-story/authority.ts",
+    "old_exit": 0,
+    "new_exit": 1,
+    "new_failures": [
+      "changed refused elapsed header classifies malformed before differing valid run and preserves newer formats (6.555917ms)",
+      "failing tests:",
+      "changed refused elapsed header classifies malformed before differing valid run and preserves newer formats (6.555917ms)"
+    ],
+    "source_restored": true,
+    "restored_sha256": "8fa0309c3aaa914015823ed48ce8ee3972c3c6996e2c7f89a49ed9c35a41fc1e",
+    "edits": [
+      [
+        "const kind = problem ?? changedRun(current, expected?.run_id)?.kind ?? 'save_corrupt';",
+        "const kind = changedRun(current, expected?.run_id)?.kind ?? 'save_corrupt';"
+      ]
+    ]
+  }
+]

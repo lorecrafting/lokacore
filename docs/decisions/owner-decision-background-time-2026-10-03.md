@@ -1,5 +1,9 @@
 # Owner decision: backgrounding does not pause the world — 2026-10-03
 
+**Current-status pointer, 2026-10-04:** the original wording and provenance remain preserved.
+Later adopted mechanics and scope follow the [current PM reconciliation](pm-decision-legend-mechanics-reconciliation-2026-10-04.md);
+its selections do not alter the owner quotations below.
+
 Recorded by Codex from this session, verbatim:
 
 > Wait, lets not pause while backgrounded, because we want players to get used to the online version

@@ -1,0 +1,35 @@
+Compiling 33 files (.ex)
+Generated loka app
+Running ExUnit with seed: 456603, max_cases: 16
+
+..................
+
+  1) test elapsed CommandId rejects malformed identity and interval operands (Loka.Core.PortableAbiTest)
+     test/loka/core/portable_abi_test.exs:279
+     Assertion with == failed
+     code:  assert IdSource.elapsed_command_id(1, "world", 0, 1) == {:error, :invalid_id}
+     left:  {:ok, "68019b0b-6829-80a6-bea8-a8d928647dc4"}
+     right: {:error, :invalid_id}
+     stacktrace:
+       test/loka/core/portable_abi_test.exs:280: (test)
+
+...........................
+Finished in 0.5 seconds (0.5s async, 0.00s sync)
+
+Result: 45/46 passed
+Failed: 1 test
+    warning: this clause in cond will never match:
+
+        false
+
+    since it has type:
+
+        false
+
+    type warning found at:
+    │
+ 59 │       false ->
+    │             ~
+    │
+    └─ lib/loka/core/id_source.ex:59:13: Loka.Core.IdSource.elapsed_command_id/4
+

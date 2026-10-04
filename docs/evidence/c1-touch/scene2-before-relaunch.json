@@ -1,0 +1,14 @@
+{
+  "content_hash": "5631ddf63007b837bef1e91dfb71fcfb8d31847257210c5de1caa5b198a771b5",
+  "kernel_versions": [
+    "loka-kernel@9732b0ec58f81ae74b7ca4e4cf8dd736d4cd409a"
+  ],
+  "scene_values": [
+    2
+  ],
+  "revision": 8,
+  "clock": 0,
+  "receipt_count": 8,
+  "state_head_digest": "48276f372fa50facde2d5f895b274bbead6b74f7aa19db1d2376a620a4f6264e",
+  "receipt_digest": "89a9969997d677d3d77f57e90941031f612e0838952e69a5cb628d76dce935a6"
+}

@@ -6,15 +6,62 @@ import type { Button } from './presenter.ts';
 import { reason, SENTENCE } from './words.ts';
 
 export type Exit = { direction: string; button: Button };
+export type Thing =
+  GameView['entities'][number] | NonNullable<GameView['entities'][number]['contents']>[number];
+export type Page =
+  | {
+      kind: 'contents' | 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'chapter';
+    }
+  | { kind: 'thing'; id: string }
+  | { kind: 'dialogue'; speaker?: string };
 
-const OWN = ['look', 'choose', 'close_choice']; // drawn in their own places, not as place actions
+export const npcPage = (page: Page | undefined, view: GameView) =>
+  page?.kind === 'dialogue' ||
+  (page?.kind === 'thing' && view.entities.some((e) => e.id === page.id && e.kind === 'npc'));
+
+const POSITIONS = ['standing', 'sitting', 'resting', 'sleeping'];
+const POSITION_ACTIONS = ['stand', 'sit', 'rest', 'sleep'];
+export function nextPosition(position: GameView['position'], actions: Button[]) {
+  const at = POSITIONS.indexOf(position ?? '');
+  if (at < 0) return;
+  for (let step = 1; step < 4; step++) {
+    const next = POSITION_ACTIONS[(at + step) % 4];
+    const offered = actions.find((b) => b.action_key === next);
+    if (offered) return offered;
+  }
+}
+
+// Only projected items: contents are already flattened and filtered for reach by the engine.
+export const things = (v: GameView): Thing[] =>
+  [
+    ...v.entities,
+    ...v.inventory,
+    ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
+  ].flatMap((e) => [e, ...(e.contents ?? [])]);
+
+// Keep the page after a same-room action, stopping at the first item page that disappeared.
+export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
+  if (after.chapter && before.chapter?.index !== after.chapter.index) return [{ kind: 'chapter' }];
+  if (before.place.id !== after.place.id) return [];
+  const visible = things(after);
+  const gone = stack.findIndex((p) => p.kind === 'thing' && !visible.some((e) => e.id === p.id));
+  return gone < 0 ? stack : stack.slice(0, gone);
+}
+
+const OWN = ['look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']; // drawn in their own places, not as place actions
 
 export function group(buttons: Button[]) {
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
   const aimed = (b: Button) => b.target_ids.length > 0;
   return {
     look: buttons.find((b) => b.action_key === 'look' && !aimed(b)),
-    exits: buttons.flatMap((b) => (dir(b) ? [{ direction: dir(b)!, button: b }] : [])),
+    exits: buttons.flatMap((b) =>
+      b.action_key === 'move' && dir(b) ? [{ direction: dir(b)!, button: b }] : [],
+    ),
+    door: (direction: string) =>
+      buttons.filter((b) => b.action_key !== 'move' && dir(b) === direction),
+    continue: buttons.find((b) => b.action_key === 'continue'),
+    position: buttons.filter((b) => ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key)),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
     // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
     place: buttons.filter(
@@ -66,8 +113,16 @@ export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 // owner's bands decision shows the phrase on hp only and colours every pool).
 export type Pool = NonNullable<GameView['resources']>[number];
 const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
-export const said = (rs: readonly Pool[]) =>
-  `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${r.band.replaceAll('_', ' ')}` : amount(r))).join(', ')}`;
+export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
+  const key = `band.${r.band}`;
+  const phrase = text(key);
+  return phrase && phrase !== key ? phrase : r.band.replaceAll('_', ' ');
+};
+export const said = (
+  rs: readonly Pool[],
+  text: (key: string) => string | undefined = () => undefined,
+) =>
+  `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${bandPhrase(r, text)}` : amount(r))).join(', ')}`;
 
 // The status line's time: the double hour's earthly branch, 子 from 23:00 to 01:00, then one
 // per two hours, with English words for VoiceOver (owner decision, untimed Lantern record). The
@@ -80,28 +135,14 @@ export const branch = (t: number) => {
   return { glyph: '子丑寅卯辰巳午未申酉戌亥'[i]!, label };
 };
 
-// The NPC menu's state: who was tapped, or which choice's menu was dismissed, in `room`. It holds only
-// while the player stays in that room: a walk clears both, so a pending choice reopens its menu (with
-// Close) wherever the player is, and a tapped NPC does not reopen on return.
-export type MenuState = { room?: string; tapped?: string; dismissed?: string };
-export const menuTap = (v: GameView, id: string): MenuState => ({ room: v.place.id, tapped: id });
-// Dismissing sends nothing; only Close does.
-export const menuDone = (v: GameView): MenuState => ({
-  room: v.place.id,
-  dismissed: v.choice?.continuation_id,
-});
-// The hook stores this at every render, so a cleared state stays cleared on return.
-export const menuLive = (v: GameView, s: MenuState): MenuState =>
-  s.room === undefined || s.room === v.place.id ? s : {};
-// Whether the menu is open: an NPC tapped and still here, else a pending choice (a restored one
-// reopens it) until its menu was dismissed.
-export const menuOpen = (v: GameView, state: MenuState) => {
-  const s = menuLive(v, state);
-  return (
-    v.entities.some((e) => e.id === s.tapped) ||
-    (!!v.choice && v.choice.continuation_id !== s.dismissed)
-  );
-};
+export const initialPages = (v: GameView): Page[] =>
+  v.chapter ? [{ kind: 'chapter' }] : v.choice ? [conversation(v)] : [];
+
+// Recover only the actual saved choice: a projected speaker has an ordinary entity page.
+export const conversation = (v: GameView): Page =>
+  v.entities.some((e) => e.id === v.choice?.speaker_id)
+    ? { kind: 'thing', id: v.choice!.speaker_id! }
+    : { kind: 'dialogue', speaker: v.choice?.speaker_id };
 
 // A first-run hint's "seen" flag in a key-value store (the shell's key-value store: its own file, not the
 // save). A store that throws falls back to this session's memory: a hint never stops the book.

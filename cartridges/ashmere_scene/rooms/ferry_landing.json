@@ -1,0 +1,18 @@
+{
+  "title": "room.ferry_landing.title",
+  "description": "room.ferry_landing.description",
+  "exits": {
+    "north": {
+      "to": "village_green"
+    }
+  },
+  "details": {
+    "mooring_post": {
+      "aliases": [
+        "post",
+        "mooring_post"
+      ],
+      "description": "detail.mooring_post"
+    }
+  }
+}

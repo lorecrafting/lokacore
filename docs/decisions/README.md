@@ -102,3 +102,39 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [One shared game difficulty](owner-decision-single-difficulty-2026-10-03.md): supersedes selectable normal/hard/ironman modes and their separate death policies.
 - [Fixed time; no player-driven time skips](owner-decision-fixed-time-2026-10-03.md): rest and retrieval do not jump the clock; the later authority drives elapsed time.
 - [Backgrounding does not pause the world](owner-decision-background-time-2026-10-03.md): elapsed time applies to combat, recovery and world events; preparing players for online play.
+- Owner decision: [fresh independent Codex primary review for c1-position PR #137 only](owner-decision-c1-position-codex-review-2026-10-03.md).
+- Owner decision (paraphrased): [prioritize touch interaction; de-emphasize loka play UX and typed synonyms](owner-decision-touch-priority-2026-10-03.md).
+
+- [C1 mechanics continuation](owner-decision-c1-mechanics-continuation-2026-10-03.md): PM selects bounded independent Codex reviews under the owner's delegated workflow.
+
+- Owner decision: [world time continues during reading; intentional timed choices and protection or escape while controls are restricted](owner-decision-reading-time-2026-10-03.md).
+
+- Owner direction: [resume C1 touch UI with useful parallel work; bounded PM review selection](owner-decision-touch-resumption-2026-10-03.md).
+- Owner delegation and PM selections: [sampler identity and complete prose batch](owner-decision-sampler-batch-2026-10-03.md).
+- PM ruling: [sampler condition-band acceptance repair using existing labels and default settings](pm-decision-sampler-bands-2026-10-03.md).
+
+- [C1 playtest polish](owner-decision-c1-playtest-polish-2026-10-03.md): clean room output, full NPC details, Back to World and room-status position controls.
+- [C1 dialogue and Contents polish](owner-decision-c1-dialogue-contents-polish-2026-10-03.md): stable scrolling NPC history with docked actions/Leave and status-entry Contents.
+
+- [Development sampler replacement and authentic Look](owner-decision-sampler-development-look-2026-10-03.md): owner building-phase save direction and bounded PM `0.0.2` adoption.
+
+- [C1 journal, Leave, position and detail-flow polish](owner-decision-c1-journal-position-polish-2026-10-03.md): latest owner feedback and PM implementation adoption.
+- [TypeScript kernel layout](owner-decision-kernel-layout-2026-10-03.md): mechanical responsibility folders, colocated rules/lifecycle, preserved semantics and deterministic guards.
+
+- [Explicit entity descriptions in GameView](pm-decision-description-projection-2026-10-03.md): optional shared view fields, current explicit projection guarantee and bounded validation scope.
+
+- [C1 human acceptance and UI deferral](owner-decision-c1-gate-ui-deferral-2026-10-03.md): owner directs gate closure; intermittent blur and unmeasured phone response carry to the next UI checkpoint.
+
+- [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
+
+- PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
+
+- [M1-A elapsed authority contract](pm-decision-m1-a-elapsed-contract-2026-10-04.md).
+- PM content decision: [sampler 0.0.3 chapel approach](pm-decision-sampler-shrine-approach-2026-10-04.md), four real route rooms and development pin replacement before shrine return.
+- PM first-consumer decision: [M4-A cellar encounter, RNG/escape/death policies and M5 prerequisites](pm-decision-first-encounter-2026-10-03.md).
+
+- [M1-B1 durable elapsed host](pm-decision-m1-b1-durable-elapsed-2026-10-04.md): checkpoint/v2, reserved input, typed completion and trusted trace replay.
+
+- PM decision: [LegendMUD/M mechanics reconciliation and selected Missing Child handoffs, recovery and finale](pm-decision-legend-mechanics-reconciliation-2026-10-04.md), under autonomous mechanics delegation; provisional alternatives retained as history.
+
+- Owner decision: [simulator-first mechanics validation](owner-decision-simulator-first-validation-2026-10-04.md); required per-PR checks/fresh review retained, physical-device proof routed substantially later before public readiness.

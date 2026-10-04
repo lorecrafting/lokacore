@@ -1,0 +1,35 @@
+✔ elapsed receipt survives reopen and replays its first result after later clock commits (16.667667ms)
+✔ old run elapsed refuses before receipt lookup after replacement without Host.random (5.08375ms)
+✖ unknown elapsed COMMIT fences trusted and player delivery until the real receipt reconciles (3.358625ms)
+✔ modal scene keeps Continue-only player controls while elapsed time commits (9.670917ms)
+✔ malformed stored command JSON conflicts without state or receipt changes (3.031ms)
+✔ malformed stored response JSON conflicts without state or receipt changes (2.994416ms)
+✔ healthy elapsed delivery preserves actual SQLite receipt-read failures (3.428375ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 160.109292
+
+✖ failing tests:
+
+test at mobile/authority/local-story/elapsed.test.ts:132:1
+✖ unknown elapsed COMMIT fences trusted and player delivery until the real receipt reconciles (3.358625ms)
+  Error: no such table: receipt
+      at Object.getFirstSync (file://[private-path]
+      at receipt (file://[private-path]
+      at elapsed (file://[private-path]
+      at Object.elapsed (file://[private-path]
+      at TestContext.<anonymous> (file://[private-path]
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12) {
+    code: 'ERR_SQLITE_ERROR',
+    errcode: 1,
+    errstr: 'SQL logic error'
+  }

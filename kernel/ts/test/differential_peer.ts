@@ -1,9 +1,9 @@
 // Differential peer for test/loka/core/compose_test.exs: composes each {state, delta} in the
 // JSON file named by argv[2] and prints the canonical results and invariant outcomes.
 import { readFileSync } from 'node:fs';
-import { encode, type Json } from '../src/canonical.ts';
-import { compose } from '../src/compose.ts';
-import { check } from '../src/invariants.ts';
+import { encode, type Json } from '../src/foundation/canonical.ts';
+import { compose } from '../src/foundation/compose.ts';
+import { check } from '../src/runtime/invariants.ts';
 
 const { ids, cases } = JSON.parse(readFileSync(process.argv[2]!, 'utf8'));
 const out = cases.map(({ state, delta }: { state: never; delta: never }) => {

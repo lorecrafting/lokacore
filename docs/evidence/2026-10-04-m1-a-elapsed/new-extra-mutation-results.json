@@ -1,0 +1,26 @@
+[
+  {
+    "mutant": "trusted-schema",
+    "layer": "kernel",
+    "exit": 1,
+    "phase": "new"
+  },
+  {
+    "mutant": "id-invalid",
+    "layer": "kernel",
+    "exit": 1,
+    "phase": "new"
+  },
+  {
+    "mutant": "id-ordinal",
+    "layer": "kernel",
+    "exit": 1,
+    "phase": "new"
+  },
+  {
+    "mutant": "player-clock-charge",
+    "layer": "kernel",
+    "exit": 1,
+    "phase": "new"
+  }
+]

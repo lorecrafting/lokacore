@@ -1,0 +1,97 @@
+defmodule Loka.Content.Position do
+  @moduledoc """
+  position@1's engine fact (cartridge.md Compiler; mechanics.md position@1): when the manifest
+  requires position, the compiler adds the fact `position` (@engine) and fact@1, whose
+  fact_changed its rule's fact.assign logs, and content may read the fact but never write it:
+  an authored fact named position, or a fact.assign of it in a recipe outcome, a reaction's
+  apply or a dialogue choice, is RESERVED_FACT. The same write-site walk also reserves
+  scene_<key> facts under scene@1 (Scenes supplies their engine FactSpecs).
+  Twin of kernel/ts/src/content/cartridge_position.ts.
+  """
+  import Loka.Content.Source, only: [diag: 2, at: 2]
+
+  @engine %{
+    "key" => "position",
+    "version" => 1,
+    "value_type" => %{
+      "type" => "enum",
+      "values" => ["standing", "sitting", "resting", "sleeping"],
+      "default" => "standing"
+    },
+    "scopes" => ["player"],
+    "meaning" => "The character's position (position@1): only its rule writes it."
+  }
+
+  @doc "`facts` with the engine fact under position@1, and RESERVED_FACT for an authored one."
+  @spec facts(map() | :unknown, map() | nil) :: {map() | :unknown, [map()]}
+  def facts(facts, m) when is_map(facts) and m != nil do
+    if required?(m) do
+      authored =
+        for {rel, steps, _} <- [facts["position"]], do: diag("RESERVED_FACT", at(rel, steps))
+
+      {Map.put(facts, "position", {"cartridge.json", [], @engine}), authored}
+    else
+      {facts, []}
+    end
+  end
+
+  def facts(facts, _), do: {facts, []}
+
+  @doc "RESERVED_FACT for content writes to position@1 and scene@1 engine facts."
+  @spec check(map() | nil, map()) :: [map()]
+  def check(m, defs) when m != nil do
+    refs = reserved_refs(m, defs)
+
+    for {rel, steps, s} <- sites(defs),
+        s["op"] == "fact.assign",
+        s["fact"] in refs,
+        do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
+  end
+
+  def check(_, _), do: []
+
+  defp reserved_refs(m, defs) do
+    keys = if required?(m), do: ["position"], else: []
+
+    scenes =
+      if is_map_key(m["requires"]["capabilities"], "scene"),
+        do: Enum.map(Map.keys(defs["scene"]), &("scene_" <> &1)),
+        else: []
+
+    for key <- keys ++ scenes,
+        do: %{
+          "cartridge_id" => m["id"],
+          "cartridge_version" => m["version"],
+          "kind" => "fact",
+          "key" => key
+        }
+  end
+
+  @doc "The manifest with fact@1 required under position@1, else unchanged."
+  @spec requires(map()) :: map()
+  def requires(m) do
+    if required?(m),
+      do: update_in(m, ["requires", "capabilities"], &Map.put(&1, "fact", 1)),
+      else: m
+  end
+
+  defp required?(m), do: Map.has_key?(m["requires"]["capabilities"], "position")
+
+  # Each authored step that may fact.assign: {rel, steps to it, step}.
+  defp sites(defs) do
+    for kind <- ~w(recipe reaction dialogue),
+        {_, {rel, steps, v}} <- defs[kind],
+        {at, list} <- lists(kind, v),
+        {s, i} <- Enum.with_index(list),
+        do: {rel, steps ++ at ++ [i], s}
+  end
+
+  # A recipe's outcome sequences, a reaction's apply, a dialogue's choice sequences: {steps, list}.
+  defp lists("recipe", r),
+    do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "sequence"], o["sequence"]})
+
+  defp lists("reaction", r), do: [{["apply"], r["apply"]}]
+
+  defp lists("dialogue", d),
+    do: for({id, o} <- d["choices"], do: {["choices", id, "sequence"], o["sequence"] || []})
+end

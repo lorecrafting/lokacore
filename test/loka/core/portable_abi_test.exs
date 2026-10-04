@@ -251,4 +251,38 @@ defmodule Loka.Core.PortableAbiTest do
     assert IdSource.job_command_id("j", -1) == {:error, :invalid_ordinal}
     assert IdSource.job_command_id("j", 1.5) == {:error, :invalid_ordinal}
   end
+
+  # Breaks: elapsed identity dropping durable run/world, swapping endpoints or reusing another domain.
+  test "elapsed CommandId matches independent run/world/interval vectors" do
+    for c <- JSON.decode!(File.read!("protocol/fixtures/elapsed_command_id.json")) do
+      assert IdSource.elapsed_command_id(
+               c["run_id"],
+               c["world_context_id"],
+               c["from"],
+               c["until"]
+             ) == {:ok, c["command_id"]}
+
+      tuple = [
+        "loka-elapsed-command-v1",
+        c["run_id"],
+        c["world_context_id"],
+        c["from"],
+        c["until"]
+      ]
+
+      assert Canonical.encode(tuple) == {:ok, c["canonical"]}
+      assert Canonical.hash(tuple) == {:ok, c["sha256"]}
+    end
+  end
+
+  # Breaks: the elapsed domain hashes bad identity or unsafe interval instead of typed refusal.
+  test "elapsed CommandId rejects malformed identity and interval operands" do
+    assert IdSource.elapsed_command_id(1, "world", 0, 1) == {:error, :invalid_id}
+    assert IdSource.elapsed_command_id("run", nil, 0, 1) == {:error, :invalid_id}
+
+    for bad <- [-1, 9_007_199_254_740_992, 1.0, true] do
+      assert IdSource.elapsed_command_id("run", "world", bad, 1) == {:error, :invalid_ordinal}
+      assert IdSource.elapsed_command_id("run", "world", 0, bad) == {:error, :invalid_ordinal}
+    end
+  end
 end

@@ -53,12 +53,21 @@ defmodule Loka.Content.Recipes do
     taken = r["key"] in ctx.actions or r["key"] in commands()
     duplicate = if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
 
-    owners(rel, r, ctx) ++
-      refs(rel, r, ctx) ++
-      texts(rel, r, ctx.text) ++
-      duplicate ++
-      mismatch(rel, r) ++
+    Enum.concat([
+      owners(rel, r, ctx),
+      refs(rel, r, ctx),
+      texts(rel, r, ctx.text),
+      duplicate,
+      mismatch(rel, r),
+      duration(rel, r, ctx.m),
       shared(rel, r, ctx.shared)
+    ])
+  end
+
+  defp duration(rel, r, m) do
+    if m["time_policy"] != nil and r["duration"] != nil,
+      do: [diag("INVALID_TIME_POLICY", at(rel, ["duration"]))],
+      else: []
   end
 
   # An inline check's key is its check definition's key: two recipes' checks may not share one.

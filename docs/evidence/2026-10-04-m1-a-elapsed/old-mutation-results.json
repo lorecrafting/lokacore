@@ -1,0 +1,74 @@
+[
+  {
+    "mutant": "id-run",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "trusted-id",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "player-elapsed",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "elapsed-from",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "wait-offer",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "wait-admit",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "loader-duration",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "loader-command",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "loader-api",
+    "layer": "kernel",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "host-run",
+    "layer": "authority",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "host-replay",
+    "layer": "authority",
+    "exit": 0,
+    "phase": "old"
+  },
+  {
+    "mutant": "host-fence",
+    "layer": "authority",
+    "exit": 0,
+    "phase": "old"
+  }
+]

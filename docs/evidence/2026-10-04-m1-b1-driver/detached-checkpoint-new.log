@@ -1,0 +1,250 @@
+✔ base1000 accounting preserves exact safe boundary quotients and rejects target overflow (1.099459ms)
+✖ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (33.6035ms)
+✔ negative wall resume rebases without credit then credits the next 20ms (4.65925ms)
+✔ a fixed 36hour horizon commits all four daily boundaries in order (6.644417ms)
+✖ sixteen segments yield and one reserved input completes at its original finite horizon (12.164584ms)
+✔ a current choice crossing departure refuses presence while Leave still closes its continuation (7.7175ms)
+✔ preexisting stale input does not account time and synchronous success emits no completion (4.888333ms)
+✖ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (5.522875ms)
+✔ an elapsed managed session without clocks fails with a typed refusal (4.058625ms)
+✖ resume extends durable target debt rather than a lagging head (10.642792ms)
+✔ unexpected closed checkpoint evidence blocks play as corrupt until confirmed Start over (6.290125ms)
+✔ a valid durable replacement invalidates an old fenced clock and input without writes (7.62225ms)
+✔ malformed v2 checkpoints and heads refuse without rewriting their progress (29.208875ms)
+✔ seed 12: every fault leaves the prior or next revision and the run ends unchanged (1143.250667ms)
+✔ seed 366: every fault leaves the prior or next revision and the run ends unchanged (667.209166ms)
+✔ seed 30636: every fault leaves the prior or next revision and the run ends unchanged (740.328792ms)
+✔ seed 300: every fault leaves the prior or next revision and the run ends unchanged (871.985083ms)
+✔ seed 622: every fault leaves the prior or next revision and the run ends unchanged (613.187209ms)
+✔ seed 9633: every fault leaves the prior or next revision and the run ends unchanged (828.557042ms)
+✔ seed 2841: every fault leaves the prior or next revision and the run ends unchanged (625.933584ms)
+✔ seed 454: every fault leaves the prior or next revision and the run ends unchanged (831.800833ms)
+✔ seed 172: every fault leaves the prior or next revision and the run ends unchanged (663.657292ms)
+✔ seed 49: every fault leaves the prior or next revision and the run ends unchanged (888.917625ms)
+✔ seed 211: every fault leaves the prior or next revision and the run ends unchanged (1143.78675ms)
+✔ seed 1595: every fault leaves the prior or next revision and the run ends unchanged (833.342958ms)
+✔ seed 337982: every fault leaves the prior or next revision and the run ends unchanged (927.359333ms)
+✔ seed 105497: every fault leaves the prior or next revision and the run ends unchanged (714.095083ms)
+✔ seed 81: every fault leaves the prior or next revision and the run ends unchanged (950.578625ms)
+✔ seed 130: every fault leaves the prior or next revision and the run ends unchanged (811.63725ms)
+✔ seed 54: every fault leaves the prior or next revision and the run ends unchanged (830.433709ms)
+✔ hand-checked anchors (14.840041ms)
+✔ views, a reopen and a changed host clock leave the play_time clock and world as they were (60.959708ms)
+✔ backward-anchor metadata accounts reconcile exact prior or next real SQLite evidence (7.825ms)
+✖ failed and lost-ack positive elapsed commits reconcile head receipt and checkpoint together (3.60975ms)
+✖ real SQLITE_FULL rolls back elapsed evidence and retries its unchanged candidate (3.079125ms)
+✔ a timer completes an unknown player receipt before sampling and emits it once (3.120917ms)
+✖ process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once (125.075042ms)
+✔ a budget fault is one valid observation of its limit, with the ReplayIds of its decision (9.378167ms)
+✔ a failing observation sink changes no reply, revision, storage or retry (9.728042ms)
+✔ an older save gains the sink untouched, and the sink keeps the newest 1000 records (328.906125ms)
+✔ each NEW decision, accepted, rejected or fault, is one kernel.decision_latency (20.722875ms)
+✔ a clock changes no reply or durable state when a COMMIT is held, then committed (7.335917ms)
+✔ a real committed elapsed then ordinary local trace replays identically with header run preflight (515.075042ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 36
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14528.249042
+
+✖ failing tests:
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:33:1
+✖ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (33.6035ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   remainder: 450,
+  +   target: 64800,
+  +   wall_ms: 10009
+  -   remainder: 0,
+  -   target: 64801,
+  -   wall_ms: 10020
+    }
+  
+      at TestContext.<anonymous> (file://[private-path]:49:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { wall_ms: 10009, remainder: 450, target: 64800 },
+    expected: { wall_ms: 10020, remainder: 0, target: 64801 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:87:1
+✖ sixteen segments yield and one reserved input completes at its original finite horizon (12.164584ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      remainder: 0,
+  +   target: 64800,
+  +   wall_ms: 10000
+  -   target: 864000,
+  -   wall_ms: 15994000
+    }
+  
+      at TestContext.<anonymous> (file://[private-path]:98:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { wall_ms: 10000, remainder: 0, target: 64800 },
+    expected: { wall_ms: 15994000, remainder: 0, target: 864000 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:188:1
+✖ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (5.522875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      remainder: 0,
+  +   target: 64800,
+  -   target: 64801,
+      wall_ms: 10000
+    }
+  
+      at TestContext.<anonymous> (file://[private-path]:212:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { wall_ms: 10000, remainder: 0, target: 64800 },
+    expected: { wall_ms: 10000, remainder: 0, target: 64801 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:232:1
+✖ resume extends durable target debt rather than a lagging head (10.642792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      remainder: 0,
+  +   target: 68400,
+  +   wall_ms: 10000
+  -   target: 68401,
+  -   wall_ms: 10020
+    }
+  
+      at TestContext.<anonymous> (file://[private-path]:240:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { wall_ms: 10000, remainder: 0, target: 68400 },
+    expected: { wall_ms: 10020, remainder: 0, target: 68401 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/faults.test.ts:357:1
+✖ failed and lost-ack positive elapsed commits reconcile head receipt and checkpoint together (3.60975ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      remainder: 0,
+  +   target: 64800,
+  +   wall_ms: 10000
+  -   target: 64801,
+  -   wall_ms: 10020
+    }
+  
+      at TestContext.<anonymous> (file://[private-path]:381:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { wall_ms: 10000, remainder: 0, target: 64800 },
+    expected: { wall_ms: 10020, remainder: 0, target: 64801 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/faults.test.ts:387:1
+✖ real SQLITE_FULL rolls back elapsed evidence and retries its unchanged candidate (3.079125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+      remainder: 0,
+  +   target: 64800,
+  +   wall_ms: 10000
+  -   target: 64801,
+  -   wall_ms: 10020
+    }
+  
+      at TestContext.<anonymous> (file://[private-path]:402:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { wall_ms: 10000, remainder: 0, target: 64800 },
+    expected: { wall_ms: 10020, remainder: 0, target: 64801 },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/faults.test.ts:458:1
+✖ process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once (125.075042ms)
+  AssertionError [ERR_ASSERTION]: file://[private-path]:23
+  wall=2602000;mono=2592000;counting=true;game.pulse();throw Error('kill not reached');
+                                                             ^
+  
+  Error: kill not reached
+      at file://[private-path]:23:60
+  
+  Node.js v24.21.0
+  
+  
+  null !== 'SIGKILL'
+  
+      at TestContext.<anonymous> (file://[private-path]:478:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'SIGKILL',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

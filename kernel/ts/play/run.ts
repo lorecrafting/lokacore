@@ -1,7 +1,7 @@
 // One command through the kernel, as the trace.command entry and the decision-latency
 // metric it produces (ADR-075 §3, §4; 11 §13, §15), and one lookup (found).
 import { performance } from 'node:perf_hooks';
-import { hash } from '../src/canonical.ts';
+import { hash } from '../src/foundation/canonical.ts';
 import {
   LIMITS,
   type Command,
@@ -9,8 +9,8 @@ import {
   type EntityId,
   type TargetResolution,
 } from '../src/contracts.gen.ts';
-import { step, type World } from '../src/index.ts';
-import { resolve } from '../src/target.ts';
+import { step, stepElapsed, type World } from '../src/index.ts';
+import { resolve } from '../src/commands/target.ts';
 import { append, line, lookupWords } from './obs.ts';
 import { which } from './text.ts';
 
@@ -33,6 +33,28 @@ export function decide(r: Run, command: Command, measured = true) {
   const t0 = performance.now();
   const { decision, world, limit } = step(r.world, command, r.revision + 1);
   const micros = Math.round((performance.now() - t0) * 1000);
+  return evaluated(r, command, { decision, world, limit }, micros, measured);
+}
+
+/** Replay-only dispatch; its run was bound by the complete trace preflight. */
+export function decideReplay(r: Run, command: Command) {
+  if (command.payload.type === 'elapsed' && command.payload.run_id !== r.ids.run_id)
+    throw new Error('elapsed run differs from trace header');
+  const next =
+    command.payload.type === 'elapsed'
+      ? stepElapsed(r.world, command, r.revision + 1)
+      : step(r.world, command, r.revision + 1);
+  return evaluated(r, command, next, 0, false);
+}
+
+function evaluated(
+  r: Run,
+  command: Command,
+  next: ReturnType<typeof step>,
+  micros: number,
+  measured: boolean,
+) {
+  const { decision, world, limit } = next;
   const ids = { ...r.ids, command_id: command.id, revision: r.revision };
   if (limit && measured) {
     const record = { format: 'loka-obs-v1', event: 'evaluation.budget_exceeded', ids };

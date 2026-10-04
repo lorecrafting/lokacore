@@ -46,26 +46,43 @@ dependency cycles and zero compile-connected edges (`mix xref`, [checks](../CHEC
 
 Pure: no I/O, clock, randomness, locale or Node API (`kernel/ts/src/index.ts:1`;
 `lint/rules/ts-kernel-pure.yml`; `bin/kernel_red_controls.sh` plants each escape and requires
-`tsc` to fail). Rules live only in `kernel/ts/src/rules/<capability>.ts`, one per capability
-that owns a command, bound in the rule table `RULES` (`kernel/ts/src/world.ts:33`); the lint
-rules `lint/rules/ts-rule-*.yml` keep them there, pure, importing only kernel modules and
-registered only as `<module>.decide`. The typed `Rule<C>` contract limits a rule to its own
-commands and events (`kernel/ts/src/decision.ts:192`), and admission re-checks event ownership
-(`kernel/ts/src/proposal.ts:285`).
+`tsc` to fail). The [owner-approved layout](../decisions/owner-decision-kernel-layout-2026-10-03.md)
+gives existing code clear homes; the public entry remains `src/index.ts` and generated
+contracts remain `src/contracts.gen.ts`.
 
-| Module | Role |
+| Under `kernel/ts/src/` | Role |
 |---|---|
-| `world.ts` | `step`: routes a command to its capability's rule, admission, budgets, adopt (`:77`); `INSTALLED` (`:63`) |
-| `proposal.ts` | the whole proposal of one decision: root, quest deliveries, reactions, due jobs; composition and adoption |
-| `compose.ts`, `apply.ts` | StateDelta composition over an overlay; the state after it |
-| `decision.ts` | `World`, `State`, the `Rule` contract, IdSource allocator, event and acceptance helpers |
-| `fresh.ts` | a new world from a loaded cartridge |
-| `actions.ts`, `dialogue.ts`, `quest.ts`, `reaction.ts`, `behavior.ts`, `resource.ts`, `fact.ts`, `policy.ts`, `target.ts` | what rules, admission and the GameView share |
-| `view.ts` | the GameView projection |
-| `invocation.ts` | the authority boundary: identify an ActionInvocation, resolve it to a Command |
-| `cartridge*.ts` | the artifact loader and its stages |
-| `canonical.ts`, `sha256.ts`, `int.ts`, `rng.ts`, `id_source.ts`, `validate.ts`, `invariants.ts` | the portable foundation, twins of `lib/loka/core` |
+| `foundation/` | canonical encoding/hash, integers, RNG, IdSource, delta composition, validation and errors; imports only its own modules and generated contracts |
+| `runtime/` | `runtime/decision.ts` state and typed Rule ABI; `runtime/world.ts` routing and installed capabilities; `runtime/proposal.ts` admission, composition and adoption; `runtime/apply.ts`, `runtime/fresh.ts`, the mixed conformance invariant registry and known-answer runner |
+| `content/` | `cartridge*.ts`, the artifact loader and validation stages |
+| `mechanics/<capability>/rule.ts` | one pure rule per capability that owns commands; quest lifecycle, dialogue/position/scene queries and schedule behavior live beside their rule |
+| `mechanics/{fact,policy,lookups,resource,reaction}.ts` | shared mechanic queries and deliveries |
+| `commands/` | `commands/actions.ts` admission, `commands/invocation.ts` identify/resolve and `commands/target.ts` targeting |
+| `view/` | GameView projection, action lists and the view/admission conformance check |
 | `contracts.gen.ts` | generated from `protocol/` by `bin/contracts.exs`; never hand-edited |
+
+Rules are registered in `runtime/world.ts` only as `<module>.decide`. The typed `Rule<C>`
+contract (`runtime/decision.ts:192`) limits each rule to its capability's commands and events;
+admission re-checks event ownership (`runtime/proposal.ts:285`). The `ts-rule-*` lint rules
+keep rule exports in `mechanics/<capability>/rule.ts`, ban mutation and type escapes there,
+and permit only kernel helpers, never another rule. The foundation import rule enforces its
+narrow dependency boundary; actual-path plants prove these guards in [CHECKS](../CHECKS.md).
+
+The other folders describe responsibilities, with these existing dependency directions:
+
+| Folder | Other kernel dependencies |
+|---|---|
+| `runtime` | foundation, content types, commands, mechanics, view and generated contracts |
+| `content` | foundation, runtime definitions, fact helpers and generated contracts |
+| `mechanics` | foundation, runtime, commands and generated contracts |
+| `commands` | foundation, runtime, mechanics and generated contracts |
+| `view` | foundation, runtime, commands, mechanics and generated contracts |
+
+`runtime/world.ts` remains the composition root. `runtime/proposal.ts` calls quest lifecycle
+`earned`, reaction delivery and the schedule rule; commands and mechanics have reciprocal
+query dependencies, and action/view queries consume RPG mechanics. The conformance invariant
+registry in runtime includes the view/admission check. This move preserves these couplings,
+the static capability registry and pure Rule ABI; loading and executing rules stays static.
 
 ## Two kernels, one semantic contract
 
@@ -92,10 +109,10 @@ The app shell imports the local authority's session controller
 - **`loka play`** (`bin/loka` → `kernel/ts/play/main.ts`): loads an artifact, takes typed or
   scripted commands, prints the GameView, writes a transcript and the game trace; `--replay`
   re-decides the trace's Commands and requires a byte-identical transcript (`:2`, `:287`).
-- **The phone app** (`mobile/app/App.tsx`): bundles the Lantern known answer
-  (`protocol/fixtures/cartridge_lantern_hash.json`), opens one expo-sqlite file per story
-  (`loka-lantern.db`, `:31`), plays through `localSession` with the device clock for latency
-  (`:50`), and draws the book UI or the save-error screen.
+- **The phone app** (`mobile/app/App.tsx`): opens the bundled story and its expo-sqlite
+  save under the current [sampler binding](cartridge.md#source-layout), plays through
+  `localSession`, uses the device clock to measure decision latency, and draws the
+  book UI or the save-error screen. This latency clock does not advance world time.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus fresh sequences (10,000 in CI, 500 locally) run in every `npm test`
@@ -103,6 +120,17 @@ The app shell imports the local authority's session controller
 - **Fault simulation** (`mobile/authority/local-story/faults.test.ts`): the simulator's
   sequences through the local authority on real SQLite with real faults (SQLITE_FULL, a failed
   COMMIT, SIGKILL just before or after COMMIT; `:4`).
+
+## Book presenter
+
+The phone book consumes the host-neutral [GameSession](../decisions/owner-decision-presenter-split-2026-10-02.md)
+boundary and [GameView](protocol.md#gameview); it sends only the actions offered by that
+view, with the freshness token captured when the button was drawn. Cartridge text supplies
+resource-band phrases (`band.<key>`), journal text, chapter titles and scene lines; projected
+resource tones map to the paper palette without presenter thresholds.
+
+Views, controls, history, return destinations and modal priority are specified once in
+[Book UI](book-ui.md).
 
 ## Observability
 
@@ -122,3 +150,10 @@ never changes a decision, a commit or a retry (`mobile/authority/local-story/tra
 Every check, its planted violation and the CI workflows: [CHECKS.md](../CHECKS.md).
 `bin/check_all.sh` is the local line and what pre-push runs (`.githooks/pre-push`, TypeScript
 checks only when a pushed ref touches TypeScript inputs).
+
+## Elapsed session driver
+
+The local authority/session owns elapsed accounting and one retained player reservation
+([save](save.md#durable-elapsed-sessions)). Its shared session notifications follow the
+[Book boundary](book-ui.md#shared-elapsed-statuscompletion-boundary). The renderer receives no
+World, SQLite handle or elapsed entry. B2 owns actual AppState/timer/UI consumption.

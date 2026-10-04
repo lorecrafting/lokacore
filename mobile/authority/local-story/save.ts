@@ -1,10 +1,17 @@
 // The local Story authority's in-memory story and the save of one NEW attempt (03 §§14-15):
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { DecisionResult, NarrationRecord } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/decision.ts';
+import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
-import { commit, load, receipt, reconcile } from './store.ts';
+import { commit, load, receipt, reconcile, identityOf } from './store.ts';
 import type { Captured, Db, Meta, Receipt } from './store.ts';
+import {
+  ElapsedRecoveryError,
+  changedRun,
+  readElapsed,
+  sameCheckpoint,
+  type Checkpoint,
+} from './elapsed-store.ts';
 import type { CommitState, RunIds } from './trace.ts';
 
 export type Trace = (at: number, ...states: CommitState[]) => void;
@@ -18,6 +25,12 @@ export type Story = {
   meta: Meta; // undefined only on a corrupt save, until its new game is adopted
   // The fence of a new game whose COMMIT outcome is unknown, and its run.
   game?: { fence: () => undefined; run_id: string } | undefined;
+  elapsed?: Checkpoint;
+  corruptFile?: boolean; // actual SQLite corruption while opening, never an invented identity
+  recoveryHeader?: { format: string; run_id?: string } | null;
+  beforeWorld?: World;
+  beforeToken?: string;
+  blocked?: ElapsedRecoveryError;
   behind: boolean; // the trace misses a committed entry or its header; catch up before the next
   // Settles the attempt whose COMMIT outcome is unknown, throwing while it still is; no decision
   // runs until it has.
@@ -31,22 +44,25 @@ export function save(
   trace: Trace,
   reports: Captured[],
   r: Receipt,
+  checkpoint?: Checkpoint,
 ): Reply {
   const at = r.revision;
   let committed: boolean;
   try {
-    committed = commit(s.db, next.world, next.decision, r, reports);
+    committed = commit(s.db, next.world, next.decision, r, reports, checkpoint);
   } catch (e) {
+    if (e instanceof ElapsedRecoveryError) block(s, e);
     trace(at, 'failed');
     throw e;
   }
   if (committed) {
     [s.world, s.revision] = [next.world, at];
+    if (checkpoint) s.elapsed = checkpoint;
     trace(at, 'committed');
     return { kind: 'saved', replay: false, revision: at, decision: r.response };
   }
   s.fence = () => {
-    const got = reconcile(s.db, () => receipt(s.db, r.scope, r.invocation_id));
+    const got = reconciled(s, r, checkpoint);
     if (got) adopt(s);
     // Traced once settled, with its follow-up; a process that dies while fenced traces neither.
     trace(at, 'unknown', got ? 'committed' : 'failed');
@@ -55,11 +71,31 @@ export function save(
   let settled: Receipt | undefined;
   try {
     settled = settle(s);
-  } catch {
+  } catch (e) {
+    if (e instanceof ElapsedRecoveryError) block(s, e);
     return { kind: 'pending' };
   }
   if (!settled) throw new Error('COMMIT failed; nothing was saved');
   return { kind: 'saved', replay: false, revision: settled.revision, decision: settled.response };
+}
+
+function reconciled(s: Story, r: Receipt, checkpoint?: Checkpoint) {
+  return reconcile(s.db, () => {
+    if (s.elapsed) {
+      const changed = changedRun(identityOf(s.db), s.meta.run_id);
+      if (changed) throw changed;
+    }
+    const got = receipt(s.db, r.scope, r.invocation_id);
+    if (s.elapsed) {
+      const row = readElapsed(s.db, s.meta.run_id, s.world.state.clock);
+      if (!row || !sameCheckpoint(row, got ? (checkpoint ?? s.elapsed) : s.elapsed))
+        throw new ElapsedRecoveryError(
+          'save_corrupt',
+          'unexpected elapsed checkpoint; recovery required',
+        );
+    }
+    return got;
+  });
 }
 
 /** The fenced attempt's receipt once settled from the store, undefined if not committed. */
@@ -114,3 +150,9 @@ export const budget = (s: Story, command_id: string, limit: string) => ({
   ids: { ...ids(s), command_id, revision: s.revision },
   data: { limit },
 });
+
+export function block(s: Story, e: ElapsedRecoveryError): never {
+  s.blocked = e;
+  s.fence = undefined;
+  throw e;
+}

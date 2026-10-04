@@ -5,10 +5,10 @@ import { mkdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { homedir, hostname, tmpdir, userInfo } from 'node:os';
 import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { encode, type Json } from '../src/canonical.ts';
+import { encode, type Json } from '../src/foundation/canonical.ts';
 import { KERNEL_ID } from '../src/index.ts';
-import { normalize } from '../src/target.ts';
-import { validate } from '../src/validate.ts';
+import { normalize } from '../src/commands/target.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 export const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 

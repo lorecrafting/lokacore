@@ -1,0 +1,26 @@
+✔ an unknown constructor action is safe to compare with admission (0.628625ms)
+✔ a door verb listed under an alias key agrees with admission through its command (0.109208ms)
+✔ every registered invariant is checked per step, or says why not (0.6905ms)
+✔ the regression seeds, then 500 fresh sequences, keep every invariant (3822.870875ms)
+ℹ generator 14; regression seeds 432 35225; fresh seeds 1791096153536 to 1791096154035; 502 sequences, 16391 steps; lengths 1-8, 9-16, ... 57-64: 52 74 60 62 58 74 66 56; outcomes accepted, cooldown, exit_closed, exit_locked, fault budget_exceeded, fault evaluator_error, fault nonfuture_job, insufficient_resource, invalid_state, invalid_target, not_found, not_owned, not_present, permission_denied, unsupported_capability
+✔ each regression seed still issues the command type it was kept for (17.50675ms)
+✔ a seed gives byte-identical steps twice in one process and in another process (226.54175ms)
+✔ red control: a planted rule bug (drop puts the item inside itself) is found and shrunk (163.874208ms)
+✔ red control: a job completed in the root writer group trips job_complete_owned_by_run (75.6195ms)
+✔ red control: a rejection that moves the clock trips rejection_consumes_nothing (0.497542ms)
+✔ red control: an unknown command type accepted trips unknown_types_fail_closed (56.961875ms)
+✔ red control: a GameView that disagrees with admission trips gameview_agrees_with_admission (219.113625ms)
+✔ red control: a door verb listed but refused, or accepted but unlisted, trips gameview_agrees_with_admission (739.846667ms)
+✔ red control: wear listed but refused, or remove accepted but unlisted, trips gameview_agrees_with_admission (265.905209ms)
+✔ red control: a recipe shown available, or refused for another code, trips gameview_agrees_with_admission (35.421167ms)
+✔ red control: an accepted decision with an unregistered event trips unknown_types_fail_closed (2.07775ms)
+✔ red control: an accepted step adopted wrong, or not composing, is adopt_mismatch (187.879458ms)
+✔ red control: a throw inside a rule is a reported failure, not a crash of the runner (48.606208ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6038.9885

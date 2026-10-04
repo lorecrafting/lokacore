@@ -10,7 +10,7 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -258,7 +258,7 @@ test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavail
 });
 
 // Breaks: the projection reading the character instead of the body, the start value or the
-// stored row instead of the current one (resource.ts level), or another order. Road: hp 10/25
+// stored row instead of the current one (mechanics/resource.ts level), or another order. Road: hp 10/25
 // is p 40; mv 2/3 is p 66; hp 20/25 after two hour boundaries is p 80 (04 §15 bands).
 test('the view lists the body resources at the clock with their bands', () => {
   const view = (w: World) =>

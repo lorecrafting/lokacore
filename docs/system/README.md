@@ -9,6 +9,7 @@ reviews) is in [docs/archive/](../archive/README.md), read only when a task need
 | File | Covers |
 |---|---|
 | [architecture.md](architecture.md) | repository layout, the compile-checked boundaries, hosts, checks, observability |
+| [book-ui.md](book-ui.md) | book views, entries, actions/logs, destinations, scene/state rules |
 | [protocol.md](protocol.md) | contracts, the numeric profile, the decision loop, budgets, invariants, ActionSet, GameView |
 | [save.md](save.md) | the local Story authority: receipts, the SQLite save, recovery, story points, the trace |
 | [cartridge.md](cartridge.md) | source format, compiler, artifact, loader, installed capabilities |
@@ -27,3 +28,5 @@ Executable contracts stay where they are and are not restated here: `protocol/`
 ([map](../../protocol/README.md)), `docs/spec/conformance/` (frozen fixtures and the
 [numeric profile](../spec/conformance/numeric-profile.md)) and
 [release scope](../spec/release-scope.md).
+
+Planned mechanics beyond C1: [M1–M23 queue](../NEXT-MECHANICS.md) and [first M1-A brief](../briefs/m1-a-clock.md), reachable through [future work](future.md). These plans do not describe installed behavior.

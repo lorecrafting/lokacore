@@ -1,21 +1,19 @@
+import { replayRecords } from './replay.ts';
 // size: allow 315, one terminal session: its loop, each command's dispatch and the replay
-// `loka play <artifact> [script]` and `loka play <artifact> --replay <transcript>`: a
-// single-player, MUD-style terminal over the TypeScript kernel on Node (owner decisions
-// 2026-09-25, R5 setup and R5 plan). Each session writes its transcript, the game_trace
-// (ADR-075 §4: the header plus the Commands by ordinal is the complete replay input);
-// --replay re-decides those Commands and requires a byte-identical transcript file.
+// `loka play <artifact> [script]` or `loka play <artifact> --replay <transcript>`.
+// The game_trace header and Commands by ordinal are complete replay input (ADR-075 §4).
+// Replay requires a byte-identical transcript.
 import { randomUUID, getRandomValues } from 'node:crypto';
 import { createReadStream, readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
-import { decode, encode, hash, type Json } from '../src/canonical.ts';
+import { encode, hash, type Json } from '../src/foundation/canonical.ts';
 import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts';
-import { commandId } from '../src/id_source.ts';
+import { commandId } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
-import { gameView } from '../src/view.ts';
-import { sha256Hex } from '../src/sha256.ts';
-import { validate } from '../src/validate.ts';
-import { doors, normalize } from '../src/target.ts';
-import { detailOf, resolved, type Offered } from '../src/actions.ts';
+import { gameView } from '../src/view/view.ts';
+import { sha256Hex } from '../src/foundation/sha256.ts';
+import { doors, normalize } from '../src/commands/target.ts';
+import { detailOf, resolved, type Offered } from '../src/commands/actions.ts';
 import { append, kernelVersion, line, redact } from './obs.ts';
 import {
   barrierAt,
@@ -34,7 +32,7 @@ import {
   scan,
   status,
 } from './text.ts';
-import { decide, found, type Run } from './run.ts';
+import { decide, decideReplay, found, type Run } from './run.ts';
 
 const [artifact, flag, transcript] = process.argv.slice(2);
 if (!artifact) fail('usage: loka play <artifact> [script | --replay <transcript>]');
@@ -152,7 +150,12 @@ const command = (r: Run, parsed: { type: string }): Command =>
 // Decides one command, prints what the player sees, the state hash and the step time, and
 // returns its game_trace line; the latency metric goes to operations.
 function turn(r: Run, cmd: Command, measured = true): string {
-  const { trace, latency, decision } = decide(r, cmd, measured);
+  return played(r, cmd, decide(r, cmd, measured), measured);
+}
+
+type Turn = ReturnType<typeof decide>;
+function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
+  const { trace, latency, decision } = result;
   if (measured) append('operations', r.ids.run_id, line(latency)); // a replay's ids repeat the run's
   const p = cmd.payload as { type: string; target_id?: EntityId; item_id?: EntityId };
   const name = (id?: string) => say(cartridge, r.world.entities[id!]?.short ?? '');
@@ -192,7 +195,7 @@ function turn(r: Run, cmd: Command, measured = true): string {
   return line(trace);
 }
 
-// Resolves the player's words (target.ts; 04 §17), and for give the recipient's: each unique
+// Resolves the player's words (commands/target.ts; 04 §17), and for give the recipient's: each unique
 // id goes into a look, take, drop or give Command; none and ambiguous build no Command.
 function lookup(r: Run, p: Extract<Parsed, { lookup: string }>) {
   const id = found(r, p.lookup);
@@ -231,7 +234,7 @@ function answer(r: Run, p: 'bye' | { choose: string }) {
   append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
 }
 
-// accept [words]: the quest offer of the player's ActionSet (actions.ts) whose label has the
+// accept [words]: the quest offer of the player's ActionSet (commands/actions.ts) whose label has the
 // words builds an accept_quest Command; several ask which (by label), none builds nothing.
 function accept(r: Run, words: string) {
   const offers = Object.values(resolved(r.world, r.world.character)).filter(
@@ -246,7 +249,7 @@ function accept(r: Run, words: string) {
 }
 
 // The recipes of the player's ActionSet with the longest leading phrase of the words as an
-// alias (actions.ts; 06 §20 aliases; two recipes may share one), and the words after it.
+// alias (commands/actions.ts; 06 §20 aliases; two recipes may share one), and the words after it.
 function recipe(r: Run, text: string): { perform: Offered[]; rest: string } | undefined {
   const words = text.trim().toLowerCase().split(/\s+/);
   const recipes = Object.values(resolved(r.world, r.world.character)).filter((a) => a.recipe);
@@ -286,27 +289,21 @@ function perform(r: Run, p: { perform: Offered[]; rest: string }) {
 // exits 1 unless the regenerated transcript is the file, byte for byte.
 function replay(path: string | undefined) {
   if (!path) fail('usage: loka play <artifact> --replay <transcript>');
-  const file = readFileSync(path, 'utf8');
-  const records = file
-    .split('\n')
-    .slice(0, -1)
-    .map((l, i) => {
-      try {
-        const rec = decode(l) as { event: string; ids: any; data: any };
-        if (!validate('ObservationRecord', rec).length) return rec;
-      } catch {}
-      return fail(`${path}:${i + 1}: not an ObservationRecord line`);
-    });
-  const [head, ...entries] = records;
-  if (head?.event !== 'trace.run' || entries.some((e) => e.event !== 'trace.command'))
-    fail(`${path}: not a game_trace (one trace.run, then trace.command entries)`);
-  if (head.ids.content_hash !== content_hash) fail(`${path}: a transcript of another cartridge`);
+  let parsed: ReturnType<typeof replayRecords>;
+  try {
+    parsed = replayRecords(path, content_hash);
+  } catch (e) {
+    fail((e as Error).message);
+  }
+  const { file, head, entries } = parsed;
   const { run_id, seed, kernel_version: recorded } = head.ids;
   const r = start(run_id, head.data.world_context_id, seed, recorded);
   if (recorded !== kernel_version)
     process.stdout.write(`recorded by ${recorded}\nreplayed on ${kernel_version}\n`);
   shown(r);
-  const out = header(r) + entries.map((e) => turn(r, e.data.command, false)).join('');
+  const out =
+    header(r) +
+    entries.map((e) => played(r, e.data.command, decideReplay(r, e.data.command), false)).join('');
   if (out !== file) fail(`replay differs from ${path}`);
   process.stdout.write(`replay: ${entries.length} commands identical\n`);
 }

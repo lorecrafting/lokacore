@@ -1,0 +1,10 @@
+{
+  "base": "48405cd9fb5f743470125aaa65b23b374536dc51",
+  "head": "1f4e27ad0b6c33fda92250d85ae02490a26500b9",
+  "cartridge_source_and_artifact_files_equal": 234,
+  "artifacts_equal": 20,
+  "prior_invalid_rows_equal": 652,
+  "existing_view_examples_equal": true,
+  "description_optional_and_exact_textkey_reference": true,
+  "sampler_pin_equal": true
+}

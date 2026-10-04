@@ -4,7 +4,7 @@
   "description": "QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation policy, §43; 04 §5.2), owned by quest@1. The persisted lifecycle state is policy.schema.json QuestState.",
   "$defs": {
     "QuestDefinition": {
-      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields.",
+      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
       "type": "object",
       "properties": {
         "key": {
@@ -28,6 +28,9 @@
         },
         "objective": {
           "$ref": "#/$defs/QuestObjective"
+        },
+        "journal": {
+          "$ref": "#/$defs/QuestJournal"
         }
       },
       "required": ["key", "title", "objective"],
@@ -59,6 +62,35 @@
                   "key": "lantern"
                 }
               }
+            }
+          }
+        },
+        {
+          "key": "lantern",
+          "title": "quest.lantern.title",
+          "objective": {
+            "evidence": "current_state",
+            "policy": {
+              "policy_version": 1,
+              "root": {
+                "op": "has_item",
+                "item": {
+                  "cartridge_id": "ferrymans_lantern",
+                  "cartridge_version": "0.1.0",
+                  "kind": "item",
+                  "key": "lantern"
+                }
+              }
+            }
+          },
+          "journal": {
+            "active": "quest.lantern.find",
+            "objectives_met": "quest.lantern.return",
+            "resolved": "quest.lantern.done",
+            "failed": "quest.lantern.failed",
+            "abandoned": "quest.lantern.abandoned",
+            "outcomes": {
+              "carry": "quest.lantern.carried"
             }
           }
         }
@@ -103,6 +135,71 @@
             "kind": "item",
             "key": "lantern"
           }
+        }
+      ]
+    },
+    "QuestJournal": {
+      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal and hints remain LATER.",
+      "type": "object",
+      "properties": {
+        "active": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "objectives_met": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "resolved": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "failed": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "abandoned": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "outcomes": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        }
+      },
+      "required": [
+        "active",
+        "objectives_met",
+        "resolved",
+        "failed",
+        "abandoned"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "active": "quest.lantern.find",
+          "objectives_met": "quest.lantern.return",
+          "resolved": "quest.lantern.done",
+          "failed": "quest.lantern.failed",
+          "abandoned": "quest.lantern.abandoned",
+          "outcomes": {
+            "carry": "quest.lantern.carried"
+          }
+        },
+        {
+          "active": "quest.lantern.find",
+          "objectives_met": "quest.lantern.return",
+          "resolved": "quest.lantern.done",
+          "failed": "quest.lantern.failed",
+          "abandoned": "quest.lantern.abandoned"
+        },
+        {
+          "active": "quest.lantern.find",
+          "objectives_met": "quest.lantern.return",
+          "resolved": "quest.lantern.done",
+          "failed": "quest.lantern.failed",
+          "abandoned": "quest.lantern.abandoned",
+          "outcomes": {}
         }
       ]
     }

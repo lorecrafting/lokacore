@@ -11,7 +11,7 @@ lists only what a file adds to that.
 | File | Covers | Spec | Fixtures |
 |---|---|---|---|
 | **Identity and scope** | | | |
-| `identity.schema.json` | definition and runtime ids, each its own type; CommandId | 03 §2, §3, §6; 05 §4 | `command_id.json`, `job_command_id.json` |
+| `identity.schema.json` | definition and runtime ids, each its own type; CommandId | 03 §2, §3, §6; 05 §4 | `command_id.json`, `job_command_id.json`, `elapsed_command_id.json` |
 | `scope.schema.json` | StateScope, AudiencePolicy | 03 §6 | |
 | `relation.schema.json` | typed relations, entity provenance | 21 §4; 03 §3, §11; 05 §25 | |
 | `text.schema.json` | localized text ids and bindings; the default-locale text catalog | 04 §15; 05 §18; 06 §43 | |
@@ -34,6 +34,7 @@ lists only what a file adds to that.
 | `entity.schema.json` | items and NPCs (ItemDefinition, NpcDefinition, ItemLocation), owned by containment; an NPC's daily_schedule, owned by behavior; an item's slot (SlotKey), owned by equipment; an item's barrier (a container's lid, barrier@1) | 21 §5, §8, §10; 03 §23; 06 §13; 00 §4.4; 00a §5, §12 | `cartridge_items_hash.json`, `cartridge_ferry_hash.json`, `cartridge_wear_hash.json`, `cartridge_locks_hash.json` |
 | `quest.schema.json` | quests (QuestDefinition and its QuestObjective evidence policy), owned by quest; the lifecycle state is policy.schema.json QuestState | 06 §1-§5, §43; 04 §5.2 | `cartridge_errand_hash.json` |
 | `dialogue.schema.json` | dialogues (DialogueDefinition: speaker, talk policy, prompt, bound roles, choices with fact.assign consequences and an optional hand-over, the quest a choice resolves), owned by dialogue | 06 §17, §18, §33, §43; 04 §5.3 | `cartridge_ferry_hash.json` |
+| `scene.schema.json` | modal SceneDefinition and closed narrate/await_ack/end SceneStep subset | 06 §33–§37; 21 §3.6; [mechanics](../docs/system/mechanics.md#scene1-rulesscenets) | `cartridge_scene_hash.json` |
 | `reaction.schema.json` | reaction rules (ReactionRule: trigger, when, fact.assign consequences), owned by reaction | 21 §3.4, §11; 06 §14; 04 §5.2-§5.4 | `cartridge_green_hash.json` |
 | `manifest.schema.json` | cartridge, deployment, campaign manifests | 05 §3, §20, §22; 07 §15; 01 A5 | |
 | `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text; its Calendar, owned by calendar), artifact file and byte cap, diagnostics | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5; 21 §4 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_ferry_hash.json` (calendar), `cartridge_lantern_hash.json` (the pre-release proof cartridge), `cartridge_loader.json` (loader corpus, TypeScript) |

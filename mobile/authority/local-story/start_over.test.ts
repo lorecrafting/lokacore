@@ -10,15 +10,16 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { DatabaseSync } from 'node:sqlite';
+import { DatabaseSync, constants } from 'node:sqlite';
 import { test } from 'node:test';
 import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
-import { INSTALLED } from '../../../kernel/ts/src/world.ts';
+import { INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { openStory, type Saved } from './authority.ts';
+import { openStory, type Host, type Saved } from './authority.ts';
 import { presenter, type Button } from '../../app/book/presenter.ts';
 import type { Game } from '../../packages/game-view/session.ts';
-import { localSession } from './session.ts';
+import { localSession, type Bundled } from './session.ts';
+import { elapsedBundle, checkpoint, receipts } from '../../../kernel/ts/test/elapsed_host.ts';
 import type { Db } from './store.ts';
 
 const FERRY = read('protocol/fixtures/cartridge_ferry_hash.json');
@@ -45,7 +46,7 @@ const all = (sql: DatabaseSync, q: string) => JSON.stringify(sql.prepare(q).all(
 const bytes = (path: string) => createHash('sha256').update(readFileSync(path)).digest('hex');
 
 /** The app's save under localSession, as App.tsx wires it (smoke.test.ts `app`). */
-function app(path: string) {
+function app(path: string, bundled: Bundled = FERRY as never, time?: Host['time']) {
   let sql: DatabaseSync | undefined;
   const c = localSession(
     () => adapt((sql = new DatabaseSync(path))),
@@ -54,8 +55,8 @@ function app(path: string) {
       sql = undefined;
       rmSync(path);
     },
-    FERRY as never,
-    { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}` },
+    bundled,
+    { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}`, time },
   );
   const screen = () => at(c.game()!).screen();
   const press = (b: Button) => at(c.game()!).press(b);
@@ -364,4 +365,79 @@ test('a receipt response that is not a decision replays as a conflict', () => {
   const receipts = all(b.sql, RECEIPTS);
   assert.deepEqual(send(b, 1, 'coil_rope'), { kind: 'conflict' });
   assert.equal(all(b.sql, RECEIPTS), receipts);
+});
+
+// Breaks: proven elapsed opening corruption dereferences absent metadata or cannot reach confirmed host file recovery.
+test('elapsed NOTADB and page corruption recover only through explicit working Start over', () => {
+  const time = { wall: () => 10000, monotonic: () => 0 };
+  for (const fault of ['notadb', 'head']) {
+    const path = save(),
+      bundle = elapsedBundle();
+    if (fault === 'notadb') writeFileSync(path, Buffer.alloc(4096, 'x'));
+    else {
+      app(path, bundle, time).sql().close();
+      corruptPage(path, 'head');
+    }
+    const a = app(path, bundle, time);
+    assert.equal(a.c.failed()?.kind, 'save_corrupt');
+    assert.equal(a.c.failed()?.startOver, true);
+    a.c.startOver();
+    assert.equal(a.c.failed(), undefined);
+    assert.equal(a.c.game()!.view().view.time, 64800);
+    assert.equal(a.sql().prepare('SELECT format FROM save').get()!.format, 'loka-save-v2');
+    assert.deepEqual(checkpoint(a.sql()), { wall_ms: 10000, remainder: 0, target: 64800 });
+    assert.equal(
+      a.c.game()!.invoke({ action_key: 'look' as never, target_ids: [], input: {} }).kind,
+      'saved',
+    );
+    assert.equal(receipts(a.sql()), 1);
+    a.sql().close();
+  }
+});
+
+// Breaks: an unreadable corrupt opening guesses a new witness, resets a readable replacement, or removes while closure/read is unknown.
+test('unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty', () => {
+  const path = save(),
+    replacement = save(),
+    bundle = elapsedBundle();
+  const time = { wall: () => 10000, monotonic: () => 0 };
+  writeFileSync(path, Buffer.alloc(4096, 'x'));
+  const a = app(path, bundle, time),
+    old = a.c.failed()!.newGame!;
+  const b = app(replacement, bundle, time);
+  b.sql().exec(
+    "UPDATE save SET run_id = 'bbbbbbbb-0000-4000-8000-000000000001'; UPDATE elapsed SET run_id = 'bbbbbbbb-0000-4000-8000-000000000001'",
+  );
+  b.sql().close();
+  writeFileSync(path, readFileSync(replacement));
+  a.sql().exec('BEGIN');
+  a.sql().setAuthorizer((action, operation) =>
+    action === constants.SQLITE_TRANSACTION && operation === 'ROLLBACK'
+      ? constants.SQLITE_DENY
+      : constants.SQLITE_OK,
+  );
+  assert.equal(old().kind, 'pending');
+  assert.equal(a.sql().isTransaction, true);
+  a.sql().setAuthorizer(null);
+  a.sql().exec('ROLLBACK');
+  a.sql().setAuthorizer((action) =>
+    action === constants.SQLITE_SELECT ? constants.SQLITE_DENY : constants.SQLITE_OK,
+  );
+  assert.equal(old().kind, 'pending');
+  a.sql().setAuthorizer(null);
+  assert.equal(old().kind, 'stale_view');
+  assert.equal(
+    a.sql().prepare('SELECT run_id FROM save').get()!.run_id,
+    'bbbbbbbb-0000-4000-8000-000000000001',
+  );
+  assert.deepEqual(checkpoint(a.sql()), { wall_ms: 10000, remainder: 0, target: 64800 });
+  assert.equal(receipts(a.sql()), 0);
+  a.c.startOver();
+  assert.equal(a.c.failed(), undefined);
+  assert.equal(a.c.game()!.view().view.time, 64800);
+  assert.equal(
+    a.sql().prepare('SELECT run_id FROM save').get()!.run_id,
+    'bbbbbbbb-0000-4000-8000-000000000001',
+  );
+  a.sql().close();
 });

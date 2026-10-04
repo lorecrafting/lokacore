@@ -1,0 +1,10 @@
+[
+  {
+    "mutant": "decode-guard",
+    "old_exit": 0
+  },
+  {
+    "mutant": "storage-catch-all",
+    "old_exit": 0
+  }
+]

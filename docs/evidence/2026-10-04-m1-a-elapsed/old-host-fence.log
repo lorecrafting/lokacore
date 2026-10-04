@@ -1,0 +1,44 @@
+✔ openStory.invoke refuses a failing chat on Bram by its key (36.262167ms)
+✔ a tiny world survives a restart with the same state (9.269875ms)
+✔ a retried consumed take replays its receipt; altered intent is a conflict (5.722334ms)
+✔ a failed attempt and a rejection persist; their retries draw nothing (7.588208ms)
+✔ a fault changes nothing and gets no receipt (6.354958ms)
+✔ a lost COMMIT acknowledgement reconciles to the committed receipt (5.053333ms)
+✔ a genuinely failed COMMIT reconciles to not committed; the retry is a fresh attempt (6.65675ms)
+✔ while the COMMIT outcome is unknown every call is fenced; a restart settles it (7.74825ms)
+✔ a process killed after COMMIT restarts with the take once and its trace entry once (277.041083ms)
+✔ a definite failure is traced once; a failed trace write changes nothing (6.197ms)
+✔ while the trace is behind no later entry overtakes a missed one (4.816417ms)
+✔ an unreadable trace never stops play or the save opening (4.161083ms)
+✔ an updated kernel starts a new segment after recovering the old one (5.399ms)
+✔ a transaction a failed ROLLBACK leaves open is never read as saved nor blocks play (4.810875ms)
+✔ a save does not open inside a transaction left open (1.241875ms)
+✔ jobs survive a restart: waiting to 19:00 after it moves Bram as without it (6.691167ms)
+✔ a recipe whose time cost runs a job replays its receipt on retry (3.221792ms)
+✔ a move whose reactions commit replays its events byte for byte after a restart (4.830375ms)
+✔ a recipe narration's pinned participants survive a restart and replay unchanged (2.744292ms)
+✔ a talk committed, then a restart: the stored choice carries its revision and choose works (7.978791ms)
+✔ a new save allocates and pins its identity; a restart and a replay reuse it (12.038125ms)
+✔ a save whose pinned release is missing is refused untouched; a new game moves on (6.347334ms)
+✔ a save of an unknown format is refused with nothing written and no new game (10.372666ms)
+✔ a damaged identity is save_corrupt and untouched; its new game repairs it (122.660125ms)
+✔ an app update reopens a save on its pinned release; new games pin the newest (8.422208ms)
+✔ a save that does not parse is save_corrupt until the player starts a new game (20.74375ms)
+✔ a new game replaces the save; an old invocation id is new again (6.138541ms)
+✔ a new game that fails part way leaves the old save and memory (3.264125ms)
+✔ a new game settles a pending attempt first, in the run it was made in (8.080084ms)
+✔ a new game whose COMMIT is unknown is fenced; settling it moves play to the new run (6.318ms)
+✔ a new game whose COMMIT fails keeps the old save, memory and receipts (3.89775ms)
+✔ a committed new game is adopted before play; a retry does not replace it twice (4.513291ms)
+✔ a corrupt save's new game settles its COMMIT like any other (9.040334ms)
+✔ a new run's entries missed by the trace follow its own header (6.82975ms)
+✔ a new game after a settled one replaces the save again (6.669834ms)
+✔ line two survives reopen and triggering receipt retry without duplicate effects (29.183958ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 597.1665

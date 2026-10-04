@@ -4,14 +4,21 @@
 // ["loka-id-v1", context, nil command id, ordinal] (numeric-profile.md), and room titles
 // are the fixture's text keys.
 import assert from 'node:assert/strict';
-import { readdirSync } from 'node:fs';
+import { globSync } from 'node:fs';
 import { test } from 'node:test';
-import { hash } from '../src/canonical.ts';
-import { commandId } from '../src/id_source.ts';
+import { hash } from '../src/foundation/canonical.ts';
+import { commandId } from '../src/foundation/id_source.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { accepted, allocator, event, rejected } from '../src/decision.ts';
-import { admit, gameView, holds, INSTALLED, newWorld, step as kernelStep } from '../src/world.ts';
+import { accepted, allocator, event, rejected } from '../src/runtime/decision.ts';
+import {
+  admit,
+  gameView,
+  holds,
+  INSTALLED,
+  newWorld,
+  step as kernelStep,
+} from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 // Every rule call sees a deep-frozen world, so a rule that mutates it throws here (ADR-072).
@@ -316,7 +323,9 @@ test('INSTALLED is each rule module and each implemented ruleless capability', (
     .filter((c: { key: string; commands?: string[] }) => !c.commands?.length)
     .map((c: { key: string }) => c.key)
     .filter((k: string) => rows[k]?.implemented_in);
-  const rules = readdirSync(new URL('../src/rules/', import.meta.url)).map((f) => f.slice(0, -3));
+  const rules = globSync('*/rule.ts', { cwd: new URL('../src/mechanics/', import.meta.url) }).map(
+    (f) => f.split('/')[0],
+  );
   const expected = [...rules, ...ruleless].sort().map((k) => [k, [1]]);
   assert.deepEqual(Object.entries(INSTALLED.capabilities).sort(), expected);
 });

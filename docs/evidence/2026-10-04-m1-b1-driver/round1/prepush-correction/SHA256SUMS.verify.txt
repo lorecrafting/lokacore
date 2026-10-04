@@ -1,0 +1,4 @@
+README.md: OK
+current-source-sha256.json: OK
+failed-fullcheck.log: OK
+play-restored.log: OK

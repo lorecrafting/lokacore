@@ -2,8 +2,8 @@
 // named in the JSON file argv[2] ({installed, paths}) and prints, per file, the re-encoded
 // artifact, hash and lock, or the diagnostic.
 import { readFileSync } from 'node:fs';
-import { encode, type Json } from '../src/canonical.ts';
-import { loadCartridge } from '../src/cartridge.ts';
+import { encode, type Json } from '../src/foundation/canonical.ts';
+import { loadCartridge } from '../src/content/cartridge.ts';
 
 const { installed, paths } = JSON.parse(readFileSync(process.argv[2]!, 'utf8'));
 const out = paths.map((path: string) => {
