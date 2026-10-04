@@ -56,3 +56,19 @@ Reviewed fix head: `7e9313e000e0bf2085a0e7cc792cd68ef4a4316a`; prior primary hea
 **Primary disposition for Sol-LEGEND-R1-01: correction verified.** The sole source correction at [reconciliation line 20](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md) now states A/B1/B2 merged and M1-C planned. It agrees with ROADMAP line 28 and independently queried PR #155, merged at `2026-10-04T17:18:06Z` with merge commit `e1b90dca77303dbdbd5bc58284fb67282c3f21e6`. The earlier inspected-main account at line 11 is unchanged and remains historical; the policy, contracts and future boundaries are unchanged. The initial primary pass overlooked the stale cell in the table labeled current; the separate review correctly distinguished it from the historical account.
 
 Independently queried PR #136 at this exact fix head: `changes` and `lint` completed SUCCESS; `elixir`, `typescript` and `sim` completed SKIPPED for the documentation-only update. No job is pending. Applied the installed Ponytail/Ponytail Review criteria to the one-cell correction: Lean already. Ship. Light lane only; no dependency installation, build, runtime test, mutation, native/Simulator or save operation. Normal documentation commit hooks cover this append/index. The historical Sol OPEN disposition above remains the record of that round; the PM owns the separate Sol answer and combined closure/publication.
+
+## Separate requested Sol scoped recheck — round 1
+
+PM-owned read-only CLI session `65828` terminated with EXIT0. Requested `gpt-6-sol`, high reasoning; runtime identity remains unverified. Rechecked source `7e9313e000e0bf2085a0e7cc792cd68ef4a4316a`. Answer SHA-256 `140e81cec93ccd01ae6f20a699fdeb845bf4d0ed7b01c2ba98f077917524218f`; event-log SHA-256 `ba259013b3f6f2a89009aafffeedee23cc419a032fb3345059683da7fed024ff`. Exact answer follows verbatim.
+
+```text
+APPROVE
+
+Sol-LEGEND-R1-01 CLOSED — should-fix — docs/decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md:20. Exact head 7e9313e changes the current table to “A/B1/B2 merged; M1-C planned.” The source-base history contains merge commit #155, and docs/ROADMAP.md:28 records B2 as merged. The dated account at line 11 remains historical.
+
+New necessary findings: none. Ponytail Review: Lean already. Ship.
+
+Scope: Read-only recheck of the fix diff and direct status references, not a repeat review of all 16 files. No checks or runtime tests were run. Exact-head CI state was supplied by the PM, not independently queried; GitHub was unavailable. Runtime model identity remains unverified.
+```
+
+PM combined disposition: **Sol-LEGEND-R1-01 CLOSED; no open findings.** Both primary and separate Sol scoped rechecks approve the one-line current-status correction. The historical inspection account and all policy remain unchanged. PM independently queried source-head CI: `changes` and `lint` completed SUCCESS; `elixir`, `typescript` and `sim` completed expected SKIPPED after the reviewed Markdown-only delta. Final record publication still requires actual terminal-green checks on its own head and a matching-head merge; this entry is not a merge claim.
