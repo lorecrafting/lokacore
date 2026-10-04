@@ -3,33 +3,17 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, ended, plain, why, type group, type Pool } from './model.ts';
+import { bandPhrase, cap, ended, plain, why, type group, type Pool, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
 import { body, head, paper } from './paper.ts';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
-export type Thing = GameView['entities'][number];
+export type { Thing } from './model.ts';
 
-// Each default condition band's colour and hp phrase (04 §15 bands). The colour tiers by the
-// band's cut as the mock does: from 80 up none, from 40 up mid, below that accent.
-const bands: Record<string, [colour: string, phrase: string]> = {
-  perfect_health: [paper.fg, 'is in perfect health'],
-  slightly_scratched: [paper.fg, 'is slightly scratched'],
-  few_bruises: [paper.fg, 'has a few bruises'],
-  some_cuts: [paper.mid, 'has some cuts'],
-  several_wounds: [paper.mid, 'has several wounds'],
-  many_nasty_wounds: [paper.mid, 'has many nasty wounds'],
-  bleeding_freely: [paper.mid, 'is bleeding freely'],
-  covered_in_blood: [paper.accent, 'is covered in blood'],
-  leaking_guts: [paper.accent, 'is leaking guts'],
-  almost_dead: [paper.accent, 'is almost dead'],
-  dying: [paper.accent, 'is DYING'],
-};
-// A band's colour and phrase. ponytail: a cartridge's own band (04 §15 as amended 2026-10-02)
-// draws neutral with its key as words until c1-touch draws its band.<key> text and tone.
-export const band = (key: string): [colour: string, phrase: string] =>
-  Object.hasOwn(bands, key) ? bands[key] : [paper.fg, key.replaceAll('_', ' ')];
+// Tones are projected by the kernel from the cartridge's band table.
+export const band = (tone: Pool['tone']): string =>
+  ({ normal: paper.fg, warning: paper.mid, danger: paper.accent })[tone];
 
 export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
 export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
@@ -80,6 +64,7 @@ export function RoomPage(p: {
       )}
       <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
       <Here view={p.view} text={p.text} open={p.open} />
+      <Ways view={p.view} text={p.text} g={p.g} press={p.press} />
       {p.g.place.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
       ))}
@@ -114,12 +99,28 @@ function Sheet({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-export function ThingPage(p: { name: string; actions: Button[]; press: (b: Button) => void }) {
+export function ThingPage(p: {
+  thing?: Thing;
+  text: Say;
+  actions: Button[];
+  press: (b: Button) => void;
+  contents: Thing[];
+  open: (id: string) => void;
+}) {
   return (
-    <Sheet title={p.name}>
-      {p.actions.length === 0 && <Text style={note}>Nothing to do here.</Text>}
+    <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
+      {p.thing?.state && <Text style={note}>{cap(p.thing.state)}</Text>}
+      {p.actions.length === 0 && p.contents.length === 0 && (
+        <Text style={note}>Nothing to do here.</Text>
+      )}
       {p.actions.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
+      ))}
+      {p.contents.length > 0 && <Text style={titleStyle}>Inside</Text>}
+      {p.contents.map((e) => (
+        <Tap key={e.id} label={`${p.text(e.name)}, open`} onPress={() => p.open(e.id)}>
+          <Text style={{ ...prose, color: paper.accent }}>{cap(p.text(e.name))}</Text>
+        </Tap>
       ))}
     </Sheet>
   );
@@ -127,15 +128,26 @@ export function ThingPage(p: { name: string; actions: Button[]; press: (b: Butto
 
 // The way into the other pages (U3): Journal, Carrying and Settings are opened from here.
 export type More = 'journal' | 'carrying' | 'settings';
-export function CharacterPage(p: { resources?: readonly Pool[]; open: (k: More) => void }) {
+export function CharacterPage(p: {
+  resources?: readonly Pool[];
+  position?: GameView['position'];
+  text: Say;
+  actions: Button[];
+  press: (b: Button) => void;
+  open: (k: More) => void;
+}) {
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
   const { resources = [] } = p;
   return (
     <Sheet title="Character">
       {resources.length === 0 && <Text style={note}>Nothing is known about you yet.</Text>}
-      {resources.map(({ resource: { key }, current, maximum, band: b }) => (
-        <Text key={key} style={prose}>
-          {`${key}  ${current} / ${maximum}${key === 'hp' ? `, ${band(b)[1]}` : ''}`}
+      {p.position && <Text style={prose}>{cap(p.position)}</Text>}
+      {p.actions.map((b) => (
+        <Act key={b.action_key} b={b} press={p.press} />
+      ))}
+      {resources.map((r) => (
+        <Text key={r.resource.key} style={{ ...prose, color: band(r.tone) }}>
+          {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
         </Text>
       ))}
       {(['journal', 'carrying', 'settings'] as const).map((k) => (
@@ -152,9 +164,10 @@ export function JournalPage({ view, text }: { view: GameView; text: Say }) {
     <Sheet title="Journal">
       {view.journal.length === 0 && <Text style={note}>Nothing written yet.</Text>}
       {view.journal.map((q) => (
-        <View key={q.title} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
           <Text style={prose}>{text(q.title)}</Text>
           <Text style={note}>{String(q.state).replaceAll('_', ' ')}</Text>
+          {q.journal && <Text style={prose}>{plain(text(q.journal))}</Text>}
         </View>
       ))}
     </Sheet>
@@ -163,47 +176,86 @@ export function JournalPage({ view, text }: { view: GameView; text: Say }) {
 
 export function CarryingPage(p: {
   items: readonly Thing[];
+  equipment?: GameView['equipment'];
   text: Say;
   open: (id: string) => void;
 }) {
   return (
     <Sheet title="Carrying">
-      {p.items.length === 0 && <Text style={note}>Your hands are empty.</Text>}
+      <Text style={titleStyle}>Held</Text>
+      {p.items.length === 0 && <Text style={note}>You are carrying nothing.</Text>}
       {p.items.map((e) => (
         <Tap key={e.id} label={`${p.text(e.name)}, open`} onPress={() => p.open(e.id)}>
           <Text style={prose}>{p.text(e.name)}</Text>
         </Tap>
       ))}
+      {(p.equipment?.length ?? 0) > 0 && <Text style={titleStyle}>Worn</Text>}
+      {p.equipment?.map(({ slot, item }) => (
+        <View key={slot}>
+          <Text style={note}>{cap(slot.replaceAll('_', ' '))}</Text>
+          {item ? (
+            <Tap label={`${p.text(item.name)}, open`} onPress={() => p.open(item.id)}>
+              <Text style={{ ...prose, color: paper.accent }}>{p.text(item.name)}</Text>
+            </Tap>
+          ) : (
+            <Text style={note}>Empty</Text>
+          )}
+        </View>
+      ))}
     </Sheet>
   );
 }
 
-// The current room's title and its exits in words (a closed one with its reason), and the place's
-// own actions without a target (scan, 00 §4.10's Map row, and any other the footer used to list).
-export function MapPage(p: {
+// Each exit's own controls, kept separate from movement; sight is read-only cartridge prose.
+function Ways(p: {
   view: GameView;
   text: Say;
-  place: Button[];
+  g: Grouped;
   press: (b: Button) => void;
-  walk: (direction: string) => void;
+  moves?: boolean;
 }) {
+  return p.view.exits.map((e) => {
+    const move = p.g.exits.find((x) => x.direction === e.direction)?.button;
+    return (
+      <View key={e.direction} style={{ marginTop: 12 }}>
+        {move && p.moves ? (
+          <Act b={move} press={p.press} />
+        ) : (
+          <Text style={note}>
+            {cap(e.direction)}
+            {!e.available && `: ${why(e, p.text)}`}
+          </Text>
+        )}
+        {e.door && (
+          <Text style={prose}>
+            {cap(p.text(e.door.name))}: {e.door.state}
+          </Text>
+        )}
+        {p.g.door(e.direction).map((b) => (
+          <Act key={b.action_key} b={b} press={p.press} />
+        ))}
+        {e.sight && (
+          <Text style={note}>
+            {`Beyond ${e.direction}: ${p.text(e.sight.title)}${
+              e.sight.entities.length
+                ? ` — ${e.sight.entities.map((x) => p.text(x.name)).join(', ')}`
+                : ''
+            }.`}
+          </Text>
+        )}
+      </View>
+    );
+  });
+}
+
+// Map reuses the room's exit controls and lists the place's targetless actions.
+export function MapPage(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
   return (
     <Sheet title="Map">
       <Text style={prose}>{p.text(p.view.place.title.key)}</Text>
       {p.view.exits.length === 0 && <Text style={note}>No way out is known.</Text>}
-      {p.view.exits.map((e) => {
-        const name = cap(e.direction);
-        return e.available ? (
-          <Tap key={e.direction} label={`Go ${e.direction}`} onPress={() => p.walk(e.direction)}>
-            <Text style={prose}>{`Go ${e.direction}`}</Text>
-          </Tap>
-        ) : (
-          <Text key={e.direction} style={note}>
-            {name}: {why(e, p.text)}
-          </Text>
-        );
-      })}
-      {p.place.map((b) => (
+      <Ways {...p} moves />
+      {p.g.place.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
       ))}
     </Sheet>
@@ -217,6 +269,30 @@ export function SettingsPage({ startOver }: { startOver: () => void }) {
       <Tap label="Start over" onPress={startOver}>
         <Text style={{ ...prose, color: paper.accent }}>Start over</Text>
       </Tap>
+    </Sheet>
+  );
+}
+
+export function ChapterPage(p: { title: string; done: () => void }) {
+  return (
+    <Sheet title={p.title}>
+      <Tap label="Continue" onPress={p.done}>
+        <Text style={{ ...prose, color: paper.accent }}>Continue</Text>
+      </Tap>
+    </Sheet>
+  );
+}
+
+export function ScenePage(p: {
+  scene: NonNullable<GameView['scene']>;
+  text: Say;
+  next?: Button;
+  press: (b: Button) => void;
+}) {
+  return (
+    <Sheet title="">
+      <Text style={prose}>{plain(p.text(p.scene.line))}</Text>
+      {p.next && <Act b={p.next} press={p.press} />}
     </Sheet>
   );
 }

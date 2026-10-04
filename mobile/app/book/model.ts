@@ -6,15 +6,43 @@ import type { Button } from './presenter.ts';
 import { reason, SENTENCE } from './words.ts';
 
 export type Exit = { direction: string; button: Button };
+export type Thing =
+  GameView['entities'][number] | NonNullable<GameView['entities'][number]['contents']>[number];
+export type Page =
+  | { kind: 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'chapter' }
+  | { kind: 'thing'; id: string };
 
-const OWN = ['look', 'choose', 'close_choice']; // drawn in their own places, not as place actions
+// Only projected items: contents are already flattened and filtered for reach by the engine.
+export const things = (v: GameView): Thing[] =>
+  [
+    ...v.entities,
+    ...v.inventory,
+    ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
+  ].flatMap((e) => [e, ...(e.contents ?? [])]);
+
+// Keep the page after a same-room action, stopping at the first item page that disappeared.
+export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
+  if (after.chapter && before.chapter?.index !== after.chapter.index) return [{ kind: 'chapter' }];
+  if (before.place.id !== after.place.id) return [];
+  const visible = things(after);
+  const gone = stack.findIndex((p) => p.kind === 'thing' && !visible.some((e) => e.id === p.id));
+  return gone < 0 ? stack : stack.slice(0, gone);
+}
+
+const OWN = ['look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']; // drawn in their own places, not as place actions
 
 export function group(buttons: Button[]) {
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
   const aimed = (b: Button) => b.target_ids.length > 0;
   return {
     look: buttons.find((b) => b.action_key === 'look' && !aimed(b)),
-    exits: buttons.flatMap((b) => (dir(b) ? [{ direction: dir(b)!, button: b }] : [])),
+    exits: buttons.flatMap((b) =>
+      b.action_key === 'move' && dir(b) ? [{ direction: dir(b)!, button: b }] : [],
+    ),
+    door: (direction: string) =>
+      buttons.filter((b) => b.action_key !== 'move' && dir(b) === direction),
+    continue: buttons.find((b) => b.action_key === 'continue'),
+    position: buttons.filter((b) => ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key)),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
     // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
     place: buttons.filter(
@@ -66,8 +94,16 @@ export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 // owner's bands decision shows the phrase on hp only and colours every pool).
 export type Pool = NonNullable<GameView['resources']>[number];
 const amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`;
-export const said = (rs: readonly Pool[]) =>
-  `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${r.band.replaceAll('_', ' ')}` : amount(r))).join(', ')}`;
+export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
+  const key = `band.${r.band}`;
+  const phrase = text(key);
+  return phrase && phrase !== key ? phrase : r.band.replaceAll('_', ' ');
+};
+export const said = (
+  rs: readonly Pool[],
+  text: (key: string) => string | undefined = () => undefined,
+) =>
+  `Character, ${rs.map((r) => (r.resource.key === 'hp' ? `${amount(r)}, ${bandPhrase(r, text)}` : amount(r))).join(', ')}`;
 
 // The status line's time: the double hour's earthly branch, 子 from 23:00 to 01:00, then one
 // per two hours, with English words for VoiceOver (owner decision, untimed Lantern record). The

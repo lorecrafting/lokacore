@@ -72,7 +72,13 @@ test('a scripted session survives a restart and plays on', () => {
   const path = join(mkdtempSync(join(tmpdir(), 'loka-sm-')), 'save.db');
   const a = processOn(path);
   assert.equal(a.now().place, 'Ferry Landing');
-  assert.deepEqual(a.now().buttons, ['Look', 'Scan', 'Go north', 'Take a leather satchel']);
+  assert.deepEqual(a.now().buttons, [
+    'Look',
+    'Scan',
+    'Go north',
+    'Take a leather satchel',
+    'Take a flask of lamp oil',
+  ]);
   a.press('Take a leather satchel');
   assert.deepEqual(a.now().carrying, ['a leather satchel']);
   assert.deepEqual(a.now().log, ['Taken.']);

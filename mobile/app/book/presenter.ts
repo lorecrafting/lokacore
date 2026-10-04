@@ -12,6 +12,7 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import { OUTCOME, reason, SENTENCE } from './words.ts';
+import { things } from './model.ts';
 
 /**
  * A tappable action: its text and the intent it sends (the session adds id and actor), with the
@@ -56,7 +57,15 @@ function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   });
   const place = v.actions.filter((a) => a.available && !a.input.length && a.target.kind === 'none');
   const moves = v.exits.filter((e) => e.available);
-  const held = [...v.entities, ...v.inventory].flatMap((e) =>
+  const doors = v.exits.flatMap((e) =>
+    (e.door?.actions ?? [])
+      .filter((a) => a.available)
+      .map((a) => ({
+        ...button(a, ` ${text(e.door!.name)} (${e.direction})`),
+        input: { direction: e.direction },
+      })),
+  );
+  const held = things(v).flatMap((e) =>
     e.actions.filter((a) => a.available).map((a) => button(a, ` ${text(e.name)}`, e.id)),
   );
   return [
@@ -67,6 +76,7 @@ function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       target_ids: [],
       input: { direction: e.direction },
     })),
+    ...doors,
     ...held,
     ...asked(v, label),
   ];

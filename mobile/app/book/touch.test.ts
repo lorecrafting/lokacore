@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { openGame } from '../../authority/local-story/session.ts';
-import { absent } from './model.ts';
+import { absent, group } from './model.ts';
 import { presenter } from './presenter.ts';
 import { reason } from './words.ts';
 
@@ -217,4 +217,24 @@ test('closed answers and a stale answer give their reason in words, not their co
   a.smoke.press({ label: 'Carry', action_key: 'choose', target_ids: [], input });
   assert.match(a.screen().log.at(-1)!, /^You can't do that: /);
   assert.ok(!a.screen().log.at(-1)!.includes(spaced('invalid_state')));
+});
+
+// Breaks: a per-exit unlock/open button loses its direction or is sent as an item action,
+// so the real authority cannot transition the gate despite the held key.
+test('the Lantern gate unlocks and opens through its projected exit buttons', () => {
+  const a = fresh();
+  a.tap(...FETCH);
+  assert.deepEqual(
+    group(a.screen().buttons)
+      .door('west')
+      .map((b) => b.label),
+    ['Unlock the old gate (west)'],
+  );
+  a.tap('Unlock the old gate (west)');
+  assert.equal(a.screen().view.exits.find((e) => e.direction === 'west')!.door!.state, 'closed');
+  a.tap('Open the old gate (west)');
+  const west = a.screen().view.exits.find((e) => e.direction === 'west')!;
+  assert.equal(west.door!.state, 'open');
+  assert.equal(west.available, true);
+  a.sql.close();
 });
