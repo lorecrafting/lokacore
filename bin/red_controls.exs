@@ -1,11 +1,7 @@
-# Red controls: plant each violation the Elixir checks exist to catch, and require the
-# check to fail with the expected message. Planted files are always removed. ast-grep
-# rules carry their own red cases (`ast-grep test`).
-#
-#   elixir bin/red_controls.exs
+# Red controls plant violations, require checks to fail, and clean their own files.
+# Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
 
-# Prints the control's result and returns its failure count (0 or 1).
 verdict = fn
   name, true, _ ->
     IO.puts("ok   #{name}")
@@ -112,8 +108,6 @@ controls = [
    ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"}
 ]
 
-# Refuse occupied paths before any control runs; exclusive creation also closes the race
-# between this preflight and a plant. Cleanup below owns only successfully created files.
 for {_, files, _, _} <- controls, {rel, _} <- files do
   if File.exists?(Path.join(root, rel)),
     do: raise("refusing to overwrite red-control file: #{rel}")
