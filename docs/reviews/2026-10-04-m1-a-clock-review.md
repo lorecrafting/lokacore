@@ -51,3 +51,18 @@ The delivery helpers match their original bodies. Independent recomputation matc
 
 Requested model: Sol per workflow. Runtime model identity: not verifiable here.
 ```
+
+## Primary fix-round 1 recheck — 2026-10-04
+
+Reviewed fixed head `e44f8104e65a0323b94fd7d2c97ca359e0ab9046`, including fix `0eb5c4b51ad9cd002869da287ef18e62db8b5715`. PM personally confirmed all six CI jobs successful on this exact head before recheck. Historical primary and separate Sol source verdicts above remain unchanged.
+
+**Current primary verdict: APPROVE. No open findings.**
+
+- **M1A-01 closed.** The fault renames the actual SQLite receipt table after successful COMMIT and loses its acknowledgement. Normal SQLite reads then fail; both trusted/player calls remain pending and memory stays at its old clock. Restoring the table permits real receipt reconciliation and replay without a second advance. The updated evidence identifies the superseded synthetic-read proof honestly.
+- **Separate Sol F1 closed.** Only `SyntaxError` from the existing receipt decode call becomes `conflict`. Real SQLite read failures rethrow. Controlled malformed command and response JSON both return literal conflict without memory, durable head or receipt-count changes; a real missing-table error remains `ERR_SQLITE_ERROR` and replay resumes after restoration. This adds no result-digest guarantee beyond the existing documented integrity limitation.
+
+Inspected changed delivery/test/spec/evidence and direct authority/store/save callers. Rechecked final contract agreement against the original derived requirements: the only production fix is the narrow receipt-decode guard; run-before-receipt and matched-run replay-before-clock ordering, closed admission, frozen profiles/IDs, pure proposal machinery and M1-B carries remain intact. The normal main content merge is independently reviewed work; unchanged core/compiler/content behavior was not retested broadly.
+
+Independent command: `mise exec -- node --test --test-reporter=spec mobile/authority/local-story/elapsed.test.ts`: **7 passed**. Reviewer red controls separately removed trusted fencing (**1 named failure**), removed decode classification (**both malformed-column tests fail**) and broadened the catch (**real SQLite-error test fails**), each exit 1. All original bytes restored. Verified all **97** retained evidence hashes and the round-1 restored-source manifest against final review bytes; inspected old-suite-surviving new guard controls and actual red logs.
+
+Ponytail Review: **Lean already. Ship.** One narrow guard reuses existing receipt/store behavior; no abstraction, dependency or duplicated fault test. This is the primary recheck; the simultaneous separate Sol fixed-head result remains a separate review.
