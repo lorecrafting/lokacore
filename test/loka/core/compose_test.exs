@@ -377,4 +377,92 @@ defmodule Loka.Core.ComposeTest do
   end
 
   defp vary(op, _), do: op
+
+  # Breaks: old-rate settlement, fraction retention/cap reset, zero rate, unsafe absence or malformed metadata.
+  test "opted recovery literal rows and independent metadata replay" do
+    fixture = JSON.decode!(File.read!("protocol/fixtures/resource_recovery.json"))
+
+    for c <- fixture["cases"] do
+      spec = c["spec"] || fixture["spec"]
+      resources = if c["row"] == nil, do: %{}, else: %{Compose.key(fixture["target"]) => c["row"]}
+
+      state = %{
+        "clock" => c["clock"],
+        "resource_specs" => %{Compose.key(fixture["resource"]) => spec},
+        "resources" => resources
+      }
+
+      ops =
+        Enum.map(
+          c["ops"],
+          &Map.merge(
+            %{
+              "op" => "resource.adjust",
+              "writer_group" => 0,
+              "resource" => fixture["resource"],
+              "entity_id" => fixture["target"]["entity_id"]
+            },
+            &1
+          )
+        )
+
+      ops =
+        if c["advance"] == nil,
+          do: ops,
+          else:
+            ops ++
+              [
+                %{
+                  "op" => "time.advance",
+                  "writer_group" => 0,
+                  "from" => c["clock"],
+                  "to" => c["advance"]
+                }
+              ]
+
+      delta = %{"ops" => ops}
+      assert Compose.compose(state, delta) == c["expected"], c["id"]
+      observation = %{"state" => state, "delta" => delta, "result" => c["expected"]}
+      assert Invariants.check("delta_preconditions_hold", observation), c["id"]
+
+      case c["expected"] do
+        %{"fault" => _} ->
+          fake = %{
+            "changes" => [
+              %{
+                "target" => fixture["target"],
+                "value" => %{"value" => 0, "at" => c["clock"], "rate" => 2, "remainder" => 0}
+              }
+            ]
+          }
+
+          refute Invariants.check("delta_preconditions_hold", %{observation | "result" => fake}),
+                 c["id"]
+
+        %{"changes" => [row | _]} ->
+          fake = %{"changes" => [put_in(row, ["value", "remainder"], -1)]}
+
+          refute Invariants.check("delta_preconditions_hold", %{observation | "result" => fake}),
+                 c["id"]
+
+          if c["query"] do
+            assert Compose.current(row["value"], spec, c["query"]["at"]) == c["query"]["value"],
+                   c["id"]
+          end
+      end
+    end
+  end
+
+  # Breaks: optional recovery schemas accept omitted table fields, unsafe/negative rates or malformed intervals.
+  test "recovery schema trust-boundary literals" do
+    fixture = JSON.decode!(File.read!("protocol/fixtures/resource_recovery.json"))
+
+    for c <- fixture["contracts"] do
+      errors =
+        Enum.map(c["errors"], &%{path: &1["path"], code: String.to_existing_atom(&1["code"])})
+
+      expected = if errors == [], do: :ok, else: {:error, errors}
+      assert Contracts.validate(c["contract"], c["value"]) == expected, c["id"]
+    end
+  end
 end

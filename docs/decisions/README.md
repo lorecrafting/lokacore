@@ -131,3 +131,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [M1-B1 durable elapsed host](pm-decision-m1-b1-durable-elapsed-2026-10-04.md): checkpoint/v2, reserved input, typed completion and trusted trace replay.
 - [M1-B2 app lifecycle and elapsed sampler](pm-decision-m1-b2-lifecycle-2026-10-04.md): resume reservations, confirmed touch updates and the current development consumer.
+
+- [M2-A position recovery](pm-decision-m2-a-position-recovery-2026-10-04.md): exact fractions, player rate/position agreement, Save validation and the actual sampler consumer.

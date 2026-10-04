@@ -1,8 +1,9 @@
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
 // after STEP read one kernel step and are TypeScript only (rules are TypeScript, ADR-074).
+import { recovered } from './invariants_resource.ts';
 import type { Json } from '../foundation/canonical.ts';
-import { current, key, same, target, type Result } from '../foundation/compose.ts';
+import { key, same, target, type Result } from '../foundation/compose.ts';
 import { CAPABILITY_OWNERS, EVALUATION_FAULTS, type DeltaOp } from '../contracts.gen.ts';
 import { gameview_agrees_with_admission } from '../view/invariants_view.ts';
 import { validate } from '../foundation/validate.ts';
@@ -60,7 +61,15 @@ function initial(op: Any, s: Any): Json | undefined {
     return s.barriers?.[key(target(op))] ?? s.barrier_initial?.[key(op.barrier)];
   if (family === 'resource') {
     const spec = s.resource_specs?.[key(op.resource)];
-    return spec && current(s.resources?.[key(target(op))], spec, s.clock);
+    const row = s.resources?.[key(target(op))];
+    if (!spec || spec.regen) return undefined;
+    const before = row ?? { value: spec.start, at: 0 };
+    return Number.isInteger(before.value) && Number.isInteger(before.at)
+      ? Math.min(
+          spec.maximum,
+          before.value + spec.gain * (Math.floor(s.clock / 3600) - Math.floor(before.at / 3600)),
+        )
+      : undefined;
   }
   return s.clock;
 }
@@ -106,6 +115,15 @@ function questValid(op: Any, quests: Map<string, Any>): boolean {
   );
 }
 
+function offeredChoice(op: Any, s: Any): boolean {
+  const row = s.choices?.[op.continuation_id];
+  return (
+    Array.isArray(row?.choice_ids) &&
+    row.choice_ids.includes(op.choice_id) &&
+    row.opened_revision === op.expected_revision
+  );
+}
+
 function extra(
   op: Any,
   s: Any,
@@ -119,14 +137,8 @@ function extra(
     case 'quest.activate':
     case 'quest.transition':
       return questValid(op, quests);
-    case 'choice.resolve': {
-      const row = s.choices?.[op.continuation_id];
-      return (
-        Array.isArray(row?.choice_ids) &&
-        row.choice_ids.includes(op.choice_id) &&
-        row.opened_revision === op.expected_revision
-      );
-    }
+    case 'choice.resolve':
+      return offeredChoice(op, s);
     case 'job.schedule':
       return op.due_time > horizon;
     case 'job.complete':
@@ -135,7 +147,12 @@ function extra(
       return op.to > op.from;
     case 'resource.adjust': {
       const spec = s.resource_specs?.[key(op.resource)];
-      return spec !== undefined && op.to >= spec.minimum && op.to <= spec.maximum;
+      return (
+        spec !== undefined &&
+        Number.isInteger(op.to) &&
+        op.to >= spec.minimum &&
+        op.to <= spec.maximum
+      );
     }
     case 'cooldown.start':
       return op.at === s.clock;
@@ -186,11 +203,23 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
     const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));
+    const resources = new Map<string, Json>();
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
       const k = key(target(op));
       const [need, give] = link(op);
+      if (op.op === 'resource.adjust') {
+        const spec = state.resource_specs?.[key(op.resource)];
+        if (spec?.regen) {
+          const before = resources.has(k) ? resources.get(k) : state.resources?.[k];
+          const after = recovered(op, spec, before, state.clock);
+          if (!after) return false;
+          resources.set(k, after);
+          continue;
+        }
+        if (op.next_rate !== undefined) return false;
+      }
       if (
         !same(seen.has(k) ? seen.get(k) : initial(op, state), need) ||
         !extra(op, state, horizon, containers, quests)
@@ -203,7 +232,9 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
       if (op.op === 'quest.transition')
         quests.set(op.instance_id, { ...quests.get(op.instance_id), state: op.to });
     }
-    return true;
+    return [...resources].every(([k, expected]) =>
+      result.changes.some((r: Any) => key(r.target) === k && same(r.value, expected)),
+    );
   },
   fault_discards_whole_proposal: ({ result }) =>
     Object.keys(result).length === 1 &&

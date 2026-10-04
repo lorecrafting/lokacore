@@ -176,3 +176,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Driver-managed elapsed saves, reserved input and replay follow the [M1-B1 PM adoption](../decisions/pm-decision-m1-b1-durable-elapsed-2026-10-04.md).
 - App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
+
+- Exact fractional recovery, the final player rate/position guard and opted Save validation follow the [M2-A PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).

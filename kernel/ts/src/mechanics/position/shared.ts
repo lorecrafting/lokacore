@@ -1,11 +1,11 @@
 // Shared position@1 queries and verb mapping (mechanics.md position@1). Rules import kernel
 // helpers; movement never depends on the position rule module.
-import type { CharacterId, DefinitionRef, FactValue } from '../../contracts.gen.ts';
+import type { CharacterId, DefinitionRef, FactValue, ResourceRegen } from '../../contracts.gen.ts';
 import { has, type World } from '../../runtime/decision.ts';
 import { value } from '../fact.ts';
 
 /** Each position@1 command, its position and its outcome. */
-export const VERBS: Readonly<Record<string, [string, string]>> = {
+export const VERBS: Readonly<Record<string, [keyof ResourceRegen['by_position'], string]>> = {
   stand: ['standing', 'stood'],
   sit: ['sitting', 'sat'],
   rest: ['resting', 'rested'],

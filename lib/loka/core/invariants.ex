@@ -4,9 +4,7 @@ defmodule Loka.Core.Invariants do
   (docs/ROADMAP.md, verification harness). `kernel/ts/src/runtime/invariants.ts` is the TypeScript
   twin; both run the `"invariants"` cases of
   `protocol/fixtures/composition.json`.
-
   `check(id, observation)` is true when the invariant holds. Observation fields:
-
   - `"state"`, `"delta"`, `"result"`: a base state, a StateDelta and its
     `Loka.Core.Compose.compose/2` result;
   - `"resolution"`: a TargetResolution;
@@ -15,7 +13,6 @@ defmodule Loka.Core.Invariants do
     host published. An unknown id raises.
   """
   alias Loka.Core.Compose
-
   @registry_path Path.expand("../../../protocol/error_registry.json", __DIR__)
   @external_resource @registry_path
   @registry File.read!(@registry_path)
@@ -29,7 +26,6 @@ defmodule Loka.Core.Invariants do
     "abandoned" => ["active"]
   }
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
-
   @spec check(String.t(), map()) :: boolean()
   def check("one_container_per_item", %{"state" => s, "result" => r}) do
     moved = moved(r)
@@ -56,7 +52,7 @@ defmodule Loka.Core.Invariants do
   # Replay success preconditions independently of Compose.compose/2, including cross-target
   # overlays for containment and quest scope. A fault vacuously holds this success-only check.
   def check("delta_preconditions_hold", %{"state" => s, "delta" => %{"ops" => ops}, "result" => r}) do
-    Map.has_key?(r, "fault") or preconditions_hold?(s, ops)
+    Map.has_key?(r, "fault") or preconditions_hold?(s, ops, r)
   end
 
   def check("fault_discards_whole_proposal", %{"result" => r}) do
@@ -102,11 +98,11 @@ defmodule Loka.Core.Invariants do
         do: {e, c}
   end
 
-  defp preconditions_hold?(s, ops) do
-    if not is_integer(s["clock"]), do: false, else: replay_preconditions(s, ops)
+  defp preconditions_hold?(s, ops, result) do
+    if not is_integer(s["clock"]), do: false, else: replay_preconditions(s, ops, result)
   end
 
-  defp replay_preconditions(s, ops) do
+  defp replay_preconditions(s, ops, result) do
     horizon =
       Enum.reduce(ops, s["clock"], fn op, t ->
         if op["op"] == "time.advance", do: op["to"], else: t
@@ -115,18 +111,52 @@ defmodule Loka.Core.Invariants do
     containers = Map.get(s, "containers", %{})
     quests = Map.get(s, "quests", %{})
 
-    Enum.reduce_while(ops, {%{}, containers, quests}, fn op, {seen, containers, quests} ->
-      k = Compose.key(Compose.target(op))
-      {need, give} = link(op)
-      before = Map.get_lazy(seen, k, fn -> initial(op, s) end)
+    replay =
+      Enum.reduce_while(ops, {%{}, containers, quests, %{}}, &replay_op(&1, s, horizon, &2))
 
-      if before == need and extra?(op, s, horizon, containers, quests) do
-        {:cont,
-         {Map.put(seen, k, give), moved_container(op, containers), moved_quest(op, quests)}}
-      else
-        {:halt, false}
+    case replay do
+      false ->
+        false
+
+      {_, _, _, resources} ->
+        Enum.all?(resources, &written?(&1, result))
+    end
+  end
+
+  defp written?({k, expected}, result),
+    do:
+      Enum.any?(result["changes"], &(Compose.key(&1["target"]) == k and &1["value"] == expected))
+
+  defp replay_op(op, s, horizon, {seen, containers, quests, resources}) do
+    k = Compose.key(Compose.target(op))
+
+    spec =
+      if op["op"] == "resource.adjust",
+        do: get_in(s, ["resource_specs", Compose.key(op["resource"])])
+
+    if spec != nil and spec["regen"] != nil do
+      before = Map.get_lazy(resources, k, fn -> get_in(s, ["resources", k]) end)
+
+      case Loka.Core.InvariantsResource.recovered(op, spec, before, s["clock"]) do
+        nil -> {:halt, false}
+        after_row -> {:cont, {seen, containers, quests, Map.put(resources, k, after_row)}}
       end
-    end) != false
+    else
+      replay_legacy(op, s, horizon, k, {seen, containers, quests, resources})
+    end
+  end
+
+  defp replay_legacy(op, s, horizon, k, {seen, containers, quests, resources}) do
+    {need, give} = link(op)
+    before = Map.get_lazy(seen, k, fn -> initial(op, s) end)
+
+    if before == need and extra?(op, s, horizon, containers, quests) do
+      {:cont,
+       {Map.put(seen, k, give), moved_container(op, containers), moved_quest(op, quests),
+        resources}}
+    else
+      {:halt, false}
+    end
   end
 
   # Mark each path once; a deep chain is linear in the number of rows.
@@ -185,10 +215,8 @@ defmodule Loka.Core.Invariants do
 
   defp extra?(%{"op" => "time.advance"} = op, _, _, _, _), do: op["to"] > op["from"]
 
-  defp extra?(%{"op" => "resource.adjust"} = op, s, _, _, _) do
-    spec = get_in(s, ["resource_specs", Compose.key(op["resource"])])
-    spec != nil and op["to"] >= spec["minimum"] and op["to"] <= spec["maximum"]
-  end
+  defp extra?(%{"op" => "resource.adjust"} = op, s, _, _, _),
+    do: Loka.Core.InvariantsResource.legacy_valid?(op, s)
 
   defp extra?(%{"op" => "cooldown.start"} = op, s, _, _, _), do: op["at"] == s["clock"]
 
@@ -255,11 +283,8 @@ defmodule Loka.Core.Invariants do
   defp initial(%{"op" => "job." <> _, "job_id" => j}, s), do: get_in(s, ["jobs", j, "status"])
   defp initial(%{"op" => "time.advance"}, s), do: s["clock"]
 
-  defp initial(%{"op" => "resource.adjust"} = op, s) do
-    spec = get_in(s, ["resource_specs", Compose.key(op["resource"])])
-    row = get_in(s, ["resources", Compose.key(Compose.target(op))])
-    spec && Compose.current(row, spec, s["clock"])
-  end
+  defp initial(%{"op" => "resource.adjust"} = op, s),
+    do: Loka.Core.InvariantsResource.initial(op, s)
 
   defp initial(%{"op" => "cooldown.start"} = op, s),
     do: get_in(s, ["cooldowns", Compose.key(Compose.target(op))])

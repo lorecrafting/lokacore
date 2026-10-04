@@ -433,7 +433,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Resource adjustment (04 §5.3). Target: resource (resource, entity_id). Preconditions: the resource has a spec (ResourceSpec); its current value equals `from`; `to` is within the spec's bounds; never clamped. The current value is derived: the stored value (start, stored at time 0, when unset) plus gain for each hour boundary (floor(time / 3600)) the base clock has crossed since it was stored, stopping at maximum (regeneration). Writes {value: to, at: the base clock}, so a write stores the derived value. The rule does the arithmetic; a same-group sequence chains (each op's `from` the previous op's `to`).",
+          "description": "Resource adjustment (04 §5.3). Target: resource (resource, entity_id). Preconditions: the resource has a spec (ResourceSpec); its current value equals `from`; `to` is within the spec's bounds; never clamped. The current value is derived: the stored value (start, stored at time 0, when unset) plus gain for each hour boundary (floor(time / 3600)) the base clock has crossed since it was stored, stopping at maximum (regeneration). Writes {value: to, at: the base clock}, so a write stores the derived value. The rule does the arithmetic; a same-group sequence chains (each op's `from` the previous op's `to`). Opted recovery requires valid {value,at,rate,remainder} metadata and settles the old rate at the committed base clock. Optional next_rate must belong to its authored table. Writes the settled remainder and retained/new rate, clearing remainder when to equals maximum.",
           "type": "object",
           "properties": {
             "op": {
@@ -453,6 +453,12 @@
             },
             "to": {
               "$ref": "resource.schema.json#/$defs/ResourceInt"
+            },
+            "next_rate": {
+              "description": "Opted recovery only: a nonnegative authored position-table rate. Settle old rate at base clock before changing it, including when from equals to. Zero retains its literal meaning.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
             }
           },
           "required": [

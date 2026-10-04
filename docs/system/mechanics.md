@@ -18,7 +18,10 @@ The body starts in `entry`, each NPC in its room, each item at its location; the
 `calendar.start` or 0 (`:40`); each scheduled NPC's first job is due at its schedule's first
 hour strictly after the start; facts hold their defaults, with no record until the first change
 (so the [position](#position1-kerneltssrcmechanicspositionrulets) fact adds nothing to a fresh state); a world starting after time 0 stores
-the body's resources at their start values. One body per world; rules read the actor from the
+the body's legacy resources at their start values. Every opted recovery pool has a required
+player-body row at the birth clock, including zero, with its authored start, standing rate
+and zero remainder ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). One body per world;
+rules read the actor from the
 command and its body from `bodyOf` (`runtime/decision.ts:159`).
 
 ## movement@1 (`kernel/ts/src/mechanics/movement/rule.ts`)
@@ -101,14 +104,19 @@ The actor's position is the engine fact `position` (enum `standing`, `sitting`, 
 `sleeping`, default `standing`, scope player), which the compiler adds when the lock holds
 `position` ([cartridge.md](cartridge.md#compiler)). `stand`, `sit`, `rest`, `sleep` (no
 target): the command's position equal to the current one is `invalid_state`; else accepted
-`stood`, `sat`, `rested` or `slept`, one `fact.assign` at the actor's player scope with
-`expected` the current position and no event from the rule (the host adds `fact_changed`).
+`stood`, `sat`, `rested` or `slept`. Resolve the actor's body through `bodyOf`; for each
+opted recovery pool in DefinitionRef order, emit an exact zero-amount `resource.adjust` with
+the destination position's `next_rate`, including when `from == to`. These operations settle
+the old rate first, then one `fact.assign` at the actor's player scope has `expected` the
+current position. All operations share one writer group; the host adds `fact_changed` at
+the assignment's causal position. Legacy pools receive no position adjustment.
 Every change between two positions is legal (twelve), and every verb but `move` works in any
 position ([movement@1](#movement1-kerneltssrcmechanicsmovementrulets)). Content may read the fact
 (`fact_compare`, a reaction's `on.fact`) but never write it (`RESERVED_FACT`). The GameView
 shows `position` and lists the verbs but the current position's with the place's actions
-([protocol.md](protocol.md#gameview)). No position changes regeneration (00 §4.2 as amended
-2026-10-03). Sleeping that cannot act, waking on damage, double damage and `meditating` are
+([protocol.md](protocol.md#gameview)). Position affects only opted resource recovery as
+specified below ([PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md)).
+Sleeping that cannot act, waking on damage, double damage and `meditating` are
 LATER ([ROADMAP](../ROADMAP.md)).
 
 ## description_variant@1 and inspectable_detail@1 (`mechanics/description_variant/rule.ts`)
@@ -132,10 +140,24 @@ The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1
 ## resource@1 (`kernel/ts/src/mechanics/resource.ts`)
 
 Ruleless. A body's current value is derived from the stored row and the clock: `gain` per
-hour boundary crossed, capped at `maximum` (`foundation/compose.ts:87`). Costs are paid in order as exact
+hour boundary crossed, capped at `maximum` (`foundation/resource.ts:59`), for legacy pools.
+An optional `regen {every, by_position}` instead uses a required stored
+`{value, at, rate, remainder}` row. At `now`, settle the **old stored rate** over `now-at`:
+conceptually divide `remainder + (now-at)*rate` by `every`, adding the quotient and retaining
+the residual. `gain` is ignored for opted recovery. At maximum discard all credit, including
+the fraction; an explicit adjustment to maximum does the same. Spending below full preserves
+the fraction; a zero rate preserves it while below maximum. Queries are pure and never write
+metadata. Split elapsed time into whole intervals and residual before multiplying: a positive
+rate caps immediately when whole intervals suffice, otherwise their gain is bounded by the
+resource span and the residual multiplication is exact under the authored bound in
+[cartridge.md](cartridge.md#compiler). No per-unit loop or unsafe full elapsed product.
+Opted rows require bounded integer value, safe integer `0 <= at <= committed clock`, an
+authored rate, and integer `0 <= remainder < every`; full rows require zero remainder.
+Missing or malformed opted rows fail preconditions rather than falling back to time zero.
+Costs are paid in order as exact
 `resource.adjust` ops; one that would go below `minimum` refuses the whole command
-`insufficient_resource` (`pay`, `:67`). A recipe step `resource.adjust` saturates at the bounds
-and is dropped when it changes nothing (`adjust`, `:39`; `mechanics/action_recipe/rule.ts:146`). No
+`insufficient_resource` (`pay`, `:73`). A recipe step `resource.adjust` saturates at the bounds
+and is dropped when it changes nothing (`adjust`, `:45`; `mechanics/action_recipe/rule.ts:146`). No
 events. The engine pools are hp, ma, mv ([cartridge.md](cartridge.md#compiler)); the GameView
 shows each with a condition band and its tone from the pool's own `bands`, else the
 cartridge's `world.bands`, else the engine default table ([protocol.md](protocol.md#gameview)).

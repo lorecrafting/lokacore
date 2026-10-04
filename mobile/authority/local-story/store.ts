@@ -18,6 +18,7 @@ import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/co
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { row } from '../../../kernel/ts/src/runtime/world.ts';
+import { recoveryFault } from '../../../kernel/ts/src/mechanics/resource.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
 export type Db = {
@@ -124,6 +125,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
+    if (recoveryFault(world)) return undefined;
     return saved(world, h.revision, { ...m, parent, seed, pin } as Meta, db);
   } catch (e) {
     if (e instanceof SyntaxError) return undefined;
