@@ -34,7 +34,13 @@ export function elapsed(s: Story, evidence: Elapsed): Reply {
   );
   const command = { id: command_id, world_context_id: s.world.context, payload } as Command;
   const digest = hash(command as never);
-  const old = receipt(s.db, scope(s), command_id);
+  let old: ReturnType<typeof receipt>;
+  try {
+    old = receipt(s.db, scope(s), command_id);
+  } catch (e) {
+    if (e instanceof SyntaxError) return { kind: 'conflict' };
+    throw e;
+  }
   if (old) {
     if (
       old.intent_digest_version !== ELAPSED_INTENT ||

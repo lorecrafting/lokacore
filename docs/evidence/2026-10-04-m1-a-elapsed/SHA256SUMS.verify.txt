@@ -82,7 +82,16 @@ rate-minimum-fixtures.log: OK
 rate-minimum-generate.log: OK
 rate-required-fixtures.log: OK
 rate-required-generate.log: OK
+round1-green.log: OK
+round1-new-decode-guard.log: OK
+round1-new-real-sqlite-fence.log: OK
+round1-new-results.json: OK
+round1-new-storage-catch-all.log: OK
+round1-old-decode-guard.log: OK
+round1-old-results.json: OK
+round1-old-storage-catch-all.log: OK
 schema-green-restored.log: OK
 schema-results.json: OK
 size-final.log: OK
+source-restored-round1-sha256.json: OK
 source-restored-sha256.json: OK

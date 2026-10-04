@@ -14,7 +14,7 @@ Developer-observed results for the [elapsed contract decision](../../decisions/p
 
 `mutations.json` and `compiler-mutations.json` name the exact planted changes. Each was applied separately to the old same-layer suite before adding its missing assertions. All 16 TypeScript and seven Elixir mutations survived those old suites. The new focused suites kill all 23. Each process restores the saved source in a `finally` block; compiler controls additionally verify restored SHA-256 bytes. The restored source manifest records the final bytes, including regenerated contracts.
 
-Fourteen TypeScript controls fail named behavioral assertions. Removing receipt replay instead attempts a duplicate receipt insert and fails SQLite's real UNIQUE constraint. Removing the commit fence attempts a read while reconciliation is unavailable and fails the controlled `read unavailable` operation. These two are runtime behavior failures, not assertion failures. All seven Elixir controls fail ExUnit assertions (exit 2); TS controls exit 1.
+Fourteen TypeScript controls fail named behavioral assertions. Removing receipt replay instead attempts a duplicate receipt insert and fails SQLite's real UNIQUE constraint. The original removed-fence control failed a synthetic `read unavailable` error; the round-1 correction below supersedes that storage-fault proof with an actual SQLite error. Its historical raw log remains retained. These two are runtime behavior failures, not assertion failures. All seven Elixir controls fail ExUnit assertions (exit 2); TS controls exit 1.
 
 ## Schema sweep
 
@@ -29,3 +29,16 @@ Ponytail Review: Lean already. Ship. The delivery split reuses three existing he
 The raw advance retains its existing nonfuture-job fault; chronological recurrence segmentation belongs to M1-B. Persisted elapsed commands replay directly through the trusted entry; paused CLI trace dispatch/run-namespace verification remains the explicit M1-B carry. No full driver, elapsed sampler or all-trace-conformance completion is claimed.
 
 Raw retained logs are redacted before retention and covered by `SHA256SUMS`; verification is beside that manifest and neither file hashes itself. Full normal pre-push and exact-head CI remain publication checks.
+
+## Fix round 1 — M1A-01 and separate Sol F1
+
+The [independent source reviews](../../reviews/2026-10-04-m1-a-clock-review.md) required a real storage-read fault and typed conflict on malformed persisted JSON. The test now renames `receipt` after the actual successful COMMIT, directly inspects the retained row under its temporary name, keeps both trusted/player delivery pending and memory at its old clock, then restores the table before real receipt reconciliation. `getFirstSync` always executes SQLite; no synthetic read failure or SQL-prefix fault selector remains. The deliberate lost-COMMIT-acknowledgement error models uncertainty after a verified successful transaction.
+
+The elapsed entry catches only `SyntaxError` from the existing receipt decode call and returns literal `conflict`; actual SQLite read errors propagate. Legacy store/player/fence code is unchanged. Controlled SQL edits of either stored command or response JSON prove two distinct decode failures leave world/revision/receipt count unchanged. A separate reversible missing-table case proves the guard does not swallow genuine storage errors.
+
+- Focused kernel/portable/schedule/real-authority suite: **52 pass** (`round1-green.log`).
+- Missing decode guard and catch-all guard both survive the old authority suite before the three new cases are added (`round1-old-results.json`). Missing guard subsequently fails both malformed-column tests with actual `SyntaxError`; catch-all fails the expected genuine SQLite exception. Removed fence fails with actual `ERR_SQLITE_ERROR`, `no such table: receipt`. These are distinct runtime/assertion controls (`round1-new-results.json` and logs).
+- Every mutated source is restored exactly and verified by SHA-256. Initial reviewed evidence remains historical; the separate round-1 source manifest describes current restored bytes; the initial source manifest remains unchanged.
+- Ponytail Review: Lean already. Ship. Correctness review confirms the run guard and matched-run receipt ordering stay intact, only decode syntax failures become conflicts, and real storage failures/fencing retain their existing behavior. No helper, store API, receipt format, schema or unrelated integrity guarantee is introduced.
+
+Separate Sol answer is retained verbatim in the review record: requested `gpt-6-sol`, runtime model identity unverified, process exit 0; answer SHA `5e985f1ced7bbd9453517c1eded5297d21a24c3535b05e31fbcf166d416c5e73`, transcript SHA `438a43d4e0703c82929c8734f34cca5db8c6982e98998dfa4a96b604e057d71f`. Primary CHANGES REQUIRED remains historical until its independent scoped recheck.

@@ -32,23 +32,22 @@ function setup(scene = false) {
   assert.ok(loaded.ok);
   const fresh = newWorld(loaded.cartridge as Cartridge, CONTEXT, [1, 2, 3, 4]);
   const sql = new DatabaseSync(':memory:');
-  const fault = { armed: false, unreadable: false, reads: 0 };
+  const fault = { armed: false, reads: 0 };
   const db = {
     execSync(q: string) {
       const before = sql.isTransaction;
       sql.exec(q);
-      // Lose a successful transaction completion acknowledgement, then block actual reads.
+      // Lose a successful COMMIT acknowledgement after making receipt reads fail in real SQLite.
       // This is an operation fault; no SQL text or statement spelling selects it.
       if (fault.armed && before && !sql.isTransaction) {
         fault.armed = false;
-        fault.unreadable = true;
+        sql.exec('ALTER TABLE receipt RENAME TO unavailable_receipt');
         throw new Error('lost transaction acknowledgement');
       }
     },
     runSync: (q: string, ...p: (string | number | null)[]) => sql.prepare(q).run(...p),
     getFirstSync<T>(q: string, ...p: (string | number | null)[]) {
       fault.reads++;
-      if (fault.unreadable) throw new Error('read unavailable');
       return (sql.prepare(q).get(...p) ?? null) as T | null;
     },
     getAllSync: <T>(q: string, ...p: (string | number | null)[]) => sql.prepare(q).all(...p) as T[],
@@ -137,11 +136,11 @@ test('unknown elapsed COMMIT fences trusted and player delivery until the real r
     fault.armed = true;
     assert.deepEqual(o.elapsed(first), { kind: 'pending' });
     assert.equal(sql.isTransaction, false);
-    assert.equal(count(sql), 1);
+    assert.equal(sql.prepare('SELECT count(*) AS n FROM unavailable_receipt').get()!.n, 1);
     assert.equal(o.world().state.clock, 21600);
     assert.deepEqual(o.elapsed({ ...first, until: 21602 }), { kind: 'pending' });
     assert.deepEqual(invoke('look'), { kind: 'pending' });
-    fault.unreadable = false;
+    sql.exec('ALTER TABLE unavailable_receipt RENAME TO receipt');
     const got = o.elapsed(first) as Saved;
     assert.equal(got.kind, 'saved');
     assert.equal(got.replay, true);
@@ -193,6 +192,44 @@ test('modal scene keeps Continue-only player controls while elapsed time commits
       error: { code: 'unsupported_capability' },
     });
     assert.equal(o.world().state.clock, 21601);
+  } finally {
+    sql.close();
+  }
+});
+
+// Breaks: either stored JSON column escaping as a parse exception on elapsed replay.
+for (const field of ['command', 'response'] as const)
+  test(`malformed stored ${field} JSON conflicts without state or receipt changes`, () => {
+    const { o, sql } = setup();
+    try {
+      const first = { expected_run_id: o.runId(), from: 21600, until: 21601 };
+      assert.equal((o.elapsed(first) as Saved).revision, 1);
+      const before = o.world();
+      sql.prepare(`UPDATE receipt SET ${field} = ?`).run('{');
+      assert.deepEqual(o.elapsed(first), { kind: 'conflict' });
+      assert.equal(o.world(), before);
+      assert.equal(o.world().state.clock, 21601);
+      assert.equal(sql.prepare('SELECT revision, clock FROM head').get()!.revision, 1);
+      assert.equal(count(sql), 1);
+    } finally {
+      sql.close();
+    }
+  });
+
+// Breaks: an overly broad parse guard swallowing a real SQLite receipt-read error as conflict.
+test('healthy elapsed delivery preserves actual SQLite receipt-read failures', () => {
+  const { o, sql } = setup();
+  try {
+    const first = { expected_run_id: o.runId(), from: 21600, until: 21601 };
+    assert.equal((o.elapsed(first) as Saved).revision, 1);
+    const before = o.world();
+    sql.exec('ALTER TABLE receipt RENAME TO unavailable_receipt');
+    assert.throws(() => o.elapsed(first), { code: 'ERR_SQLITE_ERROR' });
+    assert.equal(o.world(), before);
+    assert.equal(o.world().state.clock, 21601);
+    assert.equal(sql.prepare('SELECT count(*) AS n FROM unavailable_receipt').get()!.n, 1);
+    sql.exec('ALTER TABLE unavailable_receipt RENAME TO receipt');
+    assert.equal((o.elapsed(first) as Saved).replay, true);
   } finally {
     sql.close();
   }

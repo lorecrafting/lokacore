@@ -35,3 +35,19 @@ Reviewer demonstrated a bounded alternative: after the real COMMIT, rename the r
 - Shared delivery helpers retain their previous bodies and both callers use them. No proposal algorithm, delta/state shape, dependency, timer or UI change. Existing receipt-integrity limitation remains the explicit [known difference](../system/DIFFERENCES.md), rather than an unclaimed result-digest guarantee.
 
 Ponytail Review: **Lean already. Ship.** No unnecessary abstraction or dependency found. Open finding: **M1A-01**.
+
+## Separate Sol source review
+
+Requested `gpt-6-sol`; runtime model identity was not verifiable. Read-only process exited 0. Answer SHA-256: `5e985f1ced7bbd9453517c1eded5297d21a24c3535b05e31fbcf166d416c5e73`; transcript SHA-256: `438a43d4e0703c82929c8734f34cca5db8c6982e98998dfa4a96b604e057d71f`. This is separate review evidence, not the primary reviewer's verdict.
+
+```text
+Verdict: CHANGES REQUIRED
+Reviewed: PR #153, head 7d6455af04fc5be7d9139c78e8f3660ce252ccc4 against d279a4ab6acb871ad246fe21811526e0ac168824.
+
+F1 — blocker — mobile/authority/local-story/delivery.ts:37
+After an elapsed receipt is committed, malformed JSON in its stored command or response makes receipt() throw during JSON.parse. A retry therefore escapes as an exception instead of returning conflict, contrary to the trusted receipt contract. Handle malformed receipt data without masking SQLite read failures.
+
+The delivery helpers match their original bodies. Independent recomputation matched all three elapsed ID vectors; retained mutation and schema records show old-suite survivors and new red controls. I did not run tests or builds. PM reported all six exact-head CI jobs successful.
+
+Requested model: Sol per workflow. Runtime model identity: not verifiable here.
+```

@@ -117,7 +117,7 @@ receipts").
 
 An accepted decision's `story_point_reached` events become pending `report` rows committed
 with the decision, each with a host id, the run, lineage, release and the run's binding
-(`delivery.ts:88`); a replay adds none; a malformed report throws before anything is stored.
+(`delivery.ts:96`); a replay adds none; a malformed report throws before anything is stored.
 `deliver(db, submit, limit)` (`progress.ts:22`) sends pending reports with a binding (a
 guest's wait), least tried first; the answer must be a StoryPointAcceptance of this report for
 this account; `accepted` or `rejected` with a matching payload digest is stored as itself, else
@@ -158,6 +158,6 @@ outcome words live in `mobile/app/book/words.ts`
 
 The open authority also exposes trusted `elapsed({expected_run_id, from, until})` and `runId()`, for an authority driver, never a player invocation. No timer or anchor storage is installed in A. After settling the existing fence, compare expected_run_id with the current durable save run before receipt lookup: mismatch returns `stale_view` without writes.
 
-For a matching run, build its actor/world-bound elapsed Command and deterministic domain CommandId. That UUID is the receipt invocation key in the existing save scope. `loka-elapsed-intent-v1` hashes the full canonical Command. Matching receipt/version/digest validates and replays the original response/revision before current-clock admission; altered or malformed stored receipts conflict. A new command passes `stepElapsed`, then the same changed-row/receipt transaction, adoption, reports and trace. Faults have no receipt; failed/unknown COMMIT keeps existing rollback/fence/reconcile behavior for both trusted and player delivery. New-game replacement keeps old callbacks stale even if the release template world context is reused. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
+For a matching run, build its actor/world-bound elapsed Command and deterministic domain CommandId. That UUID is the receipt invocation key in the existing save scope. `loka-elapsed-intent-v1` hashes the full canonical Command. Matching receipt/version/digest validates and replays the original response/revision before current-clock admission; altered or malformed stored receipts conflict. Malformed JSON in a stored command or response returns `conflict`; only JSON `SyntaxError` is classified this way, while genuine SQLite read failures remain storage errors. The existing receipt-integrity limitation remains in [known differences](DIFFERENCES.md). A new command passes `stepElapsed`, then the same changed-row/receipt transaction, adoption, reports and trace. Faults have no receipt; failed/unknown COMMIT keeps existing rollback/fence/reconcile behavior for both trusted and player delivery. New-game replacement keeps old callbacks stale even if the release template world context is reused. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 
 M1-A limitation: persisted elapsed commands replay through `stepElapsed`, but the paused CLI trace reader still routes all commands to player `step`. M1-B must add the narrow trusted replay dispatch and match its elapsed run namespace to the trace header before claiming full elapsed trace conformance.
