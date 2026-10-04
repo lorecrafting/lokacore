@@ -111,8 +111,9 @@ The app shell imports the local authority's session controller
   re-decides the trace's Commands and requires a byte-identical transcript (`:2`, `:287`).
 - **The phone app** (`mobile/app/App.tsx`): opens the bundled story and its expo-sqlite
   save under the current [sampler binding](cartridge.md#source-layout), plays through
-  `localSession`, uses the device clock to measure decision latency, and draws the
-  book UI or the save-error screen. This latency clock does not advance world time.
+  `localSession`, supplies separate wall (`Date.now`) and monotonic (`performance.now`) clocks, and draws
+  the book UI or the save-error screen. Elapsed accounting follows
+  [durable elapsed sessions](save.md#durable-elapsed-sessions); latency remains separate.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus fresh sequences (10,000 in CI, 500 locally) run in every `npm test`
@@ -156,4 +157,29 @@ checks only when a pushed ref touches TypeScript inputs).
 The local authority/session owns elapsed accounting and one retained player reservation
 ([save](save.md#durable-elapsed-sessions)). Its shared session notifications follow the
 [Book boundary](book-ui.md#shared-elapsed-statuscompletion-boundary). The renderer receives no
-World, SQLite handle or elapsed entry. B2 owns actual AppState/timer/UI consumption.
+World, SQLite handle or elapsed entry.
+
+The App owns one AppState listener and one `setTimeout` chain per current Game, registered
+before the font-loading return. Active entry requests resume; catching-up debt yields to the
+next host turn, and ready active sampling uses a 250ms host responsiveness cadence. The first
+inactive transition cancels wakeups and requests pause once, without unbounded draining.
+There is no background-execution promise: resume accounts absence from the durable wall anchor.
+Cleanup and Game/session identity invalidate old callbacks; the authority additionally checks
+the durable run. Fast Refresh cleans the previous global chain before installing its owner.
+
+The AppState listener requests one synchronous resume pulse on active entry, before another
+player press can arrive, then schedules the single chain. The private driver obligation follows
+[durable reservation accounting](save.md#durable-elapsed-sessions): a retained player or clock
+candidate can consume the pulse without consuming resume. Existing active/reservation entry
+captures the remaining wall evidence only after receipt/freshness preflight and prerequisite
+settlement. A press never performs a pre-pulse plus invoke. Catching-up debt yields to the next
+host turn. Unknown-save, fault, error or replacement stops wakeups. Active re-entry and Game
+replacement are retry entries; a confirmed user retry or matched terminal completion may
+re-arm the same chain. A healthy confirmed catching_up retry also re-arms to finish retained
+debt. Conflict, invalid, stale or fault replies alone never certify recovery. The same Shell
+callback cancels already queued wakeups on observed blocked status; it schedules recovery on
+a host turn, never recursively pulses from a completion or creates a Book-owned chain.
+
+The consumer composes with confirmed subscriptions, fixed input horizons, ordered schedule
+recurrence and changed-row saves. [B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md)
+records bounded parallel authoring and the separate controlled native proof requirement.

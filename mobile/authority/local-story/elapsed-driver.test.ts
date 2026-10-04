@@ -7,7 +7,7 @@ import { constants } from 'node:sqlite';
 import { accounted } from './elapsed-store.ts';
 import { openStory } from './authority.ts';
 import { openGame } from './session.ts';
-import { checkpoint, elapsedHost, receipts } from '../../../kernel/ts/test/elapsed_host.ts';
+import { checkpoint, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
 import type { GameSubscription, Intent } from '../../packages/game-view/session.ts';
 import { INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
 const LOOK: Intent = { action_key: 'look' as never, target_ids: [], input: {} };

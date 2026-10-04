@@ -121,6 +121,7 @@ function opened(s: Story) {
     onAdvance: (listener: typeof changed) => {
       changed = listener;
     },
+    requestResume: (expected: string) => driver?.requestResume(expected),
     pulse: (mode: Pulse, expected: string) =>
       driver?.pulse(mode, expected) ?? { kind: 'ready' as const },
     elapsed: (evidence: Elapsed) => elapsed(s, evidence),

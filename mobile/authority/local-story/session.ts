@@ -166,6 +166,7 @@ function pulseOf(
   return (mode: Pulse = 'active'): ElapsedStatus => {
     try {
       if (story.runId() !== run) return { kind: 'replaced' };
+      if (mode === 'resume') story.requestResume(run);
       const held = pending();
       // A retained player's receipt must replay before any new host sampling.
       if (held) {

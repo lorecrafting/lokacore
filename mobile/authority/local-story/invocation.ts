@@ -85,17 +85,18 @@ function reserved(s: Story, id: Identified, driver?: ClockDriver): Reply {
       reservations.set(s, { id: privateId, run_id: s.meta.run_id, target: -1 });
     }
     const reserved = reservations.get(s)!;
-    const status =
+    const result =
       reserved.target < 0
         ? driver.reserve(reserved.run_id)
-        : driver.pulse('drain', reserved.run_id);
-    if (reserved.target < 0) reserved.target = driver.target();
+        : { status: driver.pulse('drain', reserved.run_id) };
+    if (reserved.target < 0 && result.target !== undefined) reserved.target = result.target;
+    const { status } = result;
     if (status.kind === 'pending') return { kind: 'pending' };
     if (status.kind === 'fault') {
       reservations.delete(s);
       return status;
     }
-    if (s.world.state.clock < reserved.target)
+    if (reserved.target < 0 || s.world.state.clock < reserved.target)
       return { kind: 'catching_up', invocation_id: i.invocation_id };
     return finish(s, reserved.id);
   }

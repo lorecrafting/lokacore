@@ -138,3 +138,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - PM decision: [LegendMUD/M mechanics reconciliation and selected Missing Child handoffs, recovery and finale](pm-decision-legend-mechanics-reconciliation-2026-10-04.md), under autonomous mechanics delegation; provisional alternatives retained as history.
 
 - Owner decision: [simulator-first mechanics validation](owner-decision-simulator-first-validation-2026-10-04.md); required per-PR checks/fresh review retained, physical-device proof routed substantially later before public readiness.
+- [M1-B2 app lifecycle and elapsed sampler](pm-decision-m1-b2-lifecycle-2026-10-04.md): resume reservations, confirmed touch updates and the current development consumer.

@@ -5,7 +5,7 @@ import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { localSession, openGame } from './session.ts';
-import { elapsedHost, checkpoint, receipts } from '../../../kernel/ts/test/elapsed_host.ts';
+import { elapsedHost, checkpoint, receipts } from './__tests__/elapsed-host.test.ts';
 import type { Db } from './store.ts';
 
 type P = (string | number | null)[];

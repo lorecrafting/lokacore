@@ -1,10 +1,10 @@
 // Controlled host clocks and real rollback-journal SQLite for elapsed integration regressions.
 import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
-import { encode } from '../src/foundation/canonical.ts';
-import { read } from './read.ts';
-import { openGame } from '../../../mobile/authority/local-story/session.ts';
-import type { Db } from '../../../mobile/authority/local-story/store.ts';
+import { encode } from '../../../../kernel/ts/src/foundation/canonical.ts';
+import { read } from '../../../../kernel/ts/test/read.ts';
+import { openGame } from '../session.ts';
+import type { Db } from '../store.ts';
 
 export function elapsedBundle() {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
@@ -16,7 +16,11 @@ export function elapsedBundle() {
   return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 }
 
-export function elapsedHost(path = ':memory:', clock = { wall: 10000, mono: 0 }) {
+export function elapsedHost(
+  path = ':memory:',
+  clock = { wall: 10000, mono: 0 },
+  bundle = elapsedBundle(),
+) {
   const sql = new DatabaseSync(path);
   sql.exec('PRAGMA page_size = 512');
   const fault = { kind: '' as '' | 'failed' | 'lost', armed: false, reads: false, inserted: false };
@@ -64,8 +68,7 @@ export function elapsedHost(path = ':memory:', clock = { wall: 10000, mono: 0 })
     newId: () => `aaaaaaaa-0000-4000-8000-${(++n).toString().padStart(12, '0')}`,
     time: { wall: () => clock.wall, monotonic: () => clock.mono },
   };
-  const bundle = elapsedBundle(),
-    game = openGame(db, bundle, host);
+  const game = openGame(db, bundle, host);
   return { sql, db, host, bundle, game, clock, fault };
 }
 

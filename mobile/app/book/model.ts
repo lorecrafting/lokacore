@@ -1,9 +1,17 @@
 // How the book view sorts the controller's flat button list (presenter.ts `buttons`): the place's look,
 // the exits (a move button carries input.direction), the pending choice's answers and Close, other
 // place actions, and a thing's own actions.
-import type { GameView } from '../../packages/game-view/session.ts';
+import type {
+  ActionInput,
+  EntityId,
+  GameView,
+  Intent,
+  Key,
+} from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
 import { reason, SENTENCE } from './words.ts';
+type Say = (key: string) => string;
+type Press = Omit<Button, 'token'>;
 
 export type Exit = { direction: string; button: Button };
 export type Thing =
@@ -45,7 +53,11 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
   if (before.place.id !== after.place.id) return [];
   const visible = things(after);
   const gone = stack.findIndex((p) => p.kind === 'thing' && !visible.some((e) => e.id === p.id));
-  return gone < 0 ? stack : stack.slice(0, gone);
+  if (gone < 0) return stack;
+  const page = stack[gone];
+  if (page.kind === 'thing' && after.choice?.speaker_id === page.id)
+    return [...stack.slice(0, gone), { kind: 'dialogue', speaker: page.id }];
+  return stack.slice(0, gone);
 }
 
 const OWN = ['look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']; // drawn in their own places, not as place actions
@@ -166,3 +178,66 @@ export function hint(store: Store, key: string) {
     },
   };
 }
+
+// The pending choice's available answers and its Close (06 §43: never a trap).
+function asked(v: GameView, label: Say): Press[] {
+  const c = v.choice;
+  const answer = (o: { choice_id: string; label: string }) => ({
+    label: label(o.label),
+    action_key: 'choose',
+    target_ids: [],
+    input: { choice_id: o.choice_id, continuation_id: c!.continuation_id },
+  });
+  return [
+    ...(c?.choices.filter((o) => o.available) ?? []).map(answer),
+    ...(c?.closable
+      ? [{ label: 'Close', action_key: 'close_choice', target_ids: [], input: {} }]
+      : []),
+  ];
+}
+
+// The view's available actions as buttons: place actions that need no input, each open exit as a
+// move, each entity's or held item's actions aimed at it, then the pending choice's.
+export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
+  const button = (a: { action_key: string; label: string }, name: string, id?: string) => ({
+    label: `${label(a.label)}${name}`,
+    action_key: a.action_key,
+    target_ids: id ? [id] : [],
+    input: {},
+  });
+  const place = v.actions.filter((a) => a.available && !a.input.length && a.target.kind === 'none');
+  const moves = v.exits.filter((e) => e.available);
+  const doors = v.exits.flatMap((e) =>
+    (e.door?.actions ?? [])
+      .filter((a) => a.available)
+      .map((a) => ({
+        ...button(a, ` ${text(e.door!.name)} (${e.direction})`),
+        input: { direction: e.direction },
+      })),
+  );
+  const held = things(v).flatMap((e) =>
+    e.actions
+      .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
+      .map((a) => button(a, ` ${text(e.name)}`, e.id)),
+  );
+  return [
+    ...place.map((a) => button(a, '')),
+    ...moves.map((e) => ({
+      label: `Go ${e.direction}`,
+      action_key: 'move',
+      target_ids: [],
+      input: { direction: e.direction },
+    })),
+    ...doors,
+    ...held,
+    ...asked(v, label),
+  ];
+}
+
+// The button's plain strings are the wire's branded ones: a button is built from the view's own keys.
+export const intentOf = ({ action_key, target_ids, input, token }: Button): Intent => ({
+  action_key: action_key as Key,
+  target_ids: target_ids as EntityId[],
+  input: input as ActionInput,
+  ...(token && { view_freshness_token: token }),
+});

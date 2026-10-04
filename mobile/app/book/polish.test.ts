@@ -1,5 +1,5 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
-// size: allow 520, Book routes, retries and authored-detail checks share the minimal host/session adapter
+// size: allow 740, Book routes and elapsed subscription/completion regressions share one controlled native-leaf and real-session adapter
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -8,6 +8,8 @@ import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { pathToFileURL } from 'node:url';
 import { openGame } from '../../authority/local-story/session.ts';
+import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import type { GameSubscription } from '../../packages/game-view/session.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -24,7 +26,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v); export const useRef = v => useState(() => ({ current: v }))[0];`,
+        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v); export const useRef = v => useState(() => ({ current: v }))[0]; export const useEffect = (f,d) => globalThis[Symbol.for('loka-book-test-effect')](f,d);`,
       };
     if (url === 'test:native-hosts')
       return {
@@ -73,25 +75,50 @@ const words = (element: any): string =>
       ? String(element)
       : words(element?.props?.children ?? []);
 
-function book(cartridge = fixture) {
-  const sql = new DatabaseSync(':memory:');
-  let failRead = 0;
-  const game = openGame(
-    {
-      execSync: (s) => sql.exec(s),
-      isInTransactionSync: () => sql.isTransaction,
-      runSync: (s, ...p) => sql.prepare(s).run(...p),
-      getFirstSync: (s, ...p) => {
-        if (failRead && !--failRead) sql.exec('SELECT * FROM missing_narration');
-        return sql.prepare(s).get(...p) ?? null;
+function book(cartridge = fixture, existing?: ReturnType<typeof elapsedHost>) {
+  const sql = existing?.sql ?? new DatabaseSync(':memory:');
+  const clock = existing?.clock ?? { wall: 10000, mono: 0 };
+  let failedNarrationAfter: number | undefined;
+  const game =
+    existing?.game ??
+    openGame(
+      {
+        execSync: (s) => sql.exec(s),
+        isInTransactionSync: () => sql.isTransaction,
+        runSync: (s, ...p) => sql.prepare(s).run(...p),
+        getFirstSync: (s, ...p) => sql.prepare(s).get(...p) ?? null,
+        getAllSync: (s, ...p) => sql.prepare(s).all(...p),
+      } as never,
+      cartridge,
+      {
+        newId: randomUUID,
+        kernel_version: `loka-kernel@${'0'.repeat(40)}`,
+        time: { wall: () => clock.wall, monotonic: () => clock.mono },
       },
-      getAllSync: (s, ...p) => sql.prepare(s).all(...p),
-    } as never,
-    cartridge,
-    { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}` },
-  );
+    );
+  const narration = game.lastNarration;
+  game.lastNarration = () => {
+    const revision = sql.prepare('SELECT revision FROM head').get()!.revision as number;
+    if (failedNarrationAfter !== undefined && revision > failedNarrationAfter) {
+      failedNarrationAfter = undefined;
+      sql.exec('SELECT * FROM missing_narration');
+    }
+    return narration();
+  };
   const state: any[] = [];
   let slot = 0;
+  const effects = new Map<number, { deps: unknown[]; cleanup?: () => void }>();
+  const queued: (() => void)[] = [];
+  const useEffect = (f: () => (() => void) | undefined, deps: unknown[]) => {
+    const i = slot++,
+      old = effects.get(i);
+    if (old && old.deps.length === deps.length && deps.every((d, j) => Object.is(d, old.deps[j])))
+      return;
+    queued.push(() => {
+      old?.cleanup?.();
+      effects.set(i, { deps, cleanup: f() });
+    });
+  };
   const useState = (initial: any) => {
     const i = slot++;
     if (!(i in state)) state[i] = typeof initial === 'function' ? initial() : initial;
@@ -105,13 +132,16 @@ function book(cartridge = fixture) {
   const draw = () => {
     slot = 0;
     (globalThis as any)[Symbol.for('loka-book-test-state')] = useState;
-    return nodes(
+    (globalThis as any)[Symbol.for('loka-book-test-effect')] = useEffect;
+    const rendered = nodes(
       Book({
         game,
         startOver: () => undefined,
         shell: { confirm: (f) => f(), learned: { seen: () => true, see: () => {} } },
       }),
     );
+    for (const effect of queued.splice(0)) effect();
+    return rendered;
   };
   const buttons = () => draw().filter((n) => n.type === 'Pressable' && !n.props.disabled);
   const labels = () => buttons().map((n) => n.props.accessibilityLabel);
@@ -137,7 +167,12 @@ function book(cartridge = fixture) {
     },
     game,
     sql,
-    failRead: (n: number) => (failRead = n),
+    clock,
+    unmount: () => {
+      for (const e of effects.values()) e.cleanup?.();
+    },
+    failNarration: () =>
+      (failedNarrationAfter = sql.prepare('SELECT revision FROM head').get()!.revision as number),
     draw,
     labels,
     tap,
@@ -206,7 +241,7 @@ test('a postcommit narration read fault preserves the saved result and clears re
   h.tap('Talk to Old Bram');
   const speaker = h.game.view().view.choice!.speaker_id!;
   const result = "You say you'll fetch it. Bram nods toward the path north.";
-  h.failRead(4); // receipt/version/receipt reads succeed; retained narration read fails after commit
+  h.failNarration(); // Only narration recovery after an actual newly committed revision faults.
   assert.doesNotThrow(() => h.tap("Offer to fetch Bram's lantern"));
   assert.equal(h.game.pending(), false);
   assert.equal(h.game.view().view.journal[0].state, 'active');
@@ -512,4 +547,153 @@ test('other item actions retain their detail and World consequences', () => {
   h.tap('Leave');
   assert.ok(h.labels().includes('a sewing box, open'));
   h.sql.close();
+});
+
+// Breaks: a confirmed boundary is ignored/coalesced, resets the chapter acknowledgment,
+// flips a same-room page, or removes a departed speaker's actual continuation/history.
+test('elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips', () => {
+  const h = book();
+  try {
+    h.tap('Old Bram, open');
+    h.tap('Talk to Old Bram');
+    const speaker = h.game.view().view.choice!.speaker_id!;
+    const before = [...h.p.screen().detail(speaker)];
+    const turn = () => h.draw().find((n) => n.type.name === 'Turn').props.turn;
+    const opened = turn();
+    h.clock.wall = 82000;
+    h.clock.mono = 72000;
+    assert.equal(h.game.pulse().kind, 'ready');
+    assert.equal(h.game.view().view.time, 68400);
+    assert.ok(h.text().includes('Conversation'));
+    assert.ok(h.labels().includes('Leave'));
+    assert.ok(h.text().includes('They are not here to answer. Find them, or close this.'));
+    assert.deepEqual(h.p.screen().detail(speaker), before);
+    assert.deepEqual(h.p.screen().log, ['Old Bram leaves.']);
+    assert.equal(turn(), opened);
+    // Consecutive committed boundaries in one host pulse must each be consumed, despite batching.
+    h.clock.wall = 1810000;
+    h.clock.mono = 1800000;
+    assert.equal(h.game.pulse().kind, 'ready');
+    assert.deepEqual(h.p.screen().log, [
+      'Old Bram leaves.',
+      'Old Bram arrives.',
+      'Old Bram leaves.',
+    ]);
+    assert.equal(turn(), opened);
+    h.tap('Leave');
+    assert.equal(h.game.view().view.choice, undefined);
+    assert.ok(h.text().includes('Ferry Landing'));
+    assert.equal(
+      h.p.screen().log.filter((s: string) => s.includes('leave the question')).length,
+      0,
+    );
+    const worldTurn = turn();
+    h.clock.wall = 2602000;
+    h.clock.mono = 2592000;
+    assert.equal(h.game.pulse().kind, 'ready');
+    assert.equal(h.game.view().view.time, 194400);
+    assert.ok(h.labels().includes('Old Bram, open'));
+    assert.equal(turn(), worldTurn);
+  } finally {
+    h.unmount();
+    h.sql.close();
+  }
+});
+
+// Breaks: B's conflict drops delayed A's item context, or terminal replay duplicates its pickup.
+test('delayed Take returns once with its original item name after a conflicting tap', () => {
+  const a = elapsedHost(),
+    h = book(fixture, a),
+    completed: GameSubscription[] = [];
+  h.game.subscribe((u) => {
+    if (u.kind === 'completion') completed.push(u);
+  });
+  try {
+    h.tap('a brass lantern, open');
+    h.clock.wall += 15984000;
+    h.clock.mono = 15984000;
+    h.tap('Take a brass lantern');
+    const id = h.game.pendingInvocation();
+    assert.ok(id);
+    assert.equal(h.p.screen().pending, false);
+    assert.ok(h.text().includes('Catching up…'));
+    assert.ok(h.labels().includes('Leave'));
+    const different = { label: 'Rest', action_key: 'rest', target_ids: [], input: {} };
+    h.p.press(different);
+    assert.equal(h.game.pendingInvocation(), id);
+    const refused = h.game.invoke({ action_key: 'rest' as never, target_ids: [], input: {} });
+    assert.equal(refused.kind, 'conflict');
+    assert.equal(
+      h.p.update({
+        kind: 'completion',
+        invocation_id: 'another-action',
+        intent: { action_key: 'rest' as never, target_ids: [], input: {} },
+        before: h.game.view(),
+        reply: refused,
+      }),
+      false,
+    );
+    assert.equal(h.game.pendingInvocation(), id);
+    assert.equal(h.game.pulse().kind, 'ready');
+    assert.ok(h.text().includes('Ferry Landing'));
+    assert.equal(
+      h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
+      1,
+    );
+    assert.equal(h.p.screen().log.includes('Taken.'), false);
+    assert.equal(h.p.update(completed[0]), false);
+    assert.equal(
+      h.p.screen().log.filter((s: string) => s === 'You pick up a brass lantern.').length,
+      1,
+    );
+    h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+    h.tap('Equipment & Inventory');
+    h.tap('a brass lantern, open');
+    const turn = h.draw().find((n) => n.type.name === 'Turn').props.turn;
+    h.clock.wall += 20;
+    h.clock.mono += 20;
+    h.game.pulse();
+    assert.ok(h.labels().includes('Drop a brass lantern'));
+    assert.equal(h.draw().find((n) => n.type.name === 'Turn').props.turn, turn);
+  } finally {
+    h.unmount();
+    h.sql.close();
+  }
+});
+
+// Breaks: delayed quest completion loses original NPC history or repeats the neutral journal event.
+test('delayed actual quest completion adds one authored result and Journal updated in original history', () => {
+  const h = book(),
+    completed: GameSubscription[] = [];
+  h.game.subscribe((u) => {
+    if (u.kind === 'completion') completed.push(u);
+  });
+  try {
+    h.tap('Old Bram, open');
+    h.tap('Talk to Old Bram');
+    const speaker = h.game.view().view.choice!.speaker_id!;
+    h.clock.wall += 15552000;
+    h.clock.mono = 15552000;
+    h.tap("Offer to fetch Bram's lantern");
+    assert.equal(h.game.pending(), true);
+    assert.equal(h.game.pulse().kind, 'ready');
+    assert.equal(h.game.view().view.time, 842400);
+    assert.equal(h.game.view().view.journal[0].state, 'active');
+    const history = h.p.screen().detail(speaker);
+    assert.equal(
+      history.filter(
+        (s: unknown) => s === "You say you'll fetch it. Bram nods toward the path north.",
+      ).length,
+      1,
+    );
+    assert.deepEqual(
+      history.filter((s: unknown) => typeof s !== 'string'),
+      [{ text: 'Journal updated', event: true }],
+    );
+    assert.equal(h.p.update(completed[0]), false);
+    assert.equal(history.filter((s: unknown) => typeof s !== 'string').length, 1);
+  } finally {
+    h.unmount();
+    h.sql.close();
+  }
 });

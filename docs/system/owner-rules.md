@@ -190,3 +190,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - PM reconciliation under mechanics delegation: [current Legend/M mechanics and chapter selections](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md); original owner records and provisional alternatives remain dated history.
 
 - Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.
+- App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
