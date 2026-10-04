@@ -18,8 +18,8 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_sampler@0.0.5` in `loka-ashmere-sampler.db`. This elapsed release
-requires kernel API1.2, declares real_elapsed rate50/start64800, and schedules Bram at
+The phone bundles `ashmere_sampler@0.0.6` in `loka-ashmere-sampler.db`. This elapsed release
+requires kernel API1.3, declares real_elapsed rate50/start64800, and schedules Bram at
 Ferry Landing from06:00 and the Drowned Lantern from19:00, under the
 [B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md). Its MV pool starts at82, pays1 per move, and recovers18 per3600 logical seconds
 standing/sitting or36 resting/sleeping under the
@@ -49,6 +49,23 @@ independent artifact answer and headless play/save checks. The
 artifact’s independent title-Look device proof; the C1 composed UI proof is
 linked from the [C1 checklist](../C1-GATE.md). Historical pins and captures remain
 labeled with their actual release.
+
+## Carrying settings and item mass
+
+An authored `world.carry = {max_grams: nonnegative safe integer}` opts a v2 cartridge into
+[voluntary carrying admission](mechanics.md#containment1-kerneltssrcmechanicscontainmentrulets).
+There is no engine carrying default. `ItemDefinition.mass_grams` is an optional nonnegative
+integer at most 2147483647; with carry opted in, every item definition must author it, including
+nested items. Explicit zero is valid; omission never means zero under opt-in. Missing mass is
+`SCHEMA_VIOLATION` with `data.error = missing_property` at the item's `mass_grams`; schema
+validation rejects malformed, negative or out-of-range mass and carry settings. Compiler and
+loader enforce the same requirement before any world or save mutation. Without carry, old
+content, hashes and carrying behavior retain their existing meaning.
+
+Carry requires `containment@1` and `requires.kernel_api.at_least >= 1.3`; compiler and loader
+reject an older minimum, and the existing installed API gate rejects an older implementation. This extension
+uses the existing containment capability and source/world settings seams, without a new
+capability or format tag.
 
 ## Compiler
 
@@ -193,7 +210,7 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.2, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.3, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
 `dialogue`, `equipment`, `position`, `scene` (`:35`); without a command, so without a rule, `fact`, `policy`,
@@ -242,6 +259,6 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.2; old fixture requirement ranges remain unchanged.
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.3; old fixture requirement ranges remain unchanged.
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).

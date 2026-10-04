@@ -45,6 +45,11 @@
     "description": "Not enough of a required resource (04 §7)."
   },
   {
+    "code": "too_heavy",
+    "category": "gameplay_rejection",
+    "description": "A voluntary positive-load Take would exceed the authored carrying maximum (docs/system/mechanics.md containment@1)."
+  },
+  {
     "code": "exit_locked",
     "category": "gameplay_rejection",
     "description": "The exit is locked (04 §7)."

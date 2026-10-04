@@ -21,8 +21,9 @@ import {
 } from '../../runtime/decision.ts';
 import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
+import { carrying } from './shared.ts';
 
-export const decide: Rule<'containment'> = (world, command, mint) => {
+export const decide: Rule<'containment'> = (world, command, mint, steps) => {
   const p = command.payload;
   const body = bodyOf(world, p.actor_id);
   if (!body || !has(world.entities, p.item_id)) return rejected('not_found');
@@ -43,7 +44,11 @@ export const decide: Rule<'containment'> = (world, command, mint) => {
   ];
   if (p.type === 'take') {
     if (at === body) return rejected('invalid_state');
-    if (!reach(world, body, p.item_id)) return rejected('not_present');
+    const reached = reach(world, body, p.item_id, steps);
+    if (typeof reached === 'string') return { kind: 'fault', code: reached };
+    if (!reached) return rejected('not_present');
+    const code = carrying(world, body, steps)(p.item_id);
+    if (code) return code === 'too_heavy' ? rejected(code) : { kind: 'fault', code };
     return accepted(world, 'taken', move(body), acquired(body));
   }
   if (at !== body) return rejected('not_owned');

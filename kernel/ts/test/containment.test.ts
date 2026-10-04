@@ -1,3 +1,4 @@
+// size: allow 555, containment and carrying behavior share the same minimal custody fixture
 // Containment: take, drop, give, has_item, items and NPCs in the world, target resolution and
 // examine over them (R5 S4; 21 §7, §8; 03 §23; 04 §5.3). The world is built from the items
 // known answer (protocol/fixtures/cartridge_items_hash.json). Ids and the state hash are
@@ -8,6 +9,10 @@ import { test } from 'node:test';
 import { hash } from '../src/foundation/canonical.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { accepted, allocator } from '../src/runtime/decision.ts';
+import { carrying } from '../src/mechanics/containment/shared.ts';
+import { decide as containment } from '../src/mechanics/containment/rule.ts';
+import { resolved } from '../src/commands/actions.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
@@ -295,4 +300,252 @@ test('scan lists the NPCs and items in each room beyond, and changes nothing', (
   const green = run(w, move('north'));
   const back = [{ direction: 'south', room: FERRY, entities: [BRAM, SATCHEL] }];
   assert.deepEqual(sight(green, BODY as never), back);
+});
+
+// Controlled carrying worlds reuse the frozen entity identities; no artifact answers are changed.
+const massed = (masses: Record<string, number>, max_grams: number): World => {
+  const w = fresh();
+  return {
+    ...w,
+    cartridge: { ...w.cartridge, world: { ...w.cartridge.world, carry: { max_grams } } },
+    entities: Object.fromEntries(
+      Object.entries(w.entities).map(([id, e]) => [
+        id,
+        e.kind === 'item' ? { ...e, mass_grams: masses[e.key] } : e,
+      ]),
+    ),
+  };
+};
+const forced = (w: World, entity_id: string, destination_id: string) => {
+  const ops = [
+    {
+      op: 'entity.transfer',
+      writer_group: 0,
+      entity_id,
+      source_id: w.state.containers[entity_id],
+      destination_id,
+    },
+  ];
+  const decision = admit('containment', accepted(w, 'forced', ops as never, []) as never);
+  const result = adopt(w, decision, take(entity_id) as never, allocator(w, take(entity_id)), 0);
+  assert.equal(result.decision.kind, 'accepted');
+  return result.world;
+};
+
+// Breaks: dropping nested mass, using >= at equality, or advertising a Take the rule refuses.
+// Held lantern 3000 + satchel shell 1000 + enclosed oil 2000 = 6000.
+test('nested Take fits equality and reports the same carrying refusal in the view', () => {
+  for (const [cap, kind] of [
+    [6000, 'accepted'],
+    [5999, 'rejected'],
+  ] as const) {
+    const w = forced(massed({ lantern: 3000, satchel: 1000, lamp_oil: 2000 }, cap), LANTERN, BODY);
+    const result = step(w, take(SATCHEL), 0);
+    assert.equal(result.decision.kind, kind);
+    const view = gameView(w);
+    const offered = view.entities
+      .find((e) => e.id === SATCHEL)!
+      .actions.find((a) => a.action_key === 'take')!;
+    assert.equal(offered.available, kind === 'accepted');
+    if (kind === 'rejected') {
+      assert.deepEqual(result.decision, { kind: 'rejected', error: { code: 'too_heavy' } });
+      assert.equal(result.world, w);
+      assert.ok(!offered.available);
+      if (!offered.available) assert.deepEqual(offered.reason, { code: 'too_heavy' });
+    }
+    const resolves = Object.fromEntries(
+      Object.values(resolved(w, w.character)).map((a) => [a.key, a.command]),
+    );
+    assert.ok(
+      check('gameview_agrees_with_admission', {
+        view,
+        command: take(SATCHEL),
+        decision: result.decision,
+        resolves,
+      }),
+    );
+  }
+});
+
+// Breaks: charging an owned extraction twice, prohibiting forced overload, or gating escape transfers.
+// Forced bag+oil 3000 exceeds max 0; extracting oil changes no load and giving it sheds 2000.
+test('forced overload preserves owned extraction, Give and Drop while blocking positive Take', () => {
+  const w = forced(massed({ lantern: 1, satchel: 1000, lamp_oil: 2000 }, 0), SATCHEL, BODY);
+  const extracted = step(w, take(OIL), 0);
+  assert.equal(extracted.decision.kind, 'accepted');
+  assert.equal(extracted.world.state.containers[OIL], BODY);
+  const given = step(extracted.world, give(OIL, BRAM), 0);
+  assert.equal(given.decision.kind, 'accepted');
+  assert.equal(given.world.state.containers[OIL], BRAM);
+  const dropped = step(given.world, drop(SATCHEL), 0);
+  assert.equal(dropped.decision.kind, 'accepted');
+  assert.equal(dropped.world.state.containers[SATCHEL], FERRY);
+  const nearby = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [LANTERN]: FERRY as never } },
+  };
+  assert.deepEqual(step(nearby, take(LANTERN), 0).decision, {
+    kind: 'rejected',
+    error: { code: 'too_heavy' },
+  });
+});
+
+// Breaks: signed32 accumulation or deduplicating held instances by their shared definition.
+// Two held lanterns weigh 1000 or 4294967294; a 1g external subtree exceeds the respective cap.
+test('large masses and repeated definitions stay exact by item identity', () => {
+  for (const [mass, cap] of [
+    [500, 1000],
+    [2147483647, 2147483647],
+  ]) {
+    let w = forced(massed({ lantern: mass, satchel: 0, lamp_oil: 1 }, cap), LANTERN, BODY);
+    w = {
+      ...w,
+      entities: { ...w.entities, [EVENT]: w.entities[LANTERN] },
+      state: { ...w.state, containers: { ...w.state.containers, [EVENT]: FERRY as never } },
+    };
+    w = forced(w, EVENT, BODY);
+    assert.deepEqual(step(w, take(SATCHEL), 0).decision, {
+      kind: 'rejected',
+      error: { code: 'too_heavy' },
+    });
+    assert.equal(step(w, drop(LANTERN), 0).decision.kind, 'accepted');
+  }
+});
+
+// Breaks: mistaking a zero shell for a zero subtree, treating explicit zero as missing,
+// or concealing missing mass as a zero/too_heavy result.
+test('zero subtree is neutral but positive contents and malformed mass remain distinct', () => {
+  const w = massed({ lantern: 0, satchel: 0, lamp_oil: 1 }, 0);
+  const nearby = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [LANTERN]: FERRY as never } },
+  };
+  assert.equal(step(nearby, take(LANTERN), 0).decision.kind, 'accepted');
+  assert.deepEqual(step(w, take(SATCHEL), 0).decision, {
+    kind: 'rejected',
+    error: { code: 'too_heavy' },
+  });
+  const bad = massed({ lantern: 0, satchel: 0 }, 0); // oil mass deliberately omitted
+  assert.deepEqual(step(bad, take(SATCHEL), 0).decision, {
+    kind: 'fault',
+    code: 'precondition_failed',
+  });
+});
+
+// Breaks: resetting the supplied Steps, scanning uncharged custody rows or allocating an event
+// after exhaustion. Reach edge + ancestry row + five index rows + three nodes = ten charges.
+test('carrying charges prior policy work before accumulation and event allocation', () => {
+  const w = massed({ lantern: 3000, satchel: 1000, lamp_oil: 2000 }, 6000);
+  for (const [spent, kind] of [
+    [32758, 'accepted'],
+    [32759, 'fault'],
+  ] as const) {
+    const steps = { n: spent };
+    const mint =
+      kind === 'fault'
+        ? () => {
+            throw new Error('exhausted carrying allocated an event');
+          }
+        : allocator(w, take(SATCHEL));
+    const decision = containment(w, take(SATCHEL) as never, mint, steps);
+    assert.equal(decision.kind, kind);
+    assert.equal(steps.n, spent + 10);
+    if (kind === 'fault') assert.deepEqual(decision, { kind: 'fault', code: 'budget_exceeded' });
+  }
+});
+
+// Breaks: slot-holder recognition scans entries outside the shared carrying budget.
+test('slot-holder indexing shares the carrying budget before inspecting worn mass', () => {
+  const base = massed({ lantern: 3000, satchel: 0, lamp_oil: 1 }, 0);
+  const w: World = {
+    ...base,
+    slots: { cloak: EVENT as never },
+    state: {
+      ...base.state,
+      containers: { [BODY]: FERRY, [OIL]: FERRY, [LANTERN]: EVENT, [EVENT]: BODY } as never,
+    },
+  };
+  // Ancestry + four custody rows + oil/body/holder/lantern nodes + one slot entry = ten.
+  assert.equal(carrying(w, w.body, { n: 32758 })(OIL as never), 'too_heavy');
+  assert.equal(carrying(w, w.body, { n: 32759 })(OIL as never), 'budget_exceeded');
+});
+
+// Breaks: looking up a cached neutral result again after exhaustion or inventing an unknown
+// zero result to escape the exhausted counter. Neutral admission never totals current load.
+test('cached owned and zero neutral results survive later budget exhaustion', () => {
+  const ownedBase = forced(massed({ lantern: 1, satchel: 1000, lamp_oil: 2000 }, 0), SATCHEL, BODY);
+  const owned: World = {
+    ...ownedBase,
+    state: {
+      ...ownedBase.state,
+      containers: { ...ownedBase.state.containers, [LANTERN]: FERRY as never },
+    },
+  };
+  const ownSteps = { n: 32766 };
+  const own = carrying(owned, owned.body, ownSteps);
+  assert.equal(own(OIL as never), undefined); // oil → satchel → body, two charges
+  assert.equal(own(LANTERN as never), 'budget_exceeded');
+  assert.equal(own(OIL as never), undefined);
+  assert.equal(ownSteps.n, 32769);
+  const zeroBase = massed({ lantern: 0, satchel: 1000, lamp_oil: 2000 }, 0);
+  const zero: World = {
+    ...zeroBase,
+    state: {
+      ...zeroBase.state,
+      containers: { ...zeroBase.state.containers, [LANTERN]: FERRY as never },
+    },
+  };
+  const zeroSteps = { n: 32761 };
+  const empty = carrying(zero, zero.body, zeroSteps);
+  assert.equal(empty(LANTERN as never), undefined); // ancestry + five rows + lantern = seven
+  assert.equal(empty(SATCHEL as never), 'budget_exceeded');
+  assert.equal(empty(LANTERN as never), undefined);
+  assert.equal(zeroSteps.n, 32769);
+});
+
+// Breaks: key-based carrying projection or invariant lookup ignores an alias resolving to Take.
+test('a Take alias advertises too_heavy and cannot evade the view admission invariant', () => {
+  const base = massed({ lantern: 0, satchel: 1000, lamp_oil: 2000 }, 2000);
+  const alias = {
+    key: 'lift',
+    label: 'item.satchel.short',
+    accessibility: 'item.satchel.short',
+    target: { kind: 'entity', scopes: ['room_contents'] },
+    input: [],
+    command: 'take',
+    priority: 0,
+    policy: { policy_version: 1, root: { op: 'all', items: [] } },
+  };
+  const w: World = {
+    ...base,
+    cartridge: {
+      ...base.cartridge,
+      actions: { ...base.cartridge.actions, 'ashmere_items@0.0.1:action/lift': alias as never },
+    },
+  };
+  const command = take(SATCHEL);
+  const decision = step(w, command, 0, 'lift' as never).decision;
+  assert.deepEqual(decision, { kind: 'rejected', error: { code: 'too_heavy' } });
+  const view = gameView(w);
+  const offer = view.entities
+    .find((e) => e.id === SATCHEL)!
+    .actions.find((a) => a.action_key === 'lift')!;
+  assert.ok(!offer.available);
+  if (!offer.available) assert.deepEqual(offer.reason, { code: 'too_heavy' });
+  const observation = { view, command, decision, action_key: 'lift', resolves: { lift: 'take' } };
+  assert.ok(check('gameview_agrees_with_admission', observation));
+  const drift = {
+    ...view,
+    entities: view.entities.map((e) =>
+      e.id !== SATCHEL
+        ? e
+        : {
+            ...e,
+            actions: e.actions.map((a) =>
+              a.action_key !== 'lift' ? a : { ...a, available: true },
+            ),
+          },
+    ),
+  };
+  assert.equal(check('gameview_agrees_with_admission', { ...observation, view: drift }), false);
 });

@@ -9,5 +9,6 @@
     "in": "room",
     "room": "inn_attic"
   },
-  "barrier": "trunk_lid"
+  "barrier": "trunk_lid",
+  "mass_grams": 8000
 }

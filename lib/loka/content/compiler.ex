@@ -5,7 +5,7 @@ defmodule Loka.Content.Compiler do
   the diagnostics of the others.
   """
   alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
-  alias Loka.Content.{Position, Resources, Scenes}
+  alias Loka.Content.{Entities, Position, Resources, Scenes}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -40,6 +40,7 @@ defmodule Loka.Content.Compiler do
 
   defp checks(manifest, defs, v2, located, registry) do
     Resources.check(manifest, defs, v2, located, registry) ++
+      Entities.carry(manifest, defs, located) ++
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry) ++
       Checks.rooms(manifest, defs, v2, registry) ++
       Recipes.check(manifest, defs, v2, registry) ++

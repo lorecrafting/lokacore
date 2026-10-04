@@ -9,5 +9,6 @@
   "location": {
     "in": "room",
     "room": "inn_rooms"
-  }
+  },
+  "mass_grams": 100
 }

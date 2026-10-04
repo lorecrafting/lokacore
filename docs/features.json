@@ -136,7 +136,7 @@
     "implemented_in": "R5 S6b default HP/MA/MV pools, recipe costs and resource.adjust steps, 1 MV per move, hourly regeneration; Early R7/R8 G condition bands in GameView"
   },
   "containment": {
-    "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12",
+    "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12; mechanics.md containment@1 carrying",
     "contracts": [
       "ItemDefinition",
       "NpcDefinition",
@@ -144,23 +144,28 @@
       "CommandPayload",
       "EventPayload",
       "Policy",
-      "ContentView"
+      "ContentView",
+      "WorldSettings"
     ],
     "modules": [
       "kernel/ts/src/mechanics/policy.ts",
       "kernel/ts/src/commands/target.ts",
       "kernel/ts/src/mechanics/lookups.ts",
-      "kernel/ts/src/view/view.ts"
+      "kernel/ts/src/view/view.ts",
+      "kernel/ts/src/mechanics/containment/shared.ts",
+      "kernel/ts/src/view/action_lists.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_items_hash.json",
-      "protocol/fixtures/cartridge_locks_hash.json"
+      "protocol/fixtures/cartridge_locks_hash.json",
+      "protocol/fixtures/cartridge_sampler_hash.json"
     ],
     "invariants": [
       "one_container_per_item",
-      "containment_acyclic"
+      "containment_acyclic",
+      "gameview_agrees_with_admission"
     ],
-    "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs; C1 c1-locks (#135) custody: take through open containers, contents in the GameView"
+    "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs; C1 c1-locks (#135) custody: take through open containers, contents in the GameView; M3 voluntary positive-load Take ceiling from cartridge mass/carry settings, bounded shared rule/projection query"
   },
   "action_recipe": {
     "spec": "06 §19 ActionSet algebra, §20 ActionRecipe; 21 §7 ActionRecipe / ComposedAction; 05 §28; 04 §5.2; ADR-016; 21 §7 Check, Cost (time); 04 §5.0",
