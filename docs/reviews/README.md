@@ -198,3 +198,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [PC01 exit admission projection](2026-10-04-pc01-exit-projection-review.md): PR #160 at `120549f`, CHANGES REQUIRED (blocker EXIT-1: policy-refusal bypass survives all 405 kernel tests); fix `c5f0b8e`, APPROVE (EXIT-1 closed by a loaded movement-policy regression, exact mutant red).
 - [M3-A carrying ceiling](2026-10-04-m3-a-carrying-ceiling-review.md): PR #159 at `4bd3895`, CHANGES REQUIRED; fix `20b5504`, APPROVE.
+- [CI simulator parallelism: retain the full deterministic workload in two workers](2026-10-04-ci-sim-parallel-review.md): PR #163 at `20d7d116a4adfb99f421d38450849b1812316249`, APPROVE (no findings; 18 tests pass, seven mutations red, serial/worker seeds and aggregates agree, OBS reproduction checked).
