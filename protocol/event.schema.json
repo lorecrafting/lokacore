@@ -461,6 +461,23 @@
             "to"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "scene_ended"
+            },
+            "scene": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "type",
+            "scene"
+          ],
+          "additionalProperties": false,
+          "description": "The last continue ends a scene; causal position 2 leaves fact_changed at 1. No scene_started in the modal subset."
         }
       ],
       "examples": [

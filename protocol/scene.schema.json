@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scene contracts",
+  "$defs": {
+    "SceneDefinition": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "Scene key: lowercase snake_case of at most 58 characters, leaving room for the engine fact prefix scene_ within Key's 64-character limit.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "maxLength": 58,
+          "examples": [
+            "bell_rung",
+            "k",
+            "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+          ]
+        },
+        "on": {
+          "type": "object",
+          "properties": {
+            "story_point": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "outcome": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "story_point",
+            "outcome"
+          ],
+          "additionalProperties": false
+        },
+        "control": {
+          "const": "modal"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SceneStep"
+          }
+        }
+      },
+      "required": [
+        "key",
+        "on",
+        "control",
+        "steps"
+      ],
+      "additionalProperties": false,
+      "description": "Modal current_world text sequence; ordered narrate×n (n ≥ 1), await_ack, end validated by compiler/loader. mechanics.md scene@1; dated subset of 06 §33–§37, 21 §3.6.",
+      "examples": [
+        {
+          "key": "bell_rung",
+          "on": {
+            "story_point": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "story_point",
+              "key": "lantern_resolved"
+            },
+            "outcome": "carry"
+          },
+          "control": "modal",
+          "steps": [
+            {
+              "type": "narrate",
+              "text": "scene.bell_rung.bell"
+            },
+            {
+              "type": "await_ack"
+            },
+            {
+              "type": "end"
+            }
+          ]
+        }
+      ]
+    },
+    "SceneStep": {
+      "description": "The installed closed scene step subset; no arbitrary writes.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "narrate"
+            },
+            "text": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "type",
+            "text"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "await_ack"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "end"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    }
+  }
+}

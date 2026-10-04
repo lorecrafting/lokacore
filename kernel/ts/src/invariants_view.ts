@@ -71,7 +71,13 @@ export const gameview_agrees_with_admission = ({
 // recipe's policy and admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
 // action with a policy on an engine command joins when a cartridge authors one.
 const SHOWN: Readonly<Record<string, readonly string[]>> = {
-  move: ['exit_closed', 'exit_locked', 'invalid_state', 'insufficient_resource'],
+  move: [
+    'unsupported_capability',
+    'exit_closed',
+    'exit_locked',
+    'invalid_state',
+    'insufficient_resource',
+  ],
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
   take: ['not_present'], // a listed take is in reach (c1-locks custody)
 };

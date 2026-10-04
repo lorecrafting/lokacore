@@ -4,7 +4,9 @@ defmodule Loka.Content.Position do
   requires position, the compiler adds the fact `position` (@engine) and fact@1, whose
   fact_changed its rule's fact.assign logs, and content may read the fact but never write it:
   an authored fact named position, or a fact.assign of it in a recipe outcome, a reaction's
-  apply or a dialogue choice, is RESERVED_FACT. Twin of kernel/ts/src/cartridge_position.ts.
+  apply or a dialogue choice, is RESERVED_FACT. The same write-site walk also reserves
+  scene_<key> facts under scene@1 (Scenes supplies their engine FactSpecs).
+  Twin of kernel/ts/src/cartridge_position.ts.
   """
   import Loka.Content.Source, only: [diag: 2, at: 2]
 
@@ -35,27 +37,35 @@ defmodule Loka.Content.Position do
 
   def facts(facts, _), do: {facts, []}
 
-  @doc "RESERVED_FACT for each fact.assign of the position fact under position@1."
+  @doc "RESERVED_FACT for content writes to position@1 and scene@1 engine facts."
   @spec check(map() | nil, map()) :: [map()]
   def check(m, defs) when m != nil do
-    if required?(m) do
-      ref = %{
-        "cartridge_id" => m["id"],
-        "cartridge_version" => m["version"],
-        "kind" => "fact",
-        "key" => "position"
-      }
+    refs = reserved_refs(m, defs)
 
-      for {rel, steps, s} <- sites(defs),
-          s["op"] == "fact.assign",
-          s["fact"] == ref,
-          do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
-    else
-      []
-    end
+    for {rel, steps, s} <- sites(defs),
+        s["op"] == "fact.assign",
+        s["fact"] in refs,
+        do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
   end
 
   def check(_, _), do: []
+
+  defp reserved_refs(m, defs) do
+    keys = if required?(m), do: ["position"], else: []
+
+    scenes =
+      if is_map_key(m["requires"]["capabilities"], "scene"),
+        do: Enum.map(Map.keys(defs["scene"]), &("scene_" <> &1)),
+        else: []
+
+    for key <- keys ++ scenes,
+        do: %{
+          "cartridge_id" => m["id"],
+          "cartridge_version" => m["version"],
+          "kind" => "fact",
+          "key" => key
+        }
+  end
 
   @doc "The manifest with fact@1 required under position@1, else unchanged."
   @spec requires(map()) :: map()

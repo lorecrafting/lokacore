@@ -1,0 +1,536 @@
+{
+  "description": "Independent Python known answer: frozen Ferry renamed, literal scene and engine FactSpec, bell_heard and bell_after; only text catalog copied from source. mechanics.md scene@1; c1-scenes-modal. No kernel supplies expected values.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_scene",
+      "version": "0.0.1",
+      "title": "Ashmere — Ferry",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "inspectable_detail": 1,
+          "description_variant": 1,
+          "containment": 1,
+          "policy": 1,
+          "action_recipe": 1,
+          "behavior": 1,
+          "calendar": 1,
+          "resource": 1,
+          "schedule": 1,
+          "fact": 1,
+          "quest": 1,
+          "dialogue": 1,
+          "scene": 1,
+          "reaction": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ]
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "inspectable_detail": 1,
+        "description_variant": 1,
+        "containment": 1,
+        "policy": 1,
+        "action_recipe": 1,
+        "behavior": 1,
+        "calendar": 1,
+        "resource": 1,
+        "schedule": 1,
+        "fact": 1,
+        "quest": 1,
+        "dialogue": 1,
+        "scene": 1,
+        "reaction": 1
+      }
+    },
+    "facts": {
+      "ashmere_scene@0.0.1:fact/search_plan": {
+        "version": 1,
+        "value_type": {
+          "type": "enum",
+          "values": [
+            "undecided",
+            "player_led",
+            "party_led"
+          ],
+          "default": "undecided"
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).",
+        "key": "search_plan"
+      },
+      "ashmere_scene@0.0.1:fact/scene_bell_rung": {
+        "key": "scene_bell_rung",
+        "version": 1,
+        "value_type": {
+          "type": "int",
+          "minimum": -1,
+          "maximum": 3,
+          "default": 0
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "Scene bell_rung's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it."
+      },
+      "ashmere_scene@0.0.1:fact/bell_heard": {
+        "key": "bell_heard",
+        "version": 1,
+        "value_type": {
+          "type": "bool",
+          "default": false
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "Whether bell_rung has ended (scene@1 reaction composition)."
+      }
+    },
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_scene@0.0.1:room/ferry_landing": {
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "village_green"
+            }
+          }
+        },
+        "details": {
+          "mooring_post": {
+            "aliases": [
+              "post",
+              "mooring_post"
+            ],
+            "description": "detail.mooring_post"
+          }
+        },
+        "key": "ferry_landing"
+      },
+      "ashmere_scene@0.0.1:room/village_green": {
+        "title": "room.village_green.title",
+        "description": "room.village_green.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          }
+        },
+        "key": "village_green"
+      }
+    },
+    "npcs": {
+      "ashmere_scene@0.0.1:npc/bram": {
+        "keywords": [
+          "bram",
+          "ferryman"
+        ],
+        "short": "npc.bram.short",
+        "room_line": "npc.bram.room",
+        "description": "npc.bram.description",
+        "room": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "ferry_landing"
+        },
+        "daily_schedule": {
+          "6": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "19": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "village_green"
+          }
+        },
+        "key": "bram"
+      }
+    },
+    "recipes": {
+      "ashmere_scene@0.0.1:recipe/coil_rope": {
+        "label": "actions.coil_rope",
+        "aliases": [
+          "coil"
+        ],
+        "target": {
+          "kind": "detail",
+          "room": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "detail": "mooring_post"
+        },
+        "priority": 10,
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "duration": 3600,
+        "outcomes": {
+          "success": {
+            "sequence": [
+              {
+                "op": "event.emit",
+                "event": "rope_coiled"
+              }
+            ],
+            "narration": {
+              "actor": "narration.coil_rope.actor",
+              "participants": {
+                "actor": {
+                  "role": "actor"
+                },
+                "bram": {
+                  "role": "npc",
+                  "npc": {
+                    "cartridge_id": "ashmere_scene",
+                    "cartridge_version": "0.0.1",
+                    "kind": "npc",
+                    "key": "bram"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "key": "coil_rope"
+      }
+    },
+    "resources": {
+      "ashmere_scene@0.0.1:resource/hp": {
+        "minimum": 0,
+        "maximum": 20,
+        "start": 20,
+        "gain": 5,
+        "key": "hp"
+      },
+      "ashmere_scene@0.0.1:resource/ma": {
+        "minimum": 0,
+        "maximum": 100,
+        "start": 100,
+        "gain": 4,
+        "key": "ma"
+      },
+      "ashmere_scene@0.0.1:resource/mv": {
+        "minimum": 0,
+        "maximum": 82,
+        "start": 82,
+        "gain": 18,
+        "key": "mv"
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_scene",
+      "cartridge_version": "0.0.1",
+      "kind": "room",
+      "key": "ferry_landing"
+    },
+    "text": {
+      "room.ferry_landing.title": "Ferry Landing",
+      "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.",
+      "room.village_green.title": "Village Green",
+      "room.village_green.description": "An old elm shades a patch of trodden grass.",
+      "detail.mooring_post": "Rope has worn a groove into the post. Someone has carved a fox into it.",
+      "npc.bram.short": "Bram the ferryman",
+      "npc.bram.room": "[Bram] the ferryman is here.",
+      "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.",
+      "actions.coil_rope": "Coil the mooring rope",
+      "narration.coil_rope.actor": "You coil the wet rope around the post, slowly, the way Bram does it.",
+      "item.lantern.short": "a brass lantern",
+      "item.lantern.room": "A [brass lantern] sits on a coil of rope.",
+      "item.lantern.description": "Dented brass, still smelling of oil. It would light a fen path.",
+      "quest.lantern.title": "Bram's lantern",
+      "quest.lantern.accept": "Offer to fetch Bram's lantern",
+      "action.talk": "Talk",
+      "dialogue.bram.prompt": "Bram looks at the lantern, then at the reeds. \"Are you coming with us, or do you mean to go along the bank yourself?\"",
+      "dialogue.bram.carry": "Carry it along the bank",
+      "dialogue.bram.leave": "Leave it with the search party",
+      "narration.bram.carry": "You keep the lantern. Bram nods once and points you down the bank.",
+      "narration.bram.leave": "You hand Bram the lantern. He lifts it toward the reeds and calls the others in.",
+      "scene.bell_rung.bell": "The bell rings.",
+      "scene.bell_rung.fen": "The fen answers.",
+      "scene.bell_rung.fox": "The fox stills."
+    },
+    "calendar": {
+      "start": 21600
+    },
+    "items": {
+      "ashmere_scene@0.0.1:item/lantern": {
+        "keywords": [
+          "lantern",
+          "brass_lantern"
+        ],
+        "short": "item.lantern.short",
+        "room_line": "item.lantern.room",
+        "description": "item.lantern.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          }
+        },
+        "key": "lantern"
+      }
+    },
+    "quests": {
+      "ashmere_scene@0.0.1:quest/lantern": {
+        "title": "quest.lantern.title",
+        "offer": {
+          "label": "quest.lantern.accept",
+          "policy": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          }
+        },
+        "objective": {
+          "evidence": "current_state",
+          "policy": {
+            "policy_version": 1,
+            "root": {
+              "op": "has_item",
+              "item": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "item",
+                "key": "lantern"
+              }
+            }
+          }
+        },
+        "key": "lantern"
+      }
+    },
+    "dialogues": {
+      "ashmere_scene@0.0.1:dialogue/bram": {
+        "npc": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "bram"
+        },
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "quest_state",
+            "quest": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "quest",
+              "key": "lantern"
+            },
+            "state": "active"
+          }
+        },
+        "prompt": "dialogue.bram.prompt",
+        "roles": {
+          "bram": {
+            "role": "npc",
+            "npc": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "npc",
+              "key": "bram"
+            }
+          },
+          "lantern": {
+            "role": "item",
+            "item": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "item",
+              "key": "lantern"
+            }
+          }
+        },
+        "quest": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "lantern"
+        },
+        "choices": {
+          "carry": {
+            "label": "dialogue.bram.carry",
+            "narration": "narration.bram.carry",
+            "sequence": [
+              {
+                "op": "fact.assign",
+                "fact": {
+                  "cartridge_id": "ashmere_scene",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "search_plan"
+                },
+                "value": "player_led"
+              }
+            ]
+          },
+          "leave": {
+            "label": "dialogue.bram.leave",
+            "narration": "narration.bram.leave",
+            "sequence": [
+              {
+                "op": "fact.assign",
+                "fact": {
+                  "cartridge_id": "ashmere_scene",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "search_plan"
+                },
+                "value": "party_led"
+              }
+            ],
+            "hand_over": {
+              "item": "lantern",
+              "to": "bram"
+            }
+          }
+        },
+        "key": "bram"
+      }
+    },
+    "story_points": {
+      "ashmere_scene@0.0.1:story_point/lantern_resolved": {
+        "key": "lantern_resolved",
+        "outcomes": {
+          "carry": {
+            "dialogue": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "dialogue",
+              "key": "bram"
+            },
+            "choice": "carry"
+          },
+          "leave": {
+            "dialogue": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "dialogue",
+              "key": "bram"
+            },
+            "choice": "leave"
+          }
+        }
+      }
+    },
+    "scenes": {
+      "ashmere_scene@0.0.1:scene/bell_rung": {
+        "key": "bell_rung",
+        "on": {
+          "story_point": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "story_point",
+            "key": "lantern_resolved"
+          },
+          "outcome": "carry"
+        },
+        "control": "modal",
+        "steps": [
+          {
+            "type": "narrate",
+            "text": "scene.bell_rung.bell"
+          },
+          {
+            "type": "narrate",
+            "text": "scene.bell_rung.fen"
+          },
+          {
+            "type": "narrate",
+            "text": "scene.bell_rung.fox"
+          },
+          {
+            "type": "await_ack"
+          },
+          {
+            "type": "end"
+          }
+        ]
+      }
+    },
+    "reactions": {
+      "ashmere_scene@0.0.1:reaction/bell_after": {
+        "key": "bell_after",
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "scene_bell_rung"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "scene_bell_rung"
+            },
+            "equals": -1
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "bell_heard"
+            },
+            "value": true
+          }
+        ]
+      }
+    }
+  },
+  "canonical": "{\"actions\":{},\"calendar\":{\"start\":21600},\"dialogues\":{\"ashmere_scene@0.0.1:dialogue/bram\":{\"choices\":{\"carry\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]},\"leave\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}}},\"entry\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_scene@0.0.1:fact/bell_heard\":{\"key\":\"bell_heard\",\"meaning\":\"Whether bell_rung has ended (scene@1 reaction composition).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1},\"ashmere_scene@0.0.1:fact/scene_bell_rung\":{\"key\":\"scene_bell_rung\",\"meaning\":\"Scene bell_rung's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":0,\"maximum\":3,\"minimum\":-1,\"type\":\"int\"},\"version\":1},\"ashmere_scene@0.0.1:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"undecided\",\"type\":\"enum\",\"values\":[\"undecided\",\"player_led\",\"party_led\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_scene@0.0.1:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\"}},\"lock\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"reaction\":1,\"resource\":1,\"scene\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_scene\",\"requires\":{\"capabilities\":{\"action_recipe\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"inspectable_detail\":1,\"movement\":1,\"policy\":1,\"quest\":1,\"reaction\":1,\"resource\":1,\"scene\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Ferry\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_scene@0.0.1:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"}},\"policies\":{},\"quests\":{\"ashmere_scene@0.0.1:quest/lantern\":{\"key\":\"lantern\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}}},\"offer\":{\"label\":\"quest.lantern.accept\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}}},\"title\":\"quest.lantern.title\"}},\"reactions\":{\"ashmere_scene@0.0.1:reaction/bell_after\":{\"apply\":[{\"fact\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"bell_heard\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}],\"key\":\"bell_after\",\"on\":{\"event\":\"fact_changed\",\"fact\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"scene_bell_rung\",\"kind\":\"fact\"}},\"when\":{\"policy_version\":1,\"root\":{\"equals\":-1,\"fact\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"scene_bell_rung\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}},\"recipes\":{\"ashmere_scene@0.0.1:recipe/coil_rope\":{\"aliases\":[\"coil\"],\"duration\":3600,\"key\":\"coil_rope\",\"label\":\"actions.coil_rope\",\"outcomes\":{\"success\":{\"narration\":{\"actor\":\"narration.coil_rope.actor\",\"participants\":{\"actor\":{\"role\":\"actor\"},\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"}}},\"sequence\":[{\"event\":\"rope_coiled\",\"op\":\"event.emit\"}]}},\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":10,\"target\":{\"detail\":\"mooring_post\",\"kind\":\"detail\",\"room\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}}},\"resources\":{\"ashmere_scene@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_scene@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_scene@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_scene@0.0.1:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"details\":{\"mooring_post\":{\"aliases\":[\"post\",\"mooring_post\"],\"description\":\"detail.mooring_post\"}},\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_scene@0.0.1:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"}},\"scenes\":{\"ashmere_scene@0.0.1:scene/bell_rung\":{\"control\":\"modal\",\"key\":\"bell_rung\",\"on\":{\"outcome\":\"carry\",\"story_point\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"}},\"steps\":[{\"text\":\"scene.bell_rung.bell\",\"type\":\"narrate\"},{\"text\":\"scene.bell_rung.fen\",\"type\":\"narrate\"},{\"text\":\"scene.bell_rung.fox\",\"type\":\"narrate\"},{\"type\":\"await_ack\"},{\"type\":\"end\"}]}},\"story_points\":{\"ashmere_scene@0.0.1:story_point/lantern_resolved\":{\"key\":\"lantern_resolved\",\"outcomes\":{\"carry\":{\"choice\":\"carry\",\"dialogue\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}},\"leave\":{\"choice\":\"leave\",\"dialogue\":{\"cartridge_id\":\"ashmere_scene\",\"cartridge_version\":\"0.0.1\",\"key\":\"bram\",\"kind\":\"dialogue\"}}}}},\"text\":{\"action.talk\":\"Talk\",\"actions.coil_rope\":\"Coil the mooring rope\",\"detail.mooring_post\":\"Rope has worn a groove into the post. Someone has carved a fox into it.\",\"dialogue.bram.carry\":\"Carry it along the bank\",\"dialogue.bram.leave\":\"Leave it with the search party\",\"dialogue.bram.prompt\":\"Bram looks at the lantern, then at the reeds. \\\"Are you coming with us, or do you mean to go along the bank yourself?\\\"\",\"item.lantern.description\":\"Dented brass, still smelling of oil. It would light a fen path.\",\"item.lantern.room\":\"A [brass lantern] sits on a coil of rope.\",\"item.lantern.short\":\"a brass lantern\",\"narration.bram.carry\":\"You keep the lantern. Bram nods once and points you down the bank.\",\"narration.bram.leave\":\"You hand Bram the lantern. He lifts it toward the reeds and calls the others in.\",\"narration.coil_rope.actor\":\"You coil the wet rope around the post, slowly, the way Bram does it.\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.\",\"npc.bram.room\":\"[Bram] the ferryman is here.\",\"npc.bram.short\":\"Bram the ferryman\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.title\":\"Bram's lantern\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass.\",\"room.village_green.title\":\"Village Green\",\"scene.bell_rung.bell\":\"The bell rings.\",\"scene.bell_rung.fen\":\"The fen answers.\",\"scene.bell_rung.fox\":\"The fox stills.\"}}",
+  "sha256": "d6049d81c193af520a998f2b9860079796359d7c806fd82e800fe43bd57d3a34"
+}

@@ -21,6 +21,7 @@ import { choiceView, definition } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
+import * as scene from './scene.ts';
 import * as position from './position.ts';
 import { holdsNow } from './quest.ts';
 import { cmp } from './validate.ts';
@@ -58,6 +59,7 @@ export function gameView(world: World): GameView {
   const choice = choiceView(world, world.character);
   const pools = resources(world);
   const current = chapter(world);
+  const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
   return {
     actor_id: world.character,
@@ -70,6 +72,7 @@ export function gameView(world: World): GameView {
     ...(at !== undefined && { position: at }),
     journal: journal(world),
     ...(current && { chapter: current }),
+    ...(showing && { scene: showing }),
     time: world.state.clock,
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
@@ -133,6 +136,7 @@ type Lists = ReturnType<typeof lists>;
 // unless that barrier bars the way.
 function exits(world: World, door: (direction: Key) => AdvertisedAction[]): ExitView[] {
   const room = world.rooms[world.state.containers[world.body]];
+  const modal = !!scene.running(world, world.character);
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
   const seated = !position.standing(world, world.character); // position@1, after the barrier
   return movement.sight(world, world.body).map((seen) => {
@@ -159,6 +163,7 @@ function exits(world: World, door: (direction: Key) => AdvertisedAction[]): Exit
       }),
     };
     const code =
+      (modal ? 'unsupported_capability' : undefined) ??
       movement.passage(world, room, direction) ??
       (seated ? 'invalid_state' : tired && 'insufficient_resource');
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };

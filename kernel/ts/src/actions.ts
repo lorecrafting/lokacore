@@ -29,6 +29,7 @@ import { ALWAYS, modal, talks } from './dialogue.ts';
 import { sub } from './int.ts';
 import { pay } from './resource.ts';
 import { wornIn } from './rules/equipment.ts';
+import * as scene from './scene.ts';
 import { holds } from './policy.ts';
 
 /**
@@ -151,6 +152,7 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
  * removes them, so the actor is never trapped), which the GameView never lists (lists).
  */
 export function resolved(world: World, actor: CharacterId): ActionSet {
+  if (scene.running(world, actor)) return scene.modal();
   const [verbs, own] = [engine(world), cartridge(world, actor)];
   const all = { ...verbs, ...own };
   const body = bodyOf(world, actor);

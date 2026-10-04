@@ -13,6 +13,7 @@ import { key } from './compose.ts';
 import { refString, type World } from './decision.ts';
 import { scopeOf, value } from './fact.ts';
 import { holds } from './policy.ts';
+import { starts } from './scene.ts';
 import { cmp } from './validate.ts';
 
 type Payload<T> = Extract<EventPayload, { type: T }>;
@@ -29,9 +30,11 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
       ? key(on.fact) === key((e.payload as Payload<'fact_changed'>).fact)
       : world.roomIds[refString(on.room)] ===
         (e.payload as Payload<'entity_entered_room'>).room_id);
-  return Object.values(world.cartridge.reactions ?? {})
+  const authored = Object.values(world.cartridge.reactions ?? {})
     .filter(meets)
     .sort((a, b) => cmp(a.key, b.key));
+  // ponytail: named scene start hook; generalize when a second capability starts on events.
+  return [...authored, ...starts(world, e).sort((a, b) => cmp(a.key, b.key))];
 }
 
 /**

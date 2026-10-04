@@ -19,6 +19,7 @@ import {
   type Obj,
 } from './cartridge_refs.ts';
 import { uses as dialogueUses } from './cartridge_dialogues.ts';
+import { scenes } from './cartridge_scenes.ts';
 import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from './sha256.ts';
 import { cmp, validate } from './validate.ts';
@@ -72,6 +73,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
           ],
     () => keyStage(c),
     () => lockStage(c),
+    () => scenes(c),
     () => refStage(c),
     () => installedStage(c, installed),
   ];
@@ -122,6 +124,7 @@ function keyStage(c: Obj): Diagnostic[] {
     'reactions',
     'dialogues',
     'story_points',
+    'scenes',
   ]) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z_]+\/(.*)$/)!;
@@ -186,7 +189,7 @@ function lockStage(c: Obj): Diagnostic[] {
           use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`);
       });
   }
-  for (const kind of ['resource', 'attribute'])
+  for (const kind of ['resource', 'attribute', 'scene'])
     for (const ref of Object.keys((c[`${kind}s`] ?? {}) as Obj))
       use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
