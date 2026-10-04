@@ -191,7 +191,7 @@ defmodule Loka.CartridgeCrossKernelTest do
 
     File.write!(
       input,
-      JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", "1.1"), "paths" => paths})
+      JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", "1.2"), "paths" => paths})
     )
 
     {stdout, 0} = System.cmd("node", [@peer, input])
@@ -206,6 +206,30 @@ defmodule Loka.CartridgeCrossKernelTest do
       assert theirs["artifact"] == bytes, path
       assert theirs["hash"] == ours["content_hash"], path
       assert theirs["lock"] == ours["cartridge"]["lock"], path
+    end
+  end
+
+  # Breaks: compiled opted content accidentally remains loadable by API1.1 or API1.2 rejects its own consumer.
+  test "the actual recovery consumer requires API1.2 in the direct TypeScript caller", %{
+    tmp_dir: tmp
+  } do
+    out = Path.join(tmp, "recovery.artifact.json")
+    compile("cartridges/ashmere_sampler", out)
+    assert_received {:exit, :ok}
+    input = Path.join(tmp, "api-peer.json")
+
+    for {api, accepted} <- [{"1.1", false}, {"1.2", true}] do
+      File.write!(
+        input,
+        JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", api), "paths" => [out]})
+      )
+
+      {stdout, 0} = System.cmd("node", [@peer, input])
+      [result] = JSON.decode!(stdout)
+
+      if accepted,
+        do: assert(result["hash"] == JSON.decode!(File.read!(out))["content_hash"]),
+        else: assert(result["diagnostic"]["code"] == "KERNEL_API_UNSUPPORTED")
     end
   end
 

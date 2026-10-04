@@ -130,4 +130,86 @@ defmodule Loka.ContentRestTest do
                 }
               ]}
   end
+
+  @recovery %{
+    "every" => 10,
+    "by_position" => %{"standing" => 2, "sitting" => 2, "resting" => 4, "sleeping" => 4}
+  }
+
+  defp recovery_source(dir, change) do
+    File.cp_r!("cartridges/ashmere_rest", dir)
+    manifest = JSON.decode!(File.read!(Path.join(dir, "cartridge.json")))
+
+    manifest =
+      manifest
+      |> put_in(["requires", "kernel_api", "at_least"], "1.2")
+      |> put_in(["requires", "capabilities", "schedule"], 1)
+      |> Map.put("time_policy", %{"profile" => "real_elapsed", "rate" => 50})
+
+    pool = %{"maximum" => 10, "start" => 0, "regen" => @recovery}
+    {manifest, pool} = change.(manifest, pool)
+    File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(manifest))
+    File.write!(Path.join(dir, "resources.json"), JSON.encode!(%{"resources" => %{"mv" => pool}}))
+    Loka.Content.compile(dir)
+  end
+
+  # Breaks: compiler drops authored recovery or admits missing dependencies/unsafe residual arithmetic.
+  test "recovery compiler preserves opt-in and checks its actual dependencies and exact bound", %{
+    tmp_dir: dir
+  } do
+    assert {:ok, bytes, []} = recovery_source(Path.join(dir, "valid"), &{&1, &2})
+    cartridge = JSON.decode!(bytes)["cartridge"]
+
+    assert cartridge["resources"]["ashmere_rest@0.0.1:resource/mv"] == %{
+             "key" => "mv",
+             "minimum" => 0,
+             "maximum" => 10,
+             "start" => 0,
+             "gain" => 18,
+             "regen" => @recovery
+           }
+
+    cases = [
+      {"UNDECLARED_CAPABILITY", "resources.resources.mv.regen",
+       fn m, p -> {update_in(m, ["requires", "capabilities"], &Map.delete(&1, "position")), p} end},
+      {"INVALID_TIME_POLICY", "resources.resources.mv.regen",
+       fn m, p -> {Map.delete(m, "time_policy"), p} end},
+      {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least",
+       fn m, p -> {put_in(m, ["requires", "kernel_api", "at_least"], "1.1"), p} end},
+      {"RESOURCE_SPEC_INVALID", "resources.resources.mv.regen",
+       fn m, p ->
+         {m,
+          Map.put(p, "regen", %{
+            "every" => 4_194_304,
+            "by_position" => %{
+              "standing" => 2_147_483_647,
+              "sitting" => 0,
+              "resting" => 0,
+              "sleeping" => 0
+            }
+          })}
+       end}
+    ]
+
+    for {{code, path, change}, i} <- Enum.with_index(cases) do
+      assert {:error, diagnostics} = recovery_source(Path.join(dir, "invalid-#{i}"), change)
+
+      assert Enum.any?(diagnostics, &(&1["code"] == code and &1["path"] == path)),
+             inspect(diagnostics)
+    end
+
+    assert {:ok, _, []} =
+             recovery_source(Path.join(dir, "boundary"), fn m, p ->
+               {m,
+                Map.put(p, "regen", %{
+                  "every" => 4_194_303,
+                  "by_position" => %{
+                    "standing" => 2_147_483_647,
+                    "sitting" => 0,
+                    "resting" => 0,
+                    "sleeping" => 0
+                  }
+                })}
+             end)
+  end
 end

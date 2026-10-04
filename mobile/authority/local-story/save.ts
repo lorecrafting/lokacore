@@ -110,7 +110,7 @@ export function adopt(s: Story) {
   const saved = load(s.db, s.fresh, () => {
     throw new Error('no save');
   });
-  if (!saved) throw new Error('save corrupt');
+  if (!saved) throw new ElapsedRecoveryError('save_corrupt', 'save corrupt');
   Object.assign(s, saved);
 }
 

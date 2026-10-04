@@ -1,11 +1,11 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_sampler",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "title": "Ashmere — Bram's Lantern",
   "requires": {
     "kernel_api": {
-      "at_least": "1.1",
+      "at_least": "1.2",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -106,6 +106,12 @@
         "key": "dying",
         "tone": "danger"
       }
-    ]
+    ],
+    "movement": {
+      "cost": {
+        "resource": "mv",
+        "amount": 1
+      }
+    }
   }
 }

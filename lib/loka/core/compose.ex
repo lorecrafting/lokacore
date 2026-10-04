@@ -1,4 +1,3 @@
-# size: allow 315, the delta algebra stays one module like its twin kernel/ts/src/foundation/compose.ts
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
@@ -22,8 +21,9 @@ defmodule Loka.Core.Compose do
     host-assigned `opened_revision`;
   - `"jobs"`: JobId => `job`, `due_time`, `status`;
   - `"resource_specs"`: canonical DefinitionRef text => ResourceSpec (`minimum`, `maximum`,
-    `start`, `gain`); `"resources"`: canonical resource MutationTarget text => `value`, `at`
-    (the time it was stored); a resource's current value is `current/3`;
+    `start`, `gain`, optional `regen`); `"resources"`: canonical resource MutationTarget text =>
+    `value`, `at`, with required `rate`, `remainder` for opted recovery; a resource's current
+    value is `current/3`;
   - `"cooldowns"`: canonical cooldown MutationTarget text => the LogicalTime it last started;
   - `"barrier_initial"`: canonical DefinitionRef text => BarrierState for unset barriers;
     `"barriers"`: canonical barrier MutationTarget text => BarrierState.
@@ -98,20 +98,8 @@ defmodule Loka.Core.Compose do
   def target(%{"op" => "barrier.transition", "barrier" => b}),
     do: %{"kind" => "barrier", "barrier" => b}
 
-  @doc """
-  A resource's current value at `now` (ResourceSpec regeneration): the stored value (`start` at
-  time 0 when unset) plus `gain` for each hour boundary crossed since it was stored, stopping at
-  `maximum`; nil for a malformed row, which no `from` equals (TypeScript's is NaN).
-  """
-  @spec current(map() | nil, map(), integer()) :: integer() | nil
-  def current(nil, spec, now), do: current(%{"value" => spec["start"], "at" => 0}, spec, now)
-
-  def current(%{"value" => v, "at" => at}, spec, now) when is_integer(v) and is_integer(at) do
-    ticks = Integer.floor_div(now, 3600) - Integer.floor_div(at, 3600)
-    min(spec["maximum"], v + spec["gain"] * ticks)
-  end
-
-  def current(_, _, _), do: nil
+  @doc "Current resource value; malformed opted metadata returns nil."
+  defdelegate current(row, spec, now), to: Loka.Core.Resource
 
   @doc "Canonical text of a JSON value: the identity of a target or DefinitionRef."
   @spec key(term()) :: binary()
@@ -239,11 +227,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "time.advance", "from" => from, "to" => to}, t, ctx),
     do: check(read(t, ctx) == from and to > from, to)
 
-  defp apply_op(%{"op" => "resource.adjust", "from" => from, "to" => to} = op, t, ctx) do
-    now = elem(ctx, 0)["clock"]
+  defp apply_op(%{"op" => "resource.adjust"} = op, t, ctx) do
     spec = section(elem(ctx, 0), "resource_specs")[key(op["resource"])]
-    in_bounds = spec != nil and to in spec["minimum"]..spec["maximum"]//1
-    check(in_bounds and current(read(t, ctx), spec, now) == from, %{"value" => to, "at" => now})
+    Loka.Core.Resource.adjusted(op, read(t, ctx), spec, elem(ctx, 0)["clock"])
   end
 
   defp apply_op(%{"op" => "cooldown.start", "at" => at} = op, t, {state, _, _} = ctx),

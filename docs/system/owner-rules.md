@@ -191,3 +191,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 
 - Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.
 - App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
+
+- Exact fractional recovery, the final player rate/position guard and opted Save validation follow the [M2-A PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
