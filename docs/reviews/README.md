@@ -194,3 +194,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Primitive composition guide and dated audit](2026-10-04-primitive-composition-review.md): PR #158 at `9ba477f`, independent docs-only APPROVE; bounded consumer permission, 112-row inventory, original/public evidence integrity and static-proof limits verified; no findings.
 - [Later-story plan publication](2026-10-04-later-story-plan-review.md): PR #157 at `c236ffe`, fresh independent docs-only APPROVE; no findings, future policies/ending selectors and planned MC coverage verified; implementation remains future work.
+- [PC11: validate cartridge fact defaults during loading](2026-10-04-pc11-fact-default-review.md): PR #161 at `9591296`, CHANGES REQUIRED; PC11-R1: v2 validation bypass mutant survives all 406 TypeScript tests; submitted production behavior passes controlled v1/v2 probes.
