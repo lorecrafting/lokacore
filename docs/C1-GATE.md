@@ -1,6 +1,7 @@
 # Gate C1 checklist
 
-Status: **closure preparation**. The owner directs C1 closure with UI work deferred
+Current status and gate PR: [ROADMAP](ROADMAP.md#c1-slices).
+The owner directs C1 closure with UI work deferred
 under the [acceptance record](decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 This page is the short checklist required by [WORKFLOW](WORKFLOW.md#milestone-gate),
 not a reviewer verdict or a declaration that the gate has already merged. Continued
@@ -77,7 +78,7 @@ published reviews; this gate draft integrates status head
 `bf973c56196c5f15e16b2542bb71dc35e7457bc3`. Runtime bytes remain identical to the
 reviewed composed #148 source. This records completed support merges, not gate closure.
 
-## Conditions still required before closure
+## Closure requirements
 
 - Exact gate head and all started CI jobs verified green by the PM.
 - One fresh checklist reviewer confirms proofs, audit carry-forward, carry stages
