@@ -124,6 +124,7 @@ function inside(world: World, actions: Lists, box: string, scope: string): Conte
 const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]) => ({
   id: id as EntityId,
   name: e.short,
+  description: e.description,
   kind: e.kind as Key,
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,

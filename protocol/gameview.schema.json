@@ -389,7 +389,7 @@
       ]
     },
     "EntityView": {
-      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions.",
+      "description": "A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "type": "object",
       "properties": {
         "id": {
@@ -415,6 +415,9 @@
           "items": {
             "$ref": "#/$defs/ContentView"
           }
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -485,11 +488,18 @@
               ]
             }
           ]
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "npc.wren.name",
+          "kind": "npc",
+          "description": "portrait.wren",
+          "actions": []
         }
       ]
     },
     "ContentView": {
-      "description": "An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now.",
+      "description": "An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.",
       "type": "object",
       "properties": {
         "id": {
@@ -512,6 +522,9 @@
           "items": {
             "$ref": "#/$defs/AdvertisedAction"
           }
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -542,6 +555,14 @@
               "input": []
             }
           ]
+        },
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "item.brass_key.short",
+          "kind": "item",
+          "description": "item.brass_key.description",
+          "actions": [],
+          "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b"
         }
       ]
     },

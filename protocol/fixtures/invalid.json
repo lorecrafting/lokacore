@@ -16532,5 +16532,38 @@
         "code": "pattern_mismatch"
       }
     ]
+  },
+  {
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "item.brass_key.short",
+      "kind": "item",
+      "description": "",
+      "actions": []
+    },
+    "errors": [
+      {
+        "path": "/description",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "ContentView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "item.brass_key.short",
+      "kind": "item",
+      "description": "",
+      "actions": [],
+      "container_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b"
+    },
+    "errors": [
+      {
+        "path": "/description",
+        "code": "pattern_mismatch"
+      }
+    ]
   }
 ]
