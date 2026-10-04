@@ -179,3 +179,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [M1–M23 mechanics continuation plan](2026-10-03-mechanics-continuation-plan-review.md): independent docs-only APPROVE at `a4dbb57`, planned queue and delegated policies; no implementation claimed.
 - [Gate C1 checklist](2026-10-03-c1-gate-review.md): PR #149 at `1ae17ee`, APPROVE WITH NOTES; all proofs/carries and audit carry-forward checked; owner-directed Simulator acceptance with UI-FUZZ-01/UI-PHONE-01 deferred; gate closure requires record-head green CI and merge.
+
+- [M4-A first-encounter contract](2026-10-03-m4-first-encounter-contract-review.md): PR #151 at `04fa450`, independent docs-only APPROVE; literal RNG outcomes and M5/M6 prerequisites verified; no implementation claimed.

@@ -351,3 +351,7 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`mechani
   replacement restricts position, equipment and door verbs without edits to those rules.
   Policies/reactions may read scene facts. The one direct coupling, reaction → scene,
   is limited to event start delivery until a second capability needs this hook.
+
+## Planned first combat contract (M4-A)
+
+**Planned until M5/M6 implementation.** The [M4-A first-encounter contract](../spec/conformance/first-encounter.md), under its [PM adoption](../decisions/pm-decision-first-encounter-2026-10-03.md), governs later M5/M6 work. It specifies one real cellar rat, conditional RNG, alternating opportunities, immediate deterministic flee and death-before-revival closure. This is planned, not an installed capability. Exact schemas/ownership and executable rules follow the consuming implementation PRs.
