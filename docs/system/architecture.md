@@ -127,6 +127,11 @@ and live results are drawn there; there is no inline room panel. Returning to th
 not close a saved choice: the projected speaker can be tapped again, or a conversation entry
 opens the saved choice when the speaker is absent. All detail returns say **Back to World**
 and clear the page stack to the world. Item pages retain their existing reachable contents.
+The host-neutral retained narration has no action/target context. As a bounded PM recovery
+choice, an unclassified restored consequence remains in the world log rather than being
+guessed or lost; a restored pending choice uses its actual speaker detail. Retained title/
+description TextKeys already rendered in the room are omitted structurally. Live NPC
+results remain scoped to that detail, including when a pending save is retried elsewhere.
 This supersedes the inline NPC menu and Character position controls under the
 [playtest polish direction](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md).
 

@@ -18,3 +18,13 @@ The latest label is **Back to World**. This is the first Gate C1 playtest polish
 The NPC detail direction supersedes the earlier inline NPC-menu choice for this presenter. The [architecture](../system/architecture.md#hosts) is amended before implementation; kernel, content, contracts and saves are unchanged.
 
 PM review selection under the existing [C1 continuation delegation](owner-decision-touch-resumption-2026-10-03.md#pm-execution-choices-under-existing-delegation): fresh independent Codex primary plus separate Sol for this bounded polish batch while Claude quota is unavailable. This is a PM execution choice, not an owner model quote. Normal checks and actual Release Simulator interaction remain required; owner phone play, responsiveness and gate checklist remain Gate C1.
+
+## Follow-up feedback direction
+
+Latest owner wording, verbatim:
+
+> Let me know when I can check the polishes and give additional feedback, we will probalby go through a few cycles of this before continuuing
+
+PM interpretation: notify when a verified updated preview is available, then iterate UI
+playtest, fixes and retest before further mechanics implementation. No fixed cycle count
+or Gate C1 pass is claimed.
