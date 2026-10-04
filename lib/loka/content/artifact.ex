@@ -30,7 +30,7 @@ defmodule Loka.Content.Artifact do
     m = Resources.requires(m)
 
     optional =
-      for k <- ~w(item npc recipe barrier quest reaction dialogue story_point attribute),
+      for k <- ~w(item npc recipe barrier quest reaction dialogue story_point scene attribute),
           defs[k] != %{},
           into: %{},
           do: {k <> "s", keyed(m, k, defs)}

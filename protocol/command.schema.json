@@ -523,6 +523,23 @@
             "job_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "continue"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id"
+          ],
+          "additionalProperties": false,
+          "description": "Advance one shown modal scene line; last line acknowledges and ends. Offered only while a scene runs."
         }
       ],
       "examples": [

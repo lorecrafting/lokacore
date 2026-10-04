@@ -231,7 +231,16 @@
     "key": "scene",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "continue"
+    ],
+    "events": [
+      "scene_ended"
+    ],
+    "definitions": [
+      "scene"
+    ]
   },
   {
     "key": "action_recipe",

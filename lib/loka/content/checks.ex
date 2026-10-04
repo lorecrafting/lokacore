@@ -105,6 +105,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"story_point" => p, "title" => t} = chapter, m) when is_binary(t),
     do: Map.put(chapter, "story_point", ref(p, "story_point", m))
 
+  # Scene trigger: outcome remains a key.
+  def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
+    do: Map.put(trigger, "story_point", ref(p, "story_point", m))
+
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v

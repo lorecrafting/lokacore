@@ -200,7 +200,8 @@
       "phase": "R7",
       "gates": [
         "SCENE"
-      ]
+      ],
+      "installed_subset": "Modal current_world narrate\u00d7n, await_ack, end; story-point outcome start once, persisted line fact, continue-only admission, scene_ended. Other scene modes/steps and quest completion hooks remain later."
     },
     {
       "id": "action_recipe@1",

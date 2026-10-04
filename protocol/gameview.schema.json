@@ -851,6 +851,9 @@
         "chapter": {
           "description": "Present exactly when the cartridge declares chapters.",
           "$ref": "#/$defs/ChapterView"
+        },
+        "scene": {
+          "$ref": "#/$defs/SceneView"
         }
       },
       "required": [
@@ -1420,6 +1423,46 @@
         {
           "index": 2,
           "title": "chapter.reeds"
+        }
+      ]
+    },
+    "SceneView": {
+      "type": "object",
+      "properties": {
+        "scene": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "line": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "scene",
+        "line",
+        "index",
+        "count"
+      ],
+      "additionalProperties": false,
+      "description": "Present iff a modal scene runs: its current narrate TextKey, one-based index and narrate count.",
+      "examples": [
+        {
+          "scene": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "scene",
+            "key": "bell_rung"
+          },
+          "line": "scene.bell_rung.bell",
+          "index": 1,
+          "count": 3
         }
       ]
     }

@@ -15188,5 +15188,1349 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "name": "scene_missing_key",
+    "contract": "SceneDefinition",
+    "value": {
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_missing_on",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_missing_control",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/control",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_missing_steps",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal"
+    },
+    "errors": [
+      {
+        "path": "/steps",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_on_missing_story_point",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on/story_point",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_on_missing_outcome",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        }
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on/outcome",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_extra",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ],
+      "extra": true
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_extra_on",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry",
+        "extra": true
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_key_bound_59",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "too_long"
+      }
+    ]
+  },
+  {
+    "name": "scene_key_bound_4",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "_bad",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "scene_key_bound_0",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "scene_key_bound_65",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/key",
+        "code": "too_long"
+      }
+    ]
+  },
+  {
+    "name": "scene_control",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "restricted",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/control",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "scene_narrate_text",
+    "contract": "SceneStep",
+    "value": {
+      "type": "narrate"
+    },
+    "errors": [
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_narrate_extra",
+    "contract": "SceneStep",
+    "value": {
+      "type": "narrate",
+      "text": "scene.bell_rung.bell",
+      "extra": true
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_await_ack_extra",
+    "contract": "SceneStep",
+    "value": {
+      "type": "await_ack",
+      "extra": true
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_end_extra",
+    "contract": "SceneStep",
+    "value": {
+      "type": "end",
+      "extra": true
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_step_missing_type",
+    "contract": "SceneStep",
+    "value": {},
+    "errors": [
+      {
+        "path": "/type",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_step_unknown_type",
+    "contract": "SceneStep",
+    "value": {
+      "type": "dialogue"
+    },
+    "errors": [
+      {
+        "path": "/type",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "name": "scene_continue_actor",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "continue"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_continue_extra",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "continue",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "extra": true
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_ended_scene",
+    "contract": "EventPayload",
+    "value": {
+      "type": "scene_ended"
+    },
+    "errors": [
+      {
+        "path": "/scene",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_ended_extra",
+    "contract": "EventPayload",
+    "value": {
+      "type": "scene_ended",
+      "scene": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "scene",
+        "key": "bell_rung"
+      },
+      "extra": true
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_view_missing_scene",
+    "contract": "SceneView",
+    "value": {
+      "line": "scene.bell_rung.bell",
+      "index": 1,
+      "count": 3
+    },
+    "errors": [
+      {
+        "path": "/scene",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_view_missing_line",
+    "contract": "SceneView",
+    "value": {
+      "scene": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "scene",
+        "key": "bell_rung"
+      },
+      "index": 1,
+      "count": 3
+    },
+    "errors": [
+      {
+        "path": "/line",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_view_missing_index",
+    "contract": "SceneView",
+    "value": {
+      "scene": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "scene",
+        "key": "bell_rung"
+      },
+      "line": "scene.bell_rung.bell",
+      "count": 3
+    },
+    "errors": [
+      {
+        "path": "/index",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_view_missing_count",
+    "contract": "SceneView",
+    "value": {
+      "scene": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "scene",
+        "key": "bell_rung"
+      },
+      "line": "scene.bell_rung.bell",
+      "index": 1
+    },
+    "errors": [
+      {
+        "path": "/count",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_view_min_index",
+    "contract": "SceneView",
+    "value": {
+      "scene": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "scene",
+        "key": "bell_rung"
+      },
+      "line": "scene.bell_rung.bell",
+      "index": 0,
+      "count": 3
+    },
+    "errors": [
+      {
+        "path": "/index",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "scene_view_min_count",
+    "contract": "SceneView",
+    "value": {
+      "scene": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "scene",
+        "key": "bell_rung"
+      },
+      "line": "scene.bell_rung.bell",
+      "index": 1,
+      "count": 0
+    },
+    "errors": [
+      {
+        "path": "/count",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "scene_view_extra",
+    "contract": "SceneView",
+    "value": {
+      "scene": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "scene",
+        "key": "bell_rung"
+      },
+      "line": "scene.bell_rung.bell",
+      "index": 1,
+      "count": 3,
+      "extra": true
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "scene_map_key",
+    "contract": "CompiledCartridge",
+    "value": {
+      "format": "loka-cartridge-v2",
+      "manifest": {
+        "api_version": "loka/v3",
+        "id": "ashmere_scene",
+        "version": "0.0.1",
+        "title": "Ashmere — Ferry",
+        "requires": {
+          "kernel_api": {
+            "at_least": "1.0",
+            "below": "2.0"
+          },
+          "content_schema": 1,
+          "rule_ir": 1,
+          "capabilities": {
+            "movement": 1,
+            "inspectable_detail": 1,
+            "description_variant": 1,
+            "containment": 1,
+            "policy": 1,
+            "action_recipe": 1,
+            "behavior": 1,
+            "calendar": 1,
+            "resource": 1,
+            "schedule": 1,
+            "fact": 1,
+            "quest": 1,
+            "dialogue": 1,
+            "scene": 1,
+            "reaction": 1
+          },
+          "client_features": []
+        },
+        "supported_profiles": [
+          "offline_private"
+        ]
+      },
+      "lock": {
+        "format": "loka-capability-lock-v1",
+        "capabilities": {
+          "movement": 1,
+          "inspectable_detail": 1,
+          "description_variant": 1,
+          "containment": 1,
+          "policy": 1,
+          "action_recipe": 1,
+          "behavior": 1,
+          "calendar": 1,
+          "resource": 1,
+          "schedule": 1,
+          "fact": 1,
+          "quest": 1,
+          "dialogue": 1,
+          "scene": 1,
+          "reaction": 1
+        }
+      },
+      "facts": {
+        "ashmere_scene@0.0.1:fact/search_plan": {
+          "version": 1,
+          "value_type": {
+            "type": "enum",
+            "values": [
+              "undecided",
+              "player_led",
+              "party_led"
+            ],
+            "default": "undecided"
+          },
+          "scopes": [
+            "player"
+          ],
+          "meaning": "Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).",
+          "key": "search_plan"
+        },
+        "ashmere_scene@0.0.1:fact/scene_bell_rung": {
+          "key": "scene_bell_rung",
+          "version": 1,
+          "value_type": {
+            "type": "int",
+            "minimum": -1,
+            "maximum": 3,
+            "default": 0
+          },
+          "scopes": [
+            "player"
+          ],
+          "meaning": "Scene bell_rung's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it."
+        },
+        "ashmere_scene@0.0.1:fact/bell_heard": {
+          "key": "bell_heard",
+          "version": 1,
+          "value_type": {
+            "type": "bool",
+            "default": false
+          },
+          "scopes": [
+            "player"
+          ],
+          "meaning": "Whether bell_rung has ended (scene@1 reaction composition)."
+        }
+      },
+      "policies": {},
+      "actions": {},
+      "rooms": {
+        "ashmere_scene@0.0.1:room/ferry_landing": {
+          "title": "room.ferry_landing.title",
+          "description": "room.ferry_landing.description",
+          "exits": {
+            "north": {
+              "to": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "room",
+                "key": "village_green"
+              }
+            }
+          },
+          "details": {
+            "mooring_post": {
+              "aliases": [
+                "post",
+                "mooring_post"
+              ],
+              "description": "detail.mooring_post"
+            }
+          },
+          "key": "ferry_landing"
+        },
+        "ashmere_scene@0.0.1:room/village_green": {
+          "title": "room.village_green.title",
+          "description": "room.village_green.description",
+          "exits": {
+            "south": {
+              "to": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "room",
+                "key": "ferry_landing"
+              }
+            }
+          },
+          "key": "village_green"
+        }
+      },
+      "npcs": {
+        "ashmere_scene@0.0.1:npc/bram": {
+          "keywords": [
+            "bram",
+            "ferryman"
+          ],
+          "short": "npc.bram.short",
+          "room_line": "npc.bram.room",
+          "description": "npc.bram.description",
+          "room": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "daily_schedule": {
+            "6": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            },
+            "19": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "village_green"
+            }
+          },
+          "key": "bram"
+        }
+      },
+      "recipes": {
+        "ashmere_scene@0.0.1:recipe/coil_rope": {
+          "label": "actions.coil_rope",
+          "aliases": [
+            "coil"
+          ],
+          "target": {
+            "kind": "detail",
+            "room": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            },
+            "detail": "mooring_post"
+          },
+          "priority": 10,
+          "policy": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "duration": 3600,
+          "outcomes": {
+            "success": {
+              "sequence": [
+                {
+                  "op": "event.emit",
+                  "event": "rope_coiled"
+                }
+              ],
+              "narration": {
+                "actor": "narration.coil_rope.actor",
+                "participants": {
+                  "actor": {
+                    "role": "actor"
+                  },
+                  "bram": {
+                    "role": "npc",
+                    "npc": {
+                      "cartridge_id": "ashmere_scene",
+                      "cartridge_version": "0.0.1",
+                      "kind": "npc",
+                      "key": "bram"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "key": "coil_rope"
+        }
+      },
+      "resources": {
+        "ashmere_scene@0.0.1:resource/hp": {
+          "minimum": 0,
+          "maximum": 20,
+          "start": 20,
+          "gain": 5,
+          "key": "hp"
+        },
+        "ashmere_scene@0.0.1:resource/ma": {
+          "minimum": 0,
+          "maximum": 100,
+          "start": 100,
+          "gain": 4,
+          "key": "ma"
+        },
+        "ashmere_scene@0.0.1:resource/mv": {
+          "minimum": 0,
+          "maximum": 82,
+          "start": 82,
+          "gain": 18,
+          "key": "mv"
+        }
+      },
+      "entry": {
+        "cartridge_id": "ashmere_scene",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "ferry_landing"
+      },
+      "text": {
+        "room.ferry_landing.title": "Ferry Landing",
+        "room.ferry_landing.description": "Reeds crowd a slick wooden landing. A [mooring post](mooring_post) leans into the current.",
+        "room.village_green.title": "Village Green",
+        "room.village_green.description": "An old elm shades a patch of trodden grass.",
+        "detail.mooring_post": "Rope has worn a groove into the post. Someone has carved a fox into it.",
+        "npc.bram.short": "Bram the ferryman",
+        "npc.bram.room": "[Bram] the ferryman is here.",
+        "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry. He keeps the landing by day and goes up to the green at dusk.",
+        "actions.coil_rope": "Coil the mooring rope",
+        "narration.coil_rope.actor": "You coil the wet rope around the post, slowly, the way Bram does it.",
+        "item.lantern.short": "a brass lantern",
+        "item.lantern.room": "A [brass lantern] sits on a coil of rope.",
+        "item.lantern.description": "Dented brass, still smelling of oil. It would light a fen path.",
+        "quest.lantern.title": "Bram's lantern",
+        "quest.lantern.accept": "Offer to fetch Bram's lantern",
+        "action.talk": "Talk",
+        "dialogue.bram.prompt": "Bram looks at the lantern, then at the reeds. \"Are you coming with us, or do you mean to go along the bank yourself?\"",
+        "dialogue.bram.carry": "Carry it along the bank",
+        "dialogue.bram.leave": "Leave it with the search party",
+        "narration.bram.carry": "You keep the lantern. Bram nods once and points you down the bank.",
+        "narration.bram.leave": "You hand Bram the lantern. He lifts it toward the reeds and calls the others in.",
+        "scene.bell_rung.bell": "The bell rings.",
+        "scene.bell_rung.fen": "The fen answers.",
+        "scene.bell_rung.fox": "The fox stills."
+      },
+      "calendar": {
+        "start": 21600
+      },
+      "items": {
+        "ashmere_scene@0.0.1:item/lantern": {
+          "keywords": [
+            "lantern",
+            "brass_lantern"
+          ],
+          "short": "item.lantern.short",
+          "room_line": "item.lantern.room",
+          "description": "item.lantern.description",
+          "location": {
+            "in": "room",
+            "room": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          },
+          "key": "lantern"
+        }
+      },
+      "quests": {
+        "ashmere_scene@0.0.1:quest/lantern": {
+          "title": "quest.lantern.title",
+          "offer": {
+            "label": "quest.lantern.accept",
+            "policy": {
+              "policy_version": 1,
+              "root": {
+                "op": "all",
+                "items": []
+              }
+            }
+          },
+          "objective": {
+            "evidence": "current_state",
+            "policy": {
+              "policy_version": 1,
+              "root": {
+                "op": "has_item",
+                "item": {
+                  "cartridge_id": "ashmere_scene",
+                  "cartridge_version": "0.0.1",
+                  "kind": "item",
+                  "key": "lantern"
+                }
+              }
+            }
+          },
+          "key": "lantern"
+        }
+      },
+      "dialogues": {
+        "ashmere_scene@0.0.1:dialogue/bram": {
+          "npc": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          },
+          "policy": {
+            "policy_version": 1,
+            "root": {
+              "op": "quest_state",
+              "quest": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "quest",
+                "key": "lantern"
+              },
+              "state": "active"
+            }
+          },
+          "prompt": "dialogue.bram.prompt",
+          "roles": {
+            "bram": {
+              "role": "npc",
+              "npc": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "npc",
+                "key": "bram"
+              }
+            },
+            "lantern": {
+              "role": "item",
+              "item": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "item",
+                "key": "lantern"
+              }
+            }
+          },
+          "quest": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "quest",
+            "key": "lantern"
+          },
+          "choices": {
+            "carry": {
+              "label": "dialogue.bram.carry",
+              "narration": "narration.bram.carry",
+              "sequence": [
+                {
+                  "op": "fact.assign",
+                  "fact": {
+                    "cartridge_id": "ashmere_scene",
+                    "cartridge_version": "0.0.1",
+                    "kind": "fact",
+                    "key": "search_plan"
+                  },
+                  "value": "player_led"
+                }
+              ]
+            },
+            "leave": {
+              "label": "dialogue.bram.leave",
+              "narration": "narration.bram.leave",
+              "sequence": [
+                {
+                  "op": "fact.assign",
+                  "fact": {
+                    "cartridge_id": "ashmere_scene",
+                    "cartridge_version": "0.0.1",
+                    "kind": "fact",
+                    "key": "search_plan"
+                  },
+                  "value": "party_led"
+                }
+              ],
+              "hand_over": {
+                "item": "lantern",
+                "to": "bram"
+              }
+            }
+          },
+          "key": "bram"
+        }
+      },
+      "story_points": {
+        "ashmere_scene@0.0.1:story_point/lantern_resolved": {
+          "key": "lantern_resolved",
+          "outcomes": {
+            "carry": {
+              "dialogue": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "dialogue",
+                "key": "bram"
+              },
+              "choice": "carry"
+            },
+            "leave": {
+              "dialogue": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "dialogue",
+                "key": "bram"
+              },
+              "choice": "leave"
+            }
+          }
+        }
+      },
+      "scenes": {
+        "bad": {
+          "key": "bell_rung",
+          "on": {
+            "story_point": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "story_point",
+              "key": "lantern_resolved"
+            },
+            "outcome": "carry"
+          },
+          "control": "modal",
+          "steps": [
+            {
+              "type": "narrate",
+              "text": "scene.bell_rung.bell"
+            },
+            {
+              "type": "narrate",
+              "text": "scene.bell_rung.fen"
+            },
+            {
+              "type": "narrate",
+              "text": "scene.bell_rung.fox"
+            },
+            {
+              "type": "await_ack"
+            },
+            {
+              "type": "end"
+            }
+          ]
+        }
+      },
+      "reactions": {
+        "ashmere_scene@0.0.1:reaction/bell_after": {
+          "key": "bell_after",
+          "on": {
+            "event": "fact_changed",
+            "fact": {
+              "cartridge_id": "ashmere_scene",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "scene_bell_rung"
+            }
+          },
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "scene_bell_rung"
+              },
+              "equals": -1
+            }
+          },
+          "apply": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_scene",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "bell_heard"
+              },
+              "value": true
+            }
+          ]
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/scenes/bad",
+        "code": "pattern_mismatch"
+      }
+    ]
   }
 ]
