@@ -15,7 +15,9 @@
 // (cartridge.schema.json StoryPointDefinition; 23 §3) has an outcome (SCHEMA_VIOLATION
 // too_few_items), and each outcome's trigger names a dialogue of this cartridge and one of its
 // choices, a site no other outcome names (DUPLICATE_DEFINITION), in a dialogue that resolves a
-// quest, so its choice is made once (OUTCOME_MISMATCH).
+// quest, so its choice is made once (OUTCOME_MISMATCH). Chapter markers resolve their texts,
+// story points and selected outcomes, with an unconditional opening and unambiguous counted
+// quest/choice triggers (mechanics.md Chapters).
 import {
   CAPABILITY_OWNERS,
   type DefinitionRef,
@@ -78,7 +80,7 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     for (const [id, o] of Object.entries(d.choices as Obj))
       out.push(...choice(o, `${at}.choices${step(id)}`, d, checks));
   }
-  return [...out, ...storyPoints(c, named)];
+  return [...out, ...storyPoints(c, named), ...chapters(c, checks)];
 }
 
 function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
@@ -102,6 +104,50 @@ function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
     }
   }
   return out;
+}
+
+function chapters(c: Obj, { named, text }: Checks): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  for (const [i, chapter] of (c.chapters ?? []).entries()) {
+    const at = `.cartridge.chapters[${i}]`;
+    text(chapter, ['title'], at);
+    if (i === 0) {
+      for (const field of ['story_point', 'outcome'])
+        if (Object.hasOwn(chapter, field)) out.push(diag('UNKNOWN_FIELD', `${at}.${field}`));
+      continue;
+    }
+    if (!chapter.story_point) {
+      out.push(diag('SCHEMA_VIOLATION', `${at}.story_point`, { error: 'missing_property' }));
+      continue;
+    }
+    named(chapter.story_point, 'story_point', `${at}.story_point`);
+    const point = (c.story_points ?? {})[refString(chapter.story_point)];
+    if (!point) continue;
+    if (chapter.outcome && !Object.hasOwn(point.outcomes, chapter.outcome)) {
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}.outcome`, { target: chapter.outcome }));
+      continue;
+    }
+    const counted: Obj[] = chapter.outcome
+      ? [point.outcomes[chapter.outcome]]
+      : Object.values(point.outcomes);
+    if (counted.some((t) => ambiguous(c, t)))
+      out.push(diag('OUTCOME_MISMATCH', `${at}.story_point`));
+  }
+  return out;
+}
+
+function ambiguous(c: Obj, t: Obj): boolean {
+  const d = (c.dialogues ?? {})[refString(t.dialogue)];
+  return (
+    !!d?.quest &&
+    each(c).some(
+      ([other]) =>
+        other !== d &&
+        other.quest &&
+        same(other.quest, d.quest) &&
+        Object.hasOwn(other.choices, t.choice),
+    )
+  );
 }
 
 // One option's texts, fact.assign steps, accept (a quest of this cartridge, in a dialogue that

@@ -45,7 +45,7 @@ defmodule Loka.Content.Compiler do
       Recipes.check(manifest, defs, v2, registry) ++
       Quests.check(manifest, defs, v2, registry) ++
       Reactions.check(manifest, defs, v2, registry) ++
-      Dialogues.check(manifest, defs, v2, registry) ++
+      Dialogues.check(manifest, defs, v2, located, registry) ++
       Links.check(defs, v2) ++
       Position.check(manifest, defs)
   end
@@ -77,7 +77,7 @@ defmodule Loka.Content.Compiler do
   defp manifest([{_, :invalid}], _), do: {nil, {nil, %{}}, []}
 
   # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), calendar and
-  # world (WorldSettings), the last two carried by the compiled v2 cartridge beside the manifest.
+  # world (WorldSettings) and chapters; settings travel beside the manifest in the v2 cartridge.
   defp manifest([{rel, m}], registry) do
     defs = source_defs()
 
@@ -86,10 +86,14 @@ defmodule Loka.Content.Compiler do
       |> put_in(["properties", "entry"], %{"$ref" => "DefinitionRef"})
       |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
       |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
+      |> put_in(
+        ["properties", "chapters"],
+        get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties", "chapters"])
+      )
 
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
-        {extra, manifest} = Map.split(m, ["entry", "calendar", "world"])
+        {extra, manifest} = Map.split(m, ["entry", "calendar", "world", "chapters"])
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
         diags = Requires.check(rel, manifest, registry)
         manifest = Position.requires(manifest)
@@ -100,7 +104,7 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  # cartridge.json's calendar and world, short references expanded.
+  # cartridge.json's calendar, world and chapters, short references expanded.
   defp settings(extra, m), do: Checks.expand(Map.delete(extra, "entry"), m)
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then

@@ -3,6 +3,7 @@ import type {
   AdvertisedAction,
   BandTable,
   ContentView,
+  ChapterView,
   EntityId,
   EntityView,
   ExitView,
@@ -15,8 +16,8 @@ import type {
 } from './contracts.gen.ts';
 import { lists } from './action_lists.ts';
 import { COMPASS, refString, type Entity, type World } from './decision.ts';
-import { barrierState, exitOf, opened } from './lookups.ts';
-import { choiceView } from './dialogue.ts';
+import { barrierState, exitOf, opened, questOf } from './lookups.ts';
+import { choiceView, definition } from './dialogue.ts';
 import { level, resourceRef } from './resource.ts';
 import * as description_variant from './rules/description_variant.ts';
 import * as movement from './rules/movement.ts';
@@ -42,7 +43,7 @@ import { cmp } from './validate.ts';
  * DefinitionRefString order; and the player's
  * pending choice, if any (dialogue.ts choiceView); and the body's resources with their bands (04 §15
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
- * without it.
+ * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
 export function gameView(world: World): GameView {
   const here = world.state.containers[world.body];
@@ -56,6 +57,7 @@ export function gameView(world: World): GameView {
   const description = text(description_variant.describe(world, world.character, room));
   const choice = choiceView(world, world.character);
   const pools = resources(world);
+  const current = chapter(world);
   const at = position.positionOf(world, world.character) as Key | undefined;
   return {
     actor_id: world.character,
@@ -67,6 +69,7 @@ export function gameView(world: World): GameView {
     ...(equipment.length > 0 && { equipment }),
     ...(at !== undefined && { position: at }),
     journal: journal(world),
+    ...(current && { chapter: current }),
     time: world.state.clock,
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
@@ -160,6 +163,26 @@ function exits(world: World, door: (direction: Key) => AdvertisedAction[]): Exit
       (seated ? 'invalid_state' : tired && 'insufficient_resource');
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
   });
+}
+
+function chapter(world: World): ChapterView | undefined {
+  const chapters = world.cartridge.chapters;
+  if (!chapters) return;
+  let index = 0;
+  for (let i = 1; i < chapters.length; i++) {
+    const c = chapters[i]!;
+    const outcomes = world.cartridge.story_points![refString(c.story_point!)].outcomes;
+    const counted = c.outcome ? [outcomes[c.outcome]!] : Object.values(outcomes);
+    if (
+      counted.some((t) => {
+        const d = definition(world, t.dialogue);
+        const q = questOf(world, world.character, d.quest!)?.[1];
+        return q?.state === 'resolved' && q.outcome === t.choice;
+      })
+    )
+      index = i;
+  }
+  return { index, title: chapters[index]!.title };
 }
 
 function journal(world: World): QuestView[] {

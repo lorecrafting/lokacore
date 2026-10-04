@@ -226,6 +226,14 @@
             },
             "world": {
               "$ref": "#/$defs/WorldSettings"
+            },
+            "chapters": {
+              "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/Chapter"
+              }
             }
           },
           "required": [
@@ -984,6 +992,40 @@
               "tone": "warning"
             }
           ]
+        }
+      ]
+    },
+    "Chapter": {
+      "description": "An ordered chapter marker (mechanics.md Chapters): title is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
+      "type": "object",
+      "properties": {
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "story_point": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "outcome": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "title": "chapter.landing"
+        },
+        {
+          "title": "chapter.reeds",
+          "story_point": {
+            "cartridge_id": "ashmere_chapters",
+            "cartridge_version": "0.0.1",
+            "kind": "story_point",
+            "key": "lantern_resolved"
+          },
+          "outcome": "carry"
         }
       ]
     }

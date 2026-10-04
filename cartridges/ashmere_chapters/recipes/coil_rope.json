@@ -1,0 +1,42 @@
+{
+  "label": "actions.coil_rope",
+  "aliases": [
+    "coil"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "ferry_landing",
+    "detail": "mooring_post"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "duration": 3600,
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "rope_coiled"
+        }
+      ],
+      "narration": {
+        "actor": "narration.coil_rope.actor",
+        "participants": {
+          "actor": {
+            "role": "actor"
+          },
+          "bram": {
+            "role": "npc",
+            "npc": "bram"
+          }
+        }
+      }
+    }
+  }
+}
