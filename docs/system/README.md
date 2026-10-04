@@ -28,3 +28,5 @@ Executable contracts stay where they are and are not restated here: `protocol/`
 ([map](../../protocol/README.md)), `docs/spec/conformance/` (frozen fixtures and the
 [numeric profile](../spec/conformance/numeric-profile.md)) and
 [release scope](../spec/release-scope.md).
+
+Planned mechanics beyond C1: [M1–M23 queue](../NEXT-MECHANICS.md) and [first M1-A brief](../briefs/m1-a-clock.md), reachable through [future work](future.md). These plans do not describe installed behavior.
