@@ -62,3 +62,15 @@ Applied installed Ponytail (full) and Ponytail Review, then self-reviewed the ac
 
 The separately requested Sol opinion is independent of this primary review and is appended verbatim by the PM.
 
+
+## Independent second-model review — PM publication
+
+Requested `gpt-6-sol`, read-only `codex exec`, source `cca22b6f47507cdf8341681599875048026bed9f`. Actual command exited 0. Runtime model identity was not verified. The answer below is verbatim. Answer SHA256: `5153e2e57fac290ea3489c4c9e4d536f09329d84f8fa39db08ce5d7603dcb8bc`; private event transcript SHA256: `b6db0f6e03746bf102ab9eff527ba0367d9e095a1314cbd53a0813ade8e40aa5`. No findings or fix round was required.
+
+```text
+APPROVE — PR155 at cca22b6f47507cdf8341681599875048026bed9f, base 6d53e8a12aae2550e47ad11232d68128e8356625.
+
+No open findings. The App clock chain, retained resume obligation, reservation horizon, Book completion routing, sampler contract, and focused tests align with the governing requirements. Ponytail Review found no actionable complexity issue. All 11 recorded native production source hashes match this head.
+
+Scope/limitations: Independent read-only source and evidence review; no tests, builds, generation, or native operations run. CI success and native outcomes were reported by the PM/developer, not rerun here. Runtime model identity was not verified.
+```
