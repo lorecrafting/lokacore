@@ -312,6 +312,34 @@ test('opted recovery literal rows and independent metadata replay', () => {
   }
 });
 
+// Breaks: independent replay accepts an unauthored stored rate when the next rate is authored.
+test('independent recovery replay rejects an unauthored stored rate', () => {
+  const fixture = read('protocol/fixtures/resource_recovery.json');
+  const state: State = {
+    clock: 64803,
+    resource_specs: { [key(fixture.resource)]: fixture.spec },
+    resources: { [key(fixture.target)]: { value: 0, at: 64800, rate: 3, remainder: 0 } },
+  };
+  const delta = {
+    ops: [
+      {
+        op: 'resource.adjust',
+        writer_group: 0,
+        resource: fixture.resource,
+        entity_id: fixture.target.entity_id,
+        from: 0,
+        to: 0,
+        next_rate: 2,
+      },
+    ],
+  };
+  // Without stored-rate validation, 3 elapsed ticks at rate 3 yield value 0 and remainder 9.
+  const result = {
+    changes: [{ target: fixture.target, value: { value: 0, at: 64803, rate: 2, remainder: 9 } }],
+  };
+  assert.equal(check('delta_preconditions_hold', { state, delta, result }), false);
+});
+
 // Breaks: optional recovery schemas accept omitted table fields, unsafe/negative rates or malformed intervals.
 test('recovery schema trust-boundary literals', () => {
   for (const c of read('protocol/fixtures/resource_recovery.json').contracts)

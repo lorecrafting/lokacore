@@ -453,6 +453,54 @@ defmodule Loka.Core.ComposeTest do
     end
   end
 
+  # Breaks: independent replay accepts an unauthored stored rate when the next rate is authored.
+  test "independent recovery replay rejects an unauthored stored rate" do
+    fixture = JSON.decode!(File.read!("protocol/fixtures/resource_recovery.json"))
+
+    state = %{
+      "clock" => 64803,
+      "resource_specs" => %{Compose.key(fixture["resource"]) => fixture["spec"]},
+      "resources" => %{
+        Compose.key(fixture["target"]) => %{
+          "value" => 0,
+          "at" => 64800,
+          "rate" => 3,
+          "remainder" => 0
+        }
+      }
+    }
+
+    delta = %{
+      "ops" => [
+        %{
+          "op" => "resource.adjust",
+          "writer_group" => 0,
+          "resource" => fixture["resource"],
+          "entity_id" => fixture["target"]["entity_id"],
+          "from" => 0,
+          "to" => 0,
+          "next_rate" => 2
+        }
+      ]
+    }
+
+    # Without stored-rate validation, 3 elapsed ticks at rate 3 yield value 0 and remainder 9.
+    result = %{
+      "changes" => [
+        %{
+          "target" => fixture["target"],
+          "value" => %{"value" => 0, "at" => 64803, "rate" => 2, "remainder" => 9}
+        }
+      ]
+    }
+
+    refute Invariants.check("delta_preconditions_hold", %{
+             "state" => state,
+             "delta" => delta,
+             "result" => result
+           })
+  end
+
   # Breaks: optional recovery schemas accept omitted table fields, unsafe/negative rates or malformed intervals.
   test "recovery schema trust-boundary literals" do
     fixture = JSON.decode!(File.read!("protocol/fixtures/resource_recovery.json"))
