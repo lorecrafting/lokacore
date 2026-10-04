@@ -1,0 +1,23 @@
+{
+  "exit": 0,
+  "source": "0e49963f893192d193fac65851aa882be0f597b8",
+  "configuration": "Release",
+  "sdk": "iphonesimulator",
+  "destination": "generic iOS Simulator; no device lifecycle",
+  "signing_allowed": false,
+  "incremental_native_cache_reused": true,
+  "clean_before_build": true,
+  "elapsed_seconds": 35.39,
+  "expected_content_sha256": "813fdf67dab4a1276362b2e3bdad08de8ae51b06d89f2e53bd64de0b1d001caa",
+  "attempt": 2,
+  "clean_after_build": true,
+  "bundle_sha256": "4b1a5548458aa9e07b9f974798c361ff5a985402d3ebc2c83206bd965244b1d8",
+  "bundle_contains_exact_source": true,
+  "bundle_contains_old_source": false,
+  "binary_architectures": "x86_64 arm64",
+  "independent_content_canonical_hash_verified": true,
+  "bundle_contains_expected_content_pin": true,
+  "binary_sha256": "522e6bbba913a4b1137e6c7fac743e8aa6b22c3f35cfe151a82899ce3d21dbfe",
+  "no_device_or_gui_operations": true,
+  "native_runtime_proof": "pending fresh primary install and personally observed checks"
+}

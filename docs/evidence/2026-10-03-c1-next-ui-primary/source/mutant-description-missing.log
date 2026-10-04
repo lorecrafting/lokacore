@@ -1,0 +1,105 @@
+(node:31653) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exits, the look title, place actions and a thing page come from the right buttons (1.598208ms)
+✔ position cycling skips absent offers and retains the offered freshness (0.180792ms)
+✔ a touch link is shown as its label (0.191125ms)
+✔ a choice's answers and Close are their own group, not place actions (0.165ms)
+✔ the character label says the hp band and no other (0.203959ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.180958ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (0.219541ms)
+✔ the ending line shows once every quest is over (0.192584ms)
+✔ a closed exit's log line and a capitalised title (0.18525ms)
+✔ a move refused at 0 MV says the body is too exhausted (0.173834ms)
+✔ a hint survives a store that throws, for this session (0.17975ms)
+✔ the status line shows the double hour as its earthly branch (0.245917ms)
+(node:31654) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (67.186583ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (24.991125ms)
+✖ NPC history has distinct journal events and one confirmed Leave after the scrolling log (9.778667ms)
+✔ only World position taps directly cycle the offered states with captured freshness (22.175416ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (15.115333ms)
+✔ only confirmed pickup returns World, including a retry from another page (22.034875ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (14.297208ms)
+✔ inventory Drop returns World with one named event only after confirmation (19.134333ms)
+✔ other item actions retain their detail and World consequences (9.424958ms)
+✖ reviewer projected descriptions and matching Leave preserve honest old views (7.612833ms)
+(node:31655) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///private[review]/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /private[review]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (13.058458ms)
+✔ journal cues belong only to changed NPC histories (0.968375ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.336083ms)
+✔ confirmed room change clears old history before adding new authored consequences (1.362084ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.441333ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.446708ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.228875ms)
+✔ the log stops growing in one room, its last line the latest answer (1.57375ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.1785ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 29
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 704.783166
+
+✖ failing tests:
+
+test at book/polish.test.ts:242:1
+✖ NPC history has distinct journal events and one confirmed Leave after the scrolling log (9.778667ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'Old Bram',
+  +   'Talk to Old Bram'
+  -   'A ferryman with rope-scarred hands and a coat that has never been dry.'
+    ]
+  
+      at TestContext.<anonymous> (file:///private[review]/mobile/app/book/polish.test.ts:247:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Old Bram', 'Talk to Old Bram' ],
+    expected: [ 'Old Bram', 'A ferryman with rope-scarred hands and a coat that has never been dry.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at book/polish.test.ts:518:1
+✖ reviewer projected descriptions and matching Leave preserve honest old views (7.612833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      'Bram',
+  -   'Real authored prose.',
+      'A real answer.',
+      'Journal updated',
+      'Leave'
+    ]
+  
+      at TestContext.<anonymous> (file:///private[review]/mobile/app/book/polish.test.ts:534:10)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Bram', 'A real answer.', 'Journal updated', 'Leave' ],
+    expected: [ 'Bram', 'Real authored prose.', 'A real answer.', 'Journal updated', 'Leave' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

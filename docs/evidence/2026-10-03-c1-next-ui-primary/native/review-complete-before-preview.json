@@ -1,0 +1,77 @@
+{
+  "head": [
+    26,
+    0,
+    "[3436398590,4027466031,3782669332,504507571]"
+  ],
+  "state_rows_sha256": "63d430f47f32a9f2093527d36237f027441d41bf42e95d17d54fbe314e0b0a7b",
+  "receipt_metadata_sha256": "dae8cc2364216722246e46fb7d4c54059aaefb9bf443bc362b38e7bf394ff56a",
+  "receipt_count": 26,
+  "pin": {
+    "capability_lock": {
+      "capabilities": {
+        "barrier": 1,
+        "containment": 1,
+        "description_variant": 1,
+        "dialogue": 1,
+        "equipment": 1,
+        "fact": 1,
+        "movement": 1,
+        "policy": 1,
+        "position": 1,
+        "quest": 1,
+        "resource": 1,
+        "scene": 1,
+        "schedule": 1
+      },
+      "format": "loka-capability-lock-v1"
+    },
+    "cartridge_id": "ashmere_sampler",
+    "cartridge_version": "0.0.2",
+    "content_hash": "813fdf67dab4a1276362b2e3bdad08de8ae51b06d89f2e53bd64de0b1d001caa",
+    "numeric_profile": null,
+    "rng_profile": null,
+    "rule_ir": 1,
+    "world_context_id": "<private-id>"
+  },
+  "kernel_versions": [
+    "loka-kernel@0e49963f893192d193fac65851aa882be0f597b8"
+  ],
+  "trace_content_hashes": [
+    "813fdf67dab4a1276362b2e3bdad08de8ae51b06d89f2e53bd64de0b1d001caa"
+  ],
+  "scene_facts": [
+    [
+      "{\"fact\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.2\",\"key\":\"scene_lantern_kept\",\"kind\":\"fact\"},\"kind\":\"fact\",\"scope\":{\"character_id\":\"<private-id>\",\"kind\":\"player\"}}",
+      -1
+    ]
+  ],
+  "command_kinds": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ]
+}
