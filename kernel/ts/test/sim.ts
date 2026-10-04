@@ -31,7 +31,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 14;
+export const GENERATOR = 15;
 /** Each registered invariant, by how a step checks it (runtime/world.ts holds on the world after it, */
 /** runtime/invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -127,7 +127,10 @@ function begin(seed: number, g: Gen) {
     const row = spec.regen ? { ...world.state.resources![target]!, value } : { value, at: 0 };
     return [target, row, spec.key] as const;
   });
-  const state = { ...world.state, resources: Object.fromEntries(rows) };
+  const state = {
+    ...world.state,
+    resources: { ...world.state.resources, ...Object.fromEntries(rows) },
+  };
   const drained = rows.map(([, { value }, k]) => `${k} ${value}`).join(', ');
   return { loaded, start: { ...world, state }, drained };
 }

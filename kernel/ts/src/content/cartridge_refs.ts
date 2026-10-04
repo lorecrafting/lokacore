@@ -1,3 +1,4 @@
+import { death } from './cartridge_death.ts';
 // size: allow 340, one reference stage preserves diagnostic ordering including carrying and NPC HP opt-ins
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
@@ -177,7 +178,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
     const { in: k } = i.location;
-    named(i.location[k], k, `.cartridge.items${step(ref)}.location.${k}`);
+    if (k !== 'template') named(i.location[k], k, `.cartridge.items${step(ref)}.location.${k}`);
     if (c.world?.carry !== undefined && !Object.hasOwn(i, 'mass_grams'))
       out.push(
         diag('SCHEMA_VIOLATION', `.cartridge.items${step(ref)}.mass_grams`, {
@@ -204,7 +205,7 @@ export function refStage(c: Obj): Diagnostic[] {
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
-  out.push(...pools(c, named));
+  out.push(...pools(c, named), ...death(c, named));
   return out;
 }
 
@@ -311,6 +312,7 @@ function holders(c: Obj): Diagnostic[] {
   const inside = (i?: Obj) => (i?.location.in === 'item' ? refString(i.location.item) : undefined);
   const held: Record<string, number> = {};
   for (const [ref, i] of Object.entries(items)) {
+    if (i.location.in === 'template') continue;
     const at = refString(i.location[i.location.in]);
     held[at] = (held[at] ?? 0) + 1;
     let up = inside(i);

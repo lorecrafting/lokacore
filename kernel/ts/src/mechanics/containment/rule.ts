@@ -1,3 +1,4 @@
+import { living } from '../death/shared.ts';
 // containment@1 (capability_registry.json): take, drop and give (21 §8 Containment; 03 §23;
 // 04 §5.3 conserved transfer). An entity's one container is State.containers; an actor's
 // inventory is what its body contains, never stored. Accepted: one entity.transfer, whose
@@ -27,7 +28,8 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
   const p = command.payload;
   const body = bodyOf(world, p.actor_id);
   if (!body || !has(world.entities, p.item_id)) return rejected('not_found');
-  if (world.entities[p.item_id].kind !== 'item') return rejected('invalid_target');
+  if (world.state.created?.[p.item_id] || world.entities[p.item_id].kind !== 'item')
+    return rejected('invalid_target');
   const [here, at] = [world.state.containers[body], world.state.containers[p.item_id]];
   const move = (destination_id: EntityId) =>
     [
@@ -56,12 +58,9 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
     const dropped = { type: 'item_dropped', item_id: p.item_id, room_id: here } as const;
     return accepted(world, 'dropped', move(here), [event(world, command, mint, 1, dropped)]);
   }
-  const to = p.recipient_id;
-  if (!has(world.entities, to)) return rejected('not_found');
-  if (world.entities[to].kind !== 'npc') return rejected('invalid_target');
-  if (world.state.containers[to] !== here) return rejected('not_present');
-  if (held(world, to) >= (world.capacities[to] ?? Infinity)) return rejected('invalid_state');
-  return accepted(world, 'given', move(to), acquired(to));
+  const code = recipient(world, p.recipient_id, here);
+  if (code) return rejected(code);
+  return accepted(world, 'given', move(p.recipient_id), acquired(p.recipient_id));
 };
 
 // ponytail: scans every container per call; index contents by holder when worlds grow.
@@ -87,3 +86,11 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
       result: { changes: [] },
     }),
 };
+
+function recipient(world: World, id: EntityId, here: EntityId) {
+  if (!has(world.entities, id) || !living(world, id)) return 'not_found' as const;
+  if (world.entities[id].kind !== 'npc') return 'invalid_target' as const;
+  if (world.state.containers[id] !== here) return 'not_present' as const;
+  if (held(world, id) >= (world.capacities[id] ?? Infinity)) return 'invalid_state' as const;
+  return undefined;
+}

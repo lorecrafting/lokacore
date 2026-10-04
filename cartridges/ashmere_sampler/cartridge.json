@@ -1,11 +1,11 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_sampler",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "title": "Ashmere — Bram's Lantern",
   "requires": {
     "kernel_api": {
-      "at_least": "1.4",
+      "at_least": "1.5",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -24,7 +24,8 @@
       "description_variant": 1,
       "calendar": 1,
       "behavior": 1,
-      "schedule": 1
+      "schedule": 1,
+      "death": 1
     },
     "client_features": []
   },
@@ -115,6 +116,15 @@
     },
     "carry": {
       "max_grams": 12000
+    },
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "rat_corpse",
+      "shrine": "chapel_nave",
+      "restore": {
+        "hp": 10,
+        "mv": 100
+      }
     }
   }
 }

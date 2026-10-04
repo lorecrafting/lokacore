@@ -1,5 +1,5 @@
 {
-  "generator": 14,
+  "generator": 15,
   "seeds": [
     {
       "seed": 432,
@@ -14,7 +14,7 @@
     {
       "seed": 1791136864905,
       "type": "hasOwnProperty",
-      "found": "drained sampler MV lost required born rate/remainder, causing resource view to throw before the unknown command was refused"
+      "found": "drained sampler setup lost required resource metadata: originally MV rate/remainder, then NPC HP rows; retain untouched resources when draining player pools"
     }
   ]
 }

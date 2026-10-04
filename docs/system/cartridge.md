@@ -20,8 +20,8 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_sampler@0.0.7` in `loka-ashmere-sampler.db`. This elapsed release
-requires kernel API1.4, declares real_elapsed rate50/start64800, and schedules Bram at
+The phone bundles `ashmere_sampler@0.0.8` in `loka-ashmere-sampler.db`. This elapsed release
+requires kernel API1.5, declares real_elapsed rate50/start64800, and schedules Bram at
 Ferry Landing from06:00 and the Drowned Lantern from19:00, under the
 [B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md). Its MV pool starts at100 under the [first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), pays1 per move, and recovers18 per3600 logical seconds
 standing/sitting or36 resting/sleeping under the
@@ -224,14 +224,14 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.4, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.5, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
 `dialogue`, `equipment`, `position`, `scene` (`:35`); without a command, so without a rule, `fact`, `policy`,
 `inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
-`target_resolution`, `attributes` (`:52`). The [feature map](../features.gen.md) is the authority for what
+`target_resolution`, `attributes`, `death` (`:52`). The [feature map](../features.gen.md) is the authority for what
 each one implements and where; `bin/features.exs --check` fails when a rule module exists
-without its row. The 15 registered capabilities it marks `not yet` may be named by a
+without its row. The registered capabilities it marks `not yet` may be named by a
 cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.
 
 ## Text
@@ -273,6 +273,20 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.4; old fixture requirement ranges remain unchanged.
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.5; old fixture requirement ranges remain unchanged.
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
+
+## Corpse templates and shrine settings (M5-B)
+
+`world.death` requires `death@1`, `containment@1`, `position@1`, and kernel API at least
+1.5. It names `player_corpse` and `npc_corpse` item templates, the existing `shrine` room,
+and `restore {hp, mv}` values within the corresponding declared pools. References accept
+source short keys. A corpse template has `location: {in: "template"}` and ordinary item
+text/mass; it has no capacity, slot or barrier. Templates are never minted or placed at
+birth, cannot hold authored children, and must be the configured corpse templates.
+Both compiler and loader validate these constraints and reference kinds.
+
+The sampler's 0.0.8 release binds chapel_nave, HP10/MV100 and two corpse templates.
+This is a foundation release: the first live lethal producer remains M6. Older kernels
+refuse API1.5 content; older bundled release lists refuse its unknown content pin.

@@ -57,6 +57,7 @@ const RULELESS = [
   'inspectable_detail',
   'check',
   'resource',
+  'death',
   'behavior',
   'calendar',
   'reaction',
@@ -67,7 +68,7 @@ const RULELESS = [
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.4',
+  kernel_api: '1.5',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,

@@ -109,6 +109,9 @@ defmodule Loka.Content.Checks do
   def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
     do: Map.put(trigger, "story_point", ref(p, "story_point", m))
 
+  def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
+    do: Loka.Content.Death.expand(death, m)
+
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v
@@ -176,6 +179,8 @@ defmodule Loka.Content.Checks do
 
   defp locations(m, defs),
     do: Enum.flat_map(Entities.all(defs), fn {_, rel, e} -> located(rel, e, m, defs) end)
+
+  defp located(_, %{"location" => %{"in" => "template"}}, _, _), do: []
 
   defp located(rel, %{"location" => %{"in" => k} = loc}, m, defs),
     do: reference(rel, ["location"], {k, k}, loc, m, defs)

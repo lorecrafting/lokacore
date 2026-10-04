@@ -49,6 +49,9 @@ Start S2, even round, rat HP6/player HP2 sleeping. Rat first: `5927040 % 100 = 4
 [save reopen](../../../mobile/authority/local-story/store.ts) combines those definitions with saved
 state. M5-A provides five finite passive cellar rats and entity-specific persisted HP through
 [resource@1](../../system/mechanics.md#resource1-kerneltssrcmechanicsresourcets), with no attack
-or death producer. Dynamic corpse identity and initial custody remain M5-B prerequisites:
-inserting a corpse only into World.entities is insufficient. The chapel route already reaches
-chapel_nave; shrine restoration remains pending. No creation-op syntax is frozen here.
+or death producer. M5-B now provides the [durable corpse/return foundation](../../system/mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation),
+including an additive portable creation supplement and real SQLite failure/reopen controls.
+The chapel route reaches chapel_nave, configured as the return room. The M6 actual
+Attack → round → lethal NPC/player loss → shrine → recovery proof, including encounter
+closure before revival and frozen RNG outcomes, remains required. No live death or native
+consumer proof is claimed by foundation conformance.

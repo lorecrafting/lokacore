@@ -53,6 +53,18 @@
             "item"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "in": {
+              "const": "template"
+            }
+          },
+          "required": [
+            "in"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

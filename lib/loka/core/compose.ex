@@ -1,13 +1,11 @@
-# size: allow 310, portable composition includes exact entity resource precedence and required-row guard
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
-  TypeScript twin; both run `protocol/fixtures/composition.json`.
+  TypeScript twin; both run the composition and corpse creation fixtures.
 
   Takes a committed base state and a contract-valid StateDelta. Ops apply in their semantic
   order to a proposal overlay; each op's precondition reads the overlay over the base. An op
-  on a target another writer group already wrote faults `conflicting_write` (no
-  last-writer-wins, no same-value coalescing). The base is never copied.
+  on a target another writer group wrote faults `conflicting_write`; the base is never copied.
 
   Base state, a JSON object (absent sections are empty):
 
@@ -37,9 +35,8 @@ defmodule Loka.Core.Compose do
 
   An explicit advance is a delta with `time.advance`; its target (the last `to`) is the
   visited time for `job.complete` and the bound `job.schedule` must exceed (04 §5.4).
-  Without one, both use the base clock.
   """
-  alias Loka.Core.Canonical
+  alias Loka.Core.{Canonical, Creation}
 
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
@@ -68,36 +65,21 @@ defmodule Loka.Core.Compose do
   defp apply_all(state, ops) do
     horizon = Enum.reduce(ops, state["clock"], &advance_target/2)
 
-    case Enum.reduce_while(ops, %{}, &step(&1, &2, {state, horizon})) do
+    pairs = Enum.zip(ops, Enum.drop(ops, 1) ++ [nil])
+
+    case Enum.reduce_while(pairs, %{}, &step_pair(&1, &2, {state, horizon})) do
       %{"fault" => _} = f -> f
       overlay -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
     end
   end
 
-  @doc "The MutationTarget an op writes (04 §5.1)."
-  @spec target(map()) :: map()
-  def target(%{"op" => "fact.assign"} = op),
-    do: Map.put(Map.take(op, ~w(fact scope subject_id)), "kind", "fact")
+  defp step_pair({op, next}, overlay, ctx) do
+    if op["op"] == "entity.create" and not Creation.initial_pair?(op, next),
+      do: {:halt, fault("precondition_failed", target(op))},
+      else: step(op, overlay, ctx)
+  end
 
-  def target(%{"op" => "entity.transfer", "entity_id" => e}), do: containment(e)
-
-  def target(%{"op" => "quest." <> _, "instance_id" => i}),
-    do: %{"kind" => "quest", "instance_id" => i}
-
-  def target(%{"op" => "choice." <> _, "continuation_id" => c}),
-    do: %{"kind" => "choice", "continuation_id" => c}
-
-  def target(%{"op" => "job." <> _, "job_id" => j}), do: %{"kind" => "job", "job_id" => j}
-  def target(%{"op" => "time.advance"}), do: %{"kind" => "clock"}
-
-  def target(%{"op" => "resource.adjust"} = op),
-    do: Map.put(Map.take(op, ~w(resource entity_id)), "kind", "resource")
-
-  def target(%{"op" => "cooldown.start"} = op),
-    do: Map.put(Map.take(op, ~w(actor_id action)), "kind", "cooldown")
-
-  def target(%{"op" => "barrier.transition", "barrier" => b}),
-    do: %{"kind" => "barrier", "barrier" => b}
+  defdelegate target(op), to: Loka.Core.ComposeTarget
 
   @doc "Current resource value; malformed opted metadata returns nil."
   defdelegate current(row, spec, now), to: Loka.Core.Resource
@@ -141,6 +123,17 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "fact.assign"} = op, t, ctx) do
     now = with nil <- read(t, ctx), do: get_in(elem(ctx, 0), ["fact_defaults", key(op["fact"])])
     check(now == op["expected"], op["value"])
+  end
+
+  defp apply_op(%{"op" => "entity.create", "identity" => identity}, t, {state, _, _} = ctx),
+    do: check(read(t, ctx) == nil and Creation.valid?(identity, state), identity)
+
+  defp apply_op(
+         %{"op" => "entity.transfer", "source_id" => nil} = op,
+         t,
+         {state, _, overlay} = ctx
+       ) do
+    check(read(t, ctx) == nil and Creation.initial?(op, state, overlay), op["destination_id"])
   end
 
   defp apply_op(
@@ -261,6 +254,7 @@ defmodule Loka.Core.Compose do
   end
 
   defp base(%{"kind" => "fact"} = t, s), do: section(s, "facts")[key(t)]
+  defp base(%{"kind" => "entity", "entity_id" => e}, s), do: section(s, "created")[e]
   defp base(%{"kind" => "containment", "entity_id" => e}, s), do: section(s, "containers")[e]
   defp base(%{"kind" => "quest", "instance_id" => i}, s), do: section(s, "quests")[i]
   defp base(%{"kind" => "choice", "continuation_id" => c}, s), do: section(s, "choices")[c]

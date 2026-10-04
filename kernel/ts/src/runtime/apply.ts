@@ -1,3 +1,4 @@
+import { hydrate } from './created.ts';
 import { compose, counts, over, type Fault, type Limit } from '../foundation/compose.ts';
 import type { DeltaOp } from '../contracts.gen.ts';
 import { row, type State, type World } from './decision.ts';
@@ -9,7 +10,7 @@ import { row, type State, type World } from './decision.ts';
 export function apply(
   world: World,
   ops: readonly DeltaOp[],
-): { state: State } | { fault: Fault; limit?: Limit } {
+): { state: State; world: World } | { fault: Fault; limit?: Limit } {
   const result = compose(base(world), { ops });
   if ('fault' in result)
     return result.fault.code === 'budget_exceeded'
@@ -25,7 +26,11 @@ export function apply(
     written[name] ??= { ...world.state[name] };
     written[name][at!] = value;
   }
-  return { state: { ...world.state, ...written, clock } as State };
+  const state = { ...world.state, ...written, clock } as State;
+  const hydrated = hydrate(world, state);
+  return hydrated
+    ? { state, world: hydrated }
+    : { fault: { kind: 'fault', code: 'precondition_failed' } };
 }
 
 /** What compose reads for `world`: its state, the fact defaults, capacities, resource specs and
@@ -33,6 +38,8 @@ export function apply(
 export const base = (world: World) =>
   ({
     ...world.state,
+    known_entities: world.knownEntities,
+    corpse_templates: world.corpseTemplates,
     fact_defaults: world.factDefaults,
     capacities: world.capacities,
     resource_specs: world.resourceSpecs,

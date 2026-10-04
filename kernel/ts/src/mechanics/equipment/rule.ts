@@ -44,6 +44,7 @@ export function transfer(
 ): ErrorCode | [EntityId, EntityId] {
   const body = bodyOf(world, actor);
   if (!body || !has(world.entities, item)) return 'not_found';
+  if (world.state.created?.[item]) return 'invalid_target';
   const e = world.entities[item];
   if (e.kind !== 'item') return 'invalid_target';
   const at = world.state.containers[item];

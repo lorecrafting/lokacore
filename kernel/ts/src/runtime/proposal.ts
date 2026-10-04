@@ -73,7 +73,7 @@ export function adopt(
       choices = { ...choices, [o.continuation_id]: row };
     }
   const state = { ...applied.state, ...(choices && { choices }), rng: out.rng } as World['state'];
-  return { decision: out, world: { ...world, state } };
+  return { decision: out, world: { ...applied.world, state } };
 }
 
 type Queued = { cause: DomainEvent; depth: number; mint: Mint; earns: QuestInstanceId[] };
@@ -174,7 +174,7 @@ function now(p: P): World | Admitted {
       p.limit = r.limit;
       return r.fault as Admitted;
     }
-    [p.at, p.applied] = [{ ...p.world, state: r.state }, p.ops.length];
+    [p.at, p.applied] = [r.world, p.ops.length];
   }
   return p.at;
 }

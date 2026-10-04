@@ -1,6 +1,7 @@
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
 // after STEP read one kernel step and are TypeScript only (rules are TypeScript, ADR-074).
+import { creationsHold } from './invariants_creation.ts';
 import { recovered, legacyInitial, effectiveSpec } from './invariants_resource.ts';
 import type { Json } from '../foundation/canonical.ts';
 import { key, same, target, type Result } from '../foundation/compose.ts';
@@ -44,6 +45,7 @@ function link(op: Any): [Json | undefined, Json] {
   };
   if (fixed[op.op]) return fixed[op.op]!;
   if (op.op === 'fact.assign') return [op.expected, op.value];
+  if (op.op === 'entity.create') return [undefined, op.identity];
   if (op.op === 'entity.transfer') return [op.source_id, op.destination_id];
   if (op.op === 'cooldown.start') return [op.from, op.at];
   return [op.from, op.to];
@@ -52,6 +54,7 @@ function link(op: Any): [Json | undefined, Json] {
 function initial(op: Any, s: Any): Json | undefined {
   const [family] = op.op.split('.');
   if (op.op === 'fact.assign') return s.facts?.[key(target(op))] ?? s.fact_defaults?.[key(op.fact)];
+  if (op.op === 'entity.create') return s.created?.[op.identity.id];
   if (op.op === 'entity.transfer') return s.containers?.[op.entity_id];
   if (family === 'quest') return s.quests?.[op.instance_id]?.state;
   if (family === 'choice') return s.choices?.[op.continuation_id]?.status;
@@ -153,13 +156,20 @@ function extra(
 }
 
 const CHECKS: Record<string, (o: Any) => boolean> = {
-  one_container_per_item: ({ state, result }) => {
+  one_container_per_item: ({ state, delta, result }) => {
+    if ('fault' in result) return true;
+    const created = new Set(
+      (delta?.ops ?? [])
+        .filter((o: Any) => o.op === 'entity.create')
+        .map((o: Any) => o.identity.id),
+    );
+    if (!creationsHold(state, delta?.ops ?? [], result)) return false;
     const m = moved(result);
     const ids = new Set(m.map(([e]) => e));
     const containers = state.containers ?? {};
     return (
       ids.size === m.length &&
-      m.every(([e, c]) => typeof c === 'string' && Object.hasOwn(containers, e))
+      m.every(([e, c]) => typeof c === 'string' && (Object.hasOwn(containers, e) || created.has(e)))
     );
   },
   containment_acyclic: ({ state, result }) => {
@@ -188,7 +198,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   // compute the expected answer. A fault vacuously holds this success-only invariant.
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
-    if (!Number.isInteger(state.clock)) return false;
+    if (!Number.isInteger(state.clock) || !creationsHold(state, delta.ops, result)) return false;
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
     const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));

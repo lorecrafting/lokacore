@@ -17,7 +17,7 @@ defmodule Loka.Core.Contracts.Schema do
   `oneOf` branches are inline objects, each with exactly one `const` property, the same
   required property in every branch with distinct values (the discriminator). `anyOf` has two
   or more branches, each a `type` or `$ref` resolving to a different one of string, integer
-  and boolean, so a value's JSON type selects its branch. A `$ref` may
+  boolean and null, so a value's JSON type selects its branch. A `$ref` may
   name its own or an enclosing contract; recursion is bounded by the value, and decoded
   values by the canonical depth limit.
 
@@ -40,7 +40,7 @@ defmodule Loka.Core.Contracts.Schema do
     "null" => ~w(type)
   }
   @untyped ~w($ref enum const oneOf anyOf)
-  @scalar_types ~w(string integer boolean)
+  @scalar_types ~w(string integer boolean null)
   @counts ~w(minItems maxItems minLength maxLength maxProperties)
   @class_atom ~S"(?:[A-Za-z0-9_.](?:-[A-Za-z0-9_.])?|\\[.-])"
   @atom ~S"(?:[A-Za-z0-9_@:/-]|\\\.|\[\^?" <> @class_atom <> ~S"+-?\])"

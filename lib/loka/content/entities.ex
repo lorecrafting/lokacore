@@ -116,7 +116,9 @@ defmodule Loka.Content.Entities do
   defp over(defs, items) do
     held =
       Enum.frequencies(
-        for {_, {_, %{"location" => l}}} <- items, do: {l["in"], l[l["in"]]["key"]}
+        for {_, {_, %{"location" => l}}} <- items,
+            l["in"] != "template",
+            do: {l["in"], l[l["in"]]["key"]}
       )
 
     for {kind, rel, %{"capacity" => cap} = h} <- all(defs),

@@ -279,10 +279,12 @@ defmodule Loka.Core.ComposeTest do
     assert Compose.compose(at.("toString"), %{"ops" => [op.("toString")]}) == fault
   end
 
-  # Seeded random deltas over a small id pool (so conflicts and failed preconditions are
-  # common) through both kernels: canonical bytes and invariant results must match.
+  # Seeded small-pool deltas exercise conflicts and preconditions across both kernels.
   @peer "kernel/ts/test/differential_peer.ts"
   test "differential: Elixir and TypeScript compose identically" do
+    for c <- JSON.decode!(File.read!("protocol/fixtures/corpse_creation.json"))["cases"],
+        do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
+
     :rand.seed(:exsss, {5, 5, 5})
     pool = for c <- cases(), c["state"] in ~w(base pools), op <- c["ops"], do: op
     ours = differential(for _ <- 1..1000, do: random_case(pool))
@@ -290,9 +292,7 @@ defmodule Loka.Core.ComposeTest do
     assert map_size(faults) >= 6, "generator too narrow: #{inspect(faults)}"
   end
 
-  # The simulator's accepted proposals (kernel/ts/test/sim_sample.ts, generated each run): real
-  # deltas over real world states, composed by both kernels. Breaks: the kernels disagreeing on
-  # a delta a rule actually proposes (a resource row, a barrier, a fact default).
+  # Break: kernels disagree on real simulator deltas (resources, barriers, fact defaults).
   test "differential on 300 simulator proposals" do
     {out, 0} = System.cmd("node", ["kernel/ts/test/sim_sample.ts", "300"])
     ours = differential(JSON.decode!(out))

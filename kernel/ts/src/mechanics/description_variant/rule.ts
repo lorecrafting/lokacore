@@ -1,3 +1,4 @@
+import { living } from '../death/shared.ts';
 // description_variant@1 (capability_registry.json): look at the current place, or examine one
 // of its inspectable details, an item or NPC in it, or an item the actor holds (21 §6, §8; 04
 // §14, §18). Accepted with nothing to change; the host shows the GameView or the thing, each
@@ -12,6 +13,7 @@ export const decide: Rule<'description_variant'> = (world, command) => {
   if (target_id === undefined) return accepted(world, 'looked', [], []);
   const body = bodyOf(world, actor_id);
   const detail = has(world.details, target_id);
+  if (!living(world, target_id)) return rejected('not_found');
   if (!body || !(detail || has(world.entities, target_id))) return rejected('not_found');
   const here = world.state.containers[body];
   const at = detail ? world.details[target_id].room : world.state.containers[target_id];

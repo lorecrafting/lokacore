@@ -13,6 +13,7 @@ import {
   type DefinitionRef,
   type DomainEvent,
   type EntityId,
+  type EntityIdentity,
   type ErrorCode,
   type EventPayload,
   type FactValue,
@@ -45,6 +46,7 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
  * barrier its initial state, so a world that never writes one keeps its state hash.
  */
 export type State = {
+  readonly created?: Readonly<Record<string, EntityIdentity>>;
   readonly clock: number;
   readonly containers: Readonly<Record<string, EntityId>>;
   readonly rng: RngState;
@@ -83,9 +85,18 @@ export type JobRow = {
 const SECTIONS: Readonly<
   Record<
     string,
-    'containers' | 'facts' | 'resources' | 'cooldowns' | 'barriers' | 'quests' | 'jobs' | 'choices'
+    | 'containers'
+    | 'facts'
+    | 'resources'
+    | 'cooldowns'
+    | 'barriers'
+    | 'quests'
+    | 'jobs'
+    | 'choices'
+    | 'created'
   >
 > = {
+  entity: 'created',
   containment: 'containers',
   fact: 'facts',
   resource: 'resources',
@@ -105,7 +116,7 @@ export const row = (t: MutationTarget) =>
   SECTIONS[t.kind] &&
   ([
     SECTIONS[t.kind]!,
-    t.kind === 'containment'
+    t.kind === 'containment' || t.kind === 'entity'
       ? t.entity_id
       : t.kind === 'quest'
         ? t.instance_id
@@ -135,6 +146,8 @@ export type World = {
   readonly details: Readonly<Record<string, Detail>>; // by detail target id
   readonly entities: Readonly<Record<string, Entity>>; // items and NPCs, by EntityId
   readonly entityIds: Readonly<Record<string, EntityId>>; // by DefinitionRefString
+  readonly knownEntities: Readonly<Record<string, { kind: string; owner_id?: CharacterId }>>;
+  readonly corpseTemplates: Readonly<Record<string, 'player' | 'npc'>>;
   readonly capacities: Readonly<Record<string, number>>; // by EntityId, where declared
   readonly slots: Readonly<Record<string, EntityId>>; // each slot holder, by SlotKey (equipment@1)
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text

@@ -1,6 +1,8 @@
+import { target } from './compose_target.ts';
 // StateDelta composition (04 §5.1-§5.4, 14 §R3A), twin of lib/loka/core/compose.ex, whose
 // moduledoc states the base-state shape and the semantics. The base is read, never copied:
 // writes go to an overlay keyed by canonical target text.
+import { creationValid, initialPair, initialPlacement } from './creation.ts';
 import { encode, type Json } from './canonical.ts';
 import { validOverrideRow, adjusted, type Stored } from './resource.ts';
 import {
@@ -46,37 +48,7 @@ const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
 const containment = (e: string): MutationTarget =>
   ({ kind: 'containment', entity_id: e }) as MutationTarget;
 
-/** The MutationTarget an op writes (04 §5.1). */
-export function target(op: DeltaOp): MutationTarget {
-  switch (op.op) {
-    case 'fact.assign': {
-      const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
-      if (op.subject_id !== undefined) t.subject_id = op.subject_id;
-      return t as MutationTarget;
-    }
-    case 'entity.transfer':
-      return containment(op.entity_id);
-    case 'quest.activate':
-    case 'quest.transition':
-      return { kind: 'quest', instance_id: op.instance_id };
-    case 'choice.open':
-    case 'choice.resolve':
-    case 'choice.close':
-      return { kind: 'choice', continuation_id: op.continuation_id };
-    case 'job.schedule':
-    case 'job.complete':
-      return { kind: 'job', job_id: op.job_id };
-    case 'time.advance':
-      return { kind: 'clock' };
-    case 'resource.adjust':
-      return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
-    case 'cooldown.start':
-      return { kind: 'cooldown', actor_id: op.actor_id, action: op.action };
-    case 'barrier.transition':
-      return { kind: 'barrier', barrier: op.barrier };
-  }
-}
-
+export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
 
 export function compose(state: State, delta: StateDelta): Result {
@@ -86,8 +58,9 @@ export function compose(state: State, delta: StateDelta): Result {
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
   const ctx: Ctx = { state, horizon, overlay: new Map() };
-  for (const op of ops) {
+  for (const [index, op] of ops.entries()) {
     const t = target(op);
+    if (!initialPair(op, ops[index + 1])) return fault('precondition_failed', t);
     const k = key(t);
     const prior = ctx.overlay.get(k);
     if (prior && prior.group !== op.writer_group) return fault('conflicting_write', t);
@@ -144,8 +117,13 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       const now = row ?? get(section(ctx.state, 'fact_defaults'), key(op.fact));
       return check(now !== undefined && same(now, op.expected), op.value);
     }
+    case 'entity.create':
+      return check(
+        row === undefined && creationValid(op.identity as unknown as Json, ctx.state),
+        op.identity as Json,
+      );
     case 'entity.transfer':
-      return transfer(op.entity_id, op.source_id, op.destination_id, row, ctx);
+      return transferOp(op, row, ctx);
     case 'quest.activate':
     case 'quest.transition':
       return quest(op, row, ctx);
@@ -168,13 +146,8 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       return adjustResource(op, row, ctx);
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
-    case 'barrier.transition': {
-      const now = row ?? get(section(ctx.state, 'barrier_initial'), key(op.barrier));
-      return check(
-        now === op.from && Object.hasOwn(DOOR, op.from) && DOOR[op.from].includes(op.to),
-        op.to,
-      );
-    }
+    case 'barrier.transition':
+      return barrier(op, row, ctx);
   }
 }
 
@@ -236,6 +209,17 @@ function quest(op: DeltaOp & { op: `quest.${string}` }, row: Json | undefined, c
   return check(get(row, 'state') === op.from && legal && outcomeOk, { ...next, state: op.to });
 }
 
+function transferOp(
+  op: DeltaOp & { op: 'entity.transfer' },
+  row: Json | undefined,
+  ctx: Ctx,
+): Outcome {
+  if (op.source_id !== null)
+    return transfer(op.entity_id, op.source_id, op.destination_id, row, ctx);
+  const created = ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }));
+  return check(initialPlacement(op, row, created?.group, ctx.state), op.destination_id);
+}
+
 function transfer(e: string, source: string, d: string, row: Json | undefined, ctx: Ctx): Outcome {
   if (row !== source) return { code: 'precondition_failed' };
   if (inside(d, e, ctx)) return { code: 'containment_cycle' };
@@ -266,6 +250,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   switch (t.kind) {
     case 'fact':
       return get(section(s, 'facts'), key(t));
+    case 'entity':
+      return get(section(s, 'created'), t.entity_id);
     case 'containment':
       return get(section(s, 'containers'), t.entity_id);
     case 'quest':
@@ -292,4 +278,16 @@ function rows(kind: string, name: string, id: string, ctx: Ctx): [string, Json][
     if (w.target.kind === kind) changed.set(get(w.target as Json, id) as string, w.value);
   const base = Object.entries(section(ctx.state, name)).filter(([k]) => !changed.has(k));
   return [...base, ...changed];
+}
+
+function barrier(
+  op: DeltaOp & { op: 'barrier.transition' },
+  row: Json | undefined,
+  ctx: Ctx,
+): Outcome {
+  const now = row ?? get(section(ctx.state, 'barrier_initial'), key(op.barrier));
+  return check(
+    now === op.from && Object.hasOwn(DOOR, op.from) && DOOR[op.from].includes(op.to),
+    op.to,
+  );
 }

@@ -1,3 +1,4 @@
+import { hydrate } from '../../../kernel/ts/src/runtime/created.ts';
 import { validOverrideRow } from '../../../kernel/ts/src/foundation/resource.ts';
 import { transaction } from './transaction.ts';
 export { transaction, reconcile, rollback } from './transaction.ts';
@@ -126,7 +127,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const rng = JSON.parse(h.rng!);
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
-    const world = { ...fresh, state: { ...state, clock: h.clock, rng } as World['state'] };
+    const world = hydrate(fresh, { ...state, clock: h.clock, rng } as World['state'], true);
+    if (!world) return undefined;
     if (recoveryFault(world)) return undefined;
     for (const [target, spec] of Object.entries(world.entityResourceSpecs))
       if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))

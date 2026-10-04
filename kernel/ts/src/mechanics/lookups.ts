@@ -41,13 +41,20 @@ export function reach(world: World, body: EntityId, id: EntityId, steps: Steps =
     seen.add(at);
     const parent = world.state.containers[at];
     if (parent === body || parent === room) return true;
-    if (!opened(world, parent)) return false;
+    if (!opened(world, parent, body)) return false;
     at = parent;
   }
 }
 
 /** True when `id` is an item whose contents are in reach: no barrier, or an open one. */
-export function opened(world: World, id: string): boolean {
+export function opened(world: World, id: string, body: EntityId): boolean {
+  const origin = world.state.created?.[id]?.origin;
+  if (
+    origin?.kind === 'death' &&
+    origin.owner_id !== null &&
+    world.knownEntities[body]?.owner_id !== origin.owner_id
+  )
+    return false;
   const e = has(world.entities, id) ? world.entities[id] : undefined;
   return e?.kind === 'item' && (!e.barrier || barrierState(world, e.barrier) === 'open');
 }

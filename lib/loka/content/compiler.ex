@@ -41,6 +41,7 @@ defmodule Loka.Content.Compiler do
   defp checks(manifest, defs, v2, located, registry) do
     Resources.check(manifest, defs, v2, located, registry) ++
       Entities.carry(manifest, defs, located) ++
+      Loka.Content.Death.check(manifest, defs, located) ++
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry) ++
       Checks.rooms(manifest, defs, v2, registry) ++
       Recipes.check(manifest, defs, v2, registry) ++

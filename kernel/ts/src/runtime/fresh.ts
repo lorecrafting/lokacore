@@ -30,18 +30,12 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const [character, body] = [mint() as string as CharacterId, mint()];
   const refs = Object.keys(cartridge.rooms).sort(cmp);
   const roomIds = Object.fromEntries(refs.map((r) => [r, mint()]));
-  const details: Record<string, Detail> = {};
-  for (const r of refs)
-    for (const [key, d] of Object.entries(cartridge.rooms[r].details ?? {}).sort(([a], [b]) =>
-      cmp(a, b),
-    ))
-      details[mint()] = { ...d, room: roomIds[r], key };
+  const details = roomDetails(cartridge, refs, roomIds, mint);
   const { entities, entityIds, containers, capacities } = place(cartridge, roomIds, mint);
   containers[body] = roomIds[refString(cartridge.entry)];
   const clock = cartridge.calendar?.start ?? 0;
   const jobs = firstJobs(cartridge, clock, mint);
-  const slotKeys = [...new Set(Object.values(cartridge.items ?? {}).flatMap((i) => i.slot ?? []))];
-  const slots = Object.fromEntries(slotKeys.sort(cmp).map((k) => [k, mint()]));
+  const slots = holders(cartridge, mint);
   for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
   const { resources, entityResourceSpecs } = started(cartridge, body, clock, entities);
   return {
@@ -55,6 +49,8 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entities,
     entityIds,
     capacities,
+    knownEntities: pinnedEntities(roomIds, details, entities, slots, body, character),
+    corpseTemplates: corpseTemplates(cartridge),
     slots,
     factDefaults: byRef(cartridge, 'fact', cartridge.facts, (f) => f.value_type.default),
     resourceSpecs: byRef(cartridge, 'resource', cartridge.resources, (s) => s),
@@ -91,13 +87,16 @@ function place(
     Object.entries(m ?? {}).sort(([a], [b]) => cmp(a, b));
   const defs: [string, Entity][] = [
     ...sorted(cartridge.npcs).map(([r, d]): [string, Entity] => [r, { ...d, kind: 'npc' }]),
-    ...sorted(cartridge.items).map(([r, d]): [string, Entity] => [r, { ...d, kind: 'item' }]),
+    ...sorted(cartridge.items)
+      .filter(([, d]) => d.location.in !== 'template')
+      .map(([r, d]): [string, Entity] => [r, { ...d, kind: 'item' }]),
   ];
   const entityIds = Object.fromEntries(defs.map(([r]) => [r, mint()]));
   const ids = { ...roomIds, ...entityIds };
   const containers: Record<string, EntityId> = {};
   for (const [r, e] of defs) {
     const l = e.kind === 'item' ? e.location : { in: 'room' as const, room: e.room };
+    if (l.in === 'template') continue;
     containers[entityIds[r]] =
       ids[refString(l.in === 'room' ? l.room : l.in === 'npc' ? l.npc : l.item)];
   }
@@ -141,3 +140,48 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
 // The sections that have rows: a world that writes none keeps its earlier state hash.
 const written = (sections: Record<string, object>) =>
   Object.fromEntries(Object.entries(sections).filter(([, rows]) => Object.keys(rows).length));
+
+function pinnedEntities(
+  roomIds: World['roomIds'],
+  details: World['details'],
+  entities: World['entities'],
+  slots: World['slots'],
+  body: EntityId,
+  character: CharacterId,
+): World['knownEntities'] {
+  return {
+    ...Object.fromEntries(Object.keys(roomIds).map((r) => [roomIds[r], { kind: 'room' }])),
+    ...Object.fromEntries(Object.keys(details).map((id) => [id, { kind: 'detail' }])),
+    ...Object.fromEntries(Object.entries(entities).map(([id, e]) => [id, { kind: e.kind }])),
+    ...Object.fromEntries(Object.values(slots).map((id) => [id, { kind: 'slot' }])),
+    [body]: { kind: 'body', owner_id: character },
+  };
+}
+function corpseTemplates(cartridge: Cartridge): World['corpseTemplates'] {
+  return cartridge.world?.death
+    ? {
+        [key(cartridge.world.death.player_corpse)]: 'player',
+        [key(cartridge.world.death.npc_corpse)]: 'npc',
+      }
+    : {};
+}
+
+function holders(cartridge: Cartridge, mint: () => EntityId) {
+  const keys = [...new Set(Object.values(cartridge.items ?? {}).flatMap((i) => i.slot ?? []))];
+  return Object.fromEntries(keys.sort(cmp).map((k) => [k, mint()]));
+}
+
+function roomDetails(
+  cartridge: Cartridge,
+  refs: string[],
+  roomIds: World['roomIds'],
+  mint: () => EntityId,
+) {
+  const details: Record<string, Detail> = {};
+  for (const r of refs)
+    for (const [key, d] of Object.entries(cartridge.rooms[r].details ?? {}).sort(([a], [b]) =>
+      cmp(a, b),
+    ))
+      details[mint()] = { ...d, room: roomIds[r], key };
+  return details;
+}

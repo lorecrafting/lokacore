@@ -432,3 +432,31 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`mechani
 [Contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md). `manifest.time_policy.profile = real_elapsed` disables player Wait and recipe time skips; omitted policy retains legacy behavior. `stepElapsed(world, command, revision)` admits only schedule-owned `elapsed {actor_id, run_id, from, until}`. It validates schema and derived CommandId, rejects nil ID (`permission_denied`), wrong world/actor (`not_found`), and refuses wrong derived ID (`permission_denied`), wrong profile or interval (`invalid_state`). A valid interval has `from == world.state.clock`, `until > from`. Accepted outcome `elapsed` contains one root `time.advance`, no own narration/event/RNG; the existing proposal supplies due jobs, reactions, owned events and all budgets. Faults adopt nothing. Normal `step` refuses elapsed (`permission_denied`) even if supplied a forged ActionSet action. Scenes retain Continue-only player admission while this trusted path advances time.
 
 A single advance still faults when a job it schedules would be due at or before its target; M1-B must segment at earliest due boundaries. M1-A does not implement a clock source, background driver or recurring catch-up.
+
+## death@1 — corpse custody and same-body return (M5-B foundation)
+
+The pure fatal sequence consumes a validated positive-to-zero HP transition. It creates
+a distinct corpse identity and initial room custody, then transfers sorted direct held
+item roots and roots in the victim body's worn slot holders. Nested descendants remain
+in their bags; holders remain on the body; unrelated items stay put. Death custody
+transfers emit no item_acquired and bypass voluntary carrying limits. Corpses persist
+when empty and have no decay.
+
+`entity_died` names victim, optional victim definition (none for a player body), death
+room, killer and credited character where known, and corpse. The producer allocates
+attack-result EventId before death EventId before corpse EntityId, with no death RNG.
+The actual M6 producer owns lethal loss and encounter/job closure in the same writer
+group before this sequence; no public death/damage command or test-only engine verb
+exists. Live Attack/round/death/escape integration remains required in M6.
+
+A player returns as the same body and character directly to `world.death.shrine`, with
+no fare, gate traversal, clock jump or lineage/story reset. Position recovery settles
+the old rate through the fatal clock, then switches to standing. HP/MV restore to the
+authored amounts (full pools discard remainder); MA and unrelated story state persist.
+
+Corpses are fixed room containers: Take/Drop/Give/Wear refuse the whole corpse even
+by raw ID. Contents of a player corpse are available only to its owner; NPC corpse
+contents are public. The shared custody walk and projection enforce the same boundary,
+including nested locked bags and ordinary positive-load Take admission. NPCs with
+explicit HP0 retain identity and resource provenance but disappear from living room,
+scan, targeting, dialogue and Give paths; malformed explicit HP remains corruption.
