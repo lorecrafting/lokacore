@@ -32,17 +32,17 @@ Compared against [protocol/gameview.schema.json](../../../protocol/gameview.sche
 | # | Need (nice to have) | For | Nearest today |
 |---|---|---|---|
 | 1 | resources as current/max with a condition band ([04 §15](../../archive/spec/04-command-event-effect-protocol.md#15-portable-game-view-projection)), so the UI never invents thresholds | the status line and Character | GameView `resources` (slice G) |
-| 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | GameView `position`, the position verbs and an exit's `invalid_state` (c1-position, [position@1](../../system/mechanics.md#position1-kerneltssrcrulespositionts)); `meditating` LATER |
+| 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | GameView `position`, the position verbs and an exit's `invalid_state` (c1-position, [position@1](../../system/mechanics.md#position1-kerneltssrcrulespositionts)); book status/actions in c1-touch, sampler touch acceptance pending; `meditating` LATER |
 | 3 | discovered map places with grid coordinates and z, the edges between them, and which are visited | the minimap and Map page | none ("map joins with its capability") |
 | 4 | a typed distinction between a closed door and a barred way (openable or not); the player-facing `message` already tells them apart | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |
 | 5 | per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView {id, name, kind, actions} |
 | 6 | inspectable details marked as targetable non-entities | the tappable mooring post | none |
-| 7 | the objective or stage text of each quest | Journal; tracked objective | DONE for the kernel (c1-journal): QuestView {quest, state, title, journal?}, selected by [quest@1](../../system/mechanics.md#quest1-rulesquestts-kerneltssrcquestts); drawing is c1-touch |
+| 7 | the objective or stage text of each quest | Journal; tracked objective | DONE for the kernel (c1-journal): QuestView {quest, state, title, journal?}, selected by [quest@1](../../system/mechanics.md#quest1-rulesquestts-kerneltssrcquestts); book rendering is in c1-touch; sampler touch acceptance pending |
 | 8 | discovered dialogue topics per NPC | "Ask about" chips | none |
 | 9 | text aliases per action and target | text drawer suggestions and echoes | ActionDefinition notes they arrive with the parser |
 | 10 | the accessibility text key on each advertised action | screen readers | ActionDefinition.accessibility (not projected) |
 | 11 | the destination name of an exit the player already knows | screen-reader labels; the Map page | none |
-| 12 | the door on an exit and its state even when passable, with its open/close/lock/unlock actions (R5 S7 review Q2) | closing an open door by touch | DONE for the kernel (c1-doors): ExitView `door` (name, state, the door verbs usable now) and `sight`; drawing is c1-touch |
+| 12 | the door on an exit and its state even when passable, with its open/close/lock/unlock actions (R5 S7 review Q2) | closing an open door by touch | DONE for the kernel (c1-doors): ExitView `door` (name, state, the door verbs usable now) and `sight`; book rendering is in c1-touch; sampler touch acceptance pending |
 
 Questions for the engine rather than needs:
 

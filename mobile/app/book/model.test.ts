@@ -116,6 +116,10 @@ test("a choice's answers and Close are their own group, not place actions", () =
   );
   assert.deepEqual(
     g.place.map((x) => x.label),
+    [],
+  );
+  assert.deepEqual(
+    g.position.map((x) => x.label),
     ['Rest'],
   );
 });
