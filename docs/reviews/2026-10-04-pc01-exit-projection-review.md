@@ -92,5 +92,29 @@ A second overlapping fixture or production helper is unnecessary.
 
 ## Fix recheck
 
-Pending EXIT-1 disposition from the developer.
+### Round 1 — EXIT-1 closed — APPROVE
 
+- Source fix head: `c5f0b8e2e1eba88a9bd60fb518dea606c4a67948`.
+- Scope: EXIT-1 disposition only, its changed test and the unchanged admission/projection
+  callers. No settled part of the original review was reopened.
+- The only source-fix diff adds the policy-denied Move regression at
+  `kernel/ts/test/exit_admission.test.ts:42`. It uses the existing loaded, independently
+  rehashed ferry fixture with a `time_window` from 1 to 2 that is false at its initial clock.
+  Expected unavailable exit / `invalid_state` and direct refusal are independent literals.
+  The test catches a distinct regression from removal of Move without overlapping fixtures.
+- `mise exec -- node --test test/exit_admission.test.ts`: exit 0, 2/2 passed.
+- Reapplied the exact policy-bypass mutant documented in EXIT-1: exit 1, the new regression
+  fails on available `true` instead of `false` / `invalid_state`; the subtraction test passes.
+- Restored the exact source, then ran
+  `mise exec -- node --test test/exit_admission.test.ts test/barriers.test.ts test/position.test.ts test/scene.test.ts test/invocation.test.ts test/world.test.ts`:
+  exit 0, 42/42 passed. Production source and governing protocol are byte-identical to
+  the original reviewed head. AST caller checks confirm unchanged keyed refusal callers
+  and the same exit guard preceding passage, position and fare; aliases remain governed
+  by the existing matching-action admission.
+- Ponytail Review: **Lean already. Ship.** The minimal test reuses the fixture helper;
+  no production machinery added. No open findings.
+- Exact-source-head CI independently observed via `gh pr checks 160` and verified with
+  `gh pr view 160 --json headRefOid`: changes, bundle, lint, Elixir, simulator and TypeScript
+  all SUCCESS at `c5f0b8e2e1eba88a9bd60fb518dea606c4a67948`. Merge remains the PM's step,
+  after every started job on the eventual review-record head finishes green.
+- Source mutation removed before committing this addendum; record and index only.
