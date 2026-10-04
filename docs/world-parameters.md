@@ -75,7 +75,7 @@ Repo-wide grep for `3600|86400|% 24` (excluding node_modules, tests, docs, fixtu
 |---|---|---|---|
 | P1 | mobile/app/book/model.ts:77-78 | `branch(t)` = double-hour branch from 3600 s per hour, `% 24` | cartridge calendar (W5/W6) via GameView, ideally a `time_label` text key/bindings |
 | P2 | removed | the wait offer (whole hours, 3600 step) was removed with Wait ([record](decisions/owner-decision-untimed-lantern-2026-10-02.md)) | calendar (hours_per_day, units_per_hour) and `world.wait` (W16) |
-| P3 | mobile/app/book/pages.tsx:15-29 | English DikuMUD band phrases ("is leaking guts"...) and colour tiers at cuts 80/40 | text.json band keys (`band.<key>`) and per-band tone from W13 |
+| P3 | DONE | Content catalog supplies `band.<key>` phrases; projected W13 tone selects the palette in the touch presenter ([#141](https://github.com/lorecrafting/lokacore/pull/141), [review](reviews/2026-10-03-c1-touch-review.md)) | text.json and world.bands |
 | P4 | mobile/app/book/model.ts:59-64; pages.tsx:183 | `hp` is the condition pool (phrase shown on hp only) | `resources.json <pool>.condition: true` or `world.condition_pool` |
 | P5 | mobile/app/book/model.ts:51-55 | story ends when every journal quest is resolved/failed/abandoned | a cartridge ending (story point / `world.ending`); already an OWNER item in the comment |
 | P7 | kernel/ts/play/text.ts:226-233 (`loka play` CLI) | `clock()` "day N, HH:MM" from 86400/3600/24/60 | calendar (W5/W6) |

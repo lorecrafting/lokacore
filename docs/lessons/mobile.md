@@ -46,6 +46,9 @@ Hard-won lessons for `mobile/` and physical-device runs.
   wrong function.
 
 **iOS simulator**
+- Xcode 27 exposes Simulator windows through DeviceHub (`com.apple.dt.Devices`); a missing
+  standalone Simulator.app is not evidence that the Simulator runtime is missing. Use
+  DeviceHub for the GUI and the installed Xcode developer directory for simctl.
 - iOS 27 crashes at launch (SIGTRAP, `NoSceneLifecycleAdoption`) unless the app adopts the
   UIScene lifecycle. Expo 57 ships the scene delegate but its template does not wire it;
   `mobile/app/plugins/with-ios-scene.js` does, at every prebuild. Never hand-patch `ios/`.
