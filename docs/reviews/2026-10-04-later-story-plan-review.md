@@ -39,3 +39,18 @@ Ponytail and Ponytail Review: lean already; no additional implementation, framew
 checker or duplicate planning source needed. No open items. The review approves
 publication of preserved future planning; each actual consumer still requires its
 spec amendment, focused proof and independent implementation review.
+
+## Scoped main-merge/status recheck — 2026-10-04
+
+Reviewed `71b001b901e72e141843332de020a284b1b8cc6a`: **APPROVE**, no new findings. Scope is only the
+ROADMAP conflict resolution and NEXT-MECHANICS PR #136 status correction, plus
+their direct references. ROADMAP preserves the provisional later-story row and
+current main's merged M2-A status/four completed M engine PRs. The linked M2
+record retains primary/Astra closure and separate Sol fix approval. NEXT-MECHANICS
+correctly identifies PR #136 as merged while retaining its original formulas as
+dated alternatives governed by the current reconciliation. Missing Child priority
+and the original future-planning boundaries are unchanged.
+
+Existing docs check passed: 368 documents, zero broken links or unreachable
+documents. Ponytail Review: lean already. No runtime or broad re-review performed.
+Exact-head CI and normal hook publication remain required before merge.
