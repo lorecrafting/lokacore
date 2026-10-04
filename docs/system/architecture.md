@@ -109,10 +109,10 @@ The app shell imports the local authority's session controller
 - **`loka play`** (`bin/loka` → `kernel/ts/play/main.ts`): loads an artifact, takes typed or
   scripted commands, prints the GameView, writes a transcript and the game trace; `--replay`
   re-decides the trace's Commands and requires a byte-identical transcript (`:2`, `:287`).
-- **The phone app** (`mobile/app/App.tsx`): bundles the Lantern known answer
-  (`protocol/fixtures/cartridge_lantern_hash.json`), opens one expo-sqlite file per story
-  (`loka-lantern.db`, `:31`), plays through `localSession` with the device clock for latency
-  (`:50`), and draws the book UI or the save-error screen.
+- **The phone app** (`mobile/app/App.tsx`): opens the bundled story and its expo-sqlite
+  save under the current [sampler binding](cartridge.md#source-layout), plays through
+  `localSession`, uses the device clock to measure decision latency, and draws the
+  book UI or the save-error screen. This latency clock does not advance world time.
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
   demo cartridges, every registered invariant checked per step, failures shrunk to a minimal
   case (`:167`); the regression seeds plus fresh sequences (10,000 in CI, 500 locally) run in every `npm test`

@@ -34,8 +34,11 @@ Its previous runtime release is not bundled; an old missing pin follows the exis
 [explicit Start over path](save.md#opening-a-story), with no automatic deletion or
 migration. The
 [sampler evidence](../evidence/c1-sampler/README.md) records source approval, the
-independent artifact answer and headless play/save checks, distinguishing historical
-proof from the new Look artifact’s pending combined device proof.
+independent artifact answer and headless play/save checks. The
+[Look review](../reviews/2026-10-03-c1-sampler-look-review.md) records the new
+artifact’s independent title-Look device proof; the current composed UI proof is
+linked from the [C1 checklist](../C1-GATE.md). Historical pins and captures remain
+labeled with their actual release.
 
 ## Compiler
 

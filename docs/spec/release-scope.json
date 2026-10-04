@@ -11,8 +11,8 @@
   "chapter_one": {
     "rooms": 57,
     "quests": 10,
-    "endings": 2,
-    "source": "00a-chapter-one-content.md"
+    "endings": 3,
+    "source": "docs/decisions/owner-decision-chapter-one-content-2026-10-02.md"
   },
   "always_gates": [
     "STATIC",

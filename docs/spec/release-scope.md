@@ -1,9 +1,11 @@
-# Generated release scope
+# Release scope planning
 
-Generated from `release-scope.json`; edit that reviewed planning input, then run
-`python3 docs/rewrite-v3/checks/release_scope.py --write`.
+Planning applicability from [release-scope.json](release-scope.json); its capability
+rows also feed the [feature map](../features.gen.md). The old Markdown regeneration
+script is no longer present; keep this planning summary consistent with that input.
 
-**Full chapter one remains 57 rooms, 10 quests, two endings.** R6P is a separate early proof.
+Full chapter-one endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
+R6P and the six-room C1 sampler are separate early proofs.
 This is planning applicability, not a release certificate or a frozen engine registry.
 
 ## proof

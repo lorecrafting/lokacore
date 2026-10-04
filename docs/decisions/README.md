@@ -118,3 +118,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [TypeScript kernel layout](owner-decision-kernel-layout-2026-10-03.md): mechanical responsibility folders, colocated rules/lifecycle, preserved semantics and deterministic guards.
 
 - [Explicit entity descriptions in GameView](pm-decision-description-projection-2026-10-03.md): optional shared view fields, current explicit projection guarantee and bounded validation scope.
+
+- [C1 human acceptance and UI deferral](owner-decision-c1-gate-ui-deferral-2026-10-03.md): owner directs gate closure; intermittent blur and unmeasured phone response carry to the next UI checkpoint.
+
+- [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.

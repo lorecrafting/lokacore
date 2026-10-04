@@ -10,10 +10,11 @@ Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-202
 [dialogue, Contents and pickup polish](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md),
 and [journal, Leave, position and detail-flow polish](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md).
 Original feedback lives in those records; independent reviews and retained interaction proof
-are indexed in [reviews](../reviews/README.md). This round follows
-[PR #143](https://github.com/lorecrafting/lokacore/pull/143); authorization does not claim its
-new implementation or Gate C1 acceptance. Touch acceptance follows
+are indexed in [reviews](../reviews/README.md). Touch acceptance follows
 [C1 slice 12](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
+The owner-directed C1 human acceptance and deferred UI validation are recorded once in
+[the gate UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md);
+its carries are scheduled in [ROADMAP](../ROADMAP.md#c1-carry-checkpoints).
 
 ## World and status entry
 

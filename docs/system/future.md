@@ -13,8 +13,8 @@ Short list; each item links the plan it comes from. The open stages and their ca
 ## Chapter one and the proof cartridge
 
 - Capabilities registered but not installed, with the slice that first needs them:
-  [feature map](../features.gen.md), [release scope](../spec/release-scope.md) (full chapter one
-  is 57 rooms, 10 quests, two endings).
+  [feature map](../features.gen.md), [release scope](../spec/release-scope.md); chapter-one
+  endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
 - Mechanics: [00 §4](../archive/spec/00-first-cartridge-design.md#4-feature-list) (movement, time,
   character, items, combat, economy, NPCs, quests, social, touch UI) and
   [00 §11](../archive/spec/00-first-cartridge-design.md#11-release-ladder-three-chapters-one-world) (the
