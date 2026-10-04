@@ -139,3 +139,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - Owner decision: [simulator-first mechanics validation](owner-decision-simulator-first-validation-2026-10-04.md); required per-PR checks/fresh review retained, physical-device proof routed substantially later before public readiness.
 - [M1-B2 app lifecycle and elapsed sampler](pm-decision-m1-b2-lifecycle-2026-10-04.md): resume reservations, confirmed touch updates and the current development consumer.
+- PM-selected future planning, review/implementation pending: [later Ashmere story reconciliation](pm-decision-later-story-reconciliation-2026-10-04.md), with [canonical ending selectors](../LATER-ENDINGS.md).

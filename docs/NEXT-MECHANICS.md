@@ -51,6 +51,26 @@ This queues every chapter-one “not yet” capability plus the missing installe
 
 **Content integration follows four playable phases:** village/useful actions (after the initial Bram clock beat) → search/return → living village/night → bell/all three endings. Room batches retain prototype prose; PM approves scoped content batches under the delegation record. These are content integration blocks, not one gigantic Missing Child PR; required mechanics and conformance land before their consuming batch.
 
+## Missing Child integration checklist
+
+MC identifiers track coverage inside existing parent groups; they are not eight new PRs
+or mechanic families. A missing primitive may land with its first actual mechanic
+consumer. Every row is **planned**, with no implementation or focused proof claimed.
+MC-01–03 close through one coherent finale consumer proving all three outcomes,
+the five valid child/bell pairs and once-only acknowledged export. Parent plans follow the
+[adopted mechanics policy](decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md).
+
+| Tracking item | Parent slices / consumer | Completion proof | Status |
+|---|---|---|---|
+| **MC-01 bell before dawn** | M21-C / M22-C finale | Child terminal alone cannot start dawn; accepted bell outcome precedes dawn and acknowledged export. | Planned |
+| **MC-02 voluntary Green epilogue** | M21-C finale | Reach Green by legal movement; chosen epilogue action starts its scene, without teleport or clock jump. | Planned |
+| **MC-03 complete ending coverage** | M20-A/C + M22-B/C; M23 consumes bell presentation | All three outcomes and five valid child/bell pairs yield their selected reactions; retry/reopen cannot repeat finale acknowledgement/export. | Planned |
+| **MC-04 cellar access / storage key** | M5-A / M6-A content; M20-B reward | First cellar encounter is reachable freely; earned storage-chest key opens storage without gating cellar access. | Planned |
+| **MC-05 pre-acceptance rat credit** | M6-A death producer + minimal early M22-A typed-death→content-fact mapping; M20-B current state | Eligible deaths before quest acceptance persist toward S1; wrong victim, location or credited participant gives no credit; reopen/retry preserves credit without another reward. Content declares mapping; engine validates typed participants/victim/location and writes the group, without story names or room switches. | Planned |
+| **MC-06 ledger / public Aldric deadline** | M22-A handoff + M20-D / M1-C | Peg's ledger reaches its proper recipient; public Aldric remains reachable for advertised deadline outcomes, including boundary and late/expired branches. | Planned |
+| **MC-07 actual corpse-return route** | M5-B / M6-A initial consumer; recheck with M9 / M10 / M16 / M19 | Shrine→actual owned corpse remains traversable/recoverable after death without sole lost light, water gear, follower or fare; later consumers re-prove their new route restrictions. | Planned |
+| **MC-08 usable continuous-time reading** | M13-B / M21-A/C + M20-D | World time continues during reading; safe or interruptible controls preserve usable response and accessible deadline actions rather than stranding the player. | Planned |
+
 ## After mechanics: proof, content and the product
 
 1. **R9 minimum Lab + R9C applicable conformance** package deterministic/fault/static/quest/world/scene evidence alongside real first consumers. No generalized exploration framework or future mechanic just to fill a synthetic checklist. **Large**, incremental with mechanics.
@@ -58,6 +78,8 @@ This queues every chapter-one “not yet” capability plus the missing installe
 3. **R12A accounts/progress + R12 production Story app**: real account lifecycle, offline completion sync/readback, one save per story, pinned compatibility/recovery/migrations/export and polished install/offline/resume/accessibility UX. Can overlap late R10 once interfaces are stable; both required before public free launch. **Large each**. Android evidence returns at that gate; accounts do not claim full-save cloud restore.
 4. **R11 Builder** grows from demonstrated authoring pain, not before real-cartridge proof; typed operations, compile/Lab control, receipts and explainability. **Large**; can overlap later product work. R13 paid commerce follows platform foundation before paid releases, not before the free chapter.
 5. **Later chapters / Realm**: chapter two adds magic, ghost-walk/resurrection, companions and its actual dungeon/event consumers; chapter three broader crafting/escrow/economy/crime/housing/mail/mounts. Online R14–R22 adds BEAM authority and declared rule differential, transport/reconnect, co-op/instances/shards and MMO expansion. These are **large later stages**, not dependencies of offline chapter one. Chapter-one **shrine death** remains earlier.
+
+Concrete later quest consumers and unresolved story choices: [provisional C2/C3/CC queues](LATER-MECHANICS.md). They preserve M1–M23 priority and require individual adoption before implementation.
 
 Milestone details and gates: [14 R7–R14 and dependency graph](archive/spec/14-implementation-plan.md); applicability overrides the broad historical “chapter two adds death” phrase. Phase numbers are not a mandatory total order.
 

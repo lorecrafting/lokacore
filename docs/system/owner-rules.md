@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Later Ashmere conflicts follow the [PM-selected future policy](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md); implementation and publication review remain pending, with no active M15/schema change.
+
 - One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
   ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).
 - Fixed time; no player-driven time skips. The later time model follows elapsed time, and rest or
