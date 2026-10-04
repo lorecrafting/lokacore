@@ -84,6 +84,45 @@ query dependencies, and action/view queries consume RPG mechanics. The conforman
 registry in runtime includes the view/admission check. This move preserves these couplings,
 the static capability registry and pure Rule ABI; loading and executing rules stays static.
 
+## Building mechanics by composition
+
+A mechanic reads shared typed facts, properties, relations, containment, resources,
+jobs, perception and events, then requests registered typed consequences in the normal
+proposal. Cartridge definitions supply concrete actors, places, numbers and story
+combinations. Capability code does not special-case a chapter or NPC or call another
+mechanic's player verb; existing spec-required dependencies remain named exceptions.
+
+Reuse the smallest existing primitive that preserves the required behavior. When a real
+consumer needs semantics or an invariant the vocabulary cannot express, create or extend
+its smallest reusable primitive with that consumer, under the [owner clarification](../decisions/owner-decision-consumer-primitives-2026-10-04.md).
+Do not weaken the mechanic, duplicate a writer or use untyped facts to evade a contract.
+A primitive has a semantic contract, an owner and an invariant; it need not be a separate
+package, framework, registry or public interface. Existing reserved fact-backed engine
+state and documented quest/dialogue/scene hooks retain their current contracts.
+
+The brief records the real consumer, shared reads, typed writes/consequences and writer
+ownership, reused primitives, each missing invariant, what composes without extra code,
+and justified named-mechanic/content exceptions with their governing clauses. Review that
+record against the actual consumer: ordering and causal credit, conflict/atomic rollback,
+trust-boundary validation, bounded traversal before work, shared projection/admission,
+and changed-row save/reopen when state is added. Reuse unchanged proofs; add focused
+controlled-input checks and red controls only for distinct plausible regressions.
+
+The portable foundation owns generic arithmetic, identity and delta/precondition/invariant
+semantics; RPG helpers interpret posture, life, skill and content. Shared foundation changes
+retain the [two-kernel fixture/differential obligations](#two-kernels-one-semantic-contract).
+New story capabilities stay TypeScript-only until the established server-consumption trigger.
+The authority owns clock input, receipts, transactions and adoption; the presenter consumes
+GameView and emits ActionInvocation. Neither is an additional gameplay writer.
+
+Prefer a derived query where no history is needed, typed facts for durable narrative truth,
+an immediate sequence for a bounded decision, a reaction for typed event consequences,
+and a job/quest/scene/state machine for the required durable continuation. Add only the
+actual subset; existing writer conflicts, budgets and ordering remain governed by
+[protocol](protocol.md) and [mechanics](mechanics.md). The [emergence decision](../archive/decisions/owner-decision-emergence-2026-09-25.md)
+and [primitive graduation rules](../archive/spec/21-composable-world-primitives.md#24-primitive-graduation-rule)
+supply the historical direction, without making the whole catalog an implementation queue.
+
 ## Two kernels, one semantic contract
 
 The foundation (encoding, hash, integers, RNG, ids, composition, validation, the

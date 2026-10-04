@@ -89,8 +89,7 @@ and not repeated here.
   cartridge threshold" by the [chapter-one plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md),
   triage 21); the UI shows the phrase on hp and colours every resource; LegendMUD credited,
   never named in the UI ([record](../archive/decisions/owner-decision-condition-bands-2026-10-01.md)).
-- Composability and emergence principles; every mechanic slice states what it composes with
-  ([record](../archive/decisions/owner-decision-emergence-2026-09-25.md)).
+- Composability and emergence principles: briefs/reviews use [Building mechanics by composition](architecture.md#building-mechanics-by-composition), including missing primitives at real consumers ([owner clarification](../decisions/owner-decision-consumer-primitives-2026-10-04.md)); retain the [emergence record](../archive/decisions/owner-decision-emergence-2026-09-25.md).
 - Ids: IdSource UUIDv8 and the frozen numeric profile v1; CommandId reuses the recipe and
   authority placement never enters it; lowercase UUID ids, snake_case segments, `ErrorCode` enum
   plus registry ([record](../archive/decisions/owner-decisions-r3-2026-09-24.md),

@@ -8,7 +8,7 @@ reviews) is in [docs/archive/](../archive/README.md), read only when a task need
 
 | File | Covers |
 |---|---|
-| [architecture.md](architecture.md) | repository layout, the compile-checked boundaries, hosts, checks, observability |
+| [architecture.md](architecture.md) | repository layout, primitive composition and layer ownership, the compile-checked boundaries, hosts, checks, observability |
 | [book-ui.md](book-ui.md) | book views, entries, actions/logs, destinations, scene/state rules |
 | [protocol.md](protocol.md) | contracts, the numeric profile, the decision loop, budgets, invariants, ActionSet, GameView |
 | [save.md](save.md) | the local Story authority: receipts, the SQLite save, recovery, story points, the trace |

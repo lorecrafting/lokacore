@@ -52,6 +52,7 @@ Report at the end of the slice, not at every step.
    decided, and a scope trigger (what makes the developer stop and ask, for example a frozen
    fixture or protocol file that would need to change). Add a timebox only for open-ended work:
    at the limit the developer stops and returns partial findings.
+   Mechanic briefs include the [composition record](system/architecture.md#building-mechanics-by-composition).
 3. **Build and self-review (developer).** Implement; run the full local check line from
    AGENTS.md once (the pre-push hook is the final run: do not run it again right before the push); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
@@ -64,7 +65,8 @@ Report at the end of the slice, not at every step.
 4. **Verify and review.** PM does not relay claims: it confirms CI is green on the pushed
    commit (or reruns the check line) before review. Then it spawns a *fresh* `reviewer`
    with the PR number, the brief and the cited sections. The reviewer derives the
-   requirements from them before reading the diff, and tests the tests by breaking
+   requirements from them before reading the diff, checks the [composition record](system/architecture.md#building-mechanics-by-composition)
+   against the actual consumer and diff, and tests the tests by breaking
    the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, links it from
    [the index](reviews/README.md), and returns the findings.
 5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
