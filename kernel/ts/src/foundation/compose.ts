@@ -2,7 +2,7 @@
 // moduledoc states the base-state shape and the semantics. The base is read, never copied:
 // writes go to an overlay keyed by canonical target text.
 import { encode, type Json } from './canonical.ts';
-import { adjusted, type Stored } from './resource.ts';
+import { validOverrideRow, adjusted, type Stored } from './resource.ts';
 import {
   LIMITS,
   type DeltaOp,
@@ -183,10 +183,15 @@ function adjustResource(
   row: Json | undefined,
   ctx: Ctx,
 ): Outcome {
+  const override = get(section(ctx.state, 'entity_resource_specs'), key(target(op))) as
+    ResourceSpec | undefined;
+  if (override && !validOverrideRow(row, override, ctx.state.clock))
+    return { code: 'precondition_failed' };
   return adjusted(
     op,
     row as Stored | undefined,
-    get(section(ctx.state, 'resource_specs'), key(op.resource)) as ResourceSpec | undefined,
+    override ??
+      (get(section(ctx.state, 'resource_specs'), key(op.resource)) as ResourceSpec | undefined),
     ctx.state.clock,
   );
 }

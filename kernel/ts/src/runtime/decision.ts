@@ -139,6 +139,7 @@ export type World = {
   readonly slots: Readonly<Record<string, EntityId>>; // each slot holder, by SlotKey (equipment@1)
   readonly factDefaults: Readonly<Record<string, FactValue>>; // by canonical DefinitionRef text
   readonly resourceSpecs: Readonly<Record<string, ResourceSpec>>; // by canonical DefinitionRef text
+  readonly entityResourceSpecs: Readonly<Record<string, ResourceSpec>>; // by canonical resource target
   readonly barrierInitial: Readonly<Record<string, BarrierState>>; // by canonical DefinitionRef text
   readonly attributes: Readonly<Record<string, number>>; // each attribute's start, by DefinitionRef text
   readonly state: State;

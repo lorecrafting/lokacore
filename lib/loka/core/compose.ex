@@ -1,3 +1,4 @@
+# size: allow 310, portable composition includes exact entity resource precedence and required-row guard
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
@@ -228,8 +229,14 @@ defmodule Loka.Core.Compose do
     do: check(read(t, ctx) == from and to > from, to)
 
   defp apply_op(%{"op" => "resource.adjust"} = op, t, ctx) do
-    spec = section(elem(ctx, 0), "resource_specs")[key(op["resource"])]
-    Loka.Core.Resource.adjusted(op, read(t, ctx), spec, elem(ctx, 0)["clock"])
+    override = section(elem(ctx, 0), "entity_resource_specs")[key(t)]
+    spec = override || section(elem(ctx, 0), "resource_specs")[key(op["resource"])]
+    row = read(t, ctx)
+    now = elem(ctx, 0)["clock"]
+
+    if override && !Loka.Core.Resource.valid_override_row?(row, override, now),
+      do: {:error, "precondition_failed"},
+      else: Loka.Core.Resource.adjusted(op, row, spec, now)
   end
 
   defp apply_op(%{"op" => "cooldown.start", "at" => at} = op, t, {state, _, _} = ctx),

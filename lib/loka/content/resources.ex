@@ -96,10 +96,29 @@ defmodule Loka.Content.Resources do
 
     Enum.flat_map(tables(defs, world), &table(&1, text)) ++
       cost(m, defs, world) ++
-      owned(m, defs["attribute"], registry) ++ recovery(m, defs["resource"])
+      owned(m, defs["attribute"], registry) ++ recovery(m, defs["resource"]) ++ npc_hp(m, defs)
   end
 
   def check(_, _, _, _, _), do: []
+
+  defp npc_hp(m, defs) do
+    version =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    for {_, {rel, [], %{"hp" => hp}}} <- defs["npc"],
+        d <-
+          if(hp["minimum"] <= hp["start"] and hp["start"] <= hp["maximum"],
+            do: [],
+            else: [diag("RESOURCE_SPEC_INVALID", at(rel, ["hp"]))]
+          ) ++
+            if(version >= [1, 4],
+              do: [],
+              else: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]
+            ),
+        do: d
+  end
 
   defp tables(defs, world) do
     pools = for {_, {rel, steps, %{"bands" => b}}} <- defs["resource"], do: {rel, steps, b}

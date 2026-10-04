@@ -2,8 +2,8 @@
   "resources": {
     "mv": {
       "minimum": 0,
-      "maximum": 82,
-      "start": 82,
+      "maximum": 100,
+      "start": 100,
       "gain": 18,
       "regen": {
         "every": 3600,
@@ -36,6 +36,11 @@
           "tone": "danger"
         }
       ]
+    },
+    "hp": {
+      "minimum": 0,
+      "maximum": 10,
+      "start": 10
     }
   }
 }

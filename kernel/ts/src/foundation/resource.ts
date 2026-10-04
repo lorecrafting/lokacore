@@ -95,3 +95,18 @@ export function adjusted(
     ? { value: { value: op.to, at: now } }
     : { code: 'precondition_failed' };
 }
+
+/** An explicit entity override requires exactly this legacy row, including at birth zero. */
+export function validOverrideRow(row: unknown, spec: ResourceSpec, now: number): row is Stored {
+  if (!row || typeof row !== 'object' || Array.isArray(row)) return false;
+  const r = row as Stored;
+  return (
+    Object.keys(row).length === 2 &&
+    Number.isInteger(r.value) &&
+    r.value >= spec.minimum &&
+    r.value <= spec.maximum &&
+    Number.isSafeInteger(r.at) &&
+    r.at >= 0 &&
+    r.at <= now
+  );
+}

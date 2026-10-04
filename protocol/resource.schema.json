@@ -239,6 +239,41 @@
           }
         }
       ]
+    },
+    "NpcHp": {
+      "description": "Explicit entity-specific HP bounds/start/gain. Requires kernel API 1.4; minimum <= start <= maximum (RESOURCE_SPEC_INVALID). Required legacy-shaped birth/save row; no position recovery.",
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "$ref": "#/$defs/ResourceInt"
+        },
+        "maximum": {
+          "$ref": "#/$defs/ResourceInt"
+        },
+        "start": {
+          "$ref": "#/$defs/ResourceInt"
+        },
+        "gain": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "minimum",
+        "maximum",
+        "start",
+        "gain"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "minimum": 0,
+          "maximum": 6,
+          "start": 6,
+          "gain": 0
+        }
+      ]
     }
   }
 }

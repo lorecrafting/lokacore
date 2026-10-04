@@ -345,3 +345,34 @@ test('recovery schema trust-boundary literals', () => {
   for (const c of read('protocol/fixtures/resource_recovery.json').contracts)
     assert.deepEqual(validate(c.contract, c.value), c.errors, c.id);
 });
+
+// Breaks: pool-only/entity-only keys, absent-row healing, NPC recovery, or partial composition.
+test('entity-resource overrides match literals and independent preconditions reject false success', () => {
+  for (const c of read('protocol/fixtures/entity_resource.json').cases) {
+    const delta = { ops: c.ops };
+    assert.deepEqual(compose(c.state, delta), c.expected, c.id);
+    assert.equal(
+      check('delta_preconditions_hold', { state: c.state, delta, result: c.expected }),
+      true,
+      c.id,
+    );
+    if ('fault' in c.expected)
+      assert.equal(
+        check('delta_preconditions_hold', {
+          state: c.state,
+          delta,
+          result: {
+            changes: [{ target: c.expected.fault.target, value: { value: 5, at: 64800 } }],
+          },
+        }),
+        false,
+        c.id,
+      );
+  }
+});
+
+// Breaks: NPC override schemas lose a required field, numeric bound/type, or unknown-field guard.
+test('NPC HP schema trust-boundary literals', () => {
+  for (const c of read('protocol/fixtures/entity_resource.json').contracts)
+    assert.equal(validate('NpcHp', c.value).length === 0, c.valid, c.id);
+});

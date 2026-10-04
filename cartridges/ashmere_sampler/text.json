@@ -79,5 +79,12 @@
   "band.steady": "moves steadily",
   "band.tired": "is tired",
   "band.exhausted": "is exhausted",
-  "action.take": "Take"
+  "action.take": "Take",
+  "npc.cellar_rat.short": "a cellar rat",
+  "npc.cellar_rat.description": "A small grey rat watches from beside a barrel, its whiskers twitching.",
+  "npc.cellar_rat_1.room": "A [[cellar_rat_1|cellar rat]] noses among the dusty barrels.",
+  "npc.cellar_rat_2.room": "A [[cellar_rat_2|cellar rat]] noses among the dusty barrels.",
+  "npc.cellar_rat_3.room": "A [[cellar_rat_3|cellar rat]] noses among the dusty barrels.",
+  "npc.cellar_rat_4.room": "A [[cellar_rat_4|cellar rat]] noses among the dusty barrels.",
+  "npc.cellar_rat_5.room": "A [[cellar_rat_5|cellar rat]] noses among the dusty barrels."
 }

@@ -1,3 +1,4 @@
+import { key, target } from '../foundation/compose.ts';
 import type { Json } from '../foundation/canonical.ts';
 // Decoded observations, independently replayed like the Elixir twin.
 type Any = any;
@@ -54,5 +55,35 @@ export function recovered(op: Any, spec: Any, row: Any, now: number): Json | und
         rate: op.next_rate ?? row.rate,
         remainder: op.to === spec.maximum ? 0 : fraction,
       }
+    : undefined;
+}
+
+export const effectiveSpec = (op: Any, s: Any) =>
+  s.entity_resource_specs?.[key(target(op))] ?? s.resource_specs?.[key(op.resource)];
+
+export function legacyInitial(op: Any, s: Any): number | undefined {
+  const spec = effectiveSpec(op, s);
+  const row = s.resources?.[key(target(op))];
+  if (!spec || spec.regen) return undefined;
+  if (
+    s.entity_resource_specs?.[key(target(op))] &&
+    (!row ||
+      typeof row !== 'object' ||
+      Array.isArray(row) ||
+      Object.keys(row).length !== 2 ||
+      !Number.isInteger(row.value) ||
+      row.value < spec.minimum ||
+      row.value > spec.maximum ||
+      !Number.isSafeInteger(row.at) ||
+      row.at < 0 ||
+      row.at > s.clock)
+  )
+    return undefined;
+  const before = row ?? { value: spec.start, at: 0 };
+  return Number.isInteger(before.value) && Number.isInteger(before.at)
+    ? Math.min(
+        spec.maximum,
+        before.value + spec.gain * (Math.floor(s.clock / 3600) - Math.floor(before.at / 3600)),
+      )
     : undefined;
 }

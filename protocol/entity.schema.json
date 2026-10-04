@@ -229,7 +229,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field.",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides).",
       "type": "object",
       "properties": {
         "key": {
@@ -269,6 +269,9 @@
           "additionalProperties": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           }
+        },
+        "hp": {
+          "$ref": "resource.schema.json#/$defs/NpcHp"
         }
       },
       "required": [

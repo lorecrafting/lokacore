@@ -94,4 +94,12 @@ defmodule Loka.Core.Resource do
       {:error, "precondition_failed"}
     end
   end
+
+  def valid_override_row?(%{"value" => value, "at" => at} = row, spec, now),
+    do:
+      map_size(row) == 2 and is_integer(value) and value >= spec["minimum"] and
+        value <= spec["maximum"] and is_integer(at) and at >= 0 and at <= 9_007_199_254_740_991 and
+        at <= now
+
+  def valid_override_row?(_, _, _), do: false
 end

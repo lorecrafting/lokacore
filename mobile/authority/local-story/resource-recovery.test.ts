@@ -172,22 +172,22 @@ test('bundled sampler pays MV1 and rests twice as fast while Bram still departs'
     const mv = () => p.game.view().view.resources!.find((r) => r.resource.key === 'mv')!;
     const move = (direction: string) =>
       p.game.invoke({ ...intent('move'), input: { direction: direction as never } });
-    assert.deepEqual([mv().current, mv().maximum, mv().band], [82, 82, 'mv_ready']);
+    assert.deepEqual([mv().current, mv().maximum, mv().band], [100, 100, 'mv_ready']);
     for (const direction of ['north', 'south', 'north', 'south'])
       assert.equal(move(direction).kind, 'saved');
-    assert.equal(mv().current, 78);
+    assert.equal(mv().current, 96);
     assert.equal(p.game.invoke(intent('rest')).kind, 'saved');
     at(p, 2000);
-    assert.equal(mv().current, 79);
+    assert.equal(mv().current, 97);
     assert.equal(p.game.invoke(intent('stand')).kind, 'saved');
     at(p, 4000);
-    assert.equal(mv().current, 79);
+    assert.equal(mv().current, 97);
     at(p, 6000);
-    assert.equal(mv().current, 80);
+    assert.equal(mv().current, 98);
     assert.equal(mv().band, 'steady');
     assert.equal(p.game.view().view.resources!.find((r) => r.resource.key === 'hp')!.band, 'ready');
     at(p, 72000);
-    assert.equal(mv().current, 82);
+    assert.equal(mv().current, 100);
     assert.equal(
       p.game.view().view.entities.some((e) => e.id === '15349791-fa65-81f7-b378-bb8212b808d2'),
       false,
