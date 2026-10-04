@@ -265,6 +265,11 @@ narration and dialogue choices above); no `narration.emit` consequence, no ackno
 
 ## scene@1 (`rules/scene.ts`)
 
+Shared fact/reference, running-line, modal action and start-delivery queries live in
+`kernel/ts/src/scene.ts`, used by the pure rule, reaction delivery, admission and view,
+following position@1's existing helper pattern. The rule retains typed ownership and
+never casts schema values or imports I/O.
+
 Dated implementation amendment, 2026-10-03: the installed subset of archived 06
 §33–§37 and 21 §3.6 is a modal text sequence in `current_world`, as needed by 00a §9
 and the approved [C1 plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md).
