@@ -8,9 +8,9 @@ import { read } from './read.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);
 const corpus = read('protocol/fixtures/cartridge_loader.json');
-// The hello fixture's lock, every capability at version 1.
+// The hello and fact v2 fixtures' capabilities, each at version 1.
 const hello =
-  'movement containment inspectable_detail description_variant equipment fact policy target_resolution narration quest dialogue topics check behavior schedule';
+  'movement containment inspectable_detail description_variant equipment fact policy target_resolution narration quest dialogue topics check behavior schedule resource';
 const installed: Installed = {
   kernel_api: '1.0',
   capabilities: Object.fromEntries(hello.split(' ').map((k) => [k, [1]])),
@@ -36,15 +36,18 @@ const sorted = (v: any): any =>
             .map((k) => [k, sorted(v[k])]),
         )
       : v;
-const withFactType = (value_type: object) => {
-  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
-  cartridge.facts['ashmere_hello@0.0.1:fact/village_arrived'].value_type = value_type;
+const load = (cartridge: any) => {
   const text = JSON.stringify(sorted(cartridge));
   const content_hash = createHash('sha256').update(text).digest('hex');
   return loadCartridge(
     bytes(JSON.stringify({ cartridge: sorted(cartridge), content_hash })),
     installed,
   );
+};
+const withFactType = (value_type: object) => {
+  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
+  cartridge.facts['ashmere_hello@0.0.1:fact/village_arrived'].value_type = value_type;
+  return load(cartridge);
 };
 
 // Breaks: an artifact bypasses the compiler and boots with an impossible enum default.
@@ -68,6 +71,27 @@ test('the loader rejects a bounded integer fact default outside its bounds', () 
       {},
     ),
   }));
+
+// Breaks: default validation is accidentally limited to v1, leaving a v2 artifact with an
+// impossible unwritten fact default loadable.
+test('the loader rejects an invalid v2 fact default', () => {
+  const cartridge = structuredClone(read('protocol/fixtures/cartridge_facts_hash.json').value);
+  cartridge.facts['ashmere_facts@0.0.1:fact/review_default'] = {
+    key: 'review_default',
+    version: 1,
+    value_type: { type: 'enum', values: ['missing'], default: 'rescued' },
+    scopes: ['instance'],
+    meaning: 'Controlled loader default.',
+  };
+  assert.deepEqual(load(cartridge), {
+    ok: false,
+    diagnostic: diagnostic(
+      'FACT_DEFAULT_INVALID',
+      '.cartridge.facts["ashmere_facts@0.0.1:fact/review_default"].value_type.default',
+      {},
+    ),
+  });
+});
 
 // Breaks: the hash is taken over other bytes (the artifact, a re-ordered encoding), or a valid
 // artifact is rejected by some stage.
