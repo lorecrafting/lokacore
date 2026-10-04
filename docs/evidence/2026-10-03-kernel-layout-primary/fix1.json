@@ -1,0 +1,25 @@
+{
+  "base": "48405cd9fb5f743470125aaa65b23b374536dc51",
+  "head": "75ee13133fd0a1bae9cccfe5918bdb4c84d8a052",
+  "finding": "N-1",
+  "disposition": "closed",
+  "changed_paths": [
+    "docs/world-parameters.md"
+  ],
+  "personally_verified_rule_declarations": {
+    "kernel/ts/src/mechanics/dialogue/rule.ts": 63,
+    "kernel/ts/src/mechanics/quest/rule.ts": 10
+  },
+  "tests": "not warranted; documentation-only",
+  "ci_source": "PM report",
+  "ci_success": [
+    "changes",
+    "lint",
+    "bundle"
+  ],
+  "ci_expected_docs_only_skips": [
+    "Elixir",
+    "simulator",
+    "TypeScript"
+  ]
+}

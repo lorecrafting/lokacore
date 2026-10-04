@@ -1,0 +1,18 @@
+Running ExUnit with seed: 141275, max_cases: 16
+
+
+
+  1) test red controls refuse an occupied path and preserve its bytes (Loka.RedControlsTest)
+     test/loka/red_controls_test.exs:5
+     Assertion with == failed
+     code:  assert File.read(existing) == {:ok, "# local scratch\nkeep me\n"}
+     left:  {:error, :enoent}
+     right: {:ok, "# local scratch\nkeep me\n"}
+     stacktrace:
+       test/loka/red_controls_test.exs:20: (test)
+
+
+Finished in 4.6 seconds (0.05s on load, 4.6s async, 0.00s sync)
+
+Result: 0/1 passed
+Failed: 1 test

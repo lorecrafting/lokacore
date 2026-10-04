@@ -1,0 +1,10 @@
+Pinned review 7a2a140ecdadf33a0684124862bcf178a52b64fb; authored none; model unverified.
+Derived from Book UI, GameView, Book presenter and original owner record before diff:
+- Captured offered actions and freshness remain authoritative; no fabricated targets, controls, success, or data-loss handling.
+- NPC route and scroll remain mounted across ordinary same-room results; chronological once-only history stays in original NPC context across pending retry; local Leave retains saved choice; offered Close is distinct.
+- Status opens precisely five real Contents routes; World position stays separate; scene hides ordinary controls.
+- Successful confirmed Take/Drop return World with original projected name/authored text; pending/refused/stale/fault preserve honest state and action context.
+- World history resets only after committed place change, preserving new consequences and visible active save faults; incomplete one-target Give is absent, complete Give remains legal.
+- Fixed World title and footer; conditional title Look only when offered. Supporting new content must be proven separately; no fake UI Look.
+- Actual Release composed proof must cover scrolling dock, navigation, pickup/drop, room log, choice/freshness, scene2 restart and queued chapter; existing previews untouched.
+- No scope extension into authority, kernel, persistence, protocol/content pin, native/plugins/dependencies. Dedicated canonical spec discoverable from roots.
