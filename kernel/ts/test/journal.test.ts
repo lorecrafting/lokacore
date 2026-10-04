@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Command, Key, QuestState } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { identify, resolve } from '../src/invocation.ts';
-import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
+import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';

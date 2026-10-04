@@ -6,7 +6,7 @@ defmodule Loka.Content.Position do
   an authored fact named position, or a fact.assign of it in a recipe outcome, a reaction's
   apply or a dialogue choice, is RESERVED_FACT. The same write-site walk also reserves
   scene_<key> facts under scene@1 (Scenes supplies their engine FactSpecs).
-  Twin of kernel/ts/src/cartridge_position.ts.
+  Twin of kernel/ts/src/content/cartridge_position.ts.
   """
   import Loka.Content.Source, only: [diag: 2, at: 2]
 

@@ -204,7 +204,7 @@ limits = read.("docs/spec/conformance/composition-profile.json")["limits"]
 
 # Owning capability (key@version) of each command, policy op, definition kind and event, for
 # the loader's UNDECLARED_CAPABILITY re-check, command routing and the event-ownership check
-# at admission (cartridge.schema.json DiagnosticCode; kernel/ts/src/world.ts).
+# at admission (cartridge.schema.json DiagnosticCode; kernel/ts/src/runtime/world.ts).
 owners =
   for {kind, field} <- [
         {"command", "commands"},
@@ -218,7 +218,7 @@ owners =
 
 # Per capability that owns a command or event: the command and event type names it owns, as
 # TypeScript literal unions (never for none). Rule modules are typed by it, so one that
-# handles or emits another capability's command or event fails typecheck (kernel/ts/src/world.ts).
+# handles or emits another capability's command or event fails typecheck (kernel/ts/src/runtime/world.ts).
 owned_union = fn names ->
   if names == [], do: "never", else: Enum.map_join(names, " | ", &Gen.lit/1)
 end

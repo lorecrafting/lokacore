@@ -26,7 +26,7 @@
       "TargetUnresolved"
     ],
     "modules": [
-      "kernel/ts/src/target.ts"
+      "kernel/ts/src/commands/target.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_details_hash.json",
@@ -44,8 +44,8 @@
       "Alias"
     ],
     "modules": [
-      "kernel/ts/src/world.ts",
-      "kernel/ts/src/target.ts"
+      "kernel/ts/src/runtime/world.ts",
+      "kernel/ts/src/commands/target.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_details_hash.json"
@@ -62,8 +62,8 @@
       "TargetResolution"
     ],
     "modules": [
-      "kernel/ts/src/target.ts",
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/commands/target.ts",
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_hash.json"
@@ -80,7 +80,7 @@
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_facts_hash.json"
@@ -99,8 +99,8 @@
       "ScopedFact"
     ],
     "modules": [
-      "kernel/ts/src/fact.ts",
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/mechanics/fact.ts",
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_facts_hash.json"
@@ -121,9 +121,9 @@
       "GameView"
     ],
     "modules": [
-      "kernel/ts/src/resource.ts",
-      "kernel/ts/src/compose.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/mechanics/resource.ts",
+      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/composition.json",
@@ -147,10 +147,10 @@
       "ContentView"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/target.ts",
-      "kernel/ts/src/lookups.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/commands/target.ts",
+      "kernel/ts/src/mechanics/lookups.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_items_hash.json",
@@ -174,8 +174,8 @@
       "RecipeCheck"
     ],
     "modules": [
-      "kernel/ts/src/actions.ts",
-      "kernel/ts/src/fact.ts"
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/mechanics/fact.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_bell_hash.json",
@@ -196,8 +196,8 @@
       "ActionRecipe"
     ],
     "modules": [
-      "kernel/ts/src/rules/action_recipe.ts",
-      "kernel/ts/src/rng.ts"
+      "kernel/ts/src/mechanics/action_recipe/rule.ts",
+      "kernel/ts/src/foundation/rng.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_dusk_hash.json"
@@ -218,9 +218,9 @@
       "MutationTarget"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/world.ts",
-      "kernel/ts/src/id_source.ts"
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/runtime/world.ts",
+      "kernel/ts/src/foundation/id_source.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_dusk_hash.json",
@@ -250,13 +250,13 @@
       "ContentView"
     ],
     "modules": [
-      "kernel/ts/src/rules/movement.ts",
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/compose.ts",
-      "kernel/ts/src/target.ts",
-      "kernel/ts/src/lookups.ts",
-      "kernel/ts/src/action_lists.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/mechanics/movement/rule.ts",
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/commands/target.ts",
+      "kernel/ts/src/mechanics/lookups.ts",
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/composition.json",
@@ -285,11 +285,11 @@
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/quest.ts",
-      "kernel/ts/src/actions.ts",
-      "kernel/ts/src/policy.ts",
-      "kernel/ts/src/view.ts",
-      "kernel/ts/src/cartridge_quests.ts"
+      "kernel/ts/src/mechanics/quest/lifecycle.ts",
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/mechanics/policy.ts",
+      "kernel/ts/src/view/view.ts",
+      "kernel/ts/src/content/cartridge_quests.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_errand_hash.json",
@@ -308,8 +308,8 @@
       "NpcDefinition"
     ],
     "modules": [
-      "kernel/ts/src/behavior.ts",
-      "kernel/ts/src/rules/schedule.ts"
+      "kernel/ts/src/mechanics/schedule/behavior.ts",
+      "kernel/ts/src/mechanics/schedule/rule.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -327,7 +327,7 @@
       "LogicalTime"
     ],
     "modules": [
-      "kernel/ts/src/world.ts"
+      "kernel/ts/src/runtime/world.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -346,11 +346,11 @@
       "EventPayload"
     ],
     "modules": [
-      "kernel/ts/src/reaction.ts",
-      "kernel/ts/src/proposal.ts",
-      "kernel/ts/src/world.ts",
-      "kernel/ts/src/compose.ts",
-      "kernel/ts/src/cartridge_refs.ts"
+      "kernel/ts/src/mechanics/reaction.ts",
+      "kernel/ts/src/runtime/proposal.ts",
+      "kernel/ts/src/runtime/world.ts",
+      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/content/cartridge_refs.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_green_hash.json"
@@ -370,8 +370,8 @@
       "DecisionResult"
     ],
     "modules": [
-      "kernel/ts/src/rules/action_recipe.ts",
-      "kernel/ts/src/cartridge_refs.ts"
+      "kernel/ts/src/mechanics/action_recipe/rule.ts",
+      "kernel/ts/src/content/cartridge_refs.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json"
@@ -397,11 +397,11 @@
       "ChapterView"
     ],
     "modules": [
-      "kernel/ts/src/dialogue.ts",
-      "kernel/ts/src/actions.ts",
-      "kernel/ts/src/proposal.ts",
-      "kernel/ts/src/view.ts",
-      "kernel/ts/src/cartridge_dialogues.ts"
+      "kernel/ts/src/mechanics/dialogue/shared.ts",
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/runtime/proposal.ts",
+      "kernel/ts/src/view/view.ts",
+      "kernel/ts/src/content/cartridge_dialogues.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json",
@@ -421,7 +421,7 @@
       "Policy"
     ],
     "modules": [
-      "kernel/ts/src/policy.ts"
+      "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_loader.json"
@@ -441,9 +441,9 @@
       "GameView"
     ],
     "modules": [
-      "kernel/ts/src/fresh.ts",
-      "kernel/ts/src/action_lists.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/runtime/fresh.ts",
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_wear_hash.json",
@@ -465,11 +465,11 @@
       "DiagnosticCode"
     ],
     "modules": [
-      "kernel/ts/src/cartridge_position.ts",
-      "kernel/ts/src/position.ts",
+      "kernel/ts/src/content/cartridge_position.ts",
+      "kernel/ts/src/mechanics/position/shared.ts",
       "lib/loka/content/position.ex",
-      "kernel/ts/src/action_lists.ts",
-      "kernel/ts/src/view.ts"
+      "kernel/ts/src/view/action_lists.ts",
+      "kernel/ts/src/view/view.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_rest_hash.json"
@@ -491,11 +491,11 @@
       "FactSpec"
     ],
     "modules": [
-      "kernel/ts/src/scene.ts",
-      "kernel/ts/src/reaction.ts",
-      "kernel/ts/src/actions.ts",
-      "kernel/ts/src/view.ts",
-      "kernel/ts/src/cartridge_scenes.ts",
+      "kernel/ts/src/mechanics/scene/shared.ts",
+      "kernel/ts/src/mechanics/reaction.ts",
+      "kernel/ts/src/commands/actions.ts",
+      "kernel/ts/src/view/view.ts",
+      "kernel/ts/src/content/cartridge_scenes.ts",
       "lib/loka/content/scenes.ex"
     ],
     "fixtures": [

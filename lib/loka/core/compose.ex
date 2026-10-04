@@ -1,7 +1,7 @@
-# size: allow 315, the delta algebra stays one module like its twin kernel/ts/src/compose.ts
+# size: allow 315, the delta algebra stays one module like its twin kernel/ts/src/foundation/compose.ts
 defmodule Loka.Core.Compose do
   @moduledoc """
-  StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/compose.ts` is the
+  StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
   TypeScript twin; both run `protocol/fixtures/composition.json`.
 
   Takes a committed base state and a contract-valid StateDelta. Ops apply in their semantic

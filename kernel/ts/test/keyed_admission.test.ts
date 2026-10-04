@@ -6,9 +6,9 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { EntityId } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
-import { resolve } from '../src/invocation.ts';
-import { attempt } from '../src/known_answers.ts';
-import { step } from '../src/world.ts';
+import { resolve } from '../src/commands/invocation.ts';
+import { attempt } from '../src/runtime/known_answers.ts';
+import { step } from '../src/runtime/world.ts';
 import { accept, after, at, chat, CID, F, PRESENT, shown, world } from './ferry_probe.ts';
 
 // `action_key` invoked on `target`: resolved, then stepped with the key, as the local authority.

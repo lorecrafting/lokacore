@@ -2,7 +2,7 @@
 // first argv[2] accepted decisions with delta ops from seeds 1, 2, ..., each as {state, delta}
 // with its composition base state (sim.ts base), so both composes run on real deltas. Generated
 // on every run, so it follows the generator and the kernel with no committed sample.
-import { step } from '../src/world.ts';
+import { step } from '../src/runtime/world.ts';
 import { base, simulate } from './sim.ts';
 
 const want = Number(process.argv[2]);

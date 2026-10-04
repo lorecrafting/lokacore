@@ -1,7 +1,7 @@
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
-  (docs/ROADMAP.md, verification harness). `kernel/ts/src/invariants.ts` is the TypeScript
+  (docs/ROADMAP.md, verification harness). `kernel/ts/src/runtime/invariants.ts` is the TypeScript
   twin; both run the `"invariants"` cases of
   `protocol/fixtures/composition.json`.
 

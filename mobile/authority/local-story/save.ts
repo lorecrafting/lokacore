@@ -1,7 +1,7 @@
 // The local Story authority's in-memory story and the save of one NEW attempt (03 §§14-15):
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { DecisionResult, NarrationRecord } from '../../../kernel/ts/src/contracts.gen.ts';
-import type { World } from '../../../kernel/ts/src/decision.ts';
+import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
 import { commit, load, receipt, reconcile } from './store.ts';
 import type { Captured, Db, Meta, Receipt } from './store.ts';

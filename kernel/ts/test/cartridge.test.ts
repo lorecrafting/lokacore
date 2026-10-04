@@ -2,7 +2,7 @@
 // frozen fixtures, read with JSON.parse, and hand-written literals; never the loader's output.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadCartridge, type Installed } from '../src/cartridge.ts';
+import { loadCartridge, type Installed } from '../src/content/cartridge.ts';
 import { read } from './read.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);

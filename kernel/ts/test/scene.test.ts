@@ -2,14 +2,14 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { encode, hash } from '../src/canonical.ts';
+import { encode, hash } from '../src/foundation/canonical.ts';
 import type { Command, Key } from '../src/contracts.gen.ts';
-import { key } from '../src/compose.ts';
-import { resolved } from '../src/actions.ts';
-import { identify, resolve } from '../src/invocation.ts';
-import { check } from '../src/invariants.ts';
+import { key } from '../src/foundation/compose.ts';
+import { resolved } from '../src/commands/actions.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { gameView, holds, INSTALLED, newWorld, step } from '../src/world.ts';
+import { gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const equal = (actual: unknown, expected: unknown) =>

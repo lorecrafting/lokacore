@@ -1,7 +1,7 @@
 defmodule Loka.Content.Dialogues do
   @moduledoc """
   Dialogues in a v2 source (dialogue.schema.json DialogueDefinition; 06 §8, §17, §33), twin of
-  `kernel/ts/src/cartridge_dialogues.ts`: each dialogue's owner (dialogue@1) and each
+  `kernel/ts/src/content/cartridge_dialogues.ts`: each dialogue's owner (dialogue@1) and each
   fact.assign's (fact@1, by its fact_changed) is required; its key is no registered command's,
   action's, recipe's or quest's (DUPLICATE_DEFINITION: its talk is an ActionSet identity); its
   prompt, labels and narrations have catalog entries (unless the catalog was rejected,

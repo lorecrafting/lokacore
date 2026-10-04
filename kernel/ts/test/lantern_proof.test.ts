@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Command, EntityId } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const kat = read('protocol/fixtures/cartridge_lantern_hash.json');

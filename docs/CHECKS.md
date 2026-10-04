@@ -19,10 +19,11 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   `SaveError.tsx`, tests exempt) imports only `react`, `react-native` without `Alert`, its own
   files and `packages/game-view`, and calls no `require()` or `import()` (`mobile-renderer-imports`, so react-native-web can mount it;
   [owner wish](decisions/owner-decision-presenter-split-2026-10-02.md)); rule
-  modules live only in `kernel/ts/src/rules/`, are registered in `world.ts` only as
+  modules live only in `kernel/ts/src/mechanics/<capability>/rule.ts`, are registered in `runtime/world.ts` only as
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
-  and `step`'s event-ownership check keep each to its capability's commands and events. Every
+  and `step`'s event-ownership check keep each to its capability's commands and events. The foundation
+  imports only its own modules and generated contracts (`ts-foundation-imports`). Every
   rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh` plants a
   violation at each rule's real path and requires the scan to report it.
 - TypeScript: Prettier (`.prettierrc.json`, scope in `.prettierignore`, `npm ci` at the
@@ -49,7 +50,8 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
   capability registry and `docs/features.json`; an implemented capability (a rule module) with
   a missing cell fails.
-- `elixir bin/red_controls.exs`: plants a boundary violation, a cycle, a compile edge, an
+- `elixir bin/red_controls.exs`: refuses occupied plant paths and creates files exclusively;
+  `test/loka/red_controls_test.exs` checks preserved local bytes. It plants a boundary violation, a cycle, a compile edge, an
   oversized AGENTS.md, size-limit cases, one violation per Credo check, a stale and an
   out-of-subset schema, an Elixir adapter without a differential, a stale feature map, an
   implemented capability without its map cells, and a PartyId passed where a CharacterId is

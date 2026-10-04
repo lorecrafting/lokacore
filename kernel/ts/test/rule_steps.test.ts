@@ -9,8 +9,8 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { encode } from '../src/canonical.ts';
-import { INSTALLED, newWorld, step } from '../src/world.ts';
+import { encode } from '../src/foundation/canonical.ts';
+import { INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const all = (n: number) => ({
@@ -40,7 +40,7 @@ const outcome = (w: World, payload: object, k = 1) => {
   return s.limit ?? s.decision.kind;
 };
 
-// Breaks: barrier@1's key check not counted (world.ts not passing the counter to the rule, or
+// Breaks: barrier@1's key check not counted (runtime/world.ts not passing the counter to the rule, or
 // barrier.ts not passing it to holds), or a rule rejection past the limit answered with its code.
 // Unlock overridden by an action of n leaves: n + 1 steps, the key held or not.
 test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed query_steps', () => {
@@ -70,7 +70,7 @@ test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed quer
   assert.equal(unlock(32768, false), 'query_steps'); // a rule rejection past it faults (04 §5.4)
 });
 
-// Breaks: quest@1's objective read at activation not counted (quest.ts holdsNow). The offer's
+// Breaks: quest@1's objective read at activation not counted (mechanics/quest/lifecycle.ts holdsNow). The offer's
 // policy has n leaves: n + 1 steps.
 test('an accept counts its objective check: 32767 offer leaves fit, 32768 exceed query_steps', () => {
   const accept = (n: number) => {
@@ -90,7 +90,7 @@ test('an accept counts its objective check: 32767 offer leaves fit, 32768 exceed
   assert.equal(accept(32768), 'query_steps');
 });
 
-// Breaks: the talk rule's policy read not counted (dialogue.ts talkRefused), or counted once.
+// Breaks: the talk rule's policy read not counted (mechanics/dialogue/shared.ts talkRefused), or counted once.
 // Bram's dialogue policy has n leaves: 2n steps.
 test('a talk counts its policy twice: 16384 leaves fit, 16385 exceed query_steps', () => {
   const talk = (n: number) => {
@@ -104,8 +104,8 @@ test('a talk counts its policy twice: 16384 leaves fit, 16385 exceed query_steps
   assert.equal(talk(16385), 'query_steps');
 });
 
-// Breaks: the choose rule's objective read not counted (dialogue.ts choose not passing the
-// counter to quest.ts resolution). Accepted with the lantern, taken, Bram talked to; the
+// Breaks: the choose rule's objective read not counted (mechanics/dialogue/shared.ts choose not passing the
+// counter to mechanics/quest/lifecycle.ts resolution). Accepted with the lantern, taken, Bram talked to; the
 // objective is `all` of has_item lantern (false at accept, so 1 step there) then n leaves: n + 1.
 test('a choose counts its objective check: 32767 leaves fit, 32768 exceed query_steps', () => {
   const chosen = (n: number) => {

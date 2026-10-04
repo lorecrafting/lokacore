@@ -12,11 +12,11 @@ import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { decode, encode } from '../src/canonical.ts';
-import { identify, resolve } from '../src/invocation.ts';
-import { holds } from '../src/policy.ts';
-import { resolution } from '../src/quest.ts';
-import { admit, adopt, gameView, INSTALLED, newWorld, step } from '../src/world.ts';
+import { decode, encode } from '../src/foundation/canonical.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
+import { holds } from '../src/mechanics/policy.ts';
+import { resolution } from '../src/mechanics/quest/lifecycle.ts';
+import { admit, adopt, gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';

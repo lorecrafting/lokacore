@@ -1,7 +1,7 @@
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
-  the reaction checks of `kernel/ts/src/cartridge.ts` (lock) and `kernel/ts/src/cartridge_refs.ts`
+  the reaction checks of `kernel/ts/src/content/cartridge.ts` (lock) and `kernel/ts/src/content/cartridge_refs.ts`
   (references): each rule's owner (reaction@1), its trigger event's owner and each fact.assign's
   (fact@1, by its fact_changed) is required; its trigger names a fact or room of this cartridge
   and each fact.assign a fact with a value of its type. Its `when` tree is checked with every

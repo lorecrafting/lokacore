@@ -3,9 +3,9 @@
 // canonical bytes, the form the Elixir kernel must match.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { encode, type Json } from '../src/canonical.ts';
-import { compose, key, LIMIT_ORDER, type State } from '../src/compose.ts';
-import { check } from '../src/invariants.ts';
+import { encode, type Json } from '../src/foundation/canonical.ts';
+import { compose, key, LIMIT_ORDER, type State } from '../src/foundation/compose.ts';
+import { check } from '../src/runtime/invariants.ts';
 import { read } from './read.ts';
 
 const fixture = read('protocol/fixtures/composition.json');
@@ -174,7 +174,7 @@ const changes = (s: object, ops: object[]) =>
   (compose({ ...s, clock: 6 } as State, { ops } as never) as { changes: { value: Json }[] })
     .changes;
 
-// Breaks: the 04 §5.4 order a tie is named in (compose.ts over) drifting from the composition
+// Breaks: the 04 §5.4 order a tie is named in (foundation/compose.ts over) drifting from the composition
 // profile's limits: a limit missing, misspelt (never checked) or moved.
 test('limits are named in the composition profile order', () => {
   assert.deepEqual(LIMIT_ORDER, Object.keys(limits));
