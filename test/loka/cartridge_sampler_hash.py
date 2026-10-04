@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -18,7 +18,7 @@ def quest_state(state):
 def definition(name, **parts):
     return dict(key=name, **parts)
 caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.3', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.4', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
 v['facts'] = {
@@ -48,9 +48,12 @@ for name, grams in [('lantern', 2000), ('wool_cloak', 3000), ('brass_key', 100),
 v['items'][key('item', 'trunk')]['barrier'] = ref('barrier', 'trunk_lid')
 v['items'][key('item', 'wool_cloak')]['slot'] = 'cloak'
 v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'), daily_schedule={'6': ref('room', 'ferry_landing'), '19': ref('room', 'drowned_lantern')})}
+# Five authored finite passive rats; numeric values are literal PM-approved inputs.
+for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5']:
+    v['npcs'][key('npc', name)] = definition(name, keywords=['rat', name], short='npc.cellar_rat.short', room_line=f'npc.{name}.room', description='npc.cellar_rat.description', room=ref('room', 'lantern_cellar'), hp=dict(minimum=0, maximum=6, start=6, gain=0))
 v['barriers'] = {key('barrier', name): definition(name, keywords=words, short=f'barrier.{name}.short', initial='locked', key_item=ref('item', item)) for name, words, item in [('cellar_door', ['door', 'cellar_door'], 'cellar_key'), ('trunk_lid', ['lid', 'trunk_lid'], 'brass_key')]}
-v['resources'] = {key('resource', name): definition(name, minimum=0, maximum=maximum, start=maximum, gain=gain) for name, maximum, gain in [('hp', 20, 5), ('ma', 100, 4), ('mv', 82, 18)]}
-# M2 independent literal recovery consumer; HP/MA retain their declared legacy defaults.
+v['resources'] = {key('resource', name): definition(name, minimum=0, maximum=maximum, start=maximum, gain=gain) for name, maximum, gain in [('hp', 10, 5), ('ma', 100, 4), ('mv', 100, 18)]}
+# M5-A independently declared HP10/MV100; M2 rates/fractions and MA unchanged.
 v['resources'][key('resource', 'mv')].update(
     regen=dict(every=3600, by_position=dict(standing=18, sitting=18, resting=36, sleeping=36)),
     bands=[dict(at_percent=100, key='mv_ready', tone='normal'),
@@ -89,7 +92,7 @@ fixture = dict(description='Independent Python known answer: literal approved sa
 Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
 # Reviewed numeric-profile allocation order: character, body, ten rooms, Bram, six items, the next scheduled Bram job, cloak holder.
-names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/bram'] + ['item/'+row[0] for row in items] + ['job/bram'] + ['slot/cloak']
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/'+name for name in ['bram', 'cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5']] + ['item/'+row[0] for row in items] + ['job/bram'] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):
     b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])

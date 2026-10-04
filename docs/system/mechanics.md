@@ -177,6 +177,17 @@ The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1
 
 ## resource@1 (`kernel/ts/src/mechanics/resource.ts`)
 
+An explicit NPC `hp` definition resolves once at birth into an immutable World
+`entityResourceSpecs` map, keyed by the canonical resource MutationTarget (resource
+DefinitionRef plus EntityId). Effective spec precedence is exact entity-resource override,
+then pool DefinitionRef spec. The override is a complete HP spec with no position recovery;
+lookup, adjustment, ordered costs and both portable composition/precondition twins use it.
+Among NPC resources, only explicit overrides get required `{value: start, at: birth_clock}` rows, including
+clock zero. Required rows contain exactly `value` and `at`: bounded integer value and safe
+integer `0 <= at <= committed clock`. Missing or invalid rows fail queries/preconditions,
+never falling back to start. A zero-gain NPC stays wounded or at zero as time advances;
+zero HP alone has no death behavior. No NPC rows are initialized for other pools.
+
 Ruleless. A body's current value is derived from the stored row and the clock: `gain` per
 hour boundary crossed, capped at `maximum` (`foundation/resource.ts:59`), for legacy pools.
 An optional `regen {every, by_position}` instead uses a required stored

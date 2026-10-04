@@ -63,23 +63,42 @@ defmodule Loka.Core.InvariantsResource do
   defp safe?(n), do: is_integer(n) and n >= -9_007_199_254_740_991 and n <= 9_007_199_254_740_991
 
   def initial(%{"op" => "resource.adjust"} = op, s) do
-    spec = get_in(s, ["resource_specs", Compose.key(op["resource"])])
+    spec = spec(op, s)
     row = get_in(s, ["resources", Compose.key(Compose.target(op))])
 
-    if spec != nil and spec["regen"] == nil do
-      row = row || %{"value" => spec["start"], "at" => 0}
+    required = get_in(s, ["entity_resource_specs", Compose.key(Compose.target(op))])
 
-      if is_integer(row["value"]) and is_integer(row["at"]) do
-        ticks = Integer.floor_div(s["clock"], 3600) - Integer.floor_div(row["at"], 3600)
-        min(spec["maximum"], row["value"] + spec["gain"] * ticks)
-      end
+    if spec != nil and spec["regen"] == nil and
+         (required == nil or override_row?(row, spec, s["clock"])) do
+      legacy_current(row, spec, s["clock"])
+    end
+  end
+
+  defp legacy_current(row, spec, clock) do
+    row = row || %{"value" => spec["start"], "at" => 0}
+
+    if is_integer(row["value"]) and is_integer(row["at"]) do
+      ticks = Integer.floor_div(clock, 3600) - Integer.floor_div(row["at"], 3600)
+      min(spec["maximum"], row["value"] + spec["gain"] * ticks)
     end
   end
 
   def legacy_valid?(op, s) do
-    spec = get_in(s, ["resource_specs", Compose.key(op["resource"])])
+    spec = spec(op, s)
 
     spec != nil and not Map.has_key?(op, "next_rate") and is_integer(op["to"]) and
       op["to"] >= spec["minimum"] and op["to"] <= spec["maximum"]
   end
+
+  def spec(op, s),
+    do:
+      get_in(s, ["entity_resource_specs", Compose.key(Compose.target(op))]) ||
+        get_in(s, ["resource_specs", Compose.key(op["resource"])])
+
+  defp override_row?(%{"value" => v, "at" => at} = row, spec, now),
+    do:
+      map_size(row) == 2 and is_integer(v) and v >= spec["minimum"] and v <= spec["maximum"] and
+        is_integer(at) and at >= 0 and at <= 9_007_199_254_740_991 and at <= now
+
+  defp override_row?(_, _, _), do: false
 end

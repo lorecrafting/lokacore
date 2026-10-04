@@ -101,7 +101,7 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 | `barrier.transition` | barrier | `from` is the state; the transition is legal (`:32`; [mechanics](mechanics.md#barrier1-kerneltssrcmechanicsbarrierrulets)) |
 
 A resource's `from` is its regenerated value ([resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets));
-unset means `start` at time 0 for legacy pools (`:87`). Opted recovery requires the row
+unset means `start` at time 0 for legacy pools without an explicit entity override (`:87`). Opted recovery requires the row
 and metadata validation in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
 Optional `resource.adjust.next_rate` is legal only for an opted pool and must be a
 nonnegative ResourceInt member of its authored position table, including zero. Settle the
@@ -111,6 +111,13 @@ old rate against the committed **base clock**, check `from` and bounded `to`, th
 metadata. Independent `delta_preconditions_hold` replays these rows and preconditions
 without using composition's settlement helper or result as its expected answer. The result is the
 written rows sorted by canonical target text, which the host commits.
+
+Composition base observations carry optional `entity_resource_specs`, keyed by canonical
+resource MutationTarget. An exact override takes precedence over `resource_specs`, requires
+its valid stored row, and uses the same row overlay for successive writes. The map is
+immutable pinned definition data, preserved through proposal/adoption, not state or a new
+hash field. Absent/empty maps preserve legacy results and hashes. Independent precondition
+checkers resolve this precedence independently of composition.
 
 **State** (`kernel/ts/src/runtime/decision.ts:47`): `clock`, `containers` (entity → container),
 `rng`, and the sections written so far, each keyed by canonical target text or id: `facts`,

@@ -1,5 +1,6 @@
 // resource@1: pure resource queries and exact adjustments. Legacy gain crosses hour
 // boundaries; opted recovery settles the old stored position rate and fractional credit.
+import { validOverrideRow } from '../foundation/resource.ts';
 import { current, key, same } from '../foundation/compose.ts';
 import type {
   DefinitionRef,
@@ -27,11 +28,19 @@ export const resourceRef = (world: World, k: string): DefinitionRef => ({
   key: k as Key,
 });
 
+/** Effective definition for this exact resource target, falling back to the pool. */
+export const resourceSpec = (world: World, entity: EntityId, resource: DefinitionRef) =>
+  world.entityResourceSpecs[key({ kind: 'resource', resource, entity_id: entity })] ??
+  world.resourceSpecs[key(resource)];
+
 /** `entity`'s current value of `resource` at the world's clock; undefined if undeclared. */
 export function level(world: World, entity: EntityId, resource: DefinitionRef): number | undefined {
-  const spec = world.resourceSpecs[key(resource)];
+  const spec = resourceSpec(world, entity, resource);
   if (!spec) return undefined;
   const row = world.state.resources?.[key({ kind: 'resource', resource, entity_id: entity })];
+  const override =
+    world.entityResourceSpecs[key({ kind: 'resource', resource, entity_id: entity })];
+  if (override && !validOverrideRow(row, override, world.state.clock)) return undefined;
   return current(row, spec, world.state.clock);
 }
 
@@ -52,7 +61,7 @@ export function adjust(
 ): { op: Adjust; levels: Levels } {
   const at = key({ kind: 'resource', resource, entity_id: entity });
   const from = levels[at] ?? level(world, entity, resource)!;
-  const { minimum, maximum } = world.resourceSpecs[key(resource)];
+  const { minimum, maximum } = resourceSpec(world, entity, resource);
   const exact = add(from, by);
   const to = saturate ? Math.min(maximum, Math.max(minimum, exact)) : exact;
   const op: Adjust = {
@@ -79,7 +88,7 @@ export function pay(
   const ops: Adjust[] = [];
   for (const c of costs) {
     const paid = adjust(world, entity, c.resource, -c.amount, levels);
-    if (paid.op.to < world.resourceSpecs[key(c.resource)].minimum) return undefined;
+    if (paid.op.to < resourceSpec(world, entity, c.resource).minimum) return undefined;
     ops.push(paid.op);
     levels = paid.levels;
   }
