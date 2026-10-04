@@ -1,0 +1,127 @@
+✔ a pending start over whose retry fails shows that error, not "not confirmed" (15.074833ms)
+✔ catch-up conflicts preserve the original attempt and matching retries keep its identity (21.190916ms)
+✔ invalid and cyclic shared input refuses before snapshot or elapsed sampling (4.150417ms)
+✔ missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (14.212167ms)
+✔ corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (35.454667ms)
+✖ loaded elapsed recovery refuses newer and malformed same-run formats without writes (3.845625ms)
+✖ changed refused elapsed header classifies malformed before differing valid run and preserves newer formats (4.6125ms)
+(node:80923) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[private-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [private-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a corrupt report page: Start over gives a working save (44.513833ms)
+✔ a corrupt sqlite_autoindex_report_1 page: Start over gives a working save (23.612916ms)
+✔ a malformed report index record: Start over gives a working save (22.450375ms)
+✔ an intact report table survives Start over in place (13.325042ms)
+✔ the latest committed narration is read again on reopen, from the receipts (15.27525ms)
+✔ an older save reopens with its narration and keeps its report on Start over (18.237291ms)
+✔ a malformed receipt response: Start over keeps the pending report (14.693875ms)
+✔ a narration read that fails on a lock offers no Start over (10.508417ms)
+✔ a save with no body row: save_corrupt, Start over repairs it in place (11.591458ms)
+✔ a save with a null choice: save_corrupt, Start over repairs it in place (11.895958ms)
+✔ a save with an empty resource: save_corrupt, Start over repairs it in place (11.436875ms)
+✔ a receipt narration line that is null: save_corrupt at open, Start over repairs it (13.890708ms)
+✔ a receipt response that is not a decision replays as a conflict (7.515958ms)
+✖ elapsed NOTADB and page corruption recover only through explicit working Start over (3.806958ms)
+✖ unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (6.848ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 18
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 376.070708
+
+✖ failing tests:
+
+test at mobile/authority/local-story/session.test.ts:178:1
+✖ loaded elapsed recovery refuses newer and malformed same-run formats without writes (3.845625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'replaced'
+  - 'unsupported_save_format'
+  
+      at TestContext.<anonymous> (file://[private-path]:190:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'replaced',
+    expected: 'unsupported_save_format',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/session.test.ts:216:1
+✖ changed refused elapsed header classifies malformed before differing valid run and preserves newer formats (4.6125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'stale_view'
+  - 'save_corrupt'
+  
+      at TestContext.<anonymous> (file://[private-path]:230:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'stale_view',
+    expected: 'save_corrupt',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/start_over.test.ts:371:1
+✖ elapsed NOTADB and page corruption recover only through explicit working Start over (3.806958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   code: undefined,
+  +   kind: 'save_corrupt',
+  +   message: "Cannot read properties of undefined (reading 'format')",
+  +   newGame: [Function: newGame],
+  +   replace: false,
+  +   startOver: true
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file://[private-path]:385:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [Object],
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/start_over.test.ts:399:1
+✖ unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (6.848ms)
+  TypeError: Cannot read properties of undefined (reading 'format')
+      at replaceable (file://[private-path]:190:28)
+      at newGame (file://[private-path]:215:20)
+      at newGame (file://[private-path]:73:55)
+      at TestContext.<anonymous> (file://[private-path]:419:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)

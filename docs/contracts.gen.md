@@ -436,7 +436,7 @@ The one observation record format, its stores and correlation ids, and the game-
   - `kernel.decision_latency`
   - `agent.work`
 - **ObservationStore**: The store a record belongs to (ADR-075 §2): game_trace (per-command decisions, host-independent, 11 §15), diagnostics (things to fix: 08 §6 diagnostics and simulator failures), operations (host timings, 11 §13), dev_evidence (agent work cost and outcome).
-- **ReplayIds**: The correlation ids of a record that must reproduce by deterministic replay (09 §2): the cartridge hash, the code revision, the run's initial RNG state, the run (a save lineage; for the simulator, one sequence), the command, and the authority revision the command was decided against. Local ids only: no host, device, account or time.
+- **ReplayIds**: The correlation ids of a record that must reproduce by deterministic replay (09 §2): the cartridge hash, the code revision, the run's initial RNG state, the run (the durable local save run; for CLI/simulator producers, their independent execution or sequence run), the command, and the authority revision the command was decided against. Local ids only: no host, device, account or time.
 - **RngDraw**: One bounded uniform draw (09 §4 draw trace; numeric profile): its bound and the value drawn, value below bound.
 - **RngTrace**: The RNG draws of an accepted decision, in draw order (11 §15 'RNG draws if configured'; 09 §4): observed (draws [] is a decision that drew nothing), unknown (collection was on but could not supply a complete list), or unavailable (not_collected: collection was off).
   - `observed`

@@ -1,0 +1,32 @@
+✔ elapsed receipt survives reopen and replays its first result after later clock commits (21.573042ms)
+✔ old run elapsed refuses before receipt lookup after replacement without Host.random (4.667792ms)
+✔ unknown elapsed COMMIT fences trusted and player delivery until the real receipt reconciles (6.645334ms)
+✔ modal scene keeps Continue-only player controls while elapsed time commits (14.708875ms)
+✔ malformed stored command JSON conflicts without state or receipt changes (3.698542ms)
+✔ malformed stored response JSON conflicts without state or receipt changes (2.759667ms)
+✔ healthy elapsed delivery preserves actual SQLite receipt-read failures (3.696458ms)
+✔ openStory.invoke refuses a failing chat on Bram by its key (24.472334ms)
+✔ a new save allocates and pins its identity; a restart and a replay reuse it (9.161042ms)
+✔ a save whose pinned release is missing is refused untouched; a new game moves on (6.593334ms)
+✔ a save of an unknown format is refused with nothing written and no new game (8.15475ms)
+✔ a damaged identity is save_corrupt and untouched; its new game repairs it (99.724917ms)
+✔ an app update reopens a save on its pinned release; new games pin the newest (4.984708ms)
+✔ a save that does not parse is save_corrupt until the player starts a new game (19.164333ms)
+✔ a new game replaces the save; an old invocation id is new again (5.382458ms)
+✔ a new game that fails part way leaves the old save and memory (4.076875ms)
+✔ a new game settles a pending attempt first, in the run it was made in (4.70425ms)
+✔ a new game whose COMMIT is unknown is fenced; settling it moves play to the new run (5.555167ms)
+✔ a new game whose COMMIT fails keeps the old save, memory and receipts (4.302125ms)
+✔ a committed new game is adopted before play; a retry does not replace it twice (5.114459ms)
+✔ a corrupt save's new game settles its COMMIT like any other (9.644709ms)
+✔ a new run's entries missed by the trace follow its own header (5.963458ms)
+✔ a new game after a settled one replaces the save again (5.791125ms)
+✔ a pending start over whose retry fails shows that error, not "not confirmed" (21.458458ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 418.405292

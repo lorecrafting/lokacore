@@ -1,0 +1,54 @@
+✔ base1000 accounting preserves exact safe boundary quotients and rejects target overflow (1.132375ms)
+✔ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (33.612625ms)
+✔ negative wall resume rebases without credit then credits the next 20ms (4.446708ms)
+✔ a fixed 36hour horizon commits all four daily boundaries in order (8.852542ms)
+✔ sixteen segments yield and one reserved input completes at its original finite horizon (16.13525ms)
+✔ a current choice crossing departure refuses presence while Leave still closes its continuation (9.649333ms)
+✔ preexisting stale input does not account time and synchronous success emits no completion (5.628334ms)
+✔ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (8.759584ms)
+✔ an elapsed managed session without clocks fails with a typed refusal (5.230417ms)
+✔ resume extends durable target debt rather than a lagging head (10.97275ms)
+✔ unexpected closed checkpoint evidence blocks play as corrupt until confirmed Start over (7.134167ms)
+✔ a valid durable replacement invalidates an old fenced clock and input without writes (9.438625ms)
+✔ malformed v2 checkpoints and heads refuse without rewriting their progress (49.069334ms)
+✔ a managed v1 upgrade starts its durable account at the actual opening clocks (7.278959ms)
+✔ a committed unknown elapsed segment with corrupt checkpoint completes its input as blocked (4.978625ms)
+✔ a valid replacement during unknown positive elapsed invalidates the old pending input (8.505084ms)
+✔ a private reservation rejects another intent and retains its original bounded input (11.241292ms)
+✔ terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (5.063083ms)
+✔ a budget fault is one valid observation of its limit, with the ReplayIds of its decision (10.0995ms)
+✔ a failing observation sink changes no reply, revision, storage or retry (8.486084ms)
+✔ an older save gains the sink untouched, and the sink keeps the newest 1000 records (270.940792ms)
+✔ each NEW decision, accepted, rejected or fault, is one kernel.decision_latency (17.039583ms)
+✔ a clock changes no reply or durable state when a COMMIT is held, then committed (5.300542ms)
+✔ a real committed elapsed then ordinary local trace replays identically with header run preflight (577.826833ms)
+✔ a pending start over whose retry fails shows that error, not "not confirmed" (16.771708ms)
+✔ catch-up conflicts preserve the original attempt and matching retries keep its identity (32.518333ms)
+✔ invalid and cyclic shared input refuses before snapshot or elapsed sampling (4.408708ms)
+✔ missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (22.587875ms)
+✔ corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (43.424375ms)
+(node:81874) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[private-path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [private-path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a corrupt report page: Start over gives a working save (54.824375ms)
+✔ a corrupt sqlite_autoindex_report_1 page: Start over gives a working save (30.143958ms)
+✔ a malformed report index record: Start over gives a working save (26.954375ms)
+✔ an intact report table survives Start over in place (15.114042ms)
+✔ the latest committed narration is read again on reopen, from the receipts (17.016584ms)
+✔ an older save reopens with its narration and keeps its report on Start over (23.324542ms)
+✔ a malformed receipt response: Start over keeps the pending report (19.628875ms)
+✔ a narration read that fails on a lock offers no Start over (13.137416ms)
+✔ a save with no body row: save_corrupt, Start over repairs it in place (14.776416ms)
+✔ a save with a null choice: save_corrupt, Start over repairs it in place (13.722709ms)
+✔ a save with an empty resource: save_corrupt, Start over repairs it in place (12.74125ms)
+✔ a receipt narration line that is null: save_corrupt at open, Start over repairs it (16.145167ms)
+✔ a receipt response that is not a decision replays as a conflict (6.641917ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1458.9075

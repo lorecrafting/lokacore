@@ -30,11 +30,22 @@ export type Intent = Omit<ActionInvocation, 'invocation_id' | 'actor_id'>;
 /** The answer to one press (03 §14, 04 §16). */
 export type Reply =
   | { kind: 'saved'; decision: DecisionResult }
+  | { kind: 'save_corrupt'; message: string }
   | { kind: 'stale_view' } // sent against an older view; nothing changed
   | { kind: 'conflict' }
   | { kind: 'invalid' | 'unauthorized' }
+  | { kind: 'catching_up'; invocation_id: string }
   | { kind: 'pending' } // the save is not confirmed: any later invoke resends the same attempt
   | { kind: 'fault'; code: ErrorCode };
+
+export type Projection = { view: GameView; token: string };
+export type ElapsedStatus =
+  | { kind: 'ready' | 'catching_up' | 'pending' | 'replaced' }
+  | { kind: 'fault'; code: ErrorCode }
+  | { kind: 'error'; reason?: 'save_corrupt'; message: string };
+export type GameSubscription =
+  | { kind: 'state'; projection: Projection; status: ElapsedStatus }
+  | { kind: 'completion'; invocation_id: string; intent: Intent; before: Projection; reply: Reply };
 
 /** One game being played. */
 export interface Game {
@@ -43,6 +54,8 @@ export interface Game {
   /** Throws when the write failed: the attempt stays pending and the next call resends it. */
   invoke(intent: Intent): Reply;
   pending(): boolean;
+  pendingInvocation(): string | undefined;
+  subscribe(listener: (update: GameSubscription) => void): () => void;
   /** Cartridge prose (content, not app words); none for an unknown key. */
   text(key: string): string | undefined;
   /** The last committed narration, to show again on a reopen (06 §43). */
@@ -54,7 +67,8 @@ export interface Game {
  * that is not confirmed (the presenter says it in words), and whether Start over is offered.
  */
 export type Failed = {
-  kind?: 'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing';
+  kind?:
+    'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing' | 'elapsed_clock_missing';
   message: string;
   code?: 'start_over_pending';
   startOver: boolean;

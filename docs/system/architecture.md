@@ -150,3 +150,10 @@ never changes a decision, a commit or a retry (`mobile/authority/local-story/tra
 Every check, its planted violation and the CI workflows: [CHECKS.md](../CHECKS.md).
 `bin/check_all.sh` is the local line and what pre-push runs (`.githooks/pre-push`, TypeScript
 checks only when a pushed ref touches TypeScript inputs).
+
+## Elapsed session driver
+
+The local authority/session owns elapsed accounting and one retained player reservation
+([save](save.md#durable-elapsed-sessions)). Its shared session notifications follow the
+[Book boundary](book-ui.md#shared-elapsed-statuscompletion-boundary). The renderer receives no
+World, SQLite handle or elapsed entry. B2 owns actual AppState/timer/UI consumption.

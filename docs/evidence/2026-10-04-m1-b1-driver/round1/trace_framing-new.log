@@ -1,0 +1,82 @@
+✔ base1000 accounting preserves exact safe boundary quotients and rejects target overflow (1.185666ms)
+✔ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (30.126542ms)
+✔ negative wall resume rebases without credit then credits the next 20ms (6.081625ms)
+✔ a fixed 36hour horizon commits all four daily boundaries in order (7.299291ms)
+✔ sixteen segments yield and one reserved input completes at its original finite horizon (15.454417ms)
+✔ a current choice crossing departure refuses presence while Leave still closes its continuation (7.182292ms)
+✔ preexisting stale input does not account time and synchronous success emits no completion (4.392583ms)
+✔ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (8.207708ms)
+✔ an elapsed managed session without clocks fails with a typed refusal (4.4865ms)
+✔ resume extends durable target debt rather than a lagging head (11.806292ms)
+✔ unexpected closed checkpoint evidence blocks play as corrupt until confirmed Start over (6.599125ms)
+✔ a valid durable replacement invalidates an old fenced clock and input without writes (8.177584ms)
+✔ malformed v2 checkpoints and heads refuse without rewriting their progress (47.7505ms)
+✔ a managed v1 upgrade starts its durable account at the actual opening clocks (4.999125ms)
+✔ a committed unknown elapsed segment with corrupt checkpoint completes its input as blocked (3.413792ms)
+✔ a valid replacement during unknown positive elapsed invalidates the old pending input (6.891667ms)
+✔ a private reservation rejects another intent and retains its original bounded input (10.486917ms)
+✔ terminal v1 upgrade recovery waits for real SQLite rollback closure before Start over (4.948792ms)
+✔ a budget fault is one valid observation of its limit, with the ReplayIds of its decision (9.819416ms)
+✔ a failing observation sink changes no reply, revision, storage or retry (8.754083ms)
+✔ an older save gains the sink untouched, and the sink keeps the newest 1000 records (239.655292ms)
+✔ each NEW decision, accepted, rejected or fault, is one kernel.decision_latency (16.481417ms)
+✔ a clock changes no reply or durable state when a COMMIT is held, then committed (6.189375ms)
+✖ a real committed elapsed then ordinary local trace replays identically with header run preflight (579.321042ms)
+✔ a pending start over whose retry fails shows that error, not "not confirmed" (16.957208ms)
+✔ catch-up conflicts preserve the original attempt and matching retries keep its identity (22.297292ms)
+✔ invalid and cyclic shared input refuses before snapshot or elapsed sampling (4.03125ms)
+✔ missing elapsed columns after unknown metadata or gameplay commit block and permit explicit recovery (17.253125ms)
+✔ corrupt elapsed recovery binds valid, malformed, and absent original headers without erasing a replacement (39.168625ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 28
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1359.991
+
+✖ failing tests:
+
+test at mobile/authority/local-story/observe.test.ts:231:1
+✖ a real committed elapsed then ordinary local trace replays identically with header run preflight (579.321042ms)
+  AssertionError [ERR_ASSERTION]: The input was expected to not match the regular expression /\[state /. Input:
+  
+  'recorded by loka-kernel@0000000000000000000000000000000000000000\n' +
+    'replayed on loka-kernel@2d23372974bbf75505817b25bdbef9263fc2dbb8-dirty\n' +
+    'Ferry Landing\n' +
+    'Reeds crowd a slick wooden landing. A mooring post leans into the current.\n' +
+    'Bram the ferryman is here.\n' +
+    'A brass lantern sits on a coil of rope.\n' +
+    'Exits: north\n' +
+    'hp 20/20  ma 100/100  mv 82/82  day 1, 18:00\n' +
+    '[state b51fdf086f0737aece32f0ba6b7c11c46429772460266fb1655702bd885f9912]\n' +
+    'Ferry Landing\n' +
+    'Reeds crowd a slick wooden landing. A mooring post leans into the current.\n' +
+    'Bram the ferryman is here.\n' +
+    'A brass lantern sits on a coil of rope.\n' +
+    'Exits: north\n' +
+    'hp 20/20  ma 100/100  mv 82/82  day 1, 18:00\n' +
+    '[state 8cc3dd87d16a7d77ade2b5a0f832d306ce761bf2fec6b49e507d715bf92145ee  step 0 µs]\n' +
+    'Ferry Landing\n' +
+    'Reeds crowd a slick wooden landing. A mooring post leans into the current.\n' +
+    'Bram the ferryman is here.\n' +
+    'A brass lantern sits on a coil of rope.\n' +
+    'Exits: north\n' +
+    'hp 20/20  ma 100/100  mv 82/82  day 1, 18:00\n' +
+    '[state 8cc3dd87d16a7d77ade2b5a0f832d306ce761bf2fec6b49e507d715bf92145ee  step 0 µs]\n'
+  
+      at TestContext.<anonymous> (file://[private-path]:279:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'recorded by loka-kernel@0000000000000000000000000000000000000000\nreplayed on loka-kernel@2d23372974bbf75505817b25bdbef9263fc2dbb8-dirty\nFerry Landing\nReeds crowd a slick wooden landing. A mooring post leans into the current.\nBram the ferryman is here.\nA brass lantern sits on a coil of rope.\nExits: north\nhp 20/20  ma 100/100  mv 82/82  day 1, 18:00\n[state b51fdf086f0737aece32f0ba6b7c11c46429772460266fb1655702bd885f9912]\nFerry Landing\nReeds crowd a slick wooden landing. A mooring post leans into the current.\nBram the ferryman is here.\nA brass lantern sits on a coil of rope.\nExits: north\nhp 20/20  ma 100/100  mv 82/82  day 1, 18:00\n[state 8cc3dd87d16a7d77ade2b5a0f832d306ce761bf2fec6b49e507d715bf92145ee  step 0 µs]\nFerry Landing\nReeds crowd a slick wooden landing. A mooring post leans into the current.\nBram the ferryman is here.\nA brass lantern sits on a coil of rope.\nExits: north\nhp 20/20  ma 100/100  mv 82/82  day 1, 18:00\n[state 8cc3dd87d16a7d77ade2b5a0f832d306ce761bf2fec6b49e507d715bf92145ee  step 0 µs]\n',
+    expected: /\[state /,
+    operator: 'doesNotMatch',
+    diff: 'simple'
+  }
