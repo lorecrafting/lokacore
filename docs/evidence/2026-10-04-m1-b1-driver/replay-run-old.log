@@ -1,0 +1,21 @@
+✔ a scripted walk prints the rooms and rejections a player expects (0.925458ms)
+✔ every record validates and the game_trace keeps the ADR-075 §4 relationships (1.964667ms)
+✔ replaying the transcript twice reproduces its records and state hashes byte for byte (1017.925125ms)
+✔ a header in another world replays from that world (142.093708ms)
+✔ a header-only transcript replays to the same initial world (285.109208ms)
+✔ a transcript recorded by another kernel version replays and names both versions (146.420792ms)
+✔ loader diagnostics are written with home paths and the device serial redacted (281.078416ms)
+✔ go <serial> on a valid cartridge leaves the serial in no record (145.349666ms)
+✔ look <words> examines one detail, lists an ambiguity, and records failed lookups (308.616125ms)
+✔ look <serial> or <user name> leaves neither in any record (156.519167ms)
+✔ a failed load records the input_digest known answer (136.016334ms)
+✔ kernel_version names the commit, with -dirty for an unclean tree (157.040667ms)
+✔ the terminal shows the description variant the fresh facts select (153.352417ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3297.806709

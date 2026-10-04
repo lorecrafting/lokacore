@@ -1,3 +1,9 @@
+import {
+  elapsedHost,
+  checkpoint as elapsedCheckpoint,
+  receipts as elapsedReceipts,
+} from '../../../kernel/ts/test/elapsed_host.ts';
+import { writeFileSync } from 'node:fs';
 // The fault corpus (14 §R6; OFF-03..07; 03 §§14-15; ADR-072): the kernel simulator's seeded command
 // sequences (kernel/ts/test/sim.ts) played through the local authority on real SQLite (node:sqlite,
 // the phone's rollback journal, no WAL), with real faults: SQLITE_FULL from a clamped
@@ -315,5 +321,178 @@ test('views, a reopen and a changed host clock leave the play_time clock and wor
     play(q, path, ref, 1);
   } finally {
     mock.timers.reset();
+  }
+});
+
+// Breaks: a failed or committed-but-unknown metadata account is guessed, rebased twice, or unfenced before confirmation.
+test('backward-anchor metadata accounts reconcile exact prior or next real SQLite evidence', () => {
+  for (const kind of ['failed', 'lost'] as const) {
+    const a = elapsedHost();
+    a.sql.exec(
+      'PRAGMA foreign_keys = ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+    );
+    a.fault.kind = kind;
+    a.fault.armed = true;
+    a.clock.wall = 9000;
+    assert.equal(a.game.pulse('resume').kind, 'pending');
+    assert.equal(a.game.view().view.time, 64800);
+    assert.equal(elapsedReceipts(a.sql), 0);
+    assert.deepEqual(elapsedCheckpoint(a.sql), {
+      wall_ms: kind === 'lost' ? 9000 : 10000,
+      remainder: 0,
+      target: 64800,
+    });
+    a.fault.reads = false;
+    // The retained account uses wall9000, despite later sampling evidence changing.
+    a.clock.wall = 9020;
+    assert.equal(a.game.pulse('resume').kind, 'ready');
+    assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 9000, remainder: 0, target: 64800 });
+    assert.equal(a.game.pulse('resume').kind, 'ready');
+    assert.equal(a.game.view().view.time, 64801);
+    a.sql.close();
+  }
+});
+
+// Breaks: an elapsed checkpoint escapes a rolled-back gameplay commit or uncertain memory serves the next head prematurely.
+test('failed and lost-ack positive elapsed commits reconcile head receipt and checkpoint together', () => {
+  for (const kind of ['failed', 'lost'] as const) {
+    const a = elapsedHost();
+    a.sql.exec(
+      'PRAGMA foreign_keys = ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+    );
+    a.fault.kind = kind;
+    a.fault.armed = true;
+    a.clock.wall = 10020;
+    a.clock.mono = 20;
+    assert.equal(a.game.pulse().kind, 'pending');
+    assert.equal(a.game.view().view.time, 64800);
+    assert.equal(elapsedReceipts(a.sql), kind === 'lost' ? 1 : 0);
+    assert.deepEqual(elapsedCheckpoint(a.sql), {
+      wall_ms: kind === 'lost' ? 10020 : 10000,
+      remainder: 0,
+      target: kind === 'lost' ? 64801 : 64800,
+    });
+    a.fault.reads = false;
+    a.clock.wall = 10040;
+    a.clock.mono = 40;
+    assert.equal(a.game.pulse('drain').kind, 'ready');
+    assert.equal(a.game.view().view.time, 64801);
+    assert.equal(elapsedReceipts(a.sql), 1);
+    assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 10020, remainder: 0, target: 64801 });
+    a.sql.close();
+  }
+});
+
+// Breaks: SQLITE_FULL adopts clock/checkpoint despite no receipt, or a retry resamples and credits twice.
+test('real SQLITE_FULL rolls back elapsed evidence and retries its unchanged candidate', () => {
+  const a = elapsedHost();
+  const n = a.sql.prepare('PRAGMA page_count').get()!.page_count;
+  a.sql.exec(`PRAGMA max_page_count = ${n}`);
+  a.clock.wall = 10020;
+  a.clock.mono = 20;
+  assert.equal(a.game.pulse().kind, 'error');
+  assert.equal(a.game.view().view.time, 64800);
+  assert.equal(elapsedReceipts(a.sql), 0);
+  assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 10000, remainder: 0, target: 64800 });
+  a.sql.exec('PRAGMA max_page_count = 1073741823');
+  a.clock.wall = 10100;
+  a.clock.mono = 100;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(a.game.view().view.time, 64801);
+  assert.deepEqual(elapsedCheckpoint(a.sql), { wall_ms: 10020, remainder: 0, target: 64801 });
+  a.sql.close();
+});
+
+// Breaks: timer retry samples before receipt replay, duplicates completion, or keeps a completed reservation.
+test('a timer completes an unknown player receipt before sampling and emits it once', () => {
+  const a = elapsedHost(),
+    completions: object[] = [];
+  a.game.subscribe((u) => {
+    if (u.kind === 'completion') completions.push(u);
+  });
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  const look = { action_key: 'look' as never, target_ids: [], input: {} };
+  assert.equal(a.game.invoke(look).kind, 'pending');
+  a.fault.reads = false;
+  a.host.time.wall = () => {
+    throw new Error('must not sample before replay');
+  };
+  a.host.time.monotonic = a.host.time.wall;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(completions.length, 1);
+  assert.equal(elapsedReceipts(a.sql), 1);
+  a.game.pulse('drain');
+  assert.equal(completions.length, 1);
+  a.host.time.wall = () => a.clock.wall;
+  a.host.time.monotonic = () => a.clock.mono;
+  assert.equal(a.game.invoke(look).kind, 'saved');
+  assert.equal(elapsedReceipts(a.sql), 2);
+  a.sql.close();
+});
+
+const ELAPSED_KILL = `
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
+const { openGame } = await import(process.argv[1]);
+const bundle = JSON.parse(readFileSync(process.argv[2], 'utf8'));
+const sql = new DatabaseSync(process.argv[3]);
+let counting = false, operation = 0;
+const mode = process.argv[4];
+const db = {
+ execSync(q) {
+  const n = counting ? ++operation : 0;
+  if (n === 3 && mode === 'before') { if (!sql.isTransaction) throw Error('expected open'); process.kill(process.pid, 'SIGKILL'); }
+  sql.exec(q);
+  if (n === 3 && mode === 'after') { if (sql.isTransaction) throw Error('expected closed'); process.kill(process.pid, 'SIGKILL'); }
+ },
+ runSync: (q,...p) => sql.prepare(q).run(...p),
+ getFirstSync: (q,...p) => sql.prepare(q).get(...p) ?? null,
+ getAllSync: (q,...p) => sql.prepare(q).all(...p),
+ isInTransactionSync: () => sql.isTransaction,
+};
+let wall=10000, mono=0;
+const game=openGame(db,bundle,{kernel_version:'loka-kernel@'+'0'.repeat(40),newId:()=>{throw Error('unexpected new run');},time:{wall:()=>wall,monotonic:()=>mono}});
+wall=2602000;mono=2592000;counting=true;game.pulse();throw Error('kill not reached');
+`;
+
+// Breaks: death at the actual COMMIT boundary loses durable debt or duplicates the first schedule receipt on reopen.
+test('process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once', () => {
+  for (const mode of ['before', 'after']) {
+    const path = save(),
+      a = elapsedHost(path),
+      bundle = `${path}.bundle`;
+    writeFileSync(bundle, JSON.stringify(a.bundle));
+    a.sql.close();
+    const child = spawnSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '--eval',
+        ELAPSED_KILL,
+        new URL('./session.ts', import.meta.url).href,
+        bundle,
+        path,
+        mode,
+      ],
+      { encoding: 'utf8', timeout: 10000 },
+    );
+    assert.equal(child.signal, 'SIGKILL', child.stderr);
+    const sql = new DatabaseSync(path);
+    assert.equal(
+      sql.prepare('SELECT clock FROM head').get()!.clock,
+      mode === 'before' ? 64800 : 68400,
+    );
+    assert.equal(elapsedReceipts(sql), mode === 'before' ? 0 : 1);
+    assert.deepEqual(elapsedCheckpoint(sql), {
+      wall_ms: mode === 'before' ? 10000 : 2602000,
+      remainder: 0,
+      target: mode === 'before' ? 64800 : 194400,
+    });
+    sql.close();
+    const b = elapsedHost(path, { wall: 2602000, mono: 2592000 });
+    assert.equal(b.game.view().view.time, 194400);
+    assert.equal(elapsedReceipts(b.sql), 4);
+    b.sql.close();
   }
 });

@@ -173,3 +173,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - PM decision under mechanics delegation: [first cellar encounter](../decisions/pm-decision-first-encounter-2026-10-03.md), planned contract before M5/M6; new combat equations are not silently inherited from draft PR #136.
 
 - Elapsed cartridge policy and trusted receipt delivery use the [M1-A PM contract](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md); legacy play-time behavior stays frozen.
+
+- Driver-managed elapsed saves, reserved input and replay follow the [M1-B1 PM adoption](../decisions/pm-decision-m1-b1-durable-elapsed-2026-10-04.md).

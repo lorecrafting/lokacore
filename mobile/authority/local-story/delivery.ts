@@ -6,17 +6,19 @@ import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.g
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { stepElapsed } from '../../../kernel/ts/src/runtime/world.ts';
 import type { Reply } from './authority.ts';
-import { budget, ids, save, scope, settle, type Story, type Trace } from './save.ts';
-import { receipt, type Captured } from './store.ts';
+import { block, budget, ids, save, scope, settle, type Story, type Trace } from './save.ts';
+import { receipt, identityOf, type Captured } from './store.ts';
+import { ElapsedRecoveryError, changedRun, type Checkpoint } from './elapsed-store.ts';
 import { catchUp, observe, traceCommand, type CommitState } from './trace.ts';
 
 export type Elapsed = { expected_run_id: string; from: number; until: number };
 const ELAPSED_INTENT = 'loka-elapsed-intent-v1';
 
 /** Run guard precedes receipts; matched-run replay precedes current-clock admission. */
-export function elapsed(s: Story, evidence: Elapsed): Reply {
+export function elapsed(s: Story, evidence: Elapsed, checkpoint?: Checkpoint): Reply {
   if (fenced(s)) return { kind: 'pending' };
   if (evidence.expected_run_id !== s.meta.run_id) return { kind: 'stale_view' };
+  if (s.elapsed) checkRun(s);
   const payload = {
     type: 'elapsed',
     actor_id: s.world.character,
@@ -50,10 +52,13 @@ export function elapsed(s: Story, evidence: Elapsed): Reply {
       return { kind: 'conflict' };
     return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
   }
-  return commitElapsed(s, command, digest);
+  return commitElapsed(s, command, digest, checkpoint ?? extended(s, evidence.until));
 }
 
-function commitElapsed(s: Story, command: Command, digest: string): Reply {
+const extended = (s: Story, until: number) =>
+  s.elapsed && { ...s.elapsed, target: Math.max(s.elapsed.target, until) };
+
+function commitElapsed(s: Story, command: Command, digest: string, checkpoint?: Checkpoint): Reply {
   const next = stepElapsed(s.world, command, s.revision + 1);
   const d = next.decision;
   const trace: Trace = (at, ...states) => traceAfter(s, command, d, at, states);
@@ -63,25 +68,39 @@ function commitElapsed(s: Story, command: Command, digest: string): Reply {
     return { kind: 'fault', code: d.code };
   }
   if (d.kind === 'accepted' && d.effects.length) throw new Error('effect outbox not built');
-  return save(s, next, trace, reached(s, d, s.revision + 1), {
-    scope: scope(s),
-    invocation_id: command.id,
-    command_id: command.id,
-    actor_id: s.world.character,
-    intent_digest_version: ELAPSED_INTENT,
-    intent_digest: digest,
-    command: command as never,
-    revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
-    response: d as never,
-  });
+  return save(
+    s,
+    next,
+    trace,
+    reached(s, d, s.revision + 1),
+    {
+      scope: scope(s),
+      invocation_id: command.id,
+      command_id: command.id,
+      actor_id: s.world.character,
+      intent_digest_version: ELAPSED_INTENT,
+      intent_digest: digest,
+      command: command as never,
+      revision: d.kind === 'accepted' ? s.revision + 1 : s.revision,
+      response: d as never,
+    },
+    d.kind === 'accepted' ? checkpoint : undefined,
+  );
+}
+
+export function checkRun(s: Story) {
+  const changed = changedRun(identityOf(s.db), s.meta.run_id);
+  if (changed) block(s, changed);
 }
 
 /** True while a fenced attempt's outcome is still unknown; otherwise settles it first. */
 export function fenced(s: Story): boolean {
+  if (s.blocked) throw s.blocked;
   try {
     if (s.fence) settle(s);
     return false;
-  } catch {
+  } catch (e) {
+    if (e instanceof ElapsedRecoveryError) block(s, e);
     return true;
   }
 }

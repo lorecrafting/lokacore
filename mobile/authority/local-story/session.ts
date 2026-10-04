@@ -1,3 +1,10 @@
+import { ElapsedRecoveryError } from './elapsed-store.ts';
+import type {
+  GameSubscription,
+  ElapsedStatus,
+  Projection,
+} from '../../packages/game-view/session.ts';
+import type { Pulse } from './elapsed.ts';
 // The local TypeScript implementation of GameSession (packages/game-view/session.ts): a bundled
 // cartridge played through the real local authority. It allocates invocation ids and the actor,
 // resends an unconfirmed attempt unchanged, and owns open and Start over. It says nothing in words:
@@ -22,7 +29,7 @@ const ID_PREFIX = '00000000-0000-4000-8000-';
 
 // The build's commit, its random source (lineage.test.ts proves the app path passes it; tests
 // without one play the template world), its ids and its clock.
-type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random'>;
+type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random' | 'time'>;
 
 function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
@@ -74,32 +81,153 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
  */
 export function openGame(db: Db, bundled: Bundled, host: HostPart) {
   const cartridge = cartridgeOf(bundled);
+  if (cartridge.manifest.time_policy && !host.time)
+    throw Object.assign(new Error('elapsed clocks are required'), {
+      cause: { kind: 'elapsed_clock_missing' },
+    });
   const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
   const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
   if (story.kind !== 'open') throw Object.assign(new Error(story.kind), { cause: story });
   checked(story);
-  // The unconfirmed attempt, resent unchanged (same id, same intent) until it settles (03 §§14-15).
-  let retry: object | undefined;
+  return managedGame(story, cartridge, db);
+}
+
+function managedGame(
+  story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
+  cartridge: Cartridge,
+  db: Db,
+) {
+  let retry: (Intent & { invocation_id: string; actor_id: never }) | undefined;
   let sent = lastId(db);
-  const game: Game = {
-    view: () => ({ view: gameView(story.world()), token: story.token() }),
-    invoke(intent: Intent): Reply {
-      // While unconfirmed any call resends that attempt, whatever the intent.
-      retry ??= {
-        ...intent,
-        invocation_id: `${ID_PREFIX}${(++sent).toString(16).padStart(12, '0')}`,
-        actor_id: story.world().character,
+  const listeners = new Set<(update: GameSubscription) => void>();
+  const emit = (update: GameSubscription) => {
+    for (const listener of listeners) listener(update);
+  };
+  const projection = (): Projection => ({ view: gameView(story.world()), token: story.token() });
+  const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
+  const attempt = (): Reply => {
+    const reply = attemptStory(story, retry);
+    if (terminal(reply)) retry = undefined;
+    return reply;
+  };
+  const pending = () => retry;
+  const before = (): Projection => ({
+    view: gameView(story.beforeWorld()),
+    token: story.beforeToken(),
+  });
+  const invoke = (intent: Intent) => {
+    retry ??= {
+      ...intent,
+      invocation_id: `${ID_PREFIX}${(++sent).toString(16).padStart(12, '0')}`,
+      actor_id: story.world().character as never,
+    };
+    return attempt();
+  };
+  const game = sharedGame(story, cartridge, projection, listeners, pending, invoke);
+  story.onAdvance((status) => emit({ kind: 'state', projection: projection(), status }));
+  return Object.assign(game, {
+    newGame: story.newGame,
+    pulse: pulseOf(story, projection, before, emit, pending, attempt),
+  });
+}
+
+function sharedGame(
+  story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
+  cartridge: Cartridge,
+  projection: () => Projection,
+  listeners: Set<(update: GameSubscription) => void>,
+  pending: () => { invocation_id: string } | undefined,
+  invoke: (intent: Intent) => Reply,
+): Game {
+  const run = story.runId();
+  return {
+    view: projection,
+    invoke: (intent) => (story.runId() === run ? invoke(intent) : { kind: 'stale_view' }),
+    pending: () => !!pending(),
+    pendingInvocation: () => pending()?.invocation_id,
+    subscribe(listener) {
+      listeners.add(listener);
+      listener({ kind: 'state', projection: projection(), status: story.clockStatus() });
+      return () => {
+        listeners.delete(listener);
       };
-      const reply = story.invoke(retry); // a throw may follow a durable commit: keep the attempt (03 §14)
-      if (reply.kind !== 'pending') retry = undefined;
-      return reply as Reply;
     },
-    pending: () => !!retry,
     text: (key) => cartridge.text[key as Key],
     lastNarration: story.narration,
   };
-  return Object.assign(game, { newGame: story.newGame });
 }
+
+function pulseOf(
+  story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
+  projection: () => Projection,
+  before: () => Projection,
+  emit: (update: GameSubscription) => void,
+  pending: () => (Intent & { invocation_id: string }) | undefined,
+  attempt: () => Reply,
+) {
+  const run = story.runId();
+  return (mode: Pulse = 'active'): ElapsedStatus => {
+    try {
+      if (story.runId() !== run) return { kind: 'replaced' };
+      const held = pending();
+      // A retained player's receipt must replay before any new host sampling.
+      if (held) {
+        const reply = attempt();
+        if (reply.kind !== 'pending' && reply.kind !== 'catching_up')
+          emit({
+            kind: 'completion',
+            invocation_id: held.invocation_id,
+            intent: held,
+            before: before(),
+            reply,
+          });
+        const status = statusOf(reply);
+        emit({ kind: 'state', projection: projection(), status });
+        return status;
+      }
+      const status = story.pulse(mode, run);
+      emit({ kind: 'state', projection: projection(), status });
+      return status;
+    } catch (e) {
+      const status = statusOfError(e);
+      emit({ kind: 'state', projection: projection(), status });
+      return status;
+    }
+  };
+}
+
+function attemptStory(
+  story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
+  retry: unknown,
+): Reply {
+  try {
+    return story.invoke(retry) as Reply;
+  } catch (e) {
+    if (!(e instanceof ElapsedRecoveryError)) throw e;
+    return e.kind === 'stale_view'
+      ? { kind: 'stale_view' }
+      : { kind: 'save_corrupt', message: e.message };
+  }
+}
+const statusOfError = (e: unknown): ElapsedStatus =>
+  e instanceof ElapsedRecoveryError && e.kind === 'stale_view'
+    ? { kind: 'replaced' }
+    : {
+        kind: 'error',
+        message: (e as Error).message,
+        ...(e instanceof ElapsedRecoveryError ? { reason: 'save_corrupt' as const } : {}),
+      };
+
+const statusOf = (reply: Reply): ElapsedStatus =>
+  reply.kind === 'pending' || reply.kind === 'catching_up'
+    ? { kind: reply.kind }
+    : reply.kind === 'save_corrupt'
+      ? { kind: 'error', reason: 'save_corrupt', message: reply.message }
+      : reply.kind === 'stale_view'
+        ? { kind: 'replaced' }
+        : reply.kind === 'fault'
+          ? reply
+          : { kind: 'ready' };
 
 /** The refusal and its start over options, as the authority keeps them beyond the shared Failed. */
 type Local = Failed & { newGame?: () => { kind: string }; replace?: boolean };

@@ -1,0 +1,138 @@
+✔ base1000 accounting preserves exact safe boundary quotients and rejects target overflow (1.092042ms)
+✔ 9ms and reopened 11ms commit one unit and preserve the durable fractional account (29.18475ms)
+✔ negative wall resume rebases without credit then credits the next 20ms (5.144625ms)
+✖ a fixed 36hour horizon commits all four daily boundaries in order (6.306ms)
+✖ sixteen segments yield and one reserved input completes at its original finite horizon (3.796042ms)
+✔ a current choice crossing departure refuses presence while Leave still closes its continuation (7.594416ms)
+✔ preexisting stale input does not account time and synchronous success emits no completion (5.104125ms)
+✔ trusted explicit v2 advance raises its durable target and missing checkpoints refuse (7.675ms)
+✔ an elapsed managed session without clocks fails with a typed refusal (4.71425ms)
+✖ resume extends durable target debt rather than a lagging head (9.988667ms)
+✔ unexpected closed checkpoint evidence blocks play as corrupt until confirmed Start over (6.17625ms)
+✔ a valid durable replacement invalidates an old fenced clock and input without writes (7.883708ms)
+✔ malformed v2 checkpoints and heads refuse without rewriting their progress (27.8285ms)
+✔ seed 12: every fault leaves the prior or next revision and the run ends unchanged (1203.991292ms)
+✔ seed 366: every fault leaves the prior or next revision and the run ends unchanged (665.043584ms)
+✔ seed 30636: every fault leaves the prior or next revision and the run ends unchanged (714.36475ms)
+✔ seed 300: every fault leaves the prior or next revision and the run ends unchanged (850.610708ms)
+✔ seed 622: every fault leaves the prior or next revision and the run ends unchanged (615.784625ms)
+✔ seed 9633: every fault leaves the prior or next revision and the run ends unchanged (838.467375ms)
+✔ seed 2841: every fault leaves the prior or next revision and the run ends unchanged (628.811125ms)
+✔ seed 454: every fault leaves the prior or next revision and the run ends unchanged (826.893083ms)
+✔ seed 172: every fault leaves the prior or next revision and the run ends unchanged (664.609708ms)
+✔ seed 49: every fault leaves the prior or next revision and the run ends unchanged (899.251709ms)
+✔ seed 211: every fault leaves the prior or next revision and the run ends unchanged (958.404125ms)
+✔ seed 1595: every fault leaves the prior or next revision and the run ends unchanged (809.336416ms)
+✔ seed 337982: every fault leaves the prior or next revision and the run ends unchanged (891.79575ms)
+✔ seed 105497: every fault leaves the prior or next revision and the run ends unchanged (695.231459ms)
+✔ seed 81: every fault leaves the prior or next revision and the run ends unchanged (928.097ms)
+✔ seed 130: every fault leaves the prior or next revision and the run ends unchanged (801.333625ms)
+✔ seed 54: every fault leaves the prior or next revision and the run ends unchanged (860.952833ms)
+✔ hand-checked anchors (15.197584ms)
+✔ views, a reopen and a changed host clock leave the play_time clock and world as they were (64.945625ms)
+✔ backward-anchor metadata accounts reconcile exact prior or next real SQLite evidence (7.943917ms)
+✔ failed and lost-ack positive elapsed commits reconcile head receipt and checkpoint together (6.0035ms)
+✔ real SQLITE_FULL rolls back elapsed evidence and retries its unchanged candidate (2.941208ms)
+✔ a timer completes an unknown player receipt before sampling and emits it once (3.107958ms)
+✖ process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once (121.965125ms)
+✔ a budget fault is one valid observation of its limit, with the ReplayIds of its decision (10.171125ms)
+✔ a failing observation sink changes no reply, revision, storage or retry (9.817292ms)
+✔ an older save gains the sink untouched, and the sink keeps the newest 1000 records (289.933292ms)
+✔ each NEW decision, accepted, rejected or fault, is one kernel.decision_latency (53.993125ms)
+✔ a clock changes no reply or durable state when a COMMIT is held, then committed (8.839625ms)
+✔ a real committed elapsed then ordinary local trace replays identically with header run preflight (504.7525ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 39
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14293.209041
+
+✖ failing tests:
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:68:1
+✖ a fixed 36hour horizon commits all four daily boundaries in order (6.306ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'error' !== 'ready'
+  
+      at TestContext.<anonymous> (file://[private-path]:76:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'error',
+    expected: 'ready',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:87:1
+✖ sixteen segments yield and one reserved input completes at its original finite horizon (3.796042ms)
+  Error: elapsed delivery refused: fault
+      at ClockDriver.advance (file://[private-path]:124:39)
+      at ClockDriver.drain (file://[private-path]:145:27)
+      at ClockDriver.reserve (file://[private-path]:174:32)
+      at reserved (file://[private-path]:57:18)
+      at invoke (file://[private-path]:34:10)
+      at Object.invoke (file://[private-path]:117:33)
+      at attemptStory (file://[private-path]:204:18)
+      at attempt (file://[private-path]:109:19)
+      at invoke (file://[private-path]:124:12)
+      at Object.invoke (file://[private-path]:145:50)
+
+test at mobile/authority/local-story/elapsed-driver.test.ts:232:1
+✖ resume extends durable target debt rather than a lagging head (9.988667ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 2
+  
+      at TestContext.<anonymous> (file://[private-path]:242:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/faults.test.ts:458:1
+✖ process kill before and after elapsed COMMIT leaves entirely prior or next and reopens once (121.965125ms)
+  AssertionError [ERR_ASSERTION]: file://[private-path]:23
+  wall=2602000;mono=2592000;counting=true;game.pulse();throw Error('kill not reached');
+                                                             ^
+  
+  Error: kill not reached
+      at file://[private-path]:23:60
+  
+  Node.js v24.21.0
+  
+  
+  null !== 'SIGKILL'
+  
+      at TestContext.<anonymous> (file://[private-path]:478:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'SIGKILL',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

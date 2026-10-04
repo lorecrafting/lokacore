@@ -1,0 +1,22 @@
+{
+  "kernel/ts/play/main.ts": "0b0fff5954aad46aaca182bf2cee9035c81d373d2dcf5c3bd2991a5fb0a7fe1f",
+  "kernel/ts/play/replay.ts": "1270e23b0e7242be55cc42a5511468b7b9297a3817062721376f715970ef8a43",
+  "kernel/ts/play/run.ts": "e0d71b5d323837279bd2d1ec16f43eca9df92feda15aaae37bec23bbe71c3d79",
+  "kernel/ts/src/contracts.gen.ts": "43e787527c48d820e87f8fe31cb3e5a935d117090cdd6ed9613213fac5309d7a",
+  "kernel/ts/test/elapsed_host.ts": "34087a82cda27802d24a11fffa3e45c7f36b73eedfbaeb5be8560d554157b0b2",
+  "mobile/authority/local-story/authority.ts": "ca0de2fa7f73552de0a851e91d67562060b853606d1d4575485981f21abb808f",
+  "mobile/authority/local-story/delivery.ts": "96de9291ebae45211d28348da5c6b5cece72e2099c96afaf746b718b72c05d7b",
+  "mobile/authority/local-story/elapsed-driver.test.ts": "f1086164ded4459776ec626b9cdc7fdf643fe9cd2cf618301b01cc828b7e7a35",
+  "mobile/authority/local-story/elapsed-store.ts": "f39a3abc5582d79a44e53ffcf8e254697b9571da0dae7f0d045fbc2bdb706519",
+  "mobile/authority/local-story/elapsed.ts": "bfc9dfcc7162f6600d2643de95ce934a1299b7daf976b1ea5164dca48d4cc819",
+  "mobile/authority/local-story/faults.test.ts": "094e00abf28f8def1bda161d846f25f39e119ddfb190fcea70b04872820566e0",
+  "mobile/authority/local-story/invocation.ts": "54d152939a1d4970d2c1f91223a2e250974146510c38dd83bfb8a6679f6b59ce",
+  "mobile/authority/local-story/observe.test.ts": "39e5b8f47693bb54d366837166aa9440775e7abddf19f0954f244a718cdd7921",
+  "mobile/authority/local-story/save.ts": "e3ff9229a6f6dbe09053feea36ba0ff35b011f5ec9238eaa6698a2b083d52dc0",
+  "mobile/authority/local-story/saves.test.ts": "0978b66a29d1301925e4f4e7feb962611a389be4fe84661d2adf7956ee641ebd",
+  "mobile/authority/local-story/session.ts": "4f00a28115990219020aa9cb8875a09bffd8928628c994ed16bfd6d8a5b2eb43",
+  "mobile/authority/local-story/store.ts": "6560672abc5bc4aa8f2092c566093fc0247ec894e1e6800cee85413e40a15960",
+  "mobile/authority/local-story/transaction.ts": "3306a997595348a54de7cf0398a3b6f269bec8b4e9e69d163e2b0f30e9b63db4",
+  "mobile/packages/game-view/session.ts": "d2895ea5ac68ebea4f03370b9dc7eb15e382ade0b8c6eb1b80dafe4d79aac619",
+  "protocol/observation.schema.json": "5d6060ba7c07f1be52af3b1767ac6f87cb626f858e2f3808f53ce7bf1d1edb5a"
+}

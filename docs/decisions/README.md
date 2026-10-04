@@ -128,3 +128,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [M1-A elapsed authority contract](pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 - PM content decision: [sampler 0.0.3 chapel approach](pm-decision-sampler-shrine-approach-2026-10-04.md), four real route rooms and development pin replacement before shrine return.
 - PM first-consumer decision: [M4-A cellar encounter, RNG/escape/death policies and M5 prerequisites](pm-decision-first-encounter-2026-10-03.md).
+
+- [M1-B1 durable elapsed host](pm-decision-m1-b1-durable-elapsed-2026-10-04.md): checkpoint/v2, reserved input, typed completion and trusted trace replay.

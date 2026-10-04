@@ -1,3 +1,7 @@
+import { spawnSync } from 'node:child_process';
+import { readFileSync as readFileSyncForReplay, writeFileSync } from 'node:fs';
+import { elapsedHost } from '../../../kernel/ts/test/elapsed_host.ts';
+import { decide } from '../../../kernel/ts/play/run.ts';
 // The local authority's evaluation.budget_exceeded (04 §5.4; ADR-075 §7; R6P B, PM D3/D3b): one
 // record per budget fault in the save's observation table, a sink whose failure changes nothing,
 // capped, and created on an older save without touching its rows. The release is the green known
@@ -221,4 +225,73 @@ test('a clock changes no reply or durable state when a COMMIT is held, then comm
   const plain = play();
   assert.deepEqual(plain.replies[0], { kind: 'pending' });
   assert.deepEqual(play({ host: 'hermes_ios', now: () => 0 }), plain);
+});
+
+// Breaks: actual local elapsed traces use the player entry, trust a relabeled run, or grant authority from measured=false.
+test('a real committed elapsed then ordinary local trace replays identically with header run preflight', () => {
+  const a = elapsedHost(),
+    folder = mkdtempSync(join(tmpdir(), 'loka-elapsed-replay-'));
+  a.clock.wall = 10020;
+  a.clock.mono = 20;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(
+    a.game.invoke({ action_key: 'look' as never, target_ids: [], input: {} }).kind,
+    'saved',
+  );
+  const records = a.sql
+    .prepare('SELECT record FROM trace ORDER BY rowid')
+    .all()
+    .map((r) => JSON.parse(r.record as string));
+  const artifact = join(folder, 'cartridge.json'),
+    trace = join(folder, 'trace.jsonl');
+  writeFileSync(
+    artifact,
+    `{"cartridge":${a.bundle.canonical},"content_hash":"${a.bundle.sha256}"}`,
+  );
+  const replay = () =>
+    spawnSync(
+      process.execPath,
+      [
+        new URL('../../../kernel/ts/play/main.ts', import.meta.url).pathname,
+        artifact,
+        '--replay',
+        trace,
+      ],
+      { encoding: 'utf8', timeout: 10000 },
+    );
+  writeFileSync(trace, records.map((r) => encode(r)).join('\n') + '\n');
+  const success = replay();
+  assert.equal(success.status, 0, success.stderr + success.stdout);
+  assert.match(success.stdout, /replay: 2 commands identical/);
+  for (const field of ['record', 'elapsed']) {
+    const broken = structuredClone(records);
+    if (field === 'record') broken[1].ids.run_id = 'bbbbbbbb-0000-4000-8000-000000000001';
+    else broken[1].data.command.payload.run_id = 'bbbbbbbb-0000-4000-8000-000000000001';
+    writeFileSync(trace, broken.map((r) => encode(r)).join('\n') + '\n');
+    const rejected = replay();
+    assert.equal(rejected.status, 1);
+    assert.match(rejected.stderr, /run differs from trace header/);
+    assert.doesNotMatch(rejected.stdout, /\[state /); // preflight precedes any execution
+  }
+  const loaded = loadCartridge(
+    new TextEncoder().encode(readFileSyncForReplay(artifact, 'utf8')),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok);
+  const world = newWorld(
+    loaded.cartridge as Cartridge,
+    records[0].data.world_context_id,
+    records[0].ids.seed,
+  );
+  const result = decide(
+    { ids: records[0].ids, world, ordinal: 0, revision: 0 },
+    records[1].data.command,
+    false,
+  );
+  assert.equal(
+    result.decision.kind === 'rejected' && result.decision.error.code,
+    'permission_denied',
+  );
+  assert.equal(world.state.clock, 64800);
+  a.sql.close();
 });

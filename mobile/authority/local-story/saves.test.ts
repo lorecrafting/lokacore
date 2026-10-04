@@ -221,8 +221,8 @@ test('a save whose pinned release is missing is refused untouched; a new game mo
 test('a save of an unknown format is refused with nothing written and no new game', () => {
   const unsupported = {
     kind: 'unsupported_save_format',
-    format: 'loka-save-v2',
-    supported: ['loka-save-v1'],
+    format: 'loka-save-v3',
+    supported: ['loka-save-v1', 'loka-save-v2'],
   };
   // A newer app's save, pinned to dusk: another format, without a table this one creates or with
   // a renamed identity column.
@@ -230,7 +230,7 @@ test('a save of an unknown format is refused with nothing written and no new gam
     const path = save();
     const a = processOn(path, { newId: ids() });
     a.story.invoke(pick(1));
-    a.sql.exec(`UPDATE save SET format = 'loka-save-v2'; ${newer}`);
+    a.sql.exec(`UPDATE save SET format = 'loka-save-v3'; ${newer}`);
     a.sql.close();
     const before = bytes(path);
     const b = processOn(path, { releases: LATER });

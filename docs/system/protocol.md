@@ -248,3 +248,13 @@ the observation supplies it: an available matching place action is never refused
 any available place action resolving to that command qualifies. An available exit's move is
 never refused `invalid_state` or `unsupported_capability`; a
 `take` listed on an item is never refused `not_present` (`kernel/ts/src/view/invariants_view.ts:29`, `:76`).
+
+## Trusted local elapsed replay
+
+For supported fresh single-header traces containing elapsed, replay binds the semantic durable
+save run from the header, validates every record run and elapsed payload run before execution,
+and selects stepElapsed only on the replay entry. Ordinary commands stay on player step;
+measured=false grants no authority. Generic traces without elapsed keep independent CLI or
+simulator run identity. No clock is sampled. Capped prefixes/nonfresh/fault-rich segment limits
+remain; byte-identical replay and derived receipt recovery remain required.
+See [save](save.md#durable-elapsed-sessions).

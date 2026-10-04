@@ -182,3 +182,11 @@ rather than hiding errors or clearing same-room history. Carries remain in the [
 ## Planned combat interaction (M4/M6)
 
 **Planned until M5/M6 implementation.** Under the [planned first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), the actual combat consumer must project complete Attack/Stand/Flee invocations and persistent threat/escape controls. Ordinary obstructing details yield to danger while world time continues; mandatory modal reading remains in safe authored contexts before engagement. No combat control exists until its real GameView/admission contract lands. This functional interaction work is separate from deferred cosmetic polish.
+
+## Shared elapsed status/completion boundary
+
+Game offers typed state updates (confirmed projection and elapsed/catch-up/save status) and
+terminal completion of the retained invocation, with identity and settled pre-command view.
+Immediate terminal calls are not repeated as completion notifications. Catching up means time
+settlement; pending means an unknown save. B2 consumes these notifications in actual lifecycle
+and rendering flows; this shared contract alone adds no phone timer/UI integration.

@@ -1,0 +1,37 @@
+✔ a budget fault is one valid observation of its limit, with the ReplayIds of its decision (10.876333ms)
+✔ a failing observation sink changes no reply, revision, storage or retry (9.6205ms)
+✔ an older save gains the sink untouched, and the sink keeps the newest 1000 records (275.612917ms)
+✔ each NEW decision, accepted, rejected or fault, is one kernel.decision_latency (22.082667ms)
+✔ a clock changes no reply or durable state when a COMMIT is held, then committed (5.582292ms)
+✖ a real committed elapsed then ordinary local trace replays identically with header run preflight (314.182583ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1082.884917
+
+✖ failing tests:
+
+test at mobile/authority/local-story/observe.test.ts:231:1
+✖ a real committed elapsed then ordinary local trace replays identically with header run preflight (314.182583ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /run differs from trace header/. Input:
+  
+  'replay differs from /var/folders/hm/hr2h38yj3yvd3mxh5_dmhv940000gn/T/loka-elapsed-replay-hlEgaJ/trace.jsonl\n'
+  
+      at TestContext.<anonymous> (file://[private-path]:273:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'replay differs from /var/folders/hm/hr2h38yj3yvd3mxh5_dmhv940000gn/T/loka-elapsed-replay-hlEgaJ/trace.jsonl\n',
+    expected: /run differs from trace header/,
+    operator: 'match',
+    diff: 'simple'
+  }
