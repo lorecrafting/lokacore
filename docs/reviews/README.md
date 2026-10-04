@@ -173,3 +173,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C1 next UI polish](2026-10-03-c1-next-ui-review.md): PR #148 at `0e49963`, source primary and separate Sol APPROVE; integrated Release Simulator APPROVE WITH NOTES, owner-deferred UI-FUZZ-01 at the next UI checkpoint; historical 665 native walk remains incomplete, whole Gate C1 closure is separate.
 
 - [2026-10-03 kernel layout review](2026-10-03-kernel-layout-review.md) — PR #146, behavior-preserving responsibility grouping.
+
+- [2026-10-03 C1 description projection review](2026-10-03-c1-description-projection-review.md) — PR #147, explicit authored detail descriptions.

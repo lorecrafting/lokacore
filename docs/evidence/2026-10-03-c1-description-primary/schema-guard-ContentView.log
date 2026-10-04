@@ -1,0 +1,48 @@
+✔ every contract has examples and every example validates (11.87925ms)
+✖ invalid fixtures fail with exactly the listed errors (17.013541ms)
+✔ the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable (0.681709ms)
+✔ the capability lock encodes and hashes to the independent known answer (0.777709ms)
+✔ a declared __proto__ property survives generation (0.073416ms)
+✔ values outside the canonical profile are rejected at decode, before validation (0.397791ms)
+✔ a recursive Policy at the depth cap (0.885375ms)
+✔ narration at 64 and 65 lines (0.972667ms)
+✔ ambiguous candidates at 1024 and 1025 (2.258292ms)
+✔ every composition-profile limit is a valid BudgetExceeded (0.927458ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 131.862792
+
+✖ failing tests:
+
+test at test/validate.test.ts:21:1
+✖ invalid fixtures fail with exactly the listed errors (17.013541ms)
+  AssertionError [ERR_ASSERTION]: ContentView {"id":"d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a","name":"item.brass_key.short","kind":"item","description":"","actions":[],"container_id":"d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8b"}
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     code: 'pattern_mismatch',
+  -     path: '/description'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file:///private[review-checkout]/kernel/ts/test/validate.test.ts:23:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { path: '/description', code: 'pattern_mismatch' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
