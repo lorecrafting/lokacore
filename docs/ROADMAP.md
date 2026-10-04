@@ -42,6 +42,9 @@ Independent review is complete; this docs update implements no mechanic. The
 Composition-audit carry PC01 (exit availability follows composed movement admission) is
 fixed in [#160](https://github.com/lorecrafting/lokacore/pull/160) after its
 [independent review](reviews/2026-10-04-pc01-exit-projection-review.md).
+PC11 (invalid fact defaults refused by the cartridge loader) is fixed in
+[#161](https://github.com/lorecrafting/lokacore/pull/161) after its
+[independent review](reviews/2026-10-04-pc11-fact-default-review.md).
 
 ## C1 slices
 
