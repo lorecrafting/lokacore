@@ -200,3 +200,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [M3-A carrying ceiling](2026-10-04-m3-a-carrying-ceiling-review.md): PR #159 at `4bd3895`, CHANGES REQUIRED; fix `20b5504`, APPROVE.
 
 - [Shared Story/Realm learning and replaceable content](2026-10-04-story-realm-shared-learning-review.md): PR #164 at `e14fab0`, APPROVE; familiar mechanics/interaction and rewriteable content, with ADR-074, save pins and offline-value boundaries retained.
+- [CI simulator parallelism: retain the full deterministic workload in two workers](2026-10-04-ci-sim-parallel-review.md): PR #163 at `20d7d116a4adfb99f421d38450849b1812316249`, APPROVE (no findings; 18 tests pass, seven mutations red, serial/worker seeds and aggregates agree, OBS reproduction checked).

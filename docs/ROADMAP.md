@@ -14,6 +14,7 @@ The red-control existing-file carry is closed: plants preflight occupied paths a
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
 
 The verification harness (registered invariants, the deterministic simulator, fault simulation) is adopted ([record](archive/decisions/owner-decision-roadmap-2026-09-24.md)) and described in [architecture.md](system/architecture.md#hosts) and the [owner rules](system/owner-rules.md#architecture-and-engine); its planning text is [archived](archive/ROADMAP.md#verification-harness-adopted-2026-09-24).
+The full 10,000-fresh-sequence CI simulator now runs in two workers ([#163](https://github.com/lorecrafting/lokacore/pull/163)); its seed and coverage contract is unchanged.
 
 ## Slices
 
