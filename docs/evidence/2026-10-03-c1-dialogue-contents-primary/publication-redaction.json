@@ -1,0 +1,12 @@
+{
+  "files_additionally_redacted": [
+    "native-665-partial/world-fresh.json",
+    "native-665-partial/after-look.json",
+    "native-665-partial/release-start.json",
+    "sol/initial-redacted.log",
+    "sol/fix1-redacted.log",
+    "sol/fix2-redacted.log"
+  ],
+  "sol_answers_preserved_verbatim": true,
+  "private_inputs_and_original_manifests_preserved": true
+}

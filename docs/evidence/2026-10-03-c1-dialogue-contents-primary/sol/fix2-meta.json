@@ -1,0 +1,16 @@
+{
+  "pr": 144,
+  "head": "665b3ff6c0fbed1109a8aa13576bad710a623d11",
+  "model_requested": "gpt-6.1-sol",
+  "reasoning_effort": "high",
+  "exit_status": 0,
+  "independent_read_only": true,
+  "redacted_log_sha256": "bdb6c6e94b2e065253d1248f64d5c1a783de268d210ff3bfd0e89c9c170e877f",
+  "answer_sha256": "f00acfc8ef74b3713c711ff1f3a209e0390caff2c58940332e2ed735f4c462d3",
+  "verdict": "APPROVE",
+  "open_findings": 0,
+  "raw_capture_retained_private": true,
+  "input_redacted_log_sha256": "a1a2d35c9166740e8e9fa1e546c491ad7d511ac3e331fc55872ac01c86c89af3",
+  "answer_preserved_verbatim": true,
+  "publication_privacy_redaction": true
+}

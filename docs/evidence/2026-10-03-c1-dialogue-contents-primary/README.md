@@ -1,0 +1,11 @@
+# PR144 independent primary evidence
+
+Final source approval:665b3ff6c0fbed1109a8aa13576bad710a623d11. Final composed checkpoint: APPROVE WITH NOTES on0e49963f893192d193fac65851aa882be0f597b8; owner-deferred UI-FUZZ-01. See the [canonical review](../../reviews/2026-10-03-c1-dialogue-contents-polish-review.md) and [closure](composed-native-checkpoint-closure.md).
+
+`source/` retains26 personal focused/red-control artifacts, including failure/setup history. Source-control scripts are reviewer probes, never production hooks. Source checks and mutations are actual personal execution. `native-665-partial/` retains13 artifacts of the old primary's actual clean Release/Look-only partial run; [historical report](native-665-partial-report.md) is preserved. Its full-native PENDING state is historical and was never retroactively passed; the current inherited checkpoint is closed only by fresh148 combined proof. Raw/private logs and binding pointers are excluded.
+
+`sol/` retains all three separate requested GPT-6.1 Sol answers verbatim: [initial](sol/initial-answer.md), [fix round1](sol/fix1-answer.md), [fix round2](sol/fix2-answer.md), with redacted process logs and metadata. Initial CHANGESREQUIRED finding, scoped fix1 APPROVE and fix2 APPROVE are all preserved. Metadata separates input log hashes from additional publication-redacted hashes; answer hashes are unchanged. Actual primary model identity remains unverified.
+
+Publication privacy scan covered every text/script extension. Private paths/session/world-context UUIDs were removed from copied capture bytes without changing required kernel/content hashes or revisions. Original inputs and their verified manifests remain private. Publication manifests are recomputed from actual final published bytes and actually verified, excluding themselves/verify output. Formatting of copied reviewer probes/JSON may be normalized by the standard staged-file formatter; execution logs remain historical proof, not a claim of rerunning altered copies.
+
+PR148's108 native artifacts remain with its separate forthcoming canonical evidence; no duplication here. The current closure labels inspected reported native execution and explicit owner supersession. Owner-phone response and whole Gate C1 checklist remain separate PM closure/carries.

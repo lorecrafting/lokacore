@@ -1,0 +1,2396 @@
+OpenAI Codex v0.159.2
+--------
+workdir: [private-path]
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: none
+session id: [private-identifier]
+--------
+user
+Fresh independent scoped fix-round2 review PR144 exact HEAD665b3ff6c0fbed1109a8aa13576bad710a623d11, authorednone. Source baseline eb81d98825610398b08d6bab0e6ffe16822a7245 alreadyindependentlyreviewedAPPROVE allF1/F2closed; donotreopen wholePR. Rootall6exact-headCIgreenbeforelaunch. RootPMcombined0606d10d37dc0f0b1a49a02ebad8b0dac67d3183 mergesUIeb81+PR145e3c4fddf2bb74c5e4ae4a0e79feda14e83beb434, resolvingONLYdocsowner-rulesunionlinks/latestsection-detailwording. Content145separateprimarysourceAPPROVEandSolreview; contentall6CIgreen. Permittedcontentchanges onlysampler0.0.2version/refkeys+description_variant1 manifest/lock, independentcurrentknownanswer+gen14, no oldsavecompat/productionApp/session/runtimeUIchange. ExistingcombinedpreflightobsoleteassertwasnoLooklabel because0.0.1didn'thavecap; legitimate0.0.2projectsLook. F3ONLY: 665b3ff updatespolish.test.ts room-titletesttoactualofferedLookclick: receipt0→1, tokenchanged, literalroomidentity, noduplicateWorldheading; capturedoldtitlecallbackusescapturedfreshnesstoken→stale-viewline and nosecondreceipt. Actualmissing-dispatch/dropped-captured-tokenmutantsRED/restoredGREENreported. book-ui21–23 namescurrent0.0.2andlinkownerrepair, retainsconditionalnoinventedactionpolicy. Verifyexpectedindependent/literalandmeaningfulsourcefailingguard,nobroadnewtests/noruntimechanges. Reviewtouchedtest/docanddirecttitlecalleronly; samplerbyteidentitytosource145ifneedednotwholecontentrepeat. DeriverequirementsbeforefixdiffviaAGENTS/book-ui/ownerrecord. ExistingPonytailReviewminimality.
+CleanexactWTwithroot/kernel/appdependenciesready. Read-onlyno writes/mutations/installs/build/nativeGUI/fullcheckall. Allowedlightfocusedalreadyinstalledtests/probes; personallyrunvsreportedhonest. No privatepaths/deviceIDsprinted. Outputonefencedblockverdict(APPROVE/APPROVEWITHNOTES/CHANGESREQUIRED), SHA, F3dispositionornewfindingsids/severity/path:line/exactfailure, actualchecks/limits/simplicity. OwnerGatephone/manualacceptancepending, combinednativeproofotherprimaryrunningafterthisapproval. Notrequestedredesign. PriorSolrecords sharedscratch via private [private-path]
+
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’ll review F3 at the exact requested HEAD, derive the requirements before reading the fix, and check only the touched test, docs, and direct title caller. I’ll report checks I personally run separately from the reported mutation results.
+exec
+/bin/zsh -lc 'cat [private-path]' in [private-path]
+ succeeded in 0ms:
+---
+name: ponytail-review
+description: >
+  Code review focused exclusively on over-engineering. Finds what to delete:
+  reinvented standard library, unneeded dependencies, speculative abstractions,
+  dead flexibility. One line per finding: location, what to cut, what replaces
+  it. Use when the user says "review for over-engineering", "what can we
+  delete", "is this over-engineered", "simplify review", or invokes
+  /ponytail-review. Complements correctness-focused review, this one only
+  hunts complexity.
+---
+
+Review diffs for unnecessary complexity. One line per finding: location, what
+to cut, what replaces it. The diff's best outcome is getting shorter.
+
+## Format
+
+`L<line>: <tag> <what>. <replacement>.`, or `<file>:L<line>: ...` for
+multi-file diffs.
+
+Tags:
+
+- `delete:` dead code, unused flexibility, speculative feature. Replacement: nothing.
+- `stdlib:` hand-rolled thing the standard library ships. Name the function.
+- `native:` dependency or code doing what the platform already does. Name the feature.
+- `reuse:` equivalent helper, util, or pattern already in this repo. Name the path.
+- `yagni:` abstraction with one implementation, config nobody sets, layer with one caller.
+- `shrink:` same logic, fewer lines. Show the shorter form.
+
+
+## Examples
+
+❌ "This EmailValidator class might be more complex than necessary, have you
+considered whether all these validation rules are needed at this stage?"
+
+✅ `L12-38: stdlib: 27-line validator class. "@" in email, 1 line, real validation is the confirmation mail.`
+
+✅ `L4: native: moment.js imported for one format call. Intl.DateTimeFormat, 0 deps.`
+
+✅ `L18-29: reuse: slugify helper duplicates src/lib/slug.ts slugify. Delete it, import the existing one.`
+
+✅ `repo.py:L88: yagni: AbstractRepository with one implementation. Inline it until a second one exists.`
+
+✅ `L52-71: delete: retry wrapper around an idempotent local call. Nothing replaces it.`
+
+✅ `L30-44: shrink: manual loop builds dict. dict(zip(keys, values)), 1 line.`
+
+## Scoring
+
+End with the only metric that matters: `net: -<N> lines possible.`
+
+If there is nothing to cut, say `Lean already. Ship.` and stop.
+
+## Boundaries
+
+Scope: over-engineering and complexity only. Correctness bugs, security holes,
+and performance are explicitly out of scope. Route them to a normal review
+pass, not this one. A single smoke test or `assert`-based
+self-check is the ponytail minimum, not bloat, never flag it for deletion.
+Does not apply the fixes, only lists them.
+"stop ponytail-review" or "normal mode": revert to verbose review style.
+
+exec
+/bin/zsh -lc 'cat [private-path]' in [private-path]
+ succeeded in 0ms:
+---
+name: ponytail
+description: >
+  Forces the laziest solution that actually works, simplest, shortest, most
+  minimal. Channels a senior dev who has seen everything: question whether the
+  task needs to exist at all (YAGNI), reach for the standard library before
+  custom code, native platform features before dependencies, one line before
+  fifty. Supports intensity levels: lite, full (default), ultra. Use on ANY
+  coding task: writing, adding, refactoring, fixing, reviewing, or designing
+  code, and choosing libraries or dependencies. Also use whenever the user
+  says "ponytail", "be lazy", "lazy mode", "simplest solution", "minimal
+  solution", "yagni", "do less", or "shortest path", or complains about
+  over-engineering, bloat, boilerplate, or unnecessary dependencies. Do NOT
+  use for non-coding requests (general knowledge, prose, translation,
+  summaries, recipes).
+argument-hint: "[lite|full|ultra]"
+license: MIT
+---
+
+# Ponytail
+
+You are a lazy senior developer. Lazy means efficient, not careless. You have
+seen every over-engineered codebase and been paged at 3am for one. The best
+code is the code never written.
+
+## Persistence
+
+ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if
+unsure. Off only: "stop ponytail" / "normal mode". Default: **full**.
+Switch: `/ponytail lite|full|ultra`.
+
+## The ladder
+
+Stop at the first rung that holds:
+
+1. **Does this need to exist at all?** Speculative need = skip it, say so in one line. (YAGNI)
+2. **Already in this codebase?** A helper, util, type, or pattern that already lives here → reuse it. Look before you write; re-implementing what's a few files over is the most common slop.
+3. **Stdlib does it?** Use it.
+4. **Native platform feature covers it?** `<input type="date">` over a picker lib, CSS over JS, DB constraint over app code.
+5. **Already-installed dependency solves it?** Use it. Never add a new one for what a few lines can do.
+6. **Can it be one line?** One line.
+7. **Only then:** the minimum code that works.
+
+The ladder is a reflex, not a research project — but it runs *after* you
+understand the problem, not instead of it. Read the task and the code it
+touches first, trace the real flow end to end, then climb. Two rungs work →
+take the higher one and move on. The first lazy solution that works is the
+right one — once you actually know what the change has to touch.
+
+**Bug fix = root cause, not symptom.** A report names a symptom. Before you
+edit, grep every caller of the function you're about to touch. The lazy fix IS
+the root-cause fix: one guard in the shared function is a smaller diff than a
+guard in every caller — and patching only the path the ticket names leaves
+every sibling caller still broken. Fix it once, where all callers route through.
+
+## Rules
+
+- No unrequested abstractions: no interface with one implementation, no factory for one product, no config for a value that never changes.
+- No boilerplate, no scaffolding "for later", later can scaffold for itself.
+- Deletion over addition. Boring over clever, clever is what someone decodes at 3am.
+- Fewest files possible. Shortest working diff wins — but only once you understand the problem. The smallest change in the wrong place isn't lazy, it's a second bug.
+- Complex request? Ship the lazy version and question it in the same response, "Did X; Y covers it. Need full X? Say so." Never stall on an answer you can default.
+- Two stdlib options, same size? Take the one that's correct on edge cases. Lazy means writing less code, not picking the flimsier algorithm.
+- Mark deliberate simplifications that cut a real corner with a known ceiling (global lock, O(n²) scan, naive heuristic) with a `ponytail:` comment naming the ceiling and upgrade path (`# ponytail: global lock, per-account locks if throughput matters`).
+
+## Output
+
+Code first. Then at most three short lines: what was skipped, when to add it.
+No essays, no feature tours, no design notes. If the explanation is longer
+than the code, delete the explanation, every paragraph defending a
+simplification is complexity smuggled back in as prose. Explanation the user
+explicitly asked for (a report, a walkthrough, per-phase notes) is not debt,
+give it in full, the rule is only against unrequested prose.
+
+Pattern: `[code] → skipped: [X], add when [Y].`
+
+## Intensity
+
+| Level | What change |
+|-------|------------|
+| **lite** | Build what's asked, but name the lazier alternative in one line. User picks. |
+| **full** | The ladder enforced. Stdlib and native first. Shortest diff, shortest explanation. Default. |
+| **ultra** | YAGNI extremist. Deletion before addition. Ship the one-liner and challenge the rest of the requirement in the same breath. |
+
+Example: "Add a cache for these API responses."
+- lite: "Done, cache added. FYI: `functools.lru_cache` covers this in one line if you'd rather not own a cache class."
+- full: "`@lru_cache(maxsize=1000)` on the fetch function. Skipped custom cache class, add when lru_cache measurably falls short."
+- ultra: "No cache until a profiler says so. When it does: `@lru_cache`. A hand-rolled TTL cache class is a bug farm with a hit rate."
+
+## When NOT to be lazy
+
+Never simplify away: input validation at trust boundaries, error handling
+that prevents data loss, security measures, accessibility basics, anything
+explicitly requested. User insists on the full version → build it, no
+re-arguing.
+
+Never lazy about understanding the problem. The ladder shortens the
+solution, never the reading. Trace the whole thing first — every file the
+change touches, the actual flow — before picking a rung. Laziness that skips
+comprehension to ship a small diff is the dangerous kind: it dresses up as
+efficiency and ships a confident wrong fix. Read fully, then be lazy.
+
+Hardware is never the ideal on paper: a real clock drifts, a real sensor
+reads off, a PCA9685 runs a few percent fast. Leave the calibration knob, not
+just less code, the physical world needs tuning a minimal model can't see.
+
+Lazy code without its check is unfinished. Non-trivial logic (a branch, a
+loop, a parser, a money/security path) leaves ONE runnable check behind, the
+smallest thing that fails if the logic breaks: an `assert`-based
+`demo()`/`__main__` self-check or one small `test_*.py`. No frameworks, no
+fixtures, no per-function suites unless asked. Trivial one-liners need no
+test, YAGNI applies to tests too.
+
+## Boundaries
+
+Ponytail governs what you build, not how you talk (pair with Caveman for
+terse prose). "stop ponytail" / "normal mode": revert. Level persists until
+changed or session end.
+
+The shortest path to done is the right path.
+
+exec
+/bin/zsh -lc 'cat AGENTS.md; cat docs/system/book-ui.md; cat docs/system/owner-rules.md' in [private-path]
+ succeeded in 0ms:
+# AGENTS.md — Loka v3
+
+Instructions for every coding agent and LLM working here (Codex, Claude Code, others).
+`CLAUDE.md` only points to this file; it is not separate policy.
+
+Loka v3 is an offline-first story/MUD engine: an Elixir/OTP server and a TypeScript
+kernel running on Hermes in a React Native (Expo) phone app. This repository starts at
+R2 (fresh repository foundation). The history, the R1 spike and all R1 evidence live
+in the archived repository
+[lorecrafting/lokacore-v2-legacy](https://github.com/lorecrafting/lokacore-v2-legacy)
+at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
+
+## Specification (source of truth)
+
+- [docs/system/](docs/system/README.md), [Book UI](docs/system/book-ui.md),
+  [protocol/](protocol/README.md) and conformance fixtures define the system.
+  Amend `docs/system` before code, in one PR citing the governing section or archived plan.
+  If they disagree, stop and ask ([known differences](docs/system/DIFFERENCES.md)).
+- [Owner rules in force](docs/system/owner-rules.md): a new decision adds its record to
+  [docs/decisions/](docs/decisions/README.md) and a line there.
+- [docs/archive/](docs/archive/README.md): old specs, decisions, reviews and roadmap rows.
+  History, read only when a task needs it.
+
+## Architecture decisions already made (do not reopen silently)
+
+- **Candidate C (R1), TypeScript first:** the portable semantic foundation (canonical
+  encoding and hash, numbers, RNG, IdSource, delta algebra, invariant registry) is built in
+  Elixir and TypeScript, held to the reviewed fixtures and randomized differential testing.
+  Story rules (`portable_capability`) are TypeScript-only until a server first consumes
+  them; an Elixir host adapter on one needs a declared differential (`bin/contracts.exs`).
+  [ADR-071](docs/archive/decisions/adr-071-072-proposal.md),
+  [ADR-074](docs/archive/decisions/adr-074-ts-first-proposal.md).
+- **Persistence shape (ADR-072):** the world lives in memory; rules are pure
+  (`decide(state, command) → proposal`) and never write memory or storage; the host
+  commits only the changed rows plus the receipt in one transaction, then adopts the
+  proposal into memory, then replies. Kernels use structural sharing. No periodic or
+  rest-point snapshots; a full checkpoint exists only for export/backup.
+- **Databases (ADR-006, reconfirmed 2026-09-24):** PostgreSQL online, SQLite offline on
+  the phone. Server code uses Ecto with Ecto-managed migrations.
+- **Mechanics vs numbers ([owner decision](docs/decisions/owner-decision-world-parameters-2026-10-02.md)):**
+  the engine owns mechanics; cartridges own numbers and world settings (costs, durations,
+  rates, odds, maximums, default stats, calendar lengths, thresholds). Never add a world value
+  as an engine or presenter literal; [World parameters](docs/world-parameters.md) lists the
+  ones still to move. Safety budgets and protocol constants stay in the engine.
+- **Distribution (PREP-03):** the first release bundles its chapter in the app;
+  downloadable story content waits for a pre-launch store-policy review.
+
+## Hard-won lessons
+
+New lessons go in the file for their area; a lesson enters AGENTS.md only if it applies to all work.
+- Before touching `mobile/` or running on a phone, read [mobile lessons](docs/lessons/mobile.md).
+- Before touching SQLite or persistence, read [storage lessons](docs/lessons/storage.md).
+- Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
+- Before touching `protocol/`, its fixtures or canonical encoding, read [contract lessons](docs/lessons/contracts.md).
+
+**All work**
+- Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
+  certificate or provisioning identifiers, home/scratch/worktree paths or
+  app-container UUIDs. Every capture script has a `redact()` covering them.
+- Nothing invented; unknowns stay null.
+- zsh does not word-split `$VAR`: wrap repeated commands in `function name { ...; }`.
+
+**Performance**
+- Whole-state copying kills phones. On a Pixel 3a (Hermes), copying a 190 KB state per
+  step took 216 ms; structural sharing took under 1 ms. Never deep-clone or re-encode
+  the whole state per action. BEAM maps share structure; plain JS objects do not.
+- Per-action SQLite commits are cheap when they write only changed rows (about 190 bytes,
+  6 to 11 ms p99 on the Pixel 3a; 1 to 3 ms on an M1 even for whole-state writes).
+  The disk is not the bottleneck; work per action is.
+- A full canonical checkpoint of a 730 KB state still took about 490 ms on the Pixel 3a
+  (not split into write/read/parse/encode). Keep it off the player-action path and
+  measure it split.
+- Declare any performance variant before tuning it, and keep failing results.
+
+## Conventions
+
+- Elixir: [docs/ELIXIR-CONVENTIONS.md](docs/ELIXIR-CONVENTIONS.md), built on Phoenix's
+  vendored usage rules (`docs/conventions/phoenix/`, refreshed by
+  `elixir bin/sync_phoenix_rules.exs`). Upstream rules win unless that page overrides them.
+- Phoenix is used only at the edges: Realm transport, sessions, PubSub and the admin and
+  builder web apps (spec documents 01 and 07). Domain, runtime, content and store code never
+  depend on it.
+
+## Simplicity (every change, every agent)
+
+Write the least code that correctly does the job. Before writing, stop at the first rung
+that holds: does it need to exist at all; is it already in this repo; does the standard
+library or platform do it; does an installed dependency do it; can it be one line. No
+abstraction with one implementation, no config nobody sets, no scaffolding for later.
+Never simplify away validation at trust boundaries, data-loss handling, security or
+anything the spec requires. Mark a deliberate shortcut with a `ponytail:` comment naming
+its limit. Before asking for review, audit the diff for over-engineering (Claude Code:
+`/ponytail-review`; other agents: the same questions by hand) and include the result in
+the PR. Pass this section into subagent prompts.
+
+## Writing tests (every change, every agent)
+
+A test exists to catch a specific break. Adapted from
+[obra/superpowers `writing-good-tests.md`](https://github.com/obra/superpowers/blob/main/skills/test-driven-development/writing-good-tests.md) (MIT).
+- **Name the break.** Before the body, name the realistic bug that makes it fail. If the
+  only thing that fails it is a deliberate decision (a constant, a message's wording, a
+  registry's size), it is a change detector: test the behavior that depends on it instead.
+- **Expected values never come from the code under test.** Use the frozen conformance
+  fixtures, hand-checked literals, or table rows with literal answers. Never compute the
+  answer with the implementation, its helpers, or the other kernel (where both kernels
+  implement it, they are compared to the fixtures, then to each other, never only to each other).
+- **Behavior, not text.** Run scripts and checks on controlled input and assert output or
+  exit status; do not grep source.
+- **Test our contract, not the library.** No tests for trivial structs, getters or
+  forwarding; no tests of Elixir, Node or `boundary` mechanics. A test never checks logic it
+  defines itself.
+- **Real over mocks.** Mock only what is slow or external (the network, a device); storage
+  faults are real (see [storage lessons](docs/lessons/storage.md));
+  never assert on the mock itself. Production modules carry no test-only functions.
+  Inject storage faults by operation (a table read, the n-th COMMIT), never by SQL text.
+- **Nothing extra.** No fixture, helper or validation the test does not need; no test
+  written for coverage alone.
+- **One test per break per layer.** Apply a new test's mutant to the old suite first;
+  if a focused test in the same layer (one kernel's unit files, one authority file)
+  fails, add nothing. Broad runs (simulator, transcripts, traces) do not count: they do not
+  name it.
+- **Mutation check before handoff.** For each realistic mutation (wrong constant or
+  branch, missing state change, empty return, missing validation of empty/zero/malformed
+  input) at least one test fails; actually break the code once and watch it fail.
+  A test passing with its header's break is wrong: fix or delete it.
+  Mix compares mtimes to the second, so run Elixir mutants with `mix test --force`.
+
+## Searching code (use precise tools first)
+
+- Elixir structure (callers, dependencies, cycles): `mix xref callers <Module>`,
+  `mix xref graph --format cycles`. The compiler resolves aliases, so these are exact.
+- Syntax patterns in Elixir or TypeScript: `ast-grep --lang elixir -p '<pattern>' --json`
+  (`--lang typescript` for TS). `ast-grep outline` does not parse Elixir.
+- Plain text search only for strings, docs and config.
+
+## Checks
+
+CI runs them all, each with a planted case that must fail; the list is in
+[docs/CHECKS.md](docs/CHECKS.md). Run everything locally: `bin/check_all.sh` (what pre-push runs).
+
+## Working rules
+
+- Every slice follows [the delivery workflow](docs/WORKFLOW.md): PM plans and briefs, a
+  developer builds and self-reviews, a fresh reviewer reviews, the same developer fixes.
+- Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
+- After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
+- Merge record-bearing PRs with merge commits, never squash.
+- Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored
+  none of the work ([owner ruling](docs/system/owner-rules.md#process));
+  who reviews what: [the workflow](docs/WORKFLOW.md).
+- Each fact lives in one place; other docs link to it rather than restate it.
+- Readiness probes that exit 1 by design are expected; don't "fix" them.
+- The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
+  and UI work on the owner's M1.
+# Book UI
+
+Canonical presentation behavior for rebuilding the phone book. The host boundary lives in
+[architecture](architecture.md#book-presenter); action admission, freshness and state come
+from [GameView](protocol.md#gameview). This specification changes presentation, not rules,
+authority, content, receipts or save formats.
+
+Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-2026-10-03.md),
+[room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md), and
+[dialogue, Contents and pickup polish](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md).
+Original feedback lives in those records; independent reviews and retained interaction proof
+are indexed in [reviews](../reviews/README.md). This round follows
+[PR #143](https://github.com/lorecrafting/lokacore/pull/143); authorization does not claim its
+new implementation or Gate C1 acceptance. Touch acceptance follows
+[C1 slice 12](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
+
+## World and status entry
+
+World is one current-room page. Its centered title remains fixed above the scrolling authored
+description, projected entities, offered place actions and event log. Tapping that title invokes
+the current offered Look with its drawn freshness token; it invents no refresh command. The current
+`ashmere_sampler@0.0.2` projects authentic Look under the
+[sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
+Cartridges that do not offer Look retain a fixed text title.
+Only the body scrolls, so description and entities may leave view while the title stays visible.
+Current entities are projected NPCs and items; tapping either opens its full detail. Standalone exit directions, adjacent-sight listings and redundant navigation/
+Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
+explicit per-room clearing direction, the World event log scopes
+to the actual room: after a confirmed accepted action changes place, clear the old-room log
+before adding genuine new movement/quest/authored consequences. Attempts, pending/refused/stale
+results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
+save status/error UI remains accurate; NPC histories stay independently bounded. Map
+retains movement, adjacent sight and legal door actions. The World minimap/joystick sits outside
+the scrolling body, with status beneath it, inside the existing safe area.
+
+The enabled status/resources tap opens Contents. It lists exactly **Character**, **Equipment &
+Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
+row. Character shows existing projected resources and position, without unrelated index links.
+Equipment & Inventory separates held items from worn slots; Journal uses projected quest text;
+Settings retains Start over and its confirmation/error handling. Section returns say
+**Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
+
+Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
+palette without presenter thresholds. Status shows the hp band phrase only on hp, colors every
+projected resource, and shows the game clock as its earthly branch under the
+[untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
+
+Only World's current-position label is a distinct position tap target. It opens only the
+currently offered stand/sit/rest/sleep actions, including Stand when nonstanding. Position
+in all details is informational. The position target does not open Contents, and modal scenes
+expose no position shortcut. Movement admission remains kernel-owned.
+
+## Minimap, Map and presentation controls
+
+The World endpaper minimap sits between hairlines: a center dot, existing compass paths/rings,
+barred-exit ticks and offered up/down stair nodes. Holding enlarges it; dragging highlights an
+existing direction and releasing attempts that exit. Returning to center cancels; a short tap
+opens Map; a terminated gesture walks nowhere. Release uses the action/freshness captured at
+drag start, never a new target after redraw. An unavailable exit announces its projected reason
+and logs the refusal without movement. Direction/reason appears opposite the finger. The existing
+tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
+memory fallback. The accessible Map activation opens the section; Go-direction actions use the
+same offered exits. Gesture/drawing details remain in
+[joystick](../../mobile/app/book/joystick.ts) and [footer](../../mobile/app/book/Footer.tsx).
+
+Map is a scrolling current-room projection, distinct from the enlarged joystick. It shows
+exits and unavailable reasons, adjacent authored sight/entity names, door names/states and
+currently offered door/place actions. It invents no discovered multiroom coordinate map.
+
+Full detail openings turn the arriving page forward; local World return turns backward. Ordinary
+NPC results are the stable-route exception below. The existing paper palette, bundled IM Fell
+English/EB Garamond fonts, explicit button labels/roles, section headings and minimum 44px button
+height remain. Controls and status stay outside the body scroll, respecting the safe area.
+Implementation details live in [book](../../mobile/app/book/Book.tsx),
+[pages](../../mobile/app/book/pages.tsx) and [paper](../../mobile/app/book/paper.ts).
+
+## NPC dialogue and action details
+
+Tapping an NPC opens full details using only its projected name and actions. Meaningful authored
+prompts/results append chronologically to a bounded presenter-session dialogue/action history.
+The log alone scrolls above bottom-anchored currently offered choices/actions. Ordinary same-room
+NPC actions retain the route, mounted scroll area and animation token; they do not flip the book
+or reset scrolling for each result. There is no overlaid room panel or saved transcript.
+
+**Leave** sits in that action area and clears the stack to World without a game command or
+movement. It preserves a pending saved choice. It replaces the NPC/conversation Back bar;
+section pages retain Back to World. The actual offered **Close** dialogue action remains distinct
+from Leave and follows its engine semantics. Routine `choice_closed` output adds no generic
+World exit echo; meaningful authored/quest consequences and genuine rejection/faults remain.
+
+After Leave, a projected speaker can be tapped again. If the pending choice's actual speaker
+is absent, a conversation entry opens its projected choices/Close without invented NPC data.
+Live NPC results stay in their original detail, even when an unconfirmed save is retried from
+another page. Ordinary renders or receipt retries do not duplicate committed history. Available
+choices/actions use the freshness token captured when their buttons were drawn.
+
+## Item details and Take/Drop
+
+Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
+taps resolve the same detail; item pages show the projected name/barrier state, directly nested
+reachable contents and current legal item/container/equipment actions, plus local **Leave** back to World. The available brass lantern therefore offers Take
+and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
+pickup event using the original projected item name: **You pick up a brass lantern.** for this
+sampler. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
+returns to World with the original projected name: **You drop a brass lantern.** Held items
+open their same item detail from Equipment & Inventory, with existing offered Drop/other actions
+and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
+These replace generic Taken/Dropped fallbacks; authored narration takes precedence and
+meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
+Retry retains original action/target context and appends each confirmed Take/Drop event only once.
+
+Successful Take/Drop are the specific exceptions to item-page retention. Other same-room item actions
+retain the page while that item remains projected; leaving the room or losing the item closes
+obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
+
+## Chapters, scenes and recovery
+
+A declared chapter opens a title page on launch and on index change, once per presenter session.
+A modal scene takes precedence: only its persisted current line and offered Continue appear;
+ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
+title reached with a scene waits until that scene ends. Chapter Continue dismisses presentation
+only. Same-room ordinary updates do not repeat or drop the chapter title.
+
+The host-neutral retained narration lacks action/target context. As the bounded PM recovery
+choice from the previous polish, unclassified restored consequences stay in World rather than
+being guessed or lost. A restored pending choice uses its actual speaker detail. Current room
+title/description TextKeys already rendered are omitted structurally. Choices, scenes, receipts,
+retry and relaunch persistence remain owned by the existing session/save boundary; NPC history
+is bounded in this presenter session and adds no persistence schema.
+
+Pending save status says save not confirmed; no unconfirmed result is presented as success. A later
+invocation retries the original attempt before acting on its new button, preserving original
+NPC/item context. Fault details remain visible with Start over recovery. Settings Start over
+requires destructive confirmation; failure retains the existing game/retry, while successful
+replacement remounts the book. Save-open errors expose only existing permitted recovery. Those
+boundaries live in [session](../../mobile/packages/game-view/session.ts),
+[app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
+
+## Future boundaries
+
+Other-player presence requires a real projection and UI scope; no fabricated player rows.
+Attack/skill controls wait until GameView offers them; there are no placeholders or invented
+character data. Live world-clock, reading-time safety and interruption integration remains
+future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
+Give needs both item and recipient targets. The current touch item-action projection supplies
+only its item target, so it must not offer or dispatch that incomplete Give. Complete offered
+Give invocations remain valid; engine mechanics are unchanged. Touch recipient selection is an
+explicit carry: implement it when a touch flow can supply a recipient from actual projected
+valid targets, with its own approved scope. The inspected unsupported-capability rejection was
+one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
+rather than hiding errors or clearing same-room history. Carries remain in the [roadmap](../ROADMAP.md). Further owner playtest polish precedes mechanics.
+# Owner rules in force
+
+One line per active rule, with its record. Superseded rules are not listed; their records stay in
+`docs/decisions/` or `docs/archive/decisions/` ([index](../decisions/README.md)). The architecture decisions every agent must
+know (candidate C, TypeScript-first rules, the persistence shape, PostgreSQL online and SQLite
+offline, the bundled first release) are in [AGENTS.md](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently)
+and not repeated here.
+
+## Product and scope
+
+- The current unreleased sampler may replace its previous development runtime release; the bounded `0.0.2` Look repair independently rederives its known answer while other fixtures stay frozen ([record](../decisions/owner-decision-sampler-development-look-2026-10-03.md)).
+- NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
+- C1 room output stays focused; NPCs open full details, section detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
+
+- The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); substantive story prose remains subject to batch approval.
+- Sampler identity and complete prose follow the [owner delegation and PM selections](../decisions/owner-decision-sampler-batch-2026-10-03.md).
+
+- World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
+- Resume the approved C1 touch presenter alongside useful parallel mechanics planning and sampler preparation
+  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md)).
+- The first release bundles its chapter; downloadable story content waits for the pre-launch
+  store-policy review ([PREP-03](../archive/decisions/owner-decision-prep-03-2026-09-24.md)).
+- One save per story, no manual bookmarks; a new game replaces the save after the player confirms
+  ([record](../archive/decisions/owner-decision-one-save-2026-09-30.md)).
+- One phone, the owner's iPhone 11, until the first free product gate; Android evidence is deferred
+  to that gate, not dropped ([record](../archive/decisions/owner-decision-android-descope-2026-09-30.md)).
+- A playtest-and-tune stage after R6P, ended by the owner: number and UI PRs get a short review;
+  changed or new mechanics are normal slices; until the first release to real players, formats and
+  development cartridges may change and re-derived known answers are listed in the PR
+  ([record](../archive/decisions/owner-decision-playtest-2026-09-25.md)).
+- The Lantern proof has no wait and no schedule; the game clock stays and the status line shows the
+  double hour's earthly branch; its stats start at hp 10, ma 100, mv 100 (in its `resources.json`
+  only); the later time model targets about 72 real seconds per game hour
+  ([record](../decisions/owner-decision-untimed-lantern-2026-10-02.md)). Lantern content rulings:
+  a locked west gate keyed by the lantern; Bram's talk policy is quest active
+  ([PM record](../archive/decisions/pm-decision-lantern-proof-content-2026-10-01.md)).
+- The story-progress concept is a "story point" (event `story_point_reached`); project
+  milestones keep their name ([record](../archive/decisions/owner-decision-story-point-2026-10-01.md)).
+- `knock`, map discovery and `where` are chapter-one work, not R5
+  ([record](../archive/decisions/owner-decision-r5-deferred-mechanics-2026-09-28.md)); the R5 deferrals
+  land in R7/R8 for chapter one, after R6P and before R10
+  ([record](../archive/decisions/owner-decision-early-r7r8-plan-2026-10-01.md)).
+- `scene@1`'s modal text subset is now needed by the approved chapter-one
+  [plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md), implemented as
+  [scene facts](mechanics.md#scene1-rulesscenets); the durable choice remains dialogue's
+  continuation row ([earlier record](../archive/decisions/owner-decision-split-d-2026-10-01.md)).
+- Puppeting comes later; rules read the actor from the command, never the player
+  ([record](../archive/decisions/owner-decision-puppeting-2026-09-25.md)). Player-written descriptions
+  come with the online work ([record](../archive/decisions/owner-decisions-r5-s4-2026-09-25.md)).
+- Bram's quest starts from a dialogue choice, not a place action (the Lantern's `bram_offer`
+  dialogue); one-off quest triggers may come later ([record](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
+- The owner is the human-proof tester for now ([record](../archive/decisions/owner-decision-r6p-plan-2026-10-01.md)).
+
+## Architecture and engine
+
+- The engine owns mechanics; cartridges own numbers and world settings; no game-world value is a
+  literal in the engine or a presenter. The inventory of values still to move:
+  [world-parameters.md](../world-parameters.md)
+  ([record](../decisions/owner-decision-world-parameters-2026-10-02.md)).
+- Engine output is structured; each presenter owns its layout and wording; one `GameSession`
+  boundary serves the TypeScript authority now and the Elixir Realm later; refusal words key on
+  registered error codes ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
+- Default pools hp, ma, mv (DikuMUD-derived starts and gains), 1 mv per room by default (a
+  cartridge's `world.movement.cost` overrides it; terrain costs later), regeneration per game
+  hour derived from the clock; every v2 cartridge gets the pools
+  ([record](../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
+- Condition bands: computed by the kernel from 04 §15's table, the engine default, which a
+  cartridge may replace per pool or for all pools (bands with a tone; superseded "never a
+  cartridge threshold" by the [chapter-one plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md),
+  triage 21); the UI shows the phrase on hp and colours every resource; LegendMUD credited,
+  never named in the UI ([record](../archive/decisions/owner-decision-condition-bands-2026-10-01.md)).
+- Composability and emergence principles; every mechanic slice states what it composes with
+  ([record](../archive/decisions/owner-decision-emergence-2026-09-25.md)).
+- Ids: IdSource UUIDv8 and the frozen numeric profile v1; CommandId reuses the recipe and
+  authority placement never enters it; lowercase UUID ids, snake_case segments, `ErrorCode` enum
+  plus registry ([record](../archive/decisions/owner-decisions-r3-2026-09-24.md),
+  [lanes](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)).
+- Ambiguous targets list by id; dotted fact names map to underscores with a collision check
+  ([record](../archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md)). Kernel API range as
+  `{at_least, below}`; no count limits, a byte cap at the download boundary
+  ([record](../archive/decisions/owner-decisions-r3-pr4a-2026-09-24.md)). `policy@1`,
+  `target_resolution@1` and `fact@1` are `portable_capability`; Elixir domain types arrive with
+  their first consumer ([record](../archive/decisions/owner-decisions-r3-gate-2026-09-24.md)).
+- Cartridge source is JSON (YAML later); artifacts are capped at 4 MiB
+  ([record](../archive/decisions/owner-decisions-r4-2026-09-25.md)); short references in source
+  ([record](../archive/decisions/owner-decision-short-refs-2026-09-25.md)).
+- Entity text has four tiers (keywords, short, room line, examine); the host synthesizes
+  `fact_changed` at each assign's causal position; touch links are inline markup in catalog
+  strings ([record](../archive/decisions/owner-decisions-r5-s4-2026-09-25.md)).
+- Rule modules are locked down by lint; `loka play` is the agent-drivable terminal; the feature
+  map is generated and drift-checked ([record](../archive/decisions/owner-decision-r5-setup-2026-09-25.md));
+  failed lookups are observed as `target.unresolved` for the Lab
+  ([record](../archive/decisions/owner-decision-lab-failed-lookups-2026-09-25.md)).
+- Observability: one record format, stores joined by ids, a registered event-name list (ADR-075);
+  `kernel_version` is `<KERNEL_ID>@<commit>`, a dirty build marked and never a repro key; the PM
+  keeps `docs/dev-evidence.jsonl` ([record](../archive/decisions/owner-decisions-adr-075-2026-09-25.md)).
+- Verification harness: invariants as registered data, deterministic simulation every CI run,
+  fault simulation on real SQLite; owner attention goes to invariant lists and harness changes
+  ([record](../archive/decisions/owner-decision-roadmap-2026-09-24.md), [ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
+- The due-job drain landed with the first real job; `real_elapsed` time is carried until a
+  cartridge declares it ([record](../archive/decisions/owner-decision-s4-scope-2026-09-30.md)).
+- Saves: the app carries bundled releases newest first and reopens a save on its pin; a missing
+  pin or unknown format is a typed refusal; every future save format keeps `save.format` readable
+  by older apps; release deletion, migration staging and the recovery copy are carried
+  ([record](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md)).
+- The book UI's departures from 00 §4.10 (map joystick, full pages, status line) are documented
+  departures, no spec amendment ([record](../archive/decisions/owner-decision-sm2-scope-2026-10-01.md)).
+- Narration binds its participants at commit; no `narration.emit`, no acknowledgement
+  ([record](../archive/decisions/owner-decision-narrow-n-2026-10-01.md)).
+- Open, not decided: the ADR-074 route at its trigger; the owner leans to a shared foundation with
+  separate Realm rules under new keys ([leaning](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md)).
+
+## Process
+
+- PM selects fresh independent Codex primary plus separate Sol review for the resumed C1 touch slice under the owner's delegated workflow while Opus quota is unavailable; required Simulator interaction evidence remains
+  ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md#pm-execution-choices-under-existing-delegation)).
+
+- For remaining C1 mechanics (journal, chapters, scenes-modal, sampler), the PM selects a fresh
+  independent Codex primary plus separate Sol while Claude quota prevents Opus, under the
+  owner's delegated workflow; default policy otherwise remains in force
+  ([record](../decisions/owner-decision-c1-mechanics-continuation-2026-10-03.md)).
+
+The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
+
+- Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
+- A fresh agent of any vendor that authored none of the work is an independent reviewer
+  ([record](../archive/decisions/owner-decision-reviewers-2026-09-24.md)).
+- For c1-position PR #137 only, a fresh independent Codex agent replaces the primary Opus
+  reviewer; all other review and merge requirements remain in force
+  ([record](../decisions/owner-decision-c1-position-codex-review-2026-10-03.md)).
+- Auto-merge: APPROVE or APPROVE WITH NOTES with nothing open and every CI job green
+  ([record](../archive/decisions/owner-decisions-r3-lanes-2026-09-24.md)); the PM runs a slice to its
+  merge and escalates hard calls up a ladder before the owner
+  ([record](../archive/decisions/owner-decision-autonomy-2026-09-30.md)).
+- Gates are slim: the owner's play when there is something touchable, one codex Astra audit of the
+  riskiest code, and a short checklist with one reviewer; no Opus-plus-Astra double review of a
+  docs-only gate PR ([record](../decisions/owner-decision-slim-gates-2026-10-02.md)).
+- Reviews: codex Astra only on the gate audit and `proposal.ts` changes; Sol on other core and
+  contract first reviews and every fix re-check; Fable only as codex's stand-in (and, by exception,
+  the docs compaction); Opus drafts briefs; the PM keeps one persistent worktree
+  ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md),
+  [compaction](../decisions/owner-decision-docs-compaction-2026-10-02.md)). Codex is an everyday
+  second opinion beside our own review, never instead of it
+  ([record](../archive/decisions/owner-decisions-review-flow-2026-09-30.md)).
+- Developers default to Sonnet; Opus for kernel and contract-freeze slices
+  ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
+- The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
+  ([record](../archive/decisions/owner-decision-ts-test-types-2026-09-25.md)).
+- Native mobile builds run only when native inputs change; the merge rule is every CI job that ran
+  is green ([record](../archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
+- UI-slice reviews drive the app with agent-device on the iOS Simulator
+  ([record](../archive/decisions/owner-decision-agent-device-2026-10-01.md)).
+- Per-slice device rows run on the iOS Simulator; the iPhone 11 only at gates, before a release, and
+  for native, performance or touch changes ([record](../decisions/owner-decision-simulator-device-rows-2026-10-02.md)).
+- Source of truth: `docs/system/` plus `protocol/` and the conformance fixtures; a change amends
+  `docs/system` first, then the code. `docs/archive/` is history, read when a task needs it; new
+  decision records go in `docs/decisions/` and add a line here
+  ([record](../decisions/owner-decision-docs-compaction-2026-10-02.md#decisions-for-the-move-2026-10-02)).
+
+exec
+/bin/zsh -lc 'git rev-parse HEAD && git status --short && git diff --stat eb81d98825610398b08d6bab0e6ffe16822a7245 665b3ff6c0fbed1109a8aa13576bad710a623d11' in [private-path]
+ succeeded in 0ms:
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+git: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+git: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+665b3ff6c0fbed1109a8aa13576bad710a623d11
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+git: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+git: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+git: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+git: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+git: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+ cartridges/ashmere_sampler/cartridge.json          |   5 +-
+ docs/decisions/README.md                           |   2 +
+ ...decision-sampler-development-look-2026-10-03.md |  40 ++++++
+ docs/evidence/c1-sampler/README.md                 |  40 +++++-
+ docs/evidence/c1-sampler/SHA256SUMS                |   8 ++
+ docs/evidence/c1-sampler/SHA256SUMS.verify         |   8 ++
+ docs/evidence/c1-sampler/look-amendment.json       |  27 ++++
+ docs/evidence/c1-sampler/look-compiler.log         |  28 ++++
+ docs/evidence/c1-sampler/look-faults.log           |  27 ++++
+ docs/evidence/c1-sampler/look-focused.log          |  11 ++
+ .../c1-sampler/look-mutant-missing-cap.log         |  31 +++++
+ docs/evidence/c1-sampler/look-oracle.log           |  19 +++
+ docs/evidence/c1-sampler/look-restored.log         |  11 ++
+ docs/evidence/c1-sampler/look-sim.log              |  26 ++++
+ docs/system/book-ui.md                             |   5 +-
+ docs/system/cartridge.md                           |  12 +-
+ docs/system/owner-rules.md                         |   1 +
+ kernel/ts/test/sim.test.ts                         |   2 +-
+ kernel/ts/test/sim.ts                              |   2 +-
+ kernel/ts/test/sim_seeds.json                      |   2 +-
+ mobile/app/book/polish.test.ts                     |  14 +-
+ mobile/app/sampler.test.ts                         |   2 +-
+ mobile/authority/local-story/sampler.test.ts       |  10 +-
+ protocol/fixtures/cartridge_sampler_hash.json      | 150 +++++++++++----------
+ test/loka/cartridge_sampler_hash.py                |   4 +-
+ 25 files changed, 392 insertions(+), 95 deletions(-)
+
+codex
+HEAD matches, and the worktree is clean. I’m applying Ponytail and Ponytail Review for minimality. The baseline-to-HEAD diff includes the separately reviewed sampler update; I’ll keep the substantive review on F3 and check the sampler only for identity with PR145.
+exec
+/bin/zsh -lc "nl -ba docs/system/book-ui.md | sed -n '1,100p'; cat docs/decisions/owner-decision-sampler-development-look-2026-10-03.md; cat docs/decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md" in [private-path]
+ succeeded in 0ms:
+     1	# Book UI
+     2	
+     3	Canonical presentation behavior for rebuilding the phone book. The host boundary lives in
+     4	[architecture](architecture.md#book-presenter); action admission, freshness and state come
+     5	from [GameView](protocol.md#gameview). This specification changes presentation, not rules,
+     6	authority, content, receipts or save formats.
+     7	
+     8	Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-2026-10-03.md),
+     9	[room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md), and
+    10	[dialogue, Contents and pickup polish](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md).
+    11	Original feedback lives in those records; independent reviews and retained interaction proof
+    12	are indexed in [reviews](../reviews/README.md). This round follows
+    13	[PR #143](https://github.com/lorecrafting/lokacore/pull/143); authorization does not claim its
+    14	new implementation or Gate C1 acceptance. Touch acceptance follows
+    15	[C1 slice 12](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
+    16	
+    17	## World and status entry
+    18	
+    19	World is one current-room page. Its centered title remains fixed above the scrolling authored
+    20	description, projected entities, offered place actions and event log. Tapping that title invokes
+    21	the current offered Look with its drawn freshness token; it invents no refresh command. The current
+    22	`ashmere_sampler@0.0.2` projects authentic Look under the
+    23	[sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
+    24	Cartridges that do not offer Look retain a fixed text title.
+    25	Only the body scrolls, so description and entities may leave view while the title stays visible.
+    26	Current entities are projected NPCs and items; tapping either opens its full detail. Standalone exit directions, adjacent-sight listings and redundant navigation/
+    27	Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
+    28	explicit per-room clearing direction, the World event log scopes
+    29	to the actual room: after a confirmed accepted action changes place, clear the old-room log
+    30	before adding genuine new movement/quest/authored consequences. Attempts, pending/refused/stale
+    31	results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
+    32	save status/error UI remains accurate; NPC histories stay independently bounded. Map
+    33	retains movement, adjacent sight and legal door actions. The World minimap/joystick sits outside
+    34	the scrolling body, with status beneath it, inside the existing safe area.
+    35	
+    36	The enabled status/resources tap opens Contents. It lists exactly **Character**, **Equipment &
+    37	Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
+    38	row. Character shows existing projected resources and position, without unrelated index links.
+    39	Equipment & Inventory separates held items from worn slots; Journal uses projected quest text;
+    40	Settings retains Start over and its confirmation/error handling. Section returns say
+    41	**Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
+    42	
+    43	Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
+    44	palette without presenter thresholds. Status shows the hp band phrase only on hp, colors every
+    45	projected resource, and shows the game clock as its earthly branch under the
+    46	[untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
+    47	
+    48	Only World's current-position label is a distinct position tap target. It opens only the
+    49	currently offered stand/sit/rest/sleep actions, including Stand when nonstanding. Position
+    50	in all details is informational. The position target does not open Contents, and modal scenes
+    51	expose no position shortcut. Movement admission remains kernel-owned.
+    52	
+    53	## Minimap, Map and presentation controls
+    54	
+    55	The World endpaper minimap sits between hairlines: a center dot, existing compass paths/rings,
+    56	barred-exit ticks and offered up/down stair nodes. Holding enlarges it; dragging highlights an
+    57	existing direction and releasing attempts that exit. Returning to center cancels; a short tap
+    58	opens Map; a terminated gesture walks nowhere. Release uses the action/freshness captured at
+    59	drag start, never a new target after redraw. An unavailable exit announces its projected reason
+    60	and logs the refusal without movement. Direction/reason appears opposite the finger. The existing
+    61	tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
+    62	memory fallback. The accessible Map activation opens the section; Go-direction actions use the
+    63	same offered exits. Gesture/drawing details remain in
+    64	[joystick](../../mobile/app/book/joystick.ts) and [footer](../../mobile/app/book/Footer.tsx).
+    65	
+    66	Map is a scrolling current-room projection, distinct from the enlarged joystick. It shows
+    67	exits and unavailable reasons, adjacent authored sight/entity names, door names/states and
+    68	currently offered door/place actions. It invents no discovered multiroom coordinate map.
+    69	
+    70	Full detail openings turn the arriving page forward; local World return turns backward. Ordinary
+    71	NPC results are the stable-route exception below. The existing paper palette, bundled IM Fell
+    72	English/EB Garamond fonts, explicit button labels/roles, section headings and minimum 44px button
+    73	height remain. Controls and status stay outside the body scroll, respecting the safe area.
+    74	Implementation details live in [book](../../mobile/app/book/Book.tsx),
+    75	[pages](../../mobile/app/book/pages.tsx) and [paper](../../mobile/app/book/paper.ts).
+    76	
+    77	## NPC dialogue and action details
+    78	
+    79	Tapping an NPC opens full details using only its projected name and actions. Meaningful authored
+    80	prompts/results append chronologically to a bounded presenter-session dialogue/action history.
+    81	The log alone scrolls above bottom-anchored currently offered choices/actions. Ordinary same-room
+    82	NPC actions retain the route, mounted scroll area and animation token; they do not flip the book
+    83	or reset scrolling for each result. There is no overlaid room panel or saved transcript.
+    84	
+    85	**Leave** sits in that action area and clears the stack to World without a game command or
+    86	movement. It preserves a pending saved choice. It replaces the NPC/conversation Back bar;
+    87	section pages retain Back to World. The actual offered **Close** dialogue action remains distinct
+    88	from Leave and follows its engine semantics. Routine `choice_closed` output adds no generic
+    89	World exit echo; meaningful authored/quest consequences and genuine rejection/faults remain.
+    90	
+    91	After Leave, a projected speaker can be tapped again. If the pending choice's actual speaker
+    92	is absent, a conversation entry opens its projected choices/Close without invented NPC data.
+    93	Live NPC results stay in their original detail, even when an unconfirmed save is retried from
+    94	another page. Ordinary renders or receipt retries do not duplicate committed history. Available
+    95	choices/actions use the freshness token captured when their buttons were drawn.
+    96	
+    97	## Item details and Take/Drop
+    98	
+    99	Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
+   100	taps resolve the same detail; item pages show the projected name/barrier state, directly nested
+# Owner development-save direction and sampler Look repair — 2026-10-03
+
+Owner direction, verbatim:
+
+> no need to save old save versions as i've never went back to play older saves yet because we are going forward with new builds at a very high velocity as we are in the building phase, so no need to save those things
+
+This supersedes the proposed retention of the previous sampler runtime release. The
+[pre-player-release policy](../archive/decisions/owner-decision-playtest-2026-09-25.md)
+already permits development cartridges to change with independently rederived known
+answers listed in the PR. This implementation applies that exception only to the
+current unreleased sampler; it does not thaw other protocol fixtures or change save
+format compatibility.
+
+## PM implementation adoption
+
+Inspection found that `ashmere_sampler@0.0.1` omits `description_variant@1`, the
+already installed capability owning authentic engine Look. Its GameView therefore
+correctly omits Look; no-target Look is rejected before a command exists. This is a
+content declaration gap, not an engine or presenter defect.
+
+- Replace the current development sampler in its existing source folder and known-answer
+  fixture with `ashmere_sampler@0.0.2`, adding `description_variant: 1`.
+- Independently amend the Python oracle's literal version and capability. Permitted
+  artifact changes are the version, sampler reference/key versions and manifest/lock
+  capability declarations. All 57 adopted story strings, eleven reused UI labels,
+  numbers, geometry and authored rules remain unchanged. All nineteen older cartridge
+  sources, fixtures and trace answers remain frozen.
+- The existing App binding and save filename stay. Carry no duplicate source or old
+  sampler runtime artifact and add no release catalog or session adapter. An existing
+  old sampler pin receives the existing typed `pinned_release_missing` refusal and
+  explicit Start over offer ([save contract](../system/save.md#opening-a-story)); no
+  automatic deletion or migration is introduced.
+- Preserve the old artifact, oracle, reviews and native proof in Git/history. They do
+  not prove this new hash. Fresh source review and combined Release Simulator proof
+  must establish the new artifact's authentic Look behavior.
+- The simulation pool and seed inputs stay unchanged. Generator 14 records that the
+  sampler's offered actions change; no seed remap is adopted.
+
+These are PM execution choices under the owner's development direction, not additional
+owner quotations. The old compatibility plan was never implemented or adopted.
+# Owner playtest direction: scrolling NPC dialogue and Contents — 2026-10-03
+
+Owner wording, verbatim:
+
+> Also i need some feedback about the character sheet having the other optiosn like journal, carrying and settings below everyting, looks kinda weird.  What would be a better 'menu system? just talking for now no implementation.  Should have these sections.  Character, Equipment & Inventory, Map, Journal, Settings.  For now.  ANything else you can think of?
+
+> no i want the entrypoint to be clicking on the status.  no "menu" button
+
+> We wait to queue that up for the next polish round
+
+Latest owner direction, verbatim; it authorizes this round now:
+
+> Okay when talking to bram, the expected behaviour is to land inside of the npc detail view and being able to talk to him, but everytime we take an action in brams detail view it flips the page and changes the action, it should be a dialogue/action log that scrolls, inside of the npc detail view, please put that in polish notes for next round.  Actually work on that now, and the contents thing now, and then i'll see the next iteration
+
+Additional owner wording, verbatim:
+
+> also the dialogue choice actions should be anchored to the bottom of the scrolling event/dialogue log, and instead of the bottombar back to game world for npc detail have a 'leave' option.  In the future there will be other options like attack, apply skill etc or whatever
+
+Further owner wording, verbatim:
+
+> Also when i click into the brass lantern it shows an item detail view.  It should have two options "take" and "leave" i see no "leave".  And when i press "take" it should go back to the game world and spit out in the room event log "You pick up a brass lantern".  So picking up items should echo in the room event log. Is tthat an engine or mechanic thing?
+
+Latest additional owner wording, verbatim:
+
+> And now when i walk around it has "You can't do that: unsupported capability:" in every room i traverse to.  That should not show, what is that bug?
+
+> The room shoudln't echo "You leave the question for now." So when leaving dialogue, no echo in the room, unless quest things are triggered
+
+> So all these notes of ui polish should we gather it somewhere? Because there are sort of like UI specs, in case we want to rebuild it some other time at least we have the specs
+
+Owner navigation requirement, verbatim:
+
+> Also how will LLMS know about where the UI spec is? Can you make sure its traversible? Root is agents.md right? And there should be an index somewhere? idk if its in agents.md or somewhere else
+
+Owner room-log confirmation, verbatim:
+
+> yes each rooms even tlog should clear when going to a new room
+
+Owner inventory-action placement, verbatim:
+
+> i like your recommendation of exposing in its item detail view while its in the players inventory
+
+Owner UI-spec rounding and footer requirements, verbatim:
+
+> ALso in the UI spec can you put other things that we didnt put there but was already developed that you think should be in there.  Like one page per room, title up top, room desc, and npcs/players/items show, and then event log that can scroll, and it scrolls and hides the desc and items/npcs/players but doesnt hide the room title.  clicking on room title refreshes its like a 'look'.  etc ectc anything else you can think of.  Just want to round out the ui spec
+
+> also describe the minimap joystick thing in the spec
+
+> and the status bar below it
+
+## PM implementation interpretation
+
+- Keep the NPC detail route and a stable detail screen during its ordinary Talk/action/choice results. Append meaningful dialogue/action output to a scrolling log inside that detail; do not perform the book-page flip for each ordinary NPC action. Current offered choices/actions stay anchored at the bottom of the NPC detail; the log scrolls above them. Replace the ordinary NPC bottom-bar Back to World return with **Leave**, a presentation-only return to World that preserves a pending saved choice. Do not add an engine leave verb, movement, or speculative Attack/skill buttons. Item details also use Leave; other section detail pages retain Back to World. A real modal scene or queued chapter still takes precedence under the existing rules.
+- Tapping the existing status/resources entry opens a Contents page containing Character, Equipment & Inventory, Map, Journal, Settings. No separate Menu button or extra row of world-pane links. The room position target remains separate and room-only.
+- Reuse the existing five section views; Equipment & Inventory presents the existing held/worn data. Tapping a carried item opens its detail with Drop and any other currently offered item actions, plus Leave. Use/Equip appear only when genuinely offered; no new hold-and-slide interaction or placeholder actions. Remove unrelated Journal/Carrying/Settings links from the Character sheet. Preserve accurate World destinations (Leave on NPC/item details, Back to World on section details) and current offered-action freshness/safety.
+- An item detail offers its current legal actions plus **Leave**. For the available brass lantern this is Take and Leave. After confirmed successful Take, return to World and append a descriptive pickup line using the real projected item name (for this sampler, “You pick up a brass lantern.”) instead of the generic presenter fallback “Taken.” Preserve authored narration when supplied. Pending, rejected, failed or stale attempts must not be announced as successful; retry must not duplicate the pickup. Under PM adoption of the accepted inventory-action recommendation, confirmed successful Drop likewise returns to World and appends a projected-name drop event (“You drop a brass lantern.”), with the same pending/refused/stale/fault/retry honesty. This symmetry is a PM implementation choice, not extra owner wording. Other item actions retain their established detail behavior unless their item becomes unavailable. This supersedes item-page retention for successful Take and Drop; no mechanic or save change.
+- Routine dialogue exit must not append a generic exit sentence to the World log. Leave is presentation navigation; if an offered dialogue Close is used, keep meaningful authored/quest consequences but omit generic `choice_closed` World narration structurally, not by English-text filtering.
+- World is one current-room page with its room title fixed above the scrolling description, projected entities and event log. Tapping the title invokes the current offered Look action. Source inspection found the old title inside the ScrollView; pinning it now is a bounded PM adoption to match the owner-described behavior. Describe actual existing minimap/joystick, Map tip/zoom, status bar below it, inventory/equipment/containers, journal, chapters/scenes and save/retry controls with source pointers. Show only actual projected entity kinds: other-player UI is future until the projection supports it, no fabricated player rows.
+- Gather the book UI behavior in a dedicated canonical spec, directly linked from AGENTS.md and the existing docs/system/README.md index, with an architecture link. The spec links its governing owner decisions and evidence/review index so readers can traverse root → system index → UI behavior → decision/proof. Original feedback remains in these decision records; reviews/PRs record implementation and verification. Keep future ideas distinct and avoid duplicating the spec across docs. The owner-reported unsupported-capability message was inspected read-only in the current exact9f18 preview: one malformed one-target Give was rejected; later movements were accepted and the retained error followed the room log. Fix the incomplete presenter Give control, preserving engine validation and meaningful errors. A second inspected presenter regression removed the room-change log reset: restore the World log scope on an actual committed change of place, before appending meaningful new movement consequences. Do not clear on a refused/stale/pending attempt or routine rerender/detail navigation; active save errors remain visible. NPC history remains independently session-bounded. The latest owner confirmation explicitly approves clearing each room event log on entering a new room; the committed-place-change boundary and failed/pending safety remain PM implementation details. Touch recipient selection is deferred until a real gift interaction requires it; do not expose incomplete Give meanwhile. This is inspected trace/source evidence and a bounded PM implementation disposition, not additional owner wording.
+- NPC history is bounded presenter-session state, not a new saved transcript or story mechanic. Preserve pending-choice reopen/relaunch and retry behavior; use authored/projected text, no invented speaker prose. Host-neutral unclassified restored narration remains the previously declared bounded World fallback.
+
+These are presentation-only changes. No engine mechanics, kernel, authority/store, protocol, content pin, native plugin, dependencies or save format changes. Amend [Book presenter](../system/architecture.md#book-presenter) before code. This round follows PR #143; it does not pass Gate C1 or start further mechanics.
+
+PM review choice under existing owner delegation: fresh independent Codex primary and separate Sol while Claude quota is unavailable; normal checks and actual isolated Release interaction required. This is a PM execution choice, not an owner model quote. Owner tests the updated preview and supplies the next feedback batch.
+
+exec
+/bin/zsh -lc 'cat [private-path] cat docs/lessons/mobile.md; cat mobile/package.json; cat kernel/ts/package.json; cat mise.toml' in [private-path]
+ succeeded in 0ms:
+---
+name: ast-grep-outline
+description: Use when exploring or modifying a codebase and you need a cheap structural map of files, directories, imports, exports, or direct members before reading full source.
+---
+
+# Use ast-grep outline
+
+`ast-grep outline` prints a compact structural map of source code with line
+numbers: top-level **items** (imports, functions, classes, structs,
+interfaces, modules, enums) and their direct **members** (fields, methods,
+constructors, enum variants). It is a local, syntax-only view — cheap enough
+to run before any full file read.
+
+Read code in stages: find candidate files with search or file names, outline
+them, then open only the source range the outline points to. Defaults adapt to
+input: a file shows its local structure with member digests; a directory shows
+only its exported surface as grouped names.
+
+## When To Use It
+
+**Understand a file before editing.** Get a table of contents, dependencies,
+and public entry points before reading implementation details:
+
+```shell
+ast-grep outline <file>
+ast-grep outline <file> --items imports
+ast-grep outline <file> --items exports
+```
+
+**Map an unfamiliar directory.** Scan the public surface of a subtree, then
+narrow by symbol type when you know what you are looking for:
+
+```shell
+ast-grep outline <dir> --items exports
+ast-grep outline <dir> --type struct,enum,function
+```
+
+**Zoom into a known symbol.** After search finds a likely name, list its
+members with line numbers instead of reading the whole body:
+
+```shell
+ast-grep outline <file> --match <symbol> --type class --view expanded
+```
+
+**Trace dependency direction.** Find which files import a package or module to
+decide where a change belongs:
+
+```shell
+ast-grep outline <dir> --items imports --view signatures
+```
+
+**Review changed files after editing.** Git tells you what changed; outline
+summarizes the resulting structure and public surface:
+
+```shell
+ast-grep outline $(git diff --name-only HEAD) --items exports
+```
+
+## Argument Guide
+
+- `--items <KIND>` selects top-level items: `structure` for local declarations
+  (file default), `exports` for public API (directory default), `imports` for
+  dependencies, `all` when import/export edges matter together.
+- `--view <VIEW>` controls detail, from least to most: `names` for directory
+  scans, `signatures` for one line per item, `digest` for signatures plus
+  member names, `expanded` for one line per member with its line number.
+- `--match <REGEX>` filters top-level items by name or signature. Rust regex,
+  case-sensitive; it never matches members.
+- `--type <TYPE[,TYPE...]>` keeps only some top-level symbol types, such as
+  `--type class,function`. Member types like `method,field` never match
+  top-level items.
+- `--pub-members` hides private members when the view prints members.
+- `--json=stream` emits one JSON object per file with precise ranges. Use it
+  only to pipe or post-process entries; prefer text for navigation.
+
+## Limits
+
+`outline` shows local syntax structure. It does not resolve references, infer
+types, follow re-export chains, or build a call graph. Use `ast-grep run`,
+`rg`, or compiler-backed tools for those questions, then outline the candidate
+files they surface.
+# Mobile lessons
+
+Hard-won lessons for `mobile/` and physical-device runs.
+
+**expo-sqlite and React Native**
+- expo-sqlite 57.0.3 on Android: opening the same database file twice gives both JS
+  handles one native database, and garbage collection of either closes it. Symptom:
+  `NativeDatabase.execSync` rejected, `NullPointerException`. Open each database once
+  per process.
+- expo-sqlite's transaction helpers (`withTransactionSync`,
+  `withExclusiveTransactionAsync`) issue COMMIT themselves. To own the COMMIT point
+  (fault injection, unknown-commit handling) run `BEGIN IMMEDIATE` / `COMMIT` /
+  `ROLLBACK` yourself with `execSync` on one connection.
+- The React Native Gradle plugin (`configureDevServerLocation`) writes the build
+  machine's IPv4 address into every variant's `resources.arsc`, release included. Pass
+  `-PreactNativeDevServerIp=localhost`. APKs then differ only in AGP's encrypted
+  dependency-info signing block; the JS bundle, Hermes bytecode and source map are
+  byte-identical across builds.
+- Record the AGP version with the root `./gradlew buildEnvironment`, not
+  `:app:buildEnvironment` (AGP sits on the root buildscript classpath).
+
+**Mobile builds (measured 2026-09-24, minimal Expo 57 app, arm64 release)**
+- M1 Air: Android clean 78 s with warm download caches (first ever, with NDK download,
+  346 s); JS change with a warm Gradle daemon 9 s. iOS `pod install` 23 s, clean
+  `xcodebuild` 50 s, JS change 9 s. GitHub CI Android, uncached: Gradle 349 s, job 6 min 15 s.
+  Iterate on the M1; CI builds are clean-build proof, not the edit loop.
+- `pod install` writes React Native codegen into `ios/build/generated`. Never
+  `rm -rf ios/build` or use it as `-derivedDataPath`; rerun `pod install` if it is gone.
+
+**Physical-device runs**
+- A slice's automated device rows run on a Release iOS Simulator build ([owner rule](../system/owner-rules.md)).
+- Until the first free product gate the only phone is the iPhone 11
+  ([owner decision](../archive/decisions/owner-decision-android-descope-2026-09-30.md)). After
+  that the owner can connect only one phone at a time: batch all work per phone; ask for a
+  swap only when needed.
+- A locked screen stops the app's JS. Check the lock state before a run; keep the app in
+  the foreground; treat a lock or backgrounding as an invalid run.
+- Every wait on a device needs a timeout (for example 120 s per launch, a 10 minute
+  progress watchdog). An unbounded `until grep …` loop hung for minutes once.
+- The Android logcat ring buffer keeps lines from earlier runs; a stale progress marker
+  once looked like a finished run. Match on the current process id or a run id.
+- iOS: `xcode-select` may point at the Command Line Tools; set
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` (no sudo). Signing uses the
+  owner's free personal team (automatic signing); nothing paid, no EAS.
+- iOS symbolication with `atos`: look up the return address minus 1, or it names the
+  wrong function.
+
+**iOS simulator**
+- Xcode 27 exposes Simulator windows through DeviceHub (`com.apple.dt.Devices`); a missing
+  standalone Simulator.app is not evidence that the Simulator runtime is missing. Use
+  DeviceHub for the GUI and the installed Xcode developer directory for simctl.
+- iOS 27 crashes at launch (SIGTRAP, `NoSceneLifecycleAdoption`) unless the app adopts the
+  UIScene lifecycle. Expo 57 ships the scene delegate but its template does not wire it;
+  `mobile/app/plugins/with-ios-scene.js` does, at every prebuild. Never hand-patch `ios/`.
+- agent-device: its daemon keeps the environment it first started with; after setting
+  `DEVELOPER_DIR`, run `agent-device daemon stop`. `open --relaunch` keeps the save; for a
+  fresh start, uninstall and reinstall the app.
+- The walk on a fresh Release build (the Lantern, Ferry Landing): `press 'label="Got it"' --settle`
+  (the map tip; wait 2 s after `open`, an early press misses). Bram is a context menu: `press 'label="Bram the ferryman, open"'`
+  opens it, `press 'label="Talk to Bram the ferryman"'` shows the choice in it (the answers and Close), then
+  `press "label=\"Offer to fetch Bram's lantern\"" --settle` accepts the quest (the result line is in the room log);
+  `press 'label="Done"'` hides the menu (a pending choice shows it again in the next room);
+  `press 'label="Map"' --settle`. Journal, Carrying and Settings are taps on the Character
+  page: `press` the status line's button (its label starts "Character, hp ..."; copy it from `snapshot -i`).
+  A selector with spaces is one shell argument, quotes inside. The footer map takes a raw
+  `gesture pan 207 781 0 -55 5000` (north; 55 px is about 21 map units); take a mid-drag shot with
+  `xcrun simctl io <udid> screenshot` while that runs in the background (`agent-device screenshot` waits for the
+  pan). `scroll` does not move the book's pages; a raw `swipe 200 600 200 250` does.
+- A ScrollView drawn over other content blurs its text on iOS 27 (the system scroll edge effect); the NPC menu
+  is a plain View for that reason.
+- An `Animated.View` with a `transform` around the footer map's dot displaced the dot after the map tip went and
+  the page changed (R6P Polish O-1), even with the transform at identity. The dot is now a `Disc` placed from state.
+  Check a footer fix with a fresh install, the tip still showing: tap Map, then Back, and look at the dot.
+- `xcrun simctl` cannot tap. A screenshot of a deeper UI state needs a temporary local
+  edit that starts the app on that state; such shots are static and prove layout only,
+  not navigation or gestures.
+- An agent-device `scroll` can start its pan on the footer's map joystick and walk the
+  character (R6P Polish note 5). Scroll the page with `gesture pan` from a point in the text.
+cat: mobile/package.json: No such file or directory
+{
+  "name": "loka-kernel",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.21.0"
+  },
+  "scripts": {
+    "typecheck": "tsc && tsc -p test && tsc -p play",
+    "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"test/**/*.test.ts\"",
+    "test:nosim": "node --test --test-reporter=${TEST_REPORTER:-spec} $(find test -name '*.test.ts' ! -name sim.test.ts)",
+    "test:sim": "node --test --test-reporter=${TEST_REPORTER:-spec} test/sim.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "typescript": "6.0.3"
+  }
+}
+# Project-pinned toolchain; CI pins the same versions.
+[tools]
+erlang = "28.4"
+elixir = "1.20.4"
+node = "24.21.0"
+java = "temurin-17.0.20+8"
+"npm:@ast-grep/cli" = "0.45.3"
+
+exec
+/bin/zsh -lc "git log -5 --format='%H %s' 2>/dev/null; git show --format=fuller --no-patch HEAD 2>/dev/null; cat docs/WORKFLOW.md" in [private-path]
+ succeeded in 0ms:
+665b3ff6c0fbed1109a8aa13576bad710a623d11 Verify integrated sampler title Look and captured freshness
+0606d10d37dc0f0b1a49a02ebad8b0dac67d3183 Compose C1 UI polish and sampler Look for independent native review
+e3c4fddf2bb74c5e4ae4a0e79feda14e83beb434 Declare existing Look capability in sampler development revision 0.0.2
+eb81d98825610398b08d6bab0e6ffe16822a7245 Fix postcommit narration read faults and confirmation regression coverage
+dd35c11d0be74db7015a0ad4df6547d9b7d47faf Record development sampler replacement and Look repair scope
+commit 665b3ff6c0fbed1109a8aa13576bad710a623d11
+Author:     Raymond Luong <raymond.n.luong@gmail.com>
+AuthorDate: Sat Oct 3 20:53:46 2026 -1000
+Commit:     Raymond Luong <raymond.n.luong@gmail.com>
+CommitDate: Sat Oct 3 20:53:46 2026 -1000
+
+    Verify integrated sampler title Look and captured freshness
+# Delivery workflow: PM, developer, reviewer
+
+Every milestone slice (one PR) runs through three roles. Claude Code runs them as the
+main session plus the subagents in [`.claude/agents/`](../.claude/agents/developer.md).
+Other agents (Codex and others) use those two files as the role prompt, for example "act as
+the reviewer in `.claude/agents/reviewer.md` for PR #N"; a reviewer from another vendor is
+a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every role.
+
+| Role | Who | Model | Owns |
+|---|---|---|---|
+| PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
+| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | code, checks, self-review, opening the PR, fixes |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable only as codex stand-in (see below) | independent review, review record |
+
+**Models** ([owner decision](archive/decisions/owner-decisions-review-flow-2026-09-30.md)): a slice is
+reviewed once, with a narrow fix check, by a reviewer on the highest Opus.
+**Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
+our own independent review, never instead of it: the PM may add it to any slice beyond
+docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only; `-m` Astra on the gate audit and on changes to
+`kernel/ts/src/proposal.ts`, Sol for every other review and every fix re-check;
+[owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)) with the
+PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
+severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
+answer verbatim to the review record, and adds its findings to the fix list. A second concurrent
+codex run uses a temporary `../lokacore-codex2` worktree.
+Fable is used only if codex is out of quota: a Fable subagent stands in for it on a kernel or
+contract-freeze slice's head, never on fix re-reviews
+([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
+Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
+
+## Loop
+
+**Keep going.** Once the owner has approved the slice plan, the PM runs steps 2 to 7 to the
+merge without asking permission at each step, and settles judgment calls itself. When a
+decision is hard, escalate in order: the `advisor` tool; then codex Sol by hand; only if both fail to settle it, or it is
+critical, stop for the owner ([owner decision](archive/decisions/owner-decision-autonomy-2026-09-30.md)).
+A ladder answer is advice to the PM: it never changes a reviewer's finding or verdict and is
+never the owner's OK. Critical means what [AGENTS.md](../AGENTS.md) and the owner decisions
+reserve to the owner: a product or scope decision, a spec conflict, spending money, a
+`--no-verify` push, anything destructive or outward-facing beyond the PR and its merge.
+Report at the end of the slice, not at every step.
+
+1. **Plan (PM).** Split the milestone into PR-sized slices, each citing its `docs/system` sections;
+   keep [the roadmap](ROADMAP.md) current. The plan marks slices that share no files; the PM may run
+   two developers at once on those, each PR with its own fresh reviewer (steps 2 to 7 per slice, [owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
+   Get the owner's OK on the plan and on any decision that is theirs.
+2. **Brief (PM).** An Opus subagent drafts briefs and stage slice plans so the PM session
+   stays thin; the PM decides ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)). Name the branch; do not check it out (the developer does, in its own
+   worktree). Spawn `developer` (pass `model: "opus"` for a kernel or contract-freeze slice) with a self-contained brief: goal,
+   `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
+   pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
+   decided, and a scope trigger (what makes the developer stop and ask, for example a frozen
+   fixture or protocol file that would need to change). Add a timebox only for open-ended work:
+   at the limit the developer stops and returns partial findings.
+3. **Build and self-review (developer).** Implement; run the full local check line from
+   AGENTS.md once (the pre-push hook is the final run: do not run it again right before the push); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
+   (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
+   docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
+   both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
+   schema mutant sweep in the [contract lessons](lessons/contracts.md). Commit, push, open
+   the PR (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
+   branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
+   dispositions, deviations from the brief, open questions.
+4. **Verify and review.** PM does not relay claims: it confirms CI is green on the pushed
+   commit (or reruns the check line) before review. Then it spawns a *fresh* `reviewer`
+   with the PR number, the brief and the cited sections. The reviewer derives the
+   requirements from them before reading the diff, and tests the tests by breaking
+   the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, links it from
+   [the index](reviews/README.md), and returns the findings.
+5. **Fix (same or fresh developer).** PM forwards the findings with `SendMessage` to the
+   developer, whose context is intact, while that context is small (about 220k tokens or
+   less, the subagent token count in its last completion notice); past that, or after a PM
+   session restart, a fresh developer gets the brief, the review record, the PR diff and the
+   findings (every call re-reads the whole context, so a large one makes each fix call the
+   most expensive of the slice). One message per round: batch every request for that round,
+   and name the round (1 or 2). A conflict with `main` in an index or roadmap line is
+   resolved by the PM in `../lokacore-pm` (merge, never rebase; the union driver covers the two lists) without waking the
+   developer; a conflict in code goes to the developer. Every fix message restates the whole
+   open finding list, not just the new ones (a resumed agent drops earlier directives). The
+   developer runs `git pull --rebase` first (the review record is on the branch), never
+   force-pushes, fixes or disputes each finding with a reason, reruns the checks once (the pre-push hook is the final run) and pushes.
+6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
+   the same reviewer; the codex Sol fix re-check starts at the same moment, not after it. It checks each disposition and the code the fix touched, plus that
+   code's direct callers (a fix can break a neighbor), and nothing else; it appends the
+   result to its record. A broad re-review of the whole PR happens only when the fixes
+   rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
+   rounds; anything still open goes up the escalation ladder above, then to the owner.
+7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
+   NOTES with nothing open and every CI job started on the head has finished green
+   ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
+   [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
+   Merge with `gh pr merge <N> --merge --match-head-commit <sha>`, where `<sha>` is the head
+   whose CI you confirmed green, so a later push makes the merge fail instead of landing
+   unchecked. The PM's own commits after the verdict (a `main` merge, a codex answer
+   appended verbatim, an index line) need only green CI on the new head, and the PM puts them in one push; any
+   other commit after the verdict sends the PR back to the reviewer. CI skips the code jobs only when the head differs from a commit whose code jobs all passed by
+   Markdown files alone ([CHECKS](CHECKS.md)), so green CI on the head is enough. Right after the merge the PM writes the
+   ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
+   ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
+   PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
+   escalation ladder, go to the owner. If the slice taught a lesson, record it as
+   [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
+   future decision and survives code drift; if a check could enforce it, write the check instead.
+
+## Token hygiene
+
+- Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
+  and check runs; any agent sends a check, test or push run to a scratchpad file named for the
+  slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
+  reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
+- Delegate mechanical work; clear the session after each merge and resume from the PM state
+  file. No plugin or CLAUDE.md changes mid-session (they bust the prompt cache).
+- Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
+  a reason, open items, no narrative.
+- PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
+  or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
+
+## Milestone gate
+
+A gate is slim ([owner decision](decisions/owner-decision-slim-gates-2026-10-02.md)): the owner's
+play or test when the stage has something touchable; one codex Astra audit of the stage's riskiest
+code; and a short checklist, checked by one reviewer without narrative (no separate Opus-plus-Astra
+review of a docs-only gate PR). The checklist: every spec proof linked, every carry in a stage row,
+and the docs tidy pass over the docs changed during the milestone (not `docs/archive/`, nor review
+or decision records, which are history): a fact stated
+in two places (keep one, link to it), a lesson that is stale or now enforced by a check, a doc
+turning into a catch-all. Findings are fixed in the gate PR.
+
+## Git hygiene
+
+- Every developer works in its own worktree on its own branch. The PM works in one
+  persistent worktree, `../lokacore-pm`, moved with `git checkout --detach <sha>` and never
+  removed; it is the checkout for the PM's commits and for codex's read-only runs. The main checkout is
+  not used for slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
+  Developer worktrees sit beside the repository (`../lokacore-<slice>`), outside
+  the tree the checks scan, and are removed after merge. The reviewer mutates code only in a throwaway detached worktree
+  (`git worktree add --detach`) and removes it before finishing.
+- `.gitattributes` merges `docs/reviews/README.md` and `docs/decisions/README.md` (append-only lists) with
+  `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
+  check may still report a conflict, so the PM still merges `main` locally and checks the merged index for duplicate or twice-edited lines and for order.
+- Parallel agents share one scratchpad: use file names unique to the slice (a shared
+  `pr-body.md` once put one PR's description on another).
+- The reviewer commits only its record, in a detached worktree at `origin/<branch>`,
+  pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
+- A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
+  first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`. The PM's worktree
+  does this once, then `npm ci` only on a lockfile change.
+- CI failure: rerun the job once. An identical second failure is not a flake. A failure in code
+  the diff does not touch means check for a stale base (update the branch from `main` with a merge, never a rebase
+  or force-push) before anything else.
+- Git hooks are set once per clone ([AGENTS.md, Working rules](../AGENTS.md#working-rules));
+  worktrees share that setting.
+- Agent types in `.claude/agents/` register only when a session starts. If one is missing,
+  spawn `general-purpose` and tell it to follow the definition file.
+- `developer` and `reviewer` list their tools in `tools:` (their definition files) to keep
+  each spawn's context small. A subagent cannot request more: it reports "blocked: needs
+  <tool>" in its return. For a developer, the PM does that step or spawns `general-purpose`
+  with the definition file; for a reviewer, always a fresh `general-purpose` with the
+  definition file, so the PM never does review steps. Add a tool to `tools:` if a slice keeps
+  hitting the same block.
+
+## Why these steps (keep them only while they earn their cost)
+
+- The brief is the biggest quality lever: a vague brief yields confident wrong work.
+  Acceptance is written as checkable items before any code.
+- Same-model reviewers share blind spots with the developer. Deriving requirements from
+  the spec first, breaking the code to test the tests, and a cross-vendor review are
+  the counterweights; a longer checklist is not.
+- The developer keeps its context across small fix rounds, so fixes are cheap and consistent;
+  a large context makes every call expensive, so a fresh developer takes over (step 5). The
+  reviewer stays fresh so its judgment is independent.
+- If a step keeps finding nothing across slices, the PM proposes dropping it to the owner.
+
+## Review stance
+
+Review depth scales with risk: a docs-only or config-only slice, or one that only changes
+content numbers or UI styling ([playtest decision](archive/decisions/owner-decision-playtest-2026-09-25.md)),
+gets a short review (no mutation testing), a contract freeze gets the full one.
+
+Adversarial in proportion: the reviewer tries to break the change, not to redesign it.
+Every finding states a concrete failure scenario (input or state, then the wrong result),
+or is labeled a question. Severities: **blocker** (wrong behavior, spec violation, check
+that cannot fail), **should-fix**, **nit** (at most five). Over-engineering counts as a
+finding. The reviewer does not ask for features the spec and brief do not require.
+
+exec
+/bin/zsh -lc 'cat [private-path] git diff 0606d10d37dc0f0b1a49a02ebad8b0dac67d3183 HEAD -- docs/system/book-ui.md mobile/app/book/polish.test.ts 2>/dev/null; git diff --name-only 0606d10d37dc0f0b1a49a02ebad8b0dac67d3183 HEAD 2>/dev/null; cat mobile/app/package.json' in [private-path]
+ succeeded in 0ms:
+---
+name: ast-grep-outline
+description: Use when exploring or modifying a codebase and you need a cheap structural map of files, directories, imports, exports, or direct members before reading full source.
+---
+
+# Use ast-grep outline
+
+`ast-grep outline` prints a compact structural map of source code with line
+numbers: top-level **items** (imports, functions, classes, structs,
+interfaces, modules, enums) and their direct **members** (fields, methods,
+constructors, enum variants). It is a local, syntax-only view — cheap enough
+to run before any full file read.
+
+Read code in stages: find candidate files with search or file names, outline
+them, then open only the source range the outline points to. Defaults adapt to
+input: a file shows its local structure with member digests; a directory shows
+only its exported surface as grouped names.
+
+## When To Use It
+
+**Understand a file before editing.** Get a table of contents, dependencies,
+and public entry points before reading implementation details:
+
+```shell
+ast-grep outline <file>
+ast-grep outline <file> --items imports
+ast-grep outline <file> --items exports
+```
+
+**Map an unfamiliar directory.** Scan the public surface of a subtree, then
+narrow by symbol type when you know what you are looking for:
+
+```shell
+ast-grep outline <dir> --items exports
+ast-grep outline <dir> --type struct,enum,function
+```
+
+**Zoom into a known symbol.** After search finds a likely name, list its
+members with line numbers instead of reading the whole body:
+
+```shell
+ast-grep outline <file> --match <symbol> --type class --view expanded
+```
+
+**Trace dependency direction.** Find which files import a package or module to
+decide where a change belongs:
+
+```shell
+ast-grep outline <dir> --items imports --view signatures
+```
+
+**Review changed files after editing.** Git tells you what changed; outline
+summarizes the resulting structure and public surface:
+
+```shell
+ast-grep outline $(git diff --name-only HEAD) --items exports
+```
+
+## Argument Guide
+
+- `--items <KIND>` selects top-level items: `structure` for local declarations
+  (file default), `exports` for public API (directory default), `imports` for
+  dependencies, `all` when import/export edges matter together.
+- `--view <VIEW>` controls detail, from least to most: `names` for directory
+  scans, `signatures` for one line per item, `digest` for signatures plus
+  member names, `expanded` for one line per member with its line number.
+- `--match <REGEX>` filters top-level items by name or signature. Rust regex,
+  case-sensitive; it never matches members.
+- `--type <TYPE[,TYPE...]>` keeps only some top-level symbol types, such as
+  `--type class,function`. Member types like `method,field` never match
+  top-level items.
+- `--pub-members` hides private members when the view prints members.
+- `--json=stream` emits one JSON object per file with precise ranges. Use it
+  only to pipe or post-process entries; prefer text for navigation.
+
+## Limits
+
+`outline` shows local syntax structure. It does not resolve references, infer
+types, follow re-export chains, or build a call graph. Use `ast-grep run`,
+`rg`, or compiler-backed tools for those questions, then outline the candidate
+files they surface.
+diff --git a/docs/system/book-ui.md b/docs/system/book-ui.md
+index 7edcbb5..731891d 100644
+--- a/docs/system/book-ui.md
++++ b/docs/system/book-ui.md
+@@ -19,8 +19,9 @@ new implementation or Gate C1 acceptance. Touch acceptance follows
+ World is one current-room page. Its centered title remains fixed above the scrolling authored
+ description, projected entities, offered place actions and event log. Tapping that title invokes
+ the current offered Look with its drawn freshness token; it invents no refresh command. The current
+-sampler snapshot does not project Look, so its title is fixed text until that capability gap
+-receives a scoped disposition; this round does not claim a working sampler title-Look tap.
++`ashmere_sampler@0.0.2` projects authentic Look under the
++[sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
++Cartridges that do not offer Look retain a fixed text title.
+ Only the body scrolls, so description and entities may leave view while the title stays visible.
+ Current entities are projected NPCs and items; tapping either opens its full detail. Standalone exit directions, adjacent-sight listings and redundant navigation/
+ Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
+diff --git a/mobile/app/book/polish.test.ts b/mobile/app/book/polish.test.ts
+index f37a48c..bf4f291 100644
+--- a/mobile/app/book/polish.test.ts
++++ b/mobile/app/book/polish.test.ts
+@@ -153,7 +153,19 @@ test('room is focused while Map retains directions and every detail returns to t
+   assert.ok(words(roomScroll).includes('Reeds crowd a slick wooden landing'));
+   assert.ok(nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram, open'));
+   assert.ok(h.text().includes('Ferry Landing'));
+-  assert.equal(h.labels().includes('Look, Ferry Landing'), false); // sampler offers no Look
++  const drawnLook = h.draw().find((n) => n.props.accessibilityLabel === 'Look, Ferry Landing');
++  assert.ok(drawnLook);
++  const receipts = () => h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
++  assert.equal(receipts(), 0);
++  const token = h.game.view().token;
++  h.tap('Look, Ferry Landing');
++  assert.equal(receipts(), 1);
++  assert.notEqual(h.game.view().token, token);
++  assert.equal(h.game.view().view.place.title.key, 'room.ferry_landing.title');
++  assert.deepEqual(h.p.screen().log, []);
++  drawnLook.props.onPress(); // this captured title has the pre-Look freshness token
++  assert.equal(receipts(), 1);
++  assert.deepEqual(h.p.screen().log, ['The page had changed; here it is again.']);
+   assert.ok(h.labels().includes('Old Bram, open'));
+   assert.equal(h.text().includes('North'), false);
+   assert.equal(h.text().includes('Beyond north: Well Lane — a brass lantern.'), false);
+docs/system/book-ui.md
+mobile/app/book/polish.test.ts
+{
+  "name": "loka-app",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"../authority/**/*.test.ts\" \"book/*.test.ts\" \"*.test.ts\""
+  },
+  "engines": {
+    "node": "24.21.0"
+  },
+  "dependencies": {
+    "expo": "57.0.24",
+    "expo-crypto": "57.0.3",
+    "expo-font": "57.0.4",
+    "expo-sqlite": "57.0.3",
+    "react": "19.2.3",
+    "react-native": "0.86.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "typescript": "6.0.3"
+  }
+}
+
+exec
+/bin/zsh -lc 'git diff --name-only e3c4fddf2bb74c5e4ae4a0e79feda14e83beb434 HEAD -- cartridges/ashmere_sampler protocol/fixtures/cartridge_sampler_hash.json test/loka/cartridge_sampler_hash.py kernel/ts/test/sim.ts kernel/ts/test/sim_seeds.json kernel/ts/test/sim.test.ts mobile/app/sampler.test.ts mobile/authority/local-story/sampler.test.ts 2>/dev/null; git diff --name-only eb81d98825610398b08d6bab0e6ffe16822a7245 HEAD -- mobile/app/App.tsx mobile/packages/game-view mobile/app/book mobile/authority 2>/dev/null' in [private-path]
+ succeeded in 0ms:
+mobile/app/book/polish.test.ts
+mobile/authority/local-story/sampler.test.ts
+
+exec
+/bin/zsh -lc "ast-grep --lang tsx -p 'accessibilityLabel="'$LABEL'"' --json mobile/app/book/pages.tsx" in [private-path]
+ exited 1 in 0ms:
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+[]
+
+exec
+/bin/zsh -lc 'ast-grep outline mobile/app/book/polish.test.ts; ast-grep outline mobile/app/book/pages.tsx; ast-grep outline mobile/app/book/Book.tsx; ast-grep outline mobile/app/book/presenter.ts' in [private-path]
+ succeeded in 191ms:
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+mobile/app/book/polish.test.ts
+11: require = createRequire(import.meta.url)
+12: ts = require('typescript')
+13: react = pathToFileURL(require.resolve('react')).href
+50: fixture = JSON.parse(
+58: function nodes(element: any): any[] {
+68: words = (element: any): string =>
+75: function book(cartridge = fixture) {
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+mobile/app/book/pages.tsx
+ 10: type Say = (key: string) => string;
+ 11: type Grouped = ReturnType<typeof group>;
+ 12: export type { Thing } from './model.ts';
+ 15: export const band = (tone: Pool['tone']): string =>
+ 18: export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
+ 19: export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
+ 20: export const note = { ...prose, color: paper.dim };
+ 22: export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
+ 35: export function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
+ 43: export function Leave(p: { leave: () => void }) {
+ 53: export function RoomPage(p: {
+ 94: function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
+108: export function Sheet({ title, children }: { title: string; children: ReactNode }) {
+119: export function ThingPage(p: {
+148: export function CharacterPage(p: {
+168: export function JournalPage({ view, text }: { view: GameView; text: Say }) {
+183: export function CarryingPage(p: {
+216: function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
+252: export function MapPage(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
+266: export function SettingsPage({ startOver }: { startOver: () => void }) {
+276: export function ChapterPage(p: { title: string; done: () => void }) {
+286: export function ScenePage(p: {
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+mobile/app/book/Book.tsx
+ 34: type Presenter = ReturnType<typeof presenter>;
+ 37: export type Shell = { confirm: (go: () => void) => void; learned: Hint };
+ 39: small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 }
+ 43: type BookProps = {
+ 49: export default function Book(p: BookProps) {
+ 87: type ViewProps = {
+ 99: export function BookView(p: ViewProps) {
+116: type BottomProps = {
+129: function Bottom(p: BottomProps) {
+167: type Screen = ReturnType<Presenter['screen']>;
+171: function Fault(p: { fault: string; startOver: () => void }) {
+185: function Back({ onPress }: { onPress: () => void }) {
+198: type BodyProps = {
+209: function Body(p: BodyProps) {
+244: function Item(p: {
+268: function NpcDetail(p: {
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+mobile/app/book/presenter.ts
+ 21: export type Button = {
+ 29: type Say = (key: string) => string;
+ 30: type Press = Omit<Button, 'token'>;
+ 33: function asked(v: GameView, label: Say): Press[] {
+ 51: function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
+ 89: function said(r: Reply, text: Say, view: GameView, fallback?: string): string {
+106: function comings(was: GameView, now: GameView, text: Say): string[] {
+118: sayers = (g: Game): { text: Say; label: Say } => ({
+129: intentOf = ({ action_key, target_ids, input, token }: Button): Intent => ({
+137: withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
+140: type Logs = {
+149: function restoredLogs(game: Game, text: Say): Logs {
+167: function detailLines(s: Logs, id: string) {
+172: function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
+207: function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
+232: export function presenter(game: Game) {
+
+exec
+/bin/zsh -lc "nl -ba mobile/app/book/polish.test.ts | sed -n '1,200p'; nl -ba mobile/app/book/pages.tsx | sed -n '22,107p'; nl -ba mobile/app/book/Book.tsx | sed -n '198,244p'" in [private-path]
+exec
+/bin/zsh -lc "nl -ba mobile/app/book/presenter.ts | sed -n '120,142p'; nl -ba mobile/app/book/presenter.ts | sed -n '172,350p'; cat package.json" in [private-path]
+ succeeded in 0ms:
+   120	  label: (key) =>
+   121	    g.text(key) ??
+   122	    key
+   123	      .replace(/^actions?\./, '')
+   124	      .replaceAll('_', ' ')
+   125	      .replace(/^./, (a) => a.toUpperCase()),
+   126	});
+   127	
+   128	// The button's plain strings are the wire's branded ones: a button is built from the view's own keys.
+   129	const intentOf = ({ action_key, target_ids, input, token }: Button): Intent => ({
+   130	  action_key: action_key as Key,
+   131	  target_ids: target_ids as EntityId[],
+   132	  input: input as ActionInput,
+   133	  ...(token && { view_freshness_token: token }),
+   134	});
+   135	
+   136	// Compare structured TextKeys, never rendered English. Authored non-navigation consequences stay.
+   137	const withoutHeading = <T extends { key: string }>(lines: readonly T[], view: GameView) =>
+   138	  lines.filter((t) => t.key !== view.place.title.key && t.key !== view.place.description?.key);
+   139	
+   140	type Logs = {
+   141	  log: string[];
+   142	  details: Map<string, string[]>;
+   172	function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
+   173	  const attempt = s.retry!;
+   174	  const now = game.view().view;
+   175	  const accepted =
+   176	    reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
+   177	  s.returnWorld = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
+   178	  const moved = !!accepted && was.place.id !== now.place.id;
+   179	  if (moved) s.log.length = 0;
+   180	  const lines = attempt.detail && !s.returnWorld && !moved ? detailLines(s, attempt.detail) : s.log;
+   181	  let retained: ReturnType<Game['lastNarration']>;
+   182	  try {
+   183	    retained = accepted?.narration?.length ? game.lastNarration() : undefined;
+   184	  } catch (e) {
+   185	    s.fault = `Saved result; narration recovery unavailable: ${(e as Error).message}`;
+   186	  }
+   187	  const repeated = !moved && retained && retained.command_id === s.narrationId;
+   188	  if (retained) s.narrationId = retained.command_id;
+   189	  const fallback =
+   190	    s.returnWorld && attempt.item
+   191	      ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${attempt.item}.`
+   192	      : accepted?.outcome === 'choice_closed' && lines === s.log
+   193	        ? ''
+   194	        : undefined;
+   195	  const line = repeated ? '' : said(reply, text, now, fallback);
+   196	  if (line) lines.push(line);
+   197	  lines.push(...comings(was, now, text));
+   198	  if (
+   199	    now.choice &&
+   200	    was.choice?.continuation_id !== now.choice.continuation_id &&
+   201	    !accepted?.narration?.some((line) => line.key === now.choice!.prompt.key)
+   202	  )
+   203	    detailLines(s, now.choice.speaker_id ?? 'conversation').push(text(now.choice.prompt.key));
+   204	  return line;
+   205	}
+   206	
+   207	function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
+   208	  s.returnWorld = false;
+   209	  // A complete Give remains legal; the current item-only touch button cannot supply its recipient.
+   210	  if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
+   211	  const was = game.view().view;
+   212	  const item = ['take', 'drop'].includes(b.action_key)
+   213	    ? things(was).find((e) => e.id === b.target_ids[0])
+   214	    : undefined;
+   215	  s.retry ??= { button: b, detail, item: item && text(item.name) };
+   216	  let reply: Reply;
+   217	  try {
+   218	    reply = game.invoke(intentOf(b));
+   219	  } catch (e) {
+   220	    s.fault = (e as Error).message;
+   221	    const line = `(not confirmed: ${s.fault}; the next press retries ${s.retry.button.label})`;
+   222	    (s.retry.detail ? detailLines(s, s.retry.detail) : s.log).push(line);
+   223	    return line;
+   224	  }
+   225	  s.fault = undefined;
+   226	  const line = received(game, reply, was, s, text);
+   227	  if (!game.pending()) s.retry = undefined;
+   228	  return line;
+   229	}
+   230	
+   231	/** World/detail logs, buttons and presses for one game. */
+   232	export function presenter(game: Game) {
+   233	  const { text, label } = sayers(game);
+   234	  const s = restoredLogs(game, text);
+   235	  return {
+   236	    screen: () => {
+   237	      s.log.splice(0, s.log.length - 200);
+   238	      for (const lines of s.details.values()) lines.splice(0, lines.length - 200);
+   239	      const { view, token } = game.view();
+   240	      const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({ ...b, token }));
+   241	      return {
+   242	        view,
+   243	        text,
+   244	        buttons,
+   245	        log: s.log,
+   246	        detail: (id: string) => s.details.get(id) ?? [],
+   247	        pending: game.pending(),
+   248	        fault: s.fault,
+   249	        returnWorld: s.returnWorld,
+   250	      };
+   251	    },
+   252	    // A pending retry keeps the original detail, even when retried from the world.
+   253	    press: (b: Button, detail?: string) => pressed(game, b, detail, s, text),
+   254	    startOverFailed(why?: string) {
+   255	      if (why !== undefined) s.log.push(`(start over: ${why})`);
+   256	    },
+   257	  };
+   258	}
+{
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "prettier": "3.9.9"
+  }
+}
+
+ succeeded in 0ms:
+     1	// Real book components and session; native hosts are leaves, so this is no device/layout proof.
+     2	import assert from 'node:assert/strict';
+     3	import { randomUUID } from 'node:crypto';
+     4	import { readFileSync } from 'node:fs';
+     5	import { createRequire, registerHooks } from 'node:module';
+     6	import { DatabaseSync } from 'node:sqlite';
+     7	import { test } from 'node:test';
+     8	import { pathToFileURL } from 'node:url';
+     9	import { openGame } from '../../authority/local-story/session.ts';
+    10	
+    11	const require = createRequire(import.meta.url);
+    12	const ts = require('typescript');
+    13	const react = pathToFileURL(require.resolve('react')).href;
+    14	registerHooks({
+    15	  resolve(specifier, context, next) {
+    16	    if (specifier === 'react') return { url: 'test:book-state', shortCircuit: true };
+    17	    return specifier === 'react-native'
+    18	      ? { url: 'test:native-hosts', shortCircuit: true }
+    19	      : next(specifier, context);
+    20	  },
+    21	  load(url, context, next) {
+    22	    if (url === 'test:book-state')
+    23	      return {
+    24	        format: 'module',
+    25	        shortCircuit: true,
+    26	        source: `export * from ${JSON.stringify(react)}; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v);`,
+    27	      };
+    28	    if (url === 'test:native-hosts')
+    29	      return {
+    30	        format: 'module',
+    31	        shortCircuit: true,
+    32	        source:
+    33	          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={},Easing={},Animated={View:'View'},PanResponder={};",
+    34	      };
+    35	    if (!url.endsWith('.tsx')) return next(url, context);
+    36	    return {
+    37	      format: 'module',
+    38	      shortCircuit: true,
+    39	      source: ts.transpileModule(readFileSync(new URL(url), 'utf8'), {
+    40	        compilerOptions: {
+    41	          module: ts.ModuleKind.ESNext,
+    42	          target: ts.ScriptTarget.ES2022,
+    43	          jsx: ts.JsxEmit.ReactJSX,
+    44	        },
+    45	      }).outputText,
+    46	    };
+    47	  },
+    48	});
+    49	const { default: Book } = await import('./Book.tsx');
+    50	const fixture = JSON.parse(
+    51	  readFileSync(
+    52	    new URL('../../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
+    53	    'utf8',
+    54	  ),
+    55	);
+    56	
+    57	// Expand pure components only. Native animation and map gestures are exercised in Simulator review.
+    58	function nodes(element: any): any[] {
+    59	  if (Array.isArray(element)) return element.flatMap(nodes);
+    60	  if (!element || typeof element !== 'object') return [];
+    61	  if (typeof element.type === 'function') {
+    62	    if (element.type.name === 'Footer') return [element];
+    63	    if (element.type.name === 'Turn') return [element, ...nodes(element.props.children)];
+    64	    return nodes(element.type(element.props));
+    65	  }
+    66	  return [element, ...nodes(element.props?.children)];
+    67	}
+    68	const words = (element: any): string =>
+    69	  Array.isArray(element)
+    70	    ? element.map(words).join('')
+    71	    : typeof element === 'string' || typeof element === 'number'
+    72	      ? String(element)
+    73	      : words(element?.props?.children ?? []);
+    74	
+    75	function book(cartridge = fixture) {
+    76	  const sql = new DatabaseSync(':memory:');
+    77	  let failRead = 0;
+    78	  const game = openGame(
+    79	    {
+    80	      execSync: (s) => sql.exec(s),
+    81	      isInTransactionSync: () => sql.isTransaction,
+    82	      runSync: (s, ...p) => sql.prepare(s).run(...p),
+    83	      getFirstSync: (s, ...p) => {
+    84	        if (failRead && !--failRead) sql.exec('SELECT * FROM missing_narration');
+    85	        return sql.prepare(s).get(...p) ?? null;
+    86	      },
+    87	      getAllSync: (s, ...p) => sql.prepare(s).all(...p),
+    88	    } as never,
+    89	    cartridge,
+    90	    { newId: randomUUID, kernel_version: `loka-kernel@${'0'.repeat(40)}` },
+    91	  );
+    92	  const state: any[] = [];
+    93	  let slot = 0;
+    94	  const useState = (initial: any) => {
+    95	    const i = slot++;
+    96	    if (!(i in state)) state[i] = typeof initial === 'function' ? initial() : initial;
+    97	    return [
+    98	      state[i],
+    99	      (v: any) => {
+   100	        state[i] = typeof v === 'function' ? v(state[i]) : v;
+   101	      },
+   102	    ];
+   103	  };
+   104	  const draw = () => {
+   105	    slot = 0;
+   106	    (globalThis as any)[Symbol.for('loka-book-test-state')] = useState;
+   107	    return nodes(
+   108	      Book({
+   109	        game,
+   110	        startOver: () => undefined,
+   111	        shell: { confirm: (f) => f(), learned: { seen: () => true, see: () => {} } },
+   112	      }),
+   113	    );
+   114	  };
+   115	  const buttons = () => draw().filter((n) => n.type === 'Pressable' && !n.props.disabled);
+   116	  const labels = () => buttons().map((n) => n.props.accessibilityLabel);
+   117	  const tap = (label: string) => {
+   118	    const button = buttons().find((n) => n.props.accessibilityLabel === label);
+   119	    assert.ok(button, label);
+   120	    button.props.onPress();
+   121	  };
+   122	  const map = () => {
+   123	    const footer = draw().find((n) => n.type.name === 'Footer');
+   124	    assert.ok(footer);
+   125	    footer.props.openMap();
+   126	  };
+   127	  const text = () =>
+   128	    draw()
+   129	      .filter((n) => n.type === 'Text')
+   130	      .map(words);
+   131	  draw();
+   132	  if (game.view().view.chapter) tap('Continue'); // actual chapter route callback
+   133	  return {
+   134	    get p() {
+   135	      return state[0];
+   136	    },
+   137	    game,
+   138	    sql,
+   139	    failRead: (n: number) => (failRead = n),
+   140	    draw,
+   141	    labels,
+   142	    tap,
+   143	    map,
+   144	    text,
+   145	  };
+   146	}
+   147	
+   148	// Breaks: room title scrolls away, room Ways returns, or Back pops to Contents instead of World.
+   149	test('room is focused while Map retains directions and every detail returns to the world', () => {
+   150	  const h = book();
+   151	  const roomScroll = h.draw().find((n) => n.type === 'ScrollView');
+   152	  assert.equal(words(roomScroll).includes('Ferry Landing'), false);
+   153	  assert.ok(words(roomScroll).includes('Reeds crowd a slick wooden landing'));
+   154	  assert.ok(nodes(roomScroll).some((n) => n.props.accessibilityLabel === 'Old Bram, open'));
+   155	  assert.ok(h.text().includes('Ferry Landing'));
+   156	  const drawnLook = h.draw().find((n) => n.props.accessibilityLabel === 'Look, Ferry Landing');
+   157	  assert.ok(drawnLook);
+   158	  const receipts = () => h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+   159	  assert.equal(receipts(), 0);
+   160	  const token = h.game.view().token;
+   161	  h.tap('Look, Ferry Landing');
+   162	  assert.equal(receipts(), 1);
+   163	  assert.notEqual(h.game.view().token, token);
+   164	  assert.equal(h.game.view().view.place.title.key, 'room.ferry_landing.title');
+   165	  assert.deepEqual(h.p.screen().log, []);
+   166	  drawnLook.props.onPress(); // this captured title has the pre-Look freshness token
+   167	  assert.equal(receipts(), 1);
+   168	  assert.deepEqual(h.p.screen().log, ['The page had changed; here it is again.']);
+   169	  assert.ok(h.labels().includes('Old Bram, open'));
+   170	  assert.equal(h.text().includes('North'), false);
+   171	  assert.equal(h.text().includes('Beyond north: Well Lane — a brass lantern.'), false);
+   172	  h.map();
+   173	  assert.ok(h.labels().includes('Go north'));
+   174	  assert.ok(h.text().includes('Beyond north: Well Lane — a brass lantern.'));
+   175	  h.tap('Back to World');
+   176	  h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+   177	  h.tap('Equipment & Inventory');
+   178	  h.tap('Back to World');
+   179	  assert.ok(h.labels().includes('Old Bram, open'));
+   180	  assert.equal(h.labels().includes('Equipment & Inventory'), false);
+   181	  const sections = ['Character', 'Equipment & Inventory', 'Map', 'Journal', 'Settings'];
+   182	  for (const section of sections) {
+   183	    h.tap(h.labels().find((label) => label.startsWith('Contents,'))!);
+   184	    assert.deepEqual(
+   185	      h.labels().filter((label) => sections.includes(label)),
+   186	      sections,
+   187	    );
+   188	    assert.ok(h.text().includes('Contents'));
+   189	    h.tap(section);
+   190	    assert.ok(h.text().includes(section));
+   191	    assert.deepEqual(
+   192	      h.labels().filter((label) => sections.includes(label)),
+   193	      [],
+   194	    );
+   195	    h.tap('Back to World');
+   196	    assert.ok(h.labels().includes('Old Bram, open'));
+   197	  }
+   198	  h.sql.close();
+   199	});
+   200	
+    22	export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
+    23	  return (
+    24	    <Pressable
+    25	      accessibilityRole="button"
+    26	      accessibilityLabel={p.label}
+    27	      onPress={p.onPress}
+    28	      style={{ minHeight: 44, justifyContent: 'center' }}
+    29	    >
+    30	      {p.children}
+    31	    </Pressable>
+    32	  );
+    33	}
+    34	
+    35	export function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
+    36	  return (
+    37	    <Tap label={b.label} onPress={() => press(b)}>
+    38	      <Text style={{ ...prose, color: paper.accent }}>{b.label}</Text>
+    39	    </Tap>
+    40	  );
+    41	}
+    42	
+    43	export function Leave(p: { leave: () => void }) {
+    44	  return (
+    45	    <Tap label="Leave" onPress={p.leave}>
+    46	      <Text style={{ ...prose, color: paper.accent }}>Leave</Text>
+    47	    </Tap>
+    48	  );
+    49	}
+    50	
+    51	// The place: its title (a tap looks), description, who and what is here, its own actions (an
+    52	// offered quest among them) and the log. NPCs open full details, as items do.
+    53	export function RoomPage(p: {
+    54	  view: GameView;
+    55	  text: Say;
+    56	  log: string[];
+    57	  g: Grouped;
+    58	  press: (b: Button) => void;
+    59	  open: (id: string) => void;
+    60	  openChoice: () => void;
+    61	}) {
+    62	  const title = (
+    63	    <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.text(p.view.place.title.key)}</Text>
+    64	  );
+    65	  return (
+    66	    <View style={{ flex: 1 }}>
+    67	      <View style={{ paddingHorizontal: 24, paddingTop: 24 }}>
+    68	        {p.g.look ? (
+    69	          <Tap label={`Look, ${p.text(p.view.place.title.key)}`} onPress={() => p.press(p.g.look!)}>
+    70	            {title}
+    71	          </Tap>
+    72	        ) : (
+    73	          title
+    74	        )}
+    75	      </View>
+    76	      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }}>
+    77	        <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
+    78	        <Here view={p.view} text={p.text} open={p.open} />
+    79	        {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
+    80	          <Tap label="Continue conversation" onPress={p.openChoice}>
+    81	            <Text style={{ ...prose, color: paper.accent }}>Continue conversation</Text>
+    82	          </Tap>
+    83	        )}
+    84	        {p.g.place.map((b) => (
+    85	          <Act key={b.label} b={b} press={p.press} />
+    86	        ))}
+    87	        {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
+    88	        {ended(p.view) !== '' && <Text style={{ ...note, marginTop: 12 }}>{ended(p.view)}</Text>}
+    89	      </ScrollView>
+    90	    </View>
+    91	  );
+    92	}
+    93	
+    94	function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
+    95	  return p.view.entities.map((e) => {
+    96	    const name = p.text(e.name);
+    97	    return (
+    98	      <Tap key={e.id} label={`${name}, open`} onPress={() => p.open(e.id)}>
+    99	        <Text style={prose}>
+   100	          <Text style={{ fontWeight: '500', textDecorationLine: 'underline' }}>{cap(name)}</Text> is
+   101	          here.
+   102	        </Text>
+   103	      </Tap>
+   104	    );
+   105	  });
+   106	}
+   107	
+   198	type BodyProps = {
+   199	  page?: Page;
+   200	  screen: Screen;
+   201	  g: ReturnType<typeof group>;
+   202	  press: (b: Button, detail?: string) => void;
+   203	  open: (p: Page) => void;
+   204	  startOver: () => void;
+   205	  chapterDone: () => void;
+   206	  world: () => void;
+   207	};
+   208	
+   209	function Body(p: BodyProps) {
+   210	  const { view, text, log } = p.screen;
+   211	  const { page } = p;
+   212	  if (view.scene)
+   213	    return <ScenePage scene={view.scene} text={text} next={p.g.continue} press={p.press} />;
+   214	  if (page?.kind === 'chapter' && view.chapter)
+   215	    return <ChapterPage title={text(view.chapter.title)} done={p.chapterDone} />;
+   216	  const openThing = (id: string) => p.open({ kind: 'thing', id });
+   217	  if (!page)
+   218	    return (
+   219	      <RoomPage
+   220	        view={view}
+   221	        text={text}
+   222	        log={log}
+   223	        g={p.g}
+   224	        press={p.press}
+   225	        open={openThing}
+   226	        openChoice={() => p.open(conversation(view))}
+   227	      />
+   228	    );
+   229	  if (page.kind === 'dialogue') return <NpcDetail {...p} speaker={page.speaker} />;
+   230	  if (page.kind === 'position')
+   231	    return <PositionPage current={view.position} actions={p.g.position} press={p.press} />;
+   232	  if (page.kind === 'thing') return <Item {...p} id={page.id} />;
+   233	  if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
+   234	  if (page.kind === 'character')
+   235	    return <CharacterPage resources={view.resources} position={view.position} text={text} />;
+   236	  if (page.kind === 'map') return <MapPage view={view} text={text} g={p.g} press={p.press} />;
+   237	  if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} />;
+   238	  if (page.kind === 'journal') return <JournalPage view={view} text={text} />;
+   239	  return (
+   240	    <CarryingPage items={view.inventory} equipment={view.equipment} text={text} open={openThing} />
+   241	  );
+   242	}
+   243	
+   244	function Item(p: {
+
+exec
+/bin/zsh -lc "python3 -c 'from pathlib import Path; import re; root=Path(\"[private-path]").read_text().strip(); names=(\"c1-dialogue-sol-answer.md\",\"c1-dialogue-sol-fix-answer.md\"); [(print(name),print(re.sub(r\"[private-path]"'^'"\\s"'`'"\\\"<>]+|[PRIVATE_PATH]"'^'"\\s"'`'"\\\"<>]+|[private-path]"'^'"\\s"'`'"\\\"<>]+\",\"[private path]\",(Path(root)/name).read_text()) if (Path(root)/name).exists() else \"unavailable\")) for name in names]' " in [private-path]
+ succeeded in 0ms:
+python3: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+python3: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+python3: warning: confstr() failed with code 5: couldn't get path of DARWIN_USER_TEMP_DIR; using /tmp instead
+python3: error: couldn't create cache file '[private-path]' (errno=Operation not permitted)
+c1-dialogue-sol-answer.md
+```text
+Verdict: CHANGESREQUIRED
+PR: 144
+HEAD: 7a2a140ecdadf33a0684124862bcf178a52b64fb
+BASE: 7845f9b1ab8924013d460b7dda29f21e148eb7e5
+Independent source review; authored none.
+
+F1 | should-fix | mobile/app/book/presenter.ts:181
+The new game.lastNarration() storage read occurs outside the invoke error handler. If it fails after an authored command commits, the exception escapes Book.tsx:62 before redraw. The committed consequence is omitted, fault UI remains empty, and presenter retry context is not cleared.
+Reproduced with the real sampler/session and in-memory SQLite: fail the fourth getFirstSync operation while accepting Bram’s quest. The quest becomes active and pending=false, but press throws and NPC history contains only the prompt. The control appends the authored acceptance.
+Handle this post-commit read failure while preserving the saved result and refreshing the UI.
+
+Personally run:
+- presenter.test.ts, model.test.ts, c1.test.ts, polish.test.ts: 32 passed.
+- Existing joystick stale-drag test: 1 passed.
+- In-memory sampler prompt restoration and Take/Drop probes: expected results.
+- Post-commit read-fault control/probe: reproduced F1.
+- git diff --check: passed; checkout clean at exact HEAD.
+
+Reported:
+- Root independently verified all six exact-head checks SUCCESS; I did not query CI.
+
+Limits:
+Read-only source review; no mutations, installs, builds or native/GUI proof. Actual native interaction and owner phone/Gate C1 acceptance remain separate pending work. Sampler 0.0.1’s absent Look and conditional fixed-text title are correct documented behavior.
+
+Simplicity:
+Existing platform controls and presenter state are reused; no concrete over-engineering finding. No production engine/store/protocol/content/native/App/dependency changes.
+```
+c1-dialogue-sol-fix-answer.md
+```text
+Verdict: APPROVE
+PR: 144
+Reviewed HEAD: eb81d98825610398b08d6bab0e6ffe16822a7245
+Source-reviewed baseline: 7a2a140ecdadf33a0684124862bcf178a52b64fb
+Independent scoped fix-round1 review; authored none.
+
+Primary F1 — CLOSED
+mobile/app/book/presenter.test.ts:32
+Valid pending/refused Take and Drop replies now exercise received(), assert unchanged view/custody, returnWorld=false and literal non-success output. Book.tsx:65 and model.ts:39 consequently retain the projected item detail. Reported action-key-only premature-return mutant fails at the returnWorld assertion.
+
+Sol F1 / primary F2 — CLOSED
+mobile/app/book/presenter.ts:181
+Postcommit lastNarration failures are caught without discarding the saved reply. Authored acceptance reaches the original NPC history, fault UI renders, pending remains false, and pressed() clears presenter retry context.
+mobile/app/book/polish.test.ts:190 verifies saved Bram quest acceptance, subsequent fresh movement, one acceptance entry, cleared fault and correctly named pickup. Session retry clears before the failed narration read, preventing replay of the committed command.
+
+New findings: none.
+
+Personally run:
+- presenter.test.ts and polish.test.ts: 17 passed, 0 failed.
+- Verified 10 retained evidence artifact hashes.
+- Diff whitespace check; exact HEAD confirmed; checkout clean.
+- Inspected fix diff and directly relevant callers.
+
+Reported, not personally executed:
+- Three red controls failed; restored targeted tests passed.
+- Focused suite: 42 passed, one existing optional skip.
+- Author pre-push passed; root verified exact-head checks finished SUCCESS. CI not independently queried.
+
+Limits:
+No writes, mutations, installs, full check_all, builds or native/GUI runs. No phone acceptance or whole Gate C1 claim. Separate sampler Look work excluded.
+
+Simplicity:
+Lean already. Necessary catch and focused regression coverage; no complexity finding. net: 0 lines possible.
+```
+
+codex
+F3 matches the requirements: the test clicks the offered title control, checks literal receipt counts and room identity, then reuses the captured callback to require a stale-view refusal without another receipt. The fix commit changes only that test and the UI spec. The sampler files match PR145 byte-for-byte.
+exec
+/bin/zsh -lc "rg -n 'F3|665b3|missing.dispatch|captured.token|title.Look|title Look' docs/reviews docs/evidence/c1-dialogue* 2>/dev/null" in [private-path]
+ exited 1 in 0ms:
+zsh:1: no matches found: docs/evidence/c1-dialogue*
+
+exec
+/bin/zsh -lc "set -o pipefail
+mise exec -- node --test --test-reporter=spec mobile/app/book/polish.test.ts 2>&1 | /usr/bin/perl -pe 's{(?:file://)?[private-path]"'^'"\\s\\x27\\x22)]+}{[private path]}g; s{[PRIVATE_PATH]"'^'"\\s\\x27\\x22)]+}{[private path]}g; s{[private-path]"'^'"\\s\\x27\\x22)]+}{[private path]}g'" in [private-path]
+exec
+/bin/zsh -lc "git diff --check 0606d10d37dc0f0b1a49a02ebad8b0dac67d3183 HEAD 2>/dev/null; git status --porcelain 2>/dev/null; git rev-parse HEAD 2>/dev/null; ast-grep --lang tsx -p '<RoomPage "'$$$ />'"' --json mobile/app/book/Book.tsx; nl -ba mobile/app/book/Book.tsx | sed -n '49,115p'; ast-grep outline mobile/app/book/model.ts" in [private-path]
+ succeeded in 651ms:
+665b3ff6c0fbed1109a8aa13576bad710a623d11
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+[
+{
+  "text": "<RoomPage\n        view={view}\n        text={text}\n        log={log}\n        g={p.g}\n        press={p.press}\n        open={openThing}\n        openChoice={() => p.open(conversation(view))}\n      />",
+  "range": {
+    "byteOffset": {
+      "start": 6989,
+      "end": 7184
+    },
+    "start": {
+      "line": 218,
+      "column": 6
+    },
+    "end": {
+      "line": 226,
+      "column": 8
+    }
+  },
+  "file": "mobile/app/book/Book.tsx",
+  "lines": "      <RoomPage\n        view={view}\n        text={text}\n        log={log}\n        g={p.g}\n        press={p.press}\n        open={openThing}\n        openChoice={() => p.open(conversation(view))}\n      />",
+  "charCount": {
+    "leading": 6,
+    "trailing": 0
+  },
+  "language": "Tsx"
+}
+]
+    49	export default function Book(p: BookProps) {
+    50	  const [pr] = useState(() => presenter(p.game));
+    51	  const [stack, setStack] = useState<Page[]>(() => initialPages(pr.screen().view));
+    52	  const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
+    53	  const [, redraw] = useState(0);
+    54	  const screen = pr.screen();
+    55	  const { view } = screen;
+    56	  const go = (next: Page[], dir: 1 | -1) => {
+    57	    setStack(next);
+    58	    setFlip((f) => ({ turn: f.turn + 1, dir }));
+    59	  };
+    60	  const press = (b: Button, detail?: string) => {
+    61	    const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
+    62	    pr.press(b, detail);
+    63	    if (stale) return redraw((n) => n + 1);
+    64	    const after = pr.screen();
+    65	    let next = pagesAfter(stack, view, after.view);
+    66	    if (after.returnWorld && next === stack) next = [];
+    67	    if (next === stack && npcPage(stack.at(-1), view) && !view.scene && !after.view.scene)
+    68	      redraw((n) => n + 1);
+    69	    else go(next, 1);
+    70	  };
+    71	  const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1));
+    72	  const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
+    73	  return (
+    74	    <BookView
+    75	      screen={screen}
+    76	      stack={stack}
+    77	      flip={flip}
+    78	      go={go}
+    79	      press={press}
+    80	      refused={refused}
+    81	      startOver={startOver}
+    82	      shell={p.shell}
+    83	    />
+    84	  );
+    85	}
+    86	
+    87	type ViewProps = {
+    88	  screen: Screen;
+    89	  stack: Page[];
+    90	  flip: { turn: number; dir: 1 | -1 };
+    91	  go: (pages: Page[], dir: 1 | -1) => void;
+    92	  press: (b: Button, detail?: string) => void;
+    93	  refused: (line: string) => void;
+    94	  startOver: () => void;
+    95	  shell: Shell;
+    96	};
+    97	
+    98	// The drawing and route callbacks stay separate from the shell's React state and animation.
+    99	export function BookView(p: ViewProps) {
+   100	  const g = group(p.screen.buttons);
+   101	  const page = p.stack.at(-1);
+   102	  const open = (page: Page) => p.go([...p.stack, page], 1);
+   103	  const walk = (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button);
+   104	  const ctx = { ...p, g, open, walk, world: () => p.go([], -1) };
+   105	  return (
+   106	    <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
+   107	      <Turn turn={p.flip.turn} dir={p.flip.dir}>
+   108	        <Body {...ctx} page={page} chapterDone={() => p.go([], 1)} />
+   109	      </Turn>
+   110	      <Bottom {...ctx} page={page} />
+   111	    </SafeAreaView>
+   112	  );
+   113	}
+   114	
+   115	// The footer (or Back on a page), the status line and a press's fault.
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+mobile/app/book/model.ts
+  8: export type Exit = { direction: string; button: Button };
+  9: export type Thing =
+ 11: export type Page =
+ 26: export const npcPage = (page: Page | undefined, view: GameView) =>
+ 31: export const things = (v: GameView): Thing[] =>
+ 39: export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
+ 47: OWN = ['look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']
+ 49: export function group(buttons: Button[]) {
+ 72: export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+ 75: type Offered = GameView['exits'][number] | NonNullable<GameView['choice']>['choices'][number];
+ 76: export const why = (e: Offered, text: (key: string) => string) =>
+ 81: export const refused = (e: GameView['exits'][number], text: (key: string) => string) =>
+ 91: export const absent = (v: GameView) =>
+100: OVER = ['resolved', 'failed', 'abandoned']
+101: export const ended = (v: GameView) =>
+106: export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+110: export type Pool = NonNullable<GameView['resources']>[number];
+111: amount = (r: Pool) => `${r.resource.key} ${r.current} of ${r.maximum}`
+112: export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
+117: export const said = (
+126: ANIMALS = 'Rat Ox Tiger Rabbit Dragon Snake Horse Goat Monkey Rooster Dog Pig'.split(' ')
+127: STARTS = ['eleven', 'one', 'three', 'five', 'seven', 'nine']
+128: export const branch = (t: number) => {
+134: export const initialPages = (v: GameView): Page[] =>
+138: export const conversation = (v: GameView): Page =>
+145: type Store = { getItemSync(key: string): string | null; setItemSync(key: string, v: string): void };
+146: export type Hint = ReturnType<typeof hint>;
+147: export function hint(store: Store, key: string) {
+
+ succeeded in 1712ms:
+(node:59400) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of [private path] is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [private path]
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (100.902042ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (39.805584ms)
+✔ NPC details own choices and results while Leave preserves the pending conversation (68.206ms)
+✔ only the room position target opens offered controls and a seated player can stand (27.622917ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (32.316083ms)
+✔ only confirmed pickup returns World, including a retry from another page (47.839084ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (61.4975ms)
+✔ inventory Drop returns World with one named event only after confirmation (37.728ms)
+✔ other item actions retain their detail and World consequences (15.3775ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1320.588125
+
+exec
+/bin/zsh -lc "nl -ba mobile/app/book/model.ts | sed -n '47,71p'; nl -ba mobile/app/book/presenter.ts | sed -n '89,106p'; rg -n 'F3|665b3|missing.dispatch|captured.token|title.Look|title Look' docs/reviews docs/evidence --glob '*.md' --glob '*.log'" in [private-path]
+ exited 1 in 0ms:
+    47	const OWN = ['look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']; // drawn in their own places, not as place actions
+    48	
+    49	export function group(buttons: Button[]) {
+    50	  const dir = (b: Button) => (b.input as { direction?: string }).direction;
+    51	  const aimed = (b: Button) => b.target_ids.length > 0;
+    52	  return {
+    53	    look: buttons.find((b) => b.action_key === 'look' && !aimed(b)),
+    54	    exits: buttons.flatMap((b) =>
+    55	      b.action_key === 'move' && dir(b) ? [{ direction: dir(b)!, button: b }] : [],
+    56	    ),
+    57	    door: (direction: string) =>
+    58	      buttons.filter((b) => b.action_key !== 'move' && dir(b) === direction),
+    59	    continue: buttons.find((b) => b.action_key === 'continue'),
+    60	    position: buttons.filter((b) => ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key)),
+    61	    choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
+    62	    // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
+    63	    place: buttons.filter(
+    64	      (b) => !aimed(b) && !dir(b) && !OWN.includes(b.action_key) && b.action_key !== 'scan',
+    65	    ),
+    66	    on: (id: string) => buttons.filter((b) => b.target_ids.includes(id)),
+    67	  };
+    68	}
+    69	
+    70	// Cartridge text marks touch details as [label](detail_key); the controller has no detail action
+    71	// yet, so show the label as plain prose. ponytail: details become tappable when one is offered.
+    89	function said(r: Reply, text: Say, view: GameView, fallback?: string): string {
+    90	  if (r.kind === 'pending') return '(pending: not confirmed saved; press any button to retry it)';
+    91	  if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
+    92	  if (r.kind !== 'saved') return `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
+    93	  const d = r.decision;
+    94	  if (d.kind === 'rejected') {
+    95	    const { code } = d.error; // the same sentence as a refused drag (model.ts `refused`)
+    96	    return SENTENCE[code] ?? `You can't do that: ${reason(code)}.`;
+    97	  }
+    98	  if (d.kind === 'fault') return '';
+    99	  const lines = d.narration ?? [];
+   100	  const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
+   101	  return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
+   102	}
+   103	
+   104	// Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
+   105	// still have a meaningful status line. ponytail: inferred from the view; kernel schedule narration replaces it.
+   106	function comings(was: GameView, now: GameView, text: Say): string[] {
+
+exec
+/bin/zsh -lc 'git rev-parse HEAD 2>/dev/null; git status --porcelain 2>/dev/null; git diff --check 0606d10d37dc0f0b1a49a02ebad8b0dac67d3183 HEAD 2>/dev/null; git diff --name-only e3c4fddf2bb74c5e4ae4a0e79feda14e83beb434 HEAD 2>/dev/null' in [private-path]
+ succeeded in 164ms:
+665b3ff6c0fbed1109a8aa13576bad710a623d11
+AGENTS.md
+docs/ROADMAP.md
+docs/decisions/README.md
+docs/decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md
+docs/system/README.md
+docs/system/architecture.md
+docs/system/book-ui.md
+docs/system/owner-rules.md
+mobile/app/book/Book.tsx
+mobile/app/book/Footer.tsx
+mobile/app/book/Menu.tsx
+mobile/app/book/model.ts
+mobile/app/book/pages.tsx
+mobile/app/book/polish.test.ts
+mobile/app/book/presenter.test.ts
+mobile/app/book/presenter.ts
+mobile/app/book/touch.test.ts
+mobile/authority/local-story/smoke.test.ts
+
+codex
+```text
+Verdict: APPROVE
+PR: 144
+SHA: 665b3ff6c0fbed1109a8aa13576bad710a623d11
+Fresh independent scoped fix-round2 review; authored none.
+
+F3 — CLOSED
+mobile/app/book/polish.test.ts:156
+Actual offered title Look commits receipt 0→1, changes freshness, retains literal room identity, and adds no duplicate World heading. Reusing the captured callback produces the literal stale-view line without a second receipt. Expected results are independent; missing dispatch or dropped freshness would fail these assertions.
+
+docs/system/book-ui.md:21
+Correctly identifies sampler 0.0.2 and links the owner repair while retaining conditional fixed-text behavior when Look is absent.
+
+New findings: none. Prior F1/F2 remain closed.
+
+Personally checked:
+- Requirements before fix diff; touched test/doc and direct title caller.
+- polish.test.ts: 9 passed, 0 failed.
+- Sampler/content files byte-identical to reviewed PR145.
+- Fix changes only test/doc; runtime unchanged from approved UI baseline.
+- Whitespace check passed; exact HEAD and clean worktree reconfirmed.
+
+Reported, not personally rerun:
+- Missing-dispatch/dropped-token mutants RED, restored GREEN.
+- All six exact-head CI checks green; CI not queried.
+
+Limits:
+No writes, mutations, installs, builds, native/GUI or full check_all.
+Combined native proof remains separate; owner phone/manual Gate acceptance pending.
+
+Simplicity:
+Lean already. Existing test extended without new machinery.
+net: 0 lines possible.
+```
+tokens used
+47,742
+```text
+Verdict: APPROVE
+PR: 144
+SHA: 665b3ff6c0fbed1109a8aa13576bad710a623d11
+Fresh independent scoped fix-round2 review; authored none.
+
+F3 — CLOSED
+mobile/app/book/polish.test.ts:156
+Actual offered title Look commits receipt 0→1, changes freshness, retains literal room identity, and adds no duplicate World heading. Reusing the captured callback produces the literal stale-view line without a second receipt. Expected results are independent; missing dispatch or dropped freshness would fail these assertions.
+
+docs/system/book-ui.md:21
+Correctly identifies sampler 0.0.2 and links the owner repair while retaining conditional fixed-text behavior when Look is absent.
+
+New findings: none. Prior F1/F2 remain closed.
+
+Personally checked:
+- Requirements before fix diff; touched test/doc and direct title caller.
+- polish.test.ts: 9 passed, 0 failed.
+- Sampler/content files byte-identical to reviewed PR145.
+- Fix changes only test/doc; runtime unchanged from approved UI baseline.
+- Whitespace check passed; exact HEAD and clean worktree reconfirmed.
+
+Reported, not personally rerun:
+- Missing-dispatch/dropped-token mutants RED, restored GREEN.
+- All six exact-head CI checks green; CI not queried.
+
+Limits:
+No writes, mutations, installs, builds, native/GUI or full check_all.
+Combined native proof remains separate; owner phone/manual Gate acceptance pending.
+
+Simplicity:
+Lean already. Existing test extended without new machinery.
+net: 0 lines possible.
+```
