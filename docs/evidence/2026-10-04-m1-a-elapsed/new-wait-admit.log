@@ -1,0 +1,128 @@
+✔ trusted elapsed advances and drains the existing due job with its owned event (14.247792ms)
+✔ trusted elapsed rejects invalid identity and intervals without adopting anything (3.284792ms)
+✔ normal player step cannot admit elapsed even through an offered alias (2.521ms)
+✔ elapsed ActionSet offers neither Wait nor the authority elapsed command (2.562333ms)
+✖ elapsed player Wait refuses even when a forged alias offers it (3.7495ms)
+✔ elapsed loader requires the new kernel API and schedule owner (3.278792ms)
+✔ loader rejects authority elapsed actions and elapsed Wait aliases (3.131458ms)
+✔ loader rejects duration in elapsed profiles while the frozen legacy fixture loads (2.991ms)
+✔ numeric-vectors: rng_steps from initial_rng (0.984084ms)
+✔ numeric-vectors: division (0.125792ms)
+✔ numeric-vectors: invalid_json (0.550417ms)
+✔ numeric-vectors: canonical (0.168125ms)
+✔ adverse-cases: uniform (0.207667ms)
+✔ decode edge cases (0.299542ms)
+✔ encode escapes and key order (0.084792ms)
+✔ encode rejects values outside the profile (0.093417ms)
+✔ nesting is limited to 128 containers (0.309667ms)
+✔ hash is lowercase SHA-256 of the canonical bytes (0.771ms)
+✔ checked integers overflow as a typed error (0.142833ms)
+✔ unsafe operands are integer_overflow (0.1345ms)
+✔ uniform accepts bound 2^32 (0.06225ms)
+✔ uniform rejects a bad draw budget (0.077166ms)
+✔ IdSource ids (0.232792ms)
+✔ IdSource rejects non-string ids (0.096958ms)
+✔ IdSource rejects a bad ordinal (0.087791ms)
+✔ CommandId known answers (0.369875ms)
+✔ CommandId rejects bad ids (0.1325ms)
+✔ job CommandId known answers (0.233292ms)
+✔ job CommandId rejects bad input (0.066083ms)
+✔ elapsed CommandId matches independently frozen run/world/interval vectors (1.102375ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 29
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 157.334292
+
+✖ failing tests:
+
+test at kernel/ts/test/elapsed.test.ts:143:1
+✖ elapsed player Wait refuses even when a forged alias offers it (3.7495ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   delta: {
+  +     ops: [
+  +       {
+  +         from: 21600,
+  +         op: 'time.advance',
+  +         to: 68400,
+  +         writer_group: 0
+  +       },
+  +       {
+  +         destination_id: '91fde0fc-dd14-846f-826e-245e45d16ec7',
+  +         entity_id: 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2',
+  +         op: 'entity.transfer',
+  +         source_id: '1a7c3699-2844-8a55-b29f-eac079c7bf50',
+  +         writer_group: 1
+  +       },
+  +       {
+  +         job_id: '0f5f2329-bcff-82f4-948a-3d22a75fb068',
+  +         op: 'job.complete',
+  +         writer_group: 1
+  +       },
+  +       {
+  +         due_time: 108000,
+  +         job: {
+  +           cartridge_id: 'ashmere_ferry',
+  +           cartridge_version: '0.0.1',
+  +           key: 'bram',
+  +           kind: 'npc'
+  +         },
+  +         job_id: '035d3ce3-f3f4-8640-90e0-f3ce0502adfb',
+  +         op: 'job.schedule',
+  +         writer_group: 1
+  +       }
+  +     ]
+  -   error: {
+  -     code: 'permission_denied'
+      },
+  +   effects: [],
+  +   events: [
+  +     {
+  +       causation_id: '2c814147-52f5-8be6-8919-4c4bf7939a69',
+  +       correlation_id: '9293401f-d48d-8e4e-aa5e-e773cf894076',
+  +       id: '3eabc14a-39e5-8f8c-822f-4c60f14ae614',
+  +       logical_time: 68400,
+  +       payload: {
+  +         entity_id: 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2',
+  +         room_id: '91fde0fc-dd14-846f-826e-245e45d16ec7',
+  +         type: 'entity_entered_room'
+  +       },
+  +       position: 1,
+  +       scope: {
+  +         kind: 'instance',
+  +         world_context_id: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
+  +       },
+  +       world_context_id: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
+  +     }
+  +   ],
+  +   kind: 'accepted',
+  +   outcome: 'waited',
+  +   rng: [
+  +     1,
+  +     2,
+  +     3,
+  +     4
+  +   ]
+  -   kind: 'rejected'
+    }
+  
+      at TestContext.<anonymous> (file://[private-path]
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { kind: 'accepted', outcome: 'waited', delta: { ops: [Array] }, events: [ [Object] ], effects: [], rng: [ 1, 2, 3, 4 ] },
+    expected: { kind: 'rejected', error: { code: 'permission_denied' } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,4 @@
+** (ArgumentError) protocol/ outside the schema subset:
+command.schema.json#/$defs/CommandPayload/oneOf/24/type: invalid
+    lib/loka/core/contracts/schema.ex:57: Loka.Core.Contracts.Schema.flatten!/1
+    lib/loka/core/contracts.ex:36: (module)

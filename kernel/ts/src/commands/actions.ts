@@ -109,7 +109,9 @@ function engine(world: World): ActionSet {
     Object.hasOwn(world.cartridge.lock.capabilities, CAPABILITY_OWNERS.command[verb].split('@')[0]);
   return Object.fromEntries(
     Object.entries(VERBS)
-      .filter(([verb]) => locked(verb))
+      .filter(
+        ([verb]) => locked(verb) && !(verb === 'wait' && world.cartridge.manifest.time_policy),
+      )
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
@@ -186,6 +188,7 @@ export const detailOf = (world: World, t: RecipeTarget): EntityId =>
  * invoked `action`, only that action of the set is matched.
  */
 export function refusal(world: World, payload: CommandPayload, steps: Steps, action?: Key) {
+  if (payload.type === 'wait' && world.cartridge.manifest.time_policy) return 'permission_denied';
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;
   const matching = Object.values(resolved(world, actor)).filter(

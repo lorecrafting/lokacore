@@ -182,4 +182,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [M4-A first-encounter contract](2026-10-03-m4-first-encounter-contract-review.md): PR #151 at `04fa450`, independent docs-only APPROVE; literal RNG outcomes and M5/M6 prerequisites verified; no implementation claimed.
 
+- [M1-A elapsed authority contract](2026-10-04-m1-a-clock-review.md): PR #153, primary fix-round 1 APPROVE at `e44f810`; M1A-01 and separate Sol source F1 closed; historical reviews retained.
 - [M5 chapel-approach content](2026-10-04-m5-shrine-approach-content-review.md): PR #152 at `88a400a`, initial primary CHANGES REQUIRED; scoped fix head `4ca3952` primary APPROVE, M5C-01/M5C-02 closed; bounded content/hash/prototype/ID checks and independent compiler/SQLite walks pass; missing-return mutant red/restoration green.

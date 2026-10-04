@@ -63,7 +63,7 @@ From docs/archive/spec/00-first-cartridge-design.md: terrain cost table and "ave
 - **Encoding/hash/id**: foundation/canonical.ts:10-20 (SAFE 2^53-1, MAX_DEPTH 128, surrogates), lib/loka/core/canonical.ex:10, :161; sha256.ts (all); foundation/id_source.ts:34-43 (UUIDv8); rng.ts / rng.ex (xoshiro constants); `INTENT_DIGEST_VERSION`.
 - **Schema sizes**: aliases/keywords/variants 16, recipe sequence 16, costs 8, room details 64, actions 64, narration lines 64, entity capacity max 1024, target_ids 8, ResourceInt 32-bit bounds, ARTIFACT_MAX_BYTES 4 MiB; lib/loka/content/checks.ex:24 `@enclosing 3` (nesting depth bookkeeping).
 - **Mechanism tables**: COMPASS (runtime/decision.ts:205, from room.schema), barrier `MOVES` transitions (kernel/ts/src/mechanics/barrier/rule.ts:39-44), check order (target, cooldown, costs, check), target `normalize` stop-words (target.ts).
-- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:209 `*1000` (µs); session.ts:21 ID_PREFIX.
+- **Host/telemetry**: trace.ts:73 OBSERVED 1000, :77 CAP 5000, :89 WRITE 2; authority.ts:201 `*1000` (µs); session.ts:21 ID_PREFIX.
 - **UI layout/animation**: joystick.ts (ZOOM 2.6, CANCEL 6, TAP_MS 500, STAIR), MapDrawing.tsx, Footer.tsx, Turn.tsx, Book.tsx, pages.tsx sizes, paper.ts colours.
 - **Test-only**: all `*.test.ts` seeds and fixtures (faults.test.ts SEEDS, saves.test.ts SEED, etc.).
 
@@ -82,3 +82,5 @@ Repo-wide grep for `3600|86400|% 24` (excluding node_modules, tests, docs, fixtu
 | P8 | kernel/ts/play/text.ts:101-105; play/main.ts:99 | `wait [hours]` 1..24, converted with `* 3600` | calendar units_per_hour / hours_per_day; `world.wait.max` (W16) |
 | P9 | kernel/ts/play/text.ts:241-248 | status line lists exactly `hp`, `ma`, `mv` (other pools never shown) | iterate `world.resourceSpecs` (as view.ts does) |
 | P6 | DONE | the fixed RNG seed `[1,2,3,4]` and world context of every new game: the host draws both per lineage ([#129](https://github.com/lorecrafting/lokacore/pull/129), [Simulator evidence](evidence/2026-10-02-c1-host-simulator/README.md)) | not a cartridge value |
+
+M1-A installs the opt-in content-owned elapsed rate contract ([decision](decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md)); it installs no rate default or clock conversion. M1-B owns driver/remainder and sampler rate; M1-C retains the calendar/period/recovery follow-ons. Existing W rows are not marked DONE by this contract-only slice.

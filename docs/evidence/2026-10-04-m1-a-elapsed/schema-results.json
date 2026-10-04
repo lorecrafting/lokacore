@@ -1,0 +1,129 @@
+[
+  {
+    "control": "profile-required",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 0
+      },
+      {
+        "stage": "fixtures",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "rate-required",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 0
+      },
+      {
+        "stage": "fixtures",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "rate-minimum",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 0
+      },
+      {
+        "stage": "fixtures",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "profile-const",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "policy-closed",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "elapsed-type",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "elapsed-actor_id",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 0
+      },
+      {
+        "stage": "fixtures",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "elapsed-run_id",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 0
+      },
+      {
+        "stage": "fixtures",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "elapsed-from",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 0
+      },
+      {
+        "stage": "fixtures",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "elapsed-until",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 0
+      },
+      {
+        "stage": "fixtures",
+        "exit": 1
+      }
+    ]
+  },
+  {
+    "control": "elapsed-closed",
+    "stages": [
+      {
+        "stage": "generate",
+        "exit": 1
+      }
+    ]
+  }
+]

@@ -175,7 +175,7 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/runtime/world.ts:67`): `kernel_api` 1.1, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
 `dialogue`, `equipment`, `position`, `scene` (`:35`); without a command, so without a rule, `fact`, `policy`,
@@ -221,3 +221,9 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 `carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
 (`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). The phone bundles its known answer
 (`mobile/app/App.tsx`).
+
+## M1-A elapsed policy
+
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.1; old fixture requirement ranges remain unchanged.
+
+Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).

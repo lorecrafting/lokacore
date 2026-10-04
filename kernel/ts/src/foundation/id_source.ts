@@ -30,6 +30,20 @@ export function jobCommandId(jobId: string, occurrence: number): string {
   return uuid(encode(['loka-job-command-v1', jobId, occurrence]));
 }
 
+/** M1-A: durable run/world namespace and fixed logical interval, never placement or wall time. */
+export function elapsedCommandId(
+  runId: string,
+  worldContextId: string,
+  from: number,
+  until: number,
+): string {
+  if (typeof runId !== 'string' || typeof worldContextId !== 'string')
+    throw new KernelError('invalid_id');
+  if (![from, until].every((n) => Number.isSafeInteger(n) && n >= 0))
+    throw new KernelError('invalid_ordinal');
+  return uuid(encode(['loka-elapsed-command-v1', runId, worldContextId, from, until]));
+}
+
 function uuid(json: string): string {
   const b = sha256(utf8(json)).slice(0, 16);
   b[6] = (b[6] & 0x0f) | 0x80; // version 8

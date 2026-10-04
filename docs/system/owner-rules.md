@@ -171,3 +171,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - PM adoption under autonomous mechanics authority: [M1–M23 queue, clock/safety and chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md); each implementation still amends active specs and follows reviewed delivery.
 
 - PM decision under mechanics delegation: [first cellar encounter](../decisions/pm-decision-first-encounter-2026-10-03.md), planned contract before M5/M6; new combat equations are not silently inherited from draft PR #136.
+
+- Elapsed cartridge policy and trusted receipt delivery use the [M1-A PM contract](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md); legacy play-time behavior stays frozen.

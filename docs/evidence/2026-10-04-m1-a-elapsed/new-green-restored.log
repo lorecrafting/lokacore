@@ -1,0 +1,42 @@
+✔ trusted elapsed advances and drains the existing due job with its owned event (14.364459ms)
+✔ trusted elapsed rejects invalid identity and intervals without adopting anything (3.97275ms)
+✔ normal player step cannot admit elapsed even through an offered alias (4.762667ms)
+✔ elapsed ActionSet offers neither Wait nor the authority elapsed command (2.699208ms)
+✔ elapsed player Wait refuses even when a forged alias offers it (2.690125ms)
+✔ elapsed loader requires the new kernel API and schedule owner (3.799375ms)
+✔ loader rejects authority elapsed actions and elapsed Wait aliases (3.55925ms)
+✔ loader rejects duration in elapsed profiles while the frozen legacy fixture loads (3.360792ms)
+✔ numeric-vectors: rng_steps from initial_rng (1.010625ms)
+✔ numeric-vectors: division (0.124917ms)
+✔ numeric-vectors: invalid_json (0.553792ms)
+✔ numeric-vectors: canonical (0.164292ms)
+✔ adverse-cases: uniform (0.202875ms)
+✔ decode edge cases (0.232834ms)
+✔ encode escapes and key order (0.087291ms)
+✔ encode rejects values outside the profile (0.0985ms)
+✔ nesting is limited to 128 containers (0.294792ms)
+✔ hash is lowercase SHA-256 of the canonical bytes (0.740292ms)
+✔ checked integers overflow as a typed error (0.145875ms)
+✔ unsafe operands are integer_overflow (0.129208ms)
+✔ uniform accepts bound 2^32 (0.064291ms)
+✔ uniform rejects a bad draw budget (0.08225ms)
+✔ IdSource ids (0.284167ms)
+✔ IdSource rejects non-string ids (0.070583ms)
+✔ IdSource rejects a bad ordinal (0.066958ms)
+✔ CommandId known answers (0.69675ms)
+✔ CommandId rejects bad ids (0.081292ms)
+✔ job CommandId known answers (0.755584ms)
+✔ job CommandId rejects bad input (0.09875ms)
+✔ elapsed CommandId matches independently frozen run/world/interval vectors (2.615708ms)
+✔ elapsed receipt survives reopen and replays its first result after later clock commits (18.12275ms)
+✔ old run elapsed refuses before receipt lookup after replacement without Host.random (5.013ms)
+✔ unknown elapsed COMMIT fences trusted and player delivery until the real receipt reconciles (4.303666ms)
+✔ modal scene keeps Continue-only player controls while elapsed time commits (10.747333ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 189.228542

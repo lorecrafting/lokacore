@@ -51,6 +51,22 @@ defmodule Loka.Core.IdSource do
     end
   end
 
+  @doc "Elapsed authority CommandId, scoped to durable run/world and logical interval (M1-A)."
+  @spec elapsed_command_id(term(), term(), term(), term()) ::
+          {:ok, String.t()} | {:error, :invalid_id | :invalid_ordinal | :invalid_canonical}
+  def elapsed_command_id(run_id, world_context_id, from, until) do
+    cond do
+      not (is_binary(run_id) and is_binary(world_context_id)) ->
+        {:error, :invalid_id}
+
+      not (is_safe_integer(from) and from >= 0 and is_safe_integer(until) and until >= 0) ->
+        {:error, :invalid_ordinal}
+
+      true ->
+        uuid(Canonical.encode(["loka-elapsed-command-v1", run_id, world_context_id, from, until]))
+    end
+  end
+
   defp uuid({:error, _} = error), do: error
 
   defp uuid({:ok, json}) do

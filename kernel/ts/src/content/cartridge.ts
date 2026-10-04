@@ -72,6 +72,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
             }),
           ],
     () => keyStage(c),
+    () => timeStage(c),
     () => lockStage(c),
     () => scenes(c),
     () => refStage(c),
@@ -144,6 +145,33 @@ function keyStage(c: Obj): Diagnostic[] {
           );
     }
   }
+  return out;
+}
+
+// Elapsed releases expose only authority time; legacy releases retain Wait and durations.
+function timeStage(c: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  if (c.manifest.time_policy) {
+    if (!Object.hasOwn(c.lock.capabilities, 'schedule'))
+      out.push(
+        diag(
+          'UNDECLARED_CAPABILITY',
+          '.cartridge.manifest.time_policy',
+          { capability: 'schedule' },
+          ['schedule@1'],
+        ),
+      );
+    if (apiCmp(c.manifest.requires.kernel_api.at_least, '1.1') < 0)
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
+  }
+  for (const [ref, a] of Object.entries(c.actions as Obj))
+    if (a.command === 'elapsed' || (a.command === 'wait' && c.manifest.time_policy))
+      out.push(diag('UNKNOWN_COMMAND', `.cartridge.actions${step(ref)}.command`));
+  for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj))
+    if (c.manifest.time_policy && r.duration)
+      out.push(diag('INVALID_TIME_POLICY', `.cartridge.recipes${step(ref)}.duration`));
   return out;
 }
 

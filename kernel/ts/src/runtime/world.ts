@@ -5,6 +5,8 @@
 // its result.
 import { over } from '../foundation/compose.ts';
 import { KernelError } from '../foundation/error.ts';
+import { elapsedCommandId } from '../foundation/id_source.ts';
+import { validate } from '../foundation/validate.ts';
 import type { Installed } from '../content/cartridge.ts';
 import {
   CAPABILITY_OWNERS,
@@ -65,7 +67,7 @@ const RULELESS = [
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.0',
+  kernel_api: '1.1',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,
@@ -86,6 +88,7 @@ export function step(
   // a keyed refusal (stricter) can differ there; none does while no two actions match one Command.
   action?: Key,
 ): Stepped {
+  if (command.payload.type === 'elapsed') return { decision: rejected('permission_denied'), world };
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
@@ -113,13 +116,47 @@ function decideWith(
   revision: number,
   action?: Key,
 ): Stepped {
-  const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
-  if (command.id === NIL) return reject('permission_denied');
-  if (command.world_context_id !== world.context) return reject('not_found');
-  if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
-    return reject('not_found');
-  const steps = { n: 0 }; // one query_steps count: admission, the rule and the proposal (04 §5.4)
+  const bad = identity(world, command);
+  if (bad) return { decision: rejected(bad), world };
+  const steps = { n: 0 }; // one count spans admission, rule and proposal
   const refused = refusal(world, command.payload, steps, action);
+  return evaluated(world, command, owner, rule, revision, steps, refused);
+}
+
+/** Only an authority may deliver this typed elapsed command; player step always refuses it. */
+export function stepElapsed(world: World, command: Command, revision: number): Stepped {
+  const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
+  if (validate('Command', command).length || command.payload.type !== 'elapsed')
+    return reject('permission_denied');
+  const bad = identity(world, command);
+  if (bad) return reject(bad);
+  const p = command.payload;
+  if (command.id !== elapsedCommandId(p.run_id, world.context, p.from, p.until))
+    return reject('permission_denied');
+  const owner = ownerOf(CAPABILITY_OWNERS.command, p.type);
+  if (owner !== 'schedule' || !Object.hasOwn(world.cartridge.lock.capabilities, owner))
+    return reject('unsupported_capability');
+  return evaluated(world, command, owner, RULES.schedule as unknown as AnyRule, revision, { n: 0 });
+}
+
+function identity(world: World, command: Command): ErrorCode | undefined {
+  if (command.id === NIL) return 'permission_denied';
+  if (command.world_context_id !== world.context) return 'not_found';
+  if (!('actor_id' in command.payload) || command.payload.actor_id !== world.character)
+    return 'not_found';
+  return undefined;
+}
+
+function evaluated(
+  world: World,
+  command: Command,
+  owner: string,
+  rule: AnyRule,
+  revision: number,
+  steps: Steps,
+  refused?: ErrorCode,
+): Stepped {
+  const reject = (code: ErrorCode) => ({ decision: rejected(code), world });
   const mint = allocator(world, command);
   try {
     const decided = refused ?? admit(owner, rule(world, command, mint, steps));

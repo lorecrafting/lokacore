@@ -236,7 +236,9 @@ defmodule Loka.Content.Checks do
     required = {m["requires"]["capabilities"], owners}
     actions = for {_, {rel, [], a}} <- defs["action"], do: {rel, a}
 
-    Enum.flat_map(actions, fn {rel, a} -> command(rel, a["command"], required) end) ++
+    Enum.flat_map(actions, fn {rel, a} ->
+      command(rel, a["command"], required, m["time_policy"] != nil)
+    end) ++
       Enum.flat_map(trees(defs, actions), &tree(&1, {m, defs, required}))
   end
 
@@ -256,10 +258,11 @@ defmodule Loka.Content.Checks do
   end
 
   # run_job is authority-internal (04 §1): no action builds it.
-  defp command(rel, name, required) do
-    if name in commands() and name != "run_job",
-      do: owned(at(rel, ["command"]), name, required),
-      else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
+  defp command(rel, name, required, elapsed?) do
+    if name in commands() and name not in ["run_job", "elapsed"] and
+         not (elapsed? and name == "wait"),
+       do: owned(at(rel, ["command"]), name, required),
+       else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end
 
   defp nodes(%{"op" => op, "items" => items} = n, steps) when op in ~w(all any) do

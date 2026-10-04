@@ -164,6 +164,9 @@
             "$ref": "#/$defs/ExecutionProfile"
           },
           "minItems": 1
+        },
+        "time_policy": {
+          "$ref": "#/$defs/TimePolicy"
         }
       },
       "required": [
@@ -357,6 +360,30 @@
               "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
             }
           ]
+        }
+      ]
+    },
+    "TimePolicy": {
+      "description": "Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires kernel API >=1.1 and schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.",
+      "type": "object",
+      "properties": {
+        "profile": {
+          "const": "real_elapsed"
+        },
+        "rate": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "profile",
+        "rate"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "profile": "real_elapsed",
+          "rate": 50
         }
       ]
     }

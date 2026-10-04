@@ -1,0 +1,48 @@
+✔ every contract has examples and every example validates (7.916959ms)
+✖ invalid fixtures fail with exactly the listed errors (13.466709ms)
+✔ the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable (0.65875ms)
+✔ the capability lock encodes and hashes to the independent known answer (0.743834ms)
+✔ a declared __proto__ property survives generation (0.064667ms)
+✔ values outside the canonical profile are rejected at decode, before validation (0.375334ms)
+✔ a recursive Policy at the depth cap (0.834791ms)
+✔ narration at 64 and 65 lines (0.538333ms)
+✔ ambiguous candidates at 1024 and 1025 (2.12925ms)
+✔ every composition-profile limit is a valid BudgetExceeded (0.261917ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 112.350334
+
+✖ failing tests:
+
+test at kernel/ts/test/validate.test.ts:21:1
+✖ invalid fixtures fail with exactly the listed errors (13.466709ms)
+  AssertionError [ERR_ASSERTION]: TimePolicy {"profile":"real_elapsed","rate":0}
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     code: 'below_minimum',
+  -     path: '/rate'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file://[private-path]
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { path: '/rate', code: 'below_minimum' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -41,8 +41,18 @@ export const decide: Rule<'schedule'> = (world, command, mint) => {
       move.length ? [entered(world, command, mint, npc, room, row.due_time)] : [],
     );
   }
+  if (
+    payload.type === 'elapsed' &&
+    (world.cartridge.manifest.time_policy?.profile !== 'real_elapsed' ||
+      payload.from !== world.state.clock)
+  )
+    return rejected('invalid_state');
   const from = world.state.clock;
-  const to = payload.until;
-  if (to <= from) return rejected('invalid_state');
-  return accepted(world, 'waited', [{ op: 'time.advance', writer_group: 0, from, to }], []);
+  if (payload.until <= from) return rejected('invalid_state');
+  return accepted(
+    world,
+    payload.type === 'elapsed' ? 'elapsed' : 'waited',
+    [{ op: 'time.advance', writer_group: 0, from, to: payload.until }],
+    [],
+  );
 };
