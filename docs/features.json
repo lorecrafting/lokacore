@@ -479,5 +479,32 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "C1 c1-position (#137) stand, sit, rest and sleep; move needs standing"
+  },
+  "scene": {
+    "spec": "06 §35/§37 modal text subset (amendment 2026-10-03); 21 §3.6; 00a §9; mechanics.md scene@1",
+    "contracts": [
+      "SceneDefinition",
+      "SceneStep",
+      "SceneView",
+      "CommandPayload",
+      "EventPayload",
+      "FactSpec"
+    ],
+    "modules": [
+      "kernel/ts/src/scene.ts",
+      "kernel/ts/src/reaction.ts",
+      "kernel/ts/src/actions.ts",
+      "kernel/ts/src/view.ts",
+      "kernel/ts/src/cartridge_scenes.ts",
+      "lib/loka/content/scenes.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/cartridge_scene_hash.json"
+    ],
+    "invariants": [
+      "facts_typed",
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "C1 c1-scenes-modal: modal narrate/await_ack/end; story-point start once, persisted line, continue-only admission and scene_ended"
   }
 }

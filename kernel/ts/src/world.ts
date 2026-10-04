@@ -26,6 +26,7 @@ import * as equipment from './rules/equipment.ts';
 import * as movement from './rules/movement.ts';
 import * as position from './rules/position.ts';
 import * as quest from './rules/quest.ts';
+import * as scene from './rules/scene.ts';
 import * as schedule from './rules/schedule.ts';
 import { admit, adopt, ownerOf, type Actor, type Stepped } from './proposal.ts';
 import { newWorld, NIL } from './fresh.ts';
@@ -42,6 +43,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   dialogue: dialogue.decide,
   equipment: equipment.decide,
   position: position.decide,
+  scene: scene.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements

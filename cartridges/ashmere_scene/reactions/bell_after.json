@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "scene_bell_rung"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "scene_bell_rung",
+      "equals": -1
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "bell_heard",
+      "value": true
+    }
+  ]
+}

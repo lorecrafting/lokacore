@@ -1,0 +1,31 @@
+{
+  "facts": {
+    "search_plan": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "undecided",
+          "player_led",
+          "party_led"
+        ],
+        "default": "undecided"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md)."
+    },
+    "bell_heard": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Whether bell_rung has ended (scene@1 reaction composition)."
+    }
+  }
+}

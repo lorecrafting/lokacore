@@ -117,7 +117,7 @@ leaf evaluated adds one query step (`policy.ts:32`).
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
 real heading (`test/loka/core/registries_test.exs:196`) and the kernels that implement it.
 Pure checks by id: `kernel/ts/src/invariants.ts:149` (all), `lib/loka/core/invariants.ex:34`
-(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:139`).
+(the `elixir_and_typescript` ones), plus world-level checks beside the rules (`world.ts:141`).
 The fixtures hold a holding and a violated case per shared invariant
 (`test/loka/core/compose_test.exs:189`); the simulator checks the rest
 ([architecture.md](architecture.md#hosts)).
@@ -128,17 +128,20 @@ A `DomainEvent` (`kernel/ts/src/decision.ts:227`) has an IdSource id, the world,
 the actor, the world's logical time, a one-based causal `position`, and the command as
 `causation_id` and `correlation_id`. A job's `entity_entered_room` is at instance scope and the
 job's due time, caused by the `run_job` (`behavior.ts:58`); the proposal renumbers positions and
-correlates everything to the player's command (`proposal.ts:183`).
+correlates everything to the player's command (`proposal.ts:183`). The modal scene subset
+emits `scene_ended {scene}` on the final continue at position 2, leaving position 1
+for its line fact's fact_changed; start is the fact's 0→1 change, with no scene_started
+([scene@1](mechanics.md#scene1-rulesscenets)).
 
 ## ActionSet and admission
 
-An actor's actions (`kernel/ts/src/actions.ts:153`) are, in order: the engine verbs of the
-capabilities the lock holds (`VERBS`, `:85`: look, move, scan, take, drop, give, wait, open,
+An actor's actions (`kernel/ts/src/actions.ts:154`) are, in order: the engine verbs of the
+capabilities the lock holds (`VERBS`, `:86`: look, move, scan, take, drop, give, wait, open,
 close, lock, unlock, wear, remove, stand, sit, rest, sleep, each with its target kind and input; policy always true), then the
 cartridge's actions, recipes, the offers of quests that have one and the actor has no instance
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
-intersect; `:57`), then the answers to a pending choice (`choose`, `close_choice`), which no
+intersect; `:59`), then the answers to a pending choice (`choose`, `close_choice`), which no
 contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
 ([action_recipe@1](mechanics.md#action_recipe1-rulesaction_recipets49)).
 The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
@@ -148,13 +151,19 @@ item's scope as its entity target and no input, so a client invokes it with `tar
 `[item]` and resolve fills `target_id` (`kernel/ts/src/invocation.ts` `TARGETS`).
 `wear` and `remove` (equipment@1) take an `inventory` item target in the set (an engine verb's
 rule checks its own target); for a cartridge action resolving to `remove`, the `inventory` scope
-also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:238`). The GameView lists `wear` on a held
+also holds an item worn in the body's slot holders (`kernel/ts/src/actions.ts:240`). The GameView lists `wear` on a held
 item and `remove` on a worn one only when admission and equipment@1's check accept it now, all
 available, never `drop`, `give` or `wear` on a worn item, and never either with the place's
 actions (a targetless one is never accepted: its Command needs `item_id`) (c1-equipment).
 `stand`, `sit`, `rest` and `sleep` (position@1) take no target; the GameView lists them with the
 place's actions, except every action resolving to the current position's verb (a cartridge
 alias included), which step would refuse `invalid_state` (c1-position).
+
+While [scene@1](mechanics.md#scene1-rulesscenets) runs, this shared resolved set is
+replaced by its single `continue` action (none target, empty input), after every
+ordinary contribution. Both invocation resolution and direct Command admission
+therefore refuse other commands with existing `unsupported_capability`, before
+clock or state changes. Continue is never a general engine VERBS entry.
 
 ## Policy
 
@@ -164,7 +173,7 @@ body, directly or nested), `barrier_state`, `quest_state` (false while the actor
 instance), `time_window` (hour of day from `clock / 3600 % 24`, wrapping windows allowed, `:42`),
 `target_present` (the action's target is in reach, `:47`), and `stat_compare` and
 `resource_compare` (`:60`, [attributes@1](mechanics.md#attributes1)). An op outside this list throws:
-the loader closes the set (`cartridge.ts:157`).
+the loader closes the set (`cartridge.ts:160`).
 
 ## Target resolution
 
@@ -177,9 +186,10 @@ named by its keywords through `doors` (`:72`). A Command carries only ids, never
 
 ## GameView
 
-`gameView` (`kernel/ts/src/view.ts:48`) projects, for the player: `actor_id`; `place` (room
+`gameView` (`kernel/ts/src/view.ts:49`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `rules/description_variant.ts:26`);
-`exits` in compass order, unavailable with `exit_closed`, `exit_locked` (a closed or locked
+`exits` in compass order, unavailable with `unsupported_capability` while a modal scene
+runs (before passage, position and fare), else `exit_closed`, `exit_locked` (a closed or locked
 barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
 fare) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
 carries `door` (the barrier's short name, its state and the door verbs the actor may use on it
@@ -204,13 +214,15 @@ accepts (only those resolving to `remove`), absent when the world has no holder
 has an instance of, with state and title, and optional `journal`, the selected TextKey
 from [quest@1](mechanics.md#quest1-rulesquestts-kerneltssrcquestts)); `chapter` (`{index, title}`, a non-negative declaration index and TextKey), present exactly
 when the cartridge declares chapters, selected by [Chapters](mechanics.md#chapters-kerneltssrcviewts);
+`scene` (`{scene, line, index, count}`, DefinitionRef, TextKey, one-based shown line and
+narrate count), present exactly while [scene@1](mechanics.md#scene1-rulesscenets) runs;
 `time` (the logical clock); the pending `choice`
 (prompt, speaker id, closable, each option available or blocked, `kernel/ts/src/dialogue.ts:80`); and
 `resources`, each with current, maximum, a condition band key and its tone (`normal`, `warning`
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view.ts:211`, `:230`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view.ts:216`, `:235`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
@@ -223,5 +235,5 @@ position invocation (`stand`, `sit`, `rest`, `sleep`) checks its selected `actio
 the observation supplies it: an available matching place action is never refused
 `invalid_state`, and an unavailable or absent one is never accepted. Without an action key,
 any available place action resolving to that command qualifies. An available exit's move is
-never refused `invalid_state`; a
+never refused `invalid_state` or `unsupported_capability`; a
 `take` listed on an item is never refused `not_present` (`kernel/ts/src/invariants_view.ts:29`, `:76`).

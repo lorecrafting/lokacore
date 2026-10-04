@@ -25,13 +25,13 @@ import { append } from '../../../kernel/ts/play/obs.ts';
 import { simulate } from '../../../kernel/ts/test/sim.ts';
 import { openStory, type Reply } from './authority.ts';
 
-// One seed per demo cartridge: bell, rooms, facts, items, dusk, details, road, errand (accepting
+// Inherited cartridge representatives: bell, rooms, facts, items, dusk, details, road, errand (accepting
 // its quest), gate, ferry (running Bram's job), green (delivering a reaction), the proof
 // cartridge lantern_proof, wear (wearing an item), locks (opening or unlocking a container) and
 // rest (changing position), journal (quest credit and custody), and chapters (quest acceptance).
 // sim.ts picks by seed among the cartridge known answers, so a new cartridge remaps them. None emits an effect (no
 // outbox is built yet); every sequence commits several NEW commands.
-const SEEDS = [50, 173, 11, 157, 507, 21, 3, 69, 651, 190, 101, 129, 4945, 13, 96, 135, 426];
+const SEEDS = [12, 193, 234, 144, 1623, 18, 674, 215, 172, 298, 9, 7, 1943, 75, 217, 117, 32];
 
 type Tap = (statement: string, run: () => unknown) => unknown;
 /** A process on `path` playing seed `seed`'s release; its ids count from 1, as in every run. */
@@ -285,7 +285,7 @@ test('hand-checked anchors', () => {
     { ...p.sql.prepare('SELECT revision, clock FROM head').get() },
     { revision: 2, clock: 1 },
   );
-  const d = processOn(save(), 240);
+  const d = processOn(save(), 114);
   d.send(0);
   assert.deepEqual(
     { ...d.sql.prepare('SELECT revision, clock FROM head').get() },

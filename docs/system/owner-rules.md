@@ -8,6 +8,7 @@ and not repeated here.
 
 ## Product and scope
 
+- World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
 - Finish and merge PR #137, then continue the approved game mechanics; touch UI is deprioritized
   ([record](../decisions/owner-decision-touch-priority-2026-10-03.md#latest-priority-mechanics-after-pr-137)).
 - The first release bundles its chapter; downloadable story content waits for the pre-launch
@@ -32,8 +33,10 @@ and not repeated here.
   ([record](../archive/decisions/owner-decision-r5-deferred-mechanics-2026-09-28.md)); the R5 deferrals
   land in R7/R8 for chapter one, after R6P and before R10
   ([record](../archive/decisions/owner-decision-early-r7r8-plan-2026-10-01.md)).
-- `scene@1` is not built until chapter-one content needs scenes; the durable choice is dialogue's
-  continuation row ([record](../archive/decisions/owner-decision-split-d-2026-10-01.md)).
+- `scene@1`'s modal text subset is now needed by the approved chapter-one
+  [plan](../decisions/owner-decision-chapter-one-plan-2026-10-02.md), implemented as
+  [scene facts](mechanics.md#scene1-rulesscenets); the durable choice remains dialogue's
+  continuation row ([earlier record](../archive/decisions/owner-decision-split-d-2026-10-01.md)).
 - Puppeting comes later; rules read the actor from the command, never the player
   ([record](../archive/decisions/owner-decision-puppeting-2026-09-25.md)). Player-written descriptions
   come with the online work ([record](../archive/decisions/owner-decisions-r5-s4-2026-09-25.md)).

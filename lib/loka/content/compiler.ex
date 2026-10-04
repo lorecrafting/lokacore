@@ -5,7 +5,7 @@ defmodule Loka.Content.Compiler do
   the diagnostics of the others.
   """
   alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
-  alias Loka.Content.{Position, Resources}
+  alias Loka.Content.{Position, Resources, Scenes}
   alias Loka.Core.Contracts
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
@@ -47,14 +47,14 @@ defmodule Loka.Content.Compiler do
       Reactions.check(manifest, defs, v2, registry) ++
       Dialogues.check(manifest, defs, v2, located, registry) ++
       Links.check(defs, v2) ++
-      Position.check(manifest, defs)
+      Position.check(manifest, defs) ++ Scenes.check(manifest, defs, v2, registry)
   end
 
   # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, story points, an
   # entry, a calendar or world, a text catalog, resources.json or attributes.json (CompiledCartridge).
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point),
+         ~w(room item npc recipe barrier quest reaction dialogue story_point scene),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -88,7 +88,7 @@ defmodule Loka.Content.Compiler do
         {extra, manifest} = Map.split(m, ["entry", "calendar", "world", "chapters"])
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
         diags = Requires.check(rel, manifest, registry)
-        manifest = Position.requires(manifest)
+        manifest = manifest |> Position.requires() |> Scenes.requires()
         {manifest, located, diags ++ calendar(manifest, extra["calendar"], registry)}
 
       diags ->
@@ -133,7 +133,8 @@ defmodule Loka.Content.Compiler do
     {"quest", :quest, "QuestDefinition"},
     {"reaction", :reaction, "ReactionRule"},
     {"dialogue", :dialogue, "DialogueDefinition"},
-    {"story_point", :story_point, "StoryPointDefinition"}
+    {"story_point", :story_point, "StoryPointDefinition"},
+    {"scene", :scene, "SceneDefinition"}
   ]
 
   defp definitions(files, m) do
@@ -142,8 +143,9 @@ defmodule Loka.Content.Compiler do
     {resources, d1} = Resources.load(of(files, :resources))
     {attributes, d3} = Resources.attributes(of(files, :attributes))
     {defs, d2} = kinds(files)
+    {facts, d5} = Scenes.facts(facts, m, defs)
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3 ++ d4}
+    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3 ++ d4 ++ d5}
   end
 
   # The one-file-per-definition kinds (@kinds) and their diagnostics.
@@ -243,11 +245,12 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  # An error at /key is the inserted key's, already reported against Key.
+  # Discard only key errors already reported against Key; definitions may narrow it.
   defp body(rel, steps, contract, value) do
     Enum.reject(
       validated(rel, steps, contract, value),
-      &(&1["path"] == at(rel, steps ++ ["key"]))
+      &(&1["path"] == at(rel, steps ++ ["key"]) and
+          validated(rel, steps, "Key", value["key"]) != [])
     )
   end
 
