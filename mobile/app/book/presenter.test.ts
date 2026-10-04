@@ -28,6 +28,41 @@ const accepted = (outcome: string) =>
   ({ kind: 'saved', decision: { kind: 'accepted', outcome } as DecisionResult }) as Reply;
 const north = { label: 'Go north', action_key: 'move', target_ids: [], input: {} };
 
+// Breaks: a valid pending/refused item reply asks the book to leave detail as if custody changed.
+test('pending and refused Take/Drop retain detail routing and unchanged custody', () => {
+  for (const action of ['take', 'drop']) {
+    for (const pending of [true, false]) {
+      const item = { id: 'lantern', kind: 'item', name: 'item.lantern', actions: [] };
+      const view = {
+        ...(VIEW as object),
+        inventory: action === 'drop' ? [item] : [],
+        entities: action === 'take' ? [item] : [],
+      } as never;
+      const p = presenter({
+        ...game(() =>
+          pending
+            ? { kind: 'pending' }
+            : ({
+                kind: 'saved',
+                decision: { kind: 'rejected', error: { code: 'not_present' } },
+              } as Reply),
+        ),
+        view: () => ({ view, token: 'view:r:0' }),
+        pending: () => pending,
+      });
+      p.press({ label: action, action_key: action, target_ids: ['lantern'], input: {} });
+      assert.equal(p.screen().returnWorld, false);
+      assert.equal(p.screen().view, view);
+      assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
+      assert.deepEqual(p.screen().log, [
+        pending
+          ? '(pending: not confirmed saved; press any button to retry it)'
+          : "You can't do that: not here.",
+      ]);
+    }
+  }
+});
+
 // Breaks: recovery guesses that retained narration was navigation and drops an authored consequence.
 test('recovery removes the current heading but retains an unclassified consequence', () => {
   const restored = {

@@ -178,7 +178,12 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const moved = !!accepted && was.place.id !== now.place.id;
   if (moved) s.log.length = 0;
   const lines = attempt.detail && !s.returnWorld && !moved ? detailLines(s, attempt.detail) : s.log;
-  const retained = accepted?.narration?.length ? game.lastNarration() : undefined;
+  let retained: ReturnType<Game['lastNarration']>;
+  try {
+    retained = accepted?.narration?.length ? game.lastNarration() : undefined;
+  } catch (e) {
+    s.fault = `Saved result; narration recovery unavailable: ${(e as Error).message}`;
+  }
   const repeated = !moved && retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
   const fallback =

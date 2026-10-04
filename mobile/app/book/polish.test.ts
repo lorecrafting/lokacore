@@ -74,12 +74,16 @@ const words = (element: any): string =>
 
 function book(cartridge = fixture) {
   const sql = new DatabaseSync(':memory:');
+  let failRead = 0;
   const game = openGame(
     {
       execSync: (s) => sql.exec(s),
       isInTransactionSync: () => sql.isTransaction,
       runSync: (s, ...p) => sql.prepare(s).run(...p),
-      getFirstSync: (s, ...p) => sql.prepare(s).get(...p) ?? null,
+      getFirstSync: (s, ...p) => {
+        if (failRead && !--failRead) sql.exec('SELECT * FROM missing_narration');
+        return sql.prepare(s).get(...p) ?? null;
+      },
       getAllSync: (s, ...p) => sql.prepare(s).all(...p),
     } as never,
     cartridge,
@@ -132,6 +136,7 @@ function book(cartridge = fixture) {
     },
     game,
     sql,
+    failRead: (n: number) => (failRead = n),
     draw,
     labels,
     tap,
@@ -178,6 +183,42 @@ test('room is focused while Map retains directions and every detail returns to t
     h.tap('Back to World');
     assert.ok(h.labels().includes('Old Bram, open'));
   }
+  h.sql.close();
+});
+
+// Breaks: a recovery read after commit escapes the press, hiding the result and retaining retry context.
+test('a postcommit narration read fault preserves the saved result and clears retry context', () => {
+  const h = book();
+  h.tap('Old Bram, open');
+  h.tap('Talk to Old Bram');
+  const speaker = h.game.view().view.choice!.speaker_id!;
+  const result = "You say you'll fetch it. Bram nods toward the path north.";
+  h.failRead(4); // receipt/version/receipt reads succeed; retained narration read fails after commit
+  assert.doesNotThrow(() => h.tap("Offer to fetch Bram's lantern"));
+  assert.equal(h.game.pending(), false);
+  assert.equal(h.game.view().view.journal[0].state, 'active');
+  assert.equal(h.p.screen().detail(speaker).at(-1), result);
+  assert.ok(
+    h
+      .text()
+      .includes('Saved result; narration recovery unavailable: no such table: missing_narration'),
+  );
+  h.tap('Leave');
+  h.map();
+  h.tap('Go north'); // a fresh move, not a replay of the committed choice
+  assert.ok(h.text().includes('Well Lane'));
+  assert.equal(
+    h.p
+      .screen()
+      .detail(speaker)
+      .filter((s: string) => s === result).length,
+    1,
+  );
+  assert.equal(h.p.screen().fault, undefined);
+  assert.deepEqual(h.p.screen().log, []);
+  h.tap('a brass lantern, open');
+  h.tap('Take a brass lantern');
+  assert.deepEqual(h.p.screen().log, ['You pick up a brass lantern.']);
   h.sql.close();
 });
 
