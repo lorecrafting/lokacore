@@ -132,3 +132,33 @@ The PM separately relayed an Astra audit of the proposal changes at the same sou
 head: APPROVE, 53 focused tests passed, and a mutant restoring the old final-adoption
 behavior was killed. That audit's scope differs from the primary surviving intermediate
 hydration experiment. These separate approvals do not close M5B-R1 or M5B-R2.
+
+## Scoped fix recheck — round one
+
+Reviewed fix head `4e0554530642ae8fcc701ae5c4b341cf629b0f31` after the PM
+confirmed all six CI jobs successful on that exact head. Same independent primary
+reviewer; scope was the four changed test/fixture files, their direct invariant and
+fatal-sequence consumers, and the two open findings.
+
+**Verdict: APPROVE. M5B-R1 and M5B-R2 are closed.**
+
+- **M5B-R1:** literal counterfeit success rows now match the invalid proposals' identities
+  and custody. Wrong-owner and player-template/NPC-victim observations independently
+  return false for both invariants in both implementations. The expected validity is
+  literal; neither composition nor the other kernel supplies the answer. Removing the
+  TypeScript provenance guard, removing the Elixir provenance guard, and removing just
+  the TypeScript owner comparison each failed the new behavioral assertion.
+- **M5B-R2:** the fatal-sequence test now pins the actual ordered transfer operations,
+  including initial corpse placement, worn cloak from its slot holder, held trunk from
+  the body, and same-body shrine return. Independent Python SHA-256 calculation under
+  the frozen IdSource allocation order reproduced all six body/item/holder/room UUIDs;
+  the corpse UUID was independently verified in the initial review. Both reversing the
+  sorted roots and removing sorting failed this assertion. Existing nested-child and
+  slot-holder conservation tests remain intact.
+
+After restoring all five temporary mutations, focused Node portable/death/SQLite tests
+passed 13/13 and Elixir portable creation/composition tests passed 15/15 using
+`mix test --force`. The source worktree was clean before this record amendment.
+Ponytail Review found no unnecessary machinery: the change adds literal proof to the
+existing fixture and test seams, with no production changes. The previously stated
+M6 live-encounter and intermediate-consumer proof boundaries remain unchanged.
