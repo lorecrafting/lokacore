@@ -132,3 +132,25 @@ Independent reviewer verification, in a fresh detached worktree:
 
 This is the required narrow fix re-review, not another whole-slice review or native proof.
 The initial implementation review and independent Astra answer above remain historical.
+
+## Separate Sol scoped fix review
+
+```text
+APPROVE
+PR156 scoped independent Sol fix recheck — SHA25a37c6e6a0745fe7107ed44cf9919928247c1b1
+
+noopen. M2A-01 / Astra A1 closed.
+
+kernel/ts/test/compose.test.ts:316; test/loka/core/compose_test.exs:457
+Both new tests independently supply the requested literal forged success: clock64803, old row{value:0,at:64800,rate:3,remainder:0}, authored next_rate2, claimed row{value:0,at:64803,rate:2,remainder:9}. The hand-checked credit is3*3=9 with every10; expected rejection is literal and never derived from composition or either replay implementation.
+
+Diff against review-record head65e3db8 changes only these two tests. Production and fixtures are unchanged. Scoped correctness and Ponytail Review: Lean already. Ship.
+
+Validation in isolated detached checkout, initial and exactly restored:
+- mise exec -- node --test kernel/ts/test/compose.test.ts: EXIT0,10/10 passed.
+- mise exec -- mix test --force test/loka/core/compose_test.exs: EXIT0,12/12 passed.
+- Removed only TS stored-rate authored membership, retaining next-rate validation: same TS command RED EXIT1,9/10 passed; new test alone fails because true !== false.
+- Removed only Elixir stored-rate authored membership, retaining next-rate validation: same forced Mix command RED EXIT2,11/12 passed; new test alone fails because checker returns true.
+
+Both guards restored byte-for-byte; git diff --exit-code EXIT0 and status clean. Throwaway checkout removed. No full hook, push, simulator, save or native operations. Exact-head CI remains the PM's merge prerequisite.
+```
