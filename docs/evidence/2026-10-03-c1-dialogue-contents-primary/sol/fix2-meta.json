@@ -12,5 +12,7 @@
   "raw_capture_retained_private": true,
   "input_redacted_log_sha256": "a1a2d35c9166740e8e9fa1e546c491ad7d511ac3e331fc55872ac01c86c89af3",
   "answer_preserved_verbatim": true,
-  "publication_privacy_redaction": true
+  "publication_privacy_redaction": true,
+  "redacted_log_retained_private": true,
+  "redacted_log_artifact": "c1-dialogue-publication-sol-fix2-redacted.log"
 }

@@ -17,13 +17,10 @@ native-665-partial-report.md: OK
 publication-redaction.json: OK
 sol/fix1-answer.md: OK
 sol/fix1-meta.json: OK
-sol/fix1-redacted.log: OK
 sol/fix2-answer.md: OK
 sol/fix2-meta.json: OK
-sol/fix2-redacted.log: OK
 sol/initial-answer.md: OK
 sol/initial-meta.json: OK
-sol/initial-redacted.log: OK
 source/F1.txt: OK
 source/acceptance.txt: OK
 source/loka-c1-primary-baseline.log: OK

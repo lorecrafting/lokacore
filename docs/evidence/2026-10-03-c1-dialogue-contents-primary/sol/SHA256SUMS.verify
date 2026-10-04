@@ -1,9 +1,6 @@
 fix1-answer.md: OK
 fix1-meta.json: OK
-fix1-redacted.log: OK
 fix2-answer.md: OK
 fix2-meta.json: OK
-fix2-redacted.log: OK
 initial-answer.md: OK
 initial-meta.json: OK
-initial-redacted.log: OK

@@ -11,5 +11,7 @@
   "open_findings": 0,
   "input_redacted_log_sha256": "23c9910077e1afca242365e52bdaf6614a3737ab58a0e190906bb92d104a8ce2",
   "answer_preserved_verbatim": true,
-  "publication_privacy_redaction": true
+  "publication_privacy_redaction": true,
+  "redacted_log_retained_private": true,
+  "redacted_log_artifact": "c1-dialogue-publication-sol-fix1-redacted.log"
 }
