@@ -181,3 +181,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Gate C1 checklist](2026-10-03-c1-gate-review.md): PR #149 at `1ae17ee`, APPROVE WITH NOTES; all proofs/carries and audit carry-forward checked; owner-directed Simulator acceptance with UI-FUZZ-01/UI-PHONE-01 deferred; gate closure requires record-head green CI and merge.
 
 - [M4-A first-encounter contract](2026-10-03-m4-first-encounter-contract-review.md): PR #151 at `04fa450`, independent docs-only APPROVE; literal RNG outcomes and M5/M6 prerequisites verified; no implementation claimed.
+
+- [M1-A elapsed authority contract](2026-10-04-m1-a-clock-review.md): PR #153 at `7d6455a`, fresh independent primary CHANGES REQUIRED; M1A-01 requires a real SQLite receipt-read fault.
