@@ -45,3 +45,14 @@ Owner navigation requirement, verbatim:
 These are presentation-only changes. No engine mechanics, kernel, authority/store, protocol, content pin, native plugin, dependencies or save format changes. Amend [Book presenter](../system/architecture.md#book-presenter) before code. This round follows PR #143; it does not pass Gate C1 or start further mechanics.
 
 PM review choice under existing owner delegation: fresh independent Codex primary and separate Sol while Claude quota is unavailable; normal checks and actual isolated Release interaction required. This is a PM execution choice, not an owner model quote. Owner tests the updated preview and supplies the next feedback batch.
+
+## PM diagnostic implementation choice
+
+Read-only inspection identified one incomplete item-only Give rejection, followed by accepted
+moves; a controlled complete item/recipient Give was accepted. The old World event log then
+carried the earlier rejection across rooms. Restore room-scoped World history only on an
+actual confirmed accepted place change: clear old-room lines before appending genuine new
+movement/quest/authored consequences. Do not clear it on attempts, pending/refused/stale
+results, rerenders, same-room NPC actions, Leave or section navigation; preserve accurate
+save-status/error UI and independent bounded NPC history. This is a PM implementation choice
+for the reported repeated echo, not an additional owner quote or authority/storage change.
