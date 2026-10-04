@@ -91,7 +91,7 @@ Never simplify away validation at trust boundaries, data-loss handling, security
 anything the spec requires. Mark a deliberate shortcut with a `ponytail:` comment naming
 its limit. Before asking for review, audit the diff for over-engineering (Claude Code:
 `/ponytail-review`; other agents: the same questions by hand) and include the result in
-the PR. Pass this section into subagent prompts.
+the PR. Pass this section into subagent prompts. [Mechanic composition](docs/system/architecture.md#building-mechanics-by-composition).
 
 ## Writing tests (every change, every agent)
 

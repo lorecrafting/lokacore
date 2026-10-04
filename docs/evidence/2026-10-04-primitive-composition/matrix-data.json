@@ -1,0 +1,1122 @@
+[
+  {
+    "id": "movement@1",
+    "reads": "actor/body, connection, barrier, position, resource fare",
+    "writes": "entity.transfer + resource.adjust; entity_entered_room",
+    "invariants": "passage\u2192standing\u2192fare; no partial cost; one body container",
+    "primitive": "reuse containment/resource/barrier/position query; future traversal eligibility shared with NPCs",
+    "boundary": "direction mechanics; topology/cost in content",
+    "evidence": "kernel/ts/src/mechanics/movement/rule.ts:30; docs/system/mechanics.md:24",
+    "status": "installed subset"
+  },
+  {
+    "id": "barrier@1",
+    "reads": "site, custody, barrier state, held key",
+    "writes": "barrier.transition; barrier_changed",
+    "invariants": "one shared door state; legal transition; custody recheck",
+    "primitive": "reuse reach + typed transition; later property access/material change needs own contract",
+    "boundary": "engine legal transitions; content key/site",
+    "evidence": "kernel/ts/src/mechanics/barrier/rule.ts:64; docs/system/mechanics.md:38",
+    "status": "installed subset"
+  },
+  {
+    "id": "containment@1",
+    "reads": "entity kind, parent chain, body, recipient/capacity",
+    "writes": "entity.transfer; item_acquired/item_dropped",
+    "invariants": "one location, acyclic, capacity, no partial transfer",
+    "primitive": "canonical custody primitive; M3 adds voluntary mass predicate; M5 fixed-corpse/access",
+    "boundary": "engine conservation; content placements/capacities",
+    "evidence": "kernel/ts/src/mechanics/containment/rule.ts:25",
+    "status": "installed subset"
+  },
+  {
+    "id": "equipment@1",
+    "reads": "body custody, item slot, slot-holder occupancy",
+    "writes": "entity.transfer only",
+    "invariants": "capacity1; held/worn item remains same identity",
+    "primitive": "good containment composition; future modifiers/curses need shared eligibility",
+    "boundary": "slot mechanics; content slot/property",
+    "evidence": "kernel/ts/src/mechanics/equipment/rule.ts:24",
+    "status": "installed subset"
+  },
+  {
+    "id": "inspectable_detail@1",
+    "reads": "room, detail aliases/definition",
+    "writes": "none",
+    "invariants": "stable identity; bounded target candidates",
+    "primitive": "reuse target/policy/description; no entity until needed",
+    "boundary": "authored scenery; kernel lookup",
+    "evidence": "kernel/ts/src/commands/target.ts:37; docs/system/mechanics.md:114",
+    "status": "installed subset"
+  },
+  {
+    "id": "description_variant@1",
+    "reads": "room/detail/entity target, policy variants",
+    "writes": "none; looked/examined result",
+    "invariants": "policy order deterministic; target present",
+    "primitive": "derived projection; avoid stored current-description",
+    "boundary": "content prose/conditions; mechanics selects",
+    "evidence": "kernel/ts/src/mechanics/description_variant/rule.ts:26",
+    "status": "installed subset"
+  },
+  {
+    "id": "target_resolution@1",
+    "reads": "aliases, current room, held entity IDs",
+    "writes": "none; none/unique/ambiguous result",
+    "invariants": "candidate order; candidate budget; IDs after words",
+    "primitive": "future perception filter shared with view/direct admission",
+    "boundary": "host text resolution; engine eligibility",
+    "evidence": "kernel/ts/src/commands/target.ts:37; docs/system/protocol.md:178",
+    "status": "installed subset"
+  },
+  {
+    "id": "policy@1",
+    "reads": "typed facts/custody/barrier/quest/time/stats/resources/target",
+    "writes": "none",
+    "invariants": "closed leaves; deterministic scope; query counter (scans not fully charged)",
+    "primitive": "reuse all/any/not; add typed leaves only for consumer",
+    "boundary": "content condition trees; engine semantics",
+    "evidence": "kernel/ts/src/mechanics/policy.ts:18",
+    "status": "installed subset"
+  },
+  {
+    "id": "fact@1",
+    "reads": "FactSpec scope/default/type and current value",
+    "writes": "fact.assign; synthesized fact_changed",
+    "invariants": "expected value; single declared scope; reserved authoring writes rejected",
+    "primitive": "shared narrative truth; no arbitrary component setter",
+    "boundary": "content meaning; capability owns reserved engine facts",
+    "evidence": "kernel/ts/src/mechanics/fact.ts:79; runtime/proposal.ts:52",
+    "status": "installed subset"
+  },
+  {
+    "id": "resource@1",
+    "reads": "pool spec, entity target, stored value/at, clock",
+    "writes": "exact resource.adjust; costs or saturating recipe construction",
+    "invariants": "bounds/from precondition; rollback; legacy boundary accrual",
+    "primitive": "M2 generic settle and M5 effective entity spec needed",
+    "boundary": "engine arithmetic; rates/bounds/costs content",
+    "evidence": "kernel/ts/src/mechanics/resource.ts:25; foundation/compose.ts:87",
+    "status": "installed subset"
+  },
+  {
+    "id": "attributes@1",
+    "reads": "content-defined starting attribute",
+    "writes": "none",
+    "invariants": "reference/lock fail closed; immutable start today",
+    "primitive": "new per-actor/effective-value primitive at first actual writer",
+    "boundary": "content stat vocabulary/starts; engine comparison",
+    "evidence": "kernel/ts/src/mechanics/policy.ts:60; docs/system/mechanics.md:143",
+    "status": "installed subset"
+  },
+  {
+    "id": "position@1",
+    "reads": "actor scoped reserved position fact",
+    "writes": "fact.assign; fact_changed synthesized",
+    "invariants": "same-position refuses; standing gates movement",
+    "primitive": "reuse fact; M2 add atomic resource settlement construction",
+    "boundary": "positions legal mechanics; recovery rates content",
+    "evidence": "kernel/ts/src/mechanics/position/rule.ts:10; docs/system/mechanics.md:95",
+    "status": "installed subset"
+  },
+  {
+    "id": "check@1",
+    "reads": "recipe luck chance or pre-cost resource threshold; RNG",
+    "writes": "check_passed/check_failed; accepted RNG state",
+    "invariants": "declared draws only; refusal no draws",
+    "primitive": "extract selected reusable check evaluator when M7/M6-B consumes; no universal resolver now",
+    "boundary": "check algorithm engine; chance/difficulty content",
+    "evidence": "kernel/ts/src/mechanics/action_recipe/rule.ts:109",
+    "status": "installed subset"
+  },
+  {
+    "id": "quest@1",
+    "reads": "scope, current-state policy or post-activation acquisition",
+    "writes": "quest.activate/transition; quest_activated/resolved",
+    "invariants": "causal activation boundary; terminal once; writer conflicts",
+    "primitive": "lifecycle helper already shared; M20 adds reducers through M22 consequence seam",
+    "boundary": "content objective/outcome; engine lifecycle/credit",
+    "evidence": "kernel/ts/src/mechanics/quest/lifecycle.ts:32; runtime/proposal.ts:191",
+    "status": "installed subset"
+  },
+  {
+    "id": "dialogue@1",
+    "reads": "speaker, bound roles, continuation, current custody/presence, quest",
+    "writes": "choice.open/resolve/close; handover; facts; quest transitions; story-point event",
+    "invariants": "revalidate stale new input; stable bound IDs; whole sequence atomic",
+    "primitive": "current quest+handover hooks spec required; replace widening bespoke switches with typed consequences",
+    "boundary": "content choices/roles/text; engine continuation mechanics",
+    "evidence": "kernel/ts/src/mechanics/dialogue/rule.ts:96",
+    "status": "installed subset"
+  },
+  {
+    "id": "scene@1",
+    "reads": "story-point event, reserved scene fact, narrate steps",
+    "writes": "fact.assign start/line/end; scene_ended",
+    "invariants": "start once; continue-only; committed line; no repeat consequences",
+    "primitive": "bounded one-shot fact is enough today; occurrence/roles/overlay at M21",
+    "boundary": "content sequence/prose; engine durability/control",
+    "evidence": "kernel/ts/src/mechanics/scene/shared.ts:27; docs/system/mechanics.md:266",
+    "status": "installed subset"
+  },
+  {
+    "id": "action_recipe@1",
+    "reads": "resolved action, costs, check, ordered authored steps",
+    "writes": "resource.adjust, fact.assign, custom_event, cooldown.start, time.advance",
+    "invariants": "ordered costs/outcome in one writer; failure can commit declared cost; budget/RNG rollback on fault",
+    "primitive": "current immediate sequence; extend typed vocabulary for actual consumers; no hidden wait",
+    "boundary": "content verb composition; engine check/consequence evaluator",
+    "evidence": "kernel/ts/src/mechanics/action_recipe/rule.ts:49",
+    "status": "installed subset"
+  },
+  {
+    "id": "reaction@1",
+    "reads": "fact_changed or entity_entered_room, when policy",
+    "writes": "fact.assign in own writer group; subsequent fact_changed",
+    "invariants": "FIFO; stable rule order; delivery/depth limits; conflict faults",
+    "primitive": "M22 needs selected typed events/consequences; scene start hook currently explicit",
+    "boundary": "content event\u2192meaning; engine bounded delivery",
+    "evidence": "kernel/ts/src/mechanics/reaction.ts:26; runtime/proposal.ts:220",
+    "status": "installed subset"
+  },
+  {
+    "id": "behavior@1",
+    "reads": "NPC daily schedule, logical due time",
+    "writes": "schedule-selected entity.transfer; entity_entered_room",
+    "invariants": "deterministic target/next occurrence; same proposal",
+    "primitive": "bounded location schedule; future legal intents/arbitration for follow/hostility",
+    "boundary": "content routine; engine execution",
+    "evidence": "kernel/ts/src/mechanics/schedule/behavior.ts:15",
+    "status": "installed subset"
+  },
+  {
+    "id": "schedule@1",
+    "reads": "time policy, due jobs, actor-free trusted run_job",
+    "writes": "time.advance; job.complete/schedule; movement event",
+    "invariants": "due-time/ID order; successor future; receipt; later stale generation skip required",
+    "primitive": "reuse trusted due seam; M6 adds typed job kind/cancel and actor binding",
+    "boundary": "host measures elapsed; kernel orders jobs; content pacing",
+    "evidence": "kernel/ts/src/mechanics/schedule/rule.ts:19; runtime/proposal.ts:253",
+    "status": "installed subset"
+  },
+  {
+    "id": "calendar@1",
+    "reads": "authored start; fixed legacy second/hour/day interpretation",
+    "writes": "initial clock only (time.advance owned by schedule)",
+    "invariants": "derived calendar queries deterministic",
+    "primitive": "M1-C shared calendar/window conversion before tide/deadlines/moon",
+    "boundary": "calendar settings content; engine conversion",
+    "evidence": "kernel/ts/src/mechanics/schedule/behavior.ts:18; mechanics/policy.ts:42",
+    "status": "installed subset"
+  },
+  {
+    "id": "narration@1",
+    "reads": "accepted recipe/dialogue outcome and bound EntityIds",
+    "writes": "committed narration in decision/receipt; no new delta",
+    "invariants": "redisplay/retry cannot re-execute; stable bindings",
+    "primitive": "reuse semantic outcomes; observer audiences/cues only at consumer",
+    "boundary": "text content; presenter wording/layout; authority persists",
+    "evidence": "kernel/ts/src/mechanics/dialogue/rule.ts:123; docs/system/mechanics.md:261",
+    "status": "installed subset"
+  },
+  {
+    "id": "skills@1",
+    "reads": "Not installed; see M7",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M7",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:26",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "status@1",
+    "reads": "Not installed; see M8",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M8",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:27",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "combat@1",
+    "reads": "Not installed; see M4/M6",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M4/M6",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:29",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "death@1",
+    "reads": "Not installed; see M5",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M5",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:30",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "population@1",
+    "reads": "Not installed; see M17",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M17",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:38",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "commerce@1",
+    "reads": "Not installed; see M18",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M18",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:39",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "service@1",
+    "reads": "Not installed; see M19",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M19",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:40",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "tide@1",
+    "reads": "Not installed; see M10",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M10",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:42",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "light@1",
+    "reads": "Not installed; see M9",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M9",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:43",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "liquid@1",
+    "reads": "Not installed; see M11",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M11",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:44",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "readable@1",
+    "reads": "Not installed; see M12",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M12",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:45",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "topics@1",
+    "reads": "Not installed; see M13",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M13",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:46",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "relationship@1",
+    "reads": "Not installed; see M14",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M14",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:47",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "faction@1",
+    "reads": "Not installed; see M15",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M15",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:48",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "sense_cue@1",
+    "reads": "Not installed; see M23",
+    "writes": "No installed writer",
+    "invariants": "No implementation/portability claim",
+    "primitive": "Consumer decomposition in M23",
+    "boundary": "Registered name is not a shipped mechanic",
+    "evidence": "docs/features.gen.md:50",
+    "status": "registered, not installed"
+  },
+  {
+    "id": "M1",
+    "reads": "A/B1/B2 trusted elapsed, checkpoint/debt/reserved input; C calendar",
+    "writes": "clock/jobs plus host elapsed checkpoint/receipt",
+    "invariants": "due boundaries before input; debt once; fixed horizon; no menu privilege",
+    "primitive": "reuse jobs + receipts; C shared calendar/window query",
+    "boundary": "host clocks; content rate/start/calendar; kernel logical order",
+    "evidence": "docs/NEXT-MECHANICS.md:13; docs/system/save.md:163",
+    "status": "A/B1/B2 merged at audit base; C planned"
+  },
+  {
+    "id": "M2",
+    "reads": "position + opted pool/rate table + elapsed interval",
+    "writes": "old-rate resource settlement then position fact in one writer",
+    "invariants": "fraction/cap/zero-rate; required birth rows; final RPG agreement before commit and on load",
+    "primitive": "NEW generic resource metadata/arithmetic; shared position-settlement constructor for M5/M8",
+    "boundary": "foundation generic rate table; RPG chooses position; cartridge rates",
+    "evidence": "private/m2-a-position-recovery-brief.md:17; private/m2-position-rate-boundary.md:16",
+    "status": "planned; separate changing implementation not audited"
+  },
+  {
+    "id": "M3",
+    "reads": "owned item subtree mass incl nested/worn; Take candidate",
+    "writes": "ordinary entity.transfer only after voluntary carrying admission",
+    "invariants": "count EntityIds once; neutral/forced overload legal; pre-charge traversal; truthful too_heavy view",
+    "primitive": "NEW small pure carry context; reuse custody, Steps, checked add; reuse later Buy/Loot/Swim",
+    "boundary": "mass/cap content; no global transfer ceiling or persisted weight",
+    "evidence": "private/m3-a-carrying-ceiling-brief.md:23",
+    "status": "planned private formal brief"
+  },
+  {
+    "id": "M4",
+    "reads": "first-rat attack eligibility/positions, accuracy, damage/RNG table",
+    "writes": "contract/oracles only; no code writer",
+    "invariants": "conditional raw draws; death before later opportunity; flee atomic",
+    "primitive": "select reusable attack resolution footprint without general combat framework",
+    "boundary": "content parameters; mechanics ordering; independent literals",
+    "evidence": "docs/spec/conformance/first-encounter.md:7",
+    "status": "adopted planned contract"
+  },
+  {
+    "id": "M5",
+    "reads": "A effective per-entity HP; B lethal transition, held/worn roots, death owner",
+    "writes": "resource.adjust; NEW identity create+guarded initial custody; transfers/standing/restore/close",
+    "invariants": "same-group placement; hydrate prefix/final/load; owner custody; positive\u2192zero once; no loot loss",
+    "primitive": "NEW generic entity-resource override and created identity primitives; share M2 settle/M3 admission",
+    "boundary": "corpse template/shrine/restores content; death mechanics engine",
+    "evidence": "private/m5-a-npc-hp-brief.md:27; private/m5-b-death-return-brief.md:17",
+    "status": "planned private formal briefs"
+  },
+  {
+    "id": "M6",
+    "reads": "validated encounter participants, due round/generation, life/presence/position",
+    "writes": "NEW encounter lifecycle/job binding/cancel; HP/death sequence; declared events",
+    "invariants": "life re-read before each chance; no stale RNG/successor; direct schedule event ownership; safe response",
+    "primitive": "reuse RNG/resource/custody/death/jobs; missing typed combat sequence and consequence producer allowed",
+    "boundary": "rat IDs/credit mappings content, never combat switch; values content",
+    "evidence": "docs/spec/conformance/first-encounter.md:9; private/m5-b-m6-integration-audit.md:27",
+    "status": "planned"
+  },
+  {
+    "id": "M7",
+    "reads": "A actual swords/dodge; B bandage/swim/haggle; C selected progression",
+    "writes": "NEW acquired skill/qualification/effectiveness state or derived query; training payment/consequence",
+    "invariants": "learning once on retry; qualification distinct from knowledge; declared draws/caps",
+    "primitive": "shared check construction/effective stats at actual consumer; no XP/level framework without reward/spend",
+    "boundary": "skills/requirements/numbers content; rules deterministic",
+    "evidence": "docs/NEXT-MECHANICS.md:30",
+    "status": "planned"
+  },
+  {
+    "id": "M8",
+    "reads": "A real bleed producer/bandage; B water/night/combat effects",
+    "writes": "NEW status apply/remove/expiry with source/stacking; resource adjustments",
+    "invariants": "expiry boundary; stack/refresh policy; old-rate settlement before modifiers change",
+    "primitive": "shared timed status/modifier primitive; damage/life semantics reused across hazards",
+    "boundary": "effect values/duration content; ownership/stack/expiry engine",
+    "evidence": "docs/NEXT-MECHANICS.md:31",
+    "status": "planned"
+  },
+  {
+    "id": "M9",
+    "reads": "A lantern/torch lit state, custody, room visibility; B fuel",
+    "writes": "lit/fuel typed state, consumption; derived perception",
+    "invariants": "direct target/action/view use same perception; transfer cannot reset fuel; budget selectors",
+    "primitive": "NEW common perception predicate + timed quantity/fuel subset; no UI-only darkness",
+    "boundary": "emitter/range/fuel content; query/consumption engine",
+    "evidence": "docs/NEXT-MECHANICS.md:32",
+    "status": "planned"
+  },
+  {
+    "id": "M10",
+    "reads": "A tide window; B swim/load/movement resources/life; C drift origin",
+    "writes": "transfer + costs/status/death or declared failure; drift job/placement",
+    "invariants": "same traversal query view/direct/NPC; conserve items; equipment-free recovery route",
+    "primitive": "reuse calendar/carry/check/damage; NEW connection traversal policy and bounded delayed relocation",
+    "boundary": "plank/swim/drift routes and thresholds content",
+    "evidence": "docs/NEXT-MECHANICS.md:33",
+    "status": "planned"
+  },
+  {
+    "id": "M11",
+    "reads": "A container liquid kind/quantity/capacity; B food/drink/oil/needs",
+    "writes": "NEW quantity transfer/consume; resource/status consequences",
+    "invariants": "no mixed/self/overfill; conservation; same receipt; origin-time spoilage",
+    "primitive": "quantity is a real new invariant; reuse resource bounds/custody not fake a bag of arbitrary facts",
+    "boundary": "content liquid kinds/cost/effects; engine conservation",
+    "evidence": "docs/NEXT-MECHANICS.md:34",
+    "status": "planned"
+  },
+  {
+    "id": "M12",
+    "reads": "A notice board; B held readable/pages and authored topic grant",
+    "writes": "usually no state; typed knowledge/fact grant when authored",
+    "invariants": "actual object reach; re-read does not reward again; no time privilege",
+    "primitive": "reuse detail/custody/narration; add readable definition then grant via M13/M22",
+    "boundary": "pages/prose/topic link content; mechanics validates object",
+    "evidence": "docs/NEXT-MECHANICS.md:35",
+    "status": "planned"
+  },
+  {
+    "id": "M13",
+    "reads": "A known topics/node graph; B typed riddle input; C topic gates",
+    "writes": "NEW topic acquisition and durable dialogue node/continuation; node event; typed consequences",
+    "invariants": "unknown topic disclosure policy; bound roles/revalidation; input closed; no duplicate grant",
+    "primitive": "reuse current continuation + policy + knowledge; no riddle DSL",
+    "boundary": "topics/answers/branches content; node/input rules engine",
+    "evidence": "docs/NEXT-MECHANICS.md:36",
+    "status": "planned"
+  },
+  {
+    "id": "M14",
+    "reads": "Bram subject/actor trust and thankful/grieving fact",
+    "writes": "NEW typed scoped relationship adjustment",
+    "invariants": "correct subject pair, bounds, outcome once; admission reads live trust",
+    "primitive": "reuse scoped facts when semantically sufficient; first numeric relation owns invariant",
+    "boundary": "content affinity/thresholds; engine subject/scope",
+    "evidence": "docs/NEXT-MECHANICS.md:37",
+    "status": "planned"
+  },
+  {
+    "id": "M15",
+    "reads": "faction standing, timely/late/repeat reward evidence",
+    "writes": "NEW scoped faction/reputation adjustment",
+    "invariants": "once per eligible completion; cartridge caps; no global personality rewrite",
+    "primitive": "reuse relationship/scoped numeric semantics where same; no giant faction subsystem",
+    "boundary": "content faction meaning/caps; engine credit/scope",
+    "evidence": "docs/NEXT-MECHANICS.md:38",
+    "status": "planned"
+  },
+  {
+    "id": "M16",
+    "reads": "A profile facts; B follow binding/separation; C patrol; D hostile/flee/scavenge intents",
+    "writes": "typed internal commands\u2192transfer/combat/custody; selected profile state when needed",
+    "invariants": "legal path/cost; deterministic channel/priority/tie; life/range recheck; no direct writes",
+    "primitive": "NEW bounded intent arbitration/path queries at first competing consumer; shared traversal/life",
+    "boundary": "routes/profile eligibility content; engine arbitration",
+    "evidence": "docs/NEXT-MECHANICS.md:39",
+    "status": "planned"
+  },
+  {
+    "id": "M17",
+    "reads": "A finite rats; B actual dynamic animal population; C herb node",
+    "writes": "authored initial placement; later create/place/lifecycle; separate node depletion/regrow",
+    "invariants": "finite kills not respawn; provenance/count bounds; no duplicates after retry",
+    "primitive": "reuse M5 identity creation; NEW population reconciliation only for B; C quantity/node semantics",
+    "boundary": "spawn counts/regrow tuning content; engine conservation/provenance",
+    "evidence": "docs/NEXT-MECHANICS.md:40; pending PM reconciliation:27",
+    "status": "planned; rat population machinery unnecessary"
+  },
+  {
+    "id": "M18",
+    "reads": "A offer/currency/item custody/load; B stock/hours/restock",
+    "writes": "payment + stock + custody/create typed operations in one writer",
+    "invariants": "insufficient funds no change; purchase obeys selected M3 policy; same occurrence",
+    "primitive": "NEW bounded commerce transaction builder; reuse resources/creation/custody/time",
+    "boundary": "prices/stock/offers content; transaction invariants engine",
+    "evidence": "docs/NEXT-MECHANICS.md:41",
+    "status": "planned"
+  },
+  {
+    "id": "M19",
+    "reads": "A ferry fare/token/provider; B inn/food; C heal/train",
+    "writes": "payment + transport/access/resource/knowledge consequences",
+    "invariants": "one transaction; actual provider/hours; no time skip; no charge when effect impossible",
+    "primitive": "reuse M18 payment and typed consequence construction; no escrow for immediate service",
+    "boundary": "Bram/Maud offers content; generic immediate service admission",
+    "evidence": "docs/NEXT-MECHANICS.md:42",
+    "status": "planned"
+  },
+  {
+    "id": "M20",
+    "reads": "A sequence/all/any/current/event activation; B attributed kills; C escort; D deadlines/survive; E repeats",
+    "writes": "typed objective progress/lifecycle/outcomes and M22 consequence requests",
+    "invariants": "causal position/scope; distinct evidence; current possession vs history; deadline inclusivity; reward once",
+    "primitive": "NEW objective reducers as each family consumed; do not put quest increment in move/attack",
+    "boundary": "content objective graph and credit declarations; engine reducers",
+    "evidence": "docs/NEXT-MECHANICS.md:43; archive/spec/06:236",
+    "status": "planned"
+  },
+  {
+    "id": "M21",
+    "reads": "A dialogue/choice roles; B rest-triggered dream overlay; C acknowledged finale",
+    "writes": "NEW durable occurrence/beat/role/wait state, scoped overlay, scene events; typed consequence",
+    "invariants": "resume bound identities; no overlay loot leaks; restriction has safe/escape response; acknowledgement first",
+    "primitive": "reuse choice/state machine/FIFO; new occurrence only when one-shot fact inadequate",
+    "boundary": "dream/bell/dawn narrative content; generic scene durability/control",
+    "evidence": "docs/NEXT-MECHANICS.md:44; archive/spec/06:1049",
+    "status": "planned"
+  },
+  {
+    "id": "M22",
+    "reads": "A selected typed event\u2192consequence; B profiles/barrier/population/narration; C Q2/Q3 finale",
+    "writes": "registered typed consequences via existing proposal; persisted completion export at acknowledged end",
+    "invariants": "stable FIFO; causal actor from event/binding; one writer per target; no recursive reward/finale",
+    "primitive": "NEW minimal shared consequence seam needed early by M6 finite credit and M20; not arbitrary op interpreter",
+    "boundary": "exact rat/room/quest/finale names content; engine event validation/evaluation",
+    "evidence": "docs/NEXT-MECHANICS.md:45; mechanics/reaction.ts:26",
+    "status": "planned"
+  },
+  {
+    "id": "M23",
+    "reads": "committed bell event, declared room propagation and observer perception",
+    "writes": "projection only; no authoritative writer",
+    "invariants": "outside range absent; replay display never consequence; bounded propagation",
+    "primitive": "reuse event/narration/perception; NEW cue projection subset",
+    "boundary": "sound range/text content; visibility projection engine",
+    "evidence": "docs/NEXT-MECHANICS.md:46",
+    "status": "planned"
+  },
+  {
+    "id": "C2-M01",
+    "reads": "connection discovery/visibility/access policy",
+    "writes": "reveal fact/knowledge then ordinary movement",
+    "invariants": "forged hidden Move blocked; discovery separate from physical topology",
+    "primitive": "reuse M9 perception/M20 discovery; add typed connection policy if missing",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:75; Hidden passage discovery: Q4 ossuary\u2192flooded_gallery and hidden_treasury; S8 hidden-room ledger. A \u00a7\u00a73,4.1.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M02",
+    "reads": "rope/tool custody, traversal mode, climb check/load",
+    "writes": "transfer and selected damage/status/death consequence",
+    "invariants": "failed descent exact landing/loss once; escape possible after gear loss",
+    "primitive": "reuse M10 traversal, M7 check, M5 life/corpse; no Rope engine",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:76; Rope/climb traversal: Q4 barrow-mouth descent; S13 well_shaft\u2192well_bottom murder weapon. A \u00a7\u00a73,4.1.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M03",
+    "reads": "revealed/spent trap state, crossing/disarm event",
+    "writes": "state transition + damage/status consequence",
+    "invariants": "one-shot once including re-entry/reopen; reset explicitly authored",
+    "primitive": "reuse M22 reaction + M8 hazard consequence; new trigger only if actual event absent",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:77; Trap activation/disarm or avoidance: Q4 barrow_passage trap. A \u00a7\u00a73,4.1.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M04",
+    "reads": "typed material/resistance and effective attack",
+    "writes": "existing damage pipeline adjustment",
+    "invariants": "material modifier once in frozen order; defenses/draws unchanged otherwise",
+    "primitive": "NEW minimal damage modifier stage reused for armor/status/material; no if-wight-and-silver IDs",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:78; Material-sensitive damage: Q4 silver against barrow wights. A \u00a7\u00a74.4\u20134.5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M05",
+    "reads": "chosen equipment slot, source identity, base/effective PER",
+    "writes": "containment plus source-bound modifier; settle affected rate if needed",
+    "invariants": "same ring moved slots applies once; removal restores; bounds decided",
+    "primitive": "NEW effective attribute/modifier query at first writer; reuse equipment/M8/M2",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:79; Finger slots and item affects: S8 fen-ring reward, Q4 crown chill aura, S28 later ring. A \u00a7\u00a74.4,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M06",
+    "reads": "player knowledge by item definition, actual item properties",
+    "writes": "typed knowledge grant; projection only for secrecy",
+    "invariants": "hidden name/affect still mechanically active; persists; no duplicate grant",
+    "primitive": "reuse topic/knowledge where same invariant; identity projection new subset",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:80; Item identity knowledge: S25 Maren/book identification, S28 unknown cursed treasure. A \u00a7\u00a74.4,5; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M07",
+    "reads": "cursed/status, equipment custody, blessing offer/payment",
+    "writes": "status remove + paid service; removal transfer when legal",
+    "invariants": "forged Remove blocked; failed donation changes neither; death forced transfer selected",
+    "primitive": "reuse shared equipment admission/M8/M19; no crown exception in transfer",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:81; Curse/no-remove policy and blessing: S26 bless the crown; S28 cursed equipment. A \u00a7\u00a74.4,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M08",
+    "reads": "learned words, current prerequisites, teacher/fees",
+    "writes": "knowledge acquisition + optional payment",
+    "invariants": "learned is not qualified; retry no duplicate fee",
+    "primitive": "reuse M7 acquisition/qualification + M12/M13 grant; no spell-specific persistence framework",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:82; Learned-word acquisition and qualification: S25 books/teacher grants two words; chapter-two continuation of S4 ward knowledge. A \u00a7\u00a74.3,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M09",
+    "reads": "compiled supported word pair, caster qualification/targets/resources",
+    "writes": "cost + registered effect/status/light consequence",
+    "invariants": "unknown pair no cost/RNG; deterministic exact effect",
+    "primitive": "NEW bounded dispatch table semantics; reuse checks/costs/consequences, no scripting language",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:83; Small compiled word-combination casting: S25 combination exercise; S26 sanctuary theme and Q4 vault ward exposure only where authored. A \u00a7\u00a74.3,5; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M10",
+    "reads": "life/HP crossing, encounter phase, population template, route",
+    "writes": "phase latch + create/place/status/retreat consequences",
+    "invariants": "crossing once, not equality; death stops later phase; safe reachable vault",
+    "primitive": "reuse M6/M8/M17/M22 typed phase composition; no King code",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:84; Boss phase transitions: Q4 King chill aura, summon at half HP, retreat at quarter. A \u00a74.5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M11",
+    "reads": "calendar phase/window, transport connection",
+    "writes": "ordinary transport transfer/cost",
+    "invariants": "shared projection/admission inclusive/exclusive boundary; no wait skip",
+    "primitive": "reuse M1-C derived windows + M19 transport; no moon timer",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:85; Moon window: Q4 alternate isle_shrine\u2194standing_stones transport; S21 full-moon trigger. A \u00a7\u00a73,4.2.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M12",
+    "reads": "full-moon occurrence, event phase, participants, population",
+    "writes": "phase facts/occurrence + existing spawn/behavior/scene outcomes",
+    "invariants": "occurrence once after reopen; repeat explicitly scoped; no new authority",
+    "primitive": "reuse M22 state/reactions/jobs; NEW bounded occurrence identity only as needed",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:86; Phased world-event composition: S21 Wight Night's wight-pit surge\u2192north-gate defense\u2192aftermath. A \u00a7\u00a73,4.7; Q \u00a739.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M13",
+    "reads": "named protected living actor, close event/window",
+    "writes": "objective progress/outcome and reward consequence",
+    "invariants": "correct protected identity alive at close; gate fact distinct",
+    "primitive": "reuse M20 objective reducer + M5 life; no protection subsystem",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:87; Protect objective: S21 defense tracks a named living defender through the event; gate damage is a separate outcome fact. A \u00a75; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M14A",
+    "reads": "hire payment, existing NPC identity, control/follow relation, order/range",
+    "writes": "payment + relationship/control binding; internal follow/stay/attack/guard intent",
+    "invariants": "one hire; stale/unauthorized order refused; selected intent legal",
+    "primitive": "reuse M16/M14/M18; NEW typed control relation/order subset if absent",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:88; Hired companion and orders: S12 Maud offers Dagny for hire; follow/stay/attack/guard. A \u00a7\u00a72,4.5,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M14B",
+    "reads": "wage occurrence, funds, loyalty/service state",
+    "writes": "payment + last-settled occurrence/service consequence",
+    "invariants": "each due wage once; insufficient funds bounded branch; no endless debt",
+    "primitive": "reuse M1 jobs/occurrence + M18/M14; no wage authority",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:89; Wage/loyalty lifecycle: S12 ongoing wages and Dagny's loyalty. A \u00a75.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-M15",
+    "reads": "adoption time, food/loyalty, life, learned orders",
+    "writes": "growth stage/feeding effect/order grant; death ordinary",
+    "invariants": "one same actor grows; dead stays dead; no respawn",
+    "primitive": "reuse M1 derived age + M11/M14/M16/M5; pet is composition, add missing lifecycle data only",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:90; Pet growth/feeding/death: S20 hound pup at hound_run raised, fed, trained, fights. A \u00a7\u00a74.5,5; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M01",
+    "reads": "resource node quantity, tool custody, skill, carry admission",
+    "writes": "node depletion + conserved/new yield + resource cost",
+    "invariants": "no tool no depletion/yield; finite yield retry once; load policy explicit",
+    "primitive": "reuse M17-C/M3/M7/M5 create; new harvest invariant if absent, not animal population",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:106; Tool-gated resource harvest: S14 Kell's ore quota, S5 forge ore, S23 rod/bait fishing. A \u00a7\u00a74.6,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M02",
+    "reads": "service input identity/quantity, capacity, requester, due occurrence",
+    "writes": "NEW escrow custody/service lifecycle reserve/complete/cancel/claim",
+    "invariants": "one owner of inputs/output; cancel/complete race; no double claim; real elapsed",
+    "primitive": "real new escrow/lifecycle primitive; reuse M18 payment/M1 jobs/M5 creation",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:107; Timed service custody/completion: S5 smithy forge job. A \u00a74.6; P21 \u00a714; release service.escrow_jobs.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M03",
+    "reads": "recipe inputs, tool/station, check; item condition on use",
+    "writes": "consume/create transform; condition decrement/broken status",
+    "invariants": "mass/quantity contract; repeated use not double decrement; broken cannot attack",
+    "primitive": "NEW transformation/condition only as consumed; reuse escrow/check/resource/status",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:108; Forge recipe and wear condition: S5 Dunstan's ore\u2192steel sword test explicitly uses durability. A \u00a7\u00a74.4,4.6,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M04",
+    "reads": "fish origin time, perishability, smoking recipe",
+    "writes": "transform/consume; derived freshness",
+    "invariants": "transfer/reopen never reset expiry; smoke output provenance exact",
+    "primitive": "reuse M11 quantity/consumption + M1 time + C3-M03 transform; no global spoilage tick",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:109; Perishable food and smoking transformation: S23 fish for Maud, bait/rod, spoilage and recipe. A \u00a7\u00a74.4,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M05",
+    "reads": "concealment/status, observer perception, travel/check context",
+    "writes": "conceal/reveal state; ordinary movement",
+    "invariants": "observer-specific eligibility used by targets/direct action; failed sneak reveals",
+    "primitive": "reuse M9 common perception + M8/M7; NEW observer dimension when needed",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:110; Sneak/hide affects perception and movement: S11 sneak past Marl, S18 unseen approach to moneylender. A \u00a7\u00a74.6,4.8,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M06",
+    "reads": "NPC custody, selected item, stealth/check, ownership",
+    "writes": "transfer + NEW stolen provenance; typed attempt/offense event",
+    "invariants": "same identity, failure no transfer, retry once; ordinary Take not privileged",
+    "primitive": "reuse custody/check; provenance/access semantics real new primitive",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:111; Theft/stolen provenance and fence acceptance: S18 steal ledger; S17 Nix buys stolen goods. A \u00a7\u00a74.6,5; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M07",
+    "reads": "typed offense, observer perception/range, jurisdiction",
+    "writes": "witness evidence + jurisdiction-scoped wanted/reputation consequence",
+    "invariants": "blind/nonlocal observer no evidence; no omniscient wanted; stable credit",
+    "primitive": "NEW bounded witness/jurisdiction semantics using M9/M14/M15/M22",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:112; Witnessed offense\u2192jurisdiction wanted: S18 clean versus Crown penalty; S17 theft consequence. A \u00a7\u00a74.6,5; P21 \u00a7\u00a716,28.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M08",
+    "reads": "guard intent, wanted jurisdiction, adjacency, bound actor IDs",
+    "writes": "arrest/control/scene-start consequence",
+    "invariants": "range/jurisdiction rechecked at commit; trial binds same identities",
+    "primitive": "reuse M16 arbitration + M21 occurrence; no guard special script",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:113; Arrest intent and trial admission: S19 automatically starts when a guard arrests wanted player. A \u00a7\u00a72,4.6,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M09",
+    "reads": "sentence/fine choice, duration, custody, legal escape route",
+    "writes": "custody/restricted actions + release/escape/wanted transitions",
+    "invariants": "fine xor jail; release once; escape cancels sentence; no wait skip",
+    "primitive": "NEW sentence/custody lifecycle as needed; reuse service-like settlement and scene control; resolve physical-vs-overlay first",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:114; Jail sentence, custody and escape: S19 fine or jail; jail\u2192dungeon_cells\u2192fence_cellar escape. A \u00a7\u00a73,4.6; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M10",
+    "reads": "rider/mount relation, terrain/mode, movement resource/cost",
+    "writes": "co-located rider+mount transfer and cost; mount/unmount relation",
+    "invariants": "both move or neither; excluded terrain no charge; dismount preserves mount",
+    "primitive": "NEW typed mount relation; shared traversal query and movement sequence, no horse-specific movement fork",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:115; Mounted traversal and terrain costs: S24 race on foot or horse; Hew's horse sale/rental. A \u00a7\u00a73,4.1,5; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M11",
+    "reads": "route/cart due arrivals, race occurrence, player arrival order",
+    "writes": "race objective/outcome + authored discount grant",
+    "invariants": "ordered arrivals/tie explicit; once-only reward",
+    "primitive": "reuse M16 legal route + M20 event/window + M1; race is objective composition",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:116; Race objective and cart route: S24 reach Harrowgate before Hew's cart. A \u00a74.8,5; P21 \u00a728.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M12",
+    "reads": "property owner/access, price, container/furniture slots",
+    "writes": "payment + typed ownership relation + item containment",
+    "invariants": "one owner; no second purchase; death/jail never implies ownership transfer",
+    "primitive": "NEW ownership distinct from custody; reuse transactions/barriers/containment",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:117; Property ownership/access: S16 buy empty_cottage from Josse and furnish it. A \u00a7\u00a73,4.6,5.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-M13",
+    "reads": "learned song, instrument custody, eligible listeners, status stacks",
+    "writes": "bounded listener status consequences + cost/narration",
+    "invariants": "no instrument no effect; listeners bounded; overlaps declared not last-writer-wins",
+    "primitive": "reuse knowledge/M9 perception/M8 status/M22; no song engine",
+    "boundary": "engine mechanics/typed invariants; cartridge identities, settings and composition",
+    "evidence": "draft docs/LATER-MECHANICS.md:118; Learned song and instrument-gated room effect: S22 Finch's three-round riddle contest rewards a song; A \u00a74.9 describes songs as buffs.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-C01",
+    "reads": "one fox charm, selected faction branch",
+    "writes": "transfer + terminal choice/faction consequence",
+    "invariants": "one recipient/reward; alternate branch terminal",
+    "primitive": "reuse M13/M15/M20/M22; S7 is not barter",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:96; S7 Sedge's Bargain: give the one fox charm to Sedge or Aldric; commit one faction branch.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-C02",
+    "reads": "discovered ledger, readable and ordered shrine inputs",
+    "writes": "sequence objective + one reward creation/transfer",
+    "invariants": "order A,B,C not A,C,B; no last-input repeat reward",
+    "primitive": "reuse discovery/readable/M20 sequence/custody; no puzzle DSL",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:97; S8 Unburied Ledger: discover hidden room, read ledger, perform authored shrine item sequence, receive one ring.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-C03",
+    "reads": "night, well access, three distinct clues, accusation choice",
+    "writes": "knowledge/objective/outcome facts",
+    "invariants": "three different clues; killer/other clues still null",
+    "primitive": "reuse light/water/rope/readable/dialogue; NPC ghost does not require player ghost",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:98; S13 Miller's Ghost: discover at old_mill at night, retrieve well-bottom weapon plus two authored clues, accuse in a choice scene.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-C04",
+    "reads": "actual teacher location, eligible words, crown curse/faction",
+    "writes": "knowledge + optional blessing/status/faction outcome",
+    "invariants": "qualification and terminal branch once; payment only if selected",
+    "primitive": "reuse C2-M06\u201309; spell not implied by Sanctuary quest title",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:99; S25 Words in the Scriptorium and S26 Sanctuary: resolve Maren location, teach/use the two words; Aldric blessing reinforces chosen allegiance.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C2-C05",
+    "reads": "King terminal, crown/vault route, high-pass ending acknowledgement",
+    "writes": "quest/scene facts + declared completion export",
+    "invariants": "no pre-ack completion; access after retreat; ring-pair chapter conflict open",
+    "primitive": "reuse C2-M01\u201310 + M20/M21/M22/CC; content resolves causal key cycle",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:100; Q4 fall/turn-in\u2192safe high_pass overlook; S28 crown-key vault exploration and first ring/memory.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-C01",
+    "reads": "eligible distinct kill/delivery evidence, daily cap/window",
+    "writes": "repeat objective + payment/faction reward",
+    "invariants": "same kill/item no double credit; next window explicit",
+    "primitive": "reuse M15/M17/M20/C3-M01; no quota framework",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:124; S6 Bounties and S14 Ore for the Crown: distinct eligible kills/ore deliveries, daily windows/caps, Crown reward.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-C02",
+    "reads": "toll dialogue/payment/sneak outcome",
+    "writes": "permission fact + payment or traversal consequence",
+    "invariants": "failed pay no passage grant; one charge",
+    "primitive": "reuse dialogue/commerce/service/stealth; values content",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:125; S11 Toll Bridge: dialogue, fee/bribe or sneak branch sets crossing fact.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-C03",
+    "reads": "day-six occurrence, mine participants, miners life, rope/dig",
+    "writes": "hazard/route + protect objective/outcomes",
+    "invariants": "one collapse; player survival not miner rescue; always recoverable route",
+    "primitive": "reuse C2-M02/03/12/13; real labor duration only if selected",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:126; S15 Cave-In at deep_shaft on day6: dig/rope exit and protect miners; restore a usable route.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-C04",
+    "reads": "password/hidden access, theft/witness/evidence/jurisdiction",
+    "writes": "quest branches + law/trial/scene consequences",
+    "invariants": "wrong password not reveal; unseen/witnessed/lawful branches distinct",
+    "primitive": "reuse C3-M05\u201309; no guild-class gate by implication",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:127; S17 Fence's Password, S18 Ledger and S19 trial scene: password/hidden access, theft, evidence/faction choice, fine/jail.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "C3-C05",
+    "reads": "child/allegiance/king/wanted continuity and Lantern Night occurrence",
+    "writes": "one acknowledged ending/export plus authored aftermath",
+    "invariants": "complete reachable truth table; jail variant same relevant completion once",
+    "primitive": "reuse world event + M20/M21/M22/M23/CC; four prose endings not truth table",
+    "boundary": "cartridge-authored composition; engine additions only for demonstrated missing primitive",
+    "evidence": "draft docs/LATER-MECHANICS.md:128; Q5 Fen Ward: Lantern Night world event, choice/outcome scene, village/rumor aftermath and jail-window variant.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "CC-M01",
+    "reads": "acknowledged actual ending, selected outcome, source release/lineage",
+    "writes": "NEW declared continuity export record with existing receipt/report transaction",
+    "invariants": "none before acknowledged end; identical one after reopen/retry",
+    "primitive": "reuse M21/M22 story event and host report; extend source-independent story point",
+    "boundary": "explicit continuity contract or host/product ownership; no account/storage APIs in mechanics",
+    "evidence": "draft docs/LATER-MECHANICS.md:134; Acknowledged chapter completion\u2192declared continuity export. Chapter1 dawn exports actual rescued/stays/lost plus allegiance; chapter2 high_pass adds king status; chapter3 Lantern Night finalizes. Q4/Q5 are the later consumers. A \u00a711, K.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "CC-M02",
+    "reads": "declared versioned ports, exact source/lineage/schema, explicit missing-prior defaults",
+    "writes": "initialize new destination save once from selected fields",
+    "invariants": "reject unknown/malformed before writes; no reimport/reward; prior save intact",
+    "primitive": "NEW import admission/occurrence; reuse compiler validation and atomic new-save host",
+    "boundary": "explicit continuity contract or host/product ownership; no account/storage APIs in mechanics",
+    "evidence": "draft docs/LATER-MECHANICS.md:135; Optional-prior start for Q4 Barrow King and Q5 Fen Ward: chapter2 imports declared memories or explicit defaults; chapter3 does likewise. K.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "CC-M03",
+    "reads": "explicit opt-in character fields, compatible item definitions/caps",
+    "writes": "mapped destination knowledge/equipment identities",
+    "invariants": "one imported item; incompatible explicit refusal/mapping; no silent deletion",
+    "primitive": "reuse CC-M02 and M5 identity; no full-character/world cloning",
+    "boundary": "explicit continuity contract or host/product ownership; no account/storage APIs in mechanics",
+    "evidence": "draft docs/LATER-MECHANICS.md:136; Campaign-character transfer subset only if selected for Q4/Q5 starts: retained learned skills/equipment across chapter2/3. K campaign_character.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "CC-C01",
+    "reads": "accumulated chapter maps, imported/default story truths",
+    "writes": "compiled artifact + ordinary activation/route consequences",
+    "invariants": "no live prior-cartridge ref; stays not overwritten by rescued default",
+    "primitive": "authoring composition; extend compiler only for real selection gap",
+    "boundary": "explicit continuity contract or host/product ownership; no account/storage APIs in mechanics",
+    "evidence": "draft docs/LATER-MECHANICS.md:137; Q4/Q5 chapter manifests compile whole accumulated map, open crypt/priory gate then road, preserve revisitable Ashmere and earlier ending reactions. A \u00a711.",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "CC-P01",
+    "reads": "entitlement/account/release availability and pending completion",
+    "writes": "product install/account acceptance outside kernel",
+    "invariants": "offline installed play independent of account; acceptance idempotent",
+    "primitive": "existing R12/R12A/R13/R16 product boundary; not RPG primitive",
+    "boundary": "explicit continuity contract or host/product ownership; no account/storage APIs in mechanics",
+    "evidence": "draft docs/LATER-MECHANICS.md:138; Q4/Q5 paid chapter2/3 availability, acquisition/entitlement, installs, support/recovery and account completion sync. [Product ladder](archive/spec/14-implementation-plan.md) R12/R12A/R13/R16; [account progress](archive/spec/23-accounts-progress-admission.md).",
+    "status": "future candidate; source-only draft, not implementation"
+  },
+  {
+    "id": "F-numeric-identity",
+    "reads": "canonical values, checked integers, explicit RNG, command/id inputs",
+    "writes": "canonical bytes/hash and RNG/IDs only",
+    "invariants": "frozen numeric profile; deterministic ordering; no ambient clock/RNG",
+    "primitive": "reuse installed TS/Elixir twins; change fixtures+differential for new semantics",
+    "boundary": "portable foundation",
+    "evidence": "docs/contracts.gen.md:57; kernel/ts/src/foundation/",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  },
+  {
+    "id": "F-composition",
+    "reads": "base rows/specs/defaults + ordered typed DeltaOps",
+    "writes": "sorted changed rows or whole fault",
+    "invariants": "one target/op; writer groups; preconditions; no partial publish",
+    "primitive": "extend actual ops with consumer-specific contract, never generic set-field",
+    "boundary": "portable foundation",
+    "evidence": "kernel/ts/src/foundation/compose.ts:93; lib/loka/core/compose.ex:59",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  },
+  {
+    "id": "F-validation-invariants",
+    "reads": "closed schemas, invariant observations, budgets",
+    "writes": "validation/fault result only",
+    "invariants": "independent expected evidence; fail closed; actual red controls when implementing guard",
+    "primitive": "reuse existing schema/registry/check seams; no source-text architecture guard",
+    "boundary": "portable foundation plus RPG runtime checks",
+    "evidence": "docs/contracts.gen.md:63; kernel/ts/src/runtime/invariants.ts:149",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  },
+  {
+    "id": "H-authority-save",
+    "reads": "trusted actor/run, invocation/freshness/receipt, proposal",
+    "writes": "changed rows/head/receipt/reports in SQLite then adoption",
+    "invariants": "known receipt before new execution; unknown COMMIT fenced; pinned compatibility",
+    "primitive": "reuse existing host/save, no mechanic-owned transaction",
+    "boundary": "host/platform",
+    "evidence": "docs/system/save.md:29; docs/system/save.md:53",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  },
+  {
+    "id": "H-elapsed",
+    "reads": "wall/monotonic input, durable debt/reservation",
+    "writes": "trusted elapsed receipt/checkpoint + kernel time command",
+    "invariants": "no duplicate elapsed; due before held input; no presenter clock privilege",
+    "primitive": "reuse M1 path for every timed mechanic",
+    "boundary": "host/platform",
+    "evidence": "docs/system/save.md:163; docs/system/architecture.md:155",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  },
+  {
+    "id": "H-content-compiler-loader",
+    "reads": "source/compiled defs, references, lock/API/schema",
+    "writes": "immutable compiled artifact or diagnostics",
+    "invariants": "compiler and loader both validate; reserved facts; bounded artifact",
+    "primitive": "add typed field/ref/ownership validation at actual schema seam",
+    "boundary": "authoring certification",
+    "evidence": "docs/system/cartridge.md:51; docs/system/cartridge.md:155",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  },
+  {
+    "id": "H-view-presenter",
+    "reads": "current World\u2192GameView\u2192GameSession/UI actions",
+    "writes": "projection and ActionInvocation only",
+    "invariants": "same pure eligibility; no World/storage/raw-state writer; no invented descriptions",
+    "primitive": "reuse GameView/ActionSet/session; simulator functional consumer proof",
+    "boundary": "kernel projection + host-neutral presentation",
+    "evidence": "docs/system/protocol.md:187; docs/system/architecture.md:125",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  },
+  {
+    "id": "H-realm-product",
+    "reads": "future server/account/entitlement/shared authority inputs",
+    "writes": "typed host effects/protocol only when built",
+    "invariants": "offline value never imported as Realm economy; portable story rule server trigger requires differential",
+    "primitive": "keep Realm/account/paid acquisition outside world primitive build",
+    "boundary": "future host/product, not installed",
+    "evidence": "docs/system/architecture.md:87; docs/residency.gen.json",
+    "status": "installed foundation/host boundary or explicitly future as stated"
+  }
+]

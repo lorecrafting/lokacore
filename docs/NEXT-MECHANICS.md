@@ -61,6 +61,8 @@ This queues every chapter-one “not yet” capability plus the missing installe
 
 Milestone details and gates: [14 R7–R14 and dependency graph](archive/spec/14-implementation-plan.md); applicability overrides the broad historical “chapter two adds death” phrase. Phase numbers are not a mandatory total order.
 
+Mechanic briefs and reviews use [Building mechanics by composition](system/architecture.md#building-mechanics-by-composition), including the smallest missing invariant at its actual consumer.
+
 ## Execution order and parallel work
 
 Under the delegation the PM may adopt coherent policies, amend affected specs explicitly, brief developers and continue reviewed slices without waking the owner. This document itself implements nothing. Start with [M1-A](briefs/m1-a-clock.md), a separate M4 scratch contract and M12-A readable analysis. After the first fight, prioritize M12-A, M13-A, early M22-A and M20-A before dependent scenes; merge shared protocol/spec changes serially before their dependent code. Runtime pairs need complete disjoint file lists, not an assumption that different mechanics touch different files. Follow [WORKFLOW](WORKFLOW.md), independent reviews and [simulator-first validation](decisions/owner-decision-simulator-first-validation-2026-10-04.md); batch preview refreshes at playable checkpoints while retaining required per-PR checks; do not extrapolate C1-only exceptions. [World parameters](decisions/owner-decision-world-parameters-2026-10-02.md) keeps rates/settings in cartridges and safety budgets in the engine.
