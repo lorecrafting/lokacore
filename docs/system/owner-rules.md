@@ -166,3 +166,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   ([record](../decisions/owner-decision-docs-compaction-2026-10-02.md#decisions-for-the-move-2026-10-02)).
 
 - Latest Book UI polish supersedes the earlier fixed viewport-bottom NPC dock, pending-choice-preserving Leave and position detail page; follow [Book UI](book-ui.md) and the [new record](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md). Description projection is coordinated separately; no invented player presence or description keys.
+
+- PM adoption under autonomous mechanics authority: [M1–M23 queue, clock/safety and chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md); each implementation still amends active specs and follows reviewed delivery.

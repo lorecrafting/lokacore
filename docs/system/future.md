@@ -6,6 +6,8 @@ Short list; each item links the plan it comes from. The open stages and their ca
 
 ## Next
 
+- **M mechanics continuation**: [official M1–M23 queue](../NEXT-MECHANICS.md), [adopted clock/chapter policies](../decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md) and first [M1-A brief](../briefs/m1-a-clock.md), under delegated PM authority.
+
 - **R7/R8 for chapter one**: 12 slices and Gate C1 ([record](../decisions/owner-decision-chapter-one-plan-2026-10-02.md);
   what stays LATER, with its trigger, is in the record's §2 triage table).
 - **Playtest and tune** ([record](../archive/decisions/owner-decision-playtest-2026-09-25.md)).
