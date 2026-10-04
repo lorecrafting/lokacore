@@ -1,0 +1,30 @@
+[
+  {
+    "check": "ast-tests",
+    "exit": 0
+  },
+  {
+    "check": "lint-plants",
+    "exit": 0
+  },
+  {
+    "check": "kernel-plants",
+    "exit": 0
+  },
+  {
+    "check": "features",
+    "exit": 0
+  },
+  {
+    "check": "contracts",
+    "exit": 0
+  },
+  {
+    "check": "safety-green",
+    "exit": 0
+  },
+  {
+    "check": "kernel-focused",
+    "exit": 0
+  }
+]
