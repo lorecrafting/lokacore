@@ -14,6 +14,17 @@ Short list; each item links the plan it comes from. The open stages and their ca
 
 ## Chapter one and the proof cartridge
 
+- The release uses [one shared difficulty](../decisions/owner-decision-single-difficulty-2026-10-03.md);
+  the older ladder's selectable difficulty and separate death-mode rules are superseded.
+- The later time model follows the [fixed-time restriction](../decisions/owner-decision-fixed-time-2026-10-03.md):
+  clock progression is authority-driven elapsed time; gameplay actions offer no time skip.
+- Mechanical planning now follows the [LegendMUD baseline](../decisions/owner-decision-legendmud-baseline-2026-10-03.md),
+  with its [sourced system reference](../reference/legendmud-system.md). The
+  [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
+  selects bounded consumers, recovery-route gates and chapter handoff/finale ordering. The
+  [provisional Story-mechanics proposal](../design/provisional-story-mechanics.md) retains dated,
+  unadopted alternatives; it does not override the current M1/M2/M3/M4/M5 choices. Each consuming
+  implementation amends active clauses and contracts first.
 - Capabilities registered but not installed, with the slice that first needs them:
   [feature map](../features.gen.md), [release scope](../spec/release-scope.md); chapter-one
   endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).

@@ -8,6 +8,12 @@ and not repeated here.
 
 ## Product and scope
 
+- One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
+  ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).
+- Fixed time; no player-driven time skips. The later time model follows elapsed time, and rest or
+  retrieval does not jump the clock ([record](../decisions/owner-decision-fixed-time-2026-10-03.md)).
+- Backgrounding does not pause the world; the later time model preserves elapsed combat, recovery
+  and world events ([record](../decisions/owner-decision-background-time-2026-10-03.md)).
 - Close C1 after its reviewed checklist and merges under the owner's Simulator acceptance; deferred UI work remains tracked at the next UI checkpoint ([record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md)).
 
 - NPC/item views carry explicit authored full descriptions; the compatible optional wire field is always populated by current projections ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
@@ -58,6 +64,10 @@ and not repeated here.
 
 ## Architecture and engine
 
+- LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
+  rule before each concrete consumer; adopted adaptations and historical proposals follow the
+  [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
+  ([original direction](../decisions/owner-decision-legendmud-baseline-2026-10-03.md)).
 - The TypeScript kernel uses the responsibility folders and colocated rule helpers in [architecture.md](architecture.md#typescript-kernel), preserving semantics and deterministic ownership/purity guards ([record](../decisions/owner-decision-kernel-layout-2026-10-03.md)).
 
 - The engine owns mechanics; cartridges own numbers and world settings; no game-world value is a
@@ -67,7 +77,8 @@ and not repeated here.
 - Engine output is structured; each presenter owns its layout and wording; one `GameSession`
   boundary serves the TypeScript authority now and the Elixir Realm later; refusal words key on
   registered error codes ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
-- Default pools hp, ma, mv (DikuMUD-derived starts and gains), 1 mv per room by default (a
+- Installed default pools hp, ma, mv (historical DikuMUD-derived starts and gains; future
+  derivation follows the LegendMUD reconciliation above), 1 mv per room by default (a
   cartridge's `world.movement.cost` overrides it; terrain costs later), regeneration per game
   hour derived from the clock; every v2 cartridge gets the pools
   ([record](../archive/decisions/owner-decision-hp-ma-mv-2026-09-25.md)).
@@ -175,4 +186,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Elapsed cartridge policy and trusted receipt delivery use the [M1-A PM contract](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md); legacy play-time behavior stays frozen.
 
 - Driver-managed elapsed saves, reserved input and replay follow the [M1-B1 PM adoption](../decisions/pm-decision-m1-b1-durable-elapsed-2026-10-04.md).
+
+- PM reconciliation under mechanics delegation: [current Legend/M mechanics and chapter selections](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md); original owner records and provisional alternatives remain dated history.
+
+- Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.
 - App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
