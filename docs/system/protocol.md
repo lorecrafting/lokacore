@@ -132,6 +132,8 @@ Carrying admission shares the decision's existing query counter
 budget failure remains an evaluation fault, distinct from gameplay refusal `too_heavy` and
 item-count fault `capacity_exceeded`. Malformed relevant item mass faults
 `precondition_failed`, rather than silently becoming zero or a balancing refusal.
+Custody reach uses that same counter before carrying admission, and reports relevant cycles
+as `containment_cycle`. Item-barrier reach uses its decision counter too.
 
 Each `lists()` projection uses one separate carry-local counter/context, with the registered
 `query_steps` limit, reused across its item offers. This is a narrow carrying budget, not an
@@ -141,6 +143,9 @@ Cached, genuinely established owned-child or zero-subtree admission remains lega
 exhaustion. Neutrality is checked before current load, but uncached custody/node reads remain
 charged. No second counter or unmetered scan establishes neutrality, and an unknown load never
 becomes zero or `too_heavy`.
+Take's reach prerequisite shares this projection counter; it cannot hang before carrying is evaluated.
+Boolean reach results are cached per item within the same projection, preserving established reach
+after later exhaustion without establishing an unknown result.
 
 ## Invariants
 

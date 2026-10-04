@@ -39,12 +39,17 @@ export function lists(world: World, actor: CharacterId) {
   const at = position.positionOf(world, actor);
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
+  const steps = { n: 0 };
+  const reachedItems = new Map<EntityId, boolean>();
   let carry: ReturnType<typeof carrying> | undefined;
   const take = (item: EntityId) => {
     if (!body || world.entities[item]?.kind !== 'item') return 'invalid_target' as const;
     if (world.state.containers[item] === body) return 'invalid_state' as const;
-    if (!reach(world, body, item)) return 'not_present' as const;
-    carry ??= carrying(world, body, { n: 0 });
+    const reached = reachedItems.get(item) ?? reach(world, body, item, steps);
+    if (typeof reached === 'boolean') reachedItems.set(item, reached);
+    if (typeof reached === 'string') return reached;
+    if (!reached) return 'not_present' as const;
+    carry ??= carrying(world, body, steps);
     return carry(item);
   };
   const here = (a: Offered) =>

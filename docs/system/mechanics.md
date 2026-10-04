@@ -93,6 +93,12 @@ every item EntityId whose custody reaches the body once, including worn items un
 holders; body, rooms, NPCs and slot holders have no mass. Definitions supply mass, not reach or
 barrier state. Distinct instances of one definition count separately.
 
+The shared reach prerequisite charges each custody edge to the same query counter and
+terminates on a repeated ancestor with `containment_cycle` or exhaustion with `budget_exceeded`.
+A closed lid or non-item holder still refuses `not_present` before inspecting ancestry beyond it.
+Take propagates reach failures as evaluation faults; projected Take offers expose the same code.
+Item-barrier admission also propagates these faults instead of treating an error as reachable.
+
 The shared carrying predicate uses one ephemeral context per decision or `lists()` projection,
 and derives a parent-to-children map from custody rows only when an external subtree must be measured.
 Iterative traversal memoizes subtree totals by EntityId. Every inspected custody row/node and

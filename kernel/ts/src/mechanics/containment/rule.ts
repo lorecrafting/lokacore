@@ -44,7 +44,9 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
   ];
   if (p.type === 'take') {
     if (at === body) return rejected('invalid_state');
-    if (!reach(world, body, p.item_id)) return rejected('not_present');
+    const reached = reach(world, body, p.item_id, steps);
+    if (typeof reached === 'string') return { kind: 'fault', code: reached };
+    if (!reached) return rejected('not_present');
     const code = carrying(world, body, steps)(p.item_id);
     if (code) return code === 'too_heavy' ? rejected(code) : { kind: 'fault', code };
     return accepted(world, 'taken', move(body), acquired(body));

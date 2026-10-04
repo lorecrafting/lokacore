@@ -433,12 +433,12 @@ test('zero subtree is neutral but positive contents and malformed mass remain di
 });
 
 // Breaks: resetting the supplied Steps, scanning uncharged custody rows or allocating an event
-// after exhaustion. One ancestry row + five index rows + satchel, oil and body = nine charges.
+// after exhaustion. Reach edge + ancestry row + five index rows + three nodes = ten charges.
 test('carrying charges prior policy work before accumulation and event allocation', () => {
   const w = massed({ lantern: 3000, satchel: 1000, lamp_oil: 2000 }, 6000);
   for (const [spent, kind] of [
-    [32759, 'accepted'],
-    [32760, 'fault'],
+    [32758, 'accepted'],
+    [32759, 'fault'],
   ] as const) {
     const steps = { n: spent };
     const mint =
@@ -449,7 +449,7 @@ test('carrying charges prior policy work before accumulation and event allocatio
         : allocator(w, take(SATCHEL));
     const decision = containment(w, take(SATCHEL) as never, mint, steps);
     assert.equal(decision.kind, kind);
-    assert.equal(steps.n, spent + 9);
+    assert.equal(steps.n, spent + 10);
     if (kind === 'fault') assert.deepEqual(decision, { kind: 'fault', code: 'budget_exceeded' });
   }
 });
