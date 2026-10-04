@@ -1,0 +1,60 @@
+Final fixture canonical hash and literal eleven baseline cuts/keys/tones: PASS
+Native visible ready phrase and normal foreground: PASS
+Warning/danger native HP transitions not exercised; controlled presenter tests and band-prose red control retained.
+[
+  {
+    "at_percent": 100,
+    "key": "ready",
+    "tone": "normal"
+  },
+  {
+    "at_percent": 90,
+    "key": "slightly_scratched",
+    "tone": "normal"
+  },
+  {
+    "at_percent": 80,
+    "key": "few_bruises",
+    "tone": "normal"
+  },
+  {
+    "at_percent": 70,
+    "key": "some_cuts",
+    "tone": "warning"
+  },
+  {
+    "at_percent": 60,
+    "key": "several_wounds",
+    "tone": "warning"
+  },
+  {
+    "at_percent": 50,
+    "key": "many_nasty_wounds",
+    "tone": "warning"
+  },
+  {
+    "at_percent": 40,
+    "key": "bleeding_freely",
+    "tone": "warning"
+  },
+  {
+    "at_percent": 30,
+    "key": "covered_in_blood",
+    "tone": "danger"
+  },
+  {
+    "at_percent": 20,
+    "key": "leaking_guts",
+    "tone": "danger"
+  },
+  {
+    "at_percent": 10,
+    "key": "almost_dead",
+    "tone": "danger"
+  },
+  {
+    "at_percent": 0,
+    "key": "dying",
+    "tone": "danger"
+  }
+]

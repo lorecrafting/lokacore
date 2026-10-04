@@ -1,0 +1,22 @@
+12 12 {"source":"ashmere_bell","first_command":"scan","resources":"full"}
+193 366 {"source":"ashmere_rooms","first_command":"look","resources":"full"}
+234 30636 {"source":"ashmere_facts","first_command":"move","resources":"hp 0, ma 1, mv 0"}
+144 300 {"source":"ashmere_items","first_command":"look","resources":"full"}
+1623 622 {"source":"ashmere_dusk","first_command":"run_job","resources":"full"}
+18 9633 {"source":"ashmere_details","first_command":"look","resources":"hp 0, ma 10, mv 0"}
+674 2841 {"source":"ashmere_road","first_command":"__proto__","resources":"full"}
+215 454 {"source":"ashmere_errand","first_command":"move","resources":"full"}
+172 172 {"source":"ashmere_gate","first_command":"unlock","resources":"full"}
+298 49 {"source":"ashmere_ferry","first_command":"talk","resources":"full"}
+9 211 {"source":"ashmere_green","first_command":"wait","resources":"full"}
+7 1595 {"source":"lantern_proof","first_command":"wait","resources":"hp 0, ma 1, mv 10"}
+1943 337982 {"source":"ashmere_wear","first_command":"toString","resources":"hp 1, ma 0, mv 0"}
+75 105497 {"source":"ashmere_locks","first_command":"wait","resources":"hp 1, ma 10, mv 0"}
+217 81 {"source":"ashmere_rest","first_command":"wait","resources":"full"}
+117 130 {"source":"ashmere_journal","first_command":"wait","resources":"full"}
+32 54 {"source":"ashmere_chapters","first_command":"accept_quest","resources":"full"}
+16314 61998 {"source":"ashmere_details","first_command":"wait","resources":"full"}
+114 422 {"source":"ashmere_dusk","first_command":"perform","resources":"full"}
+regression 3 432 {"source":"ashmere_wear","first_command":"__proto__","resources":"full"}
+regression 1 35225 {"source":"ashmere_rooms","first_command":"move","resources":"hp 10, ma 10, mv 0"}
+all remaps and explicit command anchors verified

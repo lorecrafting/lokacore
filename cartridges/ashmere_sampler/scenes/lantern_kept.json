@@ -1,0 +1,27 @@
+{
+  "on": {
+    "story_point": "lantern_resolved",
+    "outcome": "carry"
+  },
+  "control": "modal",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "scene.lantern_kept.bram"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.lantern_kept.brass"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.lantern_kept.river"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ]
+}
