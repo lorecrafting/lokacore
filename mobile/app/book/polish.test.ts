@@ -9,7 +9,7 @@ import { openGame } from '../../authority/local-story/session.ts';
 import { initialPages, pagesAfter, type Page } from './model.ts';
 import { presenter } from './presenter.ts';
 
-const ts = createRequire(new URL('../../../kernel/ts/package.json', import.meta.url))('typescript');
+const ts = createRequire(import.meta.url)('typescript');
 registerHooks({
   resolve(specifier, context, next) {
     return specifier === 'react-native'
