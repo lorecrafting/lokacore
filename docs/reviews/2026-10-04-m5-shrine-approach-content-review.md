@@ -2,6 +2,10 @@
 
 PR: [#152](https://github.com/lorecrafting/lokacore/pull/152). Reviewed source: `88a400a3d09a9ce808c4ee75b981a52f7e7b8a09`, against main `d279a4ab6acb871ad246fe21811526e0ac168824`.
 
+**Current primary verdict: APPROVE** at `4ca3952f6261508658c9a0667dba25e1ccbdee17`; M5C-01 and M5C-02 closed, no open primary findings. Original source verdict and separate-review history are preserved below.
+
+## Original source review
+
 **Verdict: CHANGES REQUIRED.** Fresh independent primary reviewer; authored none of the subject. Two documentation findings remain open; no content/runtime correctness finding.
 
 ## Requirements derived before the diff
@@ -55,3 +59,13 @@ N1 nit — docs/system/book-ui.md:24: The active Book UI spec calls 0.0.2 the cu
 
 Ponytail Review: Lean already. Ship.
 ```
+## Primary scoped fix recheck — round 1
+
+Reviewed fix head: `4ca3952f6261508658c9a0667dba25e1ccbdee17`. **Verdict: APPROVE.**
+
+- **M5C-01 closed** (`docs/system/book-ui.md:23`): the current sampler now links the canonical cartridge contract, which correctly selects 0.0.3 and distinguishes historical 0.0.2 proof. This also resolves the overlapping Sol source note N1.
+- **M5C-02 closed** (`docs/system/owner-rules.md:16`): the active rules index now links the actual delegated PM chapel-approach decision. Its linked authority accurately retains the bounded open route, omitted consumers and development replacement scope.
+
+Inspected only the documentation dispositions, directly linked authority and review publication changes. The complete difference from reviewed source `88a400a` consists of these two active documents plus the review record/index; runtime, content, fixture, oracle, test and evidence bytes remain unchanged. No new finding or open item. PM verified expected docs-only CI at this exact fix head, with all started jobs successful; the six-job source CI remains the original code validation. No tests, builds, mutation runs, native interaction or owner save operations were repeated for these documentation fixes.
+
+Ponytail Review: Lean already. Ship.
