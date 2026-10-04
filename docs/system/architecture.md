@@ -92,6 +92,7 @@ proposal. Cartridge [blueprints](glossary.md) supply concrete NPCs and items; it
 definitions supply places, numbers and story combinations. Capability code does not
 special-case a chapter or NPC or call another mechanic's player verb; existing spec-required
 dependencies remain named exceptions.
+The [shared Story/Realm and replaceable-content direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md) applies at this boundary.
 
 Reuse the smallest existing primitive that preserves the required behavior. When a real
 consumer needs semantics or an invariant the vocabulary cannot express, create or extend

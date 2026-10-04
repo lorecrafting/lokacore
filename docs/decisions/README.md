@@ -146,3 +146,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [M2-A position recovery](pm-decision-m2-a-position-recovery-2026-10-04.md): exact fractions, player rate/position agreement, Save validation and the actual sampler consumer.
 
 - [M3-A carrying ceiling](pm-decision-m3-a-carrying-ceiling-2026-10-04.md): PM selection under mechanics delegation; sampler consumer and bounded admission.
+
+- Owner direction: [shared Story/Realm mechanics and familiar interaction; replaceable story content](owner-decision-story-realm-shared-mechanics-2026-10-04.md); first Realm activity and unchanged-cartridge hosting remain open.
