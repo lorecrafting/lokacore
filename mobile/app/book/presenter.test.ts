@@ -33,10 +33,19 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
   for (const action of ['take', 'drop', 'close_choice']) {
     for (const pending of [true, false]) {
       const item = { id: 'lantern', kind: 'item', name: 'item.lantern', actions: [] };
+      const context = action === 'close_choice' ? 'bram' : 'lantern';
       const view = {
         ...(VIEW as object),
         inventory: action === 'drop' ? [item] : [],
         entities: action === 'take' ? [item] : [],
+        ...(action === 'close_choice' && {
+          choice: {
+            continuation_id: 'choice-1',
+            speaker_id: 'bram',
+            prompt: { key: 'choice.prompt' },
+            choices: [],
+          },
+        }),
       } as never;
       const p = presenter({
         ...game(() =>
@@ -55,15 +64,16 @@ test('pending and refused Take/Drop/Leave retain detail routing and unchanged cu
           label: action,
           action_key: action,
           target_ids: action === 'close_choice' ? [] : ['lantern'],
-          input: {},
+          input: action === 'close_choice' ? { continuation_id: 'choice-1' } : {},
+          token: 'view:r:0',
         },
-        'detail',
+        context,
       );
       assert.equal(p.screen().returnWorld, false);
       assert.equal(p.screen().view, view);
       assert.equal(p.screen().view.inventory.length, action === 'drop' ? 1 : 0);
       assert.deepEqual(p.screen().log, []);
-      assert.deepEqual(p.screen().detail('detail'), [
+      assert.deepEqual(p.screen().detail(context).slice(-1), [
         pending
           ? '(pending: not confirmed saved; press any button to retry it)'
           : "You can't do that: not here.",
