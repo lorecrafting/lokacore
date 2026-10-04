@@ -98,6 +98,10 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner decision (paraphrased): [chapter-one stage plan: 12 slices and Gate C1; a sampler story replaces the Lantern on the phone; sight lines in Look; chapter markers and modal cutscenes; breakable keys descoped; review exceptions after codex](owner-decision-chapter-one-plan-2026-10-02.md).
 - PM decision, auto-approved under owner overnight authority: [Lantern proof content: a locked west gate, dialogue change as Bram's talk ending, 23:00 as a claim limit, talk policy quest-active](../archive/decisions/pm-decision-lantern-proof-content-2026-10-01.md). Ruling 3 superseded 2026-10-02 by the [untimed Lantern](owner-decision-untimed-lantern-2026-10-02.md).
 - Owner leaning, not a decision: [Realm separation, a middle path on ADR-074 §5 route (a): shared foundation, separate rules, new keys for online behaviour](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md).
+- [LegendMUD mechanical baseline and research](owner-decision-legendmud-baseline-2026-10-03.md): future character/resource/skill/magic/combat planning, with explicit reconciliation before implementation.
+- [One shared game difficulty](owner-decision-single-difficulty-2026-10-03.md): supersedes selectable normal/hard/ironman modes and their separate death policies.
+- [Fixed time; no player-driven time skips](owner-decision-fixed-time-2026-10-03.md): rest and retrieval do not jump the clock; the later authority drives elapsed time.
+- [Backgrounding does not pause the world](owner-decision-background-time-2026-10-03.md): elapsed time applies to combat, recovery and world events; preparing players for online play.
 - Owner decision: [fresh independent Codex primary review for c1-position PR #137 only](owner-decision-c1-position-codex-review-2026-10-03.md).
 - Owner decision (paraphrased): [prioritize touch interaction; de-emphasize loka play UX and typed synonyms](owner-decision-touch-priority-2026-10-03.md).
 
@@ -130,6 +134,10 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - PM first-consumer decision: [M4-A cellar encounter, RNG/escape/death policies and M5 prerequisites](pm-decision-first-encounter-2026-10-03.md).
 
 - [M1-B1 durable elapsed host](pm-decision-m1-b1-durable-elapsed-2026-10-04.md): checkpoint/v2, reserved input, typed completion and trusted trace replay.
+
+- PM decision: [LegendMUD/M mechanics reconciliation and selected Missing Child handoffs, recovery and finale](pm-decision-legend-mechanics-reconciliation-2026-10-04.md), under autonomous mechanics delegation; provisional alternatives retained as history.
+
+- Owner decision: [simulator-first mechanics validation](owner-decision-simulator-first-validation-2026-10-04.md); required per-PR checks/fresh review retained, physical-device proof routed substantially later before public readiness.
 - [M1-B2 app lifecycle and elapsed sampler](pm-decision-m1-b2-lifecycle-2026-10-04.md): resume reservations, confirmed touch updates and the current development consumer.
 
 - [M2-A position recovery](pm-decision-m2-a-position-recovery-2026-10-04.md): exact fractions, player rate/position agreement, Save validation and the actual sampler consumer.

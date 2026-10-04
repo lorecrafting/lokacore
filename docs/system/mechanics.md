@@ -6,6 +6,11 @@ DecisionResult (`kernel/ts/src/runtime/decision.ts:192`). Admission, budgets and
 Which capability owns which command, event and policy op: `CAPABILITY_OWNERS`
 (`kernel/ts/src/contracts.gen.ts:367`), summarised in the [feature map](../features.gen.md).
 
+The clauses below describe installed behavior. Future character, resource, skill, magic and combat
+planning follows the [LegendMUD baseline direction](../decisions/owner-decision-legendmud-baseline-2026-10-03.md)
+and [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md).
+Planned selections do not change these installed clauses; each consumer amends them before code.
+
 ## A fresh world
 
 `newWorld(cartridge, context, seed)` (`kernel/ts/src/runtime/fresh.ts:26`) mints ids under the nil
@@ -376,7 +381,7 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`mechani
 
 ## Planned first combat contract (M4-A)
 
-**Planned until M5/M6 implementation.** The [M4-A first-encounter contract](../spec/conformance/first-encounter.md), under its [PM adoption](../decisions/pm-decision-first-encounter-2026-10-03.md), governs later M5/M6 work. It specifies one real cellar rat, conditional RNG, alternating opportunities, immediate deterministic flee and death-before-revival closure. This is planned, not an installed capability. Exact schemas/ownership and executable rules follow the consuming implementation PRs.
+**Planned until M5/M6 implementation.** The [M4-A first-encounter contract](../spec/conformance/first-encounter.md), under its [PM adoption](../decisions/pm-decision-first-encounter-2026-10-03.md), governs later M5/M6 work. It specifies one real cellar rat, conditional RNG, alternating opportunities, immediate deterministic flee and death-before-revival closure. This is planned, not an installed capability. Exact schemas/ownership and executable rules follow the consuming implementation PRs. The [current reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md#current-mechanics-policy) preserves the untrained/unarmed A/B/C profile; its [future acceptance](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md#future-acceptance-references) adds production recovery and reachable-corpse controls without changing those oracles.
 
 ## M1-A elapsed authority time
 
