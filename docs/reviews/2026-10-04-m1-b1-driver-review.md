@@ -91,3 +91,47 @@ The complete open list is primary M1B1-01 plus separate Sol B1-01, B1-02 and B1-
 Under the indexed autonomous mechanics delegation, PM selects an explicit shared-session clarification for B1-01: while an invocation is retained for clock catch-up, a different identified intent returns conflict without releasing the original attempt/reservation or issuing its result as the new action. A matching retry retains the original identity and completion context. Pending unknown-save retries keep the existing documented original-attempt behavior. The implementation amends the active shared Game/save contract and existing B1 adoption accordingly. This is a PM clarification, not an invented owner preference or an independent finding disposition.
 
 Only bounded validated invocation data is snapshotted; ordinary invalid-input admission remains intact. Trusted trace framing is rejected before dispatch. Checkpoint shape validation stays specific to the elapsed table; genuine operational read/rollback failures retain their existing semantics. No general serializer, save validator or native/UI scope is added.
+
+## Primary scoped round-one recheck
+
+Published source: `b1795facd8b2e32fdcf076332c80ad769633412b`. Requirements derived from the original findings and explicit active Save/Book/B1 amendments before reading fix code:
+
+- Retain a bounded private snapshot of validated targets and nested input without changing malformed/cyclic admission. Completion keeps the original intent and settled before-projection; a later new invocation succeeds.
+- During catching_up, a different identified intent conflicts and preserves the original attempt/status. Matching retries preserve identity. Unknown-save pending continues its existing original-attempt behavior.
+- Reject unterminated or malformed complete trace input before any trusted or ordinary execution, preserving complete legacy replay.
+- Missing elapsed columns are corrupt checkpoint evidence after transaction closure; operational read/rollback failures stay pending. Terminal recovery checks the original bounded raw header witness or loaded managed known run before replacement, including v1 upgrade before its checkpoint. A refused opening never invents or updates its witness. Valid replacement is stale; changed malformed identity is corrupt without writes; unsupported newer format stays refused.
+- Recheck only changed code and direct callers, preserve explicit v1 authority behavior, and independently verify additive proof inventories and historical/current-byte distinctions.
+
+**Scoped verdict: CHANGES REQUIRED. Original M1B1-01 and B1-01/B1-02/B1-03 closed; new direct-caller blocker M1B1-R1-01 remains open.**
+
+### Dispositions at b1795fa
+
+- **M1B1-01 closed:** `invocation.ts:21` and `:42` copy only the validated ActionInvocation using the existing bounded canonical seam. The managed session and authority share it; no World copy occurs. The amended finite-horizon case mutates caller targets and nested input, completes the original saved intent at literal 864000, checks the original empty completion payload, and successfully invokes again. Invalid/cyclic input retains existing invalid admission before copy/sampling.
+- **B1-01 closed:** `invocation.ts:31-42` compares action/actor/ordered targets/input while catching_up, excluding freshness admission metadata. Different valid intent conflicts without calling the original attempt or releasing it. Matching retry keeps its id; the unchanged unknown-save path retries the original regardless of the new press. Existing receipt-before-sampling/completion coverage remains green.
+- **B1-02 closed:** `play/replay.ts:8` requires a terminal newline before parsing, drawing or dispatch. Actual elapsed-trace malformed tail exits before a state draw; complete actual local and legacy CLI traces still replay identically. The one-line play test expectation correction matches preflight timing; it adds no production behavior after the reviewed fix commit.
+- **B1-03 closed:** `elapsed-store.ts:31-39` inspects the specific checkpoint columns before its projection. Missing-column evidence becomes typed corruption at opening and closed metadata/gameplay reconciliation. Real operational read failures remain pending. The metadata reconciler checks run before reading checkpoint shape, preserving replacement classification.
+- **Direct recovery guards partly correct:** `authority.ts:180-209` compares closed-transaction original raw refused header or loaded managed known run before destructive recovery, distinguishes missing/malformed/replaced witnesses, permits its own loaded v1→v2 transition and honors actual denied ROLLBACK. It preserves explicit v1 authority and higher-format refusal on the focused callers. However, the unreadable-header path below has no loaded meta or captured witness and now fails internally.
+
+### M1B1-R1-01 — blocker — elapsed corrupt-file recovery dereferences unloaded metadata
+
+Source location: `mobile/authority/local-story/authority.ts:190` at `b1795facd8b2e32fdcf076332c80ad769633412b`; direct caller `session.ts:273`. `identityOf` can raise a genuine SQLite corruption error before `openStory` captures recoveryHeader or loads meta. The typed corrupt opening still offers Start over, but replaceable's elapsed-host fallback accesses `s.meta.format`/run_id although meta is absent.
+
+Independent actual-node:sqlite reproduction: create a controlled 4096-byte file of `x` bytes, open it through `localSession` with the existing elapsed fixture and actual controlled clocks, then call Start over. Opening yields `save_corrupt` with `startOver: true`. Start over leaves no Game, never invokes removal, and replaces the recovery message with `Cannot read properties of undefined (reading 'format')`. This bypasses the established proven-corrupt-file recovery path; the 110 green scoped tests cover the legacy corrupt-file case but not this newly affected elapsed caller.
+
+Handle absent loaded metadata without inventing a header/run witness. Preserve explicit confirmed file recovery when actual SQLite corruption is proven, genuine operational header-read uncertainty as pending, and refusal to overwrite a newly valid replacement. Add only the minimal real-corrupt-file elapsed-session regression, extending the existing recovery contract; no broad validator or new format policy is requested.
+
+### Scoped checks and independent controls
+
+Reviewed the fix diff and its direct authority/store/session/replay callers with source outlines and AST JSON call searches. No core rewrite required a broader review. Applied Ponytail Review and correctness pass: the concrete session helper reuses existing validation/canonical encoding for bounded input and respects file caps; targeted PRAGMA/header guards use the existing transaction boundary. **No over-engineering finding.** M1B1-R1-01 is a correctness failure.
+
+- `mise exec -- node --test` over local-story `elapsed-driver`, `session`, `faults`, `observe`, `start_over`, `recovery`, `saves`, `elapsed` plus kernel `play`/`transcripts`: exit 0, **110/110 passed**. Covers amended reservation/input tests, complete legacy and real elapsed CLI replay, actual checkpoint column damage and real SQLite FULL/deferred-FK/lost-ack/process-kill cases, replacement witnesses, legacy explicit authority and unsupported newer format.
+- Independent mutant 1 removed the managed-session bounded copy. Existing finite-horizon/caller-mutation case failed (exit 1).
+- Independent mutant 2 bypassed recovery witness checking. Existing valid/malformed/absent header replacement case failed (exit 1).
+- Both source files restored byte-for-byte in finally blocks. Restored targeted finite-horizon, recovery witness, actual denied-ROLLBACK, real elapsed CLI and complete legacy replay cases: exit 0, **5/5 passed**.
+- PM personally verified all six exact-source CI jobs successful at 14:03:16 UTC, last sim at 14:02:56 UTC, and normal author pre-push/push exit 0. These are PM verification; no full pre-push/check_all/native/owner-save operation was rerun by this reviewer.
+
+### Scoped evidence verification
+
+All **55 original**, **28 round-one** and **4 correction** artifact hashes and exact inventories verify; all retained verification OK counts agree. Original artifacts and both original inventory files remain byte-identical against a0dfaba. All **23 final current-source manifest** entries match b1795fa after restoration. The eight round-one controls each retain old exit 0/new exit 1 with corresponding old-green/new-failing logs and source-restored hashes matching current source. Inspected the distinction between actual denied-ROLLBACK closure, proven schema damage, genuinely failed COMMIT and successful COMMIT with lost response.
+
+The earlier 73-test run remains historical and is not labeled final-byte proof. Current 53-test author proof and the later legacy-play correction have explicit scopes; the original 21-entry manifest also stays historical. No retained absolute home paths were found. Native/B2 integration and complete M1-B acceptance remain outside scope. Historical verdicts above are preserved; only this section states round-one dispositions.
