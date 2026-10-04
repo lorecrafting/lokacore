@@ -177,4 +177,8 @@ Give invocations remain valid; engine mechanics are unchanged. Touch recipient s
 explicit carry: implement it when a touch flow can supply a recipient from actual projected
 valid targets, with its own approved scope. The inspected unsupported-capability rejection was
 one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
-rather than hiding errors or clearing same-room history. Carries remain in the [roadmap](../ROADMAP.md). Further owner playtest polish precedes mechanics.
+rather than hiding errors or clearing same-room history. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
+
+## Planned combat interaction (M4/M6)
+
+**Planned until M5/M6 implementation.** Under the [planned first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), the actual combat consumer must project complete Attack/Stand/Flee invocations and persistent threat/escape controls. Ordinary obstructing details yield to danger while world time continues; mandatory modal reading remains in safe authored contexts before engagement. No combat control exists until its real GameView/admission contract lands. This functional interaction work is separate from deferred cosmetic polish.

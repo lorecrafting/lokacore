@@ -106,3 +106,7 @@ receipt validation without changing manifest schema 1 or any frozen fixture.
 Names and boolean declarations remain unauthenticated claims to be checked by
 the owner. Another language, a new session, or a changed agent role does not make
 an author independent. See the [focused correction record](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/reviews/2026-09-22-prep-followup.md).
+
+## Planned mechanics oracle supplements
+
+[M4-A first-encounter semantics and three literal RNG examples](first-encounter.md) are adopted planning answers for later combat/death consumers. They add no executable fixture, implementation or certification claim and preserve the existing numeric vectors.

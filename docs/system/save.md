@@ -149,3 +149,7 @@ commit `-dirty`. CI checks the exported bundles of a clean tree carry the bare c
 bundle never keeps an older one. Refusal and
 outcome words live in `mobile/app/book/words.ts`
 ([owner rule](owner-rules.md#architecture-and-engine)).
+
+## Planned combat/death persistence (M4/M5)
+
+**Planned until M5/M6 implementation.** The [planned first encounter](../spec/conformance/first-encounter.md#actual-foundation-gaps-to-resolve-in-m5) requires entity-specific NPC HP and saved dynamic corpse identity/initial custody before lethal combat. M5 must extend changed-row adoption/save/reopen atomically with receipts and reconcile uncertain commits before input; a transient World.entities mutation is insufficient. Final fields/operation syntax are not frozen or implemented by M4-A.
