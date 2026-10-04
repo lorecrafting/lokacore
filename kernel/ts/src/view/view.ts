@@ -15,6 +15,7 @@ import type {
   TextKey,
 } from '../contracts.gen.ts';
 import { lists } from './action_lists.ts';
+import { refusal, resolved } from '../commands/actions.ts';
 import { COMPASS, refString, type Entity, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened, questOf } from '../mechanics/lookups.ts';
 import { choiceView, definition } from '../mechanics/dialogue/shared.ts';
@@ -29,7 +30,8 @@ import { cmp } from '../foundation/validate.ts';
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
  * the player sees (description_variant.describe), exits in compass order (unavailable while
- * movement refuses them: exit_closed or exit_locked through a closed or locked barrier,
+ * admission refuses them: unsupported_capability without a matching composed action or
+ * invalid_state when its policy fails; then exit_closed or exit_locked through a closed or locked barrier,
  * movement.passage, else invalid_state while the player is not standing, position.standing, else
  * insufficient_resource while the body cannot pay a move, movement.fare),
  * each with its barrier's door (short name, state and the door verbs step accepts there now,
@@ -137,7 +139,7 @@ type Lists = ReturnType<typeof lists>;
 // unless that barrier bars the way.
 function exits(world: World, door: (direction: Key) => AdvertisedAction[]): ExitView[] {
   const room = world.rooms[world.state.containers[world.body]];
-  const modal = !!scene.running(world, world.character);
+  const set = resolved(world, world.character);
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
   const seated = !position.standing(world, world.character); // position@1, after the barrier
   return movement.sight(world, world.body).map((seen) => {
@@ -164,7 +166,13 @@ function exits(world: World, door: (direction: Key) => AdvertisedAction[]): Exit
       }),
     };
     const code =
-      (modal ? 'unsupported_capability' : undefined) ??
+      refusal(
+        world,
+        { type: 'move', actor_id: world.character, direction },
+        { n: 0 },
+        undefined,
+        set,
+      ) ??
       movement.passage(world, room, direction) ??
       (seated ? 'invalid_state' : tired && 'insufficient_resource');
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
