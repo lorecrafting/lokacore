@@ -66,3 +66,16 @@ Inspected changed delivery/test/spec/evidence and direct authority/store/save ca
 Independent command: `mise exec -- node --test --test-reporter=spec mobile/authority/local-story/elapsed.test.ts`: **7 passed**. Reviewer red controls separately removed trusted fencing (**1 named failure**), removed decode classification (**both malformed-column tests fail**) and broadened the catch (**real SQLite-error test fails**), each exit 1. All original bytes restored. Verified all **97** retained evidence hashes and the round-1 restored-source manifest against final review bytes; inspected old-suite-surviving new guard controls and actual red logs.
 
 Ponytail Review: **Lean already. Ship.** One narrow guard reuses existing receipt/store behavior; no abstraction, dependency or duplicated fault test. This is the primary recheck; the simultaneous separate Sol fixed-head result remains a separate review.
+
+## Cross-vendor fix recheck
+
+Reviewed fix head: `e44f8104e65a0323b94fd7d2c97ca359e0ab9046`. PM personally verified all six started CI jobs SUCCESS at this exact head before the independent rechecks. Requested model: `gpt-6-sol`; runtime identity unverified. Process exit status 0. Answer SHA-256: `96ef0dc132148097e4a30e6aae010cb3c1d56dfa078e0097e7d1fe8cd38fd4ca`. PM-retained private transcript SHA-256: `5ed8c33c1ba1ae7f6fd67da8550221f28637ad0071d19856c9e4dfb22035450c`. Neither private transcript nor paths are published. All primary and secondary findings are closed.
+
+```text
+Verdict: APPROVE — PR #153 fix recheck at e44f8104e65a0323b94fd7d2c97ca359e0ab9046
+Findings: None.
+
+M1A-01 resolved: the test now causes a real SQLite receipt-read error after a completed COMMIT, keeps trusted and player delivery fenced, then restores the table before reconciliation. F1 resolved: malformed command or response JSON returns literal conflict; SQLite read errors still propagate. Retained old-suite survivors and new red controls match those boundaries. All evidence hashes and 17 restored-source hashes match; the PR152 merge did not change the reviewed files.
+
+Read-only review; no tests or builds run. Exact-head CI green was reported by PM, not independently checked here. Requested model: gpt-6-sol; runtime model identity unverified.
+```
