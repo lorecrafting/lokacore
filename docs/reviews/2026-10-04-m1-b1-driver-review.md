@@ -215,3 +215,24 @@ Ponytail Review and correctness pass: **Lean already; no complexity finding.** T
 All **55 original / 28 round-one / 4 correction / 19 round-two** inventoried artifacts independently hash correctly, inventories agree exactly, and retained verification OK counts match. All earlier artifacts and inventory/verification files are byte-identical against b1795fa. All **24 current source-manifest** entries match the reviewed source. Four round-two controls have paired old exit0/new exit1 logs and restored source hashes matching current authority bytes; their specific edits and failures are retained. No retained absolute home paths were found.
 
 The four controls are distinct: absent-meta protection, proof flag/newly readable authorization, loaded format permission, and malformed-format classification priority. Actual NOTADB and page damage, native denied SELECT/ROLLBACK, genuinely failed COMMIT and lost acknowledgement remain separate behaviors. Earlier focused counts and manifests remain historical; the final 114-test run is independently rerun on this head. No native compatibility, B2 integration or complete M1-B acceptance is claimed.
+
+## Separate Sol round-two final fix recheck
+
+Exact reviewed source: `2d5b3cd6dddfd825aec63ef6ca8d360f9e328785`. Requested model: `gpt-6-sol`; runtime model identity was not independently verified. Read-only fixes and direct callers; no tests/builds run by this second reviewer. CLI exit `0`.
+
+Answer SHA-256: `ade945ede21fc662124f0bf96d734cdf47e1dc8080b8d3bf9a41dd8ed52fe8ff`; raw private transcript SHA-256: `6bcb7955891ff9b286973612c9a9754fec935791d689f91cdd54f9bfe02556f1`. Answer below is verbatim.
+
+```text
+VERDICT: APPROVE — scoped fix recheck at 2d5b3cd6dddfd825aec63ef6ca8d360f9e328785. No open finding in this scope.
+
+M1B1-R1-01 CLOSED — authority.ts:97-100,186-215 handles a corrupt-file opening without loaded metadata. Recovery requires transaction closure and renewed proof of corruption. A newly readable supported run is stale; operational rollback or read uncertainty remains pending. The localSession Start over caller reaches the confirmed file-removal path.
+
+M1B1-R1-02 CLOSED — authority.ts:196-209 refuses same-run v3 as unsupported and malformed or v2→v1 drift as corrupt, without replacement. The loaded session’s own supported v1→v2 upgrade remains permitted.
+
+Sol-R1-01 / B1-03 classification CLOSED — authority.ts:196-209 checks malformed format before classifying a different valid run as stale. A changed malformed header receives save_corrupt without writes.
+
+Original M1B1-01, B1-01, B1-02 and B1-03 remain CLOSED at their previously tested scope; the relevant direct callers and behavior were not regressed by these fixes.
+
+Read-only verification: all 24 current-source hashes and 18 retained round-two artifact hashes match. The retained baseline failures, four red controls, and final 114/114 focused pass support these dispositions. I ran no tests or builds.
+```
+The primary independently verified all nineteen round-two inventory entries (including the evidence README), all prior inventories and the twenty-four final source hashes. Its final scoped verdict is APPROVE with no open findings. Both independent rechecks close the complete round-two fix list; no B2 lifecycle or native proof is claimed here.
