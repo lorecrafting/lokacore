@@ -1,0 +1,38 @@
+(node:6190) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<PATH> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <PATH>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ room is focused while Map retains directions and every detail returns to the world (26.927209ms)
+✔ NPC details own choices and results while Back preserves the pending conversation (31.32725ms)
+✔ only the room position target opens offered controls and a seated player can stand (10.562125ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (8.389625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 390.756
+
+✖ failing tests:
+
+test at book/polish.test.ts:124:1
+✖ room is focused while Map retains directions and every detail returns to the world (26.927209ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(h.labels().includes('Old Bram, open'))
+  
+      at TestContext.<anonymous> (file://<PATH>:136:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

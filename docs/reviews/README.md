@@ -167,3 +167,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C1 sampler](2026-10-03-c1-sampler-review.md): PR #142 at `fc5a6f1`, APPROVE; final native acceptance on integrated Release `9732b0`, SAMP-BAND-01 closed.
 - [C1 riskiest-code Astra audit](2026-10-03-c1-gate-astra-audit.md): `b4d91ea`, APPROVE WITH NOTES; later App diff covered by sampler Sol, native proof linked; whole Gate C1 pending.
 - [C1 touch](2026-10-03-c1-touch-review.md): PR #141 at `595c036`, APPROVE WITH NOTES; final clean integrated Release `9732b0e`, native interaction and scene line-two relaunch passed, no open findings; owner phone play/timing remains Gate C1.
+- [C1 playtest polish](2026-10-03-c1-playtest-polish-review.md): PR #143 at `9f18cb9`, APPROVE; independent scoped source/mutations and Release Simulator proof, separate Sol appended verbatim; Gate C1 pending owner feedback.

@@ -6,7 +6,8 @@ import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from
 import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';
-import { refused, why, type Hint } from './model.ts';
+import { branch, refused, said, why, type Hint, type Pool } from './model.ts';
+import { band, Tap } from './pages.tsx';
 import { body, paper } from './paper.ts';
 
 type Props = {
@@ -132,4 +133,76 @@ function readerActions(
     onAccessibilityAction: (a: { nativeEvent: { actionName: string } }) =>
       a.nativeEvent.actionName === 'activate' ? openMap() : walk(a.nativeEvent.actionName),
   };
+}
+
+// One line: the time as its earthly branch, then the character button, which shows the body's
+// resources coloured by band when GameView carries them (the room-view status line, an owner-
+// ruled departure) and opens the Character page, the way to Journal, Carrying and Settings.
+type StatusProps = {
+  time: number;
+  resources?: readonly Pool[];
+  position?: GameView['position'];
+  text: (key: string) => string;
+  locked: boolean;
+  pending: boolean;
+  open: () => void;
+  openPosition?: () => void;
+};
+
+export function Status(p: StatusProps) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+        columnGap: 14,
+      }}
+    >
+      <Text style={{ ...small, color: paper.dim }} accessibilityLabel={branch(p.time).label}>
+        {branch(p.time).glyph}
+      </Text>
+      {p.position && <Position value={p.position} open={p.openPosition} />}
+      <Pressable
+        disabled={p.locked}
+        accessibilityRole="button"
+        accessibilityLabel={p.resources ? said(p.resources, p.text) : 'character'}
+        onPress={p.open}
+        style={{ minHeight: 44, justifyContent: 'center' }}
+      >
+        <Text style={{ ...small, color: paper.accent }}>
+          {p.resources ? shown(p.resources) : 'character'}
+        </Text>
+      </Pressable>
+      {p.pending && (
+        <Text style={{ ...small, color: paper.dim, width: '100%', textAlign: 'center' }}>
+          save not confirmed
+        </Text>
+      )}
+    </View>
+  );
+}
+
+// The resources as the status line shows them (coloured by band); its label is model.ts `said`.
+const shown = (rs: readonly Pool[]) =>
+  rs.map((r, i) => (
+    <Text key={r.resource.key} style={{ color: band(r.tone) }}>
+      {`${i ? '  ' : ''}${r.resource.key} ${r.current}/${r.maximum}`}
+    </Text>
+  ));
+
+function Position(p: { value: NonNullable<GameView['position']>; open?: () => void }) {
+  const words = (
+    <Text style={{ ...small, color: paper.dim }} accessibilityLabel={`Position, ${p.value}`}>
+      {p.value}
+    </Text>
+  );
+  return p.open ? (
+    <Tap label={`Position, ${p.value}`} onPress={p.open}>
+      {words}
+    </Tap>
+  ) : (
+    words
+  );
 }

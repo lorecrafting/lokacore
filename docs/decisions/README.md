@@ -108,3 +108,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner direction: [resume C1 touch UI with useful parallel work; bounded PM review selection](owner-decision-touch-resumption-2026-10-03.md).
 - Owner delegation and PM selections: [sampler identity and complete prose batch](owner-decision-sampler-batch-2026-10-03.md).
 - PM ruling: [sampler condition-band acceptance repair using existing labels and default settings](pm-decision-sampler-bands-2026-10-03.md).
+
+- [C1 playtest polish](owner-decision-c1-playtest-polish-2026-10-03.md): clean room output, full NPC details, Back to World and room-status position controls.

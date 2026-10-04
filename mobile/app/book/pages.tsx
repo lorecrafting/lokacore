@@ -41,7 +41,7 @@ export function Act({ b, press }: { b: Button; press: (b: Button) => void }) {
 }
 
 // The place: its title (a tap looks), description, who and what is here, its own actions (an
-// offered quest among them) and the log. A tapped NPC's menu (Menu.tsx) opens over it.
+// offered quest among them) and the log. NPCs open full details, as items do.
 export function RoomPage(p: {
   view: GameView;
   text: Say;
@@ -49,6 +49,7 @@ export function RoomPage(p: {
   g: Grouped;
   press: (b: Button) => void;
   open: (id: string) => void;
+  openChoice: () => void;
 }) {
   const title = (
     <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.text(p.view.place.title.key)}</Text>
@@ -64,7 +65,11 @@ export function RoomPage(p: {
       )}
       <Text style={prose}>{plain(p.text(p.view.place.description.key))}</Text>
       <Here view={p.view} text={p.text} open={p.open} />
-      <Ways view={p.view} text={p.text} g={p.g} press={p.press} />
+      {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
+        <Tap label="Continue conversation" onPress={p.openChoice}>
+          <Text style={{ ...prose, color: paper.accent }}>Continue conversation</Text>
+        </Tap>
+      )}
       {p.g.place.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
       ))}
@@ -88,7 +93,7 @@ function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
   });
 }
 
-function Sheet({ title, children }: { title: string; children: ReactNode }) {
+export function Sheet({ title, children }: { title: string; children: ReactNode }) {
   return (
     <ScrollView contentContainerStyle={{ padding: 24, gap: 8 }}>
       <Text style={{ ...titleStyle, fontSize: 32 }} accessibilityRole="header">
@@ -132,8 +137,6 @@ export function CharacterPage(p: {
   resources?: readonly Pool[];
   position?: GameView['position'];
   text: Say;
-  actions: Button[];
-  press: (b: Button) => void;
   open: (k: More) => void;
 }) {
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
@@ -142,9 +145,6 @@ export function CharacterPage(p: {
     <Sheet title="Character">
       {resources.length === 0 && <Text style={note}>Nothing is known about you yet.</Text>}
       {p.position && <Text style={prose}>{cap(p.position)}</Text>}
-      {p.actions.map((b) => (
-        <Act key={b.action_key} b={b} press={p.press} />
-      ))}
       {resources.map((r) => (
         <Text key={r.resource.key} style={{ ...prose, color: band(r.tone) }}>
           {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
@@ -207,18 +207,12 @@ export function CarryingPage(p: {
 }
 
 // Each exit's own controls, kept separate from movement; sight is read-only cartridge prose.
-function Ways(p: {
-  view: GameView;
-  text: Say;
-  g: Grouped;
-  press: (b: Button) => void;
-  moves?: boolean;
-}) {
+function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
   return p.view.exits.map((e) => {
     const move = p.g.exits.find((x) => x.direction === e.direction)?.button;
     return (
       <View key={e.direction} style={{ marginTop: 12 }}>
-        {move && p.moves ? (
+        {move ? (
           <Act b={move} press={p.press} />
         ) : (
           <Text style={note}>
@@ -254,7 +248,7 @@ export function MapPage(p: { view: GameView; text: Say; g: Grouped; press: (b: B
     <Sheet title="Map">
       <Text style={prose}>{p.text(p.view.place.title.key)}</Text>
       {p.view.exits.length === 0 && <Text style={note}>No way out is known.</Text>}
-      <Ways {...p} moves />
+      <Ways {...p} />
       {p.g.place.map((b) => (
         <Act key={b.label} b={b} press={p.press} />
       ))}

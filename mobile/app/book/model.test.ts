@@ -10,10 +10,7 @@ import {
   ended,
   group,
   hint,
-  menuDone,
-  menuLive,
-  menuOpen,
-  menuTap,
+  initialPages,
   plain,
   refused,
   said,
@@ -54,43 +51,6 @@ test('exits, the look title, place actions and a thing page come from the right 
     ['take a leather satchel'],
   );
   assert.deepEqual(g.on('bram-1'), []);
-});
-
-// Breaks (U5): a pending choice restored after a restart that opens no menu (the player cannot see
-// it), a dismissed one that stays open or that a new choice cannot reopen, a tapped NPC who left
-// that keeps a menu open on nothing.
-const room = (place: string, choice?: string, here = true) =>
-  ({
-    place: { id: place },
-    entities: here ? [{ id: 'bram' }] : [],
-    choice: choice && { continuation_id: choice, speaker_id: 'bram' },
-  }) as never;
-test('the NPC menu is open for a tapped NPC here and for a pending choice not dismissed', () => {
-  assert.equal(menuOpen(room('a'), {}), false);
-  assert.equal(menuOpen(room('a'), menuTap(room('a'), 'bram')), true);
-  assert.equal(menuOpen(room('a', undefined, false), menuTap(room('a'), 'bram')), false);
-  assert.equal(menuOpen(room('a', 'c1'), {}), true);
-  assert.equal(menuOpen(room('a', 'c1', false), {}), true); // walked away, still pending
-  assert.equal(menuOpen(room('a', 'c1'), menuDone(room('a', 'c1'))), false);
-  assert.equal(menuOpen(room('a', 'c2'), menuDone(room('a', 'c1'))), true);
-});
-
-// Breaks (review B-1, F1): Done, then a walk, leaves a pending choice with no menu and so no Close;
-// a tap after Done, then a walk, does the same.
-test('Done, then a walk: the pending choice shows its menu again; also after a new tap', () => {
-  const done = menuDone(room('a', 'c1'));
-  assert.equal(menuOpen(room('b', 'c1', false), done), true);
-  const again = menuTap(room('a', 'c1'), 'bram'); // tap clears the dismissal
-  assert.equal(menuOpen(room('a', 'c1'), again), true);
-  assert.equal(menuOpen(room('b', 'c1', false), again), true);
-});
-
-// Breaks (review F2): a tapped NPC's menu reopens by itself when the player leaves and returns.
-test('a tapped NPC does not reopen the menu after leave and return', () => {
-  const tapped = menuTap(room('a'), 'bram');
-  const away = menuLive(room('b', undefined, false), tapped); // what the hook stores while away
-  assert.equal(menuOpen(room('b', undefined, false), away), false);
-  assert.equal(menuOpen(room('a'), menuLive(room('a'), away)), false);
 });
 
 // Breaks: raw link syntax shown (Ferry Landing's "[mooring post](mooring_post)"), or a greedy
@@ -145,6 +105,15 @@ test('the absent-speaker line shows only when the speaker is not here', () => {
   assert.equal(absent(view(['bram'])), '');
   const speakerless = { entities: [], choice: { choices: choice.choices } } as never;
   assert.equal(absent(speakerless), 'No one is here to answer.');
+});
+
+// Breaks: a saved pending choice reopens on the world, losing its detail; an absent speaker's
+// recovery page forgets the speaker and loses the result after Close removes the choice.
+test('a restored choice opens its actual speaker detail or retained conversation', () => {
+  const view = (ids: string[]) =>
+    ({ entities: ids.map((id) => ({ id })), choice: { speaker_id: 'bram' } }) as never;
+  assert.deepEqual(initialPages(view(['bram'])), [{ kind: 'thing', id: 'bram' }]);
+  assert.deepEqual(initialPages(view([])), [{ kind: 'dialogue', speaker: 'bram' }]);
 });
 
 // Breaks (PM item: note 4's line): an ending shown before every quest is over, or with no quest.

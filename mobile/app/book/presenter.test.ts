@@ -28,6 +28,20 @@ const accepted = (outcome: string) =>
   ({ kind: 'saved', decision: { kind: 'accepted', outcome } as DecisionResult }) as Reply;
 const north = { label: 'Go north', action_key: 'move', target_ids: [], input: {} };
 
+// Breaks: recovery guesses that retained narration was navigation and drops an authored consequence.
+test('recovery removes the current heading but retains an unclassified consequence', () => {
+  const restored = {
+    ...game(() => accepted('looked')),
+    lastNarration: () => ({
+      command_id: 'saved-command',
+      lines: [{ key: 'place.title' }, { key: 'quest.consequence' }],
+    }),
+    text: (key: string) =>
+      key === 'quest.consequence' ? 'The lantern is yours to carry now.' : 'Ferry Landing',
+  };
+  assert.deepEqual(presenter(restored).screen().log, ['The lantern is yours to carry now.']);
+});
+
 // Breaks (R6P rerun N-1): an authority rejection worded "You can't do that: too exhausted." because
 // it skips the sentence a refused drag uses for the same code.
 test('a move rejected for want of MV says the body is too exhausted', () => {
@@ -41,7 +55,7 @@ test('a move rejected for want of MV says the body is too exhausted', () => {
 test('the log stops growing in one room, its last line the latest answer', () => {
   const p = presenter(game((n) => accepted(n % 2 ? 'dropped' : 'taken')));
   const cycles = () => {
-    for (let i = 0; i < 150; i++) [north, north].map(p.press);
+    for (let i = 0; i < 150; i++) [north, north].map((b) => p.press(b));
     return p.screen().log;
   };
   const [once, log] = [cycles().length, cycles()];
