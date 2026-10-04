@@ -1,0 +1,4 @@
+Detached production head: 9732b0ec58f81ae74b7ca4e4cf8dd736d4cd409a
+Tracked source status: clean
+Book presenter bytes identical to independently reviewed 595c036409744672b0854fa6ec7354065db3fced: PASS
+App/fixture actual integrated production binding, no manual preview patch.
