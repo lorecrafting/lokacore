@@ -39,6 +39,13 @@ original owner records/research and dated alternatives, with the [current PM sel
 Independent review is complete; this docs update implements no mechanic. The
 [research reference](reference/legendmud-system.md) preserves sources and unknowns.
 
+Composition-audit carry PC01 (exit availability follows composed movement admission) is
+fixed in [#160](https://github.com/lorecrafting/lokacore/pull/160) after its
+[independent review](reviews/2026-10-04-pc01-exit-projection-review.md).
+PC11 (invalid fact defaults refused by the cartridge loader) is fixed in
+[#161](https://github.com/lorecrafting/lokacore/pull/161) after its
+[independent review](reviews/2026-10-04-pc11-fact-default-review.md).
+
 ## C1 slices
 
 Owner-approved, in this order, one at a time; each slice's scope and acceptance are in [the record](decisions/owner-decision-chapter-one-plan-2026-10-02.md).
