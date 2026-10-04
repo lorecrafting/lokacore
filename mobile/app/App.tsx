@@ -2,8 +2,8 @@
 // expo-sqlite, or the screen for a save that does not open. The shell owns every phone-only API
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
-import { useState } from 'react';
-import { Alert } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, AppState } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
 import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
@@ -34,7 +34,10 @@ const NAME = 'loka-ashmere-sampler.db';
 const commit = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? `${'0'.repeat(40)}-dirty`;
 const kernel_version = `${KERNEL_ID}@${commit}${__DEV__ && !commit.endsWith('-dirty') ? '-dirty' : ''}`;
 let db: SQLiteDatabase | undefined;
-const g = globalThis as { loka_session?: ReturnType<typeof localSession> };
+const g = globalThis as {
+  loka_session?: ReturnType<typeof localSession>;
+  loka_clock_cleanup?: () => void;
+};
 const session = (g.loka_session ??= localSession(
   () => (db = openDatabaseSync(NAME)),
   () => {
@@ -50,6 +53,7 @@ const session = (g.loka_session ??= localSession(
     latency: { host: 'hermes_ios', now: () => performance.now() },
     kernel_version,
     random: getRandomValues,
+    time: { wall: () => Date.now(), monotonic: () => performance.now() },
   },
 ));
 
@@ -64,10 +68,93 @@ const shell: Shell = {
   learned: hint(Storage, 'hint.learned'),
 };
 
+type Clock = {
+  game: NonNullable<ReturnType<typeof session.game>>;
+  active: boolean;
+  draining: boolean;
+  timer?: ReturnType<typeof setTimeout>;
+  cleanup: () => void;
+};
+const current = (c: Clock) => session.game() === c.game && g.loka_clock_cleanup === c.cleanup;
+function cancel(c: Clock) {
+  if (c.timer !== undefined) clearTimeout(c.timer);
+  c.timer = undefined;
+}
+function schedule(c: Clock, delay = 0) {
+  if (!current(c) || !c.active || c.timer !== undefined) return;
+  c.timer = setTimeout(() => tick(c), delay);
+}
+function tick(c: Clock) {
+  c.timer = undefined;
+  if (!current(c) || !c.active) return;
+  const held = c.game.pendingInvocation(),
+    draining = c.draining;
+  const status = c.game.pulse(draining ? 'drain' : 'active');
+  if (!current(c) || !c.active) return;
+  if (status.kind !== 'ready' && status.kind !== 'catching_up') return cancel(c);
+  c.draining = status.kind === 'catching_up';
+  schedule(c, c.draining || draining || held ? 0 : 250);
+}
+function resume(c: Clock) {
+  if (!current(c) || !c.active) return;
+  const status = c.game.pulse('resume');
+  if (!current(c) || !c.active) return;
+  c.draining = status.kind === 'catching_up';
+  if (status.kind === 'ready' || c.draining) schedule(c);
+  else cancel(c);
+}
+function transition(c: Clock, active: boolean) {
+  if (!current(c) || c.active === active) return;
+  c.active = active;
+  c.draining = false;
+  cancel(c);
+  if (active) resume(c);
+  else c.game.pulse('pause');
+}
+
+type Recovery = { notify?: (healthy: boolean) => void };
+function useElapsed(game: ReturnType<typeof session.game>, recovered: { current: Recovery }) {
+  useEffect(() => {
+    g.loka_clock_cleanup?.();
+    if (!game) return;
+    const c: Clock = {
+      game,
+      active: AppState.currentState === 'active',
+      draining: false,
+      cleanup: () => {},
+    };
+    const listener = AppState.addEventListener('change', (state) =>
+      transition(c, state === 'active'),
+    );
+    c.cleanup = () => {
+      cancel(c);
+      listener.remove();
+      if (g.loka_clock_cleanup === c.cleanup) g.loka_clock_cleanup = undefined;
+      recovered.current.notify = undefined;
+    };
+    g.loka_clock_cleanup = c.cleanup;
+    recovered.current.notify = (healthy) => {
+      if (healthy) schedule(c);
+      else cancel(c);
+    };
+    resume(c);
+    return c.cleanup;
+  }, [game]);
+}
+
 export default function App() {
   const [loaded, fontError] = useFonts(fonts);
   const [starts, setStarts] = useState(0); // a start over opens a fresh book (its log, its pages)
   const [, redraw] = useState({});
+  const game = session.game();
+  const recovered = useRef<Recovery>({});
+  const [bookShell] = useState<Shell>(() => ({
+    ...shell,
+    recovered: (healthy) => {
+      recovered.current.notify?.(healthy);
+    },
+  }));
+  useElapsed(game, recovered);
   if (!loaded && !fontError) return null;
   const startOver = () => {
     const before = session.game();
@@ -78,8 +165,7 @@ export default function App() {
     else redraw({});
     return why;
   };
-  const game = session.game();
   if (!game)
     return <SaveError failed={session.failed()!} startOver={() => shell.confirm(startOver)} />;
-  return <Book key={starts} game={game} shell={shell} startOver={startOver} />;
+  return <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;
 }

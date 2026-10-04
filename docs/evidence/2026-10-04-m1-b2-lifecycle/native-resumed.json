@@ -1,0 +1,37 @@
+{
+  "captured_utc": "2026-10-04T16:01:51Z",
+  "captured_wall_ms": 1791129711096,
+  "head": [
+    {
+      "one": 1,
+      "revision": 591,
+      "clock": 74813,
+      "rng": "[1824510643,151081589,3097390144,2733832176]"
+    }
+  ],
+  "elapsed": [
+    {
+      "one": 1,
+      "wall_ms": 1791129710955,
+      "remainder": 800,
+      "target": 74813
+    }
+  ],
+  "save": [
+    {
+      "format": "loka-save-v2",
+      "pin": {
+        "cartridge_id": "ashmere_sampler",
+        "cartridge_version": "0.0.4",
+        "content_hash": "3a667d1b38c66026eda4597879be24b0eec9cb7c61a26b92757e2ad9f31036d6"
+      }
+    }
+  ],
+  "receipt_count": 591,
+  "retained_rows": [
+    {
+      "section": "choices",
+      "value_sha256": "63e0babaa34d0b2236cb22f9abfd06ca9053fc0f106760623b2675085faf9d18"
+    }
+  ]
+}

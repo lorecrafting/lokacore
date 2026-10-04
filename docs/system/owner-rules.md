@@ -175,3 +175,4 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Elapsed cartridge policy and trusted receipt delivery use the [M1-A PM contract](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md); legacy play-time behavior stays frozen.
 
 - Driver-managed elapsed saves, reserved input and replay follow the [M1-B1 PM adoption](../decisions/pm-decision-m1-b1-durable-elapsed-2026-10-04.md).
+- App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).

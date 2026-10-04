@@ -1,0 +1,19 @@
+Checking formatting...
+All matched files use Prettier code style!
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+error[mobile-kernel-via-local-story]: Only mobile/authority/local-story imports the kernel (spec document 10 §2).
+   ┌─ mobile/app/sampler.test.ts:12:42
+   │
+12 │ import { checkpoint, elapsedHost } from '../../kernel/ts/test/elapsed_host.ts';
+   │                                         -^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
+
+error[mobile-kernel-via-local-story]: Only mobile/authority/local-story imports the kernel (spec document 10 §2).
+   ┌─ mobile/app/book/polish.test.ts:11:30
+   │
+11 │ import { elapsedHost } from '../../../kernel/ts/test/elapsed_host.ts';
+   │                             -^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^-
+
+Error: 2 error(s) found in code.
+Help: Scan succeeded and found error level diagnostics in the codebase.
+

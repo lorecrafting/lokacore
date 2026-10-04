@@ -19,7 +19,7 @@ import { openStory, type Host, type Saved } from './authority.ts';
 import { presenter, type Button } from '../../app/book/presenter.ts';
 import type { Game } from '../../packages/game-view/session.ts';
 import { localSession, type Bundled } from './session.ts';
-import { elapsedBundle, checkpoint, receipts } from '../../../kernel/ts/test/elapsed_host.ts';
+import { elapsedBundle, checkpoint, receipts } from './__tests__/elapsed-host.test.ts';
 import type { Db } from './store.ts';
 
 const FERRY = read('protocol/fixtures/cartridge_ferry_hash.json');

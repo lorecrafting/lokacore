@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { readFileSync as readFileSyncForReplay, writeFileSync } from 'node:fs';
-import { elapsedHost } from '../../../kernel/ts/test/elapsed_host.ts';
+import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { decide } from '../../../kernel/ts/play/run.ts';
 // The local authority's evaluation.budget_exceeded (04 §5.4; ADR-075 §7; R6P B, PM D3/D3b): one
 // record per budget fault in the save's observation table, a sink whose failure changes nothing,

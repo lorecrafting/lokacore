@@ -1,0 +1,24 @@
+==> boundary
+Compiling 15 files (.ex)
+Generated boundary app
+==> file_system
+Compiling 7 files (.ex)
+Generated file_system app
+==> bunt
+Compiling 2 files (.ex)
+Generated bunt app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> credo
+Compiling 257 files (.ex)
+Generated credo app
+==> loka
+Compiling 33 files (.ex)
+Generated loka app
+Running ExUnit with seed: 459267, max_cases: 16
+
+.
+Finished in 0.03 seconds (0.03s async, 0.00s sync)
+
+Result: 1 passed

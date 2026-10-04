@@ -1,11 +1,11 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_sampler",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "title": "Ashmere — Bram's Lantern",
   "requires": {
     "kernel_api": {
-      "at_least": "1.0",
+      "at_least": "1.1",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -21,7 +21,10 @@
       "quest": 1,
       "dialogue": 1,
       "scene": 1,
-      "description_variant": 1
+      "description_variant": 1,
+      "calendar": 1,
+      "behavior": 1,
+      "schedule": 1
     },
     "client_features": []
   },
@@ -29,6 +32,13 @@
     "offline_private"
   ],
   "entry": "ferry_landing",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "calendar": {
+    "start": 64800
+  },
   "chapters": [
     {
       "title": "chapter.lantern"

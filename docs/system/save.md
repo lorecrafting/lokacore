@@ -178,6 +178,17 @@ once and durably rebases negative gaps without rewind. Each captured horizon set
 earliest pending job boundary, yielding after 16 commits. Already-due jobs/faults surface
 recovery and retain debt. Sampling never extends a reserved input’s finite horizon.
 
+The existing managed resume pulse arms a private driver obligation synchronously before a
+retained player attempt can consume that call. Arming samples no clock or storage. A new
+reservation keeps receipt/identity/freshness preflight before sampling; after prerequisite
+candidate settlement it captures resume wall evidence while that obligation remains, otherwise
+active evidence. Consume the obligation only on actual resume candidate capture, retaining that
+exact evidence through uncertainty. Reconciling an older candidate never consumes it.
+When a prerequisite candidate/horizon consumes the turn, the new reservation stays unresolved
+until its own horizon is captured; it cannot adopt the old horizon as its fixed target. Each
+host turn still commits at most sixteen elapsed segments. An admitted A keeps its original
+identity/horizon while resume remains outstanding; a different B cannot steal it.
+
 Each accepted segment atomically saves checkpoint/head/changed rows/receipt before adoption.
 Fraction-only accounting, initialization and wall rebases use metadata-only transactions:
 no command, receipt, revision or trace. These run only after gameplay fences settle. Unknown

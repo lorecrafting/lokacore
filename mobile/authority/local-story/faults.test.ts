@@ -2,7 +2,7 @@ import {
   elapsedHost,
   checkpoint as elapsedCheckpoint,
   receipts as elapsedReceipts,
-} from '../../../kernel/ts/test/elapsed_host.ts';
+} from './__tests__/elapsed-host.test.ts';
 import { writeFileSync } from 'node:fs';
 // The fault corpus (14 §R6; OFF-03..07; 03 §§14-15; ADR-072): the kernel simulator's seeded command
 // sequences (kernel/ts/test/sim.ts) played through the local authority on real SQLite (node:sqlite,

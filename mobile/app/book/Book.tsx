@@ -1,14 +1,13 @@
 // The book: the room page, the pages opened from it, the status line and the footer, over the
 // presenter (presenter.ts) over a Game. Real data only: it draws what GameView projects and nothing
 // else. It uses React Native and the Game only; the shell (App.tsx) injects the rest.
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Footer, Status } from './Footer.tsx';
 import {
   group,
   pagesAfter,
-  things,
   conversation,
   initialPages,
   npcPage,
@@ -16,7 +15,7 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { ContentsPage, NpcPage, type Section } from './Menu.tsx';
+import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
 import { body, paper } from './paper.ts';
 import { presenter, type Button } from './presenter.ts';
 import {
@@ -28,14 +27,17 @@ import {
   RoomPage,
   ScenePage,
   SettingsPage,
-  ThingPage,
 } from './pages.tsx';
 import { Turn } from './Turn.tsx';
 
 type Presenter = ReturnType<typeof presenter>;
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
-export type Shell = { confirm: (go: () => void) => void; learned: Hint };
+export type Shell = {
+  confirm: (go: () => void) => void;
+  learned: Hint;
+  recovered?: (healthy: boolean) => void;
+};
 
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 
@@ -47,6 +49,57 @@ type BookProps = {
   startOver: () => string | undefined; // a start over that failed and kept the game: why
 };
 
+type BookState = {
+  current: { current: { stack: Page[]; view: ReturnType<Presenter['screen']>['view'] } };
+  setStack: (stack: Page[]) => void;
+  setFlip: (next: (f: { turn: number; dir: 1 | -1 }) => { turn: number; dir: 1 | -1 }) => void;
+  redraw: (next: (n: number) => number) => void;
+};
+function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
+  const { current, setStack, setFlip, redraw } = s;
+  useEffect(() => {
+    let live = true;
+    const unsubscribe = p.game.subscribe((update) => {
+      if (!live) return;
+      const before = current.current;
+      const terminal = pr.update(update);
+      const after = pr.screen();
+      let next = pagesAfter(before.stack, before.view, after.view);
+      if (terminal && after.returnWorld) next = [];
+      current.current = { stack: next, view: after.view };
+      setStack(next);
+      if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
+      redraw((n) => n + 1);
+      if (after.pending || after.fault) p.shell.recovered?.(false);
+      else if (pr.recovered()) p.shell.recovered?.(true);
+    });
+    return () => {
+      live = false;
+      unsubscribe();
+    };
+  }, [p.game, pr, p.shell.recovered]);
+}
+
+function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
+  const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
+  pr.press(b, detail);
+  if (stale) return s.redraw((n) => n + 1);
+  const after = pr.screen(),
+    before = s.current.current;
+  let next = pagesAfter(before.stack, before.view, after.view);
+  if (after.returnWorld) next = [];
+  s.current.current = { stack: next, view: after.view };
+  if (after.pending || after.fault) p.shell.recovered?.(false);
+  else if (pr.recovered()) p.shell.recovered?.(true);
+  const inline = npcPage(before.stack.at(-1), before.view) || group([b]).position.length > 0;
+  if (next === before.stack && inline && !before.view.scene && !after.view.scene)
+    s.redraw((n) => n + 1);
+  else {
+    s.setStack(next);
+    s.setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
+  }
+}
+
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
   const [stack, setStack] = useState<Page[]>(() => initialPages(pr.screen().view));
@@ -54,21 +107,16 @@ export default function Book(p: BookProps) {
   const [, redraw] = useState(0);
   const screen = pr.screen();
   const { view } = screen;
+  const current = useRef({ stack, view });
+  current.current = { stack, view };
+  const state = { current, setStack, setFlip, redraw };
+  useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
+    current.current = { stack: next, view: pr.screen().view };
     setStack(next);
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
-  const press = (b: Button, detail?: string) => {
-    const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
-    pr.press(b, detail);
-    if (stale) return redraw((n) => n + 1);
-    const after = pr.screen();
-    let next = pagesAfter(stack, view, after.view);
-    if (after.returnWorld && next === stack) next = [];
-    const inline = npcPage(stack.at(-1), view) || group([b]).position.length > 0;
-    if (next === stack && inline && !view.scene && !after.view.scene) redraw((n) => n + 1);
-    else go(next, 1);
-  };
+  const press = (b: Button, detail?: string) => pressBook(p, pr, state, b, detail);
   const refused = (line: string) => (screen.log.push(line), redraw((n) => n + 1));
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
@@ -157,6 +205,7 @@ function Bottom(p: BottomProps) {
         pending={pending}
         open={() => p.open({ kind: 'contents' })}
       />
+      {p.screen.catchingUp && <Text style={{ ...small, color: paper.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
   );
@@ -224,7 +273,15 @@ function Body(p: BodyProps) {
         openChoice={() => p.open(conversation(view))}
       />
     );
-  if (page.kind === 'dialogue') return <NpcDetail {...p} speaker={page.speaker} />;
+  if (page.kind === 'dialogue' || npcPage(page, view))
+    return (
+      <NpcDetail
+        {...p}
+        speaker={
+          page.kind === 'dialogue' ? page.speaker : page.kind === 'thing' ? page.id : undefined
+        }
+      />
+    );
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
   if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
   if (page.kind === 'character')
@@ -234,53 +291,5 @@ function Body(p: BodyProps) {
   if (page.kind === 'journal') return <JournalPage view={view} text={text} />;
   return (
     <CarryingPage items={view.inventory} equipment={view.equipment} text={text} open={openThing} />
-  );
-}
-
-function Item(p: {
-  id: string;
-  screen: Screen;
-  g: ReturnType<typeof group>;
-  press: (b: Button, detail?: string) => void;
-  open: (p: Page) => void;
-  world: () => void;
-}) {
-  const items = things(p.screen.view);
-  const thing = items.find((e) => e.id === p.id);
-  if (thing?.kind === 'npc') return <NpcDetail {...p} npc={thing} />;
-  return (
-    <ThingPage
-      thing={thing}
-      text={p.screen.text}
-      actions={p.g.on(p.id)}
-      press={p.press}
-      contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
-      open={(id) => p.open({ kind: 'thing', id })}
-      leave={p.world}
-    />
-  );
-}
-
-function NpcDetail(p: {
-  screen: Screen;
-  g: ReturnType<typeof group>;
-  press: (b: Button, detail?: string) => void;
-  npc?: ReturnType<typeof things>[number];
-  speaker?: string;
-  world: () => void;
-}) {
-  const { view, text } = p.screen;
-  const npc = p.npc ?? view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
-  const id = npc?.id ?? p.speaker ?? view.choice?.speaker_id ?? 'conversation';
-  return (
-    <NpcPage
-      view={view}
-      npc={npc}
-      text={text}
-      g={p.g}
-      log={p.screen.detail(id)}
-      press={(b) => p.press(b, id)}
-      leave={p.world}
-    />
   );
 }

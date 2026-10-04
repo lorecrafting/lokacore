@@ -1,0 +1,34 @@
+[
+  {
+    "caller": "mobile/app/sampler.test.ts",
+    "import": "import { checkpoint, elapsedHost } from '../authority/local-story/__tests__/elapsed-host.test.ts';"
+  },
+  {
+    "caller": "mobile/authority/local-story/session.test.ts",
+    "import": "import { elapsedHost, checkpoint, receipts } from './__tests__/elapsed-host.test.ts';"
+  },
+  {
+    "caller": "mobile/authority/local-story/elapsed-resume.test.ts",
+    "import": "import { checkpoint, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';"
+  },
+  {
+    "caller": "mobile/authority/local-story/start_over.test.ts",
+    "import": "import { elapsedBundle, checkpoint, receipts } from './__tests__/elapsed-host.test.ts';"
+  },
+  {
+    "caller": "mobile/authority/local-story/elapsed-driver.test.ts",
+    "import": "import { checkpoint, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';"
+  },
+  {
+    "caller": "mobile/authority/local-story/observe.test.ts",
+    "import": "import { elapsedHost } from './__tests__/elapsed-host.test.ts';"
+  },
+  {
+    "caller": "mobile/authority/local-story/faults.test.ts",
+    "import": "import {\n  elapsedHost,\n  checkpoint as elapsedCheckpoint,\n  receipts as elapsedReceipts,\n} from './__tests__/elapsed-host.test.ts';"
+  },
+  {
+    "caller": "mobile/app/book/polish.test.ts",
+    "import": "import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';"
+  }
+]

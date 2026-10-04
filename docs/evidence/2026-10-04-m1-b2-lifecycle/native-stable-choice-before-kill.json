@@ -1,0 +1,58 @@
+{
+  "captured_utc": "2026-10-04T16:15:53Z",
+  "captured_wall_ms": 1791130553376,
+  "head": [
+    {
+      "one": 1,
+      "revision": 3556,
+      "clock": 116927,
+      "rng": "[1824510643,151081589,3097390144,2733832176]"
+    }
+  ],
+  "elapsed": [
+    {
+      "one": 1,
+      "wall_ms": 1791130553209,
+      "remainder": 950,
+      "target": 116927
+    }
+  ],
+  "save": [
+    {
+      "format": "loka-save-v2",
+      "pin": {
+        "cartridge_id": "ashmere_sampler",
+        "cartridge_version": "0.0.4",
+        "content_hash": "3a667d1b38c66026eda4597879be24b0eec9cb7c61a26b92757e2ad9f31036d6"
+      }
+    }
+  ],
+  "run_sha256": "2ae852117c86c2029ca1c84649c3aca237fa859702ee2e7e9220e696a9a862bc",
+  "receipt_count": 3556,
+  "retained_rows": [
+    {
+      "section": "choices",
+      "value_sha256": "d1f6f62714bf14256386ec17d0fd68ffcd7603de50d21c28ec66e740212e015b"
+    },
+    {
+      "section": "choices",
+      "value_sha256": "fe48f04f945a41be29269e47aecd68d03a307dcf82fe269dc37b1feeb88453e1"
+    },
+    {
+      "section": "choices",
+      "value_sha256": "0df28731543e18da792c286fa7578dd9c1e7182122a2fdd5c59a6c4ab1b85694"
+    },
+    {
+      "section": "choices",
+      "value_sha256": "69eea43a732d7de92b57bdd67a349741bc84a2f48be38254153e4daeb85e77f5"
+    },
+    {
+      "section": "choices",
+      "value_sha256": "d3514d4165204b19fcf6eb593c12edfa485ba22ffb7b4e19f9c895780341c115"
+    },
+    {
+      "section": "choices",
+      "value_sha256": "fc69cb32a4b935f96b43ffcc00b1631129c3de892886d23b91e6224941438ec4"
+    }
+  ]
+}

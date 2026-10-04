@@ -1,0 +1,56 @@
+(node:5220) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (48.542208ms)
+✖ a postcommit narration read fault preserves the saved result and clears retry context (12.302709ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (32.649167ms)
+✔ only World position taps directly cycle the offered states with captured freshness (15.75475ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (11.425834ms)
+✔ only confirmed pickup returns World, including a retry from another page (15.328792ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (11.058416ms)
+✔ inventory Drop returns World with one named event only after confirmation (13.567459ms)
+✔ other item actions retain their detail and World consequences (7.013292ms)
+✔ elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips (12.298417ms)
+✔ delayed Take returns once with its original item name after a conflicting tap (19.439417ms)
+✔ delayed actual quest completion adds one authored result and Journal updated in original history (17.94075ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 11
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 522.309917
+
+✖ failing tests:
+
+test at mobile/app/book/polish.test.ts:238:1
+✖ a postcommit narration read fault preserves the saved result and clears retry context (12.302709ms)
+  AssertionError [ERR_ASSERTION]: Got unwanted exception.
+  Actual message: "no such table: missing_narration"
+      at TestContext.<anonymous> (file://<worktree>/mobile/app/book/polish.test.ts:245:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: Error: no such table: missing_narration
+        at game.lastNarration (file://<worktree>/mobile/app/book/polish.test.ts:104:11)
+        at received (file://<worktree>/mobile/app/book/presenter.ts:120:51)
+        at finished (file://<worktree>/mobile/app/book/presenter.ts:192:31)
+        at pressed (file://<worktree>/mobile/app/book/presenter.ts:244:10)
+        at Object.press (file://<worktree>/mobile/app/book/presenter.ts:289:44)
+        at pressBook (file://<worktree>/mobile/app/book/Book.tsx:46:8)
+        at Object.press (file://<worktree>/mobile/app/book/Book.tsx:82:34)
+        at press (file://<worktree>/mobile/app/book/Menu.tsx:47:113)
+        at Object.onPress (file://<worktree>/mobile/app/book/pages.tsx:15:56)
+        at Object.tap (file://<worktree>/mobile/app/book/polish.test.ts:151:18),
+    expected: undefined,
+    operator: 'doesNotThrow',
+    diff: 'simple'
+  }

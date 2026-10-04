@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -17,8 +17,10 @@ def quest_state(state):
     return dict(op='quest_state', quest=ref('quest', 'lantern'), state=state)
 def definition(name, **parts):
     return dict(key=name, **parts)
-caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.0', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior'], 1)
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.1', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
+v['calendar'] = dict(start=64800)
 v['facts'] = {
     key('fact', 'search_plan'): definition('search_plan', version=1, value_type=dict(type='enum', values=['undecided', 'player_led', 'party_led'], default='undecided'), scopes=['player'], meaning="Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest)."),
     key('fact', 'position'): definition('position', version=1, value_type=dict(type='enum', values=['standing', 'sitting', 'resting', 'sleeping'], default='standing'), scopes=['player'], meaning="The character's position (position@1): only its rule writes it."),
@@ -42,7 +44,7 @@ items = [('brass_key', ['key', 'brass_key'], 'room', 'inn_rooms'), ('cellar_key'
 v['items'] = {key('item', name): definition(name, keywords=words, short=f'item.{name}.short', room_line=f'item.{name}.room', description=f'item.{name}.description', location={'in': kind, kind: ref(kind, place)}) for name, words, kind, place in items}
 v['items'][key('item', 'trunk')]['barrier'] = ref('barrier', 'trunk_lid')
 v['items'][key('item', 'wool_cloak')]['slot'] = 'cloak'
-v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'))}
+v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'), daily_schedule={'6': ref('room', 'ferry_landing'), '19': ref('room', 'drowned_lantern')})}
 v['barriers'] = {key('barrier', name): definition(name, keywords=words, short=f'barrier.{name}.short', initial='locked', key_item=ref('item', item)) for name, words, item in [('cellar_door', ['door', 'cellar_door'], 'cellar_key'), ('trunk_lid', ['lid', 'trunk_lid'], 'brass_key')]}
 v['resources'] = {key('resource', name): definition(name, minimum=0, maximum=maximum, start=maximum, gain=gain) for name, maximum, gain in [('hp', 20, 5), ('ma', 100, 4), ('mv', 82, 18)]}
 v['quests'] = {key('quest', 'lantern'): definition('lantern', title='quest.lantern.title', objective=dict(evidence='current_state', policy=policy(dict(op='has_item', item=ref('item', 'lantern')))), journal=dict(active='quest.lantern.find', objectives_met='quest.lantern.return', resolved='quest.lantern.done', failed='quest.lantern.failed', abandoned='quest.lantern.abandoned', outcomes=dict(take_it='quest.lantern.carried')))}
@@ -74,8 +76,8 @@ sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the preserved adopted catalog and eight approved prototype-derived room strings are copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
 Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram, six items, cloak holder.
-names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/bram'] + ['item/'+row[0] for row in items] + ['slot/cloak']
+# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram, six items, the next scheduled Bram job, cloak holder.
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/bram'] + ['item/'+row[0] for row in items] + ['job/bram'] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):
     b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])
