@@ -124,14 +124,14 @@ for the Lantern; `test/loka/content_*_test.exs`).
 
 ## Artifact and loader
 
-`loadCartridge(bytes, installed)` (`kernel/ts/src/cartridge.ts:47`) returns the decoded
+`loadCartridge(bytes, installed)` (`kernel/ts/src/cartridge.ts:48`) returns the decoded
 cartridge and its hash, or the first diagnostic of the first failing stage (`:62`): size
 (`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: v1 or v2), the
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
-map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:108`), the
-lock (`:157`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
+map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:110`), the
+lock (`:160`: `LOCK_MANIFEST_MISMATCH`, `UNKNOWN_COMMAND`, `UNDECLARED_CAPABILITY`),
 references (`kernel/ts/src/cartridge_refs.ts:156` and the `cartridge_*.ts` twins of the
-compiler's checks), and the installed kernel (`cartridge.ts:226`: `CAPABILITY_NOT_INSTALLED`,
+compiler's checks), and the installed kernel (`cartridge.ts:229`: `CAPABILITY_NOT_INSTALLED`,
 `FACT_SCOPE_UNSUPPORTED` (a fact has exactly one scope, `player` or `instance`),
 `KERNEL_API_UNSUPPORTED`, `PINNED_VERSION_UNSUPPORTED`, `CLIENT_FEATURE_UNSUPPORTED`).
 An item's `barrier` is a reference to a barrier (barrier@1 owns the kind; a short key compiles
@@ -149,12 +149,12 @@ the manifest, lock and definition maps keyed by DefinitionRefString
 
 ## Installed capabilities
 
-`INSTALLED` (`kernel/ts/src/world.ts:65`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
+`INSTALLED` (`kernel/ts/src/world.ts:67`): `kernel_api` 1.0, `content_schema` 1, `rule_ir`
 1, no client features, and these capabilities at version 1: with a rule module `movement`,
 `barrier`, `containment`, `description_variant`, `action_recipe`, `schedule`, `quest`,
-`dialogue`, `equipment`, `position`, `scene` (`:34`); without a command, so without a rule, `fact`, `policy`,
+`dialogue`, `equipment`, `position`, `scene` (`:35`); without a command, so without a rule, `fact`, `policy`,
 `inspectable_detail`, `check`, `resource`, `behavior`, `calendar`, `reaction`, `narration`,
-`target_resolution`, `attributes` (`:50`). The [feature map](../features.gen.md) is the authority for what
+`target_resolution`, `attributes` (`:52`). The [feature map](../features.gen.md) is the authority for what
 each one implements and where; `bin/features.exs --check` fails when a rule module exists
 without its row. The 15 registered capabilities it marks `not yet` may be named by a
 cartridge, but one that locks them fails `CAPABILITY_NOT_INSTALLED`.

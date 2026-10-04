@@ -45,3 +45,16 @@ Owner-approved, in this order, one at a time; each slice's scope and acceptance 
 | c1-sampler | `c1-sampler` | planned | |
 | c1-touch | `c1-touch` | planned | |
 | Gate C1 | `c1-gate` | planned | |
+
+## C1 scene carries
+
+- The rest of scene@1 (restricted/presentation_only, overlays/dreams, dialogue/choice,
+  role bindings, checkpoints/consequence beats, quest objectives on scene_ended): add
+  when chapter content first needs a step or mode beyond the
+  [installed modal subset](system/mechanics.md#scene1-rulesscenets).
+- scene_started: add when a consumer needs a separate start event; it requires a
+  proposal delivery event hook, with the corresponding review depth.
+- SCENE-01 Simulator kill/render walk: c1-touch, when the presenter draws SceneView.
+  Headless close/reopen and receipt-retry proof lands with c1-scenes-modal.
+- Fresh-id double tap can advance an unseen line: c1-touch input review determines
+  when continue must carry the shown line to reject stale taps.

@@ -315,9 +315,9 @@ line-bearing continue command will guard that when c1-touch establishes the inpu
 ## reaction@1 (`kernel/ts/src/reaction.ts`)
 
 Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its fact or
-`entity_entered_room` into its room (`:25`), in rule-key order; its `when` is read on the
+`entity_entered_room` into its room (`:26`), in rule-key order; its `when` is read on the
 proposal so far at the event's logical time; when it holds, its `apply` is a sequence of
-`fact.assign` at the actor's scope as its own writer group (`:44`); the `fact_changed` they
+`fact.assign` at the actor's scope as its own writer group (`:47`); the `fact_changed` they
 emit trigger further rules, FIFO, to quiescence, within the deliveries, `reaction_depth` and
 `query_steps` budgets. Matching [scene starts](#scene1-rulesscenets) follow authored
 rules in scene-key order, using the same delivery machinery.
