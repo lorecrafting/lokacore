@@ -1,0 +1,29 @@
+✔ a new save allocates and pins its identity; a restart and a replay reuse it (8.539583ms)
+✔ a save whose pinned release is missing is refused untouched; a new game moves on (6.202792ms)
+✔ a save of an unknown format is refused with nothing written and no new game (11.720375ms)
+✔ an app update reopens a save on its pinned release; new games pin the newest (6.440917ms)
+(node:53273) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[review-worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [review-worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a corrupt report page: Start over gives a working save (45.511709ms)
+✔ a corrupt sqlite_autoindex_report_1 page: Start over gives a working save (22.212542ms)
+✔ a malformed report index record: Start over gives a working save (22.294125ms)
+✔ an intact report table survives Start over in place (12.929959ms)
+✔ an older save reopens with its narration and keeps its report on Start over (20.427792ms)
+✔ a malformed receipt response: Start over keeps the pending report (14.047ms)
+✔ a narration read that fails on a lock offers no Start over (10.647792ms)
+✔ a save with no body row: save_corrupt, Start over repairs it in place (13.155542ms)
+✔ a save with a null choice: save_corrupt, Start over repairs it in place (13.158625ms)
+✔ a save with an empty resource: save_corrupt, Start over repairs it in place (13.291083ms)
+✔ a receipt narration line that is null: save_corrupt at open, Start over repairs it (15.860375ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 363.44175
+
+EXIT 0
