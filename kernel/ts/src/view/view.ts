@@ -138,8 +138,9 @@ type Lists = ReturnType<typeof lists>;
 // code movement would refuse it with, with its barrier's door, and with what is seen through it
 // unless that barrier bars the way.
 function exits(world: World, door: (direction: Key) => AdvertisedAction[]): ExitView[] {
+  const actor_id = world.character;
   const room = world.rooms[world.state.containers[world.body]];
-  const set = resolved(world, world.character);
+  const set = resolved(world, actor_id);
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
   const seated = !position.standing(world, world.character); // position@1, after the barrier
   return movement.sight(world, world.body).map((seen) => {
@@ -166,13 +167,7 @@ function exits(world: World, door: (direction: Key) => AdvertisedAction[]): Exit
       }),
     };
     const code =
-      refusal(
-        world,
-        { type: 'move', actor_id: world.character, direction },
-        { n: 0 },
-        undefined,
-        set,
-      ) ??
+      refusal(world, { type: 'move', actor_id, direction }, { n: 0 }, undefined, set) ??
       movement.passage(world, room, direction) ??
       (seated ? 'invalid_state' : tired && 'insufficient_resource');
     return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
