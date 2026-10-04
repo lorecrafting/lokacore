@@ -127,6 +127,26 @@ that order names the fault (`foundation/compose.ts:119`, `:130`), returned besid
 observed as `evaluation.budget_exceeded`, never in the result (`runtime/proposal.ts:26`). Every policy
 leaf evaluated adds one query step (`mechanics/policy.ts:32`).
 
+Carrying admission shares the decision's existing query counter
+([containment@1](mechanics.md#containment1-kerneltssrcmechanicscontainmentrulets)). A carrying
+budget failure remains an evaluation fault, distinct from gameplay refusal `too_heavy` and
+item-count fault `capacity_exceeded`. Malformed relevant item mass faults
+`precondition_failed`, rather than silently becoming zero or a balancing refusal.
+Custody reach uses that same counter before carrying admission, and reports relevant cycles
+as `containment_cycle`. Item-barrier reach uses its decision counter too.
+
+Each `lists()` projection uses one separate carry-local counter/context, with the registered
+`query_steps` limit, reused across its item offers. This is a narrow carrying budget, not an
+aggregate GameView budget. Exhaustion marks a Take needing further carrying inspection
+unavailable with `budget_exceeded`, including an as-yet unestablished neutral acquisition; other lists remain.
+Cached, genuinely established owned-child or zero-subtree admission remains legal after later
+exhaustion. Neutrality is checked before current load, but uncached custody/node reads remain
+charged. No second counter or unmetered scan establishes neutrality, and an unknown load never
+becomes zero or `too_heavy`.
+Take's reach prerequisite shares this projection counter; it cannot hang before carrying is evaluated.
+Boolean reach results are cached per item within the same projection, preserving established reach
+after later exhaustion without establishing an unknown result.
+
 ## Invariants
 
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
@@ -212,8 +232,10 @@ adjacent-sight projection, rule, content artifact or saved state
 
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
 id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
-`exits` in compass order, unavailable with `unsupported_capability` while a modal scene
-runs (before passage, position and fare), else `exit_closed`, `exit_locked` (a closed or locked
+`exits` in compass order, first checking Move against the actor's composed ActionSet with
+the exit's direction: `unsupported_capability` when no matching action remains (including
+while a modal scene runs), or `invalid_state` when every matching action's policy fails;
+then `exit_closed`, `exit_locked` (a closed or locked
 barrier), `invalid_state` (position@1: the actor is not standing; after the barrier, before the
 fare) or `insufficient_resource` (the body cannot pay a move); an exit through a barrier
 carries `door` (the barrier's short name, its state and the door verbs the actor may use on it
@@ -225,7 +247,12 @@ nor the current position's verb; `position`, the actor's position, present exact
 cartridge locks `position@1` (04 §15 as amended by c1-position);
 `entities` in the room and `inventory` of the body, each with its short name, explicit
 full-description TextKey, kind and the
-actions it accepts (NPCs first, then DefinitionRefString order); an item with a barrier also
+actions it accepts (NPCs first, then DefinitionRefString order). An offered action resolving
+to Take, including an alias and reachable contents, uses the same carrying predicate as the
+rule after its existing policy/reach checks: `too_heavy` is advertised unavailable with that
+reason. `gameview_agrees_with_admission` checks that carrying refusal against the view,
+using the supplied action identity and resolved Take command for an alias; a budget fault is
+not a gameplay refusal. An item with a barrier also
 carries its `state` and the container verbs admission and barrier@1's check accept now, all
 available; an item without a barrier or with an open one carries `contents` when it holds an
 item: every item inside it in reach (containment@1 custody: no closed or locked lid on the way),

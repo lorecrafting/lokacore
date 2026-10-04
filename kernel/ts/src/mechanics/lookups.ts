@@ -10,8 +10,9 @@ import type {
   RoomDefinition,
   StateScope,
 } from '../contracts.gen.ts';
+import { LIMITS } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
-import { has, type QuestRow, type World } from '../runtime/decision.ts';
+import { has, type QuestRow, type Steps, type World } from '../runtime/decision.ts';
 
 /** The room's exit in a direction, if it has one. */
 export const exitOf = (room: RoomDefinition, direction: string): Connection | undefined =>
@@ -30,11 +31,19 @@ export const barrierState = (world: World, barrier: DefinitionRef): BarrierState
  * `id` reaches `body` or its room through open containers only (`opened`), so an NPC, a slot
  * holder or a closed or locked lid on the way fails it.
  */
-export function reach(world: World, body: EntityId, id: EntityId): boolean {
+export function reach(world: World, body: EntityId, id: EntityId, steps: Steps = { n: 0 }) {
   const room = world.state.containers[body];
-  for (let c = world.state.containers[id]; c !== body && c !== room; c = world.state.containers[c])
-    if (!opened(world, c)) return false;
-  return true;
+  const seen = new Set<string>();
+  let at: string = id;
+  while (true) {
+    if (seen.has(at)) return 'containment_cycle' as const;
+    if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+    seen.add(at);
+    const parent = world.state.containers[at];
+    if (parent === body || parent === room) return true;
+    if (!opened(world, parent)) return false;
+    at = parent;
+  }
 }
 
 /** True when `id` is an item whose contents are in reach: no barrier, or an open one. */

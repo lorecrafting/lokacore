@@ -9,5 +9,6 @@
   "location": {
     "in": "room",
     "room": "well_lane"
-  }
+  },
+  "mass_grams": 2000
 }

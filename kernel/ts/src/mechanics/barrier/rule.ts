@@ -46,7 +46,10 @@ export const MOVES: Readonly<Record<string, [BarrierState, BarrierState, string]
 export const decide: Rule<'barrier'> = (world, command, mint, steps = { n: 0 }) => {
   const { type, actor_id } = command.payload;
   const t = transition(world, actor_id, type, command.payload, steps);
-  if (typeof t === 'string') return rejected(t);
+  if (typeof t === 'string')
+    return t === 'containment_cycle' || t === 'budget_exceeded'
+      ? { kind: 'fault', code: t }
+      : rejected(t);
   const { barrier, from, to, outcome } = t;
   const op = { op: 'barrier.transition', writer_group: 0, barrier, from, to } as const;
   const changed = { type: 'barrier_changed', barrier, from, to } as const;
@@ -73,7 +76,7 @@ export function transition(
     ? 'invalid_target'
     : site.direction !== undefined
       ? exitBarrier(world, actor_id, site.direction)
-      : itemBarrier(world, actor_id, site.target_id!);
+      : itemBarrier(world, actor_id, site.target_id!, steps);
   if (typeof barrier === 'string') return barrier;
   const [need, to, outcome] = MOVES[type];
   const from = barrierState(world, barrier);
@@ -95,10 +98,17 @@ function exitBarrier(world: World, actor: CharacterId, direction: Key): Definiti
 }
 
 // The barrier on item `id` in the actor's reach, else why not.
-function itemBarrier(world: World, actor: CharacterId, id: EntityId): DefinitionRef | ErrorCode {
+function itemBarrier(
+  world: World,
+  actor: CharacterId,
+  id: EntityId,
+  steps: Steps,
+): DefinitionRef | ErrorCode {
   const body = bodyOf(world, actor);
   if (!body || !has(world.entities, id)) return 'not_found';
   const e = world.entities[id];
   if (e.kind !== 'item') return 'invalid_target';
-  return !reach(world, body, id) ? 'not_present' : (e.barrier ?? 'invalid_target');
+  const reached = reach(world, body, id, steps);
+  if (typeof reached === 'string') return reached;
+  return reached ? (e.barrier ?? 'invalid_target') : 'not_present';
 }

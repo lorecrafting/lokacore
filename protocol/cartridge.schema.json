@@ -980,6 +980,20 @@
         },
         "bands": {
           "$ref": "resource.schema.json#/$defs/BandTable"
+        },
+        "carry": {
+          "description": "Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default.",
+          "type": "object",
+          "properties": {
+            "max_grams": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "max_grams"
+          ],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,

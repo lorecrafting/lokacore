@@ -78,5 +78,6 @@
   "band.mv_ready": "is ready to travel",
   "band.steady": "moves steadily",
   "band.tired": "is tired",
-  "band.exhausted": "is exhausted"
+  "band.exhausted": "is exhausted",
+  "action.take": "Take"
 }

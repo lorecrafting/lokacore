@@ -195,3 +195,6 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Primitive composition guide and dated audit](2026-10-04-primitive-composition-review.md): PR #158 at `9ba477f`, independent docs-only APPROVE; bounded consumer permission, 112-row inventory, original/public evidence integrity and static-proof limits verified; no findings.
 - [Later-story plan publication](2026-10-04-later-story-plan-review.md): PR #157 at `c236ffe`, fresh independent docs-only APPROVE; no findings, future policies/ending selectors and planned MC coverage verified; implementation remains future work.
 - [PC11: validate cartridge fact defaults during loading](2026-10-04-pc11-fact-default-review.md): PR #161 at `9591296`, CHANGES REQUIRED; fix round 1 `5e669b0`, APPROVE: PC11-R1 closed by a literal v2 regression; v1-only guard mutant fails the new test, restored loader suite passes 77/77.
+
+- [PC01 exit admission projection](2026-10-04-pc01-exit-projection-review.md): PR #160 at `120549f`, CHANGES REQUIRED (blocker EXIT-1: policy-refusal bypass survives all 405 kernel tests); fix `c5f0b8e`, APPROVE (EXIT-1 closed by a loaded movement-policy regression, exact mutant red).
+- [M3-A carrying ceiling](2026-10-04-m3-a-carrying-ceiling-review.md): PR #159 at `4bd3895`, CHANGES REQUIRED; fix `20b5504`, APPROVE.

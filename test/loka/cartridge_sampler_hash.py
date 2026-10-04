@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.5'
+VERSION = '0.0.6'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -18,7 +18,7 @@ def quest_state(state):
 def definition(name, **parts):
     return dict(key=name, **parts)
 caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.2', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.3', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
 v['facts'] = {
@@ -42,6 +42,9 @@ geometry = {
 v['rooms'] = {key('room', name): definition(name, title=f'room.{name}.title', description=f'room.{name}.description', exits={direction: dict(to=ref('room', dest), **(dict(barrier=ref('barrier', barrier)) if barrier else {})) for direction, dest, barrier in exits}) for name, exits in geometry.items()}
 items = [('brass_key', ['key', 'brass_key'], 'room', 'inn_rooms'), ('cellar_key', ['key', 'cellar_key'], 'room', 'inn_rooms'), ('lantern', ['lantern', 'brass_lantern'], 'room', 'well_lane'), ('tin_whistle', ['whistle', 'tin_whistle'], 'item', 'trunk'), ('trunk', ['trunk'], 'room', 'inn_attic'), ('wool_cloak', ['cloak', 'wool_cloak'], 'room', 'inn_rooms')]
 v['items'] = {key('item', name): definition(name, keywords=words, short=f'item.{name}.short', room_line=f'item.{name}.room', description=f'item.{name}.description', location={'in': kind, kind: ref(kind, place)}) for name, words, kind, place in items}
+# M3 independently declared shell masses; nested/worn custody does not change them.
+for name, grams in [('lantern', 2000), ('wool_cloak', 3000), ('brass_key', 100), ('cellar_key', 100), ('tin_whistle', 200), ('trunk', 8000)]:
+    v['items'][key('item', name)]['mass_grams'] = grams
 v['items'][key('item', 'trunk')]['barrier'] = ref('barrier', 'trunk_lid')
 v['items'][key('item', 'wool_cloak')]['slot'] = 'cloak'
 v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'), daily_schedule={'6': ref('room', 'ferry_landing'), '19': ref('room', 'drowned_lantern')})}
@@ -77,6 +80,7 @@ v['world'] = {'bands': [
     {'at_percent': 10, 'key': 'almost_dead', 'tone': 'danger'},
     {'at_percent': 0, 'key': 'dying', 'tone': 'danger'},
 ]}
+v['world']['carry'] = dict(max_grams=12000)
 v['world']['movement'] = dict(cost=dict(resource=ref('resource', 'mv'), amount=1))
 v['text'] = json.loads(Path('cartridges/ashmere_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)

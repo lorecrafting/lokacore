@@ -1,3 +1,4 @@
+// size: allow 315, established book pages with the current carrying refusal note
 // The book's pages: room, a thing's page, and the Character / Journal / Carrying pages. Each is
 // only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
@@ -6,6 +7,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { bandPhrase, cap, ended, plain, why, type group, type Pool, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
 import { body, head, paper } from './paper.ts';
+import { reason } from './words.ts';
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -130,6 +132,13 @@ export function ThingPage(p: {
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
       {p.thing?.description && <Text style={prose}>{plain(p.text(p.thing.description))}</Text>}
       {p.thing?.state && <Text style={note}>{cap(p.thing.state)}</Text>}
+      {p.thing?.actions
+        .filter((a) => !a.available && a.reason.code === 'too_heavy')
+        .map((a) => (
+          <Text key={a.action_key} style={note}>
+            {p.text(a.label)}: {reason('too_heavy')}.
+          </Text>
+        ))}
       {p.actions.length === 0 && p.contents.length === 0 && (
         <Text style={note}>Nothing to do here.</Text>
       )}

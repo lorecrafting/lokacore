@@ -34,6 +34,7 @@ const REASON: Record<string, string> = {
   not_found: 'not here',
   not_owned: 'you are not holding it',
   insufficient_resource: 'too exhausted',
+  too_heavy: 'too heavy to carry',
 };
 // A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
 export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };

@@ -1,5 +1,5 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
-// size: allow 740, Book routes and elapsed subscription/completion regressions share one controlled native-leaf and real-session adapter
+// size: allow 750, Book routes, elapsed completion and carrying note regressions share one real-session adapter
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -696,4 +696,52 @@ test('delayed actual quest completion adds one authored result and Journal updat
     h.unmount();
     h.sql.close();
   }
+});
+
+// Breaks: available-only buttons hide the carrying reason, or shedding worn load leaves a stale note.
+test('actual trunk detail explains refused Take and restores its button after Remove then Drop', () => {
+  const h = book();
+  const go = (direction: string) => {
+    h.map();
+    h.tap(`Go ${direction}`);
+  };
+  const take = (name: string) => {
+    h.tap(`${name}, open`);
+    h.tap(`Take ${name}`);
+  };
+  go('north');
+  take('a brass lantern');
+  go('east');
+  go('up');
+  take('a brass key');
+  take('a cellar key');
+  take('a wool cloak');
+  const carrying = () => {
+    h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);
+    h.tap('Equipment & Inventory');
+  };
+  carrying();
+  h.tap('a wool cloak, open');
+  h.tap('Wear a wool cloak');
+  h.tap('Leave');
+  go('up');
+  h.tap('an old trunk, open');
+  assert.ok(h.text().includes('Take: too heavy to carry.'));
+  assert.equal(h.labels().includes('Take an old trunk'), false);
+  h.tap('Leave');
+  carrying();
+  h.tap('a wool cloak, open');
+  h.tap('Remove a wool cloak');
+  assert.equal(h.labels().includes('Drop a wool cloak'), true);
+  h.tap('Drop a wool cloak');
+  h.tap('an old trunk, open');
+  assert.equal(
+    h.text().some((s) => s.includes('too heavy to carry')),
+    false,
+  );
+  assert.ok(h.labels().includes('Take an old trunk'));
+  h.tap('Take an old trunk');
+  assert.ok(h.game.view().view.inventory.some((e) => e.name === 'item.trunk.short'));
+  h.unmount();
+  h.sql.close();
 });
