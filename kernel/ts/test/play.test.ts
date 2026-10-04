@@ -133,7 +133,7 @@ test('replaying the transcript twice reproduces its records and state hashes byt
   const variants: [string, string, RegExp][] = [
     ['another decision', original.replace('"direction":"north"', '"direction":"west"'), /./],
     ['a blank line', original.replace('\n', '\n\n'), /not an ObservationRecord line/],
-    ['no final newline', original.slice(0, -1), /replay differs/],
+    ['no final newline', original.slice(0, -1), /trace must end with a newline/],
     ['another world', second((c) => (c.world_context_id = OTHER_WORLD)), /can't go that way/],
     ['the nil CommandId', second((c) => (c.id = NIL)), /permission_denied/],
   ];

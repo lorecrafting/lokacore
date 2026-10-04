@@ -54,3 +54,5 @@ Target Hermes compatibility proof, if scheduled for the arithmetic choice, uses 
 Developer proof inventory: [B1 evidence](../evidence/2026-10-04-m1-b1-driver/README.md); independent review and exact source CI remain required.
 
 Round-one fixes and controls: [current proof inventory](../evidence/2026-10-04-m1-b1-driver/round1/README.md).
+
+Required-check correction: [legacy replay premise and final manifest](../evidence/2026-10-04-m1-b1-driver/round1/prepush-correction/README.md).
