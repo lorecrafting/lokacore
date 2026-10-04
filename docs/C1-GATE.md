@@ -47,8 +47,17 @@ carry-forward inspected the later App binding. It is not an Astra audit of #148'
 Later coverage: #146's independent primary/Astra import-normalized body comparison and
 Sol doc-fix recheck; #147's primary/Sol optional description projection checks; #144/#148's
 primary/Sol presentation checks and current composed native interaction/relaunch proof.
-The PM must verify the audited files' later diffs against these scoped records before
-counting the original audit; the checklist reviewer checks that disposition.
+The PM completed the [actual Git-blob carry comparison](evidence/2026-10-03-c1-gate-audit-carry-forward.json):
+37 core audited paths are byte-identical at the pre-layout #144 source; Metro,
+mobile-bundle workflow and scene schema are identical at the composed #148 source;
+App is identical to its previously scoped sampler/touch-reviewed head. After the
+reviewed layout, only generated contracts and optional view descriptions changed
+in kernel/authority/content sources, covered by #147. The gate developer separately
+recomputed every recorded hash and that exact changed-path list. This comparison
+carries the scoped audits forward; it is not a new Astra audit. The checklist
+reviewer checks the comparison and linked relocation/projection dispositions.
+The retained comparison has [its hash manifest](evidence/2026-10-03-c1-gate-audit-carry-forward.SHA256SUMS)
+and [actual verification output](evidence/2026-10-03-c1-gate-audit-carry-forward.SHA256SUMS.verify).
 
 ## Carries and live-doc tidy
 
@@ -63,10 +72,14 @@ counting the original audit; the checklist reviewer checks that disposition.
   ending decision; its planning input is corrected without changing any capability
   or feature row. Book UI links the canonical acceptance/carry record. Historical decisions, reviews, captures and archive remain unedited.
 
+Supporting PRs #144, #146, #147 and #148 have merged into main with their
+published reviews; this gate draft integrates status head
+`bf973c56196c5f15e16b2542bb71dc35e7457bc3`. Runtime bytes remain identical to the
+reviewed composed #148 source. This records completed support merges, not gate closure.
+
 ## Conditions still required before closure
 
-- Supporting PRs #144/#146/#147/#148 merged into main with their published reviews.
-- Exact integrated head and all started CI jobs verified green by the PM.
+- Exact gate head and all started CI jobs verified green by the PM.
 - One fresh checklist reviewer confirms proofs, audit carry-forward, carry stages
   and live-doc tidy; append its short verdict in the review index.
 - Gate PR merged; only then mark Gate C1 passed in ROADMAP and the handoff state.
