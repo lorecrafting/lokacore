@@ -102,3 +102,33 @@ Validation actually run in isolated detached worktree:
 
 No additional production correctness or Ponytail findings. Arithmetic, final-only agreement, load/reconcile, receipt atomicity and legacy paths reviewed. Native proof remains deferred. No full-check, push or owner-save operations.
 ```
+
+## Scoped fix round 1
+
+Reviewed fix head `25a37c6e6a0745fe7107ed44cf9919928247c1b1` against prior review
+record head `65e3db8df0e71227716d27f9c6608d2d4ac8a2fd`. Verdict: **APPROVE**.
+**M2A-01 / Astra A1 closed; no open findings.**
+
+Only the two independent regression tests changed. Each submits the finding's controlled
+old row with unauthored rate3 and independently calculated success-shaped remainder9,
+while next_rate2 is authored. Both assert rejection through their public invariant checker;
+neither computes its expected answer with composition or settlement. The resource replay
+guards and direct invariant callers remain unchanged. Ponytail Review: minimal distinct
+controls; no speculative abstraction or production change.
+
+Independent reviewer verification, in a fresh detached worktree:
+
+- `mise exec -- node --test kernel/ts/test/compose.test.ts`: initial and restored EXIT0,
+  10 passed. Removing only the stored-rate membership branch in
+  `kernel/ts/src/runtime/invariants_resource.ts` makes the new test fail with true versus
+  false, RED EXIT1.
+- `mise exec -- mix test --force test/loka/core/compose_test.exs`: initial and restored
+  EXIT0, 12 passed. Removing only stored-rate membership in
+  `lib/loka/core/invariants_resource.ex` makes the new test fail, RED EXIT2, 11/12 passed.
+  `--force` recompiles both mutations despite same-second mtimes.
+- Both source files restored exactly; working tree clean before record edits.
+  `mise exec -- mix xref callers Loka.Core.InvariantsResource` confirms the existing
+  `Loka.Core.Invariants` direct caller; inspected it and the TypeScript replay call.
+
+This is the required narrow fix re-review, not another whole-slice review or native proof.
+The initial implementation review and independent Astra answer above remain historical.
