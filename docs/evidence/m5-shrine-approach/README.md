@@ -4,8 +4,8 @@
 govern the development release; [the brief](../../briefs/m5-shrine-approach-content.md)
 defines acceptance. [Provenance](provenance.json) records the inspected prototype
 filename/hash, exact prose adaptations and independent IdSource inputs/ordinals.
-[Validation](validation.json) records this focused developer batch, not a final
-pre-push, independent review or device proof. No owner app/save was touched.
+[Validation](validation.json) records this focused developer batch and the first full-prepush stale-pin
+failure; it is not a final successful pre-push, independent review or device proof. No owner app/save was touched.
 
 The existing independent compiler answer/cross-loader tests passed, as did both
 original sampler quest/save outcomes. The private controlled authority probe
@@ -13,6 +13,10 @@ walked the literal route to the nave, invoked Look and returned through reciproc
 exits; its commands/assertions are recorded in validation. No repository test was
 added. Removing the nave's south exit made the existing compiler-answer test fail;
 the restored source passed. Actual redacted logs are retained beside the records.
+
+The first full pre-push refused publication because the app test retained the old
+current-development hash. Its literal pin was updated from the independent oracle;
+`mise exec -- node --test mobile/app/sampler.test.ts` then passed unchanged behavior.
 
 Commands run in the isolated checkout, with `MIX_ENV=test` and `ERL_FLAGS=+S 2:2`:
 

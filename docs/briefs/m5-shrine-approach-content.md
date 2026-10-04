@@ -9,7 +9,7 @@ is the actual recovery-location prerequisite for M5; it implements no death.
 
 - Source: sampler manifest/text, Well Lane's north connection, four named new room files.
 - Existing independent Python sampler oracle and current fixture, rederived for 0.0.3.
-- Existing mobile sampler test: independently derived literal entity-ID pins and provenance only; its six-room quest walk stays intact.
+- Existing mobile sampler tests: independently derived entity-ID pins/provenance and the current app content-hash literal only; their behavior stays intact.
 - Cartridge contract, PM decision/index, this brief and narrow provenance/validation evidence.
 
 No engine, mobile TSX, schemas, compiler, rules, save code, corpse/combat producer,
