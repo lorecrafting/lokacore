@@ -27,6 +27,8 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: mobile/app/package-lock.json
       - run: npm ci --no-audit --no-fund
       - name: The tree is clean, so the bundle's kernel stamp is the bare commit (ADR-075 §3)
         run: test -z "$(git status --porcelain)"
