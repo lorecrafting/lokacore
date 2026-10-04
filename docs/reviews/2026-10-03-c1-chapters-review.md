@@ -98,3 +98,30 @@ and successful hook retry are developer-reported evidence.
 ## PM open findings
 
 N1 is the complete remaining list: refresh the three shifted source citations in docs/system/protocol.md. The independent Sol opinion approves with no findings. Both reviews cover exact head 83e306ee6df5831aa4af207c65549b27a15eccd9; no merge is claimed yet.
+
+## Scoped fix round 1 — primary review
+
+Reviewed fix head: `1be49708283ec7cac326f4d05b4fe14092da7478`; record-bearing prior head: `184126b`. Verdict: **APPROVE**. **N1 closed**; no open primary findings.
+
+Only the two changed citation lines in `docs/system/protocol.md` were re-reviewed, with their direct symbol references in the exact fix-head source. Line 180 now points to `view.ts:48`, the `gameView` declaration; line 213 points to `:211`, the default `BANDS` table, and `:230`, the `resources` projection that reads the effective band table. All three references land on the intended symbols. The fix diff changes only that Markdown file and introduces no code behavior change. Original review and Sol opinion remain historical evidence above.
+
+This is a short documentation-only check: no tests, mutants or complete check-line rerun. The PM verified final-head changes/lint/bundle success and code jobs skipped because the changes since the previously green code head are Markdown-only. The reported normal hook result (282 docs, no broken or unreachable links) is PM/developer evidence, not an independent reviewer execution. Separate Sol fix review is concurrent and will be appended by PM; no claim about that verdict is made here. Record/index copied for the authorized batch; no commit, push or shared-branch mutation. Temporary detached review worktree removed after handoff.
+
+## Independent Sol scoped fix check
+
+Verbatim concurrent second opinion:
+
+```text
+verdict: APPROVE (scoped fix check, PR #139)
+head: 1be49708283ec7cac326f4d05b4fe14092da7478
+N1: CLOSED — citations match gameView:48, BANDS:211, resources:230 in kernel/ts/src/view.ts.
+findings: None.
+
+Verified: 184126b→head changes only two citation lines in docs/system/protocol.md; git diff --check passed. Initial full-review scope remains closed.
+
+Limits: read-only inspection; no tests, mutants, or full checks run. Exact-head CI success and policy-based code-job skips are PM-verified evidence, not independently reverified here.
+```
+
+## PM final disposition
+
+Primary and Sol both APPROVE at 1be49708283ec7cac326f4d05b4fe14092da7478. N1 is closed; no findings remain. PM verified changes/lint/bundle success and code-job skips under the Markdown-only ancestor policy at that exact fix head. This final review/index-only push requires green exact-head CI before merge.
