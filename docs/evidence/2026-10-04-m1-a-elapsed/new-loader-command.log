@@ -1,0 +1,67 @@
+✔ trusted elapsed advances and drains the existing due job with its owned event (12.910375ms)
+✔ trusted elapsed rejects invalid identity and intervals without adopting anything (3.708833ms)
+✔ normal player step cannot admit elapsed even through an offered alias (4.539666ms)
+✔ elapsed ActionSet offers neither Wait nor the authority elapsed command (2.635333ms)
+✔ elapsed player Wait refuses even when a forged alias offers it (2.779792ms)
+✔ elapsed loader requires the new kernel API and schedule owner (4.143875ms)
+✖ loader rejects authority elapsed actions and elapsed Wait aliases (2.8135ms)
+✔ loader rejects duration in elapsed profiles while the frozen legacy fixture loads (3.265458ms)
+✔ numeric-vectors: rng_steps from initial_rng (0.988875ms)
+✔ numeric-vectors: division (0.123708ms)
+✔ numeric-vectors: invalid_json (0.558792ms)
+✔ numeric-vectors: canonical (0.172167ms)
+✔ adverse-cases: uniform (0.215917ms)
+✔ decode edge cases (0.26475ms)
+✔ encode escapes and key order (0.086959ms)
+✔ encode rejects values outside the profile (0.096791ms)
+✔ nesting is limited to 128 containers (0.3015ms)
+✔ hash is lowercase SHA-256 of the canonical bytes (0.657834ms)
+✔ checked integers overflow as a typed error (0.149417ms)
+✔ unsafe operands are integer_overflow (0.176ms)
+✔ uniform accepts bound 2^32 (0.093459ms)
+✔ uniform rejects a bad draw budget (0.127542ms)
+✔ IdSource ids (0.234958ms)
+✔ IdSource rejects non-string ids (0.077208ms)
+✔ IdSource rejects a bad ordinal (0.085541ms)
+✔ CommandId known answers (0.327833ms)
+✔ CommandId rejects bad ids (0.0905ms)
+✔ job CommandId known answers (0.277792ms)
+✔ job CommandId rejects bad input (0.0705ms)
+✔ elapsed CommandId matches independently frozen run/world/interval vectors (1.164667ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 29
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 158.345
+
+✖ failing tests:
+
+test at kernel/ts/test/elapsed.test.ts:180:1
+✖ loader rejects authority elapsed actions and elapsed Wait aliases (2.8135ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'UNRESOLVED_REFERENCE',
+  +   '.cartridge.actions["ashmere_ferry@0.0.1:action/clock_alias"].accessibility'
+  -   'UNKNOWN_COMMAND',
+  -   '.cartridge.actions["ashmere_ferry@0.0.1:action/clock_alias"].command'
+    ]
+  
+      at TestContext.<anonymous> (file://[private-path]
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'UNRESOLVED_REFERENCE', '.cartridge.actions["ashmere_ferry@0.0.1:action/clock_alias"].accessibility' ],
+    expected: [ 'UNKNOWN_COMMAND', '.cartridge.actions["ashmere_ferry@0.0.1:action/clock_alias"].command' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

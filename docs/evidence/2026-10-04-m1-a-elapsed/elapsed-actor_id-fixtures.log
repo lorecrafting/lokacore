@@ -1,0 +1,48 @@
+✔ every contract has examples and every example validates (8.049541ms)
+✖ invalid fixtures fail with exactly the listed errors (13.702083ms)
+✔ the capability registry: valid entries, key@version unique, covers the chapter-one lock, all portable (0.642291ms)
+✔ the capability lock encodes and hashes to the independent known answer (0.74775ms)
+✔ a declared __proto__ property survives generation (0.06725ms)
+✔ values outside the canonical profile are rejected at decode, before validation (0.373708ms)
+✔ a recursive Policy at the depth cap (0.830708ms)
+✔ narration at 64 and 65 lines (0.536125ms)
+✔ ambiguous candidates at 1024 and 1025 (2.169625ms)
+✔ every composition-profile limit is a valid BudgetExceeded (0.282042ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.527333
+
+✖ failing tests:
+
+test at kernel/ts/test/validate.test.ts:21:1
+✖ invalid fixtures fail with exactly the listed errors (13.702083ms)
+  AssertionError [ERR_ASSERTION]: CommandPayload {"type":"elapsed","run_id":"6f6f6f6f-1111-4222-8333-444444444444","from":21600,"until":68400}
+  + actual - expected
+  
+  + []
+  - [
+  -   {
+  -     code: 'missing_property',
+  -     path: '/actor_id'
+  -   }
+  - ]
+  
+      at TestContext.<anonymous> (file://[private-path]
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ { path: '/actor_id', code: 'missing_property' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

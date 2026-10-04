@@ -283,7 +283,8 @@
     "residency": "portable_capability",
     "commands": [
       "wait",
-      "run_job"
+      "run_job",
+      "elapsed"
     ],
     "policies": [
       "time_window"

@@ -3,7 +3,7 @@ defmodule Loka.Content.Requires do
   A manifest's requires and supported_profiles (05 §3, §4): the kernel_api range, the pinned
   content_schema and rule_ir, and each required capability against the capability registry.
   """
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2]
 
   @supported_pin 1
 
@@ -13,9 +13,30 @@ defmodule Loka.Content.Requires do
     offline? = "offline_private" in m["supported_profiles"]
 
     range(rel, req["kernel_api"]) ++
+      elapsed(rel, m) ++
       pins(rel, req) ++
       Enum.flat_map(req["capabilities"], &capability(rel, &1, offline?, registry))
   end
+
+  defp elapsed(rel, %{"time_policy" => _} = m) do
+    range =
+      if version(m["requires"]["kernel_api"]["at_least"]) < [1, 1],
+        do: [diag("KERNEL_API_RANGE_INVALID", at(rel, ["requires", "kernel_api", "at_least"]))],
+        else: []
+
+    owner =
+      if is_map_key(m["requires"]["capabilities"], "schedule"),
+        do: [],
+        else: [
+          diag("UNDECLARED_CAPABILITY", at(rel, ["time_policy"]), %{"capability" => "schedule"}, [
+            "schedule@1"
+          ])
+        ]
+
+    range ++ owner
+  end
+
+  defp elapsed(_, _), do: []
 
   defp range(rel, %{"at_least" => low, "below" => high}) do
     if version(low) >= version(high),

@@ -341,4 +341,88 @@ defmodule Loka.ContentFerryTest do
       assert compile(Path.join(dir, "#{n}"), files) == {:error, diags}, inspect(diags)
     end
   end
+
+  defp elapsed_files do
+    manifest =
+      src("cartridge.json")
+      |> Map.put("time_policy", %{"profile" => "real_elapsed", "rate" => 50})
+      |> put_in(~w(requires kernel_api at_least), "1.1")
+      |> put_in(~w(requires capabilities schedule), 1)
+
+    %{
+      "cartridge.json" => manifest,
+      "recipes/coil_rope.json" => Map.delete(src("recipes/coil_rope.json"), "duration")
+    }
+  end
+
+  # Breaks: opted-in policy dropped from the compiled artifact, or legacy duration rules
+  # applied to an elapsed release despite removing the recipe's time skip.
+  test "elapsed release preserves its policy in its artifact", %{tmp_dir: dir} do
+    assert {:ok, bytes, []} = compile(dir, elapsed_files())
+    artifact = JSON.decode!(bytes)
+
+    assert artifact["cartridge"]["manifest"]["time_policy"] ==
+             %{"profile" => "real_elapsed", "rate" => 50}
+  end
+
+  # Breaks: elapsed mechanics can be claimed by an API 1.0 release or without a schedule owner.
+  test "elapsed policy requires API 1.1 and schedule ownership", %{tmp_dir: dir} do
+    files = elapsed_files()
+    low = put_in(files, ["cartridge.json", "requires", "kernel_api", "at_least"], "1.0")
+
+    assert compile(Path.join(dir, "low"), low) ==
+             {:error,
+              [
+                d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})
+              ]}
+
+    missing =
+      files
+      |> update_in(["cartridge.json", "requires", "capabilities"], &Map.delete(&1, "schedule"))
+      |> Map.put("npcs/bram.json", Map.delete(src("npcs/bram.json"), "daily_schedule"))
+
+    assert compile(Path.join(dir, "owner"), missing) ==
+             {:error,
+              [
+                d(
+                  "UNDECLARED_CAPABILITY",
+                  "cartridge.time_policy",
+                  %{"capability" => "schedule"},
+                  ["schedule@1"]
+                )
+              ]}
+  end
+
+  # Breaks: a cartridge alias can manufacture authority elapsed evidence or skip real time
+  # through Wait; duration recipes likewise cannot opt into elapsed time.
+  test "elapsed release refuses time-skip recipes and player clock aliases", %{tmp_dir: dir} do
+    files = elapsed_files()
+
+    action = %{
+      "label" => "actions.coil_rope",
+      "accessibility" => "actions.coil_rope",
+      "target" => %{"kind" => "none"},
+      "priority" => 0,
+      "input" => ["until"],
+      "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+    }
+
+    for name <- ~w(elapsed wait) do
+      alias_files = Map.put(files, "actions/hurry.json", Map.put(action, "command", name))
+
+      assert compile(Path.join(dir, name), alias_files) ==
+               {:error,
+                [
+                  d("UNKNOWN_COMMAND", "actions/hurry.command", %{})
+                ]}
+    end
+
+    duration = Map.put(files, "recipes/coil_rope.json", src("recipes/coil_rope.json"))
+
+    assert compile(Path.join(dir, "duration"), duration) ==
+             {:error,
+              [
+                d("INVALID_TIME_POLICY", "recipes/coil_rope.duration", %{})
+              ]}
+  end
 end

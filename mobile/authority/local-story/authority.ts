@@ -2,12 +2,7 @@
 // one SQLite save, and 03 §14's admission order. invoke is synchronous on one connection, so
 // commands run one at a time, as WorldInstance serializes them online (07 §8).
 import type { Json } from '../../../kernel/ts/src/foundation/canonical.ts';
-import type {
-  Command,
-  DecisionResult,
-  ErrorCode,
-  HostKind,
-} from '../../../kernel/ts/src/contracts.gen.ts';
+import type { ErrorCode, HostKind } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import {
   identify,
@@ -18,10 +13,11 @@ import type { Identified } from '../../../kernel/ts/src/commands/invocation.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { newWorld, step } from '../../../kernel/ts/src/runtime/world.ts';
 import { corrupt, identityOf, load, receipt, reconcile, replace } from './store.ts';
-import type { Captured, Db, Meta } from './store.ts';
-import { adopt, budget, ids, narration, save, scope, settle, stale, token } from './save.ts';
+import type { Db, Meta } from './store.ts';
+import { adopt, budget, ids, narration, save, scope, stale, token } from './save.ts';
 import type { Story, Trace } from './save.ts';
-import { catchUp, observe, traceCommand, type CommitState } from './trace.ts';
+import { catchUp, observe } from './trace.ts';
+import { elapsed, fenced, reached, traceAfter, type Elapsed } from './delivery.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
 export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
@@ -101,6 +97,8 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     kind: 'open' as const,
     world: () => s.world,
     invoke: (value: unknown) => invoke(s, value),
+    elapsed: (evidence: Elapsed) => elapsed(s, evidence),
+    runId: () => s.meta.run_id,
     newGame: () => newGame(s),
     narration: () => narration(s),
     token: () => token(s), // the view freshness token of the world() now shown
@@ -151,16 +149,6 @@ function first(content_hash: string, fresh: World, host: Host): Meta {
   const seed = fresh.state.rng as never;
   const binding = host.binding?.() ?? null;
   return { format: SAVE_FORMAT, lineage_id, run_id, parent: null, seed, pin, binding };
-}
-
-/** True while a fenced attempt's outcome is still unknown; otherwise settles it first. */
-function fenced(s: Story): boolean {
-  try {
-    if (s.fence) settle(s);
-    return false;
-  } catch {
-    return true;
-  }
 }
 
 function invoke(s: Story, value: unknown): Reply {
@@ -223,44 +211,6 @@ function decided(s: Story, id: Identified) {
     return reply;
   };
   return { command, next, timed };
-}
-
-/**
- * The pending reports of the story points an accepted decision reaches, its story_point_reached
- * events (23 §§3-5; 03 §26), each with its id allocated once here and committed with the
- * decision, its run, lineage, release and the run's binding. A receipt replay never comes here,
- * so it adds no second report. A report that is not a StoryPointReport (a bad host id) throws
- * before anything is stored.
- */
-function reached(s: Story, d: DecisionResult, observed_revision: number): Captured[] {
-  if (d.kind !== 'accepted') return [];
-  const { cartridge_id, cartridge_version, content_hash } = s.meta.pin;
-  const release = { cartridge_id, cartridge_version, cartridge_hash: content_hash } as never;
-  return d.events.flatMap(({ payload: p }) => {
-    if (p.type !== 'story_point_reached') return [];
-    const { lineage_id, run_id, binding } = s.meta;
-    const m = { story_point: p.story_point.key, outcome: p.outcome };
-    const report = { report_id: s.host.newId(), run_id, release, observed_revision, ...m };
-    if (validate('StoryPointReport', report).length) throw new Error('not a StoryPointReport');
-    return [{ lineage_id, binding, report: report as never }];
-  });
-}
-
-/**
- * Traces a command after its commit. A trace that is behind catches up first (all but this
- * command), or this entry is skipped, so ordinals follow the commits (ADR-075 §4: the Commands by
- * ordinal replay); a skipped committed entry is caught up later from its receipt.
- */
-function traceAfter(
-  s: Story,
-  command: Command,
-  d: DecisionResult,
-  at: number,
-  states: CommitState[],
-) {
-  if (s.behind && (s.behind = !catchUp(s.db, ids(s), s.fresh.context, command.id))) return;
-  const written = traceCommand(s.db, ids(s), command, d, at, states);
-  if (!written && states.includes('committed')) s.behind = true;
 }
 
 /**

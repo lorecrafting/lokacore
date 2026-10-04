@@ -58,7 +58,14 @@ defmodule Loka.Content.Recipes do
       texts(rel, r, ctx.text) ++
       duplicate ++
       mismatch(rel, r) ++
+      duration(rel, r, ctx.m) ++
       shared(rel, r, ctx.shared)
+  end
+
+  defp duration(rel, r, m) do
+    if m["time_policy"] != nil and r["duration"] != nil,
+      do: [diag("INVALID_TIME_POLICY", at(rel, ["duration"]))],
+      else: []
   end
 
   # An inline check's key is its check definition's key: two recipes' checks may not share one.

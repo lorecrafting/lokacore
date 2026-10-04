@@ -1,0 +1,27 @@
+Compiling 33 files (.ex)
+Generated loka app
+Running ExUnit with seed: 983417, max_cases: 16
+
+......................
+
+  1) test elapsed CommandId matches independent run/world/interval vectors (Loka.Core.PortableAbiTest)
+     test/loka/core/portable_abi_test.exs:256
+     Assertion with == failed
+     code:  assert IdSource.elapsed_command_id(
+              c["run_id"],
+              c["world_context_id"],
+              c["from"],
+              c["until"]
+            ) == {:ok, c["command_id"]}
+     left:  {:ok, "277b509e-bc38-806e-85a4-27983a189f58"}
+     right: {:ok, "9293401f-d48d-8e4e-aa5e-e773cf894076"}
+     stacktrace:
+       test/loka/core/portable_abi_test.exs:258: anonymous fn/2 in Loka.Core.PortableAbiTest."test elapsed CommandId matches independent run/world/interval vectors"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/core/portable_abi_test.exs:257: (test)
+
+.......................
+Finished in 0.4 seconds (0.4s async, 0.00s sync)
+
+Result: 45/46 passed
+Failed: 1 test

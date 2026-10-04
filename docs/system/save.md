@@ -34,7 +34,7 @@ digest, the resolved Command (null for a rejection before one existed), the revi
 for a rejection) and the DecisionResult. Replay (`authority.ts:162`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
-other known id is `conflict`. A fault gets no receipt (`:182`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
+other known id is `conflict`. A fault gets no receipt (`:174`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
 Lantern traces and the 11 adverse cases). The latter projects kernel values onto the traces'
 vocabulary by the R6P P4b mapping ([archived ROADMAP](../archive/ROADMAP.md), R6P row) as
 changed by Quest from dialogue: action `activate` is gone; action `talk` with no target is the
@@ -94,7 +94,7 @@ trace segment header, its kernel version differing ([ADR-075](../archive/decisio
 
 ## New game
 
-`newGame` (`authority.ts:269`): after settling any fenced attempt, one transaction replaces the
+`newGame` (`authority.ts:223`): after settling any fenced attempt, one transaction replaces the
 save with a fresh world of the newest release at revision 0 under a new lineage and run (no
 parent) pinned to it, with its own drawn world context and seed as in a new save, drops every receipt (old invocation ids are new again) and recreates the `save`
 and `head` tables whatever shape a corrupt save left them in; `report` rows and the trace stay
@@ -117,7 +117,7 @@ receipts").
 
 An accepted decision's `story_point_reached` events become pending `report` rows committed
 with the decision, each with a host id, the run, lineage, release and the run's binding
-(`authority.ts:231`); a replay adds none; a malformed report throws before anything is stored.
+(`delivery.ts:88`); a replay adds none; a malformed report throws before anything is stored.
 `deliver(db, submit, limit)` (`progress.ts:22`) sends pending reports with a binding (a
 guest's wait), least tried first; the answer must be a StoryPointAcceptance of this report for
 this account; `accepted` or `rejected` with a matching payload digest is stored as itself, else
@@ -133,7 +133,7 @@ transaction in its own; a write failure is swallowed and caught up later from th
 (`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
 newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:110`) and, when the
-host supplies a clock, each NEW decision's `kernel.decision_latency` (`authority.ts:209-211`).
+host supplies a clock, each NEW decision's `kernel.decision_latency` (`authority.ts:201-206`).
 
 ## The session controller and the phone
 
@@ -149,3 +149,11 @@ commit `-dirty`. CI checks the exported bundles of a clean tree carry the bare c
 bundle never keeps an older one. Refusal and
 outcome words live in `mobile/app/book/words.ts`
 ([owner rule](owner-rules.md#architecture-and-engine)).
+
+## M1-A trusted elapsed receipts
+
+The open authority also exposes trusted `elapsed({expected_run_id, from, until})` and `runId()`, for an authority driver, never a player invocation. No timer or anchor storage is installed in A. After settling the existing fence, compare expected_run_id with the current durable save run before receipt lookup: mismatch returns `stale_view` without writes.
+
+For a matching run, build its actor/world-bound elapsed Command and deterministic domain CommandId. That UUID is the receipt invocation key in the existing save scope. `loka-elapsed-intent-v1` hashes the full canonical Command. Matching receipt/version/digest validates and replays the original response/revision before current-clock admission; altered or malformed stored receipts conflict. A new command passes `stepElapsed`, then the same changed-row/receipt transaction, adoption, reports and trace. Faults have no receipt; failed/unknown COMMIT keeps existing rollback/fence/reconcile behavior for both trusted and player delivery. New-game replacement keeps old callbacks stale even if the release template world context is reused. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
+
+M1-A limitation: persisted elapsed commands replay through `stepElapsed`, but the paused CLI trace reader still routes all commands to player `step`. M1-B must add the narrow trusted replay dispatch and match its elapsed run namespace to the trace header before claiming full elapsed trace conformance.
