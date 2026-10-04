@@ -135,6 +135,13 @@ Elixir host adapter for a `portable_capability` without a declared differential 
 `:100`). The compiler and the loader are checked against each other
 ([cartridge.md](cartridge.md#artifact-and-loader)).
 
+The Node simulator splits its fresh contiguous seed range across two workers, sampling the
+first seed once in the parent. It combines sequence counts, step-length buckets, outcomes
+and command/cartridge coverage before applying the existing assertions. A worker failure
+fails the run; invariant failures retain the simulator's reproducer and trace report.
+The [acceptance envelope §3](../archive/spec/r1-acceptance-envelope.md#3-corpus-command-mix-and-sampling)
+still governs the seed count, determinism and regression controls.
+
 ## Mobile import rules
 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared

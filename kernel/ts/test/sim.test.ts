@@ -20,6 +20,7 @@ import { gameView, step } from '../src/runtime/world.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { CHECKED, GENERATOR, KERNEL, report, shrink, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
+import { fresh } from './sim_batch.ts';
 
 const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = read(
   'kernel/ts/test/sim_seeds.json',
@@ -72,6 +73,35 @@ const PICKED = [
 ].map((c) => `ashmere_${c}`);
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 
+// Breaks: overlapping/omitted seeds at an odd partition boundary, or a worker's/regression's
+// lengths or coverage dropped while merging. Serial seeds 1-8 have lengths 60,53,62,64,2,29,64,9.
+test('two fresh ranges and regression seeds retain all sequence counts and coverage', async () => {
+  const { count, steps, lengths, codes, seen } = await fresh(1, 7, [8]);
+  assert.equal(count, 8);
+  assert.equal(steps, 343);
+  assert.deepEqual(lengths, [1, 1, 0, 1, 0, 0, 1, 4]);
+  assert.deepEqual([...codes].sort(), [
+    'accepted',
+    'fault nonfuture_job',
+    'insufficient_resource',
+    'invalid_state',
+    'invalid_target',
+    'not_found',
+    'permission_denied',
+    'unsupported_capability',
+  ]);
+  assert.deepEqual(
+    [...seen].sort(),
+    [
+      '__proto__ accept_quest ashmere_bell ashmere_dusk ashmere_errand ashmere_facts',
+      'ashmere_road ashmere_scene ashmere_wear choose close close_choice dance drop give',
+      'hasOwnProperty lock look move perform remove run_job scan take talk toString unlock wait wear',
+    ]
+      .join(' ')
+      .split(' '),
+  );
+});
+
 // Breaks: SHOWN's inherited constructor is treated as a list of view refusal codes.
 test('an unknown constructor action is safe to compare with admission', () => {
   const view = {
@@ -112,21 +142,13 @@ test('every registered invariant is checked per step, or says why not', () => {
 // generated sequence; a generator that stops reaching a refusal code, a cartridge or an
 // unregistered command type; or a budget_exceeded record from a fresh sequence, which has no run
 // and so no genuine ReplayIds (04 §5.4: only its playback through loka play's decide emits).
-test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`, (t) => {
+test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`, async (t) => {
   assert.equal(SEEDS.generator, GENERATOR, 'sim_seeds.json is of another generator: re-curate it');
   const first = Date.now(); // the fresh seeds, printed so a failure can be rerun
-  const lengths = Array<number>(8).fill(0);
-  const [codes, seen] = [new Set<string>(), new Set<string>()]; // outcomes; cartridges, types
-  let steps = 0;
-  for (const seed of [...seeds, ...Array.from({ length: FRESH }, (_, i) => first + i)]) {
-    const o = simulate(seed);
-    if (o.failure) assert.fail(`fresh seeds ${first} to ${first + FRESH - 1}\n${report(o)}`);
-    lengths[(o.commands.length - 1) >> 3]! += 1;
-    steps += o.commands.length;
-    for (const c of o.codes) codes.add(c);
-    seen.add(o.loaded.cartridge.manifest.id);
-    for (const c of o.commands) seen.add(c.payload.type);
-  }
+  const { count, lengths, codes, seen, steps } = await fresh(first, FRESH, seeds).catch((error) => {
+    assert.fail(`fresh seeds ${first} to ${first + FRESH - 1}\n${error}`);
+  });
+  assert.equal(count, seeds.length + FRESH, 'a worker omitted sequences');
   t.diagnostic(
     `generator ${GENERATOR}; regression seeds ${seeds.join(' ')}; fresh seeds ${first} to ` +
       `${first + FRESH - 1}; ${seeds.length + FRESH} sequences, ${steps} steps; lengths 1-8, 9-16, ... 57-64: ` +
