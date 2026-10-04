@@ -6,7 +6,7 @@
   "kernel/ts/src/mechanics/schedule/rule.ts": "736bf88bc7648b07d9511cc471108b14a60de8d97d46a843761b439efbb89080",
   "kernel/ts/src/runtime/world.ts": "6641141e44fc33d233f6fd6adfae60b60c917d1b3982d82c9729eec8f291da9e",
   "lib/loka/content/checks.ex": "1ce57e2778ac10207d99d3c86bbdf6a187005eb126f3c7f403d63b0c3df7d3ac",
-  "lib/loka/content/recipes.ex": "a88494ff729306e5fb8ce0e283968ad0a8ae689af873e38778c7ecc23ceecdff",
+  "lib/loka/content/recipes.ex": "e2be36d13ef3b57ce0e35676732d7d88d61b61c1dfa3f20de59d1df836c46a69",
   "lib/loka/content/requires.ex": "ae925cf65ab6f39b9780dc60694ff11f6de5871ac0d3e8366747b4f568383e4b",
   "lib/loka/core/id_source.ex": "9c4aa59e876b9c382f6cd4d72f8364b6d8bc7995ece9862b963c204aea9d32b0",
   "mobile/authority/local-story/delivery.ts": "1f768a184e66d82fd8539b7ca2daf41e0835aa1e71eb38a018b81436fc14b012",

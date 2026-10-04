@@ -20,6 +20,7 @@ new-compiler-results.json: OK
 new-elapsed-from.log: OK
 new-ex-actions.log: OK
 new-ex-api.log: OK
+new-ex-duration-stdlib.log: OK
 new-ex-duration.log: OK
 new-ex-id-invalid.log: OK
 new-ex-id-ordinal.log: OK
