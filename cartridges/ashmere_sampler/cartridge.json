@@ -1,0 +1,41 @@
+{
+  "api_version": "loka/v3",
+  "id": "ashmere_sampler",
+  "version": "0.0.1",
+  "title": "Ashmere — Bram's Lantern",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.0",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "barrier": 1,
+      "equipment": 1,
+      "position": 1,
+      "policy": 1,
+      "fact": 1,
+      "quest": 1,
+      "dialogue": 1,
+      "scene": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "ferry_landing",
+  "chapters": [
+    {
+      "title": "chapter.lantern"
+    },
+    {
+      "title": "chapter.bank",
+      "story_point": "lantern_resolved",
+      "outcome": "carry"
+    }
+  ]
+}

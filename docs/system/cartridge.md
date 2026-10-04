@@ -24,7 +24,9 @@ and [identity/prose record](../decisions/owner-decision-sampler-batch-2026-10-03
 Its six rooms reuse Ashmere geography and prototype prose; its lantern errand,
 chapter transition and landing scene demonstrate the installed mechanics. The
 Lantern source, release pins and `loka-lantern.db` save remain available unchanged;
-the app opens only the sampler file and offers no story picker.
+the app opens only the sampler file and offers no story picker. The
+[sampler evidence](../evidence/c1-sampler/README.md) records source approval, the
+independent artifact answer and headless play/save checks, with device rows pending.
 
 ## Compiler
 

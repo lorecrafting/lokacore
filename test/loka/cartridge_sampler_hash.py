@@ -1,0 +1,68 @@
+# Independent declared sampler semantics; only the approved catalog is copied from source.
+# Numeric-profile canonical encoding and IdSource use Python stdlib, never either kernel.
+import hashlib
+import json
+from pathlib import Path
+
+ID = 'ashmere_sampler'
+VERSION = '0.0.1'
+CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
+def ref(kind, key):
+    return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
+def key(kind, name):
+    return f'{ID}@{VERSION}:{kind}/{name}'
+def policy(root):
+    return dict(policy_version=1, root=root)
+def quest_state(state):
+    return dict(op='quest_state', quest=ref('quest', 'lantern'), state=state)
+def definition(name, **parts):
+    return dict(key=name, **parts)
+caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule'], 1)
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.0', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+v['facts'] = {
+    key('fact', 'search_plan'): definition('search_plan', version=1, value_type=dict(type='enum', values=['undecided', 'player_led', 'party_led'], default='undecided'), scopes=['player'], meaning="Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest)."),
+    key('fact', 'position'): definition('position', version=1, value_type=dict(type='enum', values=['standing', 'sitting', 'resting', 'sleeping'], default='standing'), scopes=['player'], meaning="The character's position (position@1): only its rule writes it."),
+    key('fact', 'scene_lantern_kept'): definition('scene_lantern_kept', version=1, value_type=dict(type='int', minimum=-1, maximum=3, default=0), scopes=['player'], meaning="Scene lantern_kept's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.")}
+v['policies'] = {}
+v['actions'] = {}
+# Literal reciprocal geometry; barrier faces share one reference.
+geometry = {
+    'ferry_landing': [('north', 'well_lane', None)],
+    'well_lane': [('south', 'ferry_landing', None), ('east', 'drowned_lantern', None)],
+    'drowned_lantern': [('west', 'well_lane', None), ('up', 'inn_rooms', None), ('down', 'lantern_cellar', 'cellar_door')],
+    'inn_rooms': [('down', 'drowned_lantern', None), ('up', 'inn_attic', None)],
+    'inn_attic': [('down', 'inn_rooms', None)],
+    'lantern_cellar': [('up', 'drowned_lantern', 'cellar_door')]}
+v['rooms'] = {key('room', name): definition(name, title=f'room.{name}.title', description=f'room.{name}.description', exits={direction: dict(to=ref('room', dest), **(dict(barrier=ref('barrier', barrier)) if barrier else {})) for direction, dest, barrier in exits}) for name, exits in geometry.items()}
+items = [('brass_key', ['key', 'brass_key'], 'room', 'inn_rooms'), ('cellar_key', ['key', 'cellar_key'], 'room', 'inn_rooms'), ('lantern', ['lantern', 'brass_lantern'], 'room', 'well_lane'), ('tin_whistle', ['whistle', 'tin_whistle'], 'item', 'trunk'), ('trunk', ['trunk'], 'room', 'inn_attic'), ('wool_cloak', ['cloak', 'wool_cloak'], 'room', 'inn_rooms')]
+v['items'] = {key('item', name): definition(name, keywords=words, short=f'item.{name}.short', room_line=f'item.{name}.room', description=f'item.{name}.description', location={'in': kind, kind: ref(kind, place)}) for name, words, kind, place in items}
+v['items'][key('item', 'trunk')]['barrier'] = ref('barrier', 'trunk_lid')
+v['items'][key('item', 'wool_cloak')]['slot'] = 'cloak'
+v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'))}
+v['barriers'] = {key('barrier', name): definition(name, keywords=words, short=f'barrier.{name}.short', initial='locked', key_item=ref('item', item)) for name, words, item in [('cellar_door', ['door', 'cellar_door'], 'cellar_key'), ('trunk_lid', ['lid', 'trunk_lid'], 'brass_key')]}
+v['resources'] = {key('resource', name): definition(name, minimum=0, maximum=maximum, start=maximum, gain=gain) for name, maximum, gain in [('hp', 20, 5), ('ma', 100, 4), ('mv', 82, 18)]}
+v['quests'] = {key('quest', 'lantern'): definition('lantern', title='quest.lantern.title', objective=dict(evidence='current_state', policy=policy(dict(op='has_item', item=ref('item', 'lantern')))), journal=dict(active='quest.lantern.find', objectives_met='quest.lantern.return', resolved='quest.lantern.done', failed='quest.lantern.failed', abandoned='quest.lantern.abandoned', outcomes=dict(take_it='quest.lantern.carried')))}
+roles = dict(bram=dict(role='npc', npc=ref('npc', 'bram')))
+choices = {name: dict(label=f'dialogue.bram.{outcome}', narration=f'narration.bram.{outcome}', sequence=[dict(op='fact.assign', fact=ref('fact', 'search_plan'), value=value)]) for name, outcome, value in [('take_it', 'carry', 'player_led'), ('leave_it', 'leave', 'party_led')]}
+choices['leave_it']['hand_over'] = dict(item='lantern', to='bram')
+v['dialogues'] = {
+    key('dialogue', 'bram'): definition('bram', npc=ref('npc', 'bram'), policy=policy(quest_state('active')), prompt='dialogue.bram.prompt', roles=dict(**roles, lantern=dict(role='item', item=ref('item', 'lantern'))), quest=ref('quest', 'lantern'), choices=choices),
+    key('dialogue', 'bram_offer'): definition('bram_offer', npc=ref('npc', 'bram'), policy=policy(dict(op='not', item=dict(op='any', items=[quest_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']]))), prompt='dialogue.bram_offer.prompt', roles=roles, choices=dict(accept=dict(label='quest.lantern.accept', narration='narration.bram.accept', accept=ref('quest', 'lantern'))))}
+v['story_points'] = {key('story_point', 'lantern_resolved'): definition('lantern_resolved', outcomes={outcome: dict(dialogue=ref('dialogue', 'bram'), choice=choice) for outcome, choice in [('carry', 'take_it'), ('leave', 'leave_it')]})}
+v['scenes'] = {key('scene', 'lantern_kept'): definition('lantern_kept', on=dict(story_point=ref('story_point', 'lantern_resolved'), outcome='carry'), control='modal', steps=[dict(type='narrate', text=f'scene.lantern_kept.{line}') for line in ['bram', 'brass', 'river']] + [dict(type='await_ack'), dict(type='end')])}
+v['text'] = json.loads(Path('cartridges/ashmere_sampler/text.json').read_text())
+canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
+sha = hashlib.sha256(canonical.encode()).hexdigest()
+fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the adopted 57-string catalog is copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
+Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
+print(sha)
+# Reviewed numeric-profile allocation order: character, body, six rooms, Bram, six items, cloak holder.
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/bram'] + ['item/'+row[0] for row in items] + ['slot/cloak']
+ids = {}
+for ordinal, name in enumerate(names):
+    b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])
+    b[6] = (b[6] & 15) | 128
+    b[8] = (b[8] & 63) | 128
+    s = b.hex()
+    ids[name] = '-'.join([s[:8], s[8:12], s[12:16], s[16:20], s[20:]])
+print(json.dumps(ids, indent=2))

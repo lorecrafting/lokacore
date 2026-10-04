@@ -1,0 +1,551 @@
+# Sampler owner prose batch 1 — approval pending
+
+Candidate manifest: `ashmere_sampler@0.0.1`, title **Ashmere — Bram's Lantern**. These are PM recommendations. Owner-approved identity, version/title/save binding and every prose approval remain null in status.json. This source is an unapproved scratch proposal. Separate readiness provisionally compiled and loaded a copied draft at `a7ac604`; see [its loader record](../c1-sampler-readiness/initial-loader.log). That record predates this grammar correction, which requires recopy/recheck. It supplies no approved identity/prose, final artifact, independent oracle or device claim.
+
+Content decision 1 keeps working names and makes prototype `playable-src/data.js` the prose base. All six real room passages, keys and items remain. Every catalog string below, including reused development prose, needs owner batch approval before committed sampler content. The lantern episode ends with its item disposition; no bank route, later errand or party gameplay is offered.
+
+## Complete proposed catalog
+
+### `room.drowned_lantern.title`
+
+The Drowned Lantern
+
+Provenance: reused prototype ROOMS.drowned_lantern.n.
+
+### `room.drowned_lantern.description`
+
+The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.
+
+Provenance: adapted prototype ROOMS.drowned_lantern.d; marker removal only.
+
+### `room.ferry_landing.title`
+
+Ferry Landing
+
+Provenance: reused prototype ROOMS.ferry_landing.n.
+
+### `room.ferry_landing.description`
+
+Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.
+
+Provenance: adapted prototype ROOMS.ferry_landing.d; marker removal only.
+
+### `room.inn_attic.title`
+
+Inn Attic
+
+Provenance: reused prototype ROOMS.inn_attic.n.
+
+### `room.inn_attic.description`
+
+Dust lies thick as felt. A trunk with an iron hasp sits under the slope of the roof.
+
+Provenance: adapted prototype ROOMS.inn_attic.d; marker removal and state-neutral iron hasp (prototype broken → prepared locked → PM-selected iron); owner approval pending; article corrected to an (grammar only).
+
+### `room.inn_rooms.title`
+
+Inn Rooms
+
+Provenance: reused prototype ROOMS.inn_rooms.n.
+
+### `room.inn_rooms.description`
+
+A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage.
+
+Provenance: adapted prototype ROOMS.inn_rooms.d; marker removal only.
+
+### `room.lantern_cellar.title`
+
+Lantern Cellar
+
+Provenance: reused prototype ROOMS.lantern_cellar.n.
+
+### `room.lantern_cellar.description`
+
+Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall.
+
+Provenance: adapted prototype ROOMS.lantern_cellar.d; marker removal only.
+
+### `room.well_lane.title`
+
+Well Lane
+
+Provenance: reused prototype ROOMS.well_lane.n.
+
+### `room.well_lane.description`
+
+A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east.
+
+Provenance: adapted prototype ROOMS.well_lane.d; marker removal; narrow six-room correction.
+
+### `chapter.lantern`
+
+Bram's Lantern
+
+Provenance: newly authored microquest opening title.
+
+### `chapter.bank`
+
+The Lantern Found
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `item.lantern.short`
+
+a brass lantern
+
+Provenance: reused prototype ITEMS.lantern.n.
+
+### `item.lantern.room`
+
+A [brass lantern] rests beside the well.
+
+Provenance: newly authored item catalog prose.
+
+### `item.lantern.description`
+
+Dented brass with a horn window, oil sloshing inside.
+
+Provenance: adapted prototype ITEMS.lantern.d; omit child inscription.
+
+### `item.cellar_key.short`
+
+a cellar key
+
+Provenance: reused ashmere_wear/text.json.
+
+### `item.cellar_key.room`
+
+A [cellar key] lies on the windowsill.
+
+Provenance: newly authored item catalog prose.
+
+### `item.cellar_key.description`
+
+An iron key, its bow worn smooth.
+
+Provenance: newly authored item catalog prose.
+
+### `item.brass_key.short`
+
+a brass key
+
+Provenance: reused ashmere_locks/text.json.
+
+### `item.brass_key.room`
+
+A [brass key] lies beside the cellar key.
+
+Provenance: newly authored item catalog prose.
+
+### `item.brass_key.description`
+
+A small brass key with a narrow tooth.
+
+Provenance: newly authored item catalog prose.
+
+### `item.wool_cloak.short`
+
+a wool cloak
+
+Provenance: reused prototype ITEMS.wool_cloak.n.
+
+### `item.wool_cloak.room`
+
+A [wool cloak] hangs over the bedpost.
+
+Provenance: newly authored item catalog prose.
+
+### `item.wool_cloak.description`
+
+Heavy grey wool. Rain runs off it.
+
+Provenance: reused prototype ITEMS.wool_cloak.d.
+
+### `item.trunk.short`
+
+an old trunk
+
+Provenance: newly authored item catalog prose.
+
+### `item.trunk.room`
+
+An old [trunk] sits under the slope of the roof.
+
+Provenance: newly authored item catalog prose.
+
+### `item.trunk.description`
+
+An old wooden trunk. Its iron hasp is dark with age.
+
+Provenance: newly authored item catalog prose.
+
+### `item.tin_whistle.short`
+
+a tin whistle
+
+Provenance: reused phrase in prototype ROOMS.inn_attic.det.trunk.d.
+
+### `item.tin_whistle.room`
+
+A small [tin whistle] lies in the trunk.
+
+Provenance: newly authored item room line.
+
+### `item.tin_whistle.description`
+
+A small tin whistle, dulled by dust.
+
+Provenance: newly authored item description; no playable whistle action.
+
+### `barrier.trunk_lid.short`
+
+the trunk's lid
+
+Provenance: reused ashmere_locks/text.json.
+
+### `barrier.cellar_door.short`
+
+the cellar door
+
+Provenance: newly authored barrier name.
+
+### `npc.bram.short`
+
+Old Bram
+
+Provenance: reused prototype NPCS.bram.n.
+
+### `npc.bram.room`
+
+[Old Bram] the ferryman stands here, one boot on the ferry.
+
+Provenance: adapted prototype default NPCS.bram.line; HTML name becomes self touch link.
+
+### `npc.bram.description`
+
+A ferryman with rope-scarred hands and a coat that has never been dry.
+
+Provenance: reused prototype NPCS.bram.d.
+
+### `quest.lantern.title`
+
+Bram's lantern
+
+Provenance: reused ashmere_chapters/text.json.
+
+### `quest.lantern.accept`
+
+Offer to fetch Bram's lantern
+
+Provenance: reused ashmere_chapters/text.json.
+
+### `dialogue.bram.prompt`
+
+Bram looks at the lantern, then at you. "Will you keep it for now, or leave it with me?"
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `dialogue.bram.carry`
+
+Keep the lantern
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `dialogue.bram.leave`
+
+Leave it with Bram
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `narration.bram.carry`
+
+You keep the lantern. Bram nods once.
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `narration.bram.leave`
+
+You hand Bram the lantern. He settles it beside his boot.
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `dialogue.bram_offer.prompt`
+
+Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `narration.bram.accept`
+
+You say you'll fetch it. Bram nods toward the path north.
+
+Provenance: reused lantern_proof/text.json proof.accept under new key.
+
+### `quest.lantern.find`
+
+Find Bram's lantern.
+
+Provenance: reused ashmere_journal/text.json.
+
+### `quest.lantern.return`
+
+Bring the lantern to Bram.
+
+Provenance: reused ashmere_journal/text.json.
+
+### `quest.lantern.done`
+
+Bram's lantern is found.
+
+Provenance: reused ashmere_journal/text.json.
+
+### `quest.lantern.failed`
+
+The lantern search failed.
+
+Provenance: reused ashmere_journal/text.json.
+
+### `quest.lantern.abandoned`
+
+The lantern search was abandoned.
+
+Provenance: reused ashmere_journal/text.json.
+
+### `quest.lantern.carried`
+
+You found the lantern and kept it.
+
+Provenance: adapted existing sampler draft for a completed six-room lantern errand; no unavailable bank route or search-party task; owner approval pending.
+
+### `scene.lantern_kept.bram`
+
+Bram settles his boot against the ferry. The wet rope creaks around the mooring post.
+
+Provenance: newly authored scene line; prototype landing post and Bram pose are mood base.
+
+### `scene.lantern_kept.brass`
+
+You turn the brass lantern in your hand. Its dented side is cool against your palm.
+
+Provenance: newly authored scene line; prototype brass lantern is object base.
+
+### `scene.lantern_kept.river`
+
+The reeds stir. The river keeps sliding past the landing, the color of strong tea.
+
+Provenance: newly authored scene line; adapted prototype landing river image.
+
+### `action.talk`
+
+Talk to
+
+Provenance: reused lantern_proof/text.json.
+
+### `action.continue`
+
+Continue
+
+Provenance: newly authored continuation label; provisional settled scene key.
+
+## Exact base before/after prose changes
+
+Prototype touch markers become displayed words. No detail definitions or fabricated detail links are retained. Entity room lines use existing self-link notation. Room before strings retain prototype markers, so every edit is reviewable.
+
+### `room.drowned_lantern.description`
+
+**Before:** The inn is low and warm and smells of peat smoke and spilled ale. The {hearth|hearth} is big enough to stand in. {board|The rumor board} is thick with pinned notes, and {bar|Maud’s bar} runs along the back wall.
+
+**After:** The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.
+
+### `room.ferry_landing.description`
+
+**Before:** Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A {post|mooring post} leans into the current with a {notice|notice} nailed to it. {tide|Tide marks} stripe the pilings.
+
+**After:** Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.
+
+### `room.inn_attic.description`
+
+**Before:** Dust lies thick as felt. {trunk|A trunk} with a broken hasp sits under the slope of the roof.
+
+**After:** Dust lies thick as felt. A trunk with an iron hasp sits under the slope of the roof.
+
+### `room.inn_rooms.description`
+
+**Before:** A narrow passage of doors under the eaves. One stands open on {bed|a bed} made up tight, and {window|a window} over the green. {ceiling|The ceiling} sags a little at the end of the passage.
+
+**After:** A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage.
+
+### `room.lantern_cellar.description`
+
+**Before:** {casks|Ale casks} lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. {holes|Rat holes} gnaw the base of every wall.
+
+**After:** Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall.
+
+### `room.well_lane.description`
+
+**Before:** A cobbled lane climbs from the landing toward the green. In the middle stands {well|the well}, with a {bucket|bucket} on a chain, and {steps|worn steps} going down inside the shaft. The chandler’s door is west; the Drowned Lantern’s sign creaks to the east.
+
+**After:** A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east.
+
+### `chapter.lantern`
+
+**Before:** The Missing Child
+
+**After:** Bram's Lantern
+
+### `item.lantern.room`
+
+**Before:** A [brass lantern] sits on a coil of rope.
+
+**After:** A [brass lantern] rests beside the well.
+
+### `item.lantern.description`
+
+**Before:** Dented brass with a horn window, oil sloshing inside. WREN is scratched on the base in a child’s capitals.
+
+**After:** Dented brass with a horn window, oil sloshing inside.
+
+### `item.cellar_key.room`
+
+**Before:** A [key] lies here.
+
+**After:** A [cellar key] lies on the windowsill.
+
+### `item.cellar_key.description`
+
+**Before:** A cellar key.
+
+**After:** An iron key, its bow worn smooth.
+
+### `item.brass_key.room`
+
+**Before:** A [key] lies here.
+
+**After:** A [brass key] lies beside the cellar key.
+
+### `item.brass_key.description`
+
+**Before:** A brass key.
+
+**After:** A small brass key with a narrow tooth.
+
+### `item.wool_cloak.room`
+
+**Before:** A [cloak] lies here.
+
+**After:** A [wool cloak] hangs over the bedpost.
+
+### `item.trunk.short`
+
+**Before:** an iron-bound trunk
+
+**After:** an old trunk
+
+### `item.trunk.room`
+
+**Before:** An iron-bound [trunk] stands here.
+
+**After:** An old [trunk] sits under the slope of the roof.
+
+### `item.trunk.description`
+
+**Before:** An iron-bound trunk.
+
+**After:** An old wooden trunk. Its iron hasp is dark with age.
+
+### `npc.bram.short`
+
+**Before:** Bram the ferryman
+
+**After:** Old Bram
+
+### `npc.bram.room`
+
+**Before:** <b>Old Bram</b> the ferryman stands here, one boot on the ferry.
+
+**After:** [Old Bram] the ferryman stands here, one boot on the ferry.
+
+### `dialogue.bram_offer.prompt`
+
+**Before:** Bram keeps his eyes on the reeds. "My lantern's out at the shelter past the reed bank, and I can't leave the ferry. The search party won't go out without it."
+
+**After:** Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"
+
+## Episode endpoint alignment — exact prior draft/after changes
+
+These eight small text changes remove promises of inaccessible next gameplay. Definition names, chapter TextKey `chapter.bank`, point/choice IDs and mechanics are unchanged. Before values are the immediately preceding sampler draft, not an approved batch.
+
+### `chapter.bank`
+
+**Before:** Along the Bank
+
+**After:** The Lantern Found
+
+### `dialogue.bram.prompt`
+
+**Before:** Bram looks at the lantern, then at the reeds. "Are you coming with us, or do you mean to go along the bank yourself?"
+
+**After:** Bram looks at the lantern, then at you. "Will you keep it for now, or leave it with me?"
+
+### `dialogue.bram.carry`
+
+**Before:** Carry it along the bank
+
+**After:** Keep the lantern
+
+### `dialogue.bram.leave`
+
+**Before:** Leave it with the search party
+
+**After:** Leave it with Bram
+
+### `narration.bram.carry`
+
+**Before:** You keep the lantern. Bram nods once and points you down the bank.
+
+**After:** You keep the lantern. Bram nods once.
+
+### `narration.bram.leave`
+
+**Before:** You hand Bram the lantern. He lifts it toward the reeds and calls the others in.
+
+**After:** You hand Bram the lantern. He settles it beside his boot.
+
+### `dialogue.bram_offer.prompt`
+
+**Before:** Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. The search party won’t go out without it."
+
+**After:** Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"
+
+### `quest.lantern.carried`
+
+**Before:** You carry the lantern for the search party.
+
+**After:** You found the lantern and kept it.
+
+## Selected scene and scope
+
+Resolving `bram/take_it` keeps the lantern, persists outcome `take_it`, reaches `lantern_resolved/carry`, selects journal `quest.lantern.carried`, reaches chapter 1 **The Lantern Found**, and starts `lantern_kept`. Its three lines describe Bram, the held lantern and the river at the landing. None directs the player to unavailable geography. The errand is complete; the existing six rooms remain explorable. No new episode-ending mechanic is implied.
+
+`leave_it` retains the existing hand-over to Bram, selects the resolved journal fallback, and starts no scene/later chapter. It promises neither a party action nor a new quest. The sole terminal journal override uses persisted choice `take_it`, never point outcome `carry`. Acceptance stays a separate one-choice dialogue.
+
+Scenery mentioning the green, notice, rumor board, Maud, well or tide marks remains ordinary prototype prose. No omitted rooms, Maud NPC, reading, hidden exits, darkness, tide, light, schedules, bell, deadline, child outcome or extra quest is added. The attic holds the same single declared tin whistle. The lantern’s WREN inscription remains omitted without authoring child status.
+
+## Attic hasp edit chain — approval pending
+
+Prototype **broken hasp** → preparation **locked hasp** → selected source **iron hasp**. The state-neutral adjective remains true after unlock/open while the barrier starts locked. This remains a PM draft selection requiring complete owner prose approval.
+
+## Technical prose outside the catalog
+
+Candidate manifest title: **Ashmere — Bram's Lantern** (newly authored; identity approval pending).
+
+Authored search_plan meaning: **Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest).**. The internal enum values and consequences remain unchanged. Its previous draft meaning was **Whether the player keeps Bram's lantern or leaves it with his search party (sampler lantern microquest).** Engine position and scene facts are never authored.
+
+## Attic article correction — grammar only
+
+`room.inn_attic.description` immediately preceding draft **Before:** Dust lies thick as felt. A trunk with a iron hasp sits under the slope of the roof.
+
+**After:** Dust lies thick as felt. A trunk with an iron hasp sits under the slope of the roof.
+
+True prototype and intermediate-draft before values remain in provenance. Complete owner prose approval remains pending.

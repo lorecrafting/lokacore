@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "door",
+    "cellar_door"
+  ],
+  "short": "barrier.cellar_door.short",
+  "initial": "locked",
+  "key_item": "cellar_key"
+}
