@@ -7,6 +7,9 @@ compile-time Elixir contracts and the verification harness
 ([record](archive/decisions/owner-decision-roadmap-2026-09-24.md)); the later slice counts and the
 estimate are the PM's planning, not owner decisions.
 
+The complete [M1–M23 mechanics slice list](NEXT-MECHANICS.md) gives each lettered slice,
+its dependencies, lift and acceptance. Prepared assignments are in the [brief index](briefs/README.md).
+
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
 
