@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Close C1 after its reviewed checklist and merges under the owner's Simulator acceptance; deferred UI work remains tracked at the next UI checkpoint ([record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md)).
+
 - NPC/item views carry explicit authored full descriptions; the compatible optional wire field is always populated by current projections ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
 
 - The current unreleased sampler may replace its previous development runtime release; the bounded `0.0.2` Look repair independently rederives its known answer while other fixtures stay frozen ([record](../decisions/owner-decision-sampler-development-look-2026-10-03.md)).
@@ -115,6 +117,8 @@ and not repeated here.
   separate Realm rules under new keys ([leaning](../archive/decisions/owner-leaning-realm-separation-2026-10-01.md)).
 
 ## Process
+
+- The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Astra and assign useful parallel work without waiting for owner input; normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
 
 - PM selects fresh independent Codex primary plus separate Sol review for the resumed C1 touch slice under the owner's delegated workflow while Opus quota is unavailable; required Simulator interaction evidence remains
   ([record](../decisions/owner-decision-touch-resumption-2026-10-03.md#pm-execution-choices-under-existing-delegation)).

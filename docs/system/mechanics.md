@@ -307,10 +307,13 @@ no rule event. At n it returns `ended`, one assign `expected: n, value: -1`, and
 The final continue acknowledges the last line and runs end: await_ack adds no wait.
 All continuation uses the command's actor. No running scene is the rule's defensive
 `invalid_state`; ordinary admission refuses continue as `unsupported_capability`.
-SCENE-01 is covered by a headless authority reopen at line 2; Simulator rendering
-and kill evidence waits for c1-touch. SCENE-03 and QUESTSCENE-01's start-once half
-are in this slice. A stale fresh-id double tap can advance an unseen line; a later
-line-bearing continue command will guard that when c1-touch establishes the input.
+SCENE-01 has headless line-2 reopen and actual Release Simulator terminate/relaunch
+proof in the [touch review](../reviews/2026-10-03-c1-touch-review.md) and its
+[native evidence](../evidence/c1-touch/README.md). SCENE-03 and QUESTSCENE-01's
+start-once half are covered by the [scene review](../reviews/2026-10-03-c1-scenes-modal-review.md).
+A stale fresh-id Continue can still advance an unseen line at the command boundary;
+the [ROADMAP carry](../ROADMAP.md#c1-carry-checkpoints) distinguishes presenter input
+review from the future line-bearing contract.
 
 ## reaction@1 (`kernel/ts/src/mechanics/reaction.ts`)
 

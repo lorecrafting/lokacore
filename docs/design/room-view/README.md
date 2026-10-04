@@ -1,6 +1,6 @@
 # Room view prototype (design exploration)
 
-**Status:** informative, not authority. This is an owner-chosen UI direction from exploratory mockups (2026-09-24), not specification. [docs/spec](../../spec/IMPORT.md) still governs, including [00 §4.10 Touch interface](../../archive/spec/00-first-cartridge-design.md#410-touch-interface) and the [Lantern proof](../../archive/spec/pre-release-proof.md). Where this page conflicts with the spec, the spec wins until an owner decision changes it.
+**Status:** informative, not authority. This is an owner-chosen UI direction from exploratory mockups (2026-09-24), not specification. [current system docs](../../system/README.md) govern, including [00 §4.10 Touch interface](../../archive/spec/00-first-cartridge-design.md#410-touch-interface) and the [Lantern proof](../../archive/spec/pre-release-proof.md). Where this page conflicts with the spec, the spec wins until an owner decision changes it.
 
 Open [room-view.html](room-view.html) in a browser to play the Lantern loop on the chosen design. The pages are self-contained HTML and load fonts from Google Fonts. The model inside is a hand-written mock of the proof's four places, not the engine.
 
@@ -32,17 +32,17 @@ Compared against [protocol/gameview.schema.json](../../../protocol/gameview.sche
 | # | Need (nice to have) | For | Nearest today |
 |---|---|---|---|
 | 1 | resources as current/max with a condition band ([04 §15](../../archive/spec/04-command-event-effect-protocol.md#15-portable-game-view-projection)), so the UI never invents thresholds | the status line and Character | GameView `resources` (slice G) |
-| 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | GameView `position`, the position verbs and an exit's `invalid_state` (c1-position, [position@1](../../system/mechanics.md#position1-kerneltssrcmechanicspositionrulets)); book status/actions in c1-touch, sampler touch acceptance pending; `meditating` LATER |
+| 2 | the actor's position (standing, sitting, resting, meditating, sleeping) and the actions that change it, with a typed reason when movement needs standing | the status line; "Stand up first" | GameView `position`, the position verbs and an exit's `invalid_state` (c1-position, [position@1](../../system/mechanics.md#position1-kerneltssrcmechanicspositionrulets)); book status/actions verified by [c1-touch review](../../reviews/2026-10-03-c1-touch-review.md); `meditating` LATER |
 | 3 | discovered map places with grid coordinates and z, the edges between them, and which are visited | the minimap and Map page | none ("map joins with its capability") |
 | 4 | a typed distinction between a closed door and a barred way (openable or not); the player-facing `message` already tells them apart | the dashed stair ring and struck exits | UnavailableReason.code (only `exit_locked`) |
-| 5 | per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView {id, name, kind, actions} |
+| 5 | per-entity visible status (the lantern is lit) and a long description | thing pages; "(lit)" in Carrying | EntityView includes optional authored `description`; current projections populate it ([Book UI](../../system/book-ui.md)); per-entity visible status remains LATER |
 | 6 | inspectable details marked as targetable non-entities | the tappable mooring post | none |
-| 7 | the objective or stage text of each quest | Journal; tracked objective | DONE for the kernel (c1-journal): QuestView {quest, state, title, journal?}, selected by [quest@1](../../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets); book rendering is in c1-touch; sampler touch acceptance pending |
+| 7 | the objective or stage text of each quest | Journal; tracked objective | DONE for the kernel (c1-journal): QuestView {quest, state, title, journal?}, selected by [quest@1](../../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets); book rendering and sampler touch acceptance verified by [c1-touch review](../../reviews/2026-10-03-c1-touch-review.md) |
 | 8 | discovered dialogue topics per NPC | "Ask about" chips | none |
 | 9 | text aliases per action and target | text drawer suggestions and echoes | ActionDefinition notes they arrive with the parser |
 | 10 | the accessibility text key on each advertised action | screen readers | ActionDefinition.accessibility (not projected) |
 | 11 | the destination name of an exit the player already knows | screen-reader labels; the Map page | none |
-| 12 | the door on an exit and its state even when passable, with its open/close/lock/unlock actions (R5 S7 review Q2) | closing an open door by touch | DONE for the kernel (c1-doors): ExitView `door` (name, state, the door verbs usable now) and `sight`; book rendering is in c1-touch; sampler touch acceptance pending |
+| 12 | the door on an exit and its state even when passable, with its open/close/lock/unlock actions (R5 S7 review Q2) | closing an open door by touch | DONE for the kernel (c1-doors): ExitView `door` (name, state, the door verbs usable now) and `sight`; book rendering and sampler touch acceptance verified by [c1-touch review](../../reviews/2026-10-03-c1-touch-review.md) |
 
 Questions for the engine rather than needs:
 
