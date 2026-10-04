@@ -69,3 +69,18 @@ Reviewed fix head: `4ca3952f6261508658c9a0667dba25e1ccbdee17`. **Verdict: APPROV
 Inspected only the documentation dispositions, directly linked authority and review publication changes. The complete difference from reviewed source `88a400a` consists of these two active documents plus the review record/index; runtime, content, fixture, oracle, test and evidence bytes remain unchanged. No new finding or open item. PM verified expected docs-only CI at this exact fix head, with all started jobs successful; the six-job source CI remains the original code validation. No tests, builds, mutation runs, native interaction or owner save operations were repeated for these documentation fixes.
 
 Ponytail Review: Lean already. Ship.
+
+## Cross-vendor narrow fix recheck
+
+Reviewed fix head: `4ca3952f6261508658c9a0667dba25e1ccbdee17`. PM personally verified changes, lint and bundle SUCCESS; the three code jobs were expected Markdown-only skips after all six source-head jobs passed. Requested model: `gpt-6-sol`; runtime identity unverified. Process exit status 0. Answer SHA-256: `af7d21d5120c4323fb2a9ec24249d59e240c3019669cab9f37491c7a97e99a74`. PM-retained private transcript SHA-256: `aa9a5ee2620039cc38d9865e8d4b968139199c1a31c8d9124ac31f8c372d65ef`. No transcript or private paths published. All primary and secondary findings are closed.
+
+```text
+Verdict: APPROVE — PR #152 narrow fix re-review at 4ca3952f6261508658c9a0667dba25e1ccbdee17.
+
+M5C-01 resolved: docs/system/book-ui.md:23 links the current sampler to docs/system/cartridge.md, which identifies 0.0.3.
+M5C-02 resolved: docs/system/owner-rules.md:16 links the indexed PM chapel-approach decision. Its adopted scope is unchanged.
+
+Findings: none.
+
+The commit range changes only documentation and review metadata; content, source, fixtures, and evidence are unchanged. The original fenced Sol answer is recorded as a source-head answer, not a new runtime verdict. Its fenced text matches the SHA-256 stated in the record; the private raw transcript was unavailable for an independent verbatim comparison. gpt-6-sol was requested, but actual runtime model identity is unknown. No tests or builds were run.
+```
