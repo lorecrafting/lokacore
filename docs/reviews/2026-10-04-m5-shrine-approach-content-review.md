@@ -27,3 +27,11 @@ Verified all nine retained evidence checksums and inspected actual compiler/cros
 Independent narrow validation on the actual source passed: compiler KAT/cross-loader three tests; both original real-SQLite quest outcomes; compiled-source authority walk north through all five destinations, offered Look with `looked`, no Pray/Attack/respawn, reciprocal return, and eleven durable receipts. A private controlled probe reused existing authority setup without adding a repository test. Removing only the nave south exit made the existing KAT fail (exit 2, 0/1 passed) and the independently compiled mutant probe fail (exit 1, literal expected `[south]` versus actual `[]`). Restored the source byte-for-byte; KAT, actual source compilation and route probe passed again. The restored compiled artifact matches the independent fixture value/hash. Temporary probe removed; only this record/index are committed.
 
 Ponytail Review: Lean already. Ship. No added machinery or redundant tests.
+
+## Developer response — fix round 1
+
+- **M5C-01:** Book UI now links the current sampler to the canonical cartridge contract instead of duplicating a release-version literal. Applied; pending independent narrow recheck.
+- **M5C-02:** The active owner-rules index now links the delegated PM chapel-approach decision. Applied; pending independent narrow recheck.
+
+These documentation fixes preserve the reviewed content and evidence. The source-head
+verdict above remains CHANGES REQUIRED until the reviewer verifies both dispositions.
