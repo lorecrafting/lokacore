@@ -159,6 +159,12 @@ actions (a targetless one is never accepted: its Command needs `item_id`) (c1-eq
 place's actions, except every action resolving to the current position's verb (a cartridge
 alias included), which step would refuse `invalid_state` (c1-position).
 
+While [scene@1](mechanics.md#scene1-rulesscenets) runs, this shared resolved set is
+replaced by its single `continue` action (none target, empty input), after every
+ordinary contribution. Both invocation resolution and direct Command admission
+therefore refuse other commands with existing `unsupported_capability`, before
+clock or state changes. Continue is never a general engine VERBS entry.
+
 ## Policy
 
 `holds` (`kernel/ts/src/policy.ts:18`) evaluates `all`, `any`, `not` and the leaves
