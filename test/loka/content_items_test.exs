@@ -190,4 +190,100 @@ defmodule Loka.ContentItemsTest do
 
     assert d("SCHEMA_VIOLATION", "cartridge.entry", %{"error" => "missing_property"}) in diags
   end
+
+  defp carry_files do
+    manifest =
+      src("cartridge.json")
+      |> put_in(["requires", "kernel_api", "at_least"], "1.3")
+      |> Map.put("world", %{"carry" => %{"max_grams" => 0}})
+
+    Map.new(~w(lantern satchel lamp_oil), fn key ->
+      {"items/#{key}.json", Map.put(src("items/#{key}.json"), "mass_grams", 0)}
+    end)
+    |> Map.put("cartridge.json", manifest)
+  end
+
+  # Breaks: opting in silently defaults a nested item's omitted mass to zero.
+  test "carrying requires every authored shell mass and preserves explicit zero", %{tmp_dir: dir} do
+    files = carry_files()
+    assert {:ok, _, []} = compile(Path.join(dir, "zero"), files)
+    missing = Map.update!(files, "items/lamp_oil.json", &Map.delete(&1, "mass_grams"))
+
+    assert compile(Path.join(dir, "missing"), missing) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "items/lamp_oil.mass_grams", %{
+                  "error" => "missing_property"
+                })
+              ]}
+  end
+
+  # Breaks: malformed authored mass/limits reach a world, including unsafe integers in Elixir JSON.
+  test "carrying numeric and closed-field validation rejects malformed source", %{tmp_dir: dir} do
+    for {field, value, error} <- [
+          {"mass_grams", -1, "below_minimum"},
+          {"mass_grams", 2_147_483_648, "above_maximum"},
+          {"mass_grams", "0", "invalid_type"}
+        ] do
+      files = Map.update!(carry_files(), "items/lantern.json", &Map.put(&1, field, value))
+
+      assert compile(Path.join(dir, error), files) ==
+               {:error, [d("SCHEMA_VIOLATION", "items/lantern.mass_grams", %{"error" => error})]}
+    end
+
+    for {value, error} <- [
+          {-1, "below_minimum"},
+          {0.5, "invalid_type"},
+          {9_007_199_254_740_992, "invalid_type"}
+        ] do
+      files = put_in(carry_files(), ["cartridge.json", "world", "carry", "max_grams"], value)
+
+      assert compile(Path.join(dir, "cap#{value}"), files) ==
+               {:error,
+                [d("SCHEMA_VIOLATION", "cartridge.world.carry.max_grams", %{"error" => error})]}
+    end
+
+    assert :ok = Loka.Core.Contracts.validate("GameError", %{"code" => "too_heavy"})
+
+    assert :ok =
+             Loka.Core.Contracts.validate("WorldSettings", %{
+               "carry" => %{"max_grams" => 9_007_199_254_740_991}
+             })
+
+    assert {:error, [%{path: "/carry/max_grams", code: :invalid_type}]} =
+             Loka.Core.Contracts.validate("WorldSettings", %{
+               "carry" => %{"max_grams" => 9_007_199_254_740_992}
+             })
+
+    assert {:error, [%{path: "/carry/extra", code: :unknown_property}]} =
+             Loka.Core.Contracts.validate("WorldSettings", %{
+               "carry" => %{"max_grams" => 0, "extra" => 0}
+             })
+
+    assert {:error, [%{path: "/carry/max_grams", code: :missing_property}]} =
+             Loka.Core.Contracts.validate("WorldSettings", %{"carry" => %{}})
+  end
+
+  # Breaks: an older implementation can load carrying content without enforcing its admission.
+  test "carrying source requires its API and containment owner", %{tmp_dir: dir} do
+    files = put_in(carry_files(), ["cartridge.json", "requires", "kernel_api", "at_least"], "1.2")
+
+    assert compile(Path.join(dir, "old"), files) ==
+             {:error, [d("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]}
+
+    files =
+      Map.update!(
+        carry_files(),
+        "cartridge.json",
+        &update_in(&1, ["requires", "capabilities"], fn caps ->
+          Map.delete(caps, "containment")
+        end)
+      )
+
+    assert {:error, diagnostics} = compile(Path.join(dir, "owner"), files)
+
+    assert d("UNDECLARED_CAPABILITY", "cartridge.world.carry", %{"capability" => "containment"}, [
+             "containment@1"
+           ]) in diagnostics
+  end
 end

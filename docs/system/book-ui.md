@@ -130,6 +130,12 @@ These replace generic Taken/Dropped fallbacks; authored narration takes preceden
 meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
 Retry retains original action/target context and appends each confirmed Take/Drop event only once.
 
+An item action advertised unavailable with `too_heavy` appears as a non-action note using its
+actual catalog label and **too heavy to carry**. It invokes nothing; available actions retain their
+existing buttons. The note follows the latest GameView, including Take aliases and Contents,
+and disappears when shedding held load makes Take legal.
+
+
 Successful Take/Drop are the specific exceptions to item-page retention. Other same-room item actions
 retain the page while that item remains projected; leaving the room or losing the item closes
 obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.

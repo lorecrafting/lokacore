@@ -10,5 +10,6 @@
     "in": "room",
     "room": "inn_rooms"
   },
-  "slot": "cloak"
+  "slot": "cloak",
+  "mass_grams": 3000
 }

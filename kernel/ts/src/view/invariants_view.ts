@@ -60,7 +60,7 @@ export const gameview_agrees_with_admission = ({
     );
     return listed ? code !== 'invalid_state' : decision.kind !== 'accepted';
   }
-  const entry = advertised(view, command.payload);
+  const entry = advertised(view, command.payload, action_key, commandOf);
   const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
   if (!entry) return true;
   if (entry.available) return !shown.includes(code);
@@ -79,7 +79,7 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
     'insufficient_resource',
   ],
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
-  take: ['not_present'], // a listed take is in reach (c1-locks custody)
+  take: ['not_present', 'too_heavy'], // reach and voluntary carrying admission
 };
 
 const DOOR_VERBS = Object.keys(MOVES);
@@ -92,14 +92,24 @@ const VERB_CODES = [
   'not_present',
 ];
 
-function advertised(view: GameView, p: Any): ExitView | AdvertisedAction | undefined {
+function advertised(
+  view: GameView,
+  p: Any,
+  action_key: string | undefined,
+  commandOf: (a: AdvertisedAction) => string | undefined,
+): ExitView | AdvertisedAction | undefined {
   if (p.type === 'move') return view.exits.find((e) => e.direction === p.direction);
   const id = p.type === 'perform' ? undefined : (p.item_id ?? p.target_id);
   if (id === undefined) {
     const key = p.type === 'perform' ? p.action : p.type;
     return view.actions.find((a) => a.action_key === key);
   }
-  return entityView(view, id)?.actions.find((a) => a.action_key === p.type);
+  return entityView(view, id)?.actions.find((a) =>
+    p.type === 'take'
+      ? (action_key === undefined || a.action_key === action_key) &&
+        (commandOf(a) ?? a.action_key) === 'take'
+      : a.action_key === p.type,
+  );
 }
 
 // The view's entry for an entity id: in the room, held (or inside either, c1-locks), or worn.

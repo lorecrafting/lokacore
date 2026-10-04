@@ -4,6 +4,7 @@ import type {
   CharacterId,
   CommandPayload,
   EntityId,
+  ErrorCode,
   Key,
   TargetSpec,
 } from '../contracts.gen.ts';
@@ -15,6 +16,8 @@ import * as barrier from '../mechanics/barrier/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
+import { carrying } from '../mechanics/containment/shared.ts';
+import { reach } from '../mechanics/lookups.ts';
 
 /**
  * The GameView lists of `actor`'s set: `listed(fits)` is each action that `fits` in presentation
@@ -30,11 +33,20 @@ import { cmp } from '../foundation/validate.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
+// size: allow 50, existing action lists share one lazy carrying context across their item offers
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
   const at = position.positionOf(world, actor);
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
+  let carry: ReturnType<typeof carrying> | undefined;
+  const take = (item: EntityId) => {
+    if (!body || world.entities[item]?.kind !== 'item') return 'invalid_target' as const;
+    if (world.state.containers[item] === body) return 'invalid_state' as const;
+    if (!reach(world, body, item)) return 'not_present' as const;
+    carry ??= carrying(world, body, { n: 0 });
+    return carry(item);
+  };
   const here = (a: Offered) =>
     !a.recipe ||
     world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!];
@@ -43,7 +55,7 @@ export function lists(world: World, actor: CharacterId) {
       .filter((a) => fits(a) && here(a) && !MODAL.includes(a.command))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
-      .map((a) => advertise(world, actor, a, id, scope));
+      .map((a) => advertise(world, actor, a, take, id, scope));
   return {
     place: listed(
       (a) => a.target.kind === 'none' && !door(a) && !equip(a) && a.command !== current,
@@ -73,6 +85,7 @@ function advertise(
   world: World,
   actor: CharacterId,
   a: Offered,
+  take: (item: EntityId) => ErrorCode | undefined,
   id?: string,
   scope?: string,
 ): AdvertisedAction {
@@ -91,7 +104,9 @@ function advertise(
     (speaks(world, target) ? talkRefused(world, actor, target) && 'invalid_state' : 'not_found');
   const code = !holds(world, actor, a.policy.root, { target, steps: { n: 0 } })
     ? 'invalid_state'
-    : talk || (typeof admitted === 'string' ? admitted : undefined);
+    : talk ||
+      (typeof admitted === 'string' ? admitted : undefined) ||
+      (a.command === 'take' && target !== undefined ? take(target) : undefined);
   return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
 }
 

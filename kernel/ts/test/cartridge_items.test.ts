@@ -8,6 +8,7 @@ import { test } from 'node:test';
 import { loadCartridge } from '../src/content/cartridge.ts';
 import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 const kat = read('protocol/fixtures/cartridge_items_hash.json');
 const sorted = (v: any): any =>
@@ -20,14 +21,14 @@ const sorted = (v: any): any =>
             .map((k) => [k, sorted(v[k])]),
         )
       : v;
-const load = (f: (c: any) => void) => {
+const load = (f: (c: any) => void, installed = INSTALLED) => {
   const c = structuredClone(kat.value);
   f(c);
   const text = JSON.stringify(sorted(c));
   const hash = createHash('sha256').update(text).digest('hex');
   return loadCartridge(
     new TextEncoder().encode(`{"cartridge":${text},"content_hash":"${hash}"}`),
-    INSTALLED,
+    installed,
   );
 };
 const fails = (
@@ -169,6 +170,7 @@ test('items and NPCs need containment, and their map keys their keys', () => {
   fails(
     (c) => {
       delete c.lock.capabilities.containment;
+
       delete c.manifest.requires.capabilities.containment;
     },
     'UNDECLARED_CAPABILITY',
@@ -182,4 +184,115 @@ test('items and NPCs need containment, and their map keys their keys', () => {
     item('lantern'),
     { field: 'key', declared: 'lantern', expected: 'lamp' },
   );
+});
+
+const carryingContent = (c: any) => {
+  c.world = { carry: { max_grams: 0 } };
+  c.manifest.requires.kernel_api.at_least = '1.3';
+  for (const item of Object.values(c.items) as any[]) item.mass_grams = 0;
+};
+
+// Breaks: a nested omitted mass silently becomes zero; explicit zero is mistaken for omission.
+test('carrying loader requires every mass while preserving explicit zero', () => {
+  assert.ok(load(carryingContent).ok);
+  fails(
+    (c) => {
+      carryingContent(c);
+      delete at(c, 'lamp_oil').mass_grams;
+    },
+    'SCHEMA_VIOLATION',
+    `${item('lamp_oil')}.mass_grams`,
+    { error: 'missing_property' },
+  );
+});
+
+// Breaks: malformed mass/carry values or unknown fields bypass the cartridge boundary.
+test('carrying loader and validator reject malformed numbers and fields', () => {
+  for (const [value, error] of [
+    [-1, 'below_minimum'],
+    [2147483648, 'above_maximum'],
+    ['0', 'invalid_type'],
+  ] as const)
+    fails(
+      (c) => {
+        carryingContent(c);
+        at(c, 'lantern').mass_grams = value;
+      },
+      'SCHEMA_VIOLATION',
+      `${item('lantern')}.mass_grams`,
+      { error },
+    );
+  fails(
+    (c) => {
+      carryingContent(c);
+      c.world.carry.max_grams = -1;
+    },
+    'SCHEMA_VIOLATION',
+    '.cartridge.world.carry.max_grams',
+    { error: 'below_minimum' },
+  );
+  for (const value of [0.5, 9007199254740992])
+    fails(
+      (c) => {
+        carryingContent(c);
+        c.world.carry.max_grams = value;
+      },
+      'INVALID_JSON',
+      '',
+    );
+  assert.deepEqual(validate('GameError', { code: 'too_heavy' }), []);
+  assert.deepEqual(validate('WorldSettings', { carry: { max_grams: 9007199254740991 } }), []);
+  assert.deepEqual(validate('WorldSettings', { carry: { max_grams: 9007199254740992 } }), [
+    { path: '/carry/max_grams', code: 'invalid_type' },
+  ]);
+  assert.deepEqual(validate('WorldSettings', { carry: { max_grams: 0, extra: 0 } }), [
+    { path: '/carry/extra', code: 'unknown_property' },
+  ]);
+  assert.deepEqual(validate('WorldSettings', { carry: {} }), [
+    { path: '/carry/max_grams', code: 'missing_property' },
+  ]);
+});
+
+// Breaks: opting in keeps an old minimum or permits an older installed implementation.
+test('carrying loader requires API 1.3 and containment', () => {
+  fails(
+    (c) => {
+      carryingContent(c);
+      c.manifest.requires.kernel_api.at_least = '1.2';
+    },
+    'KERNEL_API_RANGE_INVALID',
+    '.cartridge.manifest.requires.kernel_api.at_least',
+  );
+  fails(
+    (c) => {
+      carryingContent(c);
+      delete c.manifest.requires.capabilities.containment;
+      delete c.lock.capabilities.containment;
+      c.items = {};
+      c.npcs = {};
+      c.policies = {};
+      c.actions = {};
+      const ferry = c.rooms[`${ID}:room/ferry_landing`];
+      c.rooms = {
+        [`${ID}:room/ferry_landing`]: {
+          key: ferry.key,
+          title: ferry.title,
+          description: ferry.description,
+          exits: {},
+        },
+      };
+      for (const key of Object.keys(c.text)) c.text[key] = 'plain';
+    },
+    'UNDECLARED_CAPABILITY',
+    '.cartridge.world.carry',
+    { capability: 'containment' },
+    ['containment@1'],
+  );
+  const old = load(carryingContent, { ...INSTALLED, kernel_api: '1.2' });
+  assert.ok(!old.ok);
+  if (!old.ok)
+    assert.deepEqual(
+      [old.diagnostic.code, old.diagnostic.path, old.diagnostic.data],
+      ['KERNEL_API_UNSUPPORTED', '.cartridge.manifest.requires.kernel_api', { installed: '1.2' }],
+    );
 });

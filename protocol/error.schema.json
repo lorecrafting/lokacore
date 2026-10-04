@@ -15,6 +15,7 @@
         "stale_view",
         "stale_revision",
         "insufficient_resource",
+        "too_heavy",
         "exit_locked",
         "exit_closed",
         "quest_requirement",

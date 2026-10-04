@@ -9,5 +9,6 @@
   "location": {
     "in": "item",
     "item": "trunk"
-  }
+  },
+  "mass_grams": 200
 }
