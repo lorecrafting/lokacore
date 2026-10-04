@@ -13,7 +13,8 @@
     },
     {
       "seed": 1791136864905,
-      "type": "drained opted sampler pool preserves required birth metadata"
+      "type": "hasOwnProperty",
+      "found": "drained sampler MV lost required born rate/remainder, causing resource view to throw before the unknown command was refused"
     }
   ]
 }
