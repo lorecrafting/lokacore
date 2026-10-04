@@ -1,7 +1,7 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_sampler",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "title": "Ashmere — Bram's Lantern",
   "requires": {
     "kernel_api": {

@@ -7,6 +7,9 @@
     },
     "east": {
       "to": "drowned_lantern"
+    },
+    "north": {
+      "to": "village_green"
     }
   }
 }

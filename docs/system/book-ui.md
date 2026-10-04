@@ -20,8 +20,8 @@ its carries are scheduled in [ROADMAP](../ROADMAP.md#c1-carry-checkpoints).
 
 World is one current-room page. Its centered title remains fixed above the scrolling authored
 description, projected entities, offered place actions and event log. Tapping that title invokes
-the current offered Look with its drawn freshness token; it invents no refresh command. The current
-`ashmere_sampler@0.0.2` projects authentic Look under the
+the current offered Look with its drawn freshness token; it invents no refresh command. The [current sampler](cartridge.md)
+projects authentic Look under the
 [sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 Cartridges that do not offer Look retain a fixed text title.
 Only the body scrolls, so description and entities may leave view while the title stays visible.
