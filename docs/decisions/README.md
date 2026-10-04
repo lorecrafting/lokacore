@@ -124,3 +124,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
 
 - PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
+
+- PM content decision: [sampler 0.0.3 chapel approach](pm-decision-sampler-shrine-approach-2026-10-04.md), four real route rooms and development pin replacement before shrine return.

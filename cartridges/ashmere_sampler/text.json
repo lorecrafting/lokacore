@@ -66,5 +66,13 @@
   "band.covered_in_blood": "is covered in blood",
   "band.leaking_guts": "is leaking guts",
   "band.almost_dead": "is almost dead",
-  "band.dying": "is DYING"
+  "band.dying": "is DYING",
+  "room.village_green.title": "Village Green",
+  "room.village_green.description": "An old elm shades a patch of trodden grass at the heart of Ashmere. The stocks stand empty, and a market cross of weathered stone marks the middle.",
+  "room.north_gate.title": "North Gate",
+  "room.north_gate.description": "The north gate is oak banded with iron, set in the village wall. North, a track climbs to the priory.",
+  "room.chapel_steps.title": "Chapel Steps",
+  "room.chapel_steps.description": "Wide stone steps, worn into dips, climb to the chapel door. An alms bowl sits on the top step.",
+  "room.chapel_nave.title": "Chapel Nave",
+  "room.chapel_nave.description": "The nave is cold and high. A fresco covers the east wall, and the altar is plain stone."
 }

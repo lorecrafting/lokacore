@@ -21,15 +21,16 @@ const fresh = newWorld(
   '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
   [1, 2, 3, 4],
 );
-// Independent Python numeric-profile allocations (cartridge_sampler_hash.py), literal order.
+// Independent Python IdSource oracle: character/body, ten sorted rooms, then Bram/items/slot.
+// Context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f; see M5 provenance for literal ordinals.
 const ids = {
-  bram: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
-  brass_key: '2ef35eee-f837-8b28-bea7-9748a332940a',
-  cellar_key: '470b4175-5b92-89c1-bdac-645a128dc72f',
-  lantern: 'f34698e2-c92c-841a-b0bd-da6883e9c111',
-  tin_whistle: '15349791-fa65-81f7-b378-bb8212b808d2',
-  trunk: 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2',
-  wool_cloak: 'd7e286c7-c344-8eef-8aa6-94a781d448bd',
+  bram: '15349791-fa65-81f7-b378-bb8212b808d2',
+  brass_key: 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2',
+  cellar_key: 'd7e286c7-c344-8eef-8aa6-94a781d448bd',
+  lantern: '251e7a71-b5ad-8d22-858b-533e52cc5415',
+  tin_whistle: 'b0711280-2a6c-8b4e-844c-3e902e0c2184',
+  trunk: '58cfbca8-0448-8e2e-af98-49d0a71d1a04',
+  wool_cloak: 'f14e477f-cecc-897a-bee7-c573aa5c76c3',
 };
 const adapt = (sql: DatabaseSync) => ({
   execSync: (s: string) => void sql.exec(s),
@@ -96,7 +97,7 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
   try {
     let p = open(sql);
     assert.equal(fresh.character, 'bd595711-ea5f-89a5-abb0-046cd349d2f9');
-    assert.equal(fresh.slots.cloak, '251e7a71-b5ad-8d22-858b-533e52cc5415');
+    assert.equal(fresh.slots.cloak, '58ee172d-aa6f-8023-a3c1-a1d46af6d167');
     // Breaks: missing authored bands fall back to perfect_health, or the band label is absent.
     const hp = p.view().resources!.find((r) => r.resource.key === 'hp')!;
     assert.deepEqual([hp.band, hp.tone], ['ready', 'normal']);

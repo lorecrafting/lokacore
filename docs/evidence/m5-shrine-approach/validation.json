@@ -1,0 +1,124 @@
+{
+  "checks": [
+    {
+      "check": "deps",
+      "exit_code": 0,
+      "seconds": 0.91
+    },
+    {
+      "check": "compiler-and-cross-loader",
+      "exit_code": 0,
+      "seconds": 7.76
+    },
+    {
+      "check": "existing-six-room-walk",
+      "exit_code": 0,
+      "seconds": 0.24
+    },
+    {
+      "check": "chapel-authority-route",
+      "exit_code": 0,
+      "seconds": 0.15
+    },
+    {
+      "check": "missing-reciprocal-red",
+      "exit_code": 2,
+      "seconds": 1.24
+    },
+    {
+      "check": "restored-kat",
+      "exit_code": 0,
+      "seconds": 0.42
+    }
+  ],
+  "mutation": {
+    "change": "Remove chapel_nave south exit only; independent oracle left intact",
+    "expected": "Existing content_sampler_test fails",
+    "observed_exit_code": 2,
+    "restored": true,
+    "restored_exit_code": 0
+  },
+  "route_probe": {
+    "execution": "Private one-off Node script reusing existing sampler authority setup/helpers; no repository test added",
+    "commands": [
+      {
+        "action": "move",
+        "input": {
+          "direction": "north"
+        },
+        "expected_room": "well_lane"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "north"
+        },
+        "expected_room": "village_green"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "north"
+        },
+        "expected_room": "north_gate"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "north"
+        },
+        "expected_room": "chapel_steps"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "north"
+        },
+        "expected_room": "chapel_nave"
+      },
+      {
+        "action": "look",
+        "input": {},
+        "expected_room": "chapel_nave"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "south"
+        },
+        "expected_room": "chapel_steps"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "south"
+        },
+        "expected_room": "north_gate"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "south"
+        },
+        "expected_room": "village_green"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "south"
+        },
+        "expected_room": "well_lane"
+      },
+      {
+        "action": "move",
+        "input": {
+          "direction": "south"
+        },
+        "expected_room": "ferry_landing"
+      }
+    ],
+    "assertions": "Each invoke saved/accepted; each gameView title.key equals literal room.<expected_room>.title"
+  },
+  "owner_app_or_save_touched": false,
+  "capture_scope": "Focused developer verification before commit/push; final pre-push and independent review are separate delivery records."
+}
