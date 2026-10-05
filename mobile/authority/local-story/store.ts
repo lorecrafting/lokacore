@@ -97,7 +97,7 @@ const whole = (m: Record<string, Json>) =>
  * or lacks a field play relies on: the head's numbers, the receipt scope and replay ids (03 §14),
  * the binding (null: a guest) (OFF-07). A corrupt save is reported, never replaced by `fresh`.
  */
-// size: allow 45, one save-load boundary checks elapsed and required pinned resource rows
+// size: allow 46, one save-load boundary checks elapsed and required pinned resource rows
 export function load(db: Db, fresh: World, first: () => Meta) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
@@ -126,6 +126,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
   try {
     for (const r of db.getAllSync<Row>('SELECT section, key, value FROM state_row'))
       (state[r.section] ??= {})[r.key] = JSON.parse(r.value);
+    if (Object.values(state.quests ?? {}).some((q) => q === null)) return undefined;
     const rng = JSON.parse(h.rng!);
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
