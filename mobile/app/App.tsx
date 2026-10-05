@@ -41,6 +41,7 @@ const kernel_version = `${KERNEL_ID}@${commit}${__DEV__ && !commit.endsWith('-di
 let db: SQLiteDatabase | undefined;
 const g = globalThis as {
   loka_session?: ReturnType<typeof localSession>;
+  loka_web_opening?: Promise<ReturnType<typeof localSession>>;
   loka_clock_cleanup?: () => void;
 };
 const createSession = (open: () => SQLiteDatabase) =>
@@ -65,7 +66,6 @@ const createSession = (open: () => SQLiteDatabase) =>
   ));
 let session = g.loka_session;
 if (Platform.OS !== 'web') session ??= createSession(() => (db = openDatabaseSync(NAME)));
-let opening: Promise<void> | undefined;
 
 // Start over destroys the save, so the player confirms it first (10 §31). The hints live here, not
 // in the book, so a fresh book keeps what the player has already seen.
@@ -164,18 +164,19 @@ function useWebSession() {
   useEffect(() => {
     if (Platform.OS !== 'web' || session) return;
     // The worker must finish its first WASM/OPFS open before any synchronous save calls.
-    opening ??= openDatabaseAsync(NAME)
+    g.loka_web_opening ??= openDatabaseAsync(NAME)
       .then((opened) => {
         db = opened;
-        session = createSession(() => opened);
+        return createSession(() => opened);
       })
-      .catch((error) => {
-        session = createSession(() => {
+      .catch((error) =>
+        createSession(() => {
           throw error;
-        });
-      });
+        }),
+      );
     let live = true;
-    opening.then(() => {
+    g.loka_web_opening.then((opened) => {
+      session = opened;
       if (live) redrawBoot((n) => n + 1);
     });
     return () => {
