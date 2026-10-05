@@ -174,9 +174,11 @@ The app shell imports the local authority's session controller
   [durable elapsed sessions](save.md#durable-elapsed-sessions); latency remains separate.
 - **The local browser preview** (`mobile/app/`): Expo serves the same App, Book presenter,
   bundled chapter and local Story authority through React Native Web. Metro watches that
-  source worktree for Fast Refresh. The browser uses its own origin-scoped SQLite/OPFS
-  save and first-run hints; it never opens or changes a native app save. A current-build
-  game survives a page reload and a closed/reopened tab. The preview is for development;
+  source worktree; Book UI edits use Fast Refresh, while an existing game retains its
+  loaded rules and cartridge until a page reload or a fresh game. The browser uses its
+  own origin-scoped SQLite/OPFS save and first-run hints; it never opens or changes a
+  native app save. A current-build game survives a page reload and a closed/reopened tab.
+  The preview is for development;
   browser saves have no compatibility promise across chapter builds. The local run and
   worktree-switch procedure is in [web preview](../web-preview.md).
 - **The simulator** (`kernel/ts/test/sim.ts`): seeded random command sequences against the
