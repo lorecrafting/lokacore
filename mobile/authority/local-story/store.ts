@@ -150,7 +150,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     dialogueSave(world, db, meta);
     commerceSave(world, db, meta, h.revision);
     deadlineSave(world, db, meta);
-    finaleSave(world, db, meta);
+    finaleSave(world, db, meta, h.revision);
     return saved(world, h.revision, meta, db);
   } catch (e) {
     if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;

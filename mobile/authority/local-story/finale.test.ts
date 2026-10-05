@@ -62,6 +62,54 @@ test('acknowledged Green finale reopens at every line and exports one report', (
   reopen();
   assert.equal(view().chapter?.index, 1);
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM report').get()!.n, 1);
+  const head = a.sql.prepare('SELECT revision FROM head').get()!.revision as number;
+  const corrupt = () =>
+    assert.throws(
+      () => elapsedHost(path, { wall: 10000, mono: 0 }, bundle),
+      (e: unknown) => (e as { cause?: { kind?: string } }).cause?.kind === 'save_corrupt',
+    );
+  // Missing acknowledged bell receipts cannot justify the retained -1 bell fact.
+  const bellReceipts = a.sql
+    .prepare(
+      "SELECT * FROM receipt WHERE json_extract(command,'$.payload.type')='continue' AND json_extract(command,'$.payload.scene.key')='bell_rung'",
+    )
+    .all();
+  assert.equal(bellReceipts.length, 3);
+  for (const row of bellReceipts)
+    a.sql
+      .prepare('DELETE FROM receipt WHERE scope=? AND invocation_id=?')
+      .run(row.scope, row.invocation_id);
+  corrupt();
+  for (const row of bellReceipts)
+    a.sql
+      .prepare(
+        'INSERT INTO receipt (scope,invocation_id,command_id,actor_id,intent_digest_version,intent_digest,command,revision,response) VALUES (?,?,?,?,?,?,?,?,?)',
+      )
+      .run(
+        row.scope,
+        row.invocation_id,
+        row.command_id,
+        row.actor_id,
+        row.intent_digest_version,
+        row.intent_digest,
+        row.command,
+        row.revision,
+        row.response,
+      );
+  // A Begin receipt after the saved head cannot precede the acknowledged finale lines.
+  const begin = a.sql
+    .prepare(
+      "SELECT scope,invocation_id,revision FROM receipt WHERE json_extract(command,'$.payload.action')='begin_epilogue_lost_prior'",
+    )
+    .get()!;
+  a.sql
+    .prepare('UPDATE receipt SET revision=? WHERE scope=? AND invocation_id=?')
+    .run(head + 1, begin.scope, begin.invocation_id);
+  corrupt();
+  a.sql
+    .prepare('UPDATE receipt SET revision=? WHERE scope=? AND invocation_id=?')
+    .run(begin.revision, begin.scope, begin.invocation_id);
+  assert.equal(a.sql.prepare('SELECT revision FROM head').get()!.revision, head);
   const report = a.sql.prepare('SELECT report_id,report FROM report').get() as {
     report_id: string;
     report: string;

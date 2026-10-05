@@ -31,7 +31,7 @@ const ref = (world: World, kind: string, key: string) =>
     key,
   }) as DefinitionRef;
 
-export function finaleSave(world: World, db: Db, meta: Meta) {
+export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
   if (
     !Object.values(world.cartridge.story_points ?? {}).some((p) => p.key === 'prologue_completed')
   )
@@ -191,6 +191,44 @@ export function finaleSave(world: World, db: Db, meta: Meta) {
     )
   )
     invalid();
+  const bellName = selected.bell === 'prior' ? 'bell_rung' : 'bell_silenced';
+  const bellScene = ref(world, 'scene', bellName);
+  const bellAction = selected.bell === 'prior' ? 'ring_bell' : 'silence_bell';
+  const bellStarts = receipts.filter(
+    ({ command: c }) => c.payload.type === 'perform' && c.payload.action === bellAction,
+  );
+  const bellContinues = receipts.filter(
+    ({ command: c }) => c.payload.type === 'continue' && same(c.payload.scene, bellScene),
+  );
+  const bellLines = selected.bell === 'prior' ? 3 : 2;
+  if (
+    bellStarts.length !== 1 ||
+    !assignment(bellStarts[0]!.decision, `scene_${bellName}`, 0, 1) ||
+    bellContinues.length !== bellLines
+  )
+    invalid();
+  for (let i = 0; i < bellLines; i++) {
+    const { command, decision } = bellContinues[i]!;
+    if (
+      command.payload.type !== 'continue' ||
+      command.payload.actor_id !== actor ||
+      command.world_context_id !== world.context ||
+      command.payload.line !== i + 1 ||
+      !assignment(decision, `scene_${bellName}`, i + 1, i === bellLines - 1 ? -1 : i + 2)
+    )
+      invalid();
+  }
+  if (
+    bellContinues[bellLines - 1]!.decision.events.filter(
+      (e) =>
+        e.payload.type === 'scene_ended' &&
+        same(e.payload.scene, bellScene) &&
+        e.actor_id === actor &&
+        e.world_context_id === world.context &&
+        e.correlation_id === bellContinues[bellLines - 1]!.command.id,
+    ).length !== 1
+  )
+    invalid();
   const scene = ref(world, 'scene', selected.name);
   const continues = receipts.filter(
     ({ command: c }) => c.payload.type === 'continue' && same(c.payload.scene, scene),
@@ -227,6 +265,17 @@ export function finaleSave(world: World, db: Db, meta: Meta) {
         invalid();
     }
   }
+  const proof = [bellStarts[0]!, ...bellContinues, begin, ...continues];
+  if (
+    proof.some(
+      (receipt, i) =>
+        !Number.isSafeInteger(receipt.revision) ||
+        receipt.revision < 1 ||
+        receipt.revision > head ||
+        (i > 0 && receipt.revision <= proof[i - 1]!.revision),
+    )
+  )
+    invalid();
   if (selected.line === -1) {
     if (
       marker !== outcome ||
