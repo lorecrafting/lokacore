@@ -1,3 +1,4 @@
+// size: allow 320, Notice membership joins the shared button/freshness builder
 // How the book view sorts the controller's flat button list (presenter.ts `buttons`): the place's look,
 // the exits (a move button carries input.direction), the pending choice's answers and Close, other
 // place actions, and a thing's own actions.
@@ -96,9 +97,13 @@ export function group(buttons: Button[]) {
     // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
     place: buttons.filter(
       (b) =>
-        (!aimed(b) || b.place) && !dir(b) && !OWN.includes(b.action_key) && b.action_key !== 'scan',
+        !b.detail_id &&
+        (!aimed(b) || b.place) &&
+        !dir(b) &&
+        !OWN.includes(b.action_key) &&
+        b.action_key !== 'scan',
     ),
-    on: (id: string) => buttons.filter((b) => b.target_ids.includes(id)),
+    on: (id: string) => buttons.filter((b) => b.detail_id === id || b.target_ids.includes(id)),
   };
 }
 
@@ -228,6 +233,7 @@ function travel(v: GameView): Press[] {
         }));
 }
 
+// size: allow 50, one offer-to-button conversion serves place/entity/Notice actions
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const button = (
     a: { action_key: string; label: string; target_ids?: readonly string[] },
@@ -264,13 +270,21 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...button(a, ''),
     ...(a.target.kind === 'entity' && { place: true as const }),
   }));
-  return [...placed, ...travel(v), ...doors, ...held, ...asked(v, label)];
+  const notices = [
+    ...(v.notices ?? []),
+    ...(v.notice_boards ?? []).flatMap((b) => b.notices),
+  ].flatMap((n) =>
+    (n.actions ?? [])
+      .filter((a) => a.available && !a.input.length && a.target.kind === 'none')
+      .map((a) => ({ ...button(a, ''), detail_id: n.id })),
+  );
+  return [...placed, ...notices, ...travel(v), ...doors, ...held, ...asked(v, label)];
 }
 
 // Capture only the interaction, not clock/resources or the whole GameView.
 export function actionContext(
   view: GameView,
-  b: Pick<Button, 'action_key' | 'target_ids' | 'input'>,
+  b: Pick<Button, 'action_key' | 'target_ids' | 'input' | 'detail_id'>,
   generation: number,
 ) {
   const exit = view.exits.find(
@@ -280,6 +294,7 @@ export function actionContext(
     generation,
     b.action_key,
     b.target_ids,
+    b.detail_id,
     Object.entries(b.input).sort(([a], [z]) => a.localeCompare(z)),
     view.actor_id,
     view.place.id,

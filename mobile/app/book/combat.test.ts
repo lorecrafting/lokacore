@@ -384,7 +384,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
   const h = mounted(quiet);
   const accepted = (outcome: string, key?: string) => ({
     kind: 'saved',
-    decision: { kind: 'accepted', outcome, narration: key ? [{ key }] : [] },
+    decision: { kind: 'accepted', events: [], outcome, narration: key ? [{ key }] : [] },
   });
   try {
     h.tap('a marsh rat, open');

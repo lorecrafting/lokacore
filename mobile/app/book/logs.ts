@@ -59,9 +59,9 @@ export function restoredLogs(game: Game, text: Say): Logs {
   };
 }
 
-export function savedNarration(game: Game, s: Logs) {
+export function savedNarration(game: Game, s: Logs, command_id?: string) {
   try {
-    return game.lastNarration();
+    return game.lastNarration(command_id);
   } catch (e) {
     s.fault = `Saved result; narration recovery unavailable: ${(e as Error).message}`;
   }

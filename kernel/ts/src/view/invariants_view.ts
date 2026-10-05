@@ -55,7 +55,7 @@ export const gameview_agrees_with_admission = ({
     return placeAgrees(view, command.payload, decision, action_key, commandOf);
   const entry = advertised(view, command.payload, action_key, commandOf);
   const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
-  if (!entry) return true;
+  if (!entry) return type !== 'perform' || decision.kind !== 'accepted';
   if (entry.available) return !shown.includes(code);
   return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
 };
@@ -117,7 +117,15 @@ function advertised(
   const id = p.type === 'perform' ? undefined : (p.item_id ?? p.target_id);
   if (id === undefined) {
     const key = p.type === 'perform' ? p.action : p.type;
-    return view.actions.find((a) => a.action_key === key);
+    const actions =
+      p.type === 'perform'
+        ? [
+            ...view.actions,
+            ...(view.notices ?? []).flatMap((n) => n.actions ?? []),
+            ...(view.notice_boards ?? []).flatMap((b) => b.notices.flatMap((n) => n.actions ?? [])),
+          ]
+        : view.actions;
+    return actions.find((a) => a.action_key === key);
   }
   return entityView(view, id)?.actions.find((a) =>
     p.type === 'put'

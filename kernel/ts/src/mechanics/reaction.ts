@@ -3,6 +3,7 @@
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
 import type {
   CharacterId,
+  CommandId,
   DeltaOp,
   DomainEvent,
   EventPayload,
@@ -10,10 +11,19 @@ import type {
   ReactionRule,
 } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
-import { refString, type World } from '../runtime/decision.ts';
+import {
+  accepted,
+  event,
+  refString,
+  type Decision,
+  type Mint,
+  type World,
+} from '../runtime/decision.ts';
 import { scopeOf, value } from './fact.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
+import { activation } from './quest/lifecycle.ts';
+import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 
 type Payload<T> = Extract<EventPayload, { type: T }>;
@@ -28,8 +38,11 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
     on.event === e.payload.type &&
     (on.event === 'fact_changed'
       ? key(on.fact) === key((e.payload as Payload<'fact_changed'>).fact)
-      : world.roomIds[refString(on.room)] ===
-        (e.payload as Payload<'entity_entered_room'>).room_id);
+      : on.event === 'quest_resolved'
+        ? refString(on.quest) === refString((e.payload as Payload<'quest_resolved'>).quest) &&
+          on.outcome === (e.payload as Payload<'quest_resolved'>).outcome
+        : world.roomIds[refString(on.room)] ===
+          (e.payload as Payload<'entity_entered_room'>).room_id);
   const authored = Object.values(world.cartridge.reactions ?? {})
     .filter(meets)
     .sort((a, b) => cmp(a.key, b.key));
@@ -44,6 +57,7 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  * for `actor`, expecting the value the proposal and the steps before it leave. Each policy leaf
  * the `when` evaluates adds one to `steps.n`.
  */
+// size: allow 55, one ordered delivery lowers fact assignments and consumed quest activations
 export function sequence(
   world: World,
   actor: CharacterId,
@@ -51,15 +65,65 @@ export function sequence(
   cause: DomainEvent,
   group: number,
   steps: { n: number },
-): DeltaOp[] | undefined {
+  mint: Mint,
+): Decision<'quest_activated'> | undefined {
+  const source = resolvedActor(world, cause, actor);
+  if (!source) return { kind: 'fault', code: 'precondition_failed' };
+  actor = source;
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
   if (rule.when && !holds(then, actor, rule.when.root, { steps })) return undefined;
   const set: Record<string, FactValue> = {};
-  return rule.apply.map(({ fact, value: v }) => {
-    const scope = scopeOf(world, actor, fact);
-    const at = key({ kind: 'fact', fact, scope });
-    const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, fact);
-    set[at] = v;
-    return { op: 'fact.assign', writer_group: group, fact, scope, expected, value: v };
-  });
+  const activated = new Set<string>();
+  const ops: DeltaOp[] = [];
+  const events: ReturnType<typeof event<Payload<'quest_activated'>>>[] = [];
+  let position = 0;
+  for (const step of rule.apply) {
+    if (step.op === 'quest.activate') {
+      if (rule.on.event !== 'quest_resolved') return { kind: 'fault', code: 'precondition_failed' };
+      if (questOf(world, actor, step.quest) || activated.has(refString(step.quest))) continue;
+      const started = activation(mint, actor, step.quest);
+      activated.add(refString(step.quest));
+      ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
+      events.push(
+        event(
+          then,
+          { id: cause.id as string as CommandId, payload: { actor_id: actor } },
+          mint,
+          ++position,
+          started.payload,
+        ),
+      );
+    } else {
+      const scope = scopeOf(world, actor, step.fact);
+      const at = key({ kind: 'fact', fact: step.fact, scope });
+      const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact);
+      set[at] = step.value;
+      ops.push({
+        op: 'fact.assign',
+        writer_group: group,
+        fact: step.fact,
+        scope,
+        expected,
+        value: step.value,
+      });
+      if (expected !== step.value) position++;
+    }
+  }
+  return accepted(world, 'reacted', ops, events);
+}
+
+// A quest event's evidenced player instance owns the delivery; legacy triggers keep the root actor.
+function resolvedActor(world: World, cause: DomainEvent, actor: CharacterId) {
+  if (cause.payload.type !== 'quest_resolved') return actor;
+  const source = world.state.quests?.[cause.payload.instance_id];
+  return source &&
+    source.scope.kind === 'player' &&
+    source.state === 'resolved' &&
+    refString(source.quest) === refString(cause.payload.quest) &&
+    source.outcome === cause.payload.outcome &&
+    cause.actor_id === source.scope.character_id &&
+    cause.scope.kind === 'player' &&
+    cause.scope.character_id === source.scope.character_id
+    ? source.scope.character_id
+    : undefined;
 }

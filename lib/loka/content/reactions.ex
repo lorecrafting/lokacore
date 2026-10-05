@@ -7,7 +7,7 @@ defmodule Loka.Content.Reactions do
   and each fact.assign a fact with a value of its type. Its `when` tree is checked with every
   other (`conditions/1`, `Loka.Content.Checks`).
   """
-  import Loka.Content.Source, only: [at: 2]
+  import Loka.Content.Source, only: [at: 2, diag: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3, reference: 6]
 
   @doc "Each schema-valid reaction's `when` root, as `{rel, steps, root}`."
@@ -28,16 +28,46 @@ defmodule Loka.Content.Reactions do
     Enum.flat_map(all(defs), &rule(&1, ctx))
   end
 
-  defp rule({rel, %{"on" => on} = r}, ctx) do
-    kind = if is_map_key(on, "fact"), do: "fact", else: "room"
+  defp rule({rel, %{"on" => %{"event" => event} = on} = r}, ctx) do
+    kind =
+      %{"fact_changed" => "fact", "entity_entered_room" => "room", "quest_resolved" => "quest"}[
+        event
+      ]
 
-    owned(at(rel, []), "reaction", ctx.kinds) ++
-      owned(at(rel, ["on", "event"]), on["event"], ctx.events) ++
+    api(r, ctx.m) ++
+      owned(at(rel, []), "reaction", ctx.kinds) ++
+      owned(at(rel, ["on", "event"]), event, ctx.events) ++
       reference(rel, ["on"], kind, on, ctx.m, ctx.defs) ++
-      Enum.flat_map(Enum.with_index(r["apply"]), &assign(rel, &1, ctx))
+      Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
   end
 
-  defp assign(rel, {s, i}, ctx),
+  defp api(r, manifest) do
+    needed =
+      r["on"]["event"] == "quest_resolved" or
+        Enum.any?(r["apply"], &(&1["op"] == "quest.activate"))
+
+    version =
+      manifest["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    if needed and version < [1, 8],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp consequence(rel, {%{"op" => "quest.activate"} = s, i}, on, ctx) do
+    path = at(rel, ["apply", i, "op"])
+
+    restricted =
+      if on["event"] == "quest_resolved", do: [], else: [diag("OUTCOME_MISMATCH", path)]
+
+    restricted ++
+      owned(path, "quest_activated", ctx.events) ++
+      reference(rel, ["apply", i], "quest", s, ctx.m, ctx.defs)
+  end
+
+  defp consequence(rel, {s, i}, _, ctx),
     do:
       owned(at(rel, ["apply", i, "op"]), "fact_changed", ctx.events) ++
         reference(rel, ["apply", i], "fact", s, ctx.m, ctx.defs)

@@ -2,6 +2,8 @@
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
+import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
 import { commit, load, receipt, reconcile, identityOf } from './store.ts';
@@ -120,12 +122,15 @@ export function adopt(s: Story) {
  * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
  * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
  */
-export function narration(s: Story): NarrationRecord | undefined {
+export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
   if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
   const r = s.db.getFirstSync<{ command_id: string; command: string; response: string }>(
     `SELECT command_id, command, response FROM receipt WHERE scope = ?
-     AND json_array_length(response, '$.narration') > 0 ORDER BY revision DESC LIMIT 1`,
+     AND json_array_length(response, '$.narration') > 0
+     AND (? IS NULL OR command_id = ?) ORDER BY revision DESC LIMIT 1`,
     scope(s),
+    command_id ?? null,
+    command_id ?? null,
   );
   if (!r) return undefined;
   const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
@@ -139,16 +144,60 @@ export function narration(s: Story): NarrationRecord | undefined {
     : [];
   const lines = d.narration!;
   const combat_lines = lines.flatMap((line, i) => (root || keys.includes(line?.key) ? [i] : []));
-  const command = d.outcome === 'read' ? (JSON.parse(r.command) as Command | null) : undefined;
-  const detail_id = command?.payload?.type === 'read' ? command.payload.target_id : undefined;
-  if (d.outcome === 'read' && (typeof detail_id !== 'string' || !detail_id))
-    throw new Error('malformed JSON: Read without a target');
+  const detail_id = receiptDetail(s, r, d);
   return {
     command_id: r.command_id,
     lines,
     ...(combat_lines.length && { combat_lines }),
     ...(detail_id && { detail_id }),
   } as NarrationRecord;
+}
+
+// Routing belongs to this receipt's committed command/evidence, never text or current room.
+// size: allow 50, one receipt trust boundary validates Read and readable-recipe identity
+function receiptDetail(
+  s: Story,
+  r: { command_id: string; command: string },
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+) {
+  if (d.kind !== 'accepted' || !['read', 'performed', 'success'].includes(d.outcome)) return;
+  const command = JSON.parse(r.command) as Command | null;
+  if (d.outcome === 'read') {
+    if (
+      validate('Command', command).length ||
+      command?.id !== r.command_id ||
+      command.payload.type !== 'read'
+    )
+      throw new Error('malformed JSON: invalid committed Read');
+    return command.payload.target_id;
+  }
+  const completed = d.events.filter(
+    (e) => e.payload.type === 'action_completed' && e.causation_id === r.command_id,
+  );
+  const action = command?.payload?.type === 'perform' ? command.payload.action : undefined;
+  const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((r) => r.key === action);
+  const subject = recipe && detailOf(s.world, recipe.target);
+  const readable = subject && s.world.details[subject]?.readable;
+  const readableEvidence = completed.some(
+    (e) => e.payload.type === 'action_completed' && s.world.details[e.payload.subject_id]?.readable,
+  );
+  if (!readable && !readableEvidence) return;
+  const event = completed[0];
+  if (
+    validate('Command', command).length ||
+    command?.id !== r.command_id ||
+    !readable ||
+    completed.length !== 1 ||
+    event.payload.type !== 'action_completed' ||
+    event.payload.action !== action ||
+    event.payload.subject_id !== subject ||
+    (command?.payload.type === 'perform' && event.actor_id !== command.payload.actor_id) ||
+    (command?.payload.type === 'perform' &&
+      command.payload.target_id !== undefined &&
+      command.payload.target_id !== subject)
+  )
+    throw new Error('malformed JSON: invalid readable recipe receipt');
+  return subject;
 }
 
 // The run is in it, so an old run's token is never current again after newGame.

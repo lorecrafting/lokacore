@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Reaction contracts",
-  "description": "ReactionRule (21 §3.4, §11; 06 §14; 04 §5.2-§5.4), owned by reaction@1.",
+  "description": "ReactionRule (21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4), owned by reaction@1.",
   "$defs": {
     "ReactionRule": {
-      "description": "A typed reaction (21 §3.4: event or fact transition, policy, typed consequences), keyed in CompiledCartridge.reactions by DefinitionRefString of kind reaction, owned by reaction@1 (a cartridge with one requires it): its key, also its stable semantic order among the rules one event triggers (UTF-8 bytes, 04 §5.2 step 6); on, the DomainEvent that triggers it: fact_changed of the fact `fact` names (owned by fact@1), or entity_entered_room of any entity into the room `room` names (owned by movement@1), never a wall clock (21 §11); when, an optional policy read on the proposal so far at the event's logical time, for the command's actor; apply, its explicit sequence of registered consequences (21 §11 shared consequence vocabulary; no generic setter): fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type, its fact_changed (fact@1) emitted when the value changes, as an ActionRecipe's step does (action.schema.json RecipeStep); a delivery's fact_changed has no actor_id (no actor performed it) and its causation_id is the event that triggered the rule. Each rule an event triggers is a delivery at one more than its cause's reaction depth, and one whose when holds runs as its own writer group in the same proposal; deliveries share the decision's budgets (composition-profile.json deliveries, events, reaction_depth, and query_steps for each policy leaf a when evaluates), so a cycle faults budget_exceeded and commits nothing (04 §5.4; 06 §14). Selectors over populations and other consequence operators join as optional fields.",
+      "description": "A typed reaction owned by reaction@1 (21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4), in rule-key UTF-8 order. Trigger on fact_changed of its fact, entity_entered_room into its room, or exact quest_resolved quest/outcome. Quest resolution verifies the source resolved player instance, outcome, actor and scope; its instance actor owns the delivery. Legacy triggers retain the command actor. Optional when is read on the proposal at the event time. Apply is an ordered sequence of fact.assign and, only on quest_resolved, quest.activate. Facts use their declared scope and expected values; activation skips every prior actor instance including terminal rows and emits quest-owned quest_activated. A delivery uses one writer group/causal allocator, is caused by its trigger and correlated with the root command; fact_changed remains actorless. All deliveries share the existing FIFO queue and delivery/depth/query/output budgets; faults commit nothing. New quest trigger/consequence forms require kernel API1.8.",
       "type": "object",
       "properties": {
         "key": {
@@ -22,7 +22,10 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
-              "required": ["event", "fact"],
+              "required": [
+                "event",
+                "fact"
+              ],
               "additionalProperties": false
             },
             {
@@ -35,7 +38,30 @@
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
-              "required": ["event", "room"],
+              "required": [
+                "event",
+                "room"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "quest_resolved"
+                },
+                "quest": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "outcome": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "event",
+                "quest",
+                "outcome"
+              ],
               "additionalProperties": false
             }
           ]
@@ -46,24 +72,52 @@
         "apply": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "op": {
-                "const": "fact.assign"
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "fact.assign"
+                  },
+                  "fact": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "value": {
+                    "$ref": "delta.schema.json#/$defs/FactValue"
+                  }
+                },
+                "required": [
+                  "op",
+                  "fact",
+                  "value"
+                ],
+                "additionalProperties": false
               },
-              "fact": {
-                "$ref": "identity.schema.json#/$defs/DefinitionRef"
-              },
-              "value": {
-                "$ref": "delta.schema.json#/$defs/FactValue"
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "quest.activate"
+                  },
+                  "quest": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "required": [
+                  "op",
+                  "quest"
+                ],
+                "additionalProperties": false
               }
-            },
-            "required": ["op", "fact", "value"],
-            "additionalProperties": false
+            ]
           }
         }
       },
-      "required": ["key", "on", "apply"],
+      "required": [
+        "key",
+        "on",
+        "apply"
+      ],
       "additionalProperties": false,
       "examples": [
         {
@@ -100,6 +154,30 @@
                 "key": "gossip_spread"
               },
               "value": true
+            }
+          ]
+        },
+        {
+          "key": "start_search",
+          "on": {
+            "event": "quest_resolved",
+            "quest": {
+              "cartridge_id": "ashmere_missing_child",
+              "cartridge_version": "0.0.9",
+              "kind": "quest",
+              "key": "first_lead"
+            },
+            "outcome": "report"
+          },
+          "apply": [
+            {
+              "op": "quest.activate",
+              "quest": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.9",
+                "kind": "quest",
+                "key": "missing_child"
+              }
             }
           ]
         }

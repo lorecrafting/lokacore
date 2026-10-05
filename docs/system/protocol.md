@@ -323,7 +323,7 @@ first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/view/action_lists.ts:33`). Invariant `gameview_agrees_with_admission` holds this for exits and
-recipes, and for the door and container verbs and `wear`/`remove`, matched by the Command each
+recipes (including standalone and board-child Notice actions), and for the door and container verbs and `wear`/`remove`, matched by the Command each
 listed action resolves to (a cartridge alias included): one listed on its exit or item (a nested
 one in `contents` included) is never refused with a code the view predicts (`not_present`
 among them), one not listed is never accepted, and none of `wear`/`remove` is a place action; a
@@ -351,9 +351,11 @@ GameView optionally supplies `notice_boards` only when the current room has boar
 has `id`, `title: TextKey`, selected `description: TextKey` and ordered `notices`, each
 with `id`, `title: TextKey`, selected `description: TextKey`. Board and notice arrays are
 nonempty and bounded to 64. IDs are existing detail target IDs; bodies are never projected.
-Standalone notices have the same `id`, `title` and selected `description` shape. The view is
-descriptive even when Read is unavailable. Existing exact-target place actions
-remain the sole offered invocation authority, including policy, alias and modal restrictions.
+Standalone notices have the same `id`, `title` and selected `description` shape. Each Notice
+optionally has `actions`, existing AdvertisedAction rows: exact-subject recipes for
+that readable detail, available or with their actual refusal reason. These recipes are omitted
+from World actions; Read remains in its existing exact-target entry channel. The view is
+descriptive even when Read is unavailable. Existing exact-target place actions govern Read entry; Notice actions govern detail recipes, including policy, alias and modal restrictions.
 Older snapshots without these optional fields keep their meaning and wire tag.
 
 An AdvertisedAction may supply optional concrete `target_ids`; Put supplies its final item/container

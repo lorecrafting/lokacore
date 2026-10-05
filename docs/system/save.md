@@ -26,8 +26,13 @@ The session controller adds `save_corrupt` causes with the new game in place aft
 opens: a world whose first screen cannot be built
 (`mobile/authority/local-story/session.ts:60`), or a receipt response in the story's scope
 that is not valid JSON or has a narration line without a key (`:71`). A stored Read command
-that is invalid JSON or has no valid target also follows this corruption path. SQLite
-read failures such as locks and I/O errors retain their storage-error handling. Any other
+that is invalid JSON or has no valid target also follows this corruption path. A
+successful readable-recipe receipt also requires a valid committed Command bound to
+`receipt.command_id`, the pinned recipe's action, and exactly one root-caused
+`action_completed` naming that action and its canonical detail subject. Missing or mismatched
+evidence follows the same corruption path. This structured receipt derives detail identity for
+replay and reopen, without a new row or transcript. Unrelated receipts retain ordinary routing.
+SQLite read failures such as locks and I/O errors retain their storage-error handling. Any other
 valid-JSON response of the wrong shape still opens; its replay is a `conflict`
 ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),

@@ -1,0 +1,57 @@
+✖ quest trigger matches both fields and rejects malformed source row, actor and scope (25.543208ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 146.077291
+
+✖ failing tests:
+
+test at kernel/ts/test/first_search.test.ts:140:1
+✖ quest trigger matches both fields and rejects malformed source row, actor and scope (25.543208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   [Object: null prototype] {
+  +     apply: [
+  +       [Object: null prototype] {
+  +         op: 'quest.activate',
+  +         quest: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_missing_child',
+  +           cartridge_version: '0.0.9',
+  +           key: 'missing_child',
+  +           kind: 'quest'
+  +         }
+  +       }
+  +     ],
+  +     key: 'start_search',
+  +     on: [Object: null prototype] {
+  +       event: 'quest_resolved',
+  +       outcome: 'report',
+  +       quest: [Object: null prototype] {
+  +         cartridge_id: 'ashmere_missing_child',
+  +         cartridge_version: '0.0.9',
+  +         key: 'first_lead',
+  +         kind: 'quest'
+  +       }
+  +     }
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://[redacted-local-path])
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { key: 'start_search', on: [Object], apply: [Array] } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

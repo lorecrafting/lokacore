@@ -1557,6 +1557,12 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AdvertisedAction"
+          }
         }
       },
       "required": [
@@ -1565,12 +1571,28 @@
         "description"
       ],
       "additionalProperties": false,
-      "description": "Current-room readable detail identity, authored page title and selected description; no body.",
+      "description": "Current-room readable detail identity, authored page title and selected description; no body. Optional actions list exact-subject readable-detail recipes, exclusively on this Notice, with ordinary availability/reasons and no fabricated command targets.",
       "examples": [
         {
           "id": "aaaaaaaa-0000-4000-8000-000000000001",
           "title": "detail.notice.title",
           "description": "detail.notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "detail.tracks.title",
+          "description": "detail.tracks.description",
+          "actions": [
+            {
+              "action_key": "study_tracks",
+              "label": "actions.study_tracks",
+              "target": {
+                "kind": "none"
+              },
+              "input": [],
+              "available": true
+            }
+          ]
         }
       ]
     },

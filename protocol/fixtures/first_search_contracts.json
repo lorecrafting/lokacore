@@ -1,0 +1,430 @@
+[
+  {
+    "name": "valid quest activation",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "valid Notice recipe",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "detail.tracks.title",
+      "description": "detail.tracks.description",
+      "actions": [
+        {
+          "action_key": "study_tracks",
+          "label": "actions.study_tracks",
+          "target": {
+            "kind": "none"
+          },
+          "input": [],
+          "available": true
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "missing ('on', 'event')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "missing ('on', 'quest')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "missing ('on', 'outcome')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "missing ('apply', 0, 'op')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "missing ('apply', 0, 'quest')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('on', 'event')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_activated",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('on', 'outcome')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": ""
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('on', 'outcome')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "bad key"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('on', 'quest')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": "first_lead",
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('apply', 0, 'quest')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": "missing_child"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('apply', 0, 'op')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.start",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('on', 'extra')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report",
+        "extra": true
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed ('apply', 0, 'extra')",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "start_search",
+      "on": {
+        "event": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.9",
+          "kind": "quest",
+          "key": "first_lead"
+        },
+        "outcome": "report"
+      },
+      "apply": [
+        {
+          "op": "quest.activate",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.9",
+            "kind": "quest",
+            "key": "missing_child"
+          },
+          "extra": true
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "Notice actions not an array",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "detail.tracks.title",
+      "description": "detail.tracks.description",
+      "actions": "study"
+    },
+    "valid": false
+  },
+  {
+    "name": "Notice action item is not an AdvertisedAction",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "detail.tracks.title",
+      "description": "detail.tracks.description",
+      "actions": [
+        "study_tracks"
+      ]
+    },
+    "valid": false
+  }
+]

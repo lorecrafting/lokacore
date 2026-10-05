@@ -78,6 +78,17 @@
         "instance"
       ],
       "meaning": "Maud’s cellar quest has been completed."
+    },
+    "fen.tracks_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player studied the Reed Bank tracks during the search for Wren."
     }
   }
 }

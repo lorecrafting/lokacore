@@ -1,3 +1,4 @@
+// size: allow 610, current chapter/search persistence regressions share one real SQLite harness
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -18,7 +19,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v008_hash.json');
+const bundle = read('protocol/fixtures/missing_child_v009_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -37,11 +38,11 @@ const chestId = '329aae20-7fc7-8e3d-9119-ad44c022c439' as EntityId;
 const brassId = '2a2d32e5-e113-8dca-a989-b9f1a35c4c78';
 const maudId = '8a20c3d3-0f0f-84ec-b058-d27c85d5ba17';
 const entity = (kind: string, name: string) =>
-  fresh.entityIds[`ashmere_missing_child@0.0.8:${kind}/${name}`];
+  fresh.entityIds[`ashmere_missing_child@0.0.9:${kind}/${name}`];
 const ref = (name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.8',
+    cartridge_version: '0.0.9',
     kind: 'fact',
     key: name,
   }) as DefinitionRef;
@@ -113,7 +114,7 @@ function setup(path = ':memory:') {
 // or the chest uses the attic key / loses deposited custody on a real cold reopen.
 test('active chapter five actual kills, shrine return, Maud reward and cold-reopen storage', (t) => {
   // Breaks: adding details shifts entity allocation but release bindings retain stale IDs.
-  const expectedIds = read('protocol/fixtures/missing_child_v008_ids.json');
+  const expectedIds = read('protocol/fixtures/missing_child_v009_ids.json');
   assert.deepEqual(
     {
       character: fresh.character,
@@ -253,7 +254,7 @@ test('Q1 explicit acceptance, held drawing gate, report priority and durable onc
   p.answer('inn');
   assert.deepEqual(
     p.view().journal.map((q) => q.quest.key),
-    ['first_lead'],
+    ['first_lead', 'missing_child'],
   );
   p.sql.close();
 });
@@ -383,11 +384,218 @@ test('Mire Crossing and Fox Hollow offer both approaches and cold return at ever
         walk('north', 'reed_bank');
         assert.deepEqual(
           p.view().journal.map((q) => [q.quest.key, q.state]),
-          phase === 'resolved' ? [['first_lead', 'resolved']] : [],
+          phase === 'resolved'
+            ? [
+                ['first_lead', 'resolved'],
+                ['missing_child', 'active'],
+              ]
+            : [],
         );
       } finally {
         p.sql.close();
       }
+    }
+  }
+});
+
+const tracksId = '86b28f4e-f743-87f8-8375-2ead5c2c295c';
+const search = (p: ReturnType<typeof setup>) =>
+  p.view().journal.find((q) => q.quest.key === 'missing_child');
+const reportLead = (p: ReturnType<typeof setup>) => {
+  acceptLead(p);
+  p.move('north', 'north');
+  p.invoke('take', [drawingId]);
+  p.move('south', 'south');
+  p.invoke('elspeth', [elspethId]);
+  return p.answer('report');
+};
+
+// Breaks: reading/arrival banks Q2 credit before Q1 report, report activation is detached,
+// Study targets the wrong detail, or the first lead claims completion/rescue or grants twice.
+test('Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead', (t) => {
+  const p = setup();
+  t.after(() => p.sql.close());
+  p.move('south', 'south');
+  p.invoke('look', [tracksId]);
+  p.invoke('read', [tracksId]);
+  p.invoke('study_tracks', [], {}, 'invalid_state');
+  assert.equal(search(p), undefined);
+  assert.equal(value(p.story.world(), fresh.character, ref('fen_tracks_found')), false);
+  p.move('north', 'north');
+  const report = reportLead(p);
+  assert.ok(report.reply.kind === 'saved');
+  const d = report.reply.decision as any;
+  assert.deepEqual(
+    d.events.map((e: any) => [e.payload.type, e.position]),
+    [
+      ['quest_resolved', 1],
+      ['choice_resolved', 2],
+      ['quest_activated', 3],
+    ],
+  );
+  assert.equal(d.events[2].causation_id, d.events[0].id);
+  assert.equal(d.events[2].correlation_id, d.events[0].correlation_id);
+  assert.equal(d.events[2].actor_id, fresh.character);
+  assert.deepEqual(
+    p.view().journal.map((q) => [q.quest.key, q.state, q.journal]),
+    [
+      ['first_lead', 'resolved', 'quest.first_lead.resolved'],
+      ['missing_child', 'active', 'quest.missing_child.active'],
+    ],
+  );
+  p.move('south', 'south');
+  const before = p.view();
+  assert.ok(!before.actions.some((a) => a.action_key === 'study_tracks'));
+  assert.deepEqual(
+    before
+      .notices!.find((n) => n.id === tracksId)!
+      .actions!.map((a) => [a.action_key, a.available, a.target]),
+    [['study_tracks', true, { kind: 'none' }]],
+  );
+  p.invoke('read', [tracksId]);
+  assert.equal(value(p.story.world(), fresh.character, ref('fen_tracks_found')), false);
+  const study = p.invoke('study_tracks');
+  assert.ok(study.reply.kind === 'saved');
+  const done = study.reply.decision as any;
+  assert.deepEqual(JSON.parse(JSON.stringify(done.events.map((e: any) => e.payload))), [
+    {
+      type: 'fact_changed',
+      fact: ref('fen_tracks_found'),
+      old: false,
+      new: true,
+    },
+    { type: 'action_completed', action: 'study_tracks', subject_id: tracksId },
+  ]);
+  assert.equal(done.delta.ops.length, 1);
+  assert.equal(search(p)?.state, 'active');
+  assert.equal(search(p)?.journal, 'quest.missing_child.lead');
+  assert.equal(
+    bundle.value.text['quest.missing_child.lead'],
+    'The tracks lead south across Mire Crossing toward Fox Hollow. Wren remains unfound.',
+  );
+  assert.equal(value(p.story.world(), fresh.character, ref('fen_tracks_found')), true);
+  p.invoke('study_tracks', [], {}, 'invalid_state');
+  assert.ok(!p.view().actions.some((a) => a.action_key === 'accept_quest'));
+  assert.equal(
+    p.story.invoke({
+      invocation_id: 'bbbbbbbb-0000-4000-8000-000000000999',
+      actor_id: fresh.character,
+      action_key: 'accept_quest',
+      target_ids: [],
+      input: { quest: { ...ref('missing_child'), kind: 'quest' } },
+    }).kind,
+    'invalid',
+  );
+});
+
+// Breaks: changed-row receipts forget activation/credit on cold reopen; retries write twice,
+// or an older Study replay borrows the detail identity of newer unrelated Read narration.
+test('SQLite report/Study reopen and exact replay preserve active Q2 and receipt-specific history', async (t) => {
+  const { openGame } = await import('./session.ts');
+  const { presenter } = await import('../../app/book/presenter.ts');
+  const dir = mkdtempSync(join(tmpdir(), 'loka-search-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const path = join(dir, 'save.db');
+  let p = setup(path);
+  const report = reportLead(p);
+  const before = p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+  p.sql.close();
+  p = setup(path);
+  assert.equal(search(p)?.state, 'active');
+  assert.equal(p.story.invoke(report.invocation).kind, 'saved');
+  assert.equal(p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, before);
+  p.move('south', 'south');
+  const study = p.invoke('study_tracks');
+  const metadata = p.story.narration()!;
+  assert.equal(metadata.detail_id, tracksId);
+  p.sql.close();
+  p = setup(path);
+  let game = openGame(p.db, bundle, p.host);
+  let book = presenter(game);
+  assert.deepEqual(book.screen().detail(tracksId), [bundle.value.text['narration.study_tracks']]);
+  assert.deepEqual(book.screen().log, []);
+  assert.equal(search(p)?.state, 'active');
+  assert.equal(value(p.story.world(), fresh.character, ref('fen_tracks_found')), true);
+  p.move('north', 'north');
+  p.invoke('read', ['05f6aca0-79cd-83fe-8096-bae95b0730e8']);
+  assert.notEqual(p.story.narration()!.detail_id, tracksId);
+  const count = p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+  game = openGame(p.db, bundle, p.host);
+  book = presenter({
+    ...game,
+    invoke: () => {
+      const reply = p.story.invoke(study.invocation);
+      assert.ok(reply.kind === 'saved');
+      return { kind: 'saved', decision: reply.decision as never };
+    },
+  });
+  book.press({ label: 'Study tracks', action_key: 'study_tracks', target_ids: [], input: {} });
+  assert.deepEqual(book.screen().detail(tracksId), [bundle.value.text['narration.study_tracks']]);
+  assert.ok(!book.screen().log.includes(bundle.value.text['narration.study_tracks']));
+  book.press({ label: 'Study tracks', action_key: 'study_tracks', target_ids: [], input: {} });
+  assert.equal(book.screen().detail(tracksId).length, 1);
+  assert.equal(p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, count);
+  p.sql.close();
+  p = setup(path);
+  game = openGame(p.db, bundle, p.host);
+  book = presenter(game);
+  assert.equal(book.screen().view.place.title.key, 'room.ferry_landing.title');
+  assert.ok(!book.screen().log.includes(bundle.value.text['narration.study_tracks']));
+  p.sql.close();
+});
+
+// Breaks: successful readable recipes without bound committed command/root completion
+// evidence are guessed into a detail; corrupt receipts must keep explicit Start over recovery.
+test('malformed Study receipt evidence is save_corrupt on reopen', async () => {
+  const { openGame } = await import('./session.ts');
+  for (const mutate of [
+    (r: any) => (r.command.id = 'aaaaaaaa-0000-4000-8000-000000000099'),
+    (r: any) => (r.command.payload.action = 'absent'),
+    (r: any) =>
+      (r.response.events = r.response.events.filter(
+        (e: any) => e.payload.type !== 'action_completed',
+      )),
+    (r: any) =>
+      (r.response.events.find((e: any) => e.payload.type === 'action_completed').causation_id =
+        'aaaaaaaa-0000-4000-8000-000000000099'),
+    (r: any) =>
+      (r.response.events.find(
+        (e: any) => e.payload.type === 'action_completed',
+      ).payload.subject_id = '05f6aca0-79cd-83fe-8096-bae95b0730e8'),
+    (r: any) =>
+      (r.response.events.find((e: any) => e.payload.type === 'action_completed').payload.action =
+        'absent'),
+    (r: any) =>
+      r.response.events.push(
+        r.response.events.find((e: any) => e.payload.type === 'action_completed'),
+      ),
+  ]) {
+    const p = setup();
+    try {
+      reportLead(p);
+      p.move('south', 'south');
+      p.invoke('study_tracks');
+      const row = p.sql
+        .prepare('SELECT rowid, command, response FROM receipt ORDER BY revision DESC LIMIT 1')
+        .get()!;
+      const receipt = {
+        command: JSON.parse(row.command as string),
+        response: JSON.parse(row.response as string),
+      };
+      mutate(receipt);
+      p.sql
+        .prepare('UPDATE receipt SET command = ?, response = ? WHERE rowid = ?')
+        .run(
+          JSON.stringify(receipt.command),
+          JSON.stringify(receipt.response),
+          row.rowid as number,
+        );
+      assert.throws(
+        () => openGame(p.db, bundle, p.host),
+        (e: any) => e.cause?.kind === 'save_corrupt',
+      );
+    } finally {
+      p.sql.close();
     }
   }
 });

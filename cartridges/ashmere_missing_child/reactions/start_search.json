@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "quest_resolved",
+    "quest": "first_lead",
+    "outcome": "report"
+  },
+  "apply": [
+    {
+      "op": "quest.activate",
+      "quest": "missing_child"
+    }
+  ]
+}

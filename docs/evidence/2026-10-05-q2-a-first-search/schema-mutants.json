@@ -1,0 +1,91 @@
+{
+  "caught": 15,
+  "controls": [
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/on/oneOf/2:event",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/on/oneOf: every branch needs the same one required const property",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "data fixture",
+      "name": "ReactionRule/properties/on/oneOf/2:quest",
+      "typescript": "data fixture"
+    },
+    {
+      "elixir": "data fixture",
+      "name": "ReactionRule/properties/on/oneOf/2:outcome",
+      "typescript": "data fixture"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/on/oneOf/2:type",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/on/oneOf: every branch needs the same one required const property\nreaction.schema.json#/$defs/ReactionRule/properties/on/oneOf/2: needs one supported type, or exactly one of $ref, enum, const, oneOf, anyOf",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/on/oneOf/2:additionalProperties",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/on/oneOf/2/type: invalid",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/on/oneOf/2/properties/event:const",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/on/oneOf: every branch needs the same one required const property\nreaction.schema.json#/$defs/ReactionRule/properties/on/oneOf/2/properties/event: needs one supported type, or exactly one of $ref, enum, const, oneOf, anyOf",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/apply/items/oneOf/1:op",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/apply/items/oneOf: every branch needs the same one required const property",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "data fixture",
+      "name": "ReactionRule/properties/apply/items/oneOf/1:quest",
+      "typescript": "data fixture"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/apply/items/oneOf/1:type",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/apply/items/oneOf: every branch needs the same one required const property\nreaction.schema.json#/$defs/ReactionRule/properties/apply/items/oneOf/1: needs one supported type, or exactly one of $ref, enum, const, oneOf, anyOf",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/apply/items/oneOf/1:additionalProperties",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/apply/items/oneOf/1/type: invalid",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "ReactionRule/properties/apply/items/oneOf/1/properties/op:const",
+      "reason": "protocol/ outside the schema subset:\nreaction.schema.json#/$defs/ReactionRule/properties/apply/items/oneOf: every branch needs the same one required const property\nreaction.schema.json#/$defs/ReactionRule/properties/apply/items/oneOf/1/properties/op: needs one supported type, or exactly one of $ref, enum, const, oneOf, anyOf",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "NoticeView/properties/actions:type",
+      "reason": "protocol/ outside the schema subset:\ngameview.schema.json#/$defs/NoticeView/properties/actions: needs one supported type, or exactly one of $ref, enum, const, oneOf, anyOf",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "schema compiler rejection",
+      "name": "NoticeView/properties/actions:items",
+      "reason": "protocol/ outside the schema subset:\ngameview.schema.json#/$defs/NoticeView/properties/actions/type: invalid",
+      "typescript": "shared schema generator rejection"
+    },
+    {
+      "elixir": "data fixture",
+      "name": "Notice actions changed to a scalar",
+      "typescript": "data fixture"
+    },
+    {
+      "elixir": "data fixture",
+      "name": "Notice items changed to text keys",
+      "typescript": "data fixture"
+    }
+  ],
+  "mutations": 15
+}

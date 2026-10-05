@@ -20,27 +20,26 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.8`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.9`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
 earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
 Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
-— in progress”; Q1, The First Lead, is playable; Q2 and the rescue await their playable consumers. The temporary Lantern
+— in progress”; Q1, The First Lead, and Q2’s first search lead are playable; rescue awaits its consumer. The temporary Lantern
 errand, Bram NPC/dialogues, lantern item, story point, scene and `search_plan` are
 absent. Four connected fen rooms form the first south search route: Ferry Landing south to
 Reed Path, south to Reed Bank, west to Willow Shade, south to Drowned Oak. Each exit has
 its reciprocal; a visible fox-prints detail at Reed Path and tracks at Reed Bank can be
-inspected without accepting a quest or waiting for the clock. This is geography and an
-optional clue, not Q2 discovery credit, a swim/tide gate, an item, a population, or a
-promise of onward exits ([FEN-01 decision](../decisions/pm-decision-fen01-south-search-2026-10-05.md)).
+inspected without accepting a quest or waiting for the clock. This inspection grants no Q2 discovery credit and adds no swim/tide gate, item or
+population ([FEN-01 decision](../decisions/pm-decision-fen01-south-search-2026-10-05.md)).
 FEN-02 extends that route: Reed Bank south ↔ Mire Crossing north, Drowned Oak east ↔
 Mire Crossing west, and Mire Crossing south ↔ Fox Hollow north. The plank and firm path
 use the ordinary move at every hour, before and after Q1, after shrine return and cold
 reopen; no tide, daylight, swimming or equipment gate applies. Visible plank and hollow
 details open the installed Book detail pages with noun titles and descriptive inspection
-only. No Q2 state or credit, Wren/Vesper, items, populations or exits to unbuilt rooms enter
-this release ([FEN-02 decision](../decisions/pm-decision-fen02-mire-hollow-2026-10-05.md)).
+only. These two details grant no Q2 credit; Wren/Vesper, items, populations and exits to
+unbuilt rooms remain deferred ([FEN-02 decision](../decisions/pm-decision-fen02-mire-hollow-2026-10-05.md)).
 The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 keeps Old Bram outside the active cast.
 
@@ -65,17 +64,32 @@ retains the drawing, and says it could be Wren's, suggesting reeds south of the 
 without proof of his route. The guide remains available before and after report; Maud's
 S1 offer and turn-in remain independently usable in every Q1 state. No hour or wait gates
 apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
-Q2 activation waits for its playable consumer; Q1 adds no pending Q2 state.
+Its Q2 activation consumer is [the staged first search lead below](#source-layout).
 
-The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
+The release declares API1.8 for quest-resolution reactions, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
-reviewed sampler source; installed mechanics and validation are unchanged. Its
-independent answer is `protocol/fixtures/missing_child_v008_hash.json`, derived
+reviewed sampler source. Its
+independent answer is `protocol/fixtures/missing_child_v009_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
 The app opens only the chapter file and offers no story picker. Missing pins follow
 [explicit Start over](save.md#opening-a-story), without automatic deletion or migration.
+
+Q2-A — the first Missing Child search lead — consumes that report: exact `first_lead/report`
+automatically starts `missing_child` in the same receipt. Its current-state objective is the
+player fact `fen.tracks_found`, default false. Only **Study tracks** at Reed Bank assigns it,
+with Q2 active and the fact false; arrival, examine and Read never grant credit. Study has no
+check, cost, duration or cooldown. The journal directs the player to Reed Bank, then toward
+Fox Hollow and explicitly says Wren remains unfound. The quest remains **active**; this staged
+objective adds no objectives-complete transition, turn-in, rescue or reward. The all-hours
+Mire/Hollow route remains unchanged. See [Q2-A adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
+
+Reaction authoring accepts exact `on: quest_resolved {quest, outcome}` and
+`apply: quest.activate {quest}` only under that trigger. Both quest references expand from
+source short keys, resolve to local quest definitions, and require the quest event owner in
+the capability lock. These trigger/consequence forms require kernel API at least 1.8.
+Existing fact/room triggers retain their semantics.
 
 ## Carrying settings and item mass
 
@@ -340,7 +354,7 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.7; old fixture requirement ranges remain unchanged.
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.8; old fixture requirement ranges remain unchanged.
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 

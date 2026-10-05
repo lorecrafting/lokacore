@@ -1,0 +1,21 @@
+{
+  "title": "quest.missing_child.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "fen_tracks_found",
+        "equals": true
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.missing_child.active",
+    "objectives_met": "quest.missing_child.lead",
+    "resolved": "quest.missing_child.resolved",
+    "failed": "quest.missing_child.failed",
+    "abandoned": "quest.missing_child.abandoned"
+  }
+}

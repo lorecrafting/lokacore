@@ -1,3 +1,4 @@
+// size: allow 315, typed quest reactions join the existing FIFO admission/causation path
 // The proposal of one admitted decision (04 §5.1-§5.4): admission of a rule's result, its whole
 // proposal (the root sequence, its due jobs and every reaction delivery in one FIFO causal
 // order), composition and adoption. runtime/world.ts routes each command here.
@@ -211,6 +212,7 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
+// size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -232,14 +234,24 @@ function react(p: P): Admitted | undefined {
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
-      const own = sequence(at, p.command.payload.actor_id, rule, next.cause, p.group + 1, p.steps);
+      const own = sequence(
+        at,
+        p.command.payload.actor_id,
+        rule,
+        next.cause,
+        p.group + 1,
+        p.steps,
+        next.mint,
+      );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
       if (p.limit) return BUDGET;
       if (!own) continue;
+      const delivered = admit('reaction', own);
+      if (delivered.kind !== 'accepted') return delivered;
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);
-      const failed = join(p, own, [], base, depth, next.mint);
+      const failed = join(p, delivered.delta.ops, delivered.events, base, depth, next.mint);
       if (failed) return failed;
     }
   }

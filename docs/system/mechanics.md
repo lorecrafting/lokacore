@@ -289,7 +289,7 @@ The narration is the outcome's `narration.actor` key with its participants pinne
 
 ## quest@1 (`mechanics/quest/rule.ts`, `kernel/ts/src/mechanics/quest/lifecycle.ts`)
 
-A quest starts through its offer, which is optional, or through a dialogue choice's `accept`
+A quest starts through its offer, which is optional, a quest-resolution reaction, or a dialogue choice's `accept`
 (dialogue@1 below; [owner decision](../decisions/owner-decision-quest-from-dialogue-2026-10-02.md)).
 `accept_quest {quest}` is admitted only through the quest's offer (a quest without one has no
 accept action), withdrawn once the actor has an instance (`commands/actions.ts:138`), so a second accept
@@ -435,13 +435,20 @@ review from the future line-bearing contract.
 
 ## reaction@1 (`kernel/ts/src/mechanics/reaction.ts`)
 
-Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its fact or
-`entity_entered_room` into its room (`:26`), in rule-key order; its `when` is read on the
-proposal so far at the event's logical time; when it holds, its `apply` is a sequence of
-`fact.assign` at the actor's scope as its own writer group (`:47`); the `fact_changed` they
-emit trigger further rules, FIFO, to quiescence, within the deliveries, `reaction_depth` and
-`query_steps` budgets. Matching [scene starts](#scene1-mechanicsscenerulets) follow authored
-rules in scene-key order, using the same delivery machinery.
+Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its fact,
+`entity_entered_room` into its room, or exact `quest_resolved {quest, outcome}`, in rule-key order.
+For quest resolution, the source instance must exist at player scope, be resolved with the
+event's quest/outcome, and agree with its actor and scope; inconsistent evidence faults
+`precondition_failed`. The instance's actor owns the delivery. Legacy fact/room triggers retain
+the command actor. Its `when` is read on the proposal so far at the event's logical time.
+`apply` assigns facts at that actor's scope or activates a declared quest through
+`quest.activate {quest}`. Activation is legal only on a quest-resolution trigger; any prior
+instance for that actor, including terminal instances, skips activation. The delivery uses
+one writer group and causal allocator; its quest-owned `quest_activated` is admitted through
+reaction's quest composition, caused by the source event and correlated with the root command.
+The resulting events trigger further rules, FIFO, to quiescence, within the deliveries,
+`reaction_depth` and `query_steps` budgets. Matching [scene starts](#scene1-mechanicsscenerulets)
+follow authored rules in scene-key order, using the same delivery machinery.
 
 ## schedule@1, behavior@1, calendar@1 (`mechanics/schedule/rule.ts`, `kernel/ts/src/mechanics/schedule/behavior.ts`)
 
@@ -467,8 +474,8 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`mechani
   are the shared vocabulary every mechanic reads through the same policy leaves.
   Scene starts read story_point_reached and write only their own facts; modal ActionSet
   replacement restricts position, equipment and door verbs without edits to those rules.
-  Policies/reactions may read scene facts. The one direct coupling, reaction → scene,
-  is limited to event start delivery until a second capability needs this hook.
+  Policies/reactions may read scene facts. Reactions compose quest activation and the existing
+  scene event-start hook; both use the proposal's single delivery queue.
 
 ## M1-A elapsed authority time
 
