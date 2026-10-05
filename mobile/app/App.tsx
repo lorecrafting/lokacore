@@ -3,10 +3,15 @@
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState } from 'react-native';
+import { Alert, AppState, Platform } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
-import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
+import {
+  deleteDatabaseSync,
+  openDatabaseAsync,
+  openDatabaseSync,
+  type SQLiteDatabase,
+} from 'expo-sqlite';
 import Storage from 'expo-sqlite/kv-store';
 import { KERNEL_ID, localSession } from '../authority/local-story/session';
 import Book, { type Shell } from './book/Book.tsx';
@@ -38,44 +43,53 @@ const g = globalThis as {
   loka_session?: ReturnType<typeof localSession>;
   loka_clock_cleanup?: () => void;
 };
-const session = (g.loka_session ??= localSession(
-  () => (db = openDatabaseSync(NAME)),
-  () => {
-    db?.closeSync();
-    db = undefined;
-    deleteDatabaseSync(NAME);
-  },
-  chapter,
-  // Each NEW decision's kernel.decision_latency (11 §13), on the iPhone (Android descoped): select
-  // the actual platform before Android evidence resumes.
-  {
-    newId: randomUUID,
-    latency: { host: 'hermes_ios', now: () => performance.now() },
-    kernel_version,
-    random: getRandomValues,
-    time: { wall: () => Date.now(), monotonic: () => performance.now() },
-  },
-));
+const createSession = (open: () => SQLiteDatabase) =>
+  (g.loka_session ??= localSession(
+    open,
+    () => {
+      db?.closeSync();
+      db = undefined;
+      deleteDatabaseSync(NAME);
+    },
+    chapter,
+    // Each NEW decision's kernel.decision_latency (11 §13), on the iPhone (Android descoped): select
+    // the actual platform before Android evidence resumes.
+    {
+      newId: randomUUID,
+      latency:
+        Platform.OS === 'web' ? undefined : { host: 'hermes_ios', now: () => performance.now() },
+      kernel_version,
+      random: getRandomValues,
+      time: { wall: () => Date.now(), monotonic: () => performance.now() },
+    },
+  ));
+let session = g.loka_session;
+if (Platform.OS !== 'web') session ??= createSession(() => (db = openDatabaseSync(NAME)));
+let opening: Promise<void> | undefined;
 
 // Start over destroys the save, so the player confirms it first (10 §31). The hints live here, not
 // in the book, so a fresh book keeps what the player has already seen.
 const shell: Shell = {
-  confirm: (go) =>
-    Alert.alert('Start over?', 'Your saved game will be lost.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Start over', style: 'destructive', onPress: go },
-    ]),
+  confirm: (go) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Start over? Your saved game will be lost.')) go();
+    } else
+      Alert.alert('Start over?', 'Your saved game will be lost.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Start over', style: 'destructive', onPress: go },
+      ]);
+  },
   learned: hint(Storage, 'hint.learned'),
 };
 
 type Clock = {
-  game: NonNullable<ReturnType<typeof session.game>>;
+  game: NonNullable<ReturnType<ReturnType<typeof localSession>['game']>>;
   active: boolean;
   draining: boolean;
   timer?: ReturnType<typeof setTimeout>;
   cleanup: () => void;
 };
-const current = (c: Clock) => session.game() === c.game && g.loka_clock_cleanup === c.cleanup;
+const current = (c: Clock) => session?.game() === c.game && g.loka_clock_cleanup === c.cleanup;
 function cancel(c: Clock) {
   if (c.timer !== undefined) clearTimeout(c.timer);
   c.timer = undefined;
@@ -113,7 +127,10 @@ function transition(c: Clock, active: boolean) {
 }
 
 type Recovery = { notify?: (healthy: boolean) => void };
-function useElapsed(game: ReturnType<typeof session.game>, recovered: { current: Recovery }) {
+function useElapsed(
+  game: ReturnType<ReturnType<typeof localSession>['game']>,
+  recovered: { current: Recovery },
+) {
   useEffect(() => {
     g.loka_clock_cleanup?.();
     if (!game) return;
@@ -142,11 +159,38 @@ function useElapsed(game: ReturnType<typeof session.game>, recovered: { current:
   }, [game]);
 }
 
+function useWebSession() {
+  const [, redrawBoot] = useState(0);
+  useEffect(() => {
+    if (Platform.OS !== 'web' || session) return;
+    // The worker must finish its first WASM/OPFS open before any synchronous save calls.
+    opening ??= openDatabaseAsync(NAME)
+      .then((opened) => {
+        db = opened;
+        session = createSession(() => opened);
+      })
+      .catch((error) => {
+        session = createSession(() => {
+          throw error;
+        });
+      });
+    let live = true;
+    opening.then(() => {
+      if (live) redrawBoot((n) => n + 1);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  return session;
+}
+
 export default function App() {
+  const activeSession = useWebSession();
   const [loaded, fontError] = useFonts(fonts);
   const [starts, setStarts] = useState(0); // a start over opens a fresh book (its log, its pages)
   const [, redraw] = useState({});
-  const game = session.game();
+  const game = activeSession?.game();
   const recovered = useRef<Recovery>({});
   const [bookShell] = useState<Shell>(() => ({
     ...shell,
@@ -155,17 +199,20 @@ export default function App() {
     },
   }));
   useElapsed(game, recovered);
+  if (!activeSession) return null;
   if (!loaded && !fontError) return null;
   const startOver = () => {
-    const before = session.game();
-    const why = session.startOver();
+    const before = activeSession.game();
+    const why = activeSession.startOver();
     // Only a start over that replaced the game opens a fresh book; a failed one keeps this book
     // and its log (which says why), so the log must not restart.
-    if (session.game() !== before) setStarts((n) => n + 1);
+    if (activeSession.game() !== before) setStarts((n) => n + 1);
     else redraw({});
     return why;
   };
   if (!game)
-    return <SaveError failed={session.failed()!} startOver={() => shell.confirm(startOver)} />;
+    return (
+      <SaveError failed={activeSession.failed()!} startOver={() => shell.confirm(startOver)} />
+    );
   return <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;
 }
