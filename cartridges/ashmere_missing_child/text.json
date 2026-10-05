@@ -131,5 +131,19 @@
   "dialogue.elspeth.inn": "“Is there an inn nearby?”",
   "narration.elspeth.inn": "“Go north to Well Lane, then east into the Drowned Lantern. Maud keeps the inn. Speak to her at the bar; she’ll tell you what needs doing.”",
   "dialogue.elspeth.wren": "“Who is Wren?”",
-  "narration.elspeth.wren": "“My son.” Elspeth looks back at the river. “He’s always off exploring, but he should have been home by now.”"
+  "narration.elspeth.wren": "“My son.” Elspeth looks back at the river. “He’s always off exploring, but he should have been home by now.”",
+  "item.fox_drawing.short": "a fox drawing",
+  "item.fox_drawing.room": "A folded [fox drawing] lies near the elm's roots.",
+  "item.fox_drawing.description": "A child's charcoal drawing shows a fox among tall reeds. The paper is creased and muddy. There is no name on it.",
+  "dialogue.elspeth.accept": "Will you look around the Green for a sign of Wren?",
+  "narration.elspeth.accept": "You agree to look around Village Green for a sign of Wren.",
+  "dialogue.elspeth_report.prompt": "Elspeth watches the folded drawing in your hand.",
+  "dialogue.elspeth_report.report": "I found this drawing on the Green.",
+  "narration.elspeth.report": "“That could be Wren's drawing,” Elspeth says. “He was always exploring. The reeds south of the landing may be worth searching, but I can't know where he went.”",
+  "quest.first_lead.title": "The First Lead",
+  "quest.first_lead.active": "Look for a sign of Wren on Village Green.",
+  "quest.first_lead.ready": "You found a fox drawing. Bring it to Elspeth at Ferry Landing.",
+  "quest.first_lead.resolved": "Elspeth thought the drawing might be Wren's and suggested searching the reeds south of the landing.",
+  "quest.first_lead.failed": "You could not follow the first lead.",
+  "quest.first_lead.abandoned": "You set aside the search for a sign of Wren."
 }

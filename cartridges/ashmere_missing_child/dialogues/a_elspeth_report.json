@@ -1,0 +1,34 @@
+{
+  "npc": "elspeth",
+  "quest": "first_lead",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "first_lead",
+          "state": "active"
+        },
+        {
+          "op": "has_item",
+          "item": "fox_drawing"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.elspeth_report.prompt",
+  "roles": {
+    "elspeth": {
+      "role": "npc",
+      "npc": "elspeth"
+    }
+  },
+  "choices": {
+    "report": {
+      "label": "dialogue.elspeth_report.report",
+      "narration": "narration.elspeth.report"
+    }
+  }
+}

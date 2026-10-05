@@ -31,6 +31,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Q1-A — Elspeth’s first lead](pm-decision-q1-a-first-lead-2026-10-05.md): explicit acceptance and a current-possession village clue.
+
 - [Authored receptacles only](owner-decision-container-eligibility-2026-10-05.md): explicit item eligibility, with historical fixture bytes retained.
 
 - Owner direction (paraphrased): [detail-page order](owner-decision-detail-page-order-2026-10-05.md), conditional chronological logs before offered options.

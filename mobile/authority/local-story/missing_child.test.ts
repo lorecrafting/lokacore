@@ -18,7 +18,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v006_hash.json');
+const bundle = read('protocol/fixtures/missing_child_v007_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -33,15 +33,15 @@ const fresh = newWorld(
 );
 // Independent Python IdSource literals for this release, not allocated by the test.
 const keyId = 'e918a5af-fc77-8a97-86ea-4a5ac3047213';
-const chestId = 'a443f590-c8d3-86d8-9972-75e09b637bed' as EntityId;
+const chestId = '8a20c3d3-0f0f-84ec-b058-d27c85d5ba17' as EntityId;
 const brassId = 'aae69ad9-ea5d-8dc0-b84a-5b427bedb688';
 const maudId = '71697171-efcc-8028-9a88-60b32e4a73ad';
 const entity = (kind: string, name: string) =>
-  fresh.entityIds[`ashmere_missing_child@0.0.6:${kind}/${name}`];
+  fresh.entityIds[`ashmere_missing_child@0.0.7:${kind}/${name}`];
 const ref = (name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.6',
+    cartridge_version: '0.0.7',
     kind: 'fact',
     key: name,
   }) as DefinitionRef;
@@ -57,13 +57,14 @@ function setup(path = ':memory:') {
     input: object = {},
     expected = 'accepted',
   ) => {
-    const reply = story.invoke({
+    const invocation = {
       invocation_id: `bbbbbbbb-0000-4000-8000-${String(++n).padStart(12, '0')}`,
       actor_id: fresh.character,
       action_key,
       target_ids,
       input,
-    });
+    };
+    const reply = story.invoke(invocation);
     assert.equal(reply.kind, 'saved');
     if (reply.kind === 'saved') {
       const d = reply.decision as { kind: string; error?: { code: string } };
@@ -73,6 +74,7 @@ function setup(path = ':memory:') {
         JSON.stringify(reply),
       );
     }
+    return { invocation, reply };
   };
   const move = (...directions: string[]) =>
     directions.forEach((direction) => invoke('move', [], { direction }));
@@ -111,7 +113,7 @@ function setup(path = ':memory:') {
 // or the chest uses the attic key / loses deposited custody on a real cold reopen.
 test('active chapter five actual kills, shrine return, Maud reward and cold-reopen storage', (t) => {
   // Breaks: adding details shifts entity allocation but release bindings retain stale IDs.
-  const expectedIds = read('protocol/fixtures/missing_child_v006_ids.json');
+  const expectedIds = read('protocol/fixtures/missing_child_v007_ids.json');
   assert.deepEqual(
     {
       character: fresh.character,
@@ -182,4 +184,147 @@ test('active chapter five actual kills, shrine return, Maud reward and cold-reop
   p.invoke('take', [brassId]);
   assert.equal(p.story.world().state.containers[brassId], fresh.body);
   p.sql.close();
+});
+
+const elspethId = '169f9a28-2c18-8ffe-8c39-fdb5ddd42d67';
+const drawingId = 'a443f590-c8d3-86d8-9972-75e09b637bed';
+const lead = (p: ReturnType<typeof setup>) =>
+  p.view().journal.find((q) => q.quest.key === 'first_lead');
+const acceptLead = (p: ReturnType<typeof setup>) => {
+  p.invoke('elspeth', [elspethId]);
+  p.answer('accept');
+};
+
+// Breaks: informational talk auto-starts Q1, the wrong item grants readiness, dropping
+// leaves the report eligible, the guide masks report, or a retry/reopen resolves twice.
+test('Q1 explicit acceptance, held drawing gate, report priority and durable once-only resolution', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-first-lead-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const path = join(dir, 'save.db');
+  let p = setup(path);
+  p.invoke('elspeth', [elspethId]);
+  p.answer('directions');
+  assert.equal(lead(p), undefined);
+  acceptLead(p);
+  assert.equal(lead(p)?.journal, 'quest.first_lead.active');
+  p.move('north', 'north');
+  p.invoke('take', [drawingId]);
+  assert.equal(lead(p)?.journal, 'quest.first_lead.ready');
+  p.move('south', 'south');
+  p.invoke('drop', [drawingId]);
+  assert.equal(lead(p)?.journal, 'quest.first_lead.active');
+  p.invoke('elspeth', [elspethId]);
+  assert.ok(p.view().choice!.choices.some((c) => c.choice_id === 'directions'));
+  assert.ok(!p.view().choice!.choices.some((c) => c.choice_id === 'report'));
+  p.invoke('close_choice', [], { continuation_id: p.view().choice!.continuation_id });
+  p.invoke('take', [drawingId]);
+  p.sql.close();
+  p = setup(path);
+  assert.equal(p.story.world().state.containers[drawingId], fresh.body);
+  assert.equal(lead(p)?.journal, 'quest.first_lead.ready');
+  p.invoke('elspeth', [elspethId]);
+  assert.deepEqual(
+    p.view().choice!.choices.map((c) => c.choice_id),
+    ['report'],
+  );
+  const result = p.invoke('choose', [], {
+    continuation_id: p.view().choice!.continuation_id,
+    choice_id: 'report',
+  });
+  assert.equal(lead(p)?.state, 'resolved');
+  assert.equal(lead(p)?.journal, 'quest.first_lead.resolved');
+  assert.equal(p.story.world().state.containers[drawingId], fresh.body);
+  const count = p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
+  assert.equal(p.story.invoke(result.invocation).kind, 'saved');
+  assert.equal(p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, count);
+  p.sql.close();
+  p = setup(path);
+  assert.equal(lead(p)?.state, 'resolved');
+  assert.equal(p.story.invoke(result.invocation).kind, 'saved');
+  assert.equal(p.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, count);
+  p.invoke('elspeth', [elspethId]);
+  assert.ok(p.view().choice!.choices.some((c) => c.choice_id === 'directions'));
+  assert.ok(!p.view().choice!.choices.some((c) => c.choice_id === 'report'));
+  p.answer('accept', 'invalid_state');
+  p.answer('inn');
+  assert.deepEqual(
+    p.view().journal.map((q) => q.quest.key),
+    ['first_lead'],
+  );
+  p.sql.close();
+});
+
+// Breaks: preacceptance pickup implicitly activates Q1 or acceptance forgets current custody.
+test('picking up the clue first starts no quest and acceptance is immediately ready', () => {
+  const p = setup();
+  try {
+    p.move('north', 'north');
+    p.invoke('take', [drawingId]);
+    assert.deepEqual(p.view().journal, []);
+    p.move('south', 'south');
+    acceptLead(p);
+    assert.equal(lead(p)?.journal, 'quest.first_lead.ready');
+  } finally {
+    p.sql.close();
+  }
+});
+
+// Breaks: Q1 masks or gates Maud's S1 offer/turn-in in any of its playable states.
+for (const phase of ['unaccepted', 'active', 'ready', 'resolved']) {
+  test(`Maud offer and earned turn-in stay usable while Q1 is ${phase}`, () => {
+    const p = setup();
+    try {
+      if (phase !== 'unaccepted') acceptLead(p);
+      if (phase === 'ready' || phase === 'resolved') {
+        p.move('north', 'north');
+        p.invoke('take', [drawingId]);
+        p.move('south', 'south');
+      }
+      if (phase === 'resolved') {
+        p.invoke('elspeth', [elspethId]);
+        p.answer('report');
+      }
+      p.move('north', 'east');
+      p.invoke('maud_offer', [maudId]);
+      p.answer('accept');
+      p.move('down');
+      for (const number of [1, 2, 3, 4, 5]) p.kill(number);
+      p.move('up');
+      p.invoke('maud_turn_in', [maudId]);
+      p.answer('done');
+      assert.equal(p.story.world().state.containers[keyId], fresh.body);
+      assert.equal(value(p.story.world(), fresh.character, ref('maud_trust')), 5);
+      assert.equal(p.view().journal.find((q) => q.quest.key === 'mauds_cellar')?.state, 'resolved');
+    } finally {
+      p.sql.close();
+    }
+  });
+}
+
+// Breaks: a new schedule/hour gate strands the opening quest or Maud on the no-wait route.
+test('Q1 acceptance, Green pickup, report and Maud offer work throughout the day', () => {
+  for (let hours = 0; hours < 24; hours++) {
+    const p = setup();
+    try {
+      if (hours) {
+        const from = p.story.world().state.clock;
+        assert.equal(
+          p.story.elapsed({ expected_run_id: p.story.runId(), from, until: from + hours * 3600 })
+            .kind,
+          'saved',
+        );
+      }
+      acceptLead(p);
+      p.move('north', 'north');
+      p.invoke('take', [drawingId]);
+      p.move('south', 'south');
+      p.invoke('elspeth', [elspethId]);
+      p.answer('report');
+      assert.equal(lead(p)?.state, 'resolved');
+      p.move('north', 'east');
+      p.offer();
+    } finally {
+      p.sql.close();
+    }
+  }
 });

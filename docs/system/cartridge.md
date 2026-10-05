@@ -20,13 +20,13 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.6`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.7`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
 earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
 Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
-— in progress”; Q1 and the main search are not yet playable. The temporary Lantern
+— in progress”; Q1, The First Lead, is playable; Q2 and the rescue await their playable consumers. The temporary Lantern
 errand, Bram NPC/dialogues, lantern item, story point, scene and `search_plan` are
 absent. Four connected fen rooms form the first south search route: Ferry Landing south to
 Reed Path, south to Reed Bank, west to Willow Shade, south to Drowned Oak. Each exit has
@@ -35,22 +35,35 @@ inspected without accepting a quest or waiting for the clock. This is geography 
 optional clue, not Q2 discovery credit, a swim/tide gate, an item, a population, or a
 promise of onward exits ([FEN-01 decision](../decisions/pm-decision-fen01-south-search-2026-10-05.md)).
 The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
-keeps Old Bram outside the active cast; Q1 awaits design from the actual Ashmere cast
-and rooms.
+keeps Old Bram outside the active cast.
 
 Elspeth, Wren's mother, stands at Ferry Landing at every hour. Her opening conversation
 introduces Wren and directs newcomers north through Well Lane to Village Green, or east
 from Well Lane to the Drowned Lantern and Maud. Her selectable NPC detail uses the existing
 [Book dialogue flow](book-ui.md#npc-dialogue-and-action-details); directions remain in that
-detail's history rather than the World log. Talking and choosing a reply grant no quest,
-fact or reward, and Leave preserves the north route. This fixed placement supersedes the
+detail's history rather than the World log. The informational replies grant no quest, fact or reward, and Leave preserves the north route. This fixed placement supersedes the
 archived Elspeth Green/cottage schedule for the current opening
 ([opening NPC decision](../decisions/owner-decision-opening-elspeth-2026-10-05.md)).
+
+Q1-A follows the [PM first-lead decision](../decisions/pm-decision-q1-a-first-lead-2026-10-05.md).
+Elspeth's always-eligible guide includes an explicit accept choice for **The First Lead**;
+only acceptance starts Q1. A unique 20g `fox_drawing` lies at Village Green by the elm,
+using ordinary item detail with authored identity/description, Take and Leave under
+[detail-page order](book-ui.md#detail-page-order). Its `current_state`/`has_item` objective
+shows the active journal until held, then the ready text. Taking it before acceptance starts
+nothing; acceptance while holding it is ready immediately. Dropping removes readiness,
+and retaking restores it. The separate `a_elspeth_report` dialogue sorts before the guide
+and is eligible only with Q1 active and the drawing held. Reporting resolves Q1 once,
+retains the drawing, and says it could be Wren's, suggesting reeds south of the landing
+without proof of his route. The guide remains available before and after report; Maud's
+S1 offer and turn-in remain independently usable in every Q1 state. No hour or wait gates
+apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
+Q2 activation waits for its playable consumer; Q1 adds no pending Q2 state.
 
 The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source; installed mechanics and validation are unchanged. Its
-independent answer is `protocol/fixtures/missing_child_v006_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v007_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
