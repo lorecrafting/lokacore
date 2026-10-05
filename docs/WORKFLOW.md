@@ -9,11 +9,13 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 | Role | Who | Model | Owns |
 |---|---|---|---|
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
-| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | code, checks, self-review, opening the PR, fixes |
-| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | highest Opus; Fable only as codex stand-in (see below) | independent review, review record |
+| Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: Sonnet 5.5; Opus for kernel and contract-freeze slices ([owner decision](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)). Codex: [routing below](decisions/pm-decision-codex-model-routing-2026-10-05.md). | code, checks, self-review, opening the PR, fixes |
+| Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: highest Opus; Fable only as codex stand-in (see below). Codex: [routing below](decisions/pm-decision-codex-model-routing-2026-10-05.md). | independent review, review record |
 
-**Models** ([owner decision](archive/decisions/owner-decisions-review-flow-2026-09-30.md)): a slice is
-reviewed once, with a narrow fix check, by a reviewer on the highest Opus.
+**Claude models** ([owner decision](archive/decisions/owner-decisions-review-flow-2026-09-30.md)):
+a Claude-led slice is reviewed once, with a narrow fix check, by a reviewer
+on the highest Opus. Codex-led slices use the [Codex routing](decisions/pm-decision-codex-model-routing-2026-10-05.md)
+with the same independent-review requirements.
 **Review count** ([owner decision](decisions/owner-decision-one-reviewer-default-2026-10-04.md)):
 one fresh independent reviewer is the default for a mechanics PR. Add a separate
 second opinion when the change alters save/reconciliation behavior, protocol or
@@ -33,6 +35,13 @@ Fable is used only if codex is out of quota: a Fable subagent stands in for it o
 contract-freeze slice's head, never on fix re-reviews
 ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
 Mechanical lookups go to the `Explore` agent (Haiku/Sonnet is fine).
+
+For new Codex work, explicitly select the [Codex model routing](decisions/pm-decision-codex-model-routing-2026-10-05.md)
+in each subagent spawn. Sol is the default for substantive implementation;
+Luna handles bounded edits. A planned brief does not lower a save or contract
+change to a mechanical task. Keep the current independent-review and second-opinion
+rules; reserve Astra for the gate and `runtime/proposal.ts` audits or a consequential
+unresolved architecture decision. Existing active agents keep their context.
 
 ## Loop
 

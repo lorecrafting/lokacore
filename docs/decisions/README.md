@@ -144,6 +144,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C1 human acceptance and UI deferral](owner-decision-c1-gate-ui-deferral-2026-10-03.md): owner directs gate closure; intermittent blur and unmeasured phone response carry to the next UI checkpoint.
 
 - [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
+- [Codex model routing during local chapter work](pm-decision-codex-model-routing-2026-10-05.md): PM execution choice after the owner's model/role audit request; explicit lower-cost implementation tiers, stronger review at trust boundaries, Astra for highest-risk audits.
 
 - PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
 
