@@ -195,6 +195,53 @@ test('late Ring keeps both Q2 returns playable through cold reopen', (t) => {
   }
 });
 
+// Breaks: a late Ring receipt with an added Q2 loss transition reopens an active Q2.
+test('late Ring rejects a receipt with an extra Q2 loss transition', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-bell-late-forged-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const a = setup(join(dir, 'story.db'));
+  a.search();
+  a.move('south', 'south');
+  a.ok('a_vesper_meeting', [ids['npc/vesper']]);
+  a.choose('meet_wren');
+  a.move('north', 'north');
+  a.belfry();
+  a.ok('ring_bell', [ids['detail/bell']]);
+  const q2 = a.rows('quests').find((r) => r.value.quest.key === 'missing_child')!;
+  assert.equal(q2.value.state, 'active');
+  const receipt = a.sql
+    .prepare(
+      "SELECT scope,command_id,response FROM receipt WHERE json_extract(command,'$.payload.action')='ring_bell'",
+    )
+    .get()! as Record<string, string>;
+  const response = JSON.parse(receipt.response);
+  const q3Transition = response.delta.ops.find(
+    (op: any) => op.op === 'quest.transition' && op.to === 'resolved',
+  )!;
+  response.delta.ops.push({
+    ...q3Transition,
+    instance_id: q2.key,
+    from: 'active',
+    to: 'failed',
+    outcome: 'lost',
+  });
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE scope=? AND command_id=?')
+    .run(JSON.stringify(response), receipt.scope, receipt.command_id);
+  const before = a.sql
+    .prepare('SELECT section,key,value FROM state_row ORDER BY section,key')
+    .all();
+  assert.equal(
+    openStory(a.db, [{ content_hash: bundle.sha256, fresh }], a.host).kind,
+    'save_corrupt',
+  );
+  assert.deepEqual(
+    a.sql.prepare('SELECT section,key,value FROM state_row ORDER BY section,key').all(),
+    before,
+  );
+  a.sql.close();
+});
+
 // Breaks: malformed rows, including a resurrected Q2 against a retained loss receipt, silently hydrate.
 test('bell save contradictions offer typed recovery without changing saved rows', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-bell-corrupt-'));
