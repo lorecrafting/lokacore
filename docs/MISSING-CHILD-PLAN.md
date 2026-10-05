@@ -54,18 +54,18 @@ valid combinations become playable before the whole world's optional surfaces.
 | **C3 Living hounds:** encounter bounded, persistent Fen hounds and collect actual fight loot. | B1, C1, installed combat | 0.9–1.1 |
 | **C4 Hound behavior:** hounds respond to aggression, assist a pack and flee when hurt. | C1, C3 | 0.8–1.0 |
 | **C5 Bleeding and bandage:** a hound hit can bleed; a learned bandage skill can stop it. | B5, C1, C4 | 0.7–0.9 |
-| **C6 S27 Night in the Marsh:** begin a bounded survival expedition now and finish its real route alive. | C2, C5, D1, D6 if swim reward retained | 0.7–0.9 |
+| **C6 S27 Night in the Marsh:** begin a bounded survival expedition now and finish its real route alive; any swim-training reward is free and idempotent after Sedge's earlier lesson. | C2, C5, D1, D6 if swim reward retained | 0.7–0.9 |
 
 ## D. Connected world and remaining chapter consumers
 
 | Slice and player outcome | Depends on | Lift |
 |---|---|---:|
-| **D1 Ferry and isle:** pay for passage, meet Sedge and return safely even after a loss. | B3, B4, B8 | 0.7–0.9 |
+| **D1 Ferry and isle:** pay for passage, meet Sedge, take an immediately available swim lesson and return safely even after a loss. | B3, B4, B8 | 0.7–0.9 |
 | **D2 Priory books:** explore the public Priory and learn real topics from held books. | A1, B5, B6 | 0.4–0.6 |
 | **D3 Western Ashmere:** explore the mill and cottages and meet Hob through existing interactions. | B4, D1 | 0.3–0.5 |
 | **D4 Homes and orchard:** meet Gareth and Ada, visit Elspeth's home and forage useful food. | B5, B8 | 0.3–0.5 |
 | **D5 Deep Fen:** explore the oak canopy, black pool edge, fox den and fishing shallows. | B4, B6, Q2 returns | 0.3–0.5 |
-| **D6 Water depths:** reach two bottom rooms through an explicit, recoverable water rule. | B4, C1, D1, D5 | 0.8–1.0 |
+| **D6 Water depths:** use Sedge's earlier swim lesson to reach two bottom rooms through an explicit, recoverable water rule; S27 is not the first way to learn swim. | B4, C1, D1, D5 | 0.8–1.0 |
 | **D7 Deer:** observe bounded deer fleeing and conserved loot from deliberate fights. | C3, C4, D4 | 0.4–0.6 |
 | **D8 Crows:** follow scavenged eligible items to a bounded, reachable nest and recover them. | C3, D5 | 0.6–0.8 |
 | **D9 Reactive village:** hear the bell where it carries and see distinct cast responses to child and allegiance outcomes. | A3, B2, C3, D1, D2, D4 | 0.7–0.9 |
@@ -91,7 +91,7 @@ The shared TypeScript engine simulation, real SQLite transaction/fault checks an
 contract checks remain part of development proof. Browser play uses the same Book
 client once its web host works, but browser storage evidence does not certify native
 SQLite, backgrounding, touch or Hermes. Native build/device evidence is deferred
-under the [owner's current development pause](system/owner-rules.md); public release
+under the [owner's current development pause](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md); public release
 readiness requires that separate prelaunch work after the pause is lifted.
 
 ## Rules for each brief
