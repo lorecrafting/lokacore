@@ -127,7 +127,8 @@ export function Item(p: {
       thing={thing}
       text={p.screen.text}
       actions={p.g.on(p.id)}
-      press={p.press}
+      log={p.screen.detail(p.id)}
+      press={(b) => p.press(b, p.id)}
       contents={items.filter((e) => 'container_id' in e && e.container_id === p.id)}
       open={(id) => p.open({ kind: 'thing', id })}
       leave={p.world}

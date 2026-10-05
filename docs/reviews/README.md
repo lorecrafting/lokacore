@@ -221,3 +221,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [CHAPTER-01 actual chapter cutover](2026-10-05-chapter-01-review.md): PR #176 at `06f67ba`, APPROVE.
 
 - [M12-A first readable details](2026-10-05-m12-a-readable-review.md): PR #177 at `fe0f79ae`, CHANGES REQUIRED (M12A-R1: Book drops a valid projected Read alias); scoped fix `372d06e9`, APPROVE, M12A-R1 closed; two independent fix mutants red and 33 restored scoped tests pass.
+
+- [Book item detail order](2026-10-05-ui-detail-order-review.md): PR #178 at `102a0602`, fresh independent APPROVE; no findings, routing and order mutants red, restored focused tests 14/14 pass.

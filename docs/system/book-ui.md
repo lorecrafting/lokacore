@@ -6,9 +6,10 @@ from [GameView](protocol.md#gameview). This specification changes presentation, 
 authority, content, receipts or save formats.
 
 Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-2026-10-03.md),
-[room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md), and
+[room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md),
 [dialogue, Contents and pickup polish](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md),
-and [journal, Leave, position and detail-flow polish](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md).
+[journal, Leave, position and detail-flow polish](../decisions/owner-decision-c1-journal-position-polish-2026-10-03.md),
+and [detail-page order](../decisions/owner-decision-detail-page-order-2026-10-05.md).
 Original feedback lives in those records; independent reviews and retained interaction proof
 are indexed in [reviews](../reviews/README.md). Touch acceptance follows
 [C1 slice 12](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#12-c1-touch-the-phone-draws-the-new-gameview).
@@ -99,6 +100,13 @@ height remain. World minimap and status stay outside the body scroll, respecting
 Implementation details live in [book](../../mobile/app/book/Book.tsx),
 [pages](../../mobile/app/book/pages.tsx) and [paper](../../mobile/app/book/paper.ts).
 
+## Detail-page order
+
+Detail pages show title/identity, authored description and projected item state, then their
+chronological event log only when entries exist, then currently offered options in the same
+scrolling content. An empty log has no heading or placeholder. NPC, item and combat details
+follow this order; World retains its [room-page order](#world-and-status-entry).
+
 ## NPC dialogue and action details
 
 Tapping an NPC opens full details using its actual projected name, authored description and
@@ -138,7 +146,7 @@ currently no player-presence UI.
 ## Item details and Take/Drop
 
 Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
-taps resolve the same detail; item pages show the projected name, authored description before actions, barrier state, directly nested
+taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
 reachable contents and current legal item/container/equipment actions, plus local **Leave** back to World. The available brass lantern therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
 pickup event using the original projected item name: **You pick up a brass lantern.** for this
@@ -157,7 +165,8 @@ and disappears when shedding held load makes Take legal.
 
 
 Successful Take/Drop are the specific exceptions to item-page retention. Other same-room item actions
-retain the page while that item remains projected; leaving the room or losing the item closes
+retain the page and route their results to that item's local chronological history while the
+item remains projected; leaving the room or losing the item closes
 obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
 
 Put appears as a concrete pair button using projected source/destination names and IDs.
