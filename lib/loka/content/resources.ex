@@ -96,10 +96,23 @@ defmodule Loka.Content.Resources do
 
     Enum.flat_map(tables(defs, world), &table(&1, text)) ++
       cost(m, defs, world) ++
-      owned(m, defs["attribute"], registry) ++ recovery(m, defs["resource"]) ++ npc_hp(m, defs)
+      owned(m, defs["attribute"], registry) ++
+      npc_checks(m, defs)
   end
 
   def check(_, _, _, _, _), do: []
+
+  defp npc_checks(m, defs),
+    do: recovery(m, defs["resource"]) ++ npc_hp(m, defs) ++ npc_balances(defs)
+
+  defp npc_balances(defs) do
+    for {_, {rel, [], npc}} <- defs["npc"],
+        {name, value} <- Map.get(npc, "resource_starts", %{}),
+        spec = defs["resource"][name],
+        not (match?({_, _, _}, spec) and elem(spec, 2)["minimum"] <= value and
+               value <= elem(spec, 2)["maximum"]),
+        do: diag("RESOURCE_SPEC_INVALID", at(rel, ["resource_starts", name]))
+  end
 
   defp npc_hp(m, defs) do
     version =

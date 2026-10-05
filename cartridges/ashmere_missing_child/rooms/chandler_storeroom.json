@@ -1,0 +1,9 @@
+{
+  "title": "room.chandler_storeroom.title",
+  "description": "room.chandler_storeroom.description",
+  "exits": {
+    "up": {
+      "to": "chandler"
+    }
+  }
+}

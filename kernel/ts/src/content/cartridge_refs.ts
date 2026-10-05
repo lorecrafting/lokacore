@@ -1,7 +1,7 @@
 import { noticeBoards } from './cartridge_boards.ts';
 import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
-// size: allow 340, one reference stage preserves diagnostic ordering for custody eligibility, carrying and NPC HP
+// size: allow 345, NPC explicit resource starts join the existing reference stage
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -209,6 +209,7 @@ export function refStage(c: Obj): Diagnostic[] {
 // Each resource's bounds hold its start (RESOURCE_SPEC_INVALID), each band table (a pool's,
 // the world's) is well formed (bands), and the world's move cost names a resource of this
 // cartridge.
+// size: allow 45, NPC resource starts share the resource bounds pass
 function pools(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj)) {
@@ -239,6 +240,14 @@ function pools(c: Obj, named: Checks['named']): Diagnostic[] {
     if (s.bands) out.push(...bands(c, s.bands, `${at}.bands`));
   }
   out.push(...npcHp(c));
+  for (const [ref, npc] of Object.entries((c.npcs ?? {}) as Obj))
+    for (const [name, value] of Object.entries((npc.resource_starts ?? {}) as Obj)) {
+      const spec = Object.values((c.resources ?? {}) as Obj).find((r) => r.key === name);
+      if (!spec || (value as number) < spec.minimum || (value as number) > spec.maximum)
+        out.push(
+          diag('RESOURCE_SPEC_INVALID', `.cartridge.npcs${step(ref)}.resource_starts${step(name)}`),
+        );
+    }
   if (c.world?.bands) out.push(...bands(c, c.world.bands, '.cartridge.world.bands'));
   const cost = c.world?.movement?.cost;
   if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');

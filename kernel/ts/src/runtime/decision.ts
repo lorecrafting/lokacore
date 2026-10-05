@@ -1,3 +1,4 @@
+// size: allow 305, bound quest and job rows join the existing runtime decision model
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -27,6 +28,7 @@ import {
   type NpcDefinition,
   type Owned,
   type QuestState,
+  type QuestInstanceId,
   type ResourceSpec,
   type RoleBinding,
   type RoomDefinition,
@@ -82,6 +84,8 @@ export type JobRow = {
   readonly due_time: number;
   readonly status: 'pending' | 'completed' | 'cancelled';
   readonly encounter_id?: EncounterId;
+  readonly quest_instance_id?: QuestInstanceId;
+  readonly actor_id?: CharacterId;
 };
 
 // The State section each written MutationTarget kind lives in (the clock is State.clock).
@@ -144,6 +148,7 @@ export type QuestRow = {
   readonly scope: StateScope;
   readonly state: QuestState;
   readonly outcome?: Key;
+  readonly bindings?: readonly RoleBinding[];
 };
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */

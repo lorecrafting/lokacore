@@ -294,6 +294,11 @@
         "hp": {
           "$ref": "resource.schema.json#/$defs/NpcHp"
         },
+        "resource_starts": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+          "additionalProperties": { "$ref": "resource.schema.json#/$defs/ResourceInt" }
+        },
         "attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         }

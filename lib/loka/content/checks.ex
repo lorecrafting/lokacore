@@ -1,4 +1,4 @@
-# size: allow 315, new short quest references join the existing checked expansion boundary
+# size: allow 321, bound deadline fact refs join the existing checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;
@@ -88,6 +88,12 @@ defmodule Loka.Content.Checks do
   # map may have a detail keyed resource, whose value is a map).
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
+
+  def expand(%{"at" => _, "trust_fact" => _} = deadline, m),
+    do:
+      deadline
+      |> Map.update!("fact", &ref(&1, "fact", m))
+      |> Map.update!("trust_fact", &ref(&1, "fact", m))
 
   # A story point's trigger (StoryPointDefinition outcome): its short dialogue.
   def expand(%{"dialogue" => d, "choice" => c} = t, m) when is_binary(c),

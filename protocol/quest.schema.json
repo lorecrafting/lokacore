@@ -29,6 +29,18 @@
         "objective": {
           "$ref": "#/$defs/QuestObjective"
         },
+        "deadline": {
+          "type": "object",
+          "properties": {
+            "at": { "$ref": "command.schema.json#/$defs/LogicalTime" },
+            "outcome": { "$ref": "action.schema.json#/$defs/Key" },
+            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "trust_fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "trust_amount": { "type": "integer" }
+          },
+          "required": ["at", "outcome", "fact", "trust_fact", "trust_amount"],
+          "additionalProperties": false
+        },
         "journal": {
           "$ref": "#/$defs/QuestJournal"
         }

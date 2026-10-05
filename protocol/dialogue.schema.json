@@ -271,6 +271,24 @@
           ],
           "additionalProperties": false
         },
+        "availability": {
+          "type": "object",
+          "properties": {
+            "from": { "$ref": "command.schema.json#/$defs/LogicalTime" },
+            "through": { "$ref": "command.schema.json#/$defs/LogicalTime" }
+          },
+          "additionalProperties": false
+        },
+        "payment": {
+          "type": "object",
+          "properties": {
+            "from": { "$ref": "action.schema.json#/$defs/Key" },
+            "resource": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "amount": { "type": "integer", "minimum": 1, "maximum": 2147483647 }
+          },
+          "required": ["from", "resource", "amount"],
+          "additionalProperties": false
+        },
         "escort": {
           "type": "object",
           "properties": {

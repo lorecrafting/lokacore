@@ -242,6 +242,10 @@
             },
             "instance_id": {
               "$ref": "#/$defs/QuestInstanceId"
+            },
+            "bindings": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/RoleBinding" }
             }
           },
           "required": [
@@ -405,6 +409,12 @@
             },
             "encounter_id": {
               "$ref": "delta.schema.json#/$defs/EncounterId"
+            },
+            "quest_instance_id": {
+              "$ref": "#/$defs/QuestInstanceId"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
             }
           },
           "required": [

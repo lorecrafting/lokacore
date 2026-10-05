@@ -211,8 +211,8 @@ defmodule Loka.ContentRewardStorageTest do
     end
   end
 
-  # Breaks: removing the receive quest requirement accidentally allows simultaneous activation.
-  test "nonterminal receive still excludes accept", %{tmp_dir: dir} do
+  # Breaks: API1.10 silently admits a receive-and-accept choice that needs bound activation.
+  test "receive with accept requires API1.14", %{tmp_dir: dir} do
     source(dir)
     update(dir, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.10"))
 
@@ -222,9 +222,6 @@ defmodule Loka.ContentRewardStorageTest do
 
     assert {:error, diagnostics} = Loka.Content.compile(dir)
 
-    assert Enum.any?(
-             diagnostics,
-             &(&1["code"] == "OUTCOME_MISMATCH" and String.ends_with?(&1["path"], ".receive"))
-           )
+    assert Enum.any?(diagnostics, &(&1["code"] == "KERNEL_API_RANGE_INVALID"))
   end
 end

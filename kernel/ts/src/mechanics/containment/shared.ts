@@ -4,6 +4,7 @@ import { LIMITS, type EntityId } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
+import { refString } from '../../runtime/decision.ts';
 
 type Failure = 'too_heavy' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
 type Context = {
@@ -28,6 +29,19 @@ export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 
     const contained = underBody(context, id);
     if (typeof contained === 'string') return contained;
     if (contained) return 'invalid_state' as const;
+  }
+  for (const q of Object.values(world.state.quests ?? {})) {
+    if (
+      !['active', 'objectives_complete'].includes(q.state) ||
+      !world.cartridge.quests?.[refString(q.quest)]?.deadline
+    )
+      continue;
+    for (const role of q.bindings ?? []) {
+      if (world.entities[role.entity_id]?.kind !== 'item') continue;
+      const contained = underBody(context, role.entity_id);
+      if (typeof contained === 'string') return contained;
+      if (contained) return 'invalid_state' as const;
+    }
   }
 }
 

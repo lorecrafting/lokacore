@@ -170,7 +170,7 @@ function ambiguous(c: Obj, t: Obj): boolean {
 
 // One option's texts, fact.assign steps, accept (a quest of this cartridge, in a dialogue that
 // resolves none, with no hand_over: OUTCOME_MISMATCH) and hand_over (an item role to an npc role).
-// size: allow 47, one authored option validates its mutually constrained effects together
+// size: allow 52, one authored option validates its mutually constrained effects together
 function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Checks, c: Obj) {
   const roles = d.roles as Obj;
   const out: Diagnostic[] = [];
@@ -189,7 +189,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     } else typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
   });
   if (o.receive) {
-    if (o.accept || o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
+    if (o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
     for (const [field, role] of [
       ['item', 'item'],
       ['from', 'npc'],
@@ -198,6 +198,11 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
         out.push(
           diag('UNRESOLVED_REFERENCE', `${path}.receive.${field}`, { target: o.receive[field] }),
         );
+  }
+  if (o.payment) {
+    named(o.payment.resource, 'resource', `${path}.payment.resource`);
+    if (roles[o.payment.from]?.role !== 'npc')
+      out.push(diag('UNRESOLVED_REFERENCE', `${path}.payment.from`, { target: o.payment.from }));
   }
   if (o.escort) {
     const e = o.escort;

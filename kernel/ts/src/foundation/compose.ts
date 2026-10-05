@@ -187,7 +187,12 @@ function quest(op: DeltaOp & { op: `quest.${string}` }, row: Json | undefined, c
         same(get(r, 'scope'), op.scope) &&
         OPEN.includes(get(r, 'state') as string),
     );
-    const created = { quest: op.quest, scope: op.scope, state: 'active' };
+    const created = {
+      quest: op.quest,
+      scope: op.scope,
+      state: 'active',
+      ...(op.bindings && { bindings: op.bindings }),
+    };
     return check(row === undefined && !taken, created as unknown as Json);
   }
   const outcomeOk =

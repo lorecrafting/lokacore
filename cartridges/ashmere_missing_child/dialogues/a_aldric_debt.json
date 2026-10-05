@@ -1,0 +1,87 @@
+{
+  "npc": "aldric",
+  "quest": "chandlers_debt",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "any",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "chandlers_debt",
+          "state": "active"
+        },
+        {
+          "op": "quest_state",
+          "quest": "chandlers_debt",
+          "state": "objectives_complete"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.aldric_debt.prompt",
+  "roles": {
+    "aldric": {
+      "role": "npc",
+      "npc": "aldric"
+    },
+    "ledger": {
+      "role": "item",
+      "item": "tithe_ledger"
+    }
+  },
+  "choices": {
+    "on_time": {
+      "label": "dialogue.aldric_debt.on_time",
+      "narration": "narration.aldric_debt.on_time",
+      "hand_over": {
+        "item": "ledger",
+        "to": "aldric"
+      },
+      "availability": {
+        "through": 151200
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "priory_tithe_delivered",
+          "value": "on_time"
+        },
+        {
+          "op": "fact.adjust",
+          "fact": "priory_fen_axis",
+          "amount": 2
+        }
+      ],
+      "payment": {
+        "from": "aldric",
+        "resource": "pennies",
+        "amount": 10
+      }
+    },
+    "late": {
+      "label": "dialogue.aldric_debt.late",
+      "narration": "narration.aldric_debt.late",
+      "hand_over": {
+        "item": "ledger",
+        "to": "aldric"
+      },
+      "availability": {
+        "from": 151201,
+        "through": 237600
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "priory_tithe_delivered",
+          "value": "late"
+        },
+        {
+          "op": "fact.adjust",
+          "fact": "priory_fen_axis",
+          "amount": -1
+        }
+      ]
+    }
+  }
+}
