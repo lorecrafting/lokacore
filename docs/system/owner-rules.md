@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Q2-B ends at the bound Wren meeting and accepted riddle with Q2 active; real escort/message return belongs to Q2-C ([PM adoption](../decisions/pm-decision-q2-b-wren-riddle-2026-10-05.md)).
+
 - Only authored receptacles can hold items ([record](../decisions/owner-decision-container-eligibility-2026-10-05.md)).
 
 - Detail pages follow the [canonical Book order](book-ui.md#detail-page-order), with no empty event-log heading or placeholder ([record](../decisions/owner-decision-detail-page-order-2026-10-05.md)).

@@ -32,6 +32,12 @@ successful readable-recipe receipt also requires a valid committed Command bound
 `action_completed` naming that action and its canonical detail subject. Missing or mismatched
 evidence follows the same corruption path. This structured receipt derives detail identity for
 replay and reopen, without a new row or transcript. Unrelated receipts retain ordinary routing.
+Dialogue Choose narration also derives its original speaker from the committed command's
+continuation and the saved ChoiceRow, which persists after resolution. Command identity,
+choice ID, row source/beat/roles, outcome and root resolution evidence must agree; riddle
+wrong receipts instead prove a bank-valid wrong answer with no root mutation/event. Conflict
+or missing evidence is `save_corrupt`, even if the pending choice is already gone. No new
+save table, format or transcript is introduced.
 SQLite read failures such as locks and I/O errors retain their storage-error handling. Any other
 valid-JSON response of the wrong shape still opens; its replay is a `conflict`
 ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the

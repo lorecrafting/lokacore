@@ -322,3 +322,16 @@ closure, death, Flee and reopening a save after any of them. Routing uses struct
 receipt metadata, never rendered prose; ordinary room events remain in the World log even
 when delivered in the same receipt as combat. This replaces the earlier
 persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).
+
+## Letter-bank riddle details
+
+A pending riddle's clue, ordered tiles and answer controls follow the NPC description and
+committed detail history. Tile selection is bounded by the projected bank, including repeated
+letters, with Backspace, Clear and Submit. The unsent tile buffer is local, never saved.
+Submit uses the ordinary Choose button and answer input. Refresh across elapsed-only redraw
+requires the same continuation, speaker, choice and bank; a pending retry retains its original
+invocation and answer. Wrong and correct narration stays in the bound speaker's detail.
+Request committed narration by the sent invocation's command ID even when it has no events;
+never borrow the latest unrelated receipt. Cold reopen restores the committed detail line
+once, including after a successful answer removes the pending choice. Scene/combat precedence
+and typed save-corrupt handling remain in force.
