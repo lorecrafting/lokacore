@@ -1,3 +1,4 @@
+// size: allow 315, independent retirement pairing joins precondition replay
 import { escortsHold } from './invariants_escort.ts';
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
@@ -186,9 +187,15 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   },
   // Replay the contract preconditions on independent overlays; never use compose's result to
   // compute the expected answer. A fault vacuously holds this success-only invariant.
+  // size: allow 45, independent retirement pairing joins existing ordered precondition replay
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
-    if (!Number.isInteger(state.clock) || !creationsHold(state, delta.ops, result)) return false;
+    if (
+      !Number.isInteger(state.clock) ||
+      !creationsHold(state, delta.ops, result) ||
+      !retirementsHold(delta.ops)
+    )
+      return false;
     if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
       return false;
     const seen = new Map<string, Json | undefined>();
@@ -281,4 +288,18 @@ export function check(id: string, observation: { [field: string]: unknown }): bo
   const f = CHECKS[id];
   if (!f) throw new Error(`unknown invariant ${id}`);
   return f(observation);
+}
+
+function retirementsHold(ops: readonly DeltaOp[]): boolean {
+  return ops.every((op, i) => {
+    if (op.op !== 'quest.retire') return true;
+    const next = ops[i + 1];
+    return (
+      next?.op === 'quest.activate' &&
+      next.writer_group === op.writer_group &&
+      next.instance_id !== op.instance_id &&
+      same(next.quest, op.quest) &&
+      same(next.scope, op.scope)
+    );
+  });
 }

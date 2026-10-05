@@ -664,3 +664,102 @@ COMMIT, both uncertain-COMMIT outcomes and lost acknowledgement retain the exist
 fence/reconciliation rules; prove them with real SQLite at attempt, final wrong
 and correct transitions. Current-release mismatch remains explicit; no adapters,
 silent counter repair or save deletion is authorized.
+
+## C3 living population recovery
+
+**Selected, pending implementation.** [C3 composition](protocol.md#c3-spawned-bundles-and-population-composition)
+saves immutable spawned identities, containment, HP, separately keyed slot rows
+and plan control/current job, RNG, encounter/death changes, head and receipt through
+the existing changed-row
+transaction. Genesis binds the same checked initialization to revision0; later
+origins bind their exact accepted creation command/job occurrence. No loader
+reconciliation spawns an animal, heals HP, replaces an identity or repairs a slot.
+
+Validate full pinned plan/bundle/template refs, slot/generation/member/role and
+creation occurrence, paired initial parent, actual HP rows and current job/due
+binding. Require exactly the declared ordinal slot keys; control stores no duplicate
+membership index. A fatal receipt changes only its bound slot, while a plan-job
+receipt advances control and actual birth/replacement slots. Equal-time combined
+receipts keep their canonical job-ID order and distinct writer groups; cold reopen
+and uncertain-COMMIT reconciliation accept both legal orders with the same conserved
+fatal slot/corpse/pelt and one current plan successor. No-op rewrites of other slots
+are not valid transition evidence. Later ordinary pelt custody may be its hound,
+public corpse, room, player, bag or other legal owner; validate revision-ordered transfer/death evidence rather
+than requiring its original parent forever. Old HP0 hound identities remain valid
+corpse victims after their slot advances. A due time must trace to that member's
+positive-to-zero fatal event at fatal clock + declared delay. Fresh/never-used,
+living and replacement-eligible slots have the mechanics' distinct row shapes.
+
+Require matching causal command IDs, full refs/scopes, writer groups, event cause/
+correlation and complete prior/result slot rows for creation, fatal eligibility
+and replacement. Reopen accepts every lawful complete intermediate state, including
+live members in either area room, partially injured or engaged members, retained
+dawn surplus, dead slots before/at due and old pelts already taken after replacement.
+Invalid/missing HP, orphan bundle, swapped plan/parent/generation, impossible member
+or job/receipt proof is typed `save_corrupt`, with no rewriting or skipped rows.
+
+Real failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
+must reconcile all-prior/all-next identities, slot/generation/due, custody, HP,
+RNG, jobs, encounters, head and receipt. Fence input and elapsed until resolved;
+receipt replay allocates/transfers/schedules nothing twice. Exact unavailable or
+mismatched release pins refuse explicitly; only explicit Start over replaces the
+save. No save migration, periodic checkpoint or second population receipt ledger
+is selected. Browser reload/Book evidence is distinct from real SQLite faults.
+
+## B8 service recovery
+
+**Selected, source pending.** [B8](mechanics.md#b8-mauds-immediate-services-selected-contract)
+stores only changed balances, entitlement, meal stock, ale row and settled MV
+plus head/receipt in the existing transaction. No service ledger/table, save
+migration or reset-on-open exists. Reopen/reconciliation validates the exact
+original actor/body/provider/service/quote, full refs/scopes, causal command and
+prior/result rows against authored initial truth and revision-ordered receipts.
+B3/S2 payment history and B7 liquid history must recognize the new service
+producer without weakening their own checks. Merely plausible bounded stock,
+MV or paid=true is insufficient evidence. Lawful later movement, death, elapsed
+recovery and other payment producers cannot invalidate an old service receipt.
+
+Room proof requires its unique paid transition and matching exact payment;
+meal proof requires one exact stock debit/payment and independently valid capped
+MV settlement; drink proof requires historical provider-owned exact vessel/kind,
+complete serving debit/payment and MV settlement. Missing/extra malformed opted
+rows, altered bounded stock/quantity, forged entitlement, swapped provider/service,
+wrong price or omitted benefit/payment yields typed `save_corrupt`, preserving
+the file. Never grant, refill, delete, heal or repin to repair a save.
+
+Real failed COMMIT and uncertain-not-committed reopen all prior state; uncertain
+committed/lost acknowledgement reopen all next state. Input and elapsed remain
+fenced while unknown; exact invocation replay charges/consumes/grants nothing
+again. Reopen unpaid, paid-before-Rest, meal-used, ale-partial/empty and actual
+same-body death/recovered states, then invoke their next consumer. Confirmed
+service narration is retained once at the original Maud detail through the
+committed command identity, never inferred from an unrelated latest receipt.
+
+## D2 book knowledge and Read recovery
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) stores
+ordinary custody, schedule locations and B6 typed knowledge facts; it adds no book
+cursor, transcript, topic ledger or snapshot. Reconcile a grant with the exact
+historical Read command/receipt: actor/body, original item and pinned readable/topic
+metadata, lawful held/open-ancestor custody at that revision, causal assignment and
+prior knowledge. A lawful B6 grant also justifies ward; neither source requires the
+other. Already-known Read supplies narration without a new grant. Later Drop, Put,
+lid closure, travel, schedule movement or death cannot invalidate historical Read.
+Current fact truth must agree with the lawful grant history in both directions.
+
+Real SQLite reopen must accept every legal committed intermediate: ground books,
+directly held, open nested holding, closed nested holding, each learned topic,
+already-known reread and later stored/dropped/dead states. Reopen the novice overlap
+and departure, then exercise the next ordinary Read/Talk/move consumer. Missing or
+malformed topic mapping/fact, forged actor/book/source/cause, grant from unheld or
+closed custody, omitted required grant or unjustified knowledge returns typed
+`save_corrupt`, with existing in-place Start over and no silent repair/deletion.
+Operational read failures keep their existing storage-error handling.
+
+Failed COMMIT, both committed and absent uncertain-COMMIT outcomes, and lost
+acknowledgement preserve all-prior or all-next knowledge/receipt state. Exact retry
+replays the original response and grants nothing twice, including after later
+custody changes. Retained Read narration routes once to that exact book detail;
+restore its currently reachable parent chain only when projected, with normal
+scene/chapter precedence. An unavailable book yields no invented visible route or
+World/other-book narration fallback. Current-release pin refusal remains explicit.

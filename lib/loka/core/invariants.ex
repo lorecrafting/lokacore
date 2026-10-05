@@ -1,3 +1,4 @@
+# size: allow 320, independent retirement pairing joins precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
@@ -98,7 +99,7 @@ defmodule Loka.Core.Invariants do
     is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
-      replay_preconditions(s, ops, result)
+      retirements_hold?(ops) and replay_preconditions(s, ops, result)
   end
 
   defp replay_preconditions(s, ops, result) do
@@ -291,5 +292,21 @@ defmodule Loka.Core.Invariants do
   defp initial(%{"op" => "barrier.transition"} = op, s) do
     with nil <- get_in(s, ["barriers", Compose.key(Compose.target(op))]),
          do: get_in(s, ["barrier_initial", Compose.key(op["barrier"])])
+  end
+
+  defp retirements_hold?(ops) do
+    ops
+    |> Enum.chunk_every(2, 1, [])
+    |> Enum.all?(fn
+      [%{"op" => "quest.retire"} = op, %{"op" => "quest.activate"} = next] ->
+        next["writer_group"] == op["writer_group"] and next["instance_id"] != op["instance_id"] and
+          next["quest"] == op["quest"] and next["scope"] == op["scope"]
+
+      [%{"op" => "quest.retire"} | _] ->
+        false
+
+      _ ->
+        true
+    end)
   end
 end

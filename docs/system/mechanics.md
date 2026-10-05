@@ -196,7 +196,9 @@ This composes existing detail identity/presence, ActionSet admission and authore
 with receipt replay and Book’s notice detail history; there is no gameplay writer or saved
 reading state.
 Projection offers each exact present readable target with its authored label and shares
-command eligibility. Held books, pagination and topic grants remain later M12 work.
+command eligibility. The selected [D2 held-book extension](#d2-held-books-and-public-priory-selected-contract)
+adds item Read and declared grants; pagination remains deferred. Ordinary room
+notices retain the eventless/no-topic contract above.
 The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records scope.
 
 ## target_resolution@1, policy@1, fact@1
@@ -1058,3 +1060,146 @@ selectable even when debt/bell dialogues are eligible. Its informational reply
 requires known ward and a live/present Aldric; it changes no spells, resources,
 faction, quest or chapter ending. This is one real topic consumer, not a full
 conversation graph or a promise of all historical topics.
+
+## C3 bounded living hounds (selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c3-living-hounds-2026-10-05.md)
+selects the first dynamic population consumer; [cartridge](cartridge.md#c3-hound-population-and-loot)
+owns its bounds, periods, area and profiles. C3 hounds engage only on deliberate
+Attack using C1's single-opponent resolver. C4 owns aggression, pack assistance and
+enemy flight; C5 owns actual bleeding. No hound is a required quest objective.
+
+One instance-scoped plan owns a fixed ordered set of separately targeted slot rows,
+numbered1 through its declared cap. A slot retains its generation, exact current
+hound identity and optional death-to-replacement due time.
+Never-used slots have generation0, null member and null due time. Occupied slots
+start at generation1; a living member has null replacement due. A proven fatal HP
+transition retains the dead member identity and sets due = fatal clock + declared
+replacement delay in the same fatal writer group. Only then may a slot replace it
+at or after due, incrementing generation and allocating a fresh hound and pelt.
+Old identities, HP0, corpses and taken loot remain; they are not active membership.
+
+The first daytime-target slots can fill at every hour; extra nighttime-target
+slots can fill only in the authored night window. Existing live extra members
+remain at dawn. Count all plan-owned living members across both allowed rooms,
+not only the home room; never count authored rats or another plan's animals.
+An eligible never-used slot fills immediately; a dead slot respects its due time
+even when night raises the target. No silent live retirement, corpse decay or
+population-disable consumer is selected. This bounds live membership and scheduled
+work, not total historical corpse/identity/save size.
+
+Fresh worlds initialize the same checked bundle/state transition used by live
+replacement, under the existing genesis allocator. One current plan-owned job
+handles all slots, in slot order. Its successor is due at the earliest next wander
+boundary, day/night target boundary or eligible replacement time, strictly after
+this occurrence. Ignore past due times for night-only slots while ineligible;
+the next night boundary reconsideration prevents a zero-time loop. Require wander
+interval <= replacement delay. The current plan job is no later than the next
+wander boundary, hence no later than a newly fatal member's replacement due. Death
+writes only that slot's eligibility; it never reschedules or writes plan control.
+Existing due ordering, segmentation and shared command budgets apply; plan work
+cannot scan historical created rows to find its six current members.
+
+Equal-time combat and population jobs retain canonical `(due_time, job_id)` order
+and distinct writer groups. Population dispatch changes only actual birth/replacement
+slots, never unchanged living or not-yet-eligible dead slots. Thus population-first
+skips the engaged hound before fatal combat; combat-first leaves a dead slot whose
+new due is strictly later, which population skips. Both advance the separate plan
+control once and conserve the same fatal slot/corpse/pelt. No whole-plan slot rewrite
+or cross-writer exception is permitted; see [targets](protocol.md#c3-spawned-bundles-and-population-composition).
+
+At a wander boundary each living, unengaged member alternates between the two
+adjacent declared rooms through ordinary legal movement. A blocked edge leaves it
+in place; it spends no RNG or player MV. A newly spawned member stays at home for
+that occurrence. An open encounter suppresses its voluntary wander; dead members
+never move. No hound enters the required rescue/shrine corridor. Replacement and
+wandering grant no quest, skill, kill credit or money. Immutable template metadata
+never stores instance HP or location; every query and combat job uses the actual
+runtime EntityId. The created hound's lethal producer uses its declared hound corpse
+and transfers its same directly held pelt through ordinary death custody once.
+
+Combat loss leaves an immediate safe return/recovery route; surviving hounds can
+be deliberately retried now, and defeated hounds' loot is immediately available.
+No required chapter path or Book proof waits for a replacement or night.
+
+## B8 Maud's immediate services (selected contract)
+
+**Selected, source implementation pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+selects three all-hours services from the original living, co-located Maud at the
+Drowned Lantern. Each accepted service immediately exchanges the exact quoted
+pennies for its declared benefit in one proposal. A meal is eaten and a serving
+of ale is drunk as part of that transaction; neither purchase creates an item
+waiting for a later Eat/Drink. This deliberately replaces the provisional
+purchase-then-consume recommendation and the historical hunger/drunk formulas.
+
+Room grants one durable actor-scoped Boolean `lantern_bed_paid` for the current
+save lineage. Its immediate consumer is the actual bed detail in Inn Rooms,
+whose paid description and ordinary Rest offer become available. Renting changes
+no position, rate, clock, HP/MV, slept fact, quest or dream state. A new rental
+when already entitled refuses without payment. Ordinary unpaid Rest and all
+upstairs, attic, cellar and corpse routes remain legal. Entitlement survives
+death/reopen and has no night expiry or automatic renewal. B9 alone owns the
+first qualifying actual accepted Rest at Inn Rooms after payment; earlier unpaid
+Rest and rental are not retrospective dream credit. Already resting must Stand
+then Rest for a new accepted transition; B8 adds no Rest event/dream writer.
+
+Meal consumes one unit of Maud's finite nonregenerating meal-stock ResourceSpec
+and grants its authored capped MV increment on the actor body. Drink consumes
+one complete authored serving from the exact Maud-owned ale vessel's B7 liquid
+row and grants its authored capped MV increment. Strict B7 last-serving refusal
+applies: insufficient quantity never buys a partial drink. Exhaustion preserves
+the same empty vessel shell. The shared service query proves original provider,
+living actor/provider, co-location, exact service reference/quote, unowned room
+entitlement or available stock and exact conserved funding. Positive MV headroom
+is required only for meal/drink; room rental remains available at full MV.
+Meal/drink at full MV refuse before charging or consuming. Near the maximum the
+benefit caps; the displayed offer declares that cap. No HP/MA recovery, passive
+hunger/thirst, intoxication, carrying acquisition, food issuance or restock job
+is added. B7 water remains benefit-free and refill cannot introduce ale.
+
+Service owns admission and lowering: payment uses B3's exact debit/credit query,
+room uses existing fact assignment, meal stock uses exact resource debit, and
+MV uses existing resource settlement/capped adjustment. Liquid owns the shared
+pure exact-serving query/transition used for the provider-bound ale consequence;
+service never calls another rule or fabricates an actor-owned Drink. All writes
+share one writer group and query budget. Normal authority elapsed preflight,
+scene/combat admission, freshness and receipt replay precede this work. S1 Talk,
+accept/turn-in and earned chest/key remain reachable in every quest state;
+services are separate direct offers, not a first-eligible dialogue replacement.
+
+## D2 held books and public Priory (selected contract)
+
+Planned under [PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md),
+D2 completes the ten public Priory rooms through the reciprocal
+[authored route](cartridge.md#d2-public-priory-and-book-authoring). Movement retains
+its ordinary cost and position rules; no key, light, topic, bell/faction outcome,
+NPC schedule, fare, water skill or time window gates this extension. These are
+safe walking rooms, not a new hazard. Aldric remains public in Chapel Nave;
+S2/S4/Q3 and Wick's S9 stay independently usable. Study's ledger is descriptive,
+never a second Peg ledger. Future private gate/crypt and far Scan are excluded.
+
+A readable item declares one authored text and at most one declared topic. The
+existing actor-bound Read command accepts the exact original book only while
+it is directly held by that actor's body or reachable inside an open chain of
+held containers. Reuse the bounded custody walk and actor/body lookup, sharing
+one command query budget. A closed or locked ancestor, ground/room custody,
+foreign holding, worn-only custody or corpse custody does not qualify; a declared
+book outside this held reach refuses `not_present` before narration or grant.
+Unknown/non-readable targets remain `invalid_target`. Projection and raw admission
+use the same eligibility. Take, Look/Examine, opening details, text rendering and
+ordinary notice Read grant nothing. No keyword or same-key object substitutes
+for the original target identity and pinned definition.
+
+Accepted book Read narrates its one declared text and lowers the optional topic
+grant through [B6's declared Boolean mapping](#s4-all-hours-wisp-b6-selected-contract).
+Readable owns the text; topic lowering owns idempotence; facts owns the knowledge
+write. Already-known Read still narrates, but adds no second grant/write. RNG and
+logical duration remain unchanged; authority elapsed preflight and schedules keep
+running. Ward from either lawful source enables the same public Aldric ward
+conversation; Bell is a real known-topic entry, not Q3 activation, permission,
+resolution or spell acquisition. No quest, faction, resource or skill is awarded.
+
+Dropping/storing/giving a book moves its real identity and never unlearns a topic.
+Death preserves knowledge and puts the actual held books in ordinary owned-corpse
+custody; gear-free shrine routes permit recovery, then ordinary Take/Read. Optional
+books given away need no replacement or mint and cannot strand a required path.

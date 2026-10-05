@@ -8,6 +8,10 @@ and not repeated here.
 
 ## Product and scope
 
+- B8 immediately grants a durable paid-bed entitlement or consumes finite Maud stock for declared capped MV recovery, with conserved pennies and no rental-as-Rest/dream credit ([PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)).
+
+- D2 completes ten public Priory rooms with safe reciprocal routes and explicit held-book Read granting exact Ward/Bell topics; reuse B6 knowledge and ordinary custody/recovery ([PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md)).
+
 - B6 offers an all-hours doused-light Seek, three-wrong sitting with immediate retry, and a once-known ward with a public Aldric consumer ([PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md)).
 
 - C2 offers an all-hours finite original-Tobin patrol; player death resets only the attempt, immediate Rejoin/Restart preserves reachable recovery, and completion grants trust alone ([PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)).
@@ -105,6 +109,8 @@ and not repeated here.
 
 ## Architecture and engine
 
+- C3 living hounds have a [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; implementation and independent proof remain ahead.
+
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
   [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)
@@ -174,6 +180,8 @@ and not repeated here.
   [owner direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md); the first Realm activity, unchanged-cartridge hosting and formal ADR-074 route remain open.
 
 ## Process
+
+- Before the Chapter 1 E3 closure gate, run one Astra high audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).
 
 - After PRs #200–#204, use local branches as draft PRs. Complete units may merge provisionally into local `main` after focused checks and self-review while independent review runs in parallel; only reviewed units count as complete. Publish accumulated local history periodically after full checks and closed reviews; exact-head hosted CI gates later remote merges ([fast lane](../decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original local cadence](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)). The owner authorized a one-time hosted-CI exception only for PRs #200–#204 during GitHub's runner incident.
 

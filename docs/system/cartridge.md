@@ -856,3 +856,130 @@ bank or answer and an unresolved answer choice. Continuation/load validation rej
 missing opted attempt fields.
 Short references expand in every new field. Existing bounded answer lengths apply;
 new schemas need their actual negative fixtures and planted guard controls.
+
+## C3 hound population and loot
+
+**Selected, pending implementation.** The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
+adds one instance-scoped `fen_hounds` plan and one fixed bundle. These are PM-selected
+chapter values, not engine/presenter constants or claimed owner preferences.
+
+| Parameter | Selected chapter value |
+|---|---|
+| Live cap / ordered slot count | 6 / 6 |
+| Daytime / nighttime eligible slot targets | 4 / 6 |
+| Night window | calendar hours [20,6), wrapping midnight |
+| Replacement delay | one authored world day (currently 86400 units) after death |
+| Wander interval | one authored world hour (currently 3600 units), aligned from time0 |
+| Home / allowed area | Hound Run / Hound Run and Adder Nest only |
+| Bundle | one hound and one pelt directly held by that new hound |
+| Hound HP minimum / maximum / start / gain | 0 / 8 / 8 / 0 |
+| Hound attack chance / fixed damage | 80 / 1 |
+| Pelt mass / equipment / sale offer | 250g / none / none |
+| Hound corpse | new room-fixed, public NPC corpse template, mass0, ordinary unbounded container |
+
+Add Reed Bank east ↔ Hound Run west and Hound Run east ↔ Adder Nest west,
+with gnawed-bones and empty-nest noun details. All exits are free of gates, light,
+skill and hour requirements; Adder Nest contains no live adder or harvest node in
+C3. No exit points at unbuilt Marsh Light. Other room connections stay deferred
+to their owning slices. The existing Reed Bank–Mire–Fox Hollow main story route
+remains usable at all hours without entering the population area.
+
+Hound/pelt definitions are bundle templates, not additional authored birth spawns.
+The plan binds its exact NPC, item and NPC corpse definitions, home and ordered
+allowed rooms, eligible slot targets, time window and periods. Require resolved
+correct-kind short references, distinct allowed rooms connected by legal reciprocal
+edges, positive safe calendar products/periods, wander interval <= replacement
+delay, targets <= cap, and the exact bounded bundle shape. Hound HP/attack obey
+existing profile validation; pelt has ordinary
+item metadata and no lid, slot, children or capacity; corpse obeys M5 room-container
+validation. Unknown fields and malformed origin/job/state declarations refuse at
+compile/load; inspect actual slot bounds before traversal or allocation.
+
+No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
+in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
+S1 credits retain their declared consumer. Future deer/crows, bell disable and C4
+must amend their actual additional contracts. Successor release/API/hash/fresh IDs
+remain null until the reviewed integrated predecessor is known.
+
+## B8 Maud's service declarations
+
+The [selected services](mechanics.md#b8-mauds-immediate-services-selected-contract)
+add no rooms. The original Maud remains all-hours in `drowned_lantern`, declares
+an explicit **10p** initial balance within the existing **0..1000** pennies
+bounds, and offers the following finite chapter values. Values are source-owned,
+never kernel/presenter defaults.
+
+| Service | Price | Immediate benefit | Finite source |
+|---|---:|---|---|
+| Room | 3p | actor `lantern_bed_paid=true`; paid bed detail/Rest at Inn Rooms | once per actor/save lineage |
+| Bread meal | 2p | up to +12 MV, capped at current authored maximum | Maud `lantern_meals`, 0..4, start4, gain0; debit1 |
+| Ale serving | 1p | up to +4 MV, capped at current authored maximum | exact Maud-held `lantern_ale_cask`; debit1 liquid unit |
+
+Declare `lantern_bed_paid` Boolean/player/default false. Add one actual `bed`
+detail at `inn_rooms` with free/paid description variants and a paid ordinary
+Rest action. S10 facts/quest/dream remain B9 work. The meal stock is an ordinary
+bounded ResourceSpec initialized only for Maud, not a second inventory count.
+Add one real provider-held ale vessel with capacity4, initial ale4, drink_amount1,
+shell mass500g; declare `ale` density250g/unit (the B7 quarter-litre unit).
+Empty shell persists as null/0; no Fill source for ale is authored. The cask is
+Maud's stock, not a shop offer or actor-issued mug. It stays Maud-held in this
+slice. No dead Maud stock resurrection/refill occurs.
+
+Declare the three finite offers as `services/<key>.json` definitions, referenced
+by Maud; the typed immediate benefit alternatives are entitlement, meal-stock
+recovery and provider-vessel recovery. No free-form operations list is authored.
+Compiler and loader check typed service keys/labels/narration, original provider
+binding, positive integer quote/benefit/stock debit, resource declarations and
+bounds, Boolean fact scope, exact directly provider-held opted ale vessel/kind,
+compatible complete serving and short-reference expansion. Reject duplicate
+service keys, absent balances, regenerating stock/currency, mismatched stock
+owner, non-MV recovery declarations and unbounded/unknown consequences. The
+minimal service subset covers only these consumed consequences, not an arbitrary
+Effect interpreter. Independently re-pin the integrated bundled release/API and
+known answers after B7 source merges; future hashes/IDs/versions are null now.
+
+## D2 public Priory and book authoring
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
+`prior_study`, `spire`, `scriptorium`, `kitchen_garden` to the six existing public
+rooms. Every row below is reciprocal and ungated; preserve existing exits.
+
+| Room / outward direction | Neighbor / return direction | Delivery |
+|---|---|---|
+| North Gate / north | Chapel Steps / south | existing public approach |
+| Chapel Steps / north | Chapel Nave / south | existing |
+| Chapel Nave / up | Bell Tower / down | A1 |
+| Bell Tower / up | Belfry / down | A1 |
+| Chapel Nave / north | Cloister / south | B5 |
+| Cloister / east | Infirmary / west | B5 |
+| Chapel Nave / west | Prior Study / east | D2 |
+| Belfry / up | Spire / down | D2 |
+| Cloister / west | Scriptorium / east | D2 |
+| Scriptorium / west | Kitchen Garden / east | D2 |
+
+Spire's view and Kitchen Garden's herbs are descriptive; no far Scan, rue harvest,
+new quest or unfinished action is advertised. Study has no functional quest ledger
+or bell key. This implements archived 00a §§2/4/5/8 with current public/no-wait rules.
+The selected book instances start directly in Scriptorium with ordinary custody.
+
+| Book key | Title / single page | Declared topic / Boolean fact | Mass |
+|---|---|---|---:|
+| `ward_of_the_fen` | The Ward of the Fen / `readable.ward_of_the_fen` | `ward` / B6 `topic_ward_known` | 100g |
+| `bell_rites` | Bell Rites / `readable.bell_rites` | `bell` / `topic_bell_known`, initially false | 100g |
+
+Both facts are player-scoped; reuse B6's ward definition rather than duplicate its
+knowledge mapping. Author localized topic labels and book noun headings. Item
+readable metadata references catalog label/text and an optional topic DefinitionRef;
+compiler short-ref expansion and loader require a local declared topic mapped to a
+unique player Boolean. Reject unresolved/wrong-kind refs, non-Boolean or non-player
+facts, duplicate mappings, missing text/label, malformed metadata and missing opted-in
+mass. Update actual API/capability requirements with the consumed extension; do not
+invent successor version, hash or allocation answers in this plan.
+
+Ash and Hale are distinct original NPCs with distinct descriptions, noun headings,
+flavor Talk and shared `novice` keyword. Under [owner content decision 5](../decisions/owner-decision-chapter-one-content-2026-10-02.md), Ash is in
+Scriptorium 06:00–12:00 and 20:00–06:00, Cloister 12:00–20:00; Hale is in Kitchen
+Garden 06:00–18:00, Cloister 18:00–06:00. Intervals are start-inclusive/end-exclusive.
+At 19:00 both are in Cloister; neither waits for a player or grants topics. All
+scheduled destinations exist. Initial placement must agree with the selected launch
+clock; existing schedule machinery owns departures and saved locations.

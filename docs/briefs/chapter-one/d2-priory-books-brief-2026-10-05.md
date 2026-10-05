@@ -1,41 +1,144 @@
-# D2 — Public Priory rooms and books that grant their actual topics
+# D2 — Public Priory rooms and held-book topics: adopted developer brief
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Proposed source branch:** `chapter-one/d2-priory-books`, not created by planning.
+**Inspected planning base:** local main `4ec52632d510e45214e43a1fe5beca0ec5addbad`.
+A1 public Aldric/Belfry is installed; B5 source is provisionally integrated at chapter
+`ashmere_missing_child@0.0.19`/API1.17, with its independent v019 hash/ID fixtures.
+B5 independent source review is pending; B6 has an adopted plan and queued source,
+not an installed topic capability. Re-pin actually reviewed/integrated A1/B5/B6
+source heads and inherited check dispositions before assigning D2. Dependency final
+review heads, D2 implementation/review/PR, successor release/API/hash/IDs and proof:
+null. Planning selects behavior; it is not source GO or proof of gameplay.
+PM adoption: Codex Sol medium; source implementation: Sol high (protocol/save).
 
-Proposed branch: `chapter1/d2-priory-books`.
+## Outcome and governing clauses
 
-## Goal, dependencies and governing clauses
+Explore all ten public Priory rooms, Take the two actual Scriptorium books and
+explicitly Read held books to learn exactly Ward and Bell. Return safely and use
+Ward with the original public Aldric, regardless of how Ward was learned. Two
+novices retain separate identities and the owner-selected 19:00 ambiguity fixture.
 
-Add `prior_study`, `spire`, `scriptorium`, `kitchen_garden`; place Ash/Hale and two readable books. Re-pin A1 belfry/public Aldric, B5 cloister/infirmary, B6 topic acquisition and existing Read/Notice contracts. No quest/scene/far Scan is introduced. Governors: archived 00a §§2/4/5/8/11, active mechanics readable/topics (amend the current “held books later” clause), cartridge source/reference/text validation, protocol GameView/Notice projection, Book detail/Read history and save narration on reopen. Owner content decision **#5** already selects Ash cloister12–20/scriptorium20–6, Hale garden6–18/cloister18–6 and the **19:00 cloister** ambiguity fixture.
+Normative clauses: [mechanics](../../system/mechanics.md#d2-held-books-and-public-priory-selected-contract),
+[route/books/schedules](../../system/cartridge.md#d2-public-priory-and-book-authoring),
+[composition](../../system/protocol.md#d2-held-readable-composition),
+[save](../../system/save.md#d2-book-knowledge-and-read-recovery),
+[Book details](../../system/book-ui.md#d2-held-book-details) and
+[PM decision](../../decisions/pm-decision-d2-priory-books-2026-10-05.md).
+Archived 00a §§2/4/5/8/11 supply room/book roles; owner content decision 5 corrects
+Ash's schedule. B6 owns the ward topic mapping/grant, and ordinary readable@1
+notices retain their eventless/no-topic behavior. These adopted clauses replace
+this brief's earlier provisional alternatives. Cartridge owns all world values.
 
-## PM policy and composition
+## Composition record and scope
 
-Use one authored page each for `ward_of_the_fen` and `bell_rites`; no pagination primitive. Both are ordinary exact items at scriptorium, with mass authored under carrying. A deliberate Read of a held, reachable book grants respectively **ward** or **bell** once through B6's typed topic owner; Examine, Take and arbitrary notice Read grant neither. Open nested holding is reachable; a closed/locked nested holder is not. The text remains rereadable after learning. Reading continues world time and does not acquire quests, faction or a spell word.
+Consumers: exact held-book Read, persistent known-topic projection and existing
+public Aldric ward dialogue; four room branches and scheduled novice identity.
+Reads: commanded actor/body, original item ID/pinned definition/readable metadata,
+ordinary custody/open ancestors, actor's declared Boolean knowledge, current modal
+admission and existing schedule state. Writes: readable narration and optional typed
+topic grant lowered through B6 to fact assignment; ordinary receipt. Containment is
+sole custody writer, facts sole knowledge writer, schedules sole NPC movement writer;
+authority commits/adopts and Book projects confirmed results. No named book/NPC
+switch or cross-mechanic player-verb call.
 
-Read actor/body, original book identity/custody, book text/topic declaration and current topic knowledge. Readable owns narration; topics owns the idempotent knowledge write; containment remains the only item-custody writer. A missing held-readable metadata/query is introduced with these two real consumers and shared projection/admission. Do not blanket-grant topics from keywords, append knowledge during render or call another player verb.
+Reuse bounded reach/carrying, action resolution/projection, Read, B6 topic lowering,
+current grants/reconciliation and receipt routing, schedules, item detail stack and
+Take/Drop/Put/death. Missing invariants are item-readable metadata/reference validation,
+shared held/open-chain Read eligibility and exact saved book-grant attribution. Extend
+only those consumed seams. No new portable operation; portable fixture/differential
+work is needed only if the actual diff changes a portable contract (return to PM).
 
-Connections: nave w↔study e; belfry u↔spire d; cloister w↔scriptorium e; scriptorium w↔garden e. Public Aldric remains reachable at A1's public location when D9 later closes the optional study. The study ledger is **descriptive**: S2's actual unique Peg ledger is not duplicated here. Ash/Hale share novice keywords, retain distinct identities/noun headings and flavor dialogue; all scheduled locations are built.
+In scope: four rooms/exits, two authored book identities/100g mass/text, Bell topic
+and Boolean, reused Ward mapping, Ash/Hale/ordinary schedules/flavor dialogue;
+compiler/loader short-ref/text/mass/topic checks; smallest readable item support;
+actual Item/ContentView/ActionSet contracts and generation as required; local Story
+Read receipt validation/reconciliation and Book item history/nested route recovery;
+independent current release/API/hash/allocation pins when source exists.
+Out: second tithe ledger/key, crypt/private gate, far Scan, rue harvest, spell word,
+new quest/dialogue graph, page cursor, generic document tree, topic catalog, mint or
+replacement books, paused clock, new hazard, engine world literals, native/device/
+owner-save/preview work. Bell knowledge is visible truth, no Q3 shortcut; additional
+Bell conversation is unnecessary for this outcome.
 
-## Source scope
+## Independent acceptance and realistic breaks
 
-Four rooms, book items, Ash/Hale/schedules/dialogues, book/room text; current release bundle/hash/allocation; `mechanics/readable/rule.ts` and a small shared reach predicate only as needed, existing topic owner, compiler `entities.ex/refs.ex/checks.ex`, TS cartridge loader, applicable entity/readable/projection schemas and generated contracts. Book item-detail Read button/log context must use `buttonsOf`, `actionContext` and existing receipt routing. Out: generic document tree, page counters, message replacement, light magic, far perception, future Priory gate/crypt and Aldric movement.
+- Traverse the literal reciprocal route table, not a graph-derived expected answer.
+  North Gate north → Steps north → Nave; Nave west → Study east → Nave;
+  Nave up → Tower up → Belfry up → Spire, then down/down/down → Nave;
+  Nave north → Cloister east → Infirmary west → Cloister west → Scriptorium
+  west → Garden east → Scriptorium east → Cloister south → Nave south → Steps
+  south → North Gate. These visits cover all ten public rooms and every new return.
+  Check day/night and child/bell outcomes with no gear/knowledge and public Aldric/
+  Wick consumers intact. Existing movement cost/rest rules remain; no temporal gate.
+- Controlled actor with both topics false: opening details, Examine and Take give
+  neither. Held Ward Read yields `(ward=true, bell=false)`; held Bell Read after
+  fresh start yields `(false,true)`. Both Reads yield `(true,true)`. Each narrates
+  only its declared literal text key, consumes no RNG/logical duration and grants
+  no quest/faction/resource/spell. Reread yields the same truth and no second grant.
+  Ward learned via B6 then book and book then B6 both retain one membership and
+  allow actual public Aldric ward Talk while other eligible dialogues coexist.
+- Exact Ward inside open held container succeeds. Ground, foreign/corpse holding,
+  worn-only custody, closed/locked ancestor and a stale former child offer refuse
+  before narration/grant; reopen/Take supplies immediate lawful recovery. A
+  non-readable item refuses invalid_target. Ordinary Landing/board/Belfry detail
+  Read keeps no-topic behavior. Same-key foreign identity never substitutes for
+  the offered original. With two 100g books in a controlled max12000g cartridge,
+  starting11900g accepts one at12000g; next Take refuses unchanged. No mass shortcut.
+- Loader/compiler reject unresolved/wrong-kind topic refs, malformed item-readable
+  metadata, missing text/label/mass, non-player/non-Boolean/duplicate knowledge
+  mapping. Source short refs must compile to valid actual DefinitionRefs. Use real
+  invalid inputs, not source matching; schema guard removal must fail its fixture.
+- Schedule literals at clock 68400: Ash and Hale are distinct Cloister touch cards;
+  `novice` textual target is ambiguous, explicit ID Talk uses each own flavor.
+  At 72000 Ash is in Scriptorium and Hale alone in Cloister; at 21600 Hale is in
+  Garden and Ash in Scriptorium; at 43200 Ash enters Cloister. Pending departed-NPC
+  controls retain their original refusal, never reroute to the other novice.
+- Save/reopen every committed intermediate listed in the save clause, then perform
+  its next actual Read/Take/open/Talk/move. Dropped/stored/dead books keep exact
+  IDs and learned topics. Recover actual corpse holdings from the gear-free shrine
+  route, then Take/Read. Giving away an optional book never blocks Q2/Q3/finale.
+  Lawful post-Read closure or travel must reopen, not be declared corruption.
+- Real rollback-journal SQLite: failed COMMIT, both uncertain outcomes, lost
+  acknowledgement and same-invocation replay at first grant and already-known
+  Read leave all-prior/all-next facts and receipt; retry cannot grant or narrate
+  twice. Historical wrong actor/ID/definition/topic/cause, unheld/closed Read grant,
+  omitted grant or forged current knowledge refuse typed save_corrupt with existing
+  recovery and no repair/deletion. Legitimate B6 ward evidence remains accepted.
+- Book interaction: Take → World → Contents → Equipment & Inventory → book detail
+  → explicit Read → Character topic label; container → nested book → Read → Back
+  to container → Leave. Opening/back sends no Read. Confirmed text remains in the
+  exact book history; latest Read cold reopen restores reachable parents and book
+  once after chapter Continue. Unavailable target restores no obsolete route or
+  World/other-book fallback. Scene/combat, refusal, pending save and retry keep
+  existing precedence. Ordinary notice still reads on entry. Browse at 19:00 and
+  across 20:00 to verify two independent novice cards and departure behavior.
 
-## Acceptance, mutants and UI/save proof
+For each break apply its mutant to existing focused tests first; add one minimal
+named-break case only if that layer misses it. Plant topic-on-Examine, swapped book
+mapping, omitted closed-ancestor/actor/identity check, replay duplicate grant/history,
+ordinary notice topic grant, novice identity conflation and historical validation
+against today's custody. Observe red, restore green. Pin expected command/text/fact
+results independently, never through production helpers or another kernel. Reuse
+old tests that already kill a mutant; no count-only or source-text tests.
 
-A fresh literal actor with no topics who Takes/Examines either book learns nothing; held Read of ward grants only ward, bell Read grants only bell; reread/replay has no second grant. With the exact book inside an open held trunk, Read succeeds; closing that trunk refuses before grants or narration. A same-key forged/remote item and malformed topic reference are rejected by actual loader/admission. Ordinary Landing/board Read preserves its eventless/no-topic contract. Verify novice state at clock **68400**: two distinct touch cards, text “novice” ambiguous; Ash alone at20:00 and Hale alone in the early garden are not conflated.
+## Checks, reviews and handoff
 
-Save/reopen held, nested, closed-lid and post-grant states; malformed saved topic evidence is typed corrupt. Recover Read narration in its exact item detail, not World or another book. Plant topic-grant-on-Examine, wrong book→topic mapping, skipped reach/closed-lid check and merged novice identities; tests must detect the player behavior. Browser: traverse all four rooms; Take→item detail→Read→topic chip, Back/reopen/reread and refresh; inspect the two novice cards at19:00. Stop if B6 has no actual reusable topic contract, an arbitrary ordinary Read must be changed to grant knowledge, or book support grows beyond one page and one named grant.
+Read mechanics/storage/contracts/mobile/evidence lessons before those surfaces.
+Use pinned `mise exec --` with writable task-local state. Focused source lane:
+compiler/loader/book/topic/custody/schedules, real SQLite receipt/fault/reopen,
+Book routing/freshness, touched TS typechecks, contract/feature generation and
+headless simulation. Record commands/status on the exact head and inherited failures.
+Normal commit hooks apply. Full active `bin/check_all.sh`, changed-schema mutant
+sweep, closed reviews and exact-head CI precede accumulated remote publication.
+A later authorized isolated browser walkthrough supplements SQLite evidence; no
+native/Hermes/storage equivalence claim.
 
-## Shared delivery and proof contract
-
-This is a **provisional, source-unbuilt PM recommendation**, not a specification amendment, source GO, review approval or completed check. Parent PM must adopt its policy and re-pin the actual merged prerequisites before assigning source work. Initial inspected baseline was clean PM `0fbd2847`/chapter v011/API1.10. Revalidated during final planning: clean PM HEAD `f467f75b1e5a68462e61987f078508dafcf97a42` records PR190 merged as `05b0cb6f`, chapter `ashmere_missing_child@0.0.12`/API1.11 with the typed escort/fatal-separation/return contract. This is a provisional baseline only; each future A–D prerequisite still needs its own exact merged-source re-pin. Target main/source SHA, release/API version, content hash, allocation oracle and PR number are **null** until that source exists. The branch below is proposed, not created.
-
-Follow `AGENTS.md`, `docs/WORKFLOW.md` and `docs/system/architecture.md#building-mechanics-by-composition`. Amend the governing active clauses and record the substantive PM selection before code in the same PR. Reuse current primitives; no chapter-name switch in the engine, new general framework or speculative capability. Cartridge owns every world number; preserve frozen old fixtures, derive the new release/hash/IDs independently and retain exact refusal across unavailable pins. Read `docs/lessons/{mechanics,storage,contracts,mobile,evidence}.md` for the touched surfaces. A source/schema change requires applicable compiler/loader negatives, generated-contract checks and the contract-lesson schema mutant sweep.
-
-For each new test name the distinct realistic break, use literal expected values independent of the code, and reuse an existing test if it already kills that mutant. Actually plant the named mutation, observe red, restore and observe green. No source-text or registry-count tests. New state must pass real SQLite cold reopen at **every legal committed intermediate**, genuinely failed COMMIT, uncertain COMMIT in both committed and absent branches, lost acknowledgement and same-invocation replay; malformed new rows/evidence must yield typed `save_corrupt` with in-place Start over, never an untyped exception or repair. Memory adopts only confirmed changed rows plus receipt, preserving structural sharing.
-
-Use `mise exec --` and the existing focused kernel/host/Book/compiler harnesses; finish with the normal `bin/check_all.sh`/pre-push gate once and exact-head shared CI, retaining the headless TypeScript `sim` engine checks. Browser Book interaction and refresh/persistence are distinct from Node/real-SQLite host proof. Browser-first iteration is the owner's newer direction in the complete map; publish that workflow routing before source work. Native Android/iOS build, Hermes/device lifecycle and physical harness rows remain deferred to prelaunch tightening. Do not start previews/devices or touch owner saves during this planning task; later browser proof uses an isolated run once authorized.
-
-Developer self-reviews correctness and runs Ponytail Review before handoff. Each source PR needs a fresh primary reviewer; add the workflow's independent save/protocol opinion when those contracts change, and Astra for proposal/foundation changes. Fixes return to the same developer/reviewer. PM verifies all started checks on the exact final head, merges a record-bearing PR with a merge commit, updates ROADMAP status only, and preserves the Claude/Codex handoff. Scope growth past one reviewable complete player outcome, a frozen-fixture conflict, owner-save/destructive work, paid services, weakened recovery/no-wait rules, or a new architecture/spec conflict returns to PM before implementation.
-
-Planning audit: Ponytail review found no new framework or dependency needed; each added semantic surface has the named first consumer above. Correctness review retained exact identity, no-wait, actual route, safe corpse recovery and new-shape save/admission proof. These are design checks only; **no implementation tests, mutations, browser/native proof or independent source approval were run or claimed by this planning task**.
+Ponytail Review and actual-diff correctness self-review precede fresh independent
+primary review plus separate protocol/save opinion if those contracts change;
+Astra only on proposal/foundation/gate under workflow. Planning gets a short fresh
+docs review without gameplay mutation. Stop for unreviewed/unpinned prerequisites,
+missing reusable B6 topic lowering, private-study routing blocking public Aldric,
+nonrecoverable actual custody, changed ordinary notice grants, protocol/foundation
+scope beyond this consumer or conflicting governing clauses. No invented successor
+pins, passing proof, merge or publication. Planning self-review: reuse existing
+custody/topic/receipt/detail owners, no new framework/dependency; source proof null.

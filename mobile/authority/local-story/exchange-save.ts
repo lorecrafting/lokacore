@@ -2,7 +2,7 @@
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
-import { step } from '../../../kernel/ts/src/runtime/world.ts';
+import { step, stepElapsed } from '../../../kernel/ts/src/runtime/world.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
@@ -46,7 +46,11 @@ export function exchangeSave(
       ('actor_id' in command.payload && command.payload.actor_id !== saved.character)
     )
       invalid();
-    const replayed = step(world, command, row.revision);
+    if (command.payload.type === 'elapsed' && command.payload.run_id !== meta.run_id) invalid();
+    const replayed =
+      command.payload.type === 'elapsed'
+        ? stepElapsed(world, command, row.revision)
+        : step(world, command, row.revision);
     if (!same(replayed.decision, decision) || replayed.decision.kind !== 'accepted') invalid();
     world = replayed.world;
     previous = row.revision;

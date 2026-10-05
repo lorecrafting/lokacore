@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { gameView } from '../../../kernel/ts/src/index.ts';
 import {
   bundle,
@@ -13,8 +16,8 @@ import {
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-function setup() {
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
+function setup(path = ':memory:', clock = { wall: 10000, mono: 0 }) {
+  const a = elapsedHost(path, clock, bundle);
   let opened = openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host);
   assert.equal(opened.kind, 'open', JSON.stringify(opened));
   if (opened.kind !== 'open') throw new Error('open');
@@ -306,4 +309,36 @@ test('randomly seeded B5 lineage reopens and Start over preserves the drawn seed
   a.reopen();
   assert.deepEqual(a.story().world().state.rng, [5, 6, 7, 8]);
   a.sql.close();
+});
+
+// Breaks: cold replay delivers trusted elapsed through player admission, marking a lawful save corrupt.
+test('trusted elapsed reopens before S9 and reaches the actual herb exchange consumer', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-b5-elapsed-')),
+    path = join(dir, 'save.db');
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const a = setup(path);
+  a.clock.wall += 20;
+  a.clock.mono += 20;
+  assert.equal(a.story().pulse('active', a.story().runId()).kind, 'ready');
+  assert.equal(a.story().world().state.clock, 64801);
+  assert.equal(
+    a.sql
+      .prepare(
+        "SELECT count(*) AS n FROM receipt WHERE json_extract(command,'$.payload.type')='elapsed'",
+      )
+      .get()!.n,
+    1,
+  );
+  a.sql.close();
+  const reopened = setup(path, { wall: 10020, mono: 0 });
+  try {
+    assert.equal(reopened.story().world().state.clock, 64801);
+    reopened.gather();
+    reopened.accept();
+    reopened.turn();
+    reopened.reopen();
+    assert.equal(reopened.story().world().state.containers[herbs[0]], wick);
+  } finally {
+    reopened.sql.close();
+  }
 });

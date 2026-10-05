@@ -514,3 +514,76 @@ must target its authored dialogue rather than Talk's first eligible key. Its rep
 is informational and promises no spell. Cold reopen restores the exact committed
 wrong/success speaker line once, using that invocation's receipt; never borrow an
 unrelated latest receipt or treat selected tiles as a grant.
+
+## C3 living hound and loot details
+
+**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+projects each co-present living hound as its own existing NPC detail/action target,
+with its exact EntityId and current HP condition. Shared blueprint names may be
+the same; selecting an entry binds that instance, never the first definition match.
+Departure/death prunes its detail route and stale Attack revalidates presence/life;
+a different generation cannot inherit the old invocation. Adjacent Scan includes
+living spawned members through ordinary movement sight. HP0 hounds are absent.
+
+Attack opens the existing Combat page, with C1 defenses and only its current
+Stand/Flee/Look/Scan controls. Committed death closes once; the room then exposes
+the real public hound corpse and its ordinary Contents/Take path. Successful Take
+shows that exact pelt in Carrying, with committed custody narration once. Refused,
+pending or faulted commands claim no spawn, kill or loot. Reopen uses structured
+receipt routing, keeping combat history on Combat and Take history on item detail.
+No ecology status screen, countdown, Skin verb or next-day instruction is needed.
+An all-hours fresh-game Book walk uses existing initial hounds in either allowed
+room, following adjacent sight now when home is empty. Required story, loot/corpse
+recovery and that walk never require waiting for respawn, wandering or darkness.
+
+## B8 Maud and bed details
+
+**Selected, source pending.** Original Maud's detail follows the canonical
+[detail order](#detail-page-order), with authored description, nonempty committed
+history, then current S1 dialogue and separate Room/Meal/Drink service offers.
+Each offer states its projected exact price and declared benefit, including
+capped MV recovery and availability reasons. Sold-out,
+already-paid, full-MV and unaffordable offers cannot appear actionable. Existing
+Leave, scene/combat precedence, live freshness and pending-save fence remain.
+Services do not steal S1's first-eligible Talk/turn-in, open a synthetic dialogue
+or create success merely by rendering the menu.
+
+Accepted service narration stays in Maud's history and refreshes confirmed
+pennies/MV/availability once, also after lost reply, cold reopen and exact replay.
+Pending/refused/stale/fault outcomes claim no purchase or recovery. Bed rental
+narration points upstairs; the actual Inn Rooms bed detail shows confirmed free
+or paid text and offers the existing ordinary Rest only when entitled and
+currently admitted. This control emits the existing targetless Rest invocation;
+its bed identity belongs to the local detail route, not a new command target.
+Rest uses position's existing stable-route behavior and
+confirmed outcome. It never narrates a dream or sleep for rental. Ordinary
+position controls remain accessible without payment; Leave returns to World.
+No optimistic balances, local entitlement flags, recovery-rate bonus, time
+pause or new store/UI framework is introduced.
+
+## D2 held book details
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
+ordinary item detail order and custody projection. World → book detail → Take
+confirms the existing return to World. Contents → Equipment & Inventory → held
+book detail offers explicit Read; opening that item sends no Read. For an open
+held container, tapping its projected child pushes the child's full detail onto
+the existing stack. Back to the immediate container pops locally without a command;
+Leave/Back to World clears the stack. No new document/page-navigation system is added.
+Closed/locked ancestors expose no child Read or invented text.
+
+Read follows shared `buttonsOf`, `actionContext`, freshness, pending-save and exact
+retry handling. The confirmed one-page text appends to that exact item's history,
+then current options; the item page stays open. Pending/refused/stale/fault attempts
+show no learned topic or invented page text. Character shows the projected known
+topic labels; re-rendering or visiting Character never grants them. Intentional new
+Read can repeat text; replay of one invocation appends once. Authority clock and
+NPC schedules continue while a player browses these local pages.
+
+After chapter Continue on cold reopen, recover the latest committed Read to its
+original book history and currently reachable item route, including the projected
+open held-container parents. If custody no longer permits that route, retain exact
+history identity without opening an obsolete detail or copying text to World.
+Ordinary notice entry keeps its existing automatic Read behavior. Ash/Hale have
+separate touch cards at the declared overlap; a departed novice's pending context
+retains its original identity and follows normal refusal/Leave rules.

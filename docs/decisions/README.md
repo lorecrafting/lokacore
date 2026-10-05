@@ -32,6 +32,10 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Chapter 1 documentation audit](owner-decision-chapter-one-docs-audit-2026-10-05.md): one Astra high congruence and archive-candidate pass after A–D source integration, before E3 closes.
+
+- [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment.
+
 - [B3 Peg's immediate shop PM decision](pm-decision-b3-pegs-shop-2026-10-05.md): finite authored shelf, identity-conserving buyback and no restock.
 
 - [B1 chapter calendar and Book status PM decision](pm-decision-b1-calendar-status-2026-10-05.md): authored hour/day, solar/lunar cycle and confirmed status consumer.
@@ -221,3 +225,6 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [C2 finite Watchman's Rounds](pm-decision-c2-watchmans-rounds-2026-10-05.md): all-hours explicit leader steps, causal checkpoint credit, recoverable death failure and trust-only completion.
 
 - [B6 all-hours Wisp and usable ward](pm-decision-b6-wisp-2026-10-05.md): doused-light Seek, bounded sitting with immediate retry and a public Aldric ward consumer.
+- [C3 bounded living Fen hounds](pm-decision-c3-living-hounds-2026-10-05.md): exact spawned bundles, day/night slot bounds, deliberate fights and conserved pelt loot.
+
+- [D2 public Priory and held books](pm-decision-d2-priory-books-2026-10-05.md): ten public rooms, exact held/open-container Read, idempotent Ward/Bell and ordinary custody recovery.
