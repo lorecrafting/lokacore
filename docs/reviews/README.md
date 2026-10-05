@@ -277,3 +277,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [B5 finite Infirmary Herbs plan](2026-10-05-b5-infirmary-herbs-plan-review.md): local planning head `7faba899` against `d41ec0d2`, independent APPROVE; no findings, finite identity-preserving stock, explicit repeat/cap and composed save contract checked. Docs-only, no implementation proof.
 
 - [Fast provisional local integration](2026-10-05-local-fast-lane-review.md): local draft `61873d32` against `e028dbd3`, initial CHANGES REQUIRED; scoped fix `d0674fc4`, independent APPROVE, LFL-1/LFL-2 closed.
+- [Live Chapter 1 board](2026-10-05-live-board-review.md): initial local source head `ebf153f9` against `0caf15c7`, independent CHANGES REQUIRED; scoped final head `67a81244770b16664c0600a89cefd1d1c9850c7e`, APPROVE, LB-1–LB-4 closed by real-plan parsing, safe watcher/report output, publication provenance and relative-path redaction.
