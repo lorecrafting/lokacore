@@ -208,3 +208,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Q3-B bell-first prior and lost](pm-decision-q3-bell-prior-lost-2026-10-05.md): public Aldric, exact Belfry Ring, typed Q3/prior and bell-first Q2/lost.
 - [Q3-F fox through a silent bell](pm-decision-q3-fox-silence-2026-10-05.md): after either complete Q2 return, exact Belfry Silence resolves Q3/fox with its own evidenced scene.
 - [A3 voluntary Green finale](pm-decision-a3-green-finale-2026-10-05.md): five fixed ending memories, explicit Begin and final-line acknowledgement before one local completion report.
+
+- [B5 finite Infirmary Herbs](pm-decision-b5-infirmary-herbs-2026-10-05.md): real conserved herb/bandage supply, immediate optional repeat and separate capped S9 contribution.

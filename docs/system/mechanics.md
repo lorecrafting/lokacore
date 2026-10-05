@@ -723,3 +723,69 @@ rules. The existing query budget covers the custody and carrying checks. Accepte
 changes, receipt and narration commit together before adoption or reply; exact retry
 returns the same receipt without another item or payment. Saved custody and both
 participating balances must reopen as valid current-build truth.
+
+## S9 Infirmary Herbs (B5 selected contract)
+
+This planned consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
+It is not installed source or proof. Reuse containment, carrying, dialogue, quest,
+bounded fact adjustment and receipts. [Cartridge stock](cartridge.md#b5-herb-and-bandage-stock)
+contains the exact quantities; no engine literal identifies Wick, fenwort or S9.
+
+Chapel Nave north↔Cloister south and Cloister east↔Infirmary west are
+public reciprocal exits. The original Wick is living,
+present and reachable there at all hours, regardless of bell, child or faction
+outcomes. Willow Shade has an inspectable fenwort patch with an explicit finite
+set of authored item IDs initially directly in that room. Harvest selects the
+lowest eligible EntityId in lexicographic order still directly in the patch's
+room, and transfers that one real item into the actor's body. The patch is a
+detail, not a new holder or portable container. Its remaining stock is derived
+from these IDs' actual room custody. Ordinary Take of those same items is lawful
+and consumes the same stock. A dropped eligible item in that room restores its
+availability; no elapsed time refills it. Empty stock refuses before any effect.
+Positive-load carrying admission, reach and query budgets are the existing Take
+rules. No random roll, herbalism prerequisite, mint, count row or regrowth job
+exists. Harvest neither deletes nor recreates an item.
+
+Wick offers an explicit S9 acceptance only when the actor directly holds the
+required eligible herbs and Wick directly holds the required funded bandages.
+The offer creates one actor-owned occurrence bound to Wick; a later explicit
+acceptance may replace that actor's resolved S9 with a fresh occurrence identity.
+Active occurrences cannot be replaced, and no acceptance or replacement is
+implicit in Talk or turn-in. Reacceptance has no time gate and does not reset the
+separate player-scoped cumulative S9 contribution. Keep the latest quest row,
+not a second quest history store; committed receipts retain older evidence.
+
+Turn-in binds the active occurrence, Wick, the lexicographically lowest required
+eligible herb IDs directly in the actor's body, and the lowest required funded
+bandage IDs directly held by Wick. Choose rechecks those exact IDs and the living,
+co-located participants; a stale binding cannot silently substitute other items.
+Ground, worn, nested, corpse-held, foreign-definition and other-NPC herbs are
+ineligible until ordinary custody actions restore direct body holding. Current
+custody, not historical item_acquired credit, determines readiness.
+
+One accepted exchange transfers all bound herbs actor→Wick and all bound bandages
+Wick→actor, resolves that occurrence and applies its permitted S9 contribution
+once. Herbs stay at Wick with their original IDs; no deletion/consumed-item sink
+is introduced. The three-for-three numbers and faction increment/cap are content.
+Check the final actor load after outgoing herbs and incoming bandages using the
+shared carry query: equality fits; a positive net acquisition over the ceiling
+refuses, while a neutral or load-reducing exchange follows ordinary carrying
+semantics. Check recipient capacity, custody, distinct IDs and all participating
+facts before effects. Every transfer, fact, quest, choice, event and narration
+commits together or none does; no partial herbs-first delivery is possible.
+
+The S9 contribution fact measures only cumulative gain actually awarded by S9,
+independently of the global Priory/Fen axis. Requested gain is the smaller of the
+authored increment and remaining S9 allowance. Apply B2's global bounds; record
+the actual positive axis increase as contribution, so a globally saturated axis
+cannot spend unawarded allowance. Never lower contribution on unrelated faction
+loss. At the contribution cap, a lawful exchange still gives all its bandages.
+An old receipt or continuation cannot resolve or reward a new occurrence.
+
+S9 and all repetitions are optional and never gate the finale, required travel,
+C5 learning or possession recovery. Drop, Put, Take and the existing owned-corpse
+recovery preserve herbs/bandages and occurrence identity. Retrieval is required
+before turn-in; death does not cancel or refill S9. Giving away an herb or bandage
+may exhaust this optional supply; explain the unavailable exchange rather than
+minting replacements or making the player wait. Any later required consumer of
+bandages must adopt an immediate recovery/supply route before it is exposed.

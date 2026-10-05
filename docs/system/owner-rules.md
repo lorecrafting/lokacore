@@ -21,6 +21,8 @@ and not repeated here.
 - B2 S2 uses the real public Aldric, Peg's always-reachable offer, an inclusive chapter
   deadline and a conserved funded penny reward; its source is installed in the local
   chapter 0.0.16 ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
+- B5 S9 uses finite real herb/bandage stock, immediate optional explicit repeats and a separate capped Priory contribution ([PM adoption](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)).
+
 - B3 Peg's shop uses a finite four-item authored shelf, exact conserved penny exchange,
   same-ID buyback and no restock ([PM adoption](../decisions/pm-decision-b3-pegs-shop-2026-10-05.md)).
 - Q3-B uses an exact bell-detail recipe, typed terminal reactions and an evidenced

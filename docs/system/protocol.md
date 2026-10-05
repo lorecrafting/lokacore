@@ -512,3 +512,26 @@ one writer group; no stock-count or creation operation is needed. The receipt re
 one accepted exchange. Existing `query_steps` and failure codes govern each check;
 the developer adds only the command, capability, authored offer and view schema
 needed for this consumer.
+
+## B5 harvest and exchange composition
+
+[B5](mechanics.md#s9-infirmary-herbs-b5-selected-contract) needs only a typed
+finite-stock harvest invocation and an exact multi-item dialogue exchange plus
+explicit resolved-quest reacceptance with fresh occurrence identity. The actual
+source consumer may reuse an existing invocation where it expresses this full
+contract; do not add an item creation operation. The death-only entity.create
+contract remains unchanged.
+
+Admission and projection share the same current-stock, participant, occurrence,
+exact-custody, contribution and final-load query under the existing command
+budget. Bound multi-item lists are distinct and deterministic by EntityId; their
+length comes from the authored exchange. Each transfer has the observed source,
+known destination and ordinary preconditions. One writer group owns this bounded
+exchange. Lower existing transfer/quest/fact operations where possible; no
+post-commit authority or presenter gameplay writer is permitted. Receipts bind
+actor, occurrence, Wick, all exact outgoing/incoming IDs and the actual faction
+increase. Reacceptance cannot reuse an earlier occurrence ID. A stale continuation
+cannot act on the latest occurrence merely because its quest definition matches.
+GameView projects remaining harvest availability, exchange readiness, journal
+state and authored refusal reasons from confirmed truth, without a stock ledger,
+created-item origin, expiry job, daily clock cut or unbounded history collection.
