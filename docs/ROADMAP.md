@@ -16,7 +16,7 @@ design from Ashmere’s actual cast and retains the no-wait route rule.
 The [Missing Child completion plan](MISSING-CHILD-PLAN.md), merged in
 [#192](https://github.com/lorecrafting/lokacore/pull/192) after independent review,
 maps 33 proposed PRs through the remaining player outcomes, dependencies, relative
-lift and proof. Its rows are plans, not completed slices. The
+lift and proof. Completed rows are recorded below. The
 [33 provisional slice briefs](briefs/chapter-one/README.md), merged in
 [#193](https://github.com/lorecrafting/lokacore/pull/193) after a dependency finding
 was fixed and independently rechecked, provide candidate assignment detail.
@@ -151,7 +151,13 @@ him to Elspeth for the `rescued` path — merged in
 references were fixed. Primary and separate Sol save rechecks approved, five
 scheduled source-head checks (including headless `sim`) passed, and the final
 review-record head passed its checks. Chapter release 0.0.12 offers both complete
-return paths; the `lost` outcome and Q3 bell/finale are still ahead.
+return paths.
+
+A1 Q3-B — reach the bell and resolve the prior/lost path — merged in
+[#196](https://github.com/lorecrafting/lokacore/pull/196) after the scene-contract and
+save-reopen findings were fixed, independently rechecked and approved. The lost
+outcome is now playable; A2 fox choice and A3 Green finale remain ahead.
+This completes 1 of the 33 proposed Chapter 1 completion slices.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
