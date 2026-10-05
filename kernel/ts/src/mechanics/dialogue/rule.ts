@@ -180,7 +180,7 @@ function applyChoice(
   if (!run) return { kind: 'fault' as const, code: 'precondition_failed' as const };
   const given =
     option.exchange && d.quest
-      ? exchangeTransfers(world, command, mint, row, body, d.quest)
+      ? exchangeTransfers(world, command, mint, row, body)
       : handOver(world, command, mint, row, option, body, boundReceive ? 2 : 1);
   const quests = q
     ? [event(world, command, mint, boundReceive ? 1 : run.position + 1, q.payload)]

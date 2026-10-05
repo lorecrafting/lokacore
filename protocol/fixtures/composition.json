@@ -5498,6 +5498,280 @@
           }
         ]
       }
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "note": "A forged successful standalone retirement lacks its required fresh activation.",
+      "observation": {
+        "state": "resolved_repeat",
+        "delta": {
+          "ops": [
+            {
+              "op": "quest.retire",
+              "writer_group": 0,
+              "instance_id": "b1000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "quest",
+                "instance_id": "b1000000-0000-4000-8000-000000000000"
+              },
+              "value": null
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "note": "A fresh repeat activates a different quest.",
+      "observation": {
+        "state": "resolved_repeat",
+        "delta": {
+          "ops": [
+            {
+              "op": "quest.retire",
+              "writer_group": 0,
+              "instance_id": "b1000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            {
+              "op": "quest.activate",
+              "writer_group": 0,
+              "instance_id": "b2000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "other"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "bindings": [
+                {
+                  "role": "bram",
+                  "entity_id": "30000000-0000-4000-8000-000000000000"
+                }
+              ]
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "quest",
+                "instance_id": "b1000000-0000-4000-8000-000000000000"
+              },
+              "value": null
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "note": "A fresh repeat activates a different player scope.",
+      "observation": {
+        "state": "resolved_repeat",
+        "delta": {
+          "ops": [
+            {
+              "op": "quest.retire",
+              "writer_group": 0,
+              "instance_id": "b1000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            {
+              "op": "quest.activate",
+              "writer_group": 0,
+              "instance_id": "b2000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000001"
+              },
+              "bindings": [
+                {
+                  "role": "bram",
+                  "entity_id": "30000000-0000-4000-8000-000000000000"
+                }
+              ]
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "quest",
+                "instance_id": "b1000000-0000-4000-8000-000000000000"
+              },
+              "value": null
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "note": "A repeat reuses its retired occurrence ID.",
+      "observation": {
+        "state": "resolved_repeat",
+        "delta": {
+          "ops": [
+            {
+              "op": "quest.retire",
+              "writer_group": 0,
+              "instance_id": "b1000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            {
+              "op": "quest.activate",
+              "writer_group": 0,
+              "instance_id": "b1000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "bindings": [
+                {
+                  "role": "bram",
+                  "entity_id": "30000000-0000-4000-8000-000000000000"
+                }
+              ]
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "quest",
+                "instance_id": "b1000000-0000-4000-8000-000000000000"
+              },
+              "value": null
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "id": "delta_preconditions_hold",
+      "note": "A fresh repeat uses a different writer group.",
+      "observation": {
+        "state": "resolved_repeat",
+        "delta": {
+          "ops": [
+            {
+              "op": "quest.retire",
+              "writer_group": 0,
+              "instance_id": "b1000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              }
+            },
+            {
+              "op": "quest.activate",
+              "writer_group": 1,
+              "instance_id": "b2000000-0000-4000-8000-000000000000",
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "bindings": [
+                {
+                  "role": "bram",
+                  "entity_id": "30000000-0000-4000-8000-000000000000"
+                }
+              ]
+            }
+          ]
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "quest",
+                "instance_id": "b1000000-0000-4000-8000-000000000000"
+              },
+              "value": null
+            }
+          ]
+        }
+      },
+      "holds": false
     }
   ]
 }

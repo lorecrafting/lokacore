@@ -130,7 +130,6 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
   }
 }
 
-// size: allow 45, static participant identity and custody share one admission check
 function roleBlocked(
   world: World,
   row: ChoiceRow,
@@ -144,13 +143,7 @@ function roleBlocked(
     const expected = d.roles[r.role];
     if (option.exchange && /^(outgoing|incoming)_\d{2}$/.test(r.role)) continue;
     const entity = world.entities[r.entity_id];
-    if (
-      !expected ||
-      entity?.kind !== expected.role ||
-      r.entity_id !==
-        world.entityIds[refString(expected.role === 'npc' ? expected.npc : expected.item)]
-    )
-      return 'not_owned' as const;
+    if (!expected || entity?.kind !== expected.role) return 'not_owned' as const;
     const needed =
       allRolesNeeded ||
       r.role ===

@@ -79,3 +79,25 @@ Broad mobile typecheck is unavailable with the current installed dependencies:
 `@e2e-dev/web` and `e2e` are missing in untouched `e2e.config.ts`/`tests/book.e2e.ts`.
 A temporary config excluded only those E2E files and the existing test exclusions;
 all production sources typecheck. No native or browser run was attempted.
+
+## Independent review fix round 1
+
+Primary `B5-P1`/`B5-P2` (record commit `eab3a8f9`) and save/protocol
+`B5-S1`/`B5-S2` (`d77332eb`) remain open for scoped independent recheck.
+P1/S1 describe the same elapsed replay defect.
+
+- Accepted trusted elapsed receipts now use `stepElapsed`, including the saved run ID
+  check. A real clock tick from 64800 to 64801 survives physically closing/reopening a
+  file-backed SQLite connection before S9, then the actual harvest/exchange consumer.
+- Static dialogue roles preserve their bound identities. B5 compares its continuation's
+  participant set to the accepted quest binding and lowers to that original NPC; the
+  existing generic pinned-role test and a B5 mapping-drift test both pass.
+- Each kernel's independent precondition checker requires immediate activation of the
+  same quest/scope with a fresh instance and the same writer. Literal forged-success
+  observations reject standalone and each mismatched pairing.
+
+Reintroducing player-only elapsed replay and static-role re-resolution makes the named
+regressions fail. Removing each kernel's retire pairing check also fails the literal
+invariant observations; individually dropping the TS quest/scope/fresh-ID/writer checks
+fails its corresponding observation. All mutations are restored. Ponytail and correctness
+self-review: scoped fixes, no new ledger, repair or dependency.
