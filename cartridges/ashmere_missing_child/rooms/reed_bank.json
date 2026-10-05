@@ -3,7 +3,8 @@
   "description": "room.reed_bank.description",
   "exits": {
     "north": { "to": "reed_path" },
-    "west": { "to": "willow_shade" }
+    "west": { "to": "willow_shade" },
+    "south": { "to": "mire_crossing" }
   },
   "details": {
     "tracks": {

@@ -235,3 +235,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [FEN-01 first south search route](2026-10-05-fen01-south-search-review.md): PR #184 at `c1764bdd`, initial CHANGES REQUIRED; scoped fix `673ec70c`, independent APPROVE, FEN01-R1 closed; heading red control detected, restored focused Book/App/compiler checks and exact-head CI green.
 
 - [Q1-A — Elspeth’s first lead](2026-10-05-q1-a-first-lead-review.md): PR #185 at `de66051fd61a359d2f1927e1390bce351384169d`, independent APPROVE; explicit acceptance, current-possession clue and once-only report; no findings, two mutation classes detected, restored focused checks pass.
+
+- [FEN-02 — Mire Crossing and Fox Hollow](2026-10-05-fen02-review.md): PR #186 at `5c8e3e27e8e8d63ebfa317700124b278741593f0`, independent APPROVE; no findings, reciprocal all-hours/cold-return route and detail-local Book behavior verified; two independent red controls detected.
