@@ -162,7 +162,8 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-This completes **4 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2).
+Local `main` has completed **5 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3).
+GitHub `main` has three (A1, B1, A2).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -170,7 +171,11 @@ adopts the A3 Green finale and five-outcome plan; neither PR alone completed a s
 The owner's [one-time hosted-CI exception](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
 applied to these five merges while GitHub Actions delayed and cancelled runners.
 B2 Chandler's Debt quest mechanics are implemented and independently reviewed on
-local `main` at chapter 0.0.16/API1.14. A3 Green finale source work remains ahead.
+local `main` at chapter 0.0.16/API1.14. A3 Green finale is implemented at chapter
+0.0.17/API1.15 and independently approved after the bound-Continue and save-proof
+findings were fixed ([primary review](reviews/2026-10-05-a3-green-primary-review.md),
+[save review](reviews/2026-10-05-a3-save-second-review.md)). Both await accumulated-head
+publication checks and a GitHub PR.
 B3 Peg's shop has an [adopted PM contract](decisions/pm-decision-b3-pegs-shop-2026-10-05.md)
 and a [re-pinned brief](briefs/chapter-one/b3-pegs-shop-brief-2026-10-05.md)
 on local B2 base `ec3ab73d`; source implementation and review remain ahead.
