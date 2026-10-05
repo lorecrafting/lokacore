@@ -1,0 +1,48 @@
+✖ Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead (30.553333ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 184.460875
+
+✖ failing tests:
+
+test at mobile/authority/local-story/missing_child.test.ts:415:1
+✖ Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead (30.553333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      {
+  -     fact: {
+  -       cartridge_id: 'ashmere_missing_child',
+  -       cartridge_version: '0.0.9',
+  -       key: 'fen_tracks_found',
+  -       kind: 'fact'
+  -     },
+  -     new: true,
+  -     old: false,
+  -     type: 'fact_changed'
+  -   },
+  -   {
+        action: 'study_tracks',
+        subject_id: '86b28f4e-f743-87f8-8375-2ead5c2c295c',
+        type: 'action_completed'
+      }
+    ]
+  
+      at TestContext.<anonymous> (file://[redacted-local-path])
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { type: 'action_completed', action: 'study_tracks', subject_id: '86b28f4e-f743-87f8-8375-2ead5c2c295c' } ],
+    expected: [ { type: 'fact_changed', fact: [Object], old: false, new: true }, { type: 'action_completed', action: 'study_tracks', subject_id: '86b28f4e-f743-87f8-8375-2ead5c2c295c' } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

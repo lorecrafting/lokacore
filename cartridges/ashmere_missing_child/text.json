@@ -139,7 +139,7 @@
   "narration.elspeth.accept": "You agree to look around Village Green for a sign of Wren.",
   "dialogue.elspeth_report.prompt": "Elspeth watches the folded drawing in your hand.",
   "dialogue.elspeth_report.report": "I found this drawing on the Green.",
-  "narration.elspeth.report": "“That could be Wren's drawing,” Elspeth says. “He was always exploring. The reeds south of the landing may be worth searching, but I can't know where he went.”",
+  "narration.elspeth.report": "“That could be Wren's drawing,” Elspeth says. “He was always exploring. The reeds south of the landing may be worth searching, but I can't know where he went.” “Look closely at the tracks on Reed Bank,” Elspeth says. “Follow them south. Wren is still missing.”",
   "quest.first_lead.title": "The First Lead",
   "quest.first_lead.active": "Look for a sign of Wren on Village Green.",
   "quest.first_lead.ready": "You found a fox drawing. Bring it to Elspeth at Ferry Landing.",
@@ -157,5 +157,13 @@
   "detail.hollow.title": "Hollow",
   "detail.hollow.description": "Flattened grass and old fox bones mark a place where something has rested.",
   "actions.read_hollow": "Inspect hollow",
-  "readable.hollow": "Flattened grass and old fox bones mark a place where something has rested."
+  "readable.hollow": "Flattened grass and old fox bones mark a place where something has rested.",
+  "quest.missing_child.title": "The Missing Child",
+  "quest.missing_child.active": "Elspeth asks you to search for Wren. Study the tracks at Reed Bank, south of the landing.",
+  "quest.missing_child.lead": "The tracks lead south across Mire Crossing toward Fox Hollow. Wren remains unfound.",
+  "quest.missing_child.resolved": "The search for Wren has ended.",
+  "quest.missing_child.failed": "The search for Wren has failed.",
+  "quest.missing_child.abandoned": "You left the search for Wren.",
+  "actions.study_tracks": "Study tracks",
+  "narration.study_tracks": "You kneel beside the tracks. Small footprints run south across the mire toward Fox Hollow. They give you a lead, but Wren remains unfound."
 }

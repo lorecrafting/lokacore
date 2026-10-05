@@ -80,7 +80,7 @@ export function gameView(world: World): GameView {
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door),
     actions: actions.place,
-    ...noticeViews(world, here),
+    ...noticeViews(world, here, actions.notice),
     entities: within(world, actions, here),
     inventory: within(world, actions, world.body),
     ...(equipment.length > 0 && { equipment }),

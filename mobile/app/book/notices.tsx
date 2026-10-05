@@ -20,7 +20,7 @@ const noticesOf = (view: GameView) => [
 ];
 
 export function restoredNoticePages(screen: Screen): Page[] {
-  if (screen.view.combat) return [];
+  if (screen.view.combat || screen.view.scene) return [];
   const board = screen.view.notice_boards?.find((b) =>
     b.notices.some((n) => screen.detail(n.id).length > 0),
   );
@@ -99,6 +99,7 @@ export function NoticeEntries(p: Props) {
   );
 }
 
+// size: allow 45, ordered description/history/Notice options share one detail page
 export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; world: () => void }) {
   const board =
     p.page.kind === 'board'
@@ -117,6 +118,25 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
       ))}
       {board &&
         board.notices.map((notice) => <NoticeLink key={notice.id} {...p} notice={notice} />)}
+      {!board &&
+        ('actions' in detail ? (detail.actions ?? []) : []).map((offer) => {
+          const button = p.screen.buttons.find(
+            (b) => b.detail_id === detail.id && b.action_key === offer.action_key,
+          );
+          return button ? (
+            <Tap
+              key={offer.action_key}
+              label={button.label}
+              onPress={() => p.press(button, detail.id)}
+            >
+              <Text style={{ ...prose, color: paper.accent }}>{button.label}</Text>
+            </Tap>
+          ) : !offer.available ? (
+            <Text key={offer.action_key} style={note}>
+              {p.screen.text(offer.label)}: {why(offer, p.screen.text)}
+            </Text>
+          ) : null;
+        })}
       {standalone && <Leave leave={p.world} />}
     </Sheet>
   );

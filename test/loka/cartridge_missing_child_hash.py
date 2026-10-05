@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_missing_child'
-VERSION = '0.0.8'
+VERSION = '0.0.9'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -16,8 +16,8 @@ def policy(root):
     return dict(policy_version=1, root=root)
 def definition(name, **parts):
     return dict(key=name, **parts)
-caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'resource', 'schedule', 'description_variant', 'calendar', 'death', 'combat', 'inspectable_detail', 'readable'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Ashmere — The Missing Child', requires=dict(kernel_api=dict(at_least='1.7', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.missing_child')])
+caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'resource', 'schedule', 'description_variant', 'calendar', 'death', 'combat', 'inspectable_detail', 'readable', 'reaction', 'action_recipe'], 1)
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Ashmere — The Missing Child', requires=dict(kernel_api=dict(at_least='1.8', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.missing_child')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
 v['facts'] = {key('fact', 'position'): definition('position', version=1, value_type=dict(type='enum', values=['standing', 'sitting', 'resting', 'sleeping'], default='standing'), scopes=['player'], meaning="The character's position (position@1): only its rule writes it.")}
@@ -121,11 +121,16 @@ v['dialogues'][key('dialogue', 'maud_offer')] = definition('maud_offer', npc=ref
 v['dialogues'][key('dialogue', 'maud_turn_in')] = definition('maud_turn_in', npc=ref('npc', 'maud'), quest=ref('quest', 'mauds_cellar'), policy=policy(maud_state('active')), prompt='dialogue.maud_turn_in.prompt', roles=dict(**maud_roles, key=dict(role='item', item=ref('item', 'cellar_key'))), choices=dict(done=dict(label='dialogue.maud_turn_in.done', narration='narration.maud.done', receive=dict(item='key', **{'from': 'maud'}), sequence=[dict(op='fact.adjust', fact=ref('fact', 'maud_trust'), amount=5), dict(op='fact.assign', fact=ref('fact', 'inn_cellar_cleared'), value=True)])))
 for name in ['trunk', 'storage_chest', 'player_corpse', 'rat_corpse']:
     v['items'][key('item', name)]['container'] = True
+# Q2-A independently declared producer and guarded first-lead consumer.
+v['facts'][key('fact', 'fen_tracks_found')] = definition('fen_tracks_found', version=1, value_type=dict(type='bool', default=False), scopes=['player'], meaning='The player studied the Reed Bank tracks during the search for Wren.')
+v['quests'][key('quest', 'missing_child')] = definition('missing_child', title='quest.missing_child.title', objective=dict(evidence='current_state', policy=policy(dict(op='fact_compare', fact=ref('fact', 'fen_tracks_found'), equals=True))), journal={state: f'quest.missing_child.{text}' for state, text in [('active', 'active'), ('objectives_met', 'lead'), ('resolved', 'resolved'), ('failed', 'failed'), ('abandoned', 'abandoned')]})
+v['reactions'] = {key('reaction', 'start_search'): definition('start_search', on=dict(event='quest_resolved', quest=ref('quest', 'first_lead'), outcome='report'), apply=[dict(op='quest.activate', quest=ref('quest', 'missing_child'))])}
+v['recipes'] = {key('recipe', 'study_tracks'): definition('study_tracks', label='actions.study_tracks', aliases=['study'], target=dict(kind='detail', room=ref('room', 'reed_bank'), detail='tracks'), priority=10, policy=policy(dict(op='all', items=[dict(op='quest_state', quest=ref('quest', 'missing_child'), state='active'), dict(op='fact_compare', fact=ref('fact', 'fen_tracks_found'), equals=False)])), outcomes=dict(success=dict(sequence=[dict(op='fact.assign', fact=ref('fact', 'fen_tracks_found'), value=True)], narration=dict(actor='narration.study_tracks'))))}
 v['text'] = json.loads(Path('cartridges/ashmere_missing_child/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved chapter semantics and compiler-owned defaults; only the chapter text catalog is copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
-Path('protocol/fixtures/missing_child_v008_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
+Path('protocol/fixtures/missing_child_v009_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
 # Reviewed allocation order: character, body, sixteen rooms, eight details, seven NPCs, seven items, cloak holder.
 names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice', 'detail/hollow', 'detail/plank', 'detail/tracks', 'detail/fox_prints'] + ['npc/'+name for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'fox_drawing', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
@@ -136,4 +141,4 @@ for ordinal, name in enumerate(names):
     b[8] = (b[8] & 63) | 128
     s = b.hex()
     ids[name] = '-'.join([s[:8], s[8:12], s[12:16], s[16:20], s[20:]])
-Path('protocol/fixtures/missing_child_v008_ids.json').write_text(json.dumps(ids, indent=2)+'\n')
+Path('protocol/fixtures/missing_child_v009_ids.json').write_text(json.dumps(ids, indent=2)+'\n')

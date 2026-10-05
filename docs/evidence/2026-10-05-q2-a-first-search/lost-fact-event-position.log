@@ -1,0 +1,54 @@
+✖ mixed consequences preserve fact/event order and skip a duplicate local activation (26.805541ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 150.009042
+
+✖ failing tests:
+
+test at kernel/ts/test/first_search.test.ts:201:1
+✖ mixed consequences preserve fact/event order and skip a duplicate local activation (26.805541ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      [
+        'quest_resolved',
+        1,
+        undefined
+      ],
+      [
+  +     'quest_activated',
+  -     'fact_changed',
+        2,
+  +     undefined
+  -     true
+      ],
+      [
+  +     'fact_changed',
+  -     'quest_activated',
+        3,
+  +     true
+  -     undefined
+      ],
+      [
+        'fact_changed',
+        4,
+        false
+  
+      at TestContext.<anonymous> (file://[redacted-local-path])
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ [ 'quest_resolved', 1, undefined ], [ 'quest_activated', 2, undefined ], [ 'fact_changed', 3, true ], [ 'fact_changed', 4, false ] ],
+    expected: [ [ 'quest_resolved', 1, undefined ], [ 'fact_changed', 2, true ], [ 'quest_activated', 3, undefined ], [ 'fact_changed', 4, false ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -12688,11 +12688,7 @@
       },
       {
         "path": "/apply/1/op",
-        "code": "const_mismatch"
-      },
-      {
-        "path": "/apply/1/x",
-        "code": "unknown_property"
+        "code": "unknown_variant"
       }
     ]
   },

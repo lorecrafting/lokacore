@@ -15,6 +15,7 @@ export type Button = {
   action_key: string;
   target_ids: string[];
   input: object;
+  detail_id?: string; // UI membership only; recipes retain their wire target contract
   place?: true; // a concrete target offered among GameView's place actions
   token?: string; // none: no freshness check (a test's hand-made button)
   context?: string; // only projected buttons can refresh across an unchanged live update
@@ -72,7 +73,7 @@ function journalChanged(was: GameView, now: GameView, detail: string) {
   );
 }
 
-// size: allow 45, confirmed Read routing joins existing item, combat and conversation histories
+// size: allow 55, receipt-specific Read/recipe routing joins existing item, combat and conversation histories
 function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
   const attempt = s.retry!;
   const now = game.view().view;
@@ -82,15 +83,16 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   s.returnWorld = itemChanged || accepted?.outcome === 'choice_closed';
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
-  const retained = accepted?.narration?.length ? savedNarration(game, s) : undefined;
+  const command_id = accepted?.events[0]?.causation_id; // FIFO starts with root events
+  const retained = accepted?.narration?.length ? savedNarration(game, s, command_id) : undefined;
+  const readableDetail = retained?.detail_id ?? attempt.button.detail_id;
   const detail =
-    accepted?.outcome === 'read'
-      ? (retained?.detail_id ?? attempt.button.target_ids[0])
-      : attempt.detail;
+    readableDetail ??
+    (accepted?.outcome === 'read' ? attempt.button.target_ids[0] : attempt.detail);
   const lines =
     (was.combat || now.combat) && !accepted?.narration?.length
       ? s.combatLog
-      : detail && !itemChanged && (!moved || accepted?.outcome === 'read')
+      : detail && !itemChanged && (!moved || accepted?.outcome === 'read' || readableDetail)
         ? detailLines(s, detail)
         : s.log;
   if (s.fault && combatResult(accepted)) return '';

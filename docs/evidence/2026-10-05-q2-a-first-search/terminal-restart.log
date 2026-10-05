@@ -1,0 +1,48 @@
+✖ quest resolution delivers activation to its evidenced actor and never restarts any prior instance (26.075708ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 147.572417
+
+✖ failing tests:
+
+test at kernel/ts/test/first_search.test.ts:89:1
+✖ quest resolution delivers activation to its evidenced actor and never restarts any prior instance (26.075708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   {
+  +     instance_id: 'b3e08927-63d0-8f67-ac3d-0fc7a8ae0e2c',
+  +     op: 'quest.activate',
+  +     quest: [Object: null prototype] {
+  +       cartridge_id: 'ashmere_missing_child',
+  +       cartridge_version: '0.0.9',
+  +       key: 'missing_child',
+  +       kind: 'quest'
+  +     },
+  +     scope: {
+  +       character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
+  +       kind: 'player'
+  +     },
+  +     writer_group: 1
+  +   }
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file://[redacted-local-path])
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { op: 'quest.activate', writer_group: 1, quest: [Object], scope: [Object], instance_id: 'b3e08927-63d0-8f67-ac3d-0fc7a8ae0e2c' } ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

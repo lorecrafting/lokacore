@@ -55,8 +55,8 @@ export interface Game {
   subscribe(listener: (update: GameSubscription) => void): () => void;
   /** Cartridge prose (content, not app words); none for an unknown key. */
   text(key: string): string | undefined;
-  /** The last committed narration, to show again on a reopen (06 §43). */
-  lastNarration(): NarrationRecord | undefined;
+  /** Committed narration for an exact command, or the latest on reopen (06 §43). */
+  lastNarration(command_id?: string): NarrationRecord | undefined;
 }
 
 /**

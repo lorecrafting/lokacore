@@ -1,0 +1,216 @@
+{
+  "mutations": 21,
+  "caught": 21,
+  "controls": [
+    {
+      "name": "wrong-trigger-outcome",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "quest trigger matches",
+      "exit": 1,
+      "failed_tests": [
+        "quest trigger matches both fields and rejects malformed source row, actor and scope"
+      ]
+    },
+    {
+      "name": "root-actor-activation",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "evidenced actor",
+      "exit": 1,
+      "failed_tests": [
+        "quest resolution delivers activation to its evidenced actor and never restarts any prior instance"
+      ]
+    },
+    {
+      "name": "missing-actor-validation",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "malformed source",
+      "exit": 1,
+      "failed_tests": [
+        "quest trigger matches both fields and rejects malformed source row, actor and scope"
+      ]
+    },
+    {
+      "name": "missing-scope-validation",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "malformed source",
+      "exit": 1,
+      "failed_tests": [
+        "quest trigger matches both fields and rejects malformed source row, actor and scope"
+      ]
+    },
+    {
+      "name": "terminal-restart",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "evidenced actor",
+      "exit": 1,
+      "failed_tests": [
+        "quest resolution delivers activation to its evidenced actor and never restarts any prior instance"
+      ]
+    },
+    {
+      "name": "wrong-activation-cause",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "evidenced actor",
+      "exit": 1,
+      "failed_tests": [
+        "quest resolution delivers activation to its evidenced actor and never restarts any prior instance"
+      ]
+    },
+    {
+      "name": "missing-event-ownership",
+      "source": "kernel/ts/src/runtime/decision.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "evidenced actor",
+      "exit": 1,
+      "failed_tests": [
+        "quest resolution delivers activation to its evidenced actor and never restarts any prior instance"
+      ]
+    },
+    {
+      "name": "lost-atomic-fault",
+      "source": "kernel/ts/src/runtime/proposal.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "discards the report",
+      "exit": 1,
+      "failed_tests": [
+        "a malformed reaction source discards the report and all proposal-local changes"
+      ]
+    },
+    {
+      "name": "preactivation-policy-bypass",
+      "source": "kernel/ts/src/commands/actions.ts",
+      "test": "mobile/authority/local-story/missing_child.test.ts",
+      "pattern": "only guarded Study",
+      "exit": 1,
+      "failed_tests": [
+        "Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead"
+      ]
+    },
+    {
+      "name": "missing-track-assignment",
+      "source": "kernel/ts/src/mechanics/action_recipe/rule.ts",
+      "test": "mobile/authority/local-story/missing_child.test.ts",
+      "pattern": "only guarded Study",
+      "exit": 1,
+      "failed_tests": [
+        "Q1 report atomically activates Q2; only guarded Study tracks grants its active first lead"
+      ]
+    },
+    {
+      "name": "missing-notice-buttons",
+      "source": "mobile/app/book/model.ts",
+      "test": "mobile/app/book/notice_board.test.ts",
+      "pattern": "detail-only empty-target",
+      "exit": 1,
+      "failed_tests": [
+        "Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw"
+      ]
+    },
+    {
+      "name": "world-study-leak",
+      "source": "mobile/app/book/model.ts",
+      "test": "mobile/app/book/notice_board.test.ts",
+      "pattern": "detail-only empty-target",
+      "exit": 1,
+      "failed_tests": [
+        "Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw"
+      ]
+    },
+    {
+      "name": "missing-detail-context",
+      "source": "mobile/app/book/model.ts",
+      "test": "mobile/app/book/live_actions.test.ts",
+      "pattern": "changed-context Notice",
+      "exit": 1,
+      "failed_tests": [
+        "withdrawn or changed-context Notice controls retain their captured stale token"
+      ]
+    },
+    {
+      "name": "notice-refresh-blocked",
+      "source": "mobile/app/book/presenter.ts",
+      "test": "mobile/app/book/notice_board.test.ts",
+      "pattern": "detail-only empty-target",
+      "exit": 1,
+      "failed_tests": [
+        "Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw"
+      ]
+    },
+    {
+      "name": "notice-admission-vacuity",
+      "source": "kernel/ts/src/view/invariants_view.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "Notice-only recipe admission",
+      "exit": 1,
+      "failed_tests": [
+        "Notice-only recipe admission agreement searches standalone and board-child offers"
+      ]
+    },
+    {
+      "name": "no-study-recovery",
+      "source": "mobile/authority/local-story/save.ts",
+      "test": "mobile/authority/local-story/missing_child.test.ts",
+      "pattern": "SQLite report/Study reopen",
+      "exit": 1,
+      "failed_tests": [
+        "SQLite report/Study reopen and exact replay preserve active Q2 and receipt-specific history"
+      ]
+    },
+    {
+      "name": "newer-receipt-misrouting",
+      "source": "mobile/app/book/logs.ts",
+      "test": "mobile/authority/local-story/missing_child.test.ts",
+      "pattern": "SQLite report/Study reopen",
+      "exit": 1,
+      "failed_tests": [
+        "SQLite report/Study reopen and exact replay preserve active Q2 and receipt-specific history"
+      ]
+    },
+    {
+      "name": "missing-root-evidence",
+      "source": "mobile/authority/local-story/save.ts",
+      "test": "mobile/authority/local-story/missing_child.test.ts",
+      "pattern": "malformed Study receipt",
+      "exit": 1,
+      "failed_tests": [
+        "malformed Study receipt evidence is save_corrupt on reopen"
+      ]
+    },
+    {
+      "name": "wrong-subject-accepted",
+      "source": "mobile/authority/local-story/save.ts",
+      "test": "mobile/authority/local-story/missing_child.test.ts",
+      "pattern": "malformed Study receipt",
+      "exit": 1,
+      "failed_tests": [
+        "malformed Study receipt evidence is save_corrupt on reopen"
+      ]
+    },
+    {
+      "name": "lost-fact-event-position",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "mixed consequences",
+      "exit": 1,
+      "failed_tests": [
+        "mixed consequences preserve fact/event order and skip a duplicate local activation"
+      ]
+    },
+    {
+      "name": "duplicate-local-activation",
+      "source": "kernel/ts/src/mechanics/reaction.ts",
+      "test": "kernel/ts/test/first_search.test.ts",
+      "pattern": "mixed consequences",
+      "exit": 1,
+      "failed_tests": [
+        "mixed consequences preserve fact/event order and skip a duplicate local activation"
+      ]
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+// size: allow 650, Read and Study routes/retry/recovery share one controlled Book renderer
 // Real Book routes and authority; native leaves are not device/layout evidence.
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -50,7 +51,7 @@ registerHooks({
 const { default: Book } = await import('./Book.tsx');
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v008_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v009_hash.json', import.meta.url),
     'utf8',
   ),
 );
@@ -366,8 +367,8 @@ test('notice entries use available exact-target aliases and expose unavailable r
           : { op: 'not', item: { op: 'time_window', from: 18, to: 19 } },
       },
     });
-    c.actions['ashmere_missing_child@0.0.8:action/read'] = action('read', false);
-    if (alias) c.actions['ashmere_missing_child@0.0.8:action/consult'] = action('consult', true);
+    c.actions['ashmere_missing_child@0.0.9:action/read'] = action('read', false);
+    if (alias) c.actions['ashmere_missing_child@0.0.9:action/consult'] = action('consult', true);
     const canonical = JSON.stringify(sorted(c));
     return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
   };
@@ -496,4 +497,138 @@ test('plank and hollow open descriptive noun detail pages without story credit',
     assert.deepEqual(a.game.view().view.journal, []);
     if (title !== 'Hollow') a.walk('south');
   }
+});
+
+const tracks = '86b28f4e-f743-87f8-8375-2ead5c2c295c';
+const studyBody =
+  'You kneel beside the tracks. Small footprints run south across the mire toward Fox Hollow. They give you a lead, but Wren remains unfound.';
+const startSearch = (a: ReturnType<typeof preview>) => {
+  const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
+    const r = a.game.invoke({
+      action_key: action_key as never,
+      target_ids: target_ids as never,
+      input,
+    });
+    assert.ok(r.kind === 'saved' && r.decision.kind === 'accepted', JSON.stringify(r));
+  };
+  const answer = (choice_id: string) =>
+    invoke('choose', [], {
+      choice_id,
+      continuation_id: a.game.view().view.choice!.continuation_id,
+    });
+  invoke('elspeth', ['a443f590-c8d3-86d8-9972-75e09b637bed']);
+  answer('accept');
+  invoke('move', [], { direction: 'north' });
+  invoke('move', [], { direction: 'north' });
+  invoke('take', ['1f15fe56-3e56-8cfa-812b-1f231844c782']);
+  invoke('move', [], { direction: 'south' });
+  invoke('move', [], { direction: 'south' });
+  invoke('elspeth', ['a443f590-c8d3-86d8-9972-75e09b637bed']);
+  answer('report');
+  a.walk('south');
+  a.walk('south');
+  a.draw();
+};
+
+// Breaks: Notice recipe buttons disappear from the shared builder, leak to World, carry a
+// fabricated command target, or fail live-clock refresh; entry must still Read before Study.
+test('Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw', (t) => {
+  const a = preview();
+  t.after(() => a.sql.close());
+  startSearch(a);
+  assert.ok(a.labels().includes('Tracks'));
+  assert.ok(!a.labels().includes('Study tracks'));
+  const study = a
+    .presenter()
+    .screen()
+    .buttons.find((b: any) => b.action_key === 'study_tracks');
+  assert.equal(study.detail_id, tracks);
+  assert.deepEqual(study.target_ids, []);
+  a.tap('Tracks');
+  const row = a.sql.prepare('SELECT command FROM receipt ORDER BY revision DESC LIMIT 1').get()!;
+  assert.equal(JSON.parse(row.command as string).payload.type, 'read');
+  assert.deepEqual(a.stack(), [{ kind: 'notice', id: tracks }]);
+  assert.ok(a.labels().indexOf('Study tracks') < a.labels().indexOf('Leave'));
+  const text = a.text();
+  assert.ok(text.indexOf('Tracks') < text.indexOf('Study tracks'));
+  const captured = a
+    .draw()
+    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Study tracks');
+  a.clock.wall += 1000;
+  a.clock.mono += 1000;
+  assert.equal(a.game.pulse().kind, 'ready');
+  a.draw();
+  captured.props.onPress();
+  assert.equal(
+    a
+      .presenter()
+      .screen()
+      .detail(tracks)
+      .filter((line: any) => line === studyBody).length,
+    1,
+  );
+  assert.ok(!a.presenter().screen().log.includes(studyBody));
+  const command = JSON.parse(
+    a.sql.prepare('SELECT command FROM receipt ORDER BY revision DESC LIMIT 1').get()!
+      .command as string,
+  );
+  assert.equal(command.payload.type, 'perform');
+  assert.equal(command.payload.action, 'study_tracks');
+  assert.equal(command.payload.target_id, undefined);
+  assert.ok(!a.labels().includes('Study tracks')); // unavailable is a reason, never a button
+  const after = a.text();
+  assert.ok(after.indexOf(studyBody) < after.findIndex((s) => s.startsWith('Study tracks:')));
+  const count = receipts(a.sql);
+  a.tap('Leave');
+  assert.equal(receipts(a.sql), count);
+  assert.deepEqual(a.stack(), []);
+});
+
+// Breaks: lost Study acknowledgement renders success before confirmation, refreshes a sent
+// retry's token/context, or fails to restore one detail-local narration after cold reopen.
+test('pending Study retains its detail context and restores exactly once without World narration', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-study-book-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const path = join(dir, 'save.db');
+  let a = preview(bundle, path);
+  startSearch(a);
+  a.tap('Tracks');
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  a.tap('Study tracks');
+  assert.ok(!a.text().includes(studyBody));
+  const rows = a.sql.prepare('SELECT * FROM receipt ORDER BY revision').all();
+  a.tap('Leave');
+  a.fault.reads = false;
+  a.presenter().press(
+    a
+      .presenter()
+      .screen()
+      .buttons.find((b: any) => b.action_key === 'look'),
+  );
+  assert.equal(
+    a
+      .presenter()
+      .screen()
+      .detail(tracks)
+      .filter((line: any) => line === studyBody).length,
+    1,
+  );
+  assert.deepEqual(a.sql.prepare('SELECT * FROM receipt ORDER BY revision').all(), rows);
+  a.sql.close();
+  a = preview(bundle, path);
+  assert.deepEqual(a.stack(), [{ kind: 'notice', id: tracks }]);
+  assert.equal(a.text().filter((line) => line === studyBody).length, 1);
+  assert.deepEqual(a.presenter().screen().log, []);
+  assert.deepEqual(a.sql.prepare('SELECT * FROM receipt ORDER BY revision').all(), rows);
+  a.tap('Leave');
+  a.walk('north');
+  a.draw();
+  a.sql.close();
+  a = preview(bundle, path);
+  assert.deepEqual(a.stack(), []);
+  assert.ok(!a.text().includes(studyBody));
+  assert.deepEqual(a.presenter().screen().detail(tracks), [studyBody]);
+  assert.deepEqual(a.presenter().screen().log, []);
+  a.sql.close();
 });

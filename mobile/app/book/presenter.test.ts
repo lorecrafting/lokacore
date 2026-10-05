@@ -34,7 +34,10 @@ const game = (reply: (n: number) => Reply): Game => {
   };
 };
 const accepted = (outcome: string) =>
-  ({ kind: 'saved', decision: { kind: 'accepted', outcome } as DecisionResult }) as Reply;
+  ({
+    kind: 'saved',
+    decision: { kind: 'accepted', events: [], outcome } as DecisionResult,
+  }) as Reply;
 const north = { label: 'Go north', action_key: 'move', target_ids: [], input: {} };
 
 // Breaks: a pending/refused item or Leave reply leaves detail as if the action committed.
@@ -167,6 +170,7 @@ test('confirmed room change clears old history before adding new authored conseq
         kind: 'saved',
         decision: {
           kind: 'accepted',
+          events: [],
           outcome: 'moved',
           narration: [{ key: 'new.title' }, { key: 'move.consequence' }],
         },
@@ -198,6 +202,7 @@ test('World omits the routine Close fallback while retaining authored consequenc
           kind: 'saved',
           decision: {
             kind: 'accepted',
+            events: [],
             outcome: 'choice_closed',
             narration: [{ key: 'quest.changed' }],
           },
@@ -235,6 +240,7 @@ test('a restored committed narration is not duplicated by its pending receipt re
         kind: 'saved',
         decision: {
           kind: 'accepted',
+          events: [],
           outcome: 'choice_closed',
           narration: [{ key: 'quest.changed' }],
         },
@@ -291,7 +297,7 @@ test('a narration recovery fault holds combat results while their line routing i
         committed = true;
         return {
           kind: 'saved',
-          decision: { kind: 'accepted', ...result, narration: [{ key: 'strike' }] },
+          decision: { kind: 'accepted', events: [], ...result, narration: [{ key: 'strike' }] },
         } as Reply;
       },
       lastNarration: () => {
@@ -343,7 +349,7 @@ test('combat receipt history is once-only when completion follows an already dis
       before,
       reply: {
         kind: 'saved',
-        decision: { kind: 'accepted', outcome: 'fled', narration: [{ key }] } as never,
+        decision: { kind: 'accepted', events: [], outcome: 'fled', narration: [{ key }] } as never,
       },
     });
   }

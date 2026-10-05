@@ -127,7 +127,7 @@ function opened(s: Story) {
     elapsed: (evidence: Elapsed) => elapsed(s, evidence),
     runId: () => s.meta.run_id,
     newGame: () => newGame(s),
-    narration: () => narration(s),
+    narration: (command_id?: string) => narration(s, command_id),
     token: () => token(s), // the view freshness token of the world() now shown
   };
 }

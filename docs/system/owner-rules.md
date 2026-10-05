@@ -224,3 +224,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Nested chapter notice board: [M12-B owner direction](../decisions/owner-decision-m12-b-notice-board-2026-10-05.md).
 
 - Opening room NPC for conversation and directions: [owner direction and PM selection of Elspeth](../decisions/owner-decision-opening-elspeth-2026-10-05.md).
+
+- Q2-A staged first search lead: [PM adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).

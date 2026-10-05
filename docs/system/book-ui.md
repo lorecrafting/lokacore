@@ -36,10 +36,8 @@ save status/error UI remains accurate; NPC histories stay independently bounded.
 retains movement, adjacent sight and legal door actions. The World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
-A projected Read place action keeps its exact detail target and authored label. Its confirmed
-narration joins the normal World log; pending/refused/stale attempts add no reading text,
-and receipt replay never duplicates a line. Live action freshness applies unchanged.
-Reading opens no modal and neither pauses elapsed time nor extends a deadline.
+A projected Read place action keeps its exact detail target and authored label and follows
+the canonical [notice-detail rules](#notice-board-details).
 
 The enabled status/resources tap opens Contents. It lists exactly **Character**, **Equipment &
 Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
@@ -66,7 +64,7 @@ shortcut. Movement and position admission remain kernel-owned.
 Buttons and gestures capture the offered action and interaction context when drawn or granted.
 Before a fresh invocation, the presenter may refresh the token only if no player invocation
 has been confirmed since capture and the exact action remains available: same action key, ordered target IDs and structured input, same actor and room, and
-unchanged pending choice/continuation, scene and combat context. Movement also retains its
+unchanged pending choice/continuation, scene, combat and detail membership context. Movement also retains its
 projected destination and door state; position controls retain their drawn position. Elapsed-only
 clock/resource updates therefore do not strand unchanged controls. A changed room, unavailable
 exit, departed target, altered choice or other changed interaction context keeps its old token:
@@ -136,6 +134,15 @@ and its visible detail route after the chapter Continue. A board child restores 
 board beneath it. This creates no command or receipt. A missing current-room target restores
 no notice route; scene/combat precedence still applies. Ordinary unclassified narration
 continues to follow the existing World recovery rule.
+
+A readable detail's exact-subject recipes appear only in its Notice actions. Available controls
+follow nonempty history and precede Leave; unavailable controls show their real reason.
+Opening the detail always invokes Read, never Study. Detail membership stays UI-only: a
+no-target recipe sends `target_ids: []`. These controls use the shared offer-to-button builder,
+freshness and retry path. Confirmed readable-recipe narration routes to the receipt-linked
+detail, including replay after leaving its room, without World fallback. Recovery restores the
+latest such narration once to its original history and opens a route only when that detail is
+currently projected. A newer unrelated narration receipt cannot provide detail identity.
 
 ## NPC dialogue and action details
 

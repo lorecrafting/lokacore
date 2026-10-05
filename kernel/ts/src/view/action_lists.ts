@@ -38,7 +38,7 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
-// size: allow 60, item offers share one query counter for carrying and bounded Put pairs
+// size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
   const at = position.positionOf(world, actor);
@@ -73,30 +73,47 @@ export function lists(world: World, actor: CharacterId) {
           ? putPairs(world, body, id as EntityId, shown, steps)
           : [shown];
       });
+  const readableRecipe = (a: Offered) =>
+    !!a.recipe && !!world.details[detailOf(world, a.recipe.target)].readable;
   return {
+    notice: (id: string) =>
+      listed((a) => readableRecipe(a) && detailOf(world, a.recipe!.target) === id),
     place: [
-      ...listed((a) => a.target.kind === 'none' && !door(a) && !equip(a) && a.command !== current),
+      ...listed(
+        (a) =>
+          a.target.kind === 'none' &&
+          !readableRecipe(a) &&
+          !door(a) &&
+          !equip(a) &&
+          a.command !== current,
+      ),
       ...readActions(world, actor, set, steps),
     ].sort(
       (a, b) =>
         set[b.action_key].priority - set[a.action_key].priority || cmp(a.action_key, b.action_key),
     ),
     of: (scope: string, id: string, nested = false) =>
-      listed(
-        (a) =>
-          door(a)
-            ? lidded(world, id) && usable(world, actor, a, { target_id: id as EntityId })
-            : nested
-              ? !!a.engine && a.command === 'take'
-              : a.target.kind === 'entity' &&
-                a.target.scopes.includes(scope as never) &&
-                (!equip(a) || fits(world, actor, a, id)),
-        id,
-        scope,
-      ),
+      listed((a) => entityOffered(world, actor, a, scope, id, nested), id, scope),
     worn: (id: string) => listed((a) => a.command === 'remove' && fits(world, actor, a, id), id),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
   };
+}
+
+function entityOffered(
+  world: World,
+  actor: CharacterId,
+  a: Offered,
+  scope: string,
+  id: string,
+  nested: boolean,
+) {
+  return door(a)
+    ? lidded(world, id) && usable(world, actor, a, { target_id: id as EntityId })
+    : nested
+      ? !!a.engine && a.command === 'take'
+      : a.target.kind === 'entity' &&
+        a.target.scopes.includes(scope as never) &&
+        (!equip(a) || fits(world, actor, a, id));
 }
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed

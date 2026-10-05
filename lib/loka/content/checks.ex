@@ -1,3 +1,4 @@
+# size: allow 310, new short quest references join the existing checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;
@@ -17,6 +18,7 @@ defmodule Loka.Content.Checks do
     "quest_state" => "quest",
     "fact.assign" => "fact",
     "fact.adjust" => "fact",
+    "quest.activate" => "quest",
     "barrier_state" => "barrier",
     "stat_compare" => "attribute",
     "resource_compare" => "resource"
@@ -43,6 +45,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"event" => "entity_entered_room", "room" => k} = on, m) when is_binary(k),
     do: Map.put(on, "room", ref(k, "room", m))
+
+  def expand(%{"event" => "quest_resolved", "quest" => k} = on, m) when is_binary(k),
+    do: Map.put(on, "quest", ref(k, "quest", m))
 
   # A recipe narration's participant (NarrationParticipant): the npc or item its role selects.
   def expand(%{"role" => k} = p, m) when k in ~w(npc item) and is_map_key(p, k),

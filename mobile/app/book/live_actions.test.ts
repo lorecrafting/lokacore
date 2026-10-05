@@ -307,3 +307,58 @@ test('pending move retry adopts its original durable receipt once without a seco
     original,
   );
 });
+
+// Breaks: the shared freshness path refreshes a withdrawn Notice recipe or ignores its
+// detail/room/scene/combat membership, letting an old page send a fresh invocation.
+test('withdrawn or changed-context Notice controls retain their captured stale token', () => {
+  const a = preview();
+  try {
+    const notice = {
+      id: 'aaaaaaaa-0000-4000-8000-000000000071',
+      title: 'detail.title',
+      description: 'detail.description',
+      actions: [
+        {
+          action_key: 'study',
+          label: 'actions.study',
+          target: { kind: 'none' },
+          input: [],
+          available: true,
+        },
+      ],
+    };
+    const initial = a.game.view();
+    for (const alter of [
+      (v: any) => (v.notices[0].actions[0].available = false),
+      (v: any) => (v.notices[0].id = 'aaaaaaaa-0000-4000-8000-000000000072'),
+      (v: any) => (v.place.id = 'aaaaaaaa-0000-4000-8000-000000000073'),
+      (v: any) => (v.scene = { scene: 'changed', step: 0, line: { key: 'line' } }),
+      (v: any) => (v.combat = { encounter_id: 'changed', opponent_id: 'opponent', name: 'name' }),
+    ]) {
+      let projection: any = {
+        ...initial,
+        view: { ...initial.view, notices: [structuredClone(notice)] },
+      };
+      let sent: any;
+      const book = presenter({
+        ...a.game,
+        view: () => projection,
+        invoke: (i) => {
+          sent = i;
+          return { kind: 'stale_view' };
+        },
+      });
+      const button = book.screen().buttons.find((b) => b.action_key === 'study')!;
+      assert.ok(button);
+      projection = structuredClone(projection);
+      projection.token = 'view:new';
+      alter(projection.view);
+      book.press(button, notice.id);
+      assert.equal(sent.view_freshness_token, initial.token);
+      assert.deepEqual(sent.target_ids, []);
+      assert.equal(sent.detail_id, undefined);
+    }
+  } finally {
+    a.sql.close();
+  }
+});
