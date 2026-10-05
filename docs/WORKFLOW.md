@@ -23,13 +23,15 @@ portable foundation contracts, `kernel/ts/src/runtime/proposal.ts`, or closes a 
 gate; the PM may add one for a concrete risk found in the first review. Small content,
 copy and docs changes receive one short review. A second opinion supplements the
 independent reviewer; it never replaces that reviewer. Prefer another vendor when
-available. When the extra opinion uses Codex and CI is green, the PM runs `codex exec`
+available. For a hosted PR, after CI is green, the PM runs `codex exec`
 (read-only; `-m` Astra on the gate audit and on changes to
 `kernel/ts/src/runtime/proposal.ts`, Sol for every other review and every fix re-check;
 [owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
 severity, `path:line` at that SHA and a failure scenario, in one fenced block), appends the
-answer verbatim to the review record, and adds its findings to the fix list. A second concurrent
+answer verbatim to the review record, and adds its findings to the fix list. During
+provisional local development, start the fresh Codex second opinion in a separate
+worktree after focused checks; hosted CI waits for remote publication. A second concurrent
 codex run uses a temporary `../lokacore-codex2` worktree.
 Fable is used only if codex is out of quota: a Fable subagent stands in for it on a kernel or
 contract-freeze slice's head, never on fix re-reviews
