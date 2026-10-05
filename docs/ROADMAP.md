@@ -86,6 +86,12 @@ passed, with green review-only head checks. Release 0.0.6 remains pre-Q2; the re
 of the fen and rescue route follow separately under the
 [FEN-01 decision](decisions/pm-decision-fen01-south-search-2026-10-05.md).
 
+Q1-A — Elspeth's first Wren clue: accept The First Lead, find the fox drawing on
+Village Green and report it as a possible lead — merged in
+[#185](https://github.com/lorecrafting/lokacore/pull/185) after primary and pin/save
+approvals, six green source-head checks and green review-only head checks. Chapter
+release 0.0.7 leaves Q2 search and rescue for later slices.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
