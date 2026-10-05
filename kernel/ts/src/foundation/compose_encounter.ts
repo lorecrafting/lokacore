@@ -73,12 +73,21 @@ export function composeJob(
   if (op.op === 'job.schedule') {
     if (row !== undefined) return failed;
     if (op.due_time <= horizon) return { code: 'nonfuture_job' };
+    if (
+      (op.quest_instance_id === undefined) !== (op.actor_id === undefined) ||
+      (op.quest_instance_id !== undefined &&
+        (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+    )
+      return failed;
     return {
       value: {
         job: op.job as Json,
         due_time: op.due_time,
         status: 'pending',
         ...(op.encounter_id === undefined ? {} : { encounter_id: op.encounter_id }),
+        ...(op.quest_instance_id === undefined
+          ? {}
+          : { quest_instance_id: op.quest_instance_id, actor_id: op.actor_id }),
       },
     };
   }

@@ -1,3 +1,4 @@
+# size: allow 310, funded dialogue validates its resource and paying NPC role
 defmodule Loka.Content.Dialogues do
   @moduledoc """
   Dialogues in a v2 source (dialogue.schema.json DialogueDefinition; 06 §8, §17, §33), twin of
@@ -227,7 +228,9 @@ defmodule Loka.Content.Dialogues do
       sequence(rel, steps, o, ctx) ++
       accept(rel, steps, o, d, ctx) ++
       Loka.Content.Escort.choice(rel, steps, o, d, ctx) ++
-      hand_over(rel, steps, o, d) ++ receive_item(rel, steps, o, d, ctx)
+      hand_over(rel, steps, o, d) ++
+      receive_item(rel, steps, o, d, ctx) ++
+      payment(rel, steps, o, d, ctx)
   end
 
   defp sequence(rel, steps, o, ctx) do
@@ -261,12 +264,25 @@ defmodule Loka.Content.Dialogues do
 
     owned(at(rel, steps), "item_acquired", ctx.events) ++
       transfer_roles(rel, steps, h, d["roles"], "from") ++
-      if is_map_key(o, "accept") or is_map_key(o, "hand_over"),
+      if is_map_key(o, "hand_over"),
         do: [diag("OUTCOME_MISMATCH", at(rel, steps))],
         else: []
   end
 
   defp receive_item(_, _, _, _, _), do: []
+
+  defp payment(rel, steps, %{"payment" => p}, d, ctx) do
+    reference(rel, steps ++ ["payment"], {"resource", "resource"}, p, ctx.m, ctx.defs) ++
+      if match?(%{"role" => "npc"}, d["roles"][p["from"]]),
+        do: [],
+        else: [
+          diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["payment", "from"]), %{
+            "target" => p["from"]
+          })
+        ]
+  end
+
+  defp payment(_, _, _, _, _), do: []
 
   defp transfer_roles(rel, steps, h, roles, recipient) do
     for {field, kind} <- [{"item", "item"}, {recipient, "npc"}],

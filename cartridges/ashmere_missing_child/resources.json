@@ -45,6 +45,12 @@
     },
     "ma": {
       "gain_every": 3600
+    },
+    "pennies": {
+      "minimum": 0,
+      "maximum": 1000,
+      "start": 20,
+      "gain": 0
     }
   }
 }

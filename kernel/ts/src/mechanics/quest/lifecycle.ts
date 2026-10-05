@@ -10,8 +10,10 @@ import type {
   ErrorCode,
   EventPayload,
   Key,
+  JobId,
   QuestDefinition,
   QuestInstanceId,
+  RoleBinding,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString } from '../../runtime/decision.ts';
 import { questOf } from '../lookups.ts';
@@ -34,6 +36,37 @@ export function activation(mint: Mint, actor: CharacterId, quest: DefinitionRef)
   const scope = { kind: 'player', character_id: actor } as const;
   const op = { op: 'quest.activate', writer_group: 0, quest, scope, instance_id } as const;
   return { ops: [op], payload: { type: 'quest_activated', quest, instance_id } as const };
+}
+
+/** A bound dialogue acceptance schedules the quest's one authored absolute deadline. */
+export function boundActivation(
+  world: World,
+  mint: Mint,
+  actor: CharacterId,
+  quest: DefinitionRef,
+  bindings: readonly RoleBinding[],
+) {
+  const activated = activation(mint, actor, quest);
+  const deadline = definition(world, quest).deadline;
+  return {
+    ...activated,
+    ops: [
+      { ...activated.ops[0], bindings },
+      ...(deadline
+        ? [
+            {
+              op: 'job.schedule' as const,
+              writer_group: 0,
+              job_id: mint() as JobId,
+              job: quest,
+              due_time: deadline.at,
+              quest_instance_id: activated.payload.instance_id,
+              actor_id: actor,
+            },
+          ]
+        : []),
+    ],
+  };
 }
 
 /**

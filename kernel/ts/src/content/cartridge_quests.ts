@@ -31,6 +31,10 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
     }
     if (q.objective.item_acquired)
       named(q.objective.item_acquired, 'item', `${at}.objective.item_acquired`);
+    if (q.deadline) {
+      named(q.deadline.fact, 'fact', `${at}.deadline.fact`);
+      named(q.deadline.trust_fact, 'fact', `${at}.deadline.trust_fact`);
+    }
   }
   return out;
 }
@@ -52,6 +56,14 @@ export function questPolicies(c: Obj): [Obj, string][] {
 }
 
 export function featureApi(c: Obj): Diagnostic[] {
+  const debt =
+    Object.values((c.quests ?? {}) as Obj).some((q) => q.deadline) ||
+    Object.values((c.npcs ?? {}) as Obj).some((n) => n.resource_starts) ||
+    Object.values((c.dialogues ?? {}) as Obj).some((d) =>
+      Object.values(d.choices as Obj).some(
+        (o) => o.payment || o.availability || (o.receive && o.accept),
+      ),
+    );
   const riddles =
     Object.values((c.dialogues ?? {}) as Obj).some((d) => d.riddle) ||
     Object.values((c.quests ?? {}) as Obj).some((q) => q.journal?.active_variants);
@@ -60,13 +72,15 @@ export function featureApi(c: Obj): Diagnostic[] {
     Object.values((c.dialogues ?? {}) as Obj).some(
       (d) => !d.quest && Object.values(d.choices as Obj).some((o) => o.receive),
     );
-  const minimum = Object.hasOwn(c.manifest.requires.capabilities, 'escort')
-    ? 11
-    : transfers
-      ? 10
-      : riddles
-        ? 9
-        : 0;
+  const minimum = debt
+    ? 14
+    : Object.hasOwn(c.manifest.requires.capabilities, 'escort')
+      ? 11
+      : transfers
+        ? 10
+        : riddles
+          ? 9
+          : 0;
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   return minimum > 0 && (major < 1 || (major === 1 && minor < minimum))
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]

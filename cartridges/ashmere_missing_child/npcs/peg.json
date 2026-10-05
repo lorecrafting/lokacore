@@ -1,0 +1,11 @@
+{
+  "keywords": [
+    "peg",
+    "harrow",
+    "chandler"
+  ],
+  "short": "npc.peg.short",
+  "room_line": "npc.peg.room",
+  "description": "npc.peg.description",
+  "room": "chandler"
+}

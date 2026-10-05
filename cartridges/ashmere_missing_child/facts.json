@@ -130,14 +130,29 @@
     },
     "chapel.bell_rung": {
       "version": 1,
-      "value_type": { "type": "bool", "default": false },
-      "scopes": ["player"],
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
       "meaning": "The player rang the Belfry bell for the priory in the accepted Q3 action."
     },
     "chapel.allegiance": {
       "version": 1,
-      "value_type": { "type": "enum", "values": ["unknown", "prior", "fox"], "default": "unknown" },
-      "scopes": ["player"],
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unknown",
+          "prior",
+          "fox"
+        ],
+        "default": "unknown"
+      },
+      "scopes": [
+        "player"
+      ],
       "meaning": "The player's committed chapel allegiance; first set by Ring or Silence."
     },
     "village.child_status": {
@@ -156,6 +171,50 @@
         "instance"
       ],
       "meaning": "The committed outcome of the search for Wren."
+    },
+    "priory.fen_axis": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": -10,
+        "maximum": 10,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player’s standing between Priory and Fen."
+    },
+    "peg_trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": -100,
+        "maximum": 100,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Peg’s trust in the player."
+    },
+    "priory.tithe_delivered": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unoffered",
+          "pending",
+          "on_time",
+          "late",
+          "never"
+        ],
+        "default": "unoffered"
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The outcome of the original bound tithe ledger obligation."
     }
   }
 }

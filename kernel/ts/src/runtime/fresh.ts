@@ -131,7 +131,12 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
   );
   const entityResourceSpecs: Record<string, ResourceSpec> = {};
   for (const [entity_id, e] of Object.entries(entities)) {
-    if (e.kind !== 'npc' || !e.hp) continue;
+    if (e.kind !== 'npc') continue;
+    for (const [name, value] of Object.entries(e.resource_starts ?? {})) {
+      const resource = { cartridge_id, cartridge_version, kind: 'resource', key: name };
+      resources[key({ kind: 'resource', resource, entity_id })] = { value, at: clock };
+    }
+    if (!e.hp) continue;
     const resource = { cartridge_id, cartridge_version, kind: 'resource', key: 'hp' };
     const target = key({ kind: 'resource', resource, entity_id });
     entityResourceSpecs[target] = { key: 'hp' as ResourceSpec['key'], ...e.hp };
