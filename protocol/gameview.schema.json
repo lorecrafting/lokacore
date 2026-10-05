@@ -1713,6 +1713,7 @@
       ]
     },
     "ShopAction": {
+      "examples": [{"price":3,"available":true}],
       "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).",
       "type": "object",
       "properties": {
@@ -1735,6 +1736,7 @@
       "additionalProperties": false
     },
     "ShopItemView": {
+      "examples": [{"item_id":"3f7be222-cc48-8fb0-b007-f6d17119bd7f","name":"item.torch.short","buy":{"price":3,"available":true},"sell":{"price":1,"available":false,"reason":"not_owned"}}],
       "description": "An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).",
       "type": "object",
       "properties": {

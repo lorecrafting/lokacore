@@ -46,3 +46,24 @@ Full checks, broad schema mutant sweep, independent reviews and publication CI
 remain publication-head work under the [provisional lane](../../decisions/owner-decision-local-provisional-integration-2026-10-05.md).
 Full app TypeScript encounters unavailable `@e2e-dev/web` and `e2e`; its touched
 Book/authority subset compiles. No native build, simulator or phone check was run.
+
+## Save/protocol review fix round 1
+
+S1: the original independent enumeration incorrectly counted corpse templates and
+omitted slot holders. The [independent Python enumeration](../../../protocol/fixtures/generate_missing_child_v018_ids.py)
+now hashes the authored fresh-instance order with Python SHA-256, excluding template
+items and including scheduled jobs and slot holders. It imports no kernel/compiler
+code. The new focused ID-pin regression fails with the original pin; repaired
+answers match all spawned identities and permit Buy→Wear→cold reopen of the exact
+torch in its pinned light holder. The prior six commerce authority tests pass with
+the bad pin, demonstrating that the new test catches a previously missed break.
+
+S2: ShopOffer, Shop, ShopAction and ShopItemView each have a minimal valid schema
+example. The existing all-contract examples check fails before this correction
+(8/9 pass) and passes after it (9/9). Generated contracts are refreshed; the current
+chapter artifact/hash is unchanged. Commerce/schema focused Node checks pass eight
+tests in 0.6 s; Elixir contract examples pass nine tests in 0.5 s.
+
+Ponytail and correctness review: retain the independent enumerator so the answer
+can be reproduced without runtime output; reuse the existing schema example check.
+No runtime behavior, stock, balances or save format changes.
