@@ -52,6 +52,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (kind: string, d: Obj, at: string, field = 'variants') => {
     out.push([kind, d, at]);
+    if (kind === 'detail' && d.readable) out.push(['readable', d.readable, `${at}.readable`]);
     (d[field] ?? []).forEach((v: Obj, i: number) =>
       out.push(['variant', v, `${at}.${field}[${i}]`]),
     );
@@ -116,6 +117,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   npc: ['short', 'room_line', 'description'],
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
+  readable: ['label', 'text'],
 };
 
 // The reference checks refStage and recipes share, each pushing its diagnostic to `out`: named,

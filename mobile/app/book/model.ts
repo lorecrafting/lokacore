@@ -88,7 +88,11 @@ export function group(buttons: Button[]) {
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
     // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
     place: buttons.filter(
-      (b) => !aimed(b) && !dir(b) && !OWN.includes(b.action_key) && b.action_key !== 'scan',
+      (b) =>
+        (!aimed(b) || b.action_key === 'read') &&
+        !dir(b) &&
+        !OWN.includes(b.action_key) &&
+        b.action_key !== 'scan',
     ),
     on: (id: string) => buttons.filter((b) => b.target_ids.includes(id)),
   };
@@ -232,7 +236,9 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
-  const place = v.actions.filter((a) => a.available && !a.input.length && a.target.kind === 'none');
+  const place = v.actions.filter(
+    (a) => a.available && !a.input.length && (a.target.kind === 'none' || a.target_ids?.length),
+  );
   const doors = v.exits.flatMap((e) =>
     (e.door?.actions ?? [])
       .filter((a) => a.available)

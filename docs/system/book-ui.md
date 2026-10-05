@@ -35,6 +35,11 @@ save status/error UI remains accurate; NPC histories stay independently bounded.
 retains movement, adjacent sight and legal door actions. The World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
+A projected Read place action keeps its exact detail target and authored label. Its confirmed
+narration joins the normal World log; pending/refused/stale attempts add no reading text,
+and receipt replay never duplicates a line. Live action freshness applies unchanged.
+Reading opens no modal and neither pauses elapsed time nor extends a deadline.
+
 The enabled status/resources tap opens Contents. It lists exactly **Character**, **Equipment &
 Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.

@@ -20,6 +20,8 @@ import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, putRefused } from '../mechanics/containment/shared.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
+import { readRefused } from '../mechanics/readable/rule.ts';
+import { KernelError } from '../foundation/error.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 /**
@@ -60,7 +62,7 @@ export function lists(world: World, actor: CharacterId) {
     world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!];
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
-      .filter((a) => fits(a) && here(a) && !MODAL.includes(a.command))
+      .filter((a) => fits(a) && here(a) && a.command !== 'read' && !MODAL.includes(a.command))
       .filter((a) => movable(world, a, id))
       .filter((a) => combatOffered(world, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
@@ -72,8 +74,12 @@ export function lists(world: World, actor: CharacterId) {
           : [shown];
       });
   return {
-    place: listed(
-      (a) => a.target.kind === 'none' && !door(a) && !equip(a) && a.command !== current,
+    place: [
+      ...listed((a) => a.target.kind === 'none' && !door(a) && !equip(a) && a.command !== current),
+      ...readActions(world, actor, set, steps),
+    ].sort(
+      (a, b) =>
+        set[b.action_key].priority - set[a.action_key].priority || cmp(a.action_key, b.action_key),
     ),
     of: (scope: string, id: string, nested = false) =>
       listed(
@@ -195,4 +201,41 @@ function putPairs(
     if (!code) pairs.push({ ...shown, target_ids: [item, id as EntityId] });
   }
   return pairs;
+}
+
+// ponytail: reuse the flat detail table used by target resolution; index only if measured.
+function readActions(
+  world: World,
+  actor: CharacterId,
+  set: ReturnType<typeof resolved>,
+  steps: { n: number },
+): AdvertisedAction[] {
+  const actions = Object.values(set).filter(
+    (a) =>
+      a.command === 'read' &&
+      a.target.kind === 'entity' &&
+      a.target.scopes.includes('inspectable_details'),
+  );
+  if (!actions.length) return [];
+  const result: AdvertisedAction[] = [];
+  for (const id in world.details) {
+    if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
+    const target_id = id as EntityId;
+    if (readRefused(world, actor, target_id)) continue;
+    for (const a of actions) {
+      if (result.length >= LIMITS.selector_cardinality) throw new KernelError('budget_exceeded');
+      const code = refusal(world, { type: 'read', actor_id: actor, target_id }, steps, a.key, set);
+      const shown = {
+        action_key: a.key,
+        label: world.details[id].readable!.label,
+        target: a.target,
+        input: a.input,
+        target_ids: [target_id],
+      };
+      result.push(
+        code ? { ...shown, available: false, reason: { code } } : { ...shown, available: true },
+      );
+    }
+  }
+  return result;
 }

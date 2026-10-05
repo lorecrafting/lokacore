@@ -125,7 +125,7 @@
       ]
     },
     "TargetSpec": {
-      "description": "The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. equipped, connections, inspectable_details, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.",
+      "description": "The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.",
       "oneOf": [
         {
           "description": "The action takes no target.",
@@ -154,7 +154,8 @@
                   "self",
                   "inventory",
                   "room_contents",
-                  "room_occupants"
+                  "room_occupants",
+                  "inspectable_details"
                 ]
               },
               "minItems": 1
@@ -175,6 +176,12 @@
           "kind": "entity",
           "scopes": [
             "room_occupants"
+          ]
+        },
+        {
+          "kind": "entity",
+          "scopes": [
+            "inspectable_details"
           ]
         }
       ]

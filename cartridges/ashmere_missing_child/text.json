@@ -1,8 +1,8 @@
 {
   "room.drowned_lantern.title": "The Drowned Lantern",
-  "room.drowned_lantern.description": "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.",
+  "room.drowned_lantern.description": "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The [rumor board](rumor_board) is thick with pinned notes, and Maud’s bar runs along the back wall.",
   "room.ferry_landing.title": "Ferry Landing",
-  "room.ferry_landing.description": "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.",
+  "room.ferry_landing.description": "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a [notice](notice) nailed to it. Tide marks stripe the pilings.",
   "room.inn_attic.title": "Inn Attic",
   "room.inn_attic.description": "Dust lies thick as felt. A trunk with an iron hasp sits under the slope of the roof.",
   "room.inn_rooms.title": "Inn Rooms",
@@ -91,5 +91,11 @@
   "item.storage_chest.room": "A [storage chest] stands here.",
   "item.storage_chest.description": "A wooden chest with an iron lock.",
   "barrier.storage_chest_lid.short": "the storage chest’s lid",
-  "chapter.missing_child": "The Missing Child — in progress"
+  "chapter.missing_child": "The Missing Child — in progress",
+  "detail.notice.description": "A weathered notice is nailed to the mooring post.",
+  "detail.rumor_board.description": "Pinned notes cover a wooden board beside Maud’s bar.",
+  "actions.read_notice": "Read the notice",
+  "actions.read_rumor_board": "Read the rumor board",
+  "readable.notice": "Keep the landing clear. Tie boats to the mooring post.",
+  "readable.rumor_board": "Lost a tin whistle? Ask at the Drowned Lantern."
 }

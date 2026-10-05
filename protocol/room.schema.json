@@ -76,6 +76,23 @@
           },
           "minItems": 1,
           "maxItems": 16
+        },
+        "readable": {
+          "description": "Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog.",
+          "type": "object",
+          "properties": {
+            "label": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "text": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "label",
+            "text"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -136,6 +153,16 @@
               "description": "detail.bell.rung"
             }
           ]
+        },
+        {
+          "aliases": [
+            "notice"
+          ],
+          "description": "detail.notice",
+          "readable": {
+            "label": "action.read_notice",
+            "text": "notice.text"
+          }
         }
       ]
     },

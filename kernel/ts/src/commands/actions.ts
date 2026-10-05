@@ -24,6 +24,7 @@ import { pay } from '../mechanics/resource.ts';
 import { wornIn } from '../mechanics/equipment/rule.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import { holds } from '../mechanics/policy.ts';
+import { VERBS } from './verbs.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 
 /**
@@ -66,38 +67,6 @@ export function apply(set: ActionSet, op: ActionContribution['op'], c: ActionSet
       return keep(true);
   }
 }
-
-const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
-  kind: 'entity',
-  scopes: [scope],
-});
-// ponytail: every engine verb has priority 0, so they list in key order; give them priorities
-// when a host's presentation needs one first. ponytail: this table names other capabilities'
-// verbs; each verb's target and input move onto its command's
-// registry entry when a second capability contributes a verb outside VERBS (dialogue's talk,
-// choose and close_choice come from mechanics/dialogue/shared.ts).
-const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
-  look: [{ kind: 'none' }, []],
-  move: [{ kind: 'none' }, ['direction']],
-  scan: [{ kind: 'none' }, []],
-  attack: [{ kind: 'entity', scopes: ['room_occupants'] }, []],
-  flee: [{ kind: 'none' }, []],
-  take: [entity('room_contents'), []],
-  drop: [entity('inventory'), []],
-  give: [entity('inventory'), []],
-  put: [entity('inventory'), []],
-  wait: [{ kind: 'none' }, ['until']],
-  open: [{ kind: 'none' }, ['direction']],
-  close: [{ kind: 'none' }, ['direction']],
-  lock: [{ kind: 'none' }, ['direction']],
-  unlock: [{ kind: 'none' }, ['direction']],
-  wear: [entity('inventory'), []],
-  remove: [entity('inventory'), []],
-  stand: [{ kind: 'none' }, []],
-  sit: [{ kind: 'none' }, []],
-  rest: [{ kind: 'none' }, []],
-  sleep: [{ kind: 'none' }, []],
-};
 
 // The engine verbs whose owning capability the cartridge locks, labelled action.<verb>.
 function engine(world: World): ActionSet {
@@ -270,6 +239,8 @@ function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandP
   const kind = id === undefined ? undefined : world.entities[id]?.kind;
   const scope = {
     self: id !== undefined && id === body,
+    inspectable_details:
+      id !== undefined && world.details[id]?.room === world.state.containers[body!],
     inventory:
       at !== undefined && (at === body || (a.command === 'remove' && wornIn(world, at, body))),
     room_contents: kind === 'item' && at === world.state.containers[body!],

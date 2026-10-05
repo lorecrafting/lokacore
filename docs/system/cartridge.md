@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.1`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.2`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten Ashmere rooms and playable Maud S1 (five rats,
@@ -33,7 +33,7 @@ absent. Real Bram’s final role remains unresolved in the cutover record.
 The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source; installed mechanics and validation are unchanged. Its
-independent answer is `protocol/fixtures/missing_child_v001_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v002_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
@@ -56,6 +56,12 @@ Carry requires `containment@1` and `requires.kernel_api.at_least >= 1.3`; compil
 reject an older minimum, and the existing installed API gate rejects an older implementation. This extension
 uses the existing containment capability and source/world settings seams, without a new
 capability or format tag.
+
+Room details may embed `readable {label, text}` under the `readable@1` lock; both
+fields resolve to catalog TextKeys in compiler and loader. The current chapter adds
+`ferry_landing.notice` (aliases `notice`, `landing_notice`) and
+`drowned_lantern.rumor_board` (aliases `rumor_board`, `board`). Their authored labels
+and bodies live in the chapter text catalog; Look keeps a separate observational description.
 
 ## Compiler
 

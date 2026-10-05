@@ -350,7 +350,13 @@
     "key": "readable",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "read"
+    ],
+    "definitions": [
+      "readable"
+    ]
   },
   {
     "key": "topics",
