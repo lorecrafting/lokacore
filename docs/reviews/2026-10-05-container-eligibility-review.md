@@ -50,3 +50,24 @@ Commands used the pinned toolchain through `mise exec --`; routine logs stayed o
 Lean already. Ship. The shared guard and derived zero capacity reuse existing mechanisms; small compiler comprehensions preserve validation without adding an abstraction or dependency. The bulk additions are separately named frozen answers required by the approved historical/current split. Net: 0 lines proposed for removal.
 
 No owner Simulator or save was operated. No open review items.
+
+## Separate protocol/save opinion
+
+```text
+Verdict: APPROVE
+Reviewed head: 4b6345ac4a7278654843b0c711178853bf95de7f
+Findings: no findings.
+
+Checks performed:
+- Reviewed schema, compiler/loader parity, runtime capacity derivation, transfer composition, containment invariants, corpse hydration, release selection and save loading against the governing specs and owner decision.
+- Node tests: cartridge_items, death_content, put, container_history, transcripts and local-story/saves: 33 passed.
+- mobile/app/chapter.test.ts: 4 passed after installing pinned TypeScript; initial failure was missing dependency in the throwaway checkout.
+- Mix tests: content_items_test, content_death_test, content_missing_child_test and cartridge_cross_kernel_test: 18 passed.
+- Executed both independent Python fixture generators with writes intercepted: all 11 generated files exactly matched committed answers.
+- Confirmed previously frozen hash fixtures remain unchanged and all three historical transcripts byte-match their base recordings.
+- Controlled real SQLite: Missing Child 0.0.2 save refused as pinned_release_missing against 0.0.3; complete database bytes unchanged.
+- Controlled real SQLite: forged current cloak-in-brass-key custody refused as save_corrupt; complete database bytes unchanged.
+- git diff --check passed; tracked checkout remained clean; throwaway worktree removed.
+
+Ponytail Review: Lean already. Ship.
+```
