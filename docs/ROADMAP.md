@@ -156,15 +156,18 @@ return paths.
 A1 Q3-B — reach the bell and resolve the prior/lost path — merged in
 [#196](https://github.com/lorecrafting/lokacore/pull/196) after the scene-contract and
 save-reopen findings were fixed, independently rechecked and approved. The lost
-outcome is now playable; A2 fox choice and A3 Green finale are not yet merged.
-This completes 1 of the 33 proposed Chapter 1 completion slices.
+outcome is now playable.
 
-A2 Q3-F is approved in stacked [PR #202](https://github.com/lorecrafting/lokacore/pull/202)
-on the integrated 0.0.15/API1.13 source; B1 [#201](https://github.com/lorecrafting/lokacore/pull/201)
-and keyboard [#200](https://github.com/lorecrafting/lokacore/pull/200) precede it.
-CI/merge remain pending. The [A3 brief](briefs/chapter-one/a3-green-finale-sol-brief-2026-10-05.md)
-and [PM adoption](decisions/pm-decision-a3-green-finale-2026-10-05.md) fix the
-five Green endings before source work; no A3 implementation or proof is claimed.
+B1 — authored calendar and truthful Book sun/moon status — merged in
+[#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
+fox/silent-bell outcome after Wren's return — merged in
+[#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
+This completes **3 of the 33** proposed Chapter 1 completion slices (A1, B1, A2).
+Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
+exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
+Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
+adopts the A3 Green finale and five-outcome plan; neither is a completed source slice.
+B2 source implementation remains local; A3 source work remains ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
