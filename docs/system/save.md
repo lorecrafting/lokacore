@@ -557,3 +557,38 @@ same roots/descendants through existing carrying and lid checks. Repeated death
 retains previous corpses and exact fuel custody. This is fixture-driven combat,
 not a new production Well Shaft danger or public death command. Keep the existing
 production cellar recovery proof green; darkness adds no dependency on lost gear.
+
+## B7 liquid recovery
+
+**Selected, pending implementation.** [B7](mechanics.md#b7-well-and-waterskin-selected-contract)
+uses the existing state_row transaction for exact vessel liquid rows, head and
+receipt. No liquid table, second ledger, save-format migration or automatic
+refill/reset is added. Initialize empty rows only when creating the pinned fresh
+world. Every opted authored instance requires its row even while ground, nested,
+Peg-held, sold back or corpse-held. Load rejects missing/extra/wrong-item rows,
+unknown kinds, noninteger/negative/over-capacity quantities and null/positive
+mismatch as typed `save_corrupt`, keeping the file intact.
+
+Bounded revision-ordered validation starts from authored initial rows and checks
+each accepted liquid-changing receipt's exact command ID, actor, source/vessel
+identities, historical custody and full prior/replacement quantities. Fill must
+prove the declared current-room source, compatible free capacity and resulting
+carrying admission at that commit; Pour must prove eligible custody and both
+equal debit/credit; Drink must prove the exact kind and serving debit. Reuse pure
+transition validation, not a second gameplay writer. Ordinary transfers preserve
+liquid and may lawfully change historical holders. The final validated quantities
+must agree with current saved rows; an unrelated latest receipt or merely
+bounded current quantity is not provenance. Preserve B3/S2 penny reconciliation
+and any merged B4/C1/B5 consumers without imposing today's custody on their old
+receipts. Do not invent receipt fields; extend the actual bounded verifier as
+needed to reconstruct relevant historical rows.
+
+Real failed COMMIT retains all prior liquid/custody/head/receipt state. Both
+uncertain-COMMIT branches fence input and elapsed work until reconciliation proves
+all prior or all next truth. No committed Fill/Pour/Drink is narrated before
+adoption. Lost acknowledgement and exact receipt replay return the original
+result without another Fill, debit, item allocation or benefit. Real SQLite
+reopen covers fresh, filled, partially poured, drunk-empty, nested, sold/bought
+back and death/recovered states; explicit release mismatch refusal and Start
+over authorization remain unchanged. Unknown successor pins stay unknown until
+the final integration release is compiled and independently re-pinned.

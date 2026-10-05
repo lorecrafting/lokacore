@@ -603,3 +603,48 @@ fixtures and differential coverage; the light story rule remains TypeScript-only
 The next API/release pins and exact generated shape are assigned from the actual
 implementation base, not assumed by this planning contract. Existing error codes,
 writer groups, checked arithmetic and query budgets apply.
+
+## B7 liquid composition
+
+**Selected, pending implementation.** `liquid@1` owns only commands
+`fill {actor_id, source_id, vessel_id}`, `pour {actor_id, source_id, receiver_id}`
+and `drink {actor_id, vessel_id}`. Fill's source is a detail; Pour's source is an
+item. ActionInvocation targets retain that exact ordered pair (or Drink's one
+item), with no player-supplied amount, kind or resource benefit. Projection and
+admission share current custody, reach, compatibility, capacity and load checks.
+Use structured filled/poured/drank outcomes containing bound participant IDs,
+kind and actual quantity; no consumer reads success from narration.
+
+The missing primitive is a typed exact-instance liquid row and
+`liquid.set {item_id, from, to}` with whole-row equality precondition and one
+writer target per item. Quantity is a bounded nonnegative integer; null kind iff
+zero; positive kinds and capacity are validated against immutable per-vessel
+specifications and declared liquid references. No facts/resources encode an
+alternate quantity. Pour includes the two writes in one existing writer group;
+any conflict, precondition/invariant or budget failure rolls back both. Emptying
+a vessel preserves its item identity. Optional state sections remain absent in
+cartridges without the capability; fresh worlds initialize only actual opted
+vessels once. No generic create/destroy/mix liquid operation is introduced.
+
+Reuse the existing delta dispatch, target/precondition machinery, immutable
+observation validation and writer-group handling. B4's `fuel.set` has a timed
+`at/lit` history invariant; liquid kind/volume has no burn clock. Do not remodel
+one as the other or add a generic configurable row-operation registry merely
+to share these two shapes. Existing resource rows recover/adjust numeric pools,
+and containment rows move whole item identities; neither represents liquid
+kind plus capacity. Only the new typed variant is justified.
+
+The portable operation/precondition/invariant semantics require both checked
+foundation twins, independently hand-checked new fixtures and randomized
+comparison after fixture validation. Leave frozen fixtures unchanged. The
+player rule and source/custody/issuance semantics stay TypeScript-only until an
+actual server consumes them. Compose remains independent of RPG helpers.
+The generic row invariant checks shape/capacity, not global water conservation:
+Fill introduces water and Drink consumes it. Pour conservation and authorized
+issuance/consumption are mechanic and receipt-bound obligations.
+
+Extend GameView only for confirmed vessel kind/quantity/capacity, authored unit
+labels and exact legal Fill/Pour/Drink actions; existing details and target
+selection remain the UI boundary. No renderer arithmetic creates permission or
+adjusts liquid/mass. Shared aggregate query, delta, event and writer budgets stay
+in force; pair enumeration is bounded before work, not an unmetered all-item scan.

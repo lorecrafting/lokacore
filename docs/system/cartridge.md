@@ -731,3 +731,37 @@ matching fuel units and authored dark text on opted rooms. A supply cannot be li
 or illuminate. Missing fuel rows are not an implicit fresh charge. Metadata belongs
 to the exact item definitions; fuel state belongs to their real instances, never to
 the player, room or merchant. No generic stacking, destruction, stock or liquid API.
+
+## B7 water and vessels
+
+**Selected, pending implementation.** The [B7 mechanic](mechanics.md#b7-well-and-waterskin-selected-contract)
+authors `water` in integer quarter-litre units: **250 grams/unit**, Drink **1 unit**.
+Both waterskins have capacity **4 units**, shell mass **500 grams**, and initial
+`null/0` contents. A full skin therefore weighs **1500 grams**, with no rounded
+fractional quantity. Water has no declared resource benefit in B7.
+
+Keep B3's original `waterskin` offer and add one separately authored
+`spare_waterskin`, directly Peg-held, Buy **4p**, Sell **2p**, with the same vessel
+metadata. Its distinct name/keywords and exact identity support Book target
+selection; these are two finite real item offers, not a stack or restock mode.
+This explicitly extends the four-item B3 shelf for B7's real Pour consumer.
+All prior offers and starts stay governed by their existing declarations;
+release-derived IDs must be re-pinned, not copied from another release.
+Two skins cost **8p** from the authored **20p** player start, leaving **12p**;
+with Peg's **20p** start her balance becomes **28p**. Filled skins may be sold
+and bought back for the same authored prices with their contents intact.
+
+Add one actual `well` detail to Well Lane, accessible at all hours with no
+light, quest, bell, combat, tide or room descent requirement. It declares an
+inexhaustible source of the `water` reference; only Fill may introduce its units.
+The B4 well-shaft plan is independent; preserve its exits if already merged.
+No new room or route is counted for B7. The well cannot be carried or targeted
+as a Pour receiver, and cannot be drunk from directly in this slice.
+
+Source/compiler/loader validate positive integer opted vessel capacity, exact
+initial row, kind references, positive integer drink amount and grams/unit,
+source kind/room binding and safe maximum effective mass. Short DefinitionRefs expand through
+the existing compiler path. Reject initial contents over capacity, null with
+positive quantity, unknown kind, unsafe density product and source declarations
+on non-detail entities. Non-opted items and historical frozen artifacts retain
+their existing representation; B4's fuel rows are not liquid vessels.

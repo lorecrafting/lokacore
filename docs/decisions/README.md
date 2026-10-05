@@ -216,3 +216,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [B4 useful light and safe recovery](pm-decision-b4-light-2026-10-05.md): real B3 refillable torch/oil, typed fuel history and optional dark well with gear-free owned-corpse recovery.
 - [C1 Tobin training and armed fight](pm-decision-c1-tobin-training-2026-10-05.md): immediate paid acquisition, separate attribute qualification, exact sword grant and real dodge/shield consumer.
+- [B7 Well and waterskin](pm-decision-b7-well-waterskin-2026-10-05.md): two real finite Peg offers, mass-accounted water and atomic Fill/Pour/Drink with receipt-backed recovery.
