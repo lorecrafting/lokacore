@@ -20,8 +20,8 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_sampler@0.0.8` in `loka-ashmere-sampler.db`. This elapsed release
-requires kernel API1.5, declares real_elapsed rate50/start64800, and schedules Bram at
+The phone bundles `ashmere_sampler@0.0.10` in `loka-ashmere-sampler.db`. This elapsed release
+requires kernel API1.7, declares real_elapsed rate50/start64800, and schedules Bram at
 Ferry Landing from06:00 and the Drowned Lantern from19:00, under the
 [B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md). Its MV pool starts at100 under the [first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), pays1 per move, and recovers18 per3600 logical seconds
 standing/sitting or36 resting/sleeping under the
@@ -40,8 +40,8 @@ unreleased sampler declares `description_variant@1` for authentic engine Look,
 under the [development replacement ruling](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 The [0.0.3 chapel approach](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md)
 extends Well Lane north through the green, North Gate and Chapel Steps to the nave,
-with reciprocal exits. Its altar is scenery; shrine return is not installed. The
-night gate and omitted side branches await their actual consumers.
+with reciprocal exits. Its altar is scenery; the installed death mechanic returns the
+player to this shrine. The night gate and omitted side branches await their actual consumers.
 Its previous runtime release is not bundled; an old missing pin follows the existing
 [explicit Start over path](save.md#opening-a-story), with no automatic deletion or
 migration. The
@@ -330,3 +330,37 @@ preserving the five finite rats. It removes cellar_door from both reciprocal exi
 removes the obsolete barrier/key/text. Cellar access is an ordinary free passage, so
 shrine recovery requires no equipment/key. Other barriers and owner prose remain.
 The previous0.0.8 pin is retained; changed content gets new version and independent KAT.
+
+## Maud’s Cellar content (M20-B2)
+
+The bundled `ashmere_sampler@0.0.10` consumes the [atomic reward and storage
+mechanics](mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts)
+under kernel API1.7. Widow Maud is a passive innkeeper in `drowned_lantern`. Her offer
+accepts `mauds_cellar` only before any instance exists and gives no item. The quest has
+no standalone offer; its current-state objective requires all five separate player
+facts `rat_1_killed` through `rat_5_killed`. Eligible lethal combat before acceptance
+counts through the existing [death-credit producer](#first-encounter-authoring-m6-a).
+Its journal supplies active, objectives-met and terminal fallback texts.
+
+Maud’s bound turn-in resolves the quest and pending choice while transferring the
+original `cellar_key` entity from Maud to the player, adding5 to player-scoped
+`maud_trust` (default0, bounded−100..100), and assigning instance-scoped
+`inn_cellar_cleared` true (defaultfalse). The key weighs100g. These changes commit
+atomically through ordinary dialogue, fact and containment mechanics; acceptance and
+completion never mint a replacement key. In-game text follows the [delegated copy
+rule](owner-rules.md#product-and-scope).
+
+The separate `storage_chest` starts empty in `inn_rooms`, weighs8000g, and holds12
+immediate items. Its `storage_chest_lid` starts locked and names `cellar_key`; reward
+does not unlock it. Ordinary Unlock, Open, Put, Close and Take govern storage, capacity
+and carrying admission. The attic trunk still uses the brass key and contains the
+whistle. Cellar access and corpse recovery stay free of key requirements. There is no
+money, free room, loot, respawn or new failure/abandon transition.
+
+The independent sampler answer and actual App bundle pin this new release. The0.0.9
+known answer is retained as history, not added to the bundled release list: an unmatched
+pin follows the established [missing-pin refusal](save.md#opening-a-story). Pre-production
+releases have no compatibility adapter or migration. Native evidence must identify the
+exact release; older fight captures do not prove this reward/storage consumer.
+The [M20-B2 evidence](../evidence/2026-10-05-m20-b2-mauds-cellar/README.md) records the
+current Release quest/storage walk, independent pin and behavior red controls.

@@ -1,0 +1,18 @@
+(node:83098) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<local-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <local-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ the app opens and replaces only its sampler save, preserving an existing Lantern save (101.785125ms)
+✔ actual App pause and resume preserve 9ms plus 11ms as exactly one logical unit (34.633ms)
+✔ actual App stops unknown storage wakeups and resumes after confirmed user recovery (30.808083ms)
+✔ old App wakeups cannot mutate the same remounted Game or a replacement save (35.887917ms)
+✔ production five preacceptance kills reopen into Maud reward and usable storage (172.064ms)
+✔ each of five missing actual credits refuses reward after early acceptance (211.242208ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 603.990208

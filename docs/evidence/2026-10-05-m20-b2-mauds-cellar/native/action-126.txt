@@ -1,0 +1,17 @@
+Phase: final Book fix
+Action: press label="Journal" --settle
+Exit: 0
+Tapped label="Journal" (201, 323)
+settled after 1854ms: +5 -7 (~5 unchanged)
+- @e2 [scroll-area] "Contents"
+- @e3 [other] "Contents"
+- @e4 [button] "Character"
+- @e5 [button] "Equipment & Inventory"
+- @e6 [button] "Map"
+- @e7 [button] "Journal"
+- @e8 [button] "Settings"
++ @e2~s892447 [scroll-area] "Journal"
++ @e3~s892447 [other] "Journal"
++ @e4~s892447 [text] "Maud’s Cellar"
++ @e5~s892447 [text] "resolved"
++ @e6~s892447 [text] "You cleared Maud’s cellar and received the storage key."

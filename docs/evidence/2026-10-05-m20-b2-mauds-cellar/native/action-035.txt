@@ -1,0 +1,9 @@
+Action: open com.lorecrafting.loka --foreground --timeout 120000
+Exit: 0
+Opened: com.lorecrafting.loka
+Session state: <local-path>
+Page: com.lorecrafting.loka
+App: com.lorecrafting.loka
+Snapshot: 1 nodes
+Hint: sparse accessibility snapshot returned 1 node; snapshot state is invalid or unavailable for this screen. Use plain screenshot, not screenshot --overlay-refs, as visual truth. If screenshot shows the Home Screen or another app, run open for this app again first. Then navigate away with coordinates if needed and retry snapshot -i on the next screen.
+@e1 [application] "Loka"

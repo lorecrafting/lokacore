@@ -1,0 +1,22 @@
+[
+  {
+    "mutation": "missing-fifth-credit",
+    "exit": 1
+  },
+  {
+    "mutation": "wrong-chest-key",
+    "exit": 1
+  },
+  {
+    "mutation": "gated-cellar",
+    "exit": 1
+  },
+  {
+    "mutation": "wrong-app-bundle",
+    "exit": 1
+  },
+  {
+    "mutation": "restored",
+    "exit": 0
+  }
+]

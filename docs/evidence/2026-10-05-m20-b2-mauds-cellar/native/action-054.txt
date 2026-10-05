@@ -1,0 +1,6 @@
+Action: press label="“Your cellar is clear.”" --settle
+Exit: 1
+Error (COMMAND_FAILED): Selector did not match: label="“Your cellar is clear.”"
+Hint: Selector text/label values match exactly (quote multi-word values: text="Sign in"). Run snapshot -i to see current elements and refs, or use find <text> for contains matching.
+Diagnostic ID: muum4gny-d8acc239
+Diagnostics Log: <local-path>

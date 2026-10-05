@@ -1,0 +1,18 @@
+Action: snapshot -i
+Exit: 0
+Page: com.lorecrafting.loka
+App: com.lorecrafting.loka
+Snapshot: 12 visible nodes
+@e1 [application] "Loka"
+@e2 [button] "Look, Inn Rooms"
+@e3 [scroll-area] [scrollable]
+  [content below scroll-area hidden]
+@e4 [text] "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage."
+@e5 [button] "a brass key, open"
+@e6 [button] "a storage chest, open"
+@e7 [button] "a wool cloak, open"
+@e8 [text] "The story ends here. Start over is in Settings."
+@e9 [button] "Map"
+@e10 [button] "Position, standing"
+@e11 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
+@e12 [text] "Hour of the Tiger, three to five"

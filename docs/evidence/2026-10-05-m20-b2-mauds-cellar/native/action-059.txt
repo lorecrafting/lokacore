@@ -1,0 +1,6 @@
+Action: press label="Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100" --settle
+Exit: 1
+Error (COMMAND_FAILED): Selector did not match: label="Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
+Hint: Selector text/label values match exactly (quote multi-word values: text="Sign in"). Run snapshot -i to see current elements and refs, or use find <text> for contains matching.
+Diagnostic ID: muum5xfj-34431c20
+Diagnostics Log: <local-path>

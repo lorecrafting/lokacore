@@ -1,0 +1,20 @@
+Action: press label="Go north" --settle
+Exit: 0
+Tapped label="Go north" (201, 215)
+settled after 1886ms: +8 -8 (~2 unchanged)
+- @e2 [scroll-area] "Map"
+- @e3 [other] "Map"
+- @e4 [text] "Ferry Landing"
+- @e5 [button] "Go north"
+- @e6 [text] "Beyond north: Well Lane — a brass lantern."
+- @e7 [button] "Back to World"
+- @e8 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
++ @e2~s527633 [other] "Look, Well Lane"
++ @e3~s527633 [button] "Look, Well Lane"
++ @e4~s527633 [scroll-area] "A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east."
++ @e5~s527633 [other] "A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east."
++ @e6~s527633 [button] "a brass lantern, open"
++ @e7~s527633 [button] "Map"
++ @e8~s527633 [button] "Position, standing"
++ @e9~s527633 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100"
+- @e10 [text] "Position, standing"

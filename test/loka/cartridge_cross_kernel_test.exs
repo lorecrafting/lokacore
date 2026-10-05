@@ -191,7 +191,7 @@ defmodule Loka.CartridgeCrossKernelTest do
 
     File.write!(
       input,
-      JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", "1.6"), "paths" => paths})
+      JSON.encode!(%{"installed" => Map.put(@installed, "kernel_api", "1.7"), "paths" => paths})
     )
 
     {stdout, 0} = System.cmd("node", [@peer, input])

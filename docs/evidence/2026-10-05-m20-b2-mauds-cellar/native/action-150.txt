@@ -1,0 +1,26 @@
+Phase: final Book fix
+Action: press label="a storage chest, open" --settle
+Exit: 0
+Tapped label="a storage chest, open" (201, 288)
+settled after 1727ms: +10 -9 (~3 unchanged)
+- @e2 [other] "Look, Inn Rooms"
+- @e3 [button] "Look, Inn Rooms"
+- @e4 [scroll-area] "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage."
+- @e5 [other] "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage."
+- @e6 [button] "a storage chest, open"
+- @e7 [button] "a wool cloak, open"
+- @e8 [text] "Unlocked.
+Opened.
+You pick up a brass key."
+- @e9 [button] "Map"
+- @e10 [button] "Position, standing"
++ @e2~s892533 [scroll-area] "A storage chest"
++ @e3~s892533 [other] "A storage chest"
++ @e4~s892533 [text] "A wooden chest with an iron lock."
++ @e5~s892533 [text] "Open"
++ @e6~s892533 [button] "Close a storage chest"
++ @e7~s892533 [button] "Take a storage chest"
++ @e8~s892533 [button] "Put a brass key in a storage chest"
++ @e9~s892533 [button] "Put a storage key in a storage chest"
++ @e10~s892533 [button] "Leave"
++ @e13~s892533 [text] "Position, standing"

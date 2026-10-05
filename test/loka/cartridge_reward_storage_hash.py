@@ -3,7 +3,7 @@
 import json
 import hashlib
 from pathlib import Path
-v = json.loads(Path('protocol/fixtures/cartridge_sampler_hash.json').read_text())['value']
+v = json.loads(Path('protocol/fixtures/sampler_v009_hash.json').read_text())['value']
 old, prefix = 'ashmere_sampler@0.0.9', 'reward_storage@0.0.1'
 def rekey(x):
     if isinstance(x, list): return [rekey(a) for a in x]

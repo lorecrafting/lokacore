@@ -1,0 +1,17 @@
+Phase: final Book fix
+Action: press label="Attack a cellar rat" --settle
+Exit: 0
+Tapped label="Attack a cellar rat" (201, 215)
+settled after 1844ms: +6 -6 (~3 unchanged)
+- @e2 [scroll-area] "A cellar rat"
+- @e3 [other] "A cellar rat"
+- @e4 [text] "A small grey rat watches from beside a barrel, its whiskers twitching."
+- @e5 [button] "Attack a cellar rat"
+- @e6 [button] "Leave"
+- @e7 [button] "Contents, Character, hp 8 of 10, has a few bruises, ma 100 of 100, mv 100 of 100"
++ @e2~s892109 [scroll-area] "Combat"
++ @e3~s892109 [other] "Combat"
++ @e4~s892109 [text] "a cellar rat"
++ @e5~s892109 [button] "Look"
++ @e6~s892109 [button] "Flee"
++ @e7~s892109 [button] "Contents, Character, hp 8 of 10, has a few bruises, ma 100 of 100, mv 100 of 100" [disabled]

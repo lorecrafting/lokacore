@@ -1,0 +1,17 @@
+Phase: final Book fix
+Action: press label="a brass key, open" --settle
+Exit: 0
+Tapped label="a brass key, open" (201, 498)
+settled after 1786ms: +4 -8 (~6 unchanged)
+- @e3 [text] "A storage chest"
+- @e4 [text] "A wooden chest with an iron lock."
+- @e5 [text] "Open"
+- @e6 [button] "Close a storage chest"
+- @e7 [button] "Take a storage chest"
+- @e8 [button] "Put a storage key in a storage chest"
++ @e3~s892573 [text] "A brass key"
++ @e4~s892573 [text] "A small brass key with a narrow tooth."
++ @e5~s892573 [button] "Take a brass key"
++ @e6~s892573 [button] "Put a storage key in a brass key"
+- @e10 [text] "Inside"
+- @e11 [button] "a brass key, open"

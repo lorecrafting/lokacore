@@ -1,0 +1,37 @@
+(node:83094) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<local-path> is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <local-path>
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ the app opens and replaces only its sampler save, preserving an existing Lantern save (108.29675ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 354.548917
+
+✖ failing tests:
+
+test at mobile/app/sampler.test.ts:29:1
+✖ the app opens and replaces only its sampler save, preserving an existing Lantern save (108.29675ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'ee1a72f0b8d681d8521b64be5bb2b35cd1ba9e8699cbff21ddad2ecf92d98867'
+  - '285f75c2786b96e2e1c92cc8fb859ff30bf59a6b76b51d131481cef1c1564f8c'
+  
+      at TestContext.<anonymous> (file://<local-path>:102:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'ee1a72f0b8d681d8521b64be5bb2b35cd1ba9e8699cbff21ddad2ecf92d98867',
+    expected: '285f75c2786b96e2e1c92cc8fb859ff30bf59a6b76b51d131481cef1c1564f8c',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

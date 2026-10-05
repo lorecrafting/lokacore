@@ -1,0 +1,26 @@
+Phase: final Book fix
+Action: press label="Map" --settle
+Exit: 0
+Tapped label="Map" (201, 760)
+settled after 3267ms: +12 -9 (~2 unchanged)
+- @e2 [other] "Look, The Drowned Lantern"
+- @e3 [button] "Look, The Drowned Lantern"
+- @e4 [scroll-area] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e5 [other] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e6 [button] "Old Bram, open"
+- @e7 [button] "Widow Maud, open"
+- @e8 [button] "Map"
+- @e9 [button] "Position, standing"
+- @e10 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100"
++ @e2~s892017 [scroll-area] "Map"
++ @e3~s892017 [other] "Map"
++ @e4~s892017 [text] "The Drowned Lantern"
++ @e5~s892017 [button] "Go down"
++ @e6~s892017 [text] "Beyond down: Lantern Cellar — a cellar rat, a cellar rat, a cellar rat, a cellar rat, a cellar rat."
++ @e7~s892017 [button] "Go up"
++ @e8~s892017 [text] "Beyond up: Inn Rooms — a brass key, a storage chest, a wool cloak."
++ @e9~s892017 [button] "Go west"
++ @e10~s892017 [text] "Beyond west: Well Lane — a brass lantern."
++ @e11~s892017 [button] "Back to World"
++ @e12~s892017 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
++ @e14~s892017 [text] "Position, standing"

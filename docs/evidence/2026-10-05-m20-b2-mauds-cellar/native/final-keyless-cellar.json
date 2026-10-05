@@ -1,0 +1,217 @@
+{
+  "pin": {
+    "capability_lock": {
+      "capabilities": {
+        "barrier": 1,
+        "behavior": 1,
+        "calendar": 1,
+        "combat": 1,
+        "containment": 1,
+        "death": 1,
+        "description_variant": 1,
+        "dialogue": 1,
+        "equipment": 1,
+        "fact": 1,
+        "movement": 1,
+        "policy": 1,
+        "position": 1,
+        "quest": 1,
+        "resource": 1,
+        "scene": 1,
+        "schedule": 1
+      },
+      "format": "loka-capability-lock-v1"
+    },
+    "cartridge_id": "ashmere_sampler",
+    "cartridge_version": "0.0.10",
+    "content_hash": "285f75c2786b96e2e1c92cc8fb859ff30bf59a6b76b51d131481cef1c1564f8c",
+    "numeric_profile": null,
+    "rng_profile": null,
+    "rule_ir": 1,
+    "world_context_id": "b2ee231b-9d21-4135-b73e-888f9db220ab"
+  },
+  "state_rows": [
+    {
+      "section": "containers",
+      "key": "0662543b-6547-8f8c-aabd-4b5b0a1c76ab",
+      "value": "a41c0951-dcd6-8bcd-947b-5eea1a849308"
+    },
+    {
+      "section": "containers",
+      "key": "068a2fed-fe29-8f91-afc9-f33168148e9c",
+      "value": "0763c9b6-cbc7-8ebd-9000-8e5059aaeb8f"
+    },
+    {
+      "section": "containers",
+      "key": "06c88e96-245d-8bcc-bf87-31c60773a27c",
+      "value": "e607ae23-d24d-8ed1-8b0a-48d275b70c96"
+    },
+    {
+      "section": "containers",
+      "key": "07ddaea7-865f-83c3-b78c-e609761eebd0",
+      "value": "a41c0951-dcd6-8bcd-947b-5eea1a849308"
+    },
+    {
+      "section": "containers",
+      "key": "2e7bced0-1a8c-8c65-ab03-fce20a90327c",
+      "value": "b2001ac7-0190-833f-be91-de8cad4d9c95"
+    },
+    {
+      "section": "containers",
+      "key": "46e5fff6-e2f5-82e1-936a-efbbe23512ae",
+      "value": "7577d7e3-5af4-8302-aaba-32377528cf00"
+    },
+    {
+      "section": "containers",
+      "key": "6253c1a5-f57b-819d-a5d8-8b9f206f913e",
+      "value": "b2001ac7-0190-833f-be91-de8cad4d9c95"
+    },
+    {
+      "section": "containers",
+      "key": "88aa7202-022c-821f-9f2c-602950b16cf4",
+      "value": "46e5fff6-e2f5-82e1-936a-efbbe23512ae"
+    },
+    {
+      "section": "containers",
+      "key": "8dda91c4-a300-83f7-9cf8-67188b6a6a84",
+      "value": "a1d3b8bd-7bc9-8ba8-a248-b85da243ff18"
+    },
+    {
+      "section": "containers",
+      "key": "a318b2a4-d464-8ccf-acbb-2463f9c20ef1",
+      "value": "b2001ac7-0190-833f-be91-de8cad4d9c95"
+    },
+    {
+      "section": "containers",
+      "key": "abe61fa9-c916-80d7-8250-0028d7e03547",
+      "value": "a318b2a4-d464-8ccf-acbb-2463f9c20ef1"
+    },
+    {
+      "section": "containers",
+      "key": "b9ae6bca-6900-8511-ae8c-b0abe888523b",
+      "value": "b2001ac7-0190-833f-be91-de8cad4d9c95"
+    },
+    {
+      "section": "containers",
+      "key": "c9c20a25-41ab-83e1-94b7-282a2fdf2242",
+      "value": "a41c0951-dcd6-8bcd-947b-5eea1a849308"
+    },
+    {
+      "section": "containers",
+      "key": "e607ae23-d24d-8ed1-8b0a-48d275b70c96",
+      "value": "a1d3b8bd-7bc9-8ba8-a248-b85da243ff18"
+    },
+    {
+      "section": "containers",
+      "key": "e8ee783d-7bf2-898b-9037-9b2fb2c90669",
+      "value": "b2001ac7-0190-833f-be91-de8cad4d9c95"
+    },
+    {
+      "section": "containers",
+      "key": "f0e592e4-7625-8851-9d5f-20137549cd33",
+      "value": "b2001ac7-0190-833f-be91-de8cad4d9c95"
+    },
+    {
+      "section": "jobs",
+      "key": "25ffa8c4-8a23-83c3-a817-83034d19f3ec",
+      "value": {
+        "due_time": 108000,
+        "job": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.10",
+          "key": "bram",
+          "kind": "npc"
+        },
+        "status": "pending"
+      }
+    },
+    {
+      "section": "jobs",
+      "key": "c0e29def-9756-805e-b8be-48894839ca62",
+      "value": {
+        "due_time": 68400,
+        "job": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.10",
+          "key": "bram",
+          "kind": "npc"
+        },
+        "status": "completed"
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"2e7bced0-1a8c-8c65-ab03-fce20a90327c\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"hp\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 64800,
+        "value": 6
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"6253c1a5-f57b-819d-a5d8-8b9f206f913e\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"hp\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 64800,
+        "value": 6
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"a318b2a4-d464-8ccf-acbb-2463f9c20ef1\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"hp\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 64800,
+        "value": 10
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"a318b2a4-d464-8ccf-acbb-2463f9c20ef1\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"ma\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 64800,
+        "value": 100
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"a318b2a4-d464-8ccf-acbb-2463f9c20ef1\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"mv\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 79658,
+        "rate": 18,
+        "remainder": 0,
+        "value": 99
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"b9ae6bca-6900-8511-ae8c-b0abe888523b\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"hp\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 64800,
+        "value": 6
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"e8ee783d-7bf2-898b-9037-9b2fb2c90669\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"hp\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 64800,
+        "value": 6
+      }
+    },
+    {
+      "section": "resources",
+      "key": "{\"entity_id\":\"f0e592e4-7625-8851-9d5f-20137549cd33\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.10\",\"key\":\"hp\",\"kind\":\"resource\"}}",
+      "value": {
+        "at": 64800,
+        "value": 6
+      }
+    }
+  ],
+  "head": [
+    [
+      1,
+      1110,
+      79757,
+      "[1684525926,236210820,2808276128,968905101]"
+    ]
+  ]
+}

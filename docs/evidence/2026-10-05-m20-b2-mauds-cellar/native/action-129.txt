@@ -1,0 +1,7 @@
+Phase: final Book fix
+Action: press @e10 --settle
+Exit: 1
+Error (COMMAND_FAILED): Ref @e10 needs a complete snapshot — the current frame only authorizes its emitted refs
+Hint: Capture a fresh interactive snapshot (snapshot -i) or use a stable selector, then retry.
+Diagnostic ID: muumrptb-e526d475
+Diagnostics Log: <local-path>

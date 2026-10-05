@@ -8,10 +8,25 @@ defmodule Loka.ContentRewardStorageTest do
     File.write!(path, JSON.encode!(fun.(JSON.decode!(File.read!(path)))))
   end
 
+  defp frozen_baseline(dir) do
+    # Keep this controlled B1 fixture on its frozen M6 source, before B2 production storage.
+    for rel <- [
+          "items/cellar_key.json",
+          "items/storage_chest.json",
+          "barriers/storage_chest_lid.json"
+        ] do
+      File.rm!(Path.join(dir, rel))
+    end
+
+    prior = JSON.decode!(File.read!("protocol/fixtures/sampler_v009_hash.json"))
+    File.write!(Path.join(dir, "text.json"), JSON.encode!(prior["value"]["text"]))
+  end
+
   defp source(dir) do
     File.cp_r!("cartridges/ashmere_sampler", dir)
     File.cp_r!("test/fixtures/reward_storage", dir)
     File.rm!(Path.join(dir, "README.md"))
+    frozen_baseline(dir)
 
     update(dir, "cartridge.json", fn m ->
       m

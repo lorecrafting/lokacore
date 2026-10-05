@@ -1,0 +1,10 @@
+Phase: final Book fix
+Action: press label="Unlock a storage chest" --settle
+Exit: 0
+Tapped label="Unlock a storage chest" (201, 291)
+settled after 722ms: +3 -2 (~9 unchanged)
+- @e5 [text] "Locked"
++ @e5~s892501 [text] "Closed"
++ @e6~s892501 [button] "Lock a storage chest"
++ @e7~s892501 [button] "Open a storage chest"
+- @e7 [button] "Unlock a storage chest"

@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bandPhrase, cap, ended, plain, why, type group, type Pool, type Thing } from './model.ts';
+import { bandPhrase, cap, plain, why, type group, type Pool, type Thing } from './model.ts';
 import type { Button } from './presenter.ts';
 import { body, head, paper } from './paper.ts';
 import { reason } from './words.ts';
@@ -88,7 +88,6 @@ export function RoomPage(p: {
           <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
         ))}
         {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
-        {ended(p.view) !== '' && <Text style={{ ...note, marginTop: 12 }}>{ended(p.view)}</Text>}
       </ScrollView>
     </View>
   );

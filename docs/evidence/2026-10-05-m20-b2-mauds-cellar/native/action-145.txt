@@ -1,0 +1,20 @@
+Phase: final Book fix
+Action: snapshot -i
+Exit: 0
+Page: com.lorecrafting.loka
+App: com.lorecrafting.loka
+Snapshot: 12 visible nodes
+Simulator AX snapshot unavailable (circuit-disabled); used XCTest for this app generation.
+@e1 [application] "Loka"
+@e2 [scroll-area] "A storage chest" [scrollable]
+  [content below scroll-area hidden]
+@e3 [other] "A storage chest"
+@e4 [text] "A wooden chest with an iron lock."
+@e5 [text] "Open"
+@e6 [button] "Close a storage chest"
+@e7 [button] "Take a storage chest"
+@e8 [button] "Put a storage key in a storage chest"
+@e9 [button] "Leave"
+@e10 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
+@e11 [text] "Hour of the Tiger, three to five"
+@e12 [text] "Position, standing"

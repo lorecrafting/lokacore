@@ -1,0 +1,20 @@
+Phase: final Book fix
+Action: press label="Back to World" --settle
+Exit: 0
+Tapped label="Back to World" (201, 766)
+settled after 1864ms: +8 -7 (~3 unchanged)
+- @e2 [scroll-area] "Journal"
+- @e3 [other] "Journal"
+- @e4 [text] "Maud’s Cellar"
+- @e5 [text] "resolved"
+- @e6 [text] "You cleared Maud’s cellar and received the storage key."
+- @e7 [button] "Back to World"
++ @e2~s892454 [other] "Look, The Drowned Lantern"
++ @e3~s892454 [button] "Look, The Drowned Lantern"
++ @e4~s892454 [scroll-area] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
++ @e5~s892454 [other] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
++ @e6~s892454 [button] "Old Bram, open"
++ @e7~s892454 [button] "Widow Maud, open"
++ @e8~s892454 [button] "Map"
++ @e9~s892454 [button] "Position, standing"
+- @e10 [text] "Position, standing"

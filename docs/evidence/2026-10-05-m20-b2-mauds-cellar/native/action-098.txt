@@ -1,0 +1,23 @@
+Phase: final Book fix
+Action: press label="Map" --settle
+Exit: 0
+Tapped label="Map" (201, 760)
+settled after 1737ms: +7 -11 (~3 unchanged)
+- @e2 [other] "Look, Lantern Cellar"
+- @e3 [button] "Look, Lantern Cellar"
+- @e4 [scroll-area] "Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall."
+- @e5 [other] "Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall."
+- @e6 [button] "a dead cellar rat, open"
+- @e7 [button] "a dead cellar rat, open"
+- @e8 [button] "a dead cellar rat, open"
+- @e9 [button] "a dead cellar rat, open"
+- @e10 [button] "a dead cellar rat, open"
+- @e11 [button] "Map"
+- @e12 [button] "Position, standing"
++ @e2~s892362 [scroll-area] "Map"
++ @e3~s892362 [other] "Map"
++ @e4~s892362 [text] "Lantern Cellar"
++ @e5~s892362 [button] "Go up"
++ @e6~s892362 [text] "Beyond up: The Drowned Lantern — Old Bram, Widow Maud."
++ @e7~s892362 [button] "Back to World"
++ @e10~s892362 [text] "Position, standing"

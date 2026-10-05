@@ -1,0 +1,18 @@
+Action: press @e11 --settle
+Exit: 0
+Tapped @e11 (254, 810)
+settled after 1772ms: +7 -7 (~5 unchanged)
+- @e2 [button] "Look, Inn Rooms"
+- @e4 [text] "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage."
+- @e5 [button] "a brass key, open"
+- @e6 [button] "a storage chest, open"
+- @e7 [button] "a wool cloak, open"
+- @e8 [text] "The story ends here. Start over is in Settings."
++ @e3~s528242 [text] "Contents"
++ @e4~s528242 [button] "Character"
++ @e5~s528242 [button] "Equipment & Inventory"
+- @e10 [button] "Position, standing"
++ @e7~s528242 [button] "Journal"
++ @e8~s528242 [button] "Settings"
++ @e9~s528242 [button] "Back to World"
++ @e12~s528242 [text] "Position, standing"

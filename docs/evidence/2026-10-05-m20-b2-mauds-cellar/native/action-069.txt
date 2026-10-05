@@ -1,0 +1,17 @@
+Phase: final Book fix
+Action: press label="Got it" --settle
+Exit: 0
+Tapped label="Got it" (362, 710)
+settled after 892ms: +0 -2 (~10 unchanged)
+- @e2 [other] "Hold the map and drag toward a path to walk; tap it to open the map."
+- @e8 [button] "Got it"
+unchanged interactive (9):
+= @e2~s891980 [other] "Look, Ferry Landing"
+= @e3~s891980 [button] "Look, Ferry Landing"
+= @e4~s891980 [scroll-area] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
+= @e5~s891980 [other] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
+= @e6~s891980 [text] "Old Bram leaves."
+= @e7~s891980 [button] "Map"
+= @e8~s891980 [button] "Position, standing"
+= @e9~s891980 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
+= @e10~s891980 [text] "Hour of the Pig, nine to eleven"

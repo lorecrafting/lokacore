@@ -7,7 +7,6 @@ import {
   absent,
   branch,
   cap,
-  ended,
   group,
   hint,
   initialPages,
@@ -123,16 +122,6 @@ test('a restored choice opens its actual speaker detail or retained conversation
     ({ entities: ids.map((id) => ({ id })), choice: { speaker_id: 'bram' } }) as never;
   assert.deepEqual(initialPages(view(['bram'])), [{ kind: 'thing', id: 'bram' }]);
   assert.deepEqual(initialPages(view([])), [{ kind: 'dialogue', speaker: 'bram' }]);
-});
-
-// Breaks (PM item: note 4's line): an ending shown before every quest is over, or with no quest.
-test('the ending line shows once every quest is over', () => {
-  const view = (...states: string[]) => ({ journal: states.map((state) => ({ state })) }) as never;
-  assert.deepEqual(
-    [ended(view()), ended(view('active')), ended(view('resolved', 'active'))],
-    ['', '', ''],
-  );
-  assert.equal(ended(view('resolved')), 'The story ends here. Start over is in Settings.');
 });
 
 // Breaks (notes 6, 14): a refusal line with the raw code ("exit locked"), a cartridge's own reason

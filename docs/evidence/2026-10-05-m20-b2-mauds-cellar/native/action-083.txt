@@ -1,0 +1,3 @@
+Phase: final Book fix
+Action: wait text Look, Lantern Cellar 60000
+Exit: 0

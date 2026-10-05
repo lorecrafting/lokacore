@@ -1,0 +1,20 @@
+Phase: final Book fix
+Action: press @e10 --settle
+Exit: 0
+Tapped @e10 (254, 810)
+settled after 1747ms: +8 -7 (~4 unchanged)
+- @e2 [other] "Look, The Drowned Lantern"
+- @e3 [button] "Look, The Drowned Lantern"
+- @e4 [scroll-area] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e5 [other] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e6 [button] "Old Bram, open"
+- @e7 [button] "Widow Maud, open"
++ @e2~s892440 [scroll-area] "Contents"
++ @e3~s892440 [other] "Contents"
++ @e4~s892440 [button] "Character"
++ @e5~s892440 [button] "Equipment & Inventory"
+- @e9 [button] "Position, standing"
++ @e7~s892440 [button] "Journal"
++ @e8~s892440 [button] "Settings"
++ @e9~s892440 [button] "Back to World"
++ @e12~s892440 [text] "Position, standing"

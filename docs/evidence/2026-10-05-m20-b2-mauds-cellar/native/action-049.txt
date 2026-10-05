@@ -1,0 +1,5 @@
+Action: press label="“Your cellar is clear.”" --settle
+Exit: 0
+Tapped label="“Your cellar is clear.”" (201, 367)
+settled after 759ms: +1 -0 (~13 unchanged)
++ @e9~s528196 [text] "The page had changed; here it is again."

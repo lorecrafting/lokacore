@@ -1,0 +1,23 @@
+Action: press label="Map" --settle
+Exit: 0
+Tapped label="Map" (201, 760)
+settled after 2070ms: +11 -8 (~3 unchanged)
+- @e2 [other] "Look, The Drowned Lantern"
+- @e3 [button] "Look, The Drowned Lantern"
+- @e4 [scroll-area] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e5 [other] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e6 [button] "Old Bram, open"
+- @e7 [button] "Widow Maud, open"
+- @e8 [button] "Map"
+- @e9 [button] "Position, standing"
++ @e2~s527651 [scroll-area] "Map"
++ @e3~s527651 [other] "Map"
++ @e4~s527651 [text] "The Drowned Lantern"
++ @e5~s527651 [button] "Go down"
++ @e6~s527651 [text] "Beyond down: Lantern Cellar — a cellar rat, a cellar rat, a cellar rat, a cellar rat, a cellar rat."
++ @e7~s527651 [button] "Go up"
++ @e8~s527651 [text] "Beyond up: Inn Rooms — a brass key, a storage chest, a wool cloak."
++ @e9~s527651 [button] "Go west"
++ @e10~s527651 [text] "Beyond west: Well Lane — a brass lantern."
++ @e11~s527651 [button] "Back to World"
++ @e14~s527651 [text] "Position, standing"
