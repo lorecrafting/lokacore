@@ -372,6 +372,7 @@
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max."
     },
     "ShopOffer": {
+      "description": "One exact authored shop item definition with its positive buy and sell prices; custody determines availability (B3).",
       "type": "object",
       "properties": {
         "item": {
@@ -396,6 +397,7 @@
       "additionalProperties": false
     },
     "Shop": {
+      "description": "A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).",
       "type": "object",
       "properties": {
         "resource": {

@@ -1713,6 +1713,7 @@
       ]
     },
     "ShopAction": {
+      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).",
       "type": "object",
       "properties": {
         "price": {
@@ -1734,6 +1735,7 @@
       "additionalProperties": false
     },
     "ShopItemView": {
+      "description": "An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).",
       "type": "object",
       "properties": {
         "item_id": {
