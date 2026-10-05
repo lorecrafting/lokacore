@@ -172,6 +172,10 @@ turning into a catch-all. Findings are fixed in the gate PR.
 
 ## Git hygiene
 
+- During the local draft-PR cadence above, the local integration clone owns `main`;
+  PM, developer and reviewer each use separate worktrees. The local cadence's
+  review-record and merge steps replace the hosted push steps below until batch
+  publication. Keep in-flight older clones intact.
 - Every developer works in its own worktree on its own branch. The PM works in one
   persistent worktree, `../lokacore-pm`, moved with `git checkout --detach <sha>` and never
   removed; it is the checkout for the PM's commits and for codex's read-only runs. The main checkout is
@@ -184,8 +188,12 @@ turning into a catch-all. Findings are fixed in the gate PR.
   check may still report a conflict, so the PM still merges `main` locally and checks the merged index for duplicate or twice-edited lines and for order.
 - Parallel agents share one scratchpad: use file names unique to the slice (a shared
   `pr-body.md` once put one PR's description on another).
-- The reviewer commits only its record, in a detached worktree at `origin/<branch>`,
-  pushes from there with `git push origin HEAD:<branch>`, and removes the worktree.
+- For a hosted PR, the reviewer commits only its record in a detached worktree
+  at `origin/<branch>`, pushes from there with `git push origin HEAD:<branch>`,
+  and removes the worktree. During local development, the reviewer commits
+  the record in a separate worktree; the PM cherry-picks that review-only
+  commit onto the slice branch before its integration merge, then removes
+  the reviewer worktree.
 - A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
   first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`. The PM's worktree
   does this once, then `npm ci` only on a lockfile change.
