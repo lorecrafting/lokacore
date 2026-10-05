@@ -162,14 +162,15 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-This completes **3 of the 33** proposed Chapter 1 completion slices (A1, B1, A2).
+This completes **4 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
-adopts the A3 Green finale and five-outcome plan; neither is a completed source slice.
+adopts the A3 Green finale and five-outcome plan; neither PR alone completed a source slice.
 The owner's [one-time hosted-CI exception](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
 applied to these five merges while GitHub Actions delayed and cancelled runners.
-B2 source implementation remains local; A3 source work remains ahead.
+B2 Chandler's Debt quest mechanics are implemented and independently reviewed on
+local `main` at chapter 0.0.16/API1.14. A3 Green finale source work remains ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
