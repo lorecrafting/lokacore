@@ -81,3 +81,26 @@ Verification/limits: 12 focused tests passed; independently reproduced 3/21 beha
 | Exact fix-source CI | All six jobs successful at `c8186f66` |
 
 The temporary probe and both production mutations were restored before the record-only commit. Normal commit/push hooks remain enabled; the disposable detached worktree is removed after pushing. No preview, Metro, Simulator, device or owner-save operations were used.
+
+## Independent Sol scoped fix recheck
+
+The PM ran a fresh read-only Codex Sol opinion on the exact fix source head. Its answer is reproduced verbatim.
+
+```text
+VERDICT: APPROVE
+Head: c8186f663cfb293e2a3de0b180ad62428f56c062
+
+Findings: None. Q2A-R1 / Q2A-01 is closed.
+
+Verification:
+- The save.ts:137 guard validates event structure before unsafe classification and preserves typed corruption recovery.
+- Independently exercised missing/null events and missing payload through real in-memory SQLite and localSession: no game, save_corrupt, startOver:true. Null event/payload and nonstring event type also recover correctly.
+- Explicit Start over clears the failure and old receipts, restores an empty journal, and permits a subsequent saved action.
+- Older Study narration retains its original command/detail identity after newer unrelated Read; exact replay adds no receipt.
+- A real SQLite narration-read failure remains a storage error without Start over or receipt deletion.
+- Nine focused tests passed. Removing the guard through an in-memory module hook made the updated corruption test fail on absent save_corrupt (exit 1).
+- Tests exercise behavior with controlled receipt damage and literal recovery expectations. No Ponytail Review finding.
+
+Limits:
+Scoped fix and direct callers only. No files changed, no file-backed reopen rerun, no full CI/check suite verification, and no device, preview, Simulator, Metro or owner-save operations.
+```
