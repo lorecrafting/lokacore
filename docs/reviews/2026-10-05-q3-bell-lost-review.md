@@ -34,3 +34,7 @@ SceneDefinition now accepts both an outcome-only trigger and simultaneous quest/
 Evidence: Focused bell, return, escort, scene and readable-routing tests pass. Real delete-journal SQLite controls passed Ring replay, lost acknowledgement and genuinely failed COMMIT reconciliation. Three additional corruption assertions fail with open instead of save_corrupt. Removing the receipt guard makes the existing corruption test fail. Independent v013 pins reproduce; API1.11 refuses v013. Disposable checkout removed.
 
 Ponytail: No over-engineering finding; tighten existing validation predicates.
+
+## Developer response — cross-row save follow-up
+
+On the fix-round head `45332c26293ca31d2ff21adf6c85ee2f8346776d`, the save reviewer found that a genuine bell-first loss receipt still permitted current Q2 to be changed back to active when the child and meeting facts were also changed. The controlled real SQLite case returned `open` before this follow-up fix. Ring receipt recovery now always binds Q2's instance ID and requires the receipt's Q2 transition and child-status assignment to agree with the current lost branch in both directions. The same case returns `save_corrupt` without changing saved rows; lawful late Ring and lost states still reopen. The separate reviewer will recheck this response independently.

@@ -365,7 +365,8 @@ match that actor's save. The receipt must assign the bell and allegiance, resolv
 that actor's Q3 instance and start the bell scene. A failed Q2/lost additionally requires the same Ring receipt to
 fail that Q2 instance and assign lost child status; Wren's accepted meeting,
 return selection and escort must be absent. A completed stays/rescued Q2 or an
-active Q2 after the accepted Wren meeting remains legal after Ring. Missing or
+active Q2 after the accepted Wren meeting remains legal after Ring. A retained
+Q2/lost transition against a current non-lost Q2 row is contradictory. Missing or
 contradictory quest rows, facts, scene state or receipt are `save_corrupt`, with
 the existing Start over path and no silent repair. The saved Ring receipt and
 every scene continuation use the existing changed-row transaction and unknown

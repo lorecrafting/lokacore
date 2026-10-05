@@ -195,7 +195,7 @@ test('late Ring keeps both Q2 returns playable through cold reopen', (t) => {
   }
 });
 
-// Breaks: malformed quest rows, an allegiance without its bell, or a scene without a resolved Q3 silently hydrate.
+// Breaks: malformed rows, including a resurrected Q2 against a retained loss receipt, silently hydrate.
 test('bell save contradictions offer typed recovery without changing saved rows', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-bell-corrupt-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -212,6 +212,7 @@ test('bell save contradictions offer typed recovery without changing saved rows'
     'scene_below_end',
     'scene_string',
     'scene_fraction',
+    'loss_receipt_resurrected_q2',
   ]) {
     const path = join(dir, `${damage}.db`);
     const a = setup(path);
@@ -245,6 +246,15 @@ test('bell save contradictions offer typed recovery without changing saved rows'
     if (damage === 'scene_below_end') change('facts', fact('scene_bell_rung').key, -2);
     if (damage === 'scene_string') change('facts', fact('scene_bell_rung').key, 'bad');
     if (damage === 'scene_fraction') change('facts', fact('scene_bell_rung').key, 1.5);
+    if (damage === 'loss_receipt_resurrected_q2') {
+      change('quests', q2.key, { ...q2.value, state: 'active', outcome: undefined });
+      change('facts', fact('village_child_status').key, 'missing');
+      const meetingKey = JSON.parse(fact('chapel_bell_rung').key);
+      meetingKey.fact.key = 'fen_wren_met';
+      a.sql
+        .prepare('INSERT INTO state_row (section,key,value) VALUES (?,?,?)')
+        .run('facts', JSON.stringify(meetingKey), 'true');
+    }
     if (damage === 'ring_receipt_missing')
       a.sql
         .prepare("DELETE FROM receipt WHERE json_extract(command,'$.payload.action')='ring_bell'")

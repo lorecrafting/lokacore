@@ -81,11 +81,11 @@ export function bellSave(world: World, db: Db, scope: string, rows: [string, Cho
     (rung && q2?.[1].state === 'active' && fact('fen_wren_met') === false)
   )
     invalid();
-  if (rung && !ringReceipt(world, db, scope, q3![0], lost ? q2![0] : undefined)) invalid();
+  if (rung && !ringReceipt(world, db, scope, q3![0], q2![0], lost)) invalid();
   return !!lost;
 }
 
-function ringReceipt(world: World, db: Db, scope: string, q3: string, q2?: string) {
+function ringReceipt(world: World, db: Db, scope: string, q3: string, q2: string, lost: boolean) {
   const rows = db.getAllSync<{
     command_id: string;
     actor_id: string;
@@ -115,6 +115,10 @@ function ringReceipt(world: World, db: Db, scope: string, q3: string, q2?: strin
     const d: DecisionResult = JSON.parse(response);
     if (validate('DecisionResult', d).length || d.kind !== 'accepted') return false;
     const ops = d.delta.ops;
+    const q2Changed = ops.some((o) => o.op === 'quest.transition' && o.instance_id === q2);
+    const childChanged = ops.some(
+      (o) => o.op === 'fact.assign' && same(o.fact, ref(world, 'fact', 'village_child_status')),
+    );
     const assigned = (name: string, old: unknown, next: unknown, at: object) =>
       ops.some(
         (o) =>
@@ -169,7 +173,9 @@ function ringReceipt(world: World, db: Db, scope: string, q3: string, q2?: strin
       assigned('chapel_allegiance', 'unknown', 'prior', player) &&
       assigned('scene_bell_rung', 0, 1, player) &&
       terminal(q3, 'objectives_complete', 'resolved', 'prior') &&
-      (q2
+      q2Changed === lost &&
+      childChanged === lost &&
+      (lost
         ? terminal(q2, 'active', 'failed', 'lost') &&
           assigned('village_child_status', 'missing', 'lost', instance) &&
           !!changed('village_child_status', 'missing', 'lost', instance, bell.id)

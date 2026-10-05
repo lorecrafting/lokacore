@@ -14,3 +14,5 @@ Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward 
   full definition references, scopes and event cause/correlation, not just matching keys.
   Mutate each linked field in a real saved SQLite row and require typed corruption recovery
   without rewriting the file; include intermediate scene values and an uncertain COMMIT.
+  Compare a receipt's branch effects to the current rows in both directions: a historical
+  lost transition cannot justify a later active quest merely because its fact rows changed.
