@@ -176,6 +176,8 @@ function receiptDetail(
       throw new Error('malformed JSON: invalid committed shop exchange');
     return command.payload.provider_id;
   }
+  if (d.outcome === 'harvested' && command?.payload.type === 'harvest')
+    return command.payload.target_id;
   if (!['read', 'performed', 'success'].includes(d.outcome)) return;
   if (d.outcome === 'read') {
     if (

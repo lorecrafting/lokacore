@@ -23,7 +23,7 @@ const rowFor = (world: World, ref: DefinitionRef, entity_id: string) =>
   world.state.resources?.[key({ kind: 'resource', resource: ref, entity_id })];
 type ReceiptRow = { command_id: string; actor_id: string; command: string; response: string };
 
-export function deadlineSave(world: World, db: Db, meta: Meta) {
+export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false) {
   const scope = `story/${meta.lineage_id}/${world.character}`;
   const choices = Object.entries(world.state.choices ?? {});
   for (const job of Object.values(world.state.jobs ?? {}))
@@ -163,7 +163,7 @@ export function deadlineSave(world: World, db: Db, meta: Meta) {
       committedDialogue(world, db, scope, complete[0][0]);
       const selected = terminal.choices[outcome!]!;
       const axis = selected.sequence?.filter((s) => s.op === 'fact.adjust') ?? [];
-      if (axis.length !== 1 || !terminalAxis(world, terminalReceipt, axis[0])) invalid();
+      if (axis.length !== 1 || !terminalAxis(world, terminalReceipt, axis[0], exchanges)) invalid();
       if (paid && !commerce) {
         const transfers = terminalReceipt.delta.ops.filter((o) => o.op === 'resource.adjust');
         if (
@@ -206,6 +206,7 @@ function terminalAxis(
   world: World,
   receipt: Extract<DecisionResult, { kind: 'accepted' }>,
   step: { fact: DefinitionRef; amount: number },
+  exchanges: boolean,
 ) {
   const type = world.cartridge.facts[refString(step.fact)]?.value_type;
   const scope = scopeOf(world, world.character, step.fact);
@@ -218,10 +219,10 @@ function terminalAxis(
     op.writer_group !== 0 ||
     !same(op.scope, scope) ||
     typeof op.expected !== 'number' ||
-    op.expected !== world.factDefaults[key(step.fact)] ||
+    (!exchanges && op.expected !== world.factDefaults[key(step.fact)]) ||
     op.value !==
       Math.min(type.maximum!, Math.max(type.minimum!, (op.expected as number) + step.amount)) ||
-    op.value !== value(world, world.character, step.fact)
+    (!exchanges && op.value !== value(world, world.character, step.fact))
   )
     return false;
   const events = receipt.events.filter(

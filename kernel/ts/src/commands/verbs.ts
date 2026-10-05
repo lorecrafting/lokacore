@@ -19,6 +19,7 @@ export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]
   flee: [{ kind: 'none' }, []],
   buy: [entity('room_contents'), ['quoted_price']],
   sell: [entity('inventory'), ['quoted_price']],
+  harvest: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],
   take: [entity('room_contents'), []],
   drop: [entity('inventory'), []],
   give: [entity('inventory'), []],

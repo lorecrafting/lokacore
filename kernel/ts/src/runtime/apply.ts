@@ -24,7 +24,8 @@ export function apply(
     const [name, at] = row(target) ?? [];
     if (!name) continue;
     written[name] ??= { ...world.state[name] };
-    written[name][at!] = value;
+    if (target.kind === 'quest' && value === null) delete written[name][at!];
+    else written[name][at!] = value;
   }
   const state = { ...world.state, ...written, clock } as State;
   const hydrated = hydrate(world, state);

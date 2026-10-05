@@ -1,8 +1,9 @@
+// size: allow 350, finite authored exchange checks join the existing reference stage
+import { exchanges } from './cartridge_exchange.ts';
 import { commerce } from './cartridge_commerce.ts';
 import { noticeBoards } from './cartridge_boards.ts';
 import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
-// size: allow 345, NPC explicit resource starts join the existing reference stage
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -167,6 +168,7 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c));
   if (c.format !== 'loka-cartridge-v2') return out;
+  out.push(...exchanges(c, check));
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;

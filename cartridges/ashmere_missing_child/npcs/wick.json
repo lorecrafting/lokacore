@@ -1,0 +1,10 @@
+{
+  "keywords": [
+    "wick",
+    "brother_wick"
+  ],
+  "short": "npc.wick.short",
+  "room_line": "npc.wick.room",
+  "description": "npc.wick.description",
+  "room": "infirmary"
+}

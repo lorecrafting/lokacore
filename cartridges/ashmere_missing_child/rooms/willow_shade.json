@@ -2,7 +2,40 @@
   "title": "room.willow_shade.title",
   "description": "room.willow_shade.description",
   "exits": {
-    "east": { "to": "reed_bank" },
-    "south": { "to": "drowned_oak" }
+    "east": {
+      "to": "reed_bank"
+    },
+    "south": {
+      "to": "drowned_oak"
+    }
+  },
+  "details": {
+    "fenwort_patch": {
+      "aliases": [
+        "fenwort_patch",
+        "fenwort",
+        "patch"
+      ],
+      "description": "detail.fenwort_patch.description",
+      "harvest": {
+        "items": [
+          "fenwort_01",
+          "fenwort_02",
+          "fenwort_03",
+          "fenwort_04",
+          "fenwort_05",
+          "fenwort_06",
+          "fenwort_07",
+          "fenwort_08",
+          "fenwort_09",
+          "fenwort_10",
+          "fenwort_11",
+          "fenwort_12"
+        ],
+        "label": "action.harvest",
+        "narration": "narration.harvest",
+        "title": "detail.fenwort_patch.title"
+      }
+    }
   }
 }

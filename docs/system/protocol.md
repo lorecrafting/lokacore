@@ -576,6 +576,13 @@ GameView projects remaining harvest availability, exchange readiness, journal
 state and authored refusal reasons from confirmed truth, without a stock ledger,
 created-item origin, expiry job, daily clock cut or unbounded history collection.
 
+API1.17 lowers explicit repeat to terminal-only `quest.retire` followed by a fresh
+`quest.activate` in one writer group. The retire operation names the exact prior
+instance, quest and scope; its null change removes only that quest row. An
+exchange continuation carries `quest_instance_id` and deterministic outgoing/
+incoming item role bindings. Quest-authored `exchange` tuning supplies the shared
+readiness and lowering; detail-authored `harvest` supplies conserved stock IDs.
+
 ## B4 fuel composition
 
 Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`

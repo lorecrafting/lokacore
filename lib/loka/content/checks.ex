@@ -1,4 +1,4 @@
-# size: allow 340, scene-end fact refs join the existing checked expansion boundary
+# size: allow 360, finite stock and exchange refs join the checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;
@@ -95,6 +95,18 @@ defmodule Loka.Content.Checks do
         Enum.map(offers, &Map.update!(&1, "item", fn i -> ref(i, "item", m) end))
       )
 
+  def expand(%{"quantity" => _, "outgoing" => _, "incoming" => _} = x, m) do
+    x
+    |> Map.update!("npc", &ref(&1, "npc", m))
+    |> Map.update!("outgoing", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+    |> Map.update!("incoming", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+    |> Map.update!("contribution", &ref(&1, "fact", m))
+    |> Map.update!("faction", &ref(&1, "fact", m))
+  end
+
+  def expand(%{"items" => _, "label" => _, "narration" => _} = h, m),
+    do: Map.update!(h, "items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
+
   # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
   # map may have a detail keyed resource, whose value is a map).
   def expand(%{"resource" => r} = n, m) when is_binary(r),
@@ -172,6 +184,7 @@ defmodule Loka.Content.Checks do
 
     Enum.flat_map(all, &depth/1) ++
       Loka.Content.Requires.features(manifest, all) ++
+      Loka.Content.Exchanges.check(manifest, defs) ++
       if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
   end
 

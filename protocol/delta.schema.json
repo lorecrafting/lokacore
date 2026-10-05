@@ -245,7 +245,9 @@
             },
             "bindings": {
               "type": "array",
-              "items": { "$ref": "#/$defs/RoleBinding" }
+              "items": {
+                "$ref": "#/$defs/RoleBinding"
+              }
             }
           },
           "required": [
@@ -323,6 +325,9 @@
                 "$ref": "action.schema.json#/$defs/Key"
               },
               "minItems": 1
+            },
+            "quest_instance_id": {
+              "$ref": "#/$defs/QuestInstanceId"
             }
           },
           "required": [
@@ -768,7 +773,36 @@
             "value"
           ],
           "additionalProperties": false,
-          "description": "Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null→following, following→separated, separated→following, following→completed."
+          "description": "Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null\u2192following, following\u2192separated, separated\u2192following, following\u2192completed."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "quest.retire"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "instance_id": {
+              "$ref": "#/$defs/QuestInstanceId"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "scope": {
+              "$ref": "scope.schema.json#/$defs/StateScope"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "instance_id",
+            "quest",
+            "scope"
+          ],
+          "additionalProperties": false,
+          "description": "API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only."
         }
       ],
       "examples": [

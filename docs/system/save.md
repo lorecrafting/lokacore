@@ -521,6 +521,10 @@ pennies. Lost acknowledgement, both uncertain COMMIT outcomes and reopen must
 produce all prior or all next truth. No migration, save reset, fresh replacement
 item or receipt-derived second ledger is introduced.
 
+For API1.17 explicit repeats, a committed `quest.retire` removes the prior
+resolved quest row in the same changed-row transaction as the new activation.
+Only that typed operation deletes a row; receipts retain prior occurrence proof.
+
 ## B4 fuel and dark recovery
 
 Planned [B4 fuel](protocol.md#b4-fuel-composition) rows initialize once from the

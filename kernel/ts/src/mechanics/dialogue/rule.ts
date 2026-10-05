@@ -1,3 +1,5 @@
+import { exchangeRoles, contribution, exchangeDefinition, exchangeTransfers } from './exchange.ts';
+import { questOf } from '../lookups.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §38, §43; 04 §5.3 Choice/continuation
 // resolution; 21 §20): talk, choose and close_choice. talk: a target that is no dialogue's speaker
 // is not_found; else it opens the first of its dialogues, in key order, whose own policy holds
@@ -23,6 +25,7 @@
 // else invalid_state.
 import type {
   CharacterId,
+  DefinitionRef,
   DialogueChoice,
   DialogueDefinition,
   EntityId,
@@ -44,6 +47,7 @@ import {
   type Rule,
   type Steps,
   type World,
+  refString,
 } from '../../runtime/decision.ts';
 import {
   blocked,
@@ -90,7 +94,11 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
     actor_id: p.actor_id,
     source: { cartridge_id, cartridge_version, kind: 'dialogue', key: d.key },
     beat: d.key,
-    roles: bind(world, d),
+    roles: [...bind(world, d), ...exchangeRoles(world, p.actor_id, d, steps)],
+    ...(d.quest &&
+      values(d.choices).some((o) => o.exchange) && {
+        quest_instance_id: questOf(world, p.actor_id, d.quest)?.[0],
+      }),
     choice_ids: choiceIds(d),
   } as const;
   const opened = { type: 'choice_opened', continuation_id } as const;
@@ -124,7 +132,13 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   return applyChoice(world, command, mint, row, used, participants);
 }
 
-function sequence(world: World, actor: CharacterId, option: DialogueChoice, boundReceive: boolean) {
+function sequence(
+  world: World,
+  actor: CharacterId,
+  option: DialogueChoice,
+  boundReceive: boolean,
+  quest?: DefinitionRef,
+) {
   let run: Assigned = {
     ops: [],
     position: boundReceive ? 2 : option.receive || option.hand_over ? 1 : 0,
@@ -138,7 +152,12 @@ function sequence(world: World, actor: CharacterId, option: DialogueChoice, boun
     if (!next) return undefined;
     run = next;
   }
-  return run;
+  return option.exchange && quest
+    ? contribution(world, actor, quest, {
+        ...run,
+        position: exchangeDefinition(world, quest)!.quantity * 2,
+      })
+    : run;
 }
 
 // size: allow 60, one choice lowers its bound quest, custody, payment and events atomically
@@ -157,9 +176,12 @@ function applyChoice(
   if (typeof q === 'string') return rejected(q);
   const body = bodyOf(world, actor_id)!;
   const boundReceive = !!(option.accept && option.receive);
-  const run = sequence(world, actor_id, option, boundReceive);
+  const run = sequence(world, actor_id, option, boundReceive, d.quest);
   if (!run) return { kind: 'fault' as const, code: 'precondition_failed' as const };
-  const given = handOver(world, command, mint, row, option, body, boundReceive ? 2 : 1);
+  const given =
+    option.exchange && d.quest
+      ? exchangeTransfers(world, command, mint, row, body, d.quest)
+      : handOver(world, command, mint, row, option, body, boundReceive ? 2 : 1);
   const quests = q
     ? [event(world, command, mint, boundReceive ? 1 : run.position + 1, q.payload)]
     : [];
@@ -224,7 +246,7 @@ function quest(
   if (!accept) return undefined;
   return (
     acceptRefused(world, actor, accept, used) ??
-    (option.receive
+    (option.receive || world.cartridge.quests![refString(accept)].exchange
       ? boundActivation(world, mint, actor, accept, bindings)
       : activation(mint, actor, accept))
   );

@@ -12,6 +12,8 @@ valid:
   - "import { moveSequence } from './sequence.ts';"
   - "import { roundSequence } from '../combat/round.ts';"
   - "import { flee } from './flee.ts';"
+  - "import { exchangeTransfers } from './exchange.ts';"
+  - "import { decideHarvest } from './harvest.ts';"
 invalid:
   - "import { readFileSync } from 'node:fs';"
   - "import { decide } from '../movement/rule.ts';"

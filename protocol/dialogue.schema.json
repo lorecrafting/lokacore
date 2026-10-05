@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Dialogue contracts",
-  "description": "DialogueDefinition (06 §17, §18, §33, §37, §43; 04 §5.3 Choice/continuation resolution; 21 §20), owned by dialogue@1.",
+  "description": "DialogueDefinition (06 \u00a717, \u00a718, \u00a733, \u00a737, \u00a743; 04 \u00a75.3 Choice/continuation resolution; 21 \u00a720), owned by dialogue@1.",
   "$defs": {
     "DialogueDefinition": {
-      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a loader check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
+      "description": "One dialogue node (06 \u00a717; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, recipe's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 \u00a733, \u00a743: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a loader check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list in key order. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
       "type": "object",
       "properties": {
         "key": {
@@ -180,7 +180,7 @@
       ]
     },
     "DialogueChoice": {
-      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign.",
+      "description": "One option of a dialogue (06 \u00a717, \u00a743): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign.",
       "type": "object",
       "properties": {
         "label": {
@@ -274,19 +274,35 @@
         "availability": {
           "type": "object",
           "properties": {
-            "from": { "$ref": "command.schema.json#/$defs/LogicalTime" },
-            "through": { "$ref": "command.schema.json#/$defs/LogicalTime" }
+            "from": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "through": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
           },
           "additionalProperties": false
         },
         "payment": {
           "type": "object",
           "properties": {
-            "from": { "$ref": "action.schema.json#/$defs/Key" },
-            "resource": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "amount": { "type": "integer", "minimum": 1, "maximum": 2147483647 }
+            "from": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
           },
-          "required": ["from", "resource", "amount"],
+          "required": [
+            "from",
+            "resource",
+            "amount"
+          ],
           "additionalProperties": false
         },
         "escort": {
@@ -312,7 +328,10 @@
             "transition"
           ],
           "additionalProperties": false,
-          "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest."
+          "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue\u2019s same quest."
+        },
+        "exchange": {
+          "const": true
         }
       },
       "required": [

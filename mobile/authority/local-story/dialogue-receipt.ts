@@ -58,7 +58,10 @@ export function dialogueDetail(
     !option ||
     row.actor_id !== p.actor_id ||
     row.beat !== source.key ||
-    !same(row.roles, bind(s.world, source)) ||
+    !same(
+      row.roles.filter((r) => !option.exchange || !/^(outgoing|incoming)_\d{2}$/.test(r.role)),
+      bind(s.world, source),
+    ) ||
     !same(row.choice_ids, choiceIds(source))
   )
     return invalid();
@@ -155,6 +158,22 @@ function consequences(
   }
   if (!escortEvidence(s, command, row, option, ops)) return false;
   if (!source.quest) return true;
+  if (option.exchange) {
+    const resolved = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
+    return (
+      resolved.length === 1 &&
+      resolved[0].op === 'quest.transition' &&
+      resolved[0].instance_id === row.quest_instance_id &&
+      resolved[0].outcome === row.choice_id &&
+      events.some(
+        (e) =>
+          e.payload.type === 'quest_resolved' &&
+          e.payload.instance_id === row.quest_instance_id &&
+          same(e.payload.quest, source.quest) &&
+          e.payload.outcome === row.choice_id,
+      )
+    );
+  }
   const q = questOf(s.world, actor, source.quest);
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
   const resolved = events.filter((e) => e.payload.type === 'quest_resolved');
@@ -291,6 +310,7 @@ function assignmentEvidence(
 
 // Legacy terminal rewards retain their routing; recover the new authored custody path.
 function transferDetail(s: Story, source?: DialogueDefinition, option?: DialogueChoice) {
+  if (option?.exchange) return true;
   if (option?.receive && !source?.quest) return true;
   if (source?.quest && s.world.cartridge.quests?.[refString(source.quest)]?.deadline) return true;
   const transfer = option?.receive ?? option?.hand_over;

@@ -1,0 +1,38 @@
+{
+  "npc": "wick",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "any",
+        "items": [
+          {
+            "op": "quest_state",
+            "quest": "infirmary_herbs",
+            "state": "active"
+          },
+          {
+            "op": "quest_state",
+            "quest": "infirmary_herbs",
+            "state": "objectives_complete"
+          }
+        ]
+      }
+    }
+  },
+  "prompt": "dialogue.a_wick_offer.prompt",
+  "roles": {
+    "wick": {
+      "role": "npc",
+      "npc": "wick"
+    }
+  },
+  "choices": {
+    "accept": {
+      "label": "quest.infirmary_herbs.accept",
+      "narration": "narration.wick.accept",
+      "accept": "infirmary_herbs"
+    }
+  }
+}
