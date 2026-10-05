@@ -705,3 +705,32 @@ receipt replay allocates/transfers/schedules nothing twice. Exact unavailable or
 mismatched release pins refuse explicitly; only explicit Start over replaces the
 save. No save migration, periodic checkpoint or second population receipt ledger
 is selected. Browser reload/Book evidence is distinct from real SQLite faults.
+
+## B8 service recovery
+
+**Selected, source pending.** [B8](mechanics.md#b8-mauds-immediate-services-selected-contract)
+stores only changed balances, entitlement, meal stock, ale row and settled MV
+plus head/receipt in the existing transaction. No service ledger/table, save
+migration or reset-on-open exists. Reopen/reconciliation validates the exact
+original actor/body/provider/service/quote, full refs/scopes, causal command and
+prior/result rows against authored initial truth and revision-ordered receipts.
+B3/S2 payment history and B7 liquid history must recognize the new service
+producer without weakening their own checks. Merely plausible bounded stock,
+MV or paid=true is insufficient evidence. Lawful later movement, death, elapsed
+recovery and other payment producers cannot invalidate an old service receipt.
+
+Room proof requires its unique paid transition and matching exact payment;
+meal proof requires one exact stock debit/payment and independently valid capped
+MV settlement; drink proof requires historical provider-owned exact vessel/kind,
+complete serving debit/payment and MV settlement. Missing/extra malformed opted
+rows, altered bounded stock/quantity, forged entitlement, swapped provider/service,
+wrong price or omitted benefit/payment yields typed `save_corrupt`, preserving
+the file. Never grant, refill, delete, heal or repin to repair a save.
+
+Real failed COMMIT and uncertain-not-committed reopen all prior state; uncertain
+committed/lost acknowledgement reopen all next state. Input and elapsed remain
+fenced while unknown; exact invocation replay charges/consumes/grants nothing
+again. Reopen unpaid, paid-before-Rest, meal-used, ale-partial/empty and actual
+same-body death/recovered states, then invoke their next consumer. Confirmed
+service narration is retained once at the original Maud detail through the
+committed command identity, never inferred from an unrelated latest receipt.

@@ -1119,3 +1119,48 @@ and transfers its same directly held pelt through ordinary death custody once.
 Combat loss leaves an immediate safe return/recovery route; surviving hounds can
 be deliberately retried now, and defeated hounds' loot is immediately available.
 No required chapter path or Book proof waits for a replacement or night.
+
+## B8 Maud's immediate services (selected contract)
+
+**Selected, source implementation pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+selects three all-hours services from the original living, co-located Maud at the
+Drowned Lantern. Each accepted service immediately exchanges the exact quoted
+pennies for its declared benefit in one proposal. A meal is eaten and a serving
+of ale is drunk as part of that transaction; neither purchase creates an item
+waiting for a later Eat/Drink. This deliberately replaces the provisional
+purchase-then-consume recommendation and the historical hunger/drunk formulas.
+
+Room grants one durable actor-scoped Boolean `lantern_bed_paid` for the current
+save lineage. Its immediate consumer is the actual bed detail in Inn Rooms,
+whose paid description and ordinary Rest offer become available. Renting changes
+no position, rate, clock, HP/MV, slept fact, quest or dream state. A new rental
+when already entitled refuses without payment. Ordinary unpaid Rest and all
+upstairs, attic, cellar and corpse routes remain legal. Entitlement survives
+death/reopen and has no night expiry or automatic renewal. B9 alone owns the
+first qualifying actual accepted Rest at Inn Rooms after payment; earlier unpaid
+Rest and rental are not retrospective dream credit. Already resting must Stand
+then Rest for a new accepted transition; B8 adds no Rest event/dream writer.
+
+Meal consumes one unit of Maud's finite nonregenerating meal-stock ResourceSpec
+and grants its authored capped MV increment on the actor body. Drink consumes
+one complete authored serving from the exact Maud-owned ale vessel's B7 liquid
+row and grants its authored capped MV increment. Strict B7 last-serving refusal
+applies: insufficient quantity never buys a partial drink. Exhaustion preserves
+the same empty vessel shell. The shared service query proves original provider,
+living actor/provider, co-location, exact service reference/quote, unowned room
+entitlement or available stock and exact conserved funding. Positive MV headroom
+is required only for meal/drink; room rental remains available at full MV.
+Meal/drink at full MV refuse before charging or consuming. Near the maximum the
+benefit caps; the displayed offer declares that cap. No HP/MA recovery, passive
+hunger/thirst, intoxication, carrying acquisition, food issuance or restock job
+is added. B7 water remains benefit-free and refill cannot introduce ale.
+
+Service owns admission and lowering: payment uses B3's exact debit/credit query,
+room uses existing fact assignment, meal stock uses exact resource debit, and
+MV uses existing resource settlement/capped adjustment. Liquid owns the shared
+pure exact-serving query/transition used for the provider-bound ale consequence;
+service never calls another rule or fabricates an actor-owned Drink. All writes
+share one writer group and query budget. Normal authority elapsed preflight,
+scene/combat admission, freshness and receipt replay precede this work. S1 Talk,
+accept/turn-in and earned chest/key remain reachable in every quest state;
+services are separate direct offers, not a first-eligible dialogue replacement.

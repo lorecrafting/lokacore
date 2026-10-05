@@ -782,3 +782,30 @@ or stale occurrences create/move/draw nothing. All writes use existing root
 proposal, conflicts, shared work counters and changed-row transaction. No public
 spawn action, per-hound job, global ecology service or unbounded history scan is
 required. New schemas get invalid fixtures and required/bound mutant sweeps.
+
+## B8 immediate service composition
+
+**Selected, pending implementation.** A service invocation binds actor, exact
+provider EntityId, declared service DefinitionRef and displayed positive quoted
+price. The selected command is `use_service {actor_id, provider_id, service,
+quoted_price}`, with `service` the authored DefinitionRef and accepted outcome
+`service_used`. Invocation targets contain the provider; captured input supplies
+service and quote. Add only the minimal `service@1` command/action/offer projection needed
+for the [real consumer](mechanics.md#b8-mauds-immediate-services-selected-contract).
+The projected NPC service row includes label, price, declared capped benefit and
+current availability/reason; admission reuses its query after due/elapsed work.
+A displayed offer is no reservation and a stale service never substitutes another.
+
+Service lowering uses existing exact two-party `resource.adjust` payment,
+`fact.assign` room entitlement, exact stock `resource.adjust`, settled capped MV
+`resource.adjust`, and B7 whole-row-precondition `liquid.set`. All share one
+writer group; any failed precondition/conflict/budget discards the entire service.
+Provider-bound liquid consumption is an explicit typed service consequence with
+historical provider custody/kind/quantity checks, distinct from actor-owned
+Drink. Extend B7's verifier to recognize this producer, rather than spoof a
+Drink command or add a second liquid mutation. No new portable operation,
+service state row, item creation, clock advance, queue/escrow or automatic job
+is needed. No new service DomainEvent is required: existing fact/resource/liquid
+consequences and the bound receipt command prove the result. Register the actual
+command/outcome ownership and invariants; do not invent receipt fields. The receipt command identifies its
+original provider/service for confirmed narration routing and save validation.

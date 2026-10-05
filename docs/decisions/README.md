@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment.
+
 - [B3 Peg's immediate shop PM decision](pm-decision-b3-pegs-shop-2026-10-05.md): finite authored shelf, identity-conserving buyback and no restock.
 
 - [B1 chapter calendar and Book status PM decision](pm-decision-b1-calendar-status-2026-10-05.md): authored hour/day, solar/lunar cycle and confirmed status consumer.
