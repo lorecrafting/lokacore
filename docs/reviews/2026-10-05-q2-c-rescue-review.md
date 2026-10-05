@@ -41,3 +41,12 @@ Read before the implementation diff: the private PM GO brief, [adoption and comp
 ## Limits
 
 This review independently reran focused schema fixtures and compiler/composer checks; it does not claim an independent rerun of the developer's complete schema-mutant sweep or all mobile/TypeScript tests. Source-head CI supplies the broader check result. No preview, Metro, Simulator, DeviceHub, native build or owner-save operation occurred. No roadmap completion or merge is authorized by this record alone.
+
+## Separate protocol/save opinion — source `e412193e`
+
+Read-only Codex Sol xhigh opinion, appended verbatim below. The primary APPROVE above is independent of this separate finding; PS-1 must be fixed and rechecked before merge.
+```text
+CHANGES REQUIRED
+
+1. PS-1 | blocker | mobile/authority/local-story/dialogue-receipt.ts:174 — After accepting rescue (or completing it), set the saved Q1 quest row’s value to JSON null and reopen. escortEvidence calls questOf, which dereferences the null row and throws an uncaught TypeError. Recovery loses the required save_corrupt classification and Start over offer. Reproduced in in-memory SQLite; identical corruption before rescue selection receives typed recovery.
+```
