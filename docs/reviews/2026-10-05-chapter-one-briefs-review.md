@@ -14,3 +14,7 @@ The roadmap must lead a developer to the public 33-row plan and every correspond
 ## Checks
 
 The index has 33 distinct IDs and 33 distinct existing brief files; none is unindexed. Local Markdown links from the roadmap, public plan, index and all 33 briefs resolve. Every brief links the current roadmap, carries a provisional publication note and leaves future pins null; no private filesystem path was found. I inspected A1–A3, B1, D1, D6, C6 and E1–E3 in depth, and scanned the remaining briefs for dependency, status, release and approval language. No implementation tests or mutation controls apply to this docs-only review. No source, native, device or owner-save work was performed.
+
+## Scoped fix re-review — `bdec64d8fcbf188e90333fe206ac790996479b41`
+
+**APPROVE.** R193-1 is closed. D1 now owns Sedge's immediately available free, durable, idempotent lesson without a C1 or S27 gate. D6 re-pins and consumes that learned state without a second teaching grant. C6's optional later reward acknowledges or repeats the same lesson without gating first access. These match the public D1 → D6 → C6 sequence; the touched briefs, public plan and index have resolving direct links. This was a docs-only scoped check; no implementation, native or device proof was claimed.
