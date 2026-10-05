@@ -1,6 +1,8 @@
 // Real Book routes and authority; native leaves are not device/layout evidence.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createRequire, registerHooks } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
@@ -84,8 +86,8 @@ const sorted = (v: any): any =>
             .map((k) => [k, sorted(v[k])]),
         )
       : v;
-function preview(input = bundle) {
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, input);
+function preview(input = bundle, path = ':memory:') {
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, input);
   const state: any[] = [],
     effects = new Map<number, { deps: any[]; cleanup?: () => void }>();
   let slot = 0;
@@ -196,20 +198,55 @@ test('landing detail and two board children read exact targets and pop back with
     const before = receipts(a.sql);
     a.tap(title);
     assert.equal(a.stack().at(-1).id, id);
-    assert.deepEqual(a.text().slice(0, 4), [title, description, body, 'Back']);
+    assert.deepEqual(a.text().slice(0, 4), [title, description, body, 'Back to board']);
     const receipt = JSON.parse(
       a.sql.prepare('SELECT command FROM receipt ORDER BY revision DESC LIMIT 1').get()!
         .command as string,
     );
     assert.equal(receipt.payload.target_id, id);
     assert.equal(receipts(a.sql), before + 1);
-    a.tap('Back');
+    a.tap('Back to board');
     assert.equal(a.stack().at(-1).kind, 'board');
     assert.equal(receipts(a.sql), before + 1);
   }
   a.tap('Back to World');
   assert.deepEqual(a.stack(), []);
   assert.ok(!a.text().includes(whistleBody) && !a.text().includes(cellarBody));
+});
+
+// Break: cold Continue hides restored notice text, requiring another Read to display it,
+// or restores a child without its board and duplicates the committed message/receipt.
+test('cold Continue shows the confirmed notice once and restores its return route without Read', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-notice-reopen-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  for (const [title, id, body] of [
+    ['Landing notice', landing, landingBody],
+    ['Help in the cellar', cellar, cellarBody],
+  ]) {
+    const path = join(dir, id + '.db');
+    let a = preview(bundle, path);
+    if (id === cellar) {
+      a.walk('north');
+      a.walk('east');
+      a.tap('Notice board');
+    }
+    a.tap(title);
+    const saved = a.sql.prepare('SELECT * FROM receipt ORDER BY revision').all();
+    a.sql.close();
+    a = preview(bundle, path);
+    assert.equal(a.text().filter((line) => line === body).length, 1);
+    assert.equal(a.stack().at(-1)?.id, id);
+    assert.deepEqual(a.sql.prepare('SELECT * FROM receipt ORDER BY revision').all(), saved);
+    assert.deepEqual(a.presenter().screen().log, []);
+    a.tap(id === landing ? 'Leave' : 'Back to board');
+    if (id === cellar) {
+      assert.equal(a.stack().at(-1).kind, 'board');
+      a.tap('Back to World');
+    }
+    assert.deepEqual(a.stack(), []);
+    assert.deepEqual(a.sql.prepare('SELECT * FROM receipt ORDER BY revision').all(), saved);
+    a.sql.close();
+  }
 });
 
 // Breaks: pending Read reveals source prose before commit confirmation or renders it twice on retry.
@@ -241,7 +278,7 @@ test('long elapsed redraw retains board route and a real room change prunes it',
   a.draw();
   a.tap('Notice board');
   a.tap('Lost tin whistle');
-  a.tap('Back');
+  a.tap('Back to board');
   const captured = a
     .draw()
     .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Lost tin whistle');

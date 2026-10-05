@@ -9,7 +9,7 @@ All details show title, description, a chronological log only when nonempty, the
 The consumer is the Drowned Lantern board in `ashmere_missing_child@0.0.4`, with Lost tin
 whistle and Help in the cellar. Ferry Landing opens a direct Landing notice detail and invokes
 its existing Read. Each notice displays the body on confirmation without a second Read
-option. Landing offers Leave to World; a board child offers Back to its board. Confirmed Read
+option. Landing offers Leave to World; a board child offers Back to board. Confirmed Read
 messages appear only in their notice detail histories, never in World. Cold reopen derives
 the exact target from the committed receipt without a save-format or writer change. Old Bram
 remains outside the active chapter; the sampler and Q1 are outside this change.

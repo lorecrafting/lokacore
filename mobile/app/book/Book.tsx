@@ -28,7 +28,7 @@ import {
   ScenePage,
   SettingsPage,
 } from './pages.tsx';
-import { NoticeEntries, NoticePage } from './notices.tsx';
+import { NoticeEntries, NoticePage, restoredNoticePages } from './notices.tsx';
 import { Turn } from './Turn.tsx';
 
 type Presenter = ReturnType<typeof presenter>;
@@ -103,7 +103,10 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
 
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
-  const [stack, setStack] = useState<Page[]>(() => initialPages(pr.screen().view));
+  const [stack, setStack] = useState<Page[]>(() => [
+    ...restoredNoticePages(pr.screen()),
+    ...initialPages(pr.screen().view),
+  ]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
   const screen = pr.screen();
@@ -166,7 +169,7 @@ export function BookView(p: ViewProps) {
         {p.screen.view.combat ? (
           <Combat screen={p.screen} g={g} press={p.press} />
         ) : (
-          <Body {...ctx} page={page} chapterDone={() => p.go([], 1)} />
+          <Body {...ctx} page={page} chapterDone={() => p.go(p.stack.slice(0, -1), 1)} />
         )}
       </Turn>
       <Bottom {...ctx} page={page} />
@@ -203,7 +206,7 @@ function Bottom(p: BottomProps) {
           p.page.kind === 'dialogue' ||
           (notice && view.notices?.some((n) => n.id === notice)) ? null : (
             <Back
-              label={p.page.kind === 'notice' ? 'Back' : 'Back to World'}
+              label={p.page.kind === 'notice' ? 'Back to board' : 'Back to World'}
               onPress={p.page.kind === 'notice' || p.page.kind === 'board' ? p.back : p.world}
             />
           )

@@ -53,3 +53,29 @@ writer, schema, proposal or portable foundation. No unresolved self-review findi
 `mise exec -- bin/check_all.sh` passed with exit 0, including both kernels, mobile
 typechecking/tests and the repository's planted controls. The normal pre-push result is
 recorded in the PR; independent review is required before merge.
+
+## Fix round 1
+
+The independent review found that cold recovery restored notice history without a visible
+Book route. A new real-SQLite Book test closes and reopens both Landing and a board child,
+continues past the chapter title, and requires the body once, the exact notice route, its
+Leave or Back to board control, and unchanged complete receipt rows. Before the fix, the
+cold-reopen test failed; the older Book controls still passed. The fix derives local pages
+from already restored detail history and pops only the chapter page on Continue.
+
+A second controlled test stores invalid JSON (`{broken`) in the existing Read command
+column. Before the fix, opening lacked the typed corruption refusal. It now requires
+`save_corrupt`, offered Start over, and repair using the same SQLite handle with an unrelated
+table intact. The same controlled test proves a 0.0.3 pin remains `pinned_release_missing`
+with unchanged pin bytes until explicit Start over to the unchanged 0.0.4 release. Existing
+lock/I/O refusal tests remain in the focused run. The new tests and updated return-label
+assertion produced three failures before the fixes; the 30-test focused run then passed.
+
+Three isolated source red controls each failed only the intended new regression test:
+removing restored notice pages, making chapter Continue clear those pages, and removing
+JSON `SyntaxError` classification. All source mutations were restored. The full
+`mise exec -- bin/check_all.sh` passed again with exit 0 for this fix round.
+
+Ponytail/correctness recheck: reuse the existing histories, metadata and page stack; classify
+the standard JSON `SyntaxError` at the existing session refusal boundary. No parser wrapper,
+persisted route, save writer, content-pin change or native change was added.

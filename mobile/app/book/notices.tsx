@@ -19,6 +19,22 @@ const noticesOf = (view: GameView) => [
   ...(view.notice_boards ?? []).flatMap((board) => board.notices),
 ];
 
+export function restoredNoticePages(screen: Screen): Page[] {
+  if (screen.view.combat) return [];
+  const board = screen.view.notice_boards?.find((b) =>
+    b.notices.some((n) => screen.detail(n.id).length > 0),
+  );
+  const notice = (board?.notices ?? screen.view.notices)?.find(
+    (n) => screen.detail(n.id).length > 0,
+  );
+  return notice
+    ? [
+        ...(board ? [{ kind: 'board' as const, id: board.id }] : []),
+        { kind: 'notice', id: notice.id },
+      ]
+    : [];
+}
+
 function noticeOffer(view: GameView, id: string) {
   const offers = view.actions.filter(
     (a) =>
