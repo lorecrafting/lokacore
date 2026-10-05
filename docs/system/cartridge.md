@@ -618,3 +618,44 @@ prices or missing participating balance declarations. The shop never treats Peg'
 S2 ledger or an item later given to her as an offer. B4/B7 may add use metadata to
 these definitions in their own releases without changing B3's item identities or
 shop rules. The satchel has no lid and its contents count toward the ordinary load.
+
+## B5 herb and bandage stock
+
+The [B5 mechanic](mechanics.md#s9-infirmary-herbs-b5-selected-contract) uses finite
+existing authored item instances. Because the current compiler instantiates one
+item per definition, declare twelve individually keyed fenwort definitions and
+twelve individually keyed bandage definitions, with shared visible family names
+and independent exact references. They are real items, not stacks or templates.
+Fenwort starts directly in Willow Shade; bandages start directly with Wick.
+The patch references only those twelve fenwort definitions; S9 references those
+same eligible herbs and twelve reward definitions. Derived release IDs remain
+unknown until the new cartridge is built.
+
+| Chapter setting | Selected value |
+|---|---:|
+| Initial fenwort supply | 12 distinct items |
+| Initial Wick reward supply | 12 distinct bandages |
+| Herbs per turn-in | 3 |
+| Bandages per turn-in | 3 |
+| Fenwort mass | 20g each |
+| Bandage mass | 10g each |
+| S9 Priory increment | +1 |
+| Cumulative S9 contribution cap | +3 |
+| Initial player-scoped S9 contribution | 0 |
+
+The patch and Wick have no hour gate, respawn, restock or cooldown. Four optional
+exchanges are funded in a fresh chapter, and the fourth demonstrates the cap.
+All item definitions retain ordinary custody, storage and death behavior. Wick
+has no finite carrying/custody capacity that could reject the authored incoming
+herbs. Public reciprocal Cloister/Infirmary routes cannot depend on private study
+access, a bell choice, key or timed door. The patch is immediately reachable via
+the existing Willow Shade route. C5 owns bandage use; D12 owns learned herbalism;
+neither is advertised as a selectable unfinished action in B5.
+
+Compiler and loader independently reject duplicate/overlapping eligible and
+reward references, wrong kinds or starting holders, absent patch room/Wick,
+nonpositive or unequal exchange quantities, insufficient initial stock, invalid
+mass, missing bounded contribution declaration, increment outside its cap and
+incompatible B2 faction bounds. The exchange quantities are equal for this
+consumer, not a generic barter language. Definitions and all tuning belong to
+this cartridge; no engine or Book fenwort count/faction literal is permitted.

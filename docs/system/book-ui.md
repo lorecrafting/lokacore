@@ -392,3 +392,21 @@ admission recheck the same offer when tapped. Only a confirmed receipt adds purc
 or sale narration to Peg's history and refreshes pennies, custody and inventory.
 Stale/refused/fenced results never claim success. Leave retains the existing NPC
 detail behavior and the world clock continues while the page is open.
+
+## B5 herbs and Wick details
+
+Willow Shade's patch detail shows its current finite supply and Harvest for one
+real eligible item; empty or too-heavy stock states the current refusal. The
+ordinary inventory may also Take those same room items. Wick's public NPC detail
+explains the exact authored herb/reward quantities, offers explicit Accept or
+Reaccept only when the funded exchange can begin, and offers Turn in for an
+active ready occurrence. The journal distinguishes active, resolved and optional
+reacceptance without promising regrowth or tomorrow's stock. All controls use
+shared confirmed projection/admission and ordinary live-action freshness.
+
+Only a confirmed exchange updates inventory, contribution/faction, journal and
+Wick history. Refused/stale/fenced outcomes never claim reward or completion.
+Drop, stored herbs or corpse custody explain retrieval through the existing item
+and recovery controls. Exhausted or given-away finite supply is an honest optional
+unavailable exchange, never a chapter-blocking wait. No bandage-use or herbalism
+control is exposed before its later real consumer lands.

@@ -458,3 +458,31 @@ contradictory custody/outcome evidence as `save_corrupt`. Use the existing recei
 and changed-row trust boundary, not a second money ledger or save migration.
 Receipt replay cannot pay or move the item again; malformed current-build truth
 leaves the save intact.
+
+## B5 stock and repeat recovery
+
+[B5](mechanics.md#s9-infirmary-herbs-b5-selected-contract) stores ordinary authored
+item custody, the latest bound S9 occurrence and its bounded contribution fact.
+Stock is derived from custody; there is no persisted harvest count or reward mint.
+Every changed custody/fact/quest/choice row and its receipt use the existing single
+transaction, failed-COMMIT fence and unknown-COMMIT reconciliation. Exact retry
+returns the committed result without transferring stock or adjusting faction again.
+
+Reopen accepts lawful empty patches, partial harvests, storage/drop/death custody,
+active S9 with temporarily missing herbs, every resolved occurrence and the next
+explicitly accepted occurrence. Validate exact eligible/reward identity sets,
+latest actor/Wick binding and occurrence transitions, distinct exchange IDs,
+receipt-bound transfers and actual S9 contribution. Reconcile S9 contributions
+and B2/unrelated lawful faction adjustments at their own saved revision; do not
+compare an old faction result or item holder with only today's rows. Ordinary
+Take/Drop/Put/Give/death transfers can lawfully change post-exchange custody and
+must not be classified as corruption. The actual current rows must agree with the
+receipt-evidenced sequence; a resolved exchange requires its whole transfer and
+quest evidence, and an old completion cannot justify a later active occurrence.
+
+Malformed/out-of-range contribution, reused occurrence, missing/duplicate item,
+forged transfer or contradictory current rows yields typed save_corrupt without
+repair or deletion. B3's penny/S2 reconciliation remains intact: S9 never changes
+pennies. Lost acknowledgement, both uncertain COMMIT outcomes and reopen must
+produce all prior or all next truth. No migration, save reset, fresh replacement
+item or receipt-derived second ledger is introduced.

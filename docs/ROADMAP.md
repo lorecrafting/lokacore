@@ -175,6 +175,10 @@ B3 Peg's shop has an [adopted PM contract](decisions/pm-decision-b3-pegs-shop-20
 and a [re-pinned brief](briefs/chapter-one/b3-pegs-shop-brief-2026-10-05.md)
 on local B2 base `ec3ab73d`; source implementation and review remain ahead.
 
+B5 Infirmary Herbs has an [adopted finite-stock contract](decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)
+and [re-pinned brief](briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
+on local base `d41ec0d2`; source implementation and proof remain ahead.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
