@@ -87,6 +87,11 @@ neither a sealed room nor an unimplemented quest option earns completion credit.
 | **E2 R9C interaction proof:** exercise cross-mechanic cases in a compact synthetic cartridge. | E1, final changed contracts | 0.6–0.9 |
 | **E3 R10 browser content gate:** prove reachable rooms, quests, all five ending variants, bounded long runs and a human Book walkthrough on one candidate. | A–D, E1, E2 | 0.7–1.0 |
 
+After A–D source and reviews settle, run the [one-time Astra documentation
+audit](decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md) and close
+its reviewed findings before E3 closes. This is a Chapter 1 closure obligation,
+not another implementation slice or a per-slice check.
+
 The shared TypeScript engine simulation, real SQLite transaction/fault checks and
 contract checks remain part of development proof. Browser play uses the same Book
 client once its web host works, but browser storage evidence does not certify native

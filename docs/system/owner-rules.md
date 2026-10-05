@@ -181,6 +181,8 @@ and not repeated here.
 
 ## Process
 
+- Before the Chapter 1 E3 closure gate, run one Astra high audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).
+
 - After PRs #200–#204, use local branches as draft PRs. Complete units may merge provisionally into local `main` after focused checks and self-review while independent review runs in parallel; only reviewed units count as complete. Publish accumulated local history periodically after full checks and closed reviews; exact-head hosted CI gates later remote merges ([fast lane](../decisions/owner-decision-local-provisional-integration-2026-10-05.md), [original local cadence](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)). The owner authorized a one-time hosted-CI exception only for PRs #200–#204 during GitHub's runner incident.
 
 - Reuse documents already loaded in each agent's context when following repeated links; reopen only when changed, truncated or missing a needed detail ([record](../decisions/owner-decision-read-once-docs-2026-10-05.md)).

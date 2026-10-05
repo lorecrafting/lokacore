@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Chapter 1 documentation audit](owner-decision-chapter-one-docs-audit-2026-10-05.md): one Astra high congruence and archive-candidate pass after A–D source integration, before E3 closes.
+
 - [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment.
 
 - [B3 Peg's immediate shop PM decision](pm-decision-b3-pegs-shop-2026-10-05.md): finite authored shelf, identity-conserving buyback and no restock.
