@@ -110,6 +110,19 @@ Report at the end of the slice, not at every step.
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
    future decision and survives code drift; if a check could enforce it, write the check instead.
 
+## Local edit loop
+
+During a slice, run a dedicated iOS **Debug Simulator** and Metro from the active developer
+worktree. Edit TypeScript/UI with Fast Refresh and run focused tests as needed; individual edits
+do not need full checks, CI or a fresh review. Batch related small edits into one coherent PR;
+unrelated kernel or save contract changes need their own PR review. Keep this Simulator and its save
+separate from the stable **Release Simulator** preview. Restart Metro or reset/re-pin the
+development save when a content hash or save identity changes; ordinary UI edits keep the current
+save. Native dependency or configuration changes require a native rebuild. Build the Release
+Simulator at meaningful play checkpoints. The PR still goes through the full local check,
+independent review and exact-head CI before merge (steps 3–7). No paid service or EAS is needed
+([owner decision](decisions/owner-decision-local-edit-loop-2026-10-04.md)).
+
 ## Token hygiene
 
 - Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
