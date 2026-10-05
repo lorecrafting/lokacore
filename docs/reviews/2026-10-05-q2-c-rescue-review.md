@@ -85,3 +85,38 @@ Independent validation:
 - Restored existing suites plus independent probes: **88 passed**, exit0. TypeScript size check: exit0. All five currently scheduled source-head CI checks are green: changes, lint, elixir, typescript and headless sim. No native check was started. Temporary probes and mutants were removed; only this record and its index are committed with normal hooks.
 
 Earlier findings and failed experiments above remain historical evidence. No native build, simulator/device/preview operation, source edit, merge or roadmap completion occurred.
+
+## Separate Sol fix-round 1 opinion — source `e5cca99f`
+
+This bounded in-memory recheck approved the null/false/zero/empty cases but did not
+exercise the truthy malformed references later found by the primary reviewer. Its
+verbatim answer is retained as historical evidence, not the final verdict.
+
+```text
+APPROVE
+No findings. PS-1 closed.
+
+Real in-memory SQLite checks passed for all five malformed values after start/terminal, typed recovery, save preservation, explicit Start over, valid stays/rescue reopen, and storage-error handling. Removing the guard failed all 10 regression cases. Worktree unchanged.
+```
+
+## Separate Sol fix-round 2 opinion — source `d014b719`
+
+Read-only independent scoped opinion, appended verbatim:
+
+```text
+APPROVE — d014b7197b27c1572f54f8989a9faf86c3b797c3
+
+Findings: none. PS-1 is resolved.
+
+mobile/authority/local-story/store.ts:134 validates DefinitionRef and StateScope before receipt recovery. Malformed Q1 rows after rescue selection or completion produce typed save_corrupt, offer explicit Start over, and preserve progress before confirmation. Direct opening, receipt recovery and reconciled adoption were inspected.
+
+Verification:
+- Focused wren_escort, vesper_message, saves and kernel escort suites: 76 passed, exit 0.
+- File-backed cold reopen covers 18 malformed-Q1 cases across following/completed stages.
+- Independent real SQLite BEGIN EXCLUSIVE controls at both stages: locked reads remain storage failures, offer no Start over, and preserve state/head/save/receipt rows. Releasing the lock restores normal opening.
+- Mutation restored the previous truthiness guard: node exited 1; all eight malformed-reference cases failed, plus their parent test. Restored source: 22 targeted tests/controls passed, exit 0.
+
+Ponytail Review: Lean already. No complexity findings.
+
+No repository edits, PR mutations, owner-save operations, native builds or simulator use. Temporary probes and mutation were discarded.
+```
