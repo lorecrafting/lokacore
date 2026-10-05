@@ -117,7 +117,7 @@ def render(data, watch=False):
          f"{n.get('check') or '—'} / {n.get('seconds') if n.get('seconds') is not None else 'unknown'}", n.get('head')) for n in reversed(reports[-50:])])
     rows = table(('Slice / player outcome', 'Dependencies', 'Lift (not time)', 'Roadmap', 'Last report'), [
         (f"{r['slice']} — {r['outcome']}", r['depends'], r['lift'], r['roadmap'],
-         f"{r['reports'][-1]['phase']} @ {r['reports'][-1].get('at')}" if r['reports'] else 'unknown') for r in data['rows']])
+         f"{r['reports'][-1]['phase']} @ {r['reports'][-1].get('at')}" if r['reports'] else 'no report') for r in data['rows']])
     trees = table(('Work branch', 'Latest commit description', 'Head', 'Changed files'), [
         (w['branch'], w['description'], w['head'], w['dirty']) for w in data['worktrees']])
     pr_rows = []
@@ -138,11 +138,13 @@ def render(data, watch=False):
 <h1>Chapter 1 delivery board</h1><p>Generated UTC {esc(data['at'])}. {'Refreshes every 5s while the watch command runs.' if watch else 'Snapshot; rerun bin/board to refresh.'}
 Agent activity is last reported, never OS liveness. Changed files do not imply a running agent.
 Reports are operational claims, not independent approval; review and check evidence must match the exact head.
-Local checks are not hosted CI. GitHub: {github_label}. Remote refs are cached; this command never fetches.</p>
+Local checks are not hosted CI. GitHub: {github_label}. Remote refs are cached; this command never fetches.
+Slice IDs group areas, not execution order; dependencies choose the next source work.
+Candidate means planned but not locally complete; no report means no activity logged; unknown means an exact fact has not been reported. None means skipped.</p>
 <h2>Local integration and publication</h2><p>Local main: {esc(data['local'] or 'unknown')}<br>{esc(data.get('remote_label', 'Cached remote main'))}: {esc(data['remote'] or 'unknown')}<br>
 Remote-only / local-only commits: {esc(data['divergence'] or 'unknown')}</p><pre>{esc(data['commits'] or 'No known local-only commits')}</pre>
 <h2>Pipeline — last reports</h2>{phases}<h2>Activities and measured checks</h2><p>Malformed report lines ignored: {data['note_errors']}. Unreported phase start/end times and check durations remain unknown.</p>{notes}
-<h2>All {len(data['rows'])} Chapter 1 candidates</h2><p>Source: local main completion plan and roadmap. Plan dependency/lift values are recommendations, not implementation proof.</p>{rows}
+<h2>All {len(data['rows'])} Chapter 1 slices and dependencies</h2><p>Source: local main completion plan and roadmap. Plan dependency/lift values are recommendations, not implementation proof.</p>{rows}
 <h2>Work units</h2>{trees}<h2>Recent GitHub PRs</h2>{prs}</html>'''
 
 
