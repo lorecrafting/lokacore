@@ -20,10 +20,13 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_sampler@0.0.10` in `loka-ashmere-sampler.db`. This elapsed release
-requires kernel API1.7, declares real_elapsed rate50/start64800, and schedules Bram at
-Ferry Landing from06:00 and the Drowned Lantern from19:00, under the
-[B2 policy](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md). Its MV pool starts at100 under the [first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), pays1 per move, and recovers18 per3600 logical seconds
+The phone bundles `ashmere_sampler@0.0.11` in `loka-ashmere-sampler.db`. This elapsed release
+requires kernel API1.7 and declares real_elapsed rate50/start64800. Bram has no
+`daily_schedule` and remains at Ferry Landing at every hour, including19:00 and
+the next day, so his offer and lantern hand-over require no wait, under the
+[no-wait opening decision](../decisions/owner-decision-no-wait-opening-2026-10-05.md).
+The clock and `schedule@1` lock remain for real-elapsed time; separate ferry fixtures
+retain authored NPC schedule and save/reopen coverage. Its MV pool starts at100 under the [first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), pays1 per move, and recovers18 per3600 logical seconds
 standing/sitting or36 resting/sleeping under the
 [M2 adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
 Its compiled artifact matches the independent sampler answer; earlier ten-room content and prose remain. The story is under the
@@ -333,7 +336,7 @@ The previous0.0.8 pin is retained; changed content gets new version and independ
 
 ## Maud’s Cellar content (M20-B2)
 
-The bundled `ashmere_sampler@0.0.10` consumes the [atomic reward and storage
+The bundled sampler consumes the [atomic reward and storage
 mechanics](mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts)
 under kernel API1.7. Widow Maud is a passive innkeeper in `drowned_lantern`. Her offer
 accepts `mauds_cellar` only before any instance exists and gives no item. The quest has
@@ -357,10 +360,10 @@ and carrying admission. The attic trunk still uses the brass key and contains th
 whistle. Cellar access and corpse recovery stay free of key requirements. There is no
 money, free room, loot, respawn or new failure/abandon transition.
 
-The independent sampler answer and actual App bundle pin this new release. The0.0.9
+The independent sampler answer and actual App bundle pin this release. The0.0.10
 known answer is retained as history, not added to the bundled release list: an unmatched
 pin follows the established [missing-pin refusal](save.md#opening-a-story). Pre-production
 releases have no compatibility adapter or migration. Native evidence must identify the
 exact release; older fight captures do not prove this reward/storage consumer.
 The [M20-B2 evidence](../evidence/2026-10-05-m20-b2-mauds-cellar/README.md) records the
-current Release quest/storage walk, independent pin and behavior red controls.
+0.0.10 Release quest/storage walk, independent pin and behavior red controls.

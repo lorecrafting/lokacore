@@ -161,8 +161,8 @@ test('reconciled adoption rejects wrong authored rate and keeps the prior confir
   }
 });
 
-// Breaks: the actual sampler ignores MV fare/recovery bands, retroactively changes rates, or breaks pool-free Bram departure.
-test('bundled sampler pays MV1 and rests twice as fast while Bram still departs', () => {
+// Breaks: the actual sampler ignores MV fare/recovery bands, retroactively changes rates, or fails to cap the recovered pool.
+test('bundled sampler pays MV1 and rests twice as fast before reaching its pool cap', () => {
   const p = elapsedHost(
     ':memory:',
     { wall: 10000, mono: 0 },
@@ -188,16 +188,6 @@ test('bundled sampler pays MV1 and rests twice as fast while Bram still departs'
     assert.equal(p.game.view().view.resources!.find((r) => r.resource.key === 'hp')!.band, 'ready');
     at(p, 72000);
     assert.equal(mv().current, 100);
-    assert.equal(
-      p.game.view().view.entities.some((e) => e.id === '15349791-fa65-81f7-b378-bb8212b808d2'),
-      false,
-    );
-    assert.equal(
-      p.sql
-        .prepare("SELECT value FROM state_row WHERE section='containers' AND key=?")
-        .get('15349791-fa65-81f7-b378-bb8212b808d2')!.value,
-      '"953a909b-3a29-8c5c-9e3f-4105b9a47c4b"',
-    );
   } finally {
     p.sql.close();
   }

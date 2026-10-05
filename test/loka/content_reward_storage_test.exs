@@ -18,6 +18,11 @@ defmodule Loka.ContentRewardStorageTest do
       File.rm!(Path.join(dir, rel))
     end
 
+    # The no-wait sampler must not change this frozen fixture's authored NPC movement.
+    update(dir, "npcs/bram.json", fn npc ->
+      Map.put(npc, "daily_schedule", %{"6" => "ferry_landing", "19" => "drowned_lantern"})
+    end)
+
     prior = JSON.decode!(File.read!("protocol/fixtures/sampler_v009_hash.json"))
     File.write!(Path.join(dir, "text.json"), JSON.encode!(prior["value"]["text"]))
   end

@@ -37,11 +37,11 @@ const chestId = 'd68b48e6-93a5-8899-81ec-808f7be333f8' as EntityId;
 const brassId = '58ee172d-aa6f-8023-a3c1-a1d46af6d167';
 const maudId = 'f14e477f-cecc-897a-bee7-c573aa5c76c3';
 const entity = (kind: string, name: string) =>
-  fresh.entityIds[`ashmere_sampler@0.0.10:${kind}/${name}`];
+  fresh.entityIds[`ashmere_sampler@0.0.11:${kind}/${name}`];
 const ref = (name: string) =>
   ({
     cartridge_id: 'ashmere_sampler',
-    cartridge_version: '0.0.10',
+    cartridge_version: '0.0.11',
     kind: 'fact',
     key: name,
   }) as DefinitionRef;

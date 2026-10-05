@@ -50,12 +50,11 @@ registerHooks({
   },
 });
 const { default: Book } = await import('./Book.tsx');
-const fixture = JSON.parse(
-  readFileSync(
-    new URL('../../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
-    'utf8',
-  ),
-);
+const bundle = (name = 'cartridge_sampler_hash') =>
+  JSON.parse(
+    readFileSync(new URL(`../../../protocol/fixtures/${name}.json`, import.meta.url), 'utf8'),
+  );
+const fixture = bundle();
 
 // Expand pure components only. Native animation and map gestures are exercised in Simulator review.
 function nodes(element: any): any[] {
@@ -556,7 +555,7 @@ test('other item actions retain their detail and World consequences', () => {
 // Breaks: a confirmed boundary is ignored/coalesced, resets the chapter acknowledgment,
 // flips a same-room page, or removes a departed speaker's actual continuation/history.
 test('elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips', () => {
-  const h = book();
+  const h = book(bundle('sampler_v010_hash'));
   try {
     h.tap('Old Bram, open');
     h.tap('Talk to Old Bram');
@@ -667,7 +666,7 @@ test('delayed Take returns once with its original item name after a conflicting 
 
 // Breaks: delayed quest completion loses original NPC history or repeats the neutral journal event.
 test('delayed actual quest completion adds one authored result and Journal updated in original history', () => {
-  const h = book(),
+  const h = book(bundle('sampler_v010_hash')),
     completed: GameSubscription[] = [];
   h.game.subscribe((u) => {
     if (u.kind === 'completion') completed.push(u);
