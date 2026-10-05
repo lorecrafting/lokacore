@@ -213,3 +213,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Chapter-closure browser E2E loop](owner-decision-chapter-closure-e2e-loop-2026-10-05.md): deterministic chapter routes/UI, exploratory pass, visible owner evidence, isolated fixes and exact-head review.
 
 - [B5 finite Infirmary Herbs](pm-decision-b5-infirmary-herbs-2026-10-05.md): real conserved herb/bandage supply, immediate optional repeat and separate capped S9 contribution.
+
+- [C1 Tobin training and armed fight](pm-decision-c1-tobin-training-2026-10-05.md): immediate paid acquisition, separate attribute qualification, exact sword grant and real dodge/shield consumer.

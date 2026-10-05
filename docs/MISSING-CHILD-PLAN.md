@@ -49,7 +49,7 @@ valid combinations become playable before the whole world's optional surfaces.
 
 | Slice and player outcome | Depends on | Lift |
 |---|---|---:|
-| **C1 Tobin training:** learn swords and dodge, and see qualification affect a real fight. | B3, installed combat | 0.9–1.1 |
+| **C1 Tobin training:** learn swords and dodge, and see qualification affect a real fight ([adopted contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)). | B3, installed combat | 0.9–1.1 |
 | **C2 S3 Watchman's Rounds:** accompany Tobin on a finite patrol and recover from failure without waiting for night. | B1, C1, Q2-C-rescue follow | 0.8–1.0 |
 | **C3 Living hounds:** encounter bounded, persistent Fen hounds and collect actual fight loot. | B1, C1, installed combat | 0.9–1.1 |
 | **C4 Hound behavior:** hounds respond to aggression, assist a pack and flee when hurt. | C1, C3 | 0.8–1.0 |

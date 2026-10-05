@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- C1 teaches swords/dodge immediately through conserved payment and typed acquired membership; current attribute qualification, real equipped weapons and shield defense affect the actual cellar fight ([PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)).
+
 - A3 requires an explicit Green Begin after a lawful terminal pair and acknowledged
   bell; the five fixed local memories and completion report commit only on final
   epilogue acknowledgement ([PM adoption](../decisions/pm-decision-a3-green-finale-2026-10-05.md)).

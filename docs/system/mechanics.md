@@ -724,6 +724,65 @@ changes, receipt and narration commit together before adoption or reply; exact r
 returns the same receipt without another item or payment. Saved custody and both
 participating balances must reopen as valid current-build truth.
 
+## C1 training and armed defense (selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)
+adds the first skills and armed/defense consumer to the installed combat above.
+The [cartridge](cartridge.md#c1-tobin-and-equipment) owns every threshold, price,
+profile and chance. Qualification is current policy truth, never stored mastery.
+
+`skills@1` owns acquired membership by CharacterId and declared skill reference.
+Each skill has one compiler-generated, reserved player Boolean fact, default false;
+true means acquired permanently. The skill reference deterministically owns its
+fact; duplicates, collisions and non-skill writes to it are rejected. A typed
+`skill.acquire` dialogue consequence checks declared identity and false membership,
+then lowers to the existing `fact.assign` in the choice's writer group. It is not
+a new foundation delta operation. Already acquired refuses before any lesson cost,
+gift or result; replay returns the accepted receipt without running this check again.
+The shared skills query returns acquired, current qualification and usable
+(`acquired && qualified`) separately, using the ordinary VersionedPolicy evaluator
+and the command/projection query budget. Failed qualification never clears acquisition.
+
+Tobin's ordered swords, then dodge conversations bind the original living,
+co-located teacher. Each completed Choose composes the skill acquisition, exact
+conserved actor-to-teacher penny payment, ordinary choice resolution and authored
+narration. The swords choice also receives the exact Tobin-held rusty sword through
+the installed receive/carry predicate. Subsequent dodge teaching binds no sword.
+Both lessons are immediate at every hour; opening Talk grants and charges nothing.
+Learning is permitted independently of qualification for use. Recheck teacher,
+membership, payment, bound custody and carrying before allocation. An unavailable
+gift, insufficient balance, overflow or carrying failure refuses the whole choice;
+Close stays available. No replacement sword, extra fee, cooldown or scheduled lesson
+is introduced. Reserved acquisition facts cannot be assigned by ordinary recipes,
+dialogue assignments or reactions to bypass the skills owner.
+
+At each existing combat opportunity, re-read actual wield/off-hand custody and
+usable skill state from its hydrated World. A directly equipped usable sword in
+the actor body's `wield` holder selects that item's authored AttackProfile only
+with acquired and currently qualified swords; otherwise use the existing unarmed
+profile. A held, nested, foreign, removed or undeclared weapon gives no benefit.
+No chapter/name/string matching belongs in the resolver.
+
+Resolve accuracy → eligible dodge → eligible shield block → damage. Dodge requires
+usable dodge and a living standing defender able to react. Block requires a living
+standing defender and a usable actual shield in its body's `off_hand` holder;
+it is equipment-based and needs no block skill. An absent/ineligible defense draws
+nothing. Each eligible check uses uniform(100), strict roll < authored chance.
+Stop after an accuracy miss or successful defense: no later defense, damage,
+wake or HP operation. Variable damage draws once; fixed damage draws nothing.
+Share the existing eight-raw-draw budget, including rejection draws, across the
+whole round and discard the whole proposal on exhaustion or validation fault.
+
+Existing initiative, due-time scheduling, absence/life rechecks, Flee, recovery,
+sleep damage/wake and death credit stay in force. A sleeping survivor cannot defend
+against the hit that wakes it; a later eligible opportunity may use standing defense.
+The old untrained/unarmed no-defense A/B/C behavior remains a current regression
+contract. NPCs without defense metadata use their ordinary attack profile; C1 adds
+no NPC defense catalog. Learn/Wear/Remove stay unavailable during an open encounter
+under the final shared combat ActionSet. Combat owns the attack/defense sequence,
+reads skills through its shared query, and composes existing HP/job/death writes;
+the authority remains the sole transaction/adoption owner.
+
 ## S9 Infirmary Herbs (B5 selected contract)
 
 This planned consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
