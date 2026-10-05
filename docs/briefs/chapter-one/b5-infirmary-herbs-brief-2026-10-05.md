@@ -1,12 +1,13 @@
 # B5 — S9 Infirmary Herbs: adopted developer brief
 
-**Branch:** `chapter-1/b5-infirmary-herbs`, not created by this planning slice.
-**Base:** local `main` `d41ec0d2`, B3 plan adopted, B1/B2 source installed;
-chapter `ashmere_missing_child@0.0.16`, API1.14, independent fixture
-`protocol/fixtures/missing_child_v016_hash.json`. B2 source integration is
-`ec3ab73d`; B3 source is not a dependency and is not claimed installed.
+**Branch:** `chapter-one/b5-infirmary-herbs`.
+**Base:** provisional local `main` `340025a0ef5d3644e84ac23634b74dfa6d20d459`,
+B3 source installed; chapter `ashmere_missing_child@0.0.18`, API1.16,
+independent fixture `protocol/fixtures/missing_child_v018_hash.json`, artifact hash
+`fd98910fd5c0508e6a3ee6e3f56ee4b8477cfb539b7a1527e6a67e60059aa94f`.
+B3 independent source reviews remain pending at assignment.
 B5 release, API, artifact hash, generated IDs, implementation head, PR, review and
-check results: null. Re-pin the current source/dependencies before assignment.
+check results: null. Source/dependencies re-pinned at assignment.
 PM adoption model: Codex Sol medium; implementation: Sol high for the
 cross-layer protocol/save contract. This brief is adoption, not implementation proof.
 
