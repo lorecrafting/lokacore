@@ -51,12 +51,18 @@ export function questPolicies(c: Obj): [Obj, string][] {
   });
 }
 
-export function riddleApi(c: Obj): Diagnostic[] {
-  const needed =
+export function featureApi(c: Obj): Diagnostic[] {
+  const riddles =
     Object.values((c.dialogues ?? {}) as Obj).some((d) => d.riddle) ||
     Object.values((c.quests ?? {}) as Obj).some((q) => q.journal?.active_variants);
+  const transfers =
+    Object.values((c.items ?? {}) as Obj).some((d) => Object.hasOwn(d, 'give_allowed')) ||
+    Object.values((c.dialogues ?? {}) as Obj).some(
+      (d) => !d.quest && Object.values(d.choices as Obj).some((o) => o.receive),
+    );
+  const minimum = transfers ? 10 : riddles ? 9 : 0;
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  return needed && (major < 1 || (major === 1 && minor < 9))
+  return (riddles || transfers) && (major < 1 || (major === 1 && minor < minimum))
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];
 }

@@ -1,9 +1,18 @@
 // Dialogue detail routing is derived from a committed command and its retained bound row.
-import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
+import type {
+  Command,
+  DecisionResult,
+  DeltaOp,
+  DomainEvent,
+  DialogueDefinition,
+  DialogueChoice,
+} from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { bodyOf, refString, type ChoiceRow } from '../../../kernel/ts/src/runtime/decision.ts';
 import { answerFits, bind, choiceIds } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
+import { scopeOf } from '../../../kernel/ts/src/mechanics/fact.ts';
+import { questOf } from '../../../kernel/ts/src/mechanics/lookups.ts';
 import type { Story } from './save.ts';
 
 // size: allow 60, one trust boundary checks original command, binding and narration identity
@@ -14,7 +23,7 @@ export function dialogueDetail(
   d: Extract<DecisionResult, { kind: 'accepted' }>,
 ) {
   const invalid = () => {
-    throw new Error('malformed JSON: invalid committed dialogue answer');
+    throw new SyntaxError('malformed JSON: invalid committed dialogue answer');
   };
   if (
     validate('Command', command).length ||
@@ -28,8 +37,14 @@ export function dialogueDetail(
   const row = s.world.state.choices?.[p.continuation_id];
   if (row && validate('DefinitionRef', row.source).length) return invalid();
   const source = row && s.world.cartridge.dialogues?.[refString(row.source)];
-  if (!source?.riddle && p.answer === undefined && d.outcome !== 'riddle_wrong') return;
   const option = source?.choices[p.choice_id];
+  if (
+    !source?.riddle &&
+    !transferDetail(s, source, option) &&
+    p.answer === undefined &&
+    d.outcome !== 'riddle_wrong'
+  )
+    return;
   if (
     !row ||
     !source ||
@@ -57,6 +72,7 @@ export function dialogueDetail(
   const key = wrong ? riddle.wrong : option.narration;
   if (!detail || !same(d.narration?.[0], { key, participants })) return invalid();
   if (!evidence(d, { ...command, payload: p }, row, !!wrong)) return invalid();
+  if (!wrong && !consequences(s, command, d, row, source, option)) return invalid();
   return detail;
 }
 
@@ -98,4 +114,120 @@ function evidence(
     event.payload.continuation_id === p.continuation_id &&
     event.payload.choice_id === p.choice_id
   );
+}
+
+// Check the authored transfer/consequences in this receipt, not current possession or latest narration.
+function consequences(
+  s: Story,
+  command: Command,
+  d: Extract<DecisionResult, { kind: 'accepted' }>,
+  row: ChoiceRow,
+  source: DialogueDefinition,
+  option: DialogueChoice,
+) {
+  const actor = row.actor_id;
+  const ops = d.delta.ops.filter((o) => o.writer_group === 0);
+  const events = d.events.filter((e) => e.causation_id === (command.id as string));
+  if (!transferEvidence(s, row, option, ops, events)) return false;
+  if (!assignmentEvidence(s, row, option, ops, events)) return false;
+  if (!source.quest) return true;
+  const q = questOf(s.world, actor, source.quest);
+  const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
+  const resolved = events.filter((e) => e.payload.type === 'quest_resolved');
+  return (
+    !!q &&
+    q[1].state === 'resolved' &&
+    q[1].outcome === row.choice_id &&
+    transitions.length === 1 &&
+    transitions[0].op === 'quest.transition' &&
+    transitions[0].instance_id === q[0] &&
+    transitions[0].outcome === row.choice_id &&
+    resolved.length === 1 &&
+    resolved[0].actor_id === actor &&
+    same(resolved[0].payload, {
+      type: 'quest_resolved',
+      quest: source.quest,
+      instance_id: q[0],
+      outcome: row.choice_id,
+    })
+  );
+}
+
+function transferEvidence(
+  s: Story,
+  row: ChoiceRow,
+  option: DialogueChoice,
+  ops: readonly DeltaOp[],
+  events: readonly DomainEvent[],
+) {
+  const transfer = option.receive ?? option.hand_over;
+  if (!transfer) return true;
+  const body = bodyOf(s.world, row.actor_id);
+  const bound = (role: string) => row.roles.find((r) => r.role === role)?.entity_id;
+  const item = bound(transfer.item);
+  const from = option.receive ? bound(option.receive.from) : body;
+  const to = option.receive ? body : bound(option.hand_over!.to);
+  const transfers = ops.filter((o) => o.op === 'entity.transfer');
+  const acquired = events.filter((e) => e.payload.type === 'item_acquired');
+  return (
+    transfers.length === 1 &&
+    same(transfers[0], {
+      op: 'entity.transfer',
+      writer_group: 0,
+      entity_id: item,
+      source_id: from,
+      destination_id: to,
+    }) &&
+    acquired.length === 1 &&
+    acquired[0].actor_id === row.actor_id &&
+    same(acquired[0].payload, { type: 'item_acquired', item_id: item, holder_id: to })
+  );
+}
+
+function assignmentEvidence(
+  s: Story,
+  row: ChoiceRow,
+  option: DialogueChoice,
+  ops: readonly DeltaOp[],
+  events: readonly DomainEvent[],
+) {
+  for (const step of option.sequence ?? []) {
+    if (step.op !== 'fact.assign') continue;
+    const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, step.fact));
+    const op = matching[0];
+    if (
+      matching.length !== 1 ||
+      op.op !== 'fact.assign' ||
+      !same(op.value, step.value) ||
+      !same(op.scope, scopeOf(s.world, row.actor_id, step.fact))
+    )
+      return false;
+    const changed = events.filter(
+      (e) => e.payload.type === 'fact_changed' && same(e.payload.fact, step.fact),
+    );
+    if (same(op.expected, op.value)) {
+      if (changed.length) return false;
+    } else if (
+      changed.length !== 1 ||
+      changed[0].actor_id !== row.actor_id ||
+      !same(changed[0].scope, op.scope) ||
+      !same(changed[0].payload, {
+        type: 'fact_changed',
+        fact: step.fact,
+        old: op.expected,
+        new: step.value,
+      })
+    )
+      return false;
+  }
+  return true;
+}
+
+// Legacy terminal rewards retain their routing; recover the new authored custody path.
+function transferDetail(s: Story, source?: DialogueDefinition, option?: DialogueChoice) {
+  if (option?.receive && !source?.quest) return true;
+  const transfer = option?.receive ?? option?.hand_over;
+  const role = transfer && source?.roles[transfer.item];
+  const entity = role?.role === 'item' && s.world.entities[s.world.entityIds[refString(role.item)]];
+  return entity && entity.kind === 'item' && entity.give_allowed === false;
 }

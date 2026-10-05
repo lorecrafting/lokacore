@@ -26,6 +26,22 @@
             "items": [
               {
                 "op": "fact_compare",
+                "fact": "fen_return_branch",
+                "equals": "stays"
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.deliver"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
                 "fact": "fen_vesper_riddle_answered",
                 "equals": true
               }

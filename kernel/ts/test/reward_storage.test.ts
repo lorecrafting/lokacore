@@ -137,7 +137,7 @@ test('bound reward and NPC are revalidated; resolved continuation and quest cann
   };
   assert.deepEqual(run(lost, choose(lost)).decision, {
     kind: 'rejected',
-    error: { code: 'not_owned' },
+    error: { code: 'invalid_state' },
   });
   const restoredCustody = {
     ...lost,

@@ -111,6 +111,38 @@
         "player"
       ],
       "meaning": "Vesper accepted the player’s letter-bank answer."
+    },
+    "fen.return_branch": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unselected",
+          "stays"
+        ],
+        "default": "unselected"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player chose to carry Vesper’s message while Wren stays."
+    },
+    "village.child_status": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "missing",
+          "rescued",
+          "stays",
+          "lost"
+        ],
+        "default": "missing"
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The committed outcome of the search for Wren."
     }
   }
 }

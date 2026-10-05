@@ -74,13 +74,19 @@ export const pending = (world: World, actor: CharacterId) =>
   ) as [ContinuationId, ChoiceRow] | undefined;
 
 /**
- * Why no option of `row` can be chosen now (06 §43: a NEW choice revalidates actual custody and
- * presence): not_present while a bound NPC is not in the actor's room, else not_owned while a
+ * Why no option of `row` can be chosen now: invalid_state when the pinned policy no longer
+ * holds; then revalidate actual custody and presence (06 §43): not_present while a bound NPC is not in the actor's room, else not_owned while a
  * bound item is not held by the actor body (or the selected receive NPC); Choose and GameView agree.
  */
 export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, steps: Steps) {
   const body = bodyOf(world, row.actor_id);
   const d = definition(world, row.source);
+  const target = row.roles.find((r) => {
+    const role = d.roles[r.role];
+    return role?.role === 'npc' && same(role.npc, d.npc);
+  })?.entity_id;
+  if (!holds(world, row.actor_id, d.policy.root, { target, steps }))
+    return 'invalid_state' as const;
   const bound = (role: string) => row.roles.find((r) => r.role === role)?.entity_id;
   for (const r of row.roles) {
     const expected = d.roles[r.role];

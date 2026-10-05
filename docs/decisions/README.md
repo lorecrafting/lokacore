@@ -186,3 +186,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Q2-A — first Missing Child search lead](pm-decision-q2-a-first-search-2026-10-05.md): staged active search objective and shared reaction/Notice/receipt consumers.
 
 - [Q2-B — Wren encounter and letter-bank riddle](pm-decision-q2-b-wren-riddle-2026-10-05.md): all-hours bound meeting, durable retry and honest active search stages.
+
+- [Q2-C stays return](pm-decision-q2-c-stays-2026-10-05.md): complete message custody and Elspeth terminal before a separate complete rescue path.

@@ -1,5 +1,6 @@
 {
-  "npc": "vesper",
+  "npc": "elspeth",
+  "quest": "missing_child",
   "policy": {
     "policy_version": 1,
     "root": {
@@ -18,25 +19,25 @@
         {
           "op": "fact_compare",
           "fact": "fen_return_branch",
-          "equals": "unselected"
+          "equals": "stays"
         },
         {
           "op": "fact_compare",
           "fact": "village_child_status",
           "equals": "missing"
+        },
+        {
+          "op": "has_item",
+          "item": "vesper_message"
         }
       ]
     }
   },
-  "prompt": "dialogue.c_vesper_answered.prompt",
+  "prompt": "dialogue.elspeth_return.prompt",
   "roles": {
-    "vesper": {
+    "elspeth": {
       "role": "npc",
-      "npc": "vesper"
-    },
-    "wren": {
-      "role": "npc",
-      "npc": "wren"
+      "npc": "elspeth"
     },
     "message": {
       "role": "item",
@@ -44,17 +45,17 @@
     }
   },
   "choices": {
-    "carry_message": {
-      "label": "dialogue.c_vesper_answered.carry_message",
-      "narration": "narration.c_vesper_answered",
-      "receive": {
+    "stays": {
+      "label": "dialogue.elspeth_return.stays",
+      "narration": "narration.elspeth_return",
+      "hand_over": {
         "item": "message",
-        "from": "vesper"
+        "to": "elspeth"
       },
       "sequence": [
         {
           "op": "fact.assign",
-          "fact": "fen_return_branch",
+          "fact": "village_child_status",
           "value": "stays"
         }
       ]

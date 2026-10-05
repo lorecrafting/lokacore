@@ -106,8 +106,8 @@ test('a talk counts its policy twice: 16384 leaves fit, 16385 exceed query_steps
 
 // Breaks: the choose rule's objective read not counted (mechanics/dialogue/shared.ts choose not passing the
 // counter to mechanics/quest/lifecycle.ts resolution). Accepted with the lantern, taken, Bram talked to; the
-// objective is `all` of has_item lantern (false at accept, so 1 step there) then n leaves: n + 1.
-test('a choose counts its objective check: 32767 leaves fit, 32768 exceed query_steps', () => {
+// objective is has_item lantern then n leaves, plus the pinned dialogue policy: n + 2.
+test('a choose counts policy and objective: 32766 leaves fit, 32767 exceed query_steps', () => {
   const chosen = (n: number) => {
     const F = 'ashmere_ferry@0.0.1';
     let w = world('ferry', (c) => {
@@ -136,6 +136,6 @@ test('a choose counts its objective check: 32767 leaves fit, 32768 exceed query_
     const continuation_id = Object.keys(w.state.choices!)[0];
     return outcome(w, { type: 'choose', choice_id: 'carry', continuation_id }, 4);
   };
-  assert.equal(chosen(32767), 'accepted');
-  assert.equal(chosen(32768), 'query_steps');
+  assert.equal(chosen(32766), 'accepted');
+  assert.equal(chosen(32767), 'query_steps');
 });

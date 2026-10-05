@@ -187,7 +187,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     } else typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
   });
   if (o.receive) {
-    if (!d.quest || o.accept || o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
+    if (o.accept || o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
     for (const [field, role] of [
       ['item', 'item'],
       ['from', 'npc'],

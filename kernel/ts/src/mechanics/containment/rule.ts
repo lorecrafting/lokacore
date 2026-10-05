@@ -22,7 +22,7 @@ import {
 } from '../../runtime/decision.ts';
 import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
-import { carrying, putRefused } from './shared.ts';
+import { carrying, giveRefused, putRefused } from './shared.ts';
 
 // size: allow 50, one conserved-transfer decision for Take/Drop/Give/Put with shared pair admission
 export const decide: Rule<'containment'> = (world, command, mint, steps) => {
@@ -32,16 +32,15 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
   if (world.state.created?.[p.item_id] || world.entities[p.item_id].kind !== 'item')
     return rejected('invalid_target');
   const [here, at] = [world.state.containers[body], world.state.containers[p.item_id]];
-  const move = (destination_id: EntityId) =>
-    [
-      {
-        op: 'entity.transfer',
-        writer_group: 0,
-        entity_id: p.item_id,
-        source_id: at,
-        destination_id,
-      },
-    ] as const;
+  const move = (destination_id: EntityId) => [
+    {
+      op: 'entity.transfer',
+      writer_group: 0,
+      entity_id: p.item_id,
+      source_id: at,
+      destination_id,
+    } as const,
+  ];
   const acquired = (holder_id: EntityId) => [
     event(world, command, mint, 1, { type: 'item_acquired', item_id: p.item_id, holder_id }),
   ];
@@ -67,8 +66,13 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
     const dropped = { type: 'item_dropped', item_id: p.item_id, room_id: here } as const;
     return accepted(world, 'dropped', move(here), [event(world, command, mint, 1, dropped)]);
   }
-  const code = recipient(world, p.recipient_id, here);
-  if (code) return rejected(code);
+  const code = giveRefused(world, p.item_id, steps) ?? recipient(world, p.recipient_id, here);
+  if (code)
+    return code === 'budget_exceeded' ||
+      code === 'containment_cycle' ||
+      code === 'precondition_failed'
+      ? { kind: 'fault', code }
+      : rejected(code);
   return accepted(world, 'given', move(p.recipient_id), acquired(p.recipient_id));
 };
 

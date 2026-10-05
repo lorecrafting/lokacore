@@ -171,6 +171,10 @@
           "minimum": 0,
           "maximum": 2147483647
         },
+        "give_allowed": {
+          "description": "API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal.",
+          "const": false
+        },
         "container": {
           "description": "Only explicitly authored receptacles hold items. Absence is false; capacity and barrier require this field.",
           "const": true

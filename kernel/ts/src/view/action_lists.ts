@@ -18,7 +18,7 @@ import * as barrier from '../mechanics/barrier/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
-import { carrying, putRefused } from '../mechanics/containment/shared.ts';
+import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
 import { readRefused } from '../mechanics/readable/rule.ts';
 import { KernelError } from '../foundation/error.ts';
@@ -68,7 +68,7 @@ export function lists(world: World, actor: CharacterId) {
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .flatMap((a) => {
-        const shown = advertise(world, actor, a, take, id, scope);
+        const shown = advertise(world, actor, a, take, steps, id, scope);
         return a.command === 'put' && id && body
           ? putPairs(world, body, id as EntityId, shown, steps)
           : [shown];
@@ -123,6 +123,7 @@ function advertise(
   actor: CharacterId,
   a: Offered,
   take: (item: EntityId) => ErrorCode | undefined,
+  steps: { n: number },
   id?: string,
   scope?: string,
 ): AdvertisedAction {
@@ -147,6 +148,9 @@ function advertise(
         : undefined) ||
       (typeof admitted === 'string' ? admitted : undefined) ||
       (a.command === 'take' && target !== undefined ? take(target) : undefined) ||
+      (a.command === 'give' && target !== undefined
+        ? giveRefused(world, target, steps)
+        : undefined) ||
       (a.command === 'attack' && target !== undefined
         ? attackRefused(world, actor, target)
         : undefined);

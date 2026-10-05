@@ -21,6 +21,7 @@ import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/co
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { row } from '../../../kernel/ts/src/runtime/world.ts';
+import { dialogueSave } from './dialogue-save.ts';
 import { recoveryFault } from '../../../kernel/ts/src/mechanics/resource.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
@@ -134,9 +135,11 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     for (const [target, spec] of Object.entries(world.entityResourceSpecs))
       if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))
         return undefined;
-    return saved(world, h.revision, { ...m, parent, seed, pin } as Meta, db);
+    const meta = { ...m, parent, seed, pin } as Meta;
+    dialogueSave(world, db, meta);
+    return saved(world, h.revision, meta, db);
   } catch (e) {
-    if (e instanceof SyntaxError) return undefined;
+    if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;
     throw e;
   }
 }

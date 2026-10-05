@@ -20,13 +20,13 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.10`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.11`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
 earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
 Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
-— in progress”; Q1, The First Lead, and Q2’s first search lead are playable; rescue awaits its consumer. The temporary Lantern
+— in progress”; Q1, The First Lead, and Q2’s message/stays path are playable; rescue awaits its consumer. The temporary Lantern
 errand, Bram NPC/dialogues, lantern item, story point, scene and `search_plan` are
 absent. Four connected fen rooms form the first south search route: Ferry Landing south to
 Reed Path, south to Reed Bank, west to Willow Shade, south to Drowned Oak. Each exit has
@@ -66,10 +66,10 @@ S1 offer and turn-in remain independently usable in every Q1 state. No hour or w
 apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
 Its Q2 activation consumer is [the staged first search lead below](#source-layout).
 
-The release declares API1.9 for bounded riddles and staged journals, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
+The release declares API1.10 for nonterminal receive and authored Give restrictions, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source. Its
-independent answer is `protocol/fixtures/missing_child_v010_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v011_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
@@ -91,11 +91,10 @@ The first eligible Vesper conversation requires active Q2 and studied tracks; ac
 `meet_wren` binds both living NPCs and assigns player fact `fen.wren_met`. Arrival, Look and
 opening Talk do not. The next ordered conversation offers the letter-bank riddle: answer
 `lantern`, bank `R N A O L T E N S`. Only its correct choice assigns player fact
-`fen.vesper_riddle_answered`. A final informational conversation remains available, and Wren
+`fen.vesper_riddle_answered`. The subsequent conversation offers the message return below, and Wren
 has an informational reply. All progress uses the saved, original role identities.
 The journal stages are seek tracks → tracks found/Wren unfound → Wren met/riddle pending →
-riddle accepted/return decision pending. Q2 stays active; there is no rescue/stays status,
-escort, message item, turn-in or Q2 terminal event. Those belong to Q2-C.
+riddle accepted/return decision pending. Q2 remains active through those stages.
 [Q2-B adoption](../decisions/pm-decision-q2-b-wren-riddle-2026-10-05.md) records this boundary.
 
 API1.9 `QuestJournal.active_variants` is an optional ordered list of 1–16
@@ -287,11 +286,12 @@ and that NPC and the dialogue speaker start in the same reachable room. This is 
 potential check, not proof that quest/policy/carry conditions will be met. Unreachable speakers,
 wrong custody, and keys behind inaccessible rooms or lids retain the lockout diagnostic.
 
-Dialogue `receive` role references must name an item and NPC; it requires a resolving quest
-and excludes accept/hand_over. Dialogue `fact.adjust` must name a bounded integer fact, never
+Dialogue `receive` role references must name an item and NPC and exclude accept/hand_over.
+API1.10 also permits receive without a resolving quest; earlier APIs require that quest.
+Optional item `give_allowed: false` also requires API1.10; absence preserves ordinary Give. Dialogue `fact.adjust` must name a bounded integer fact, never
 a reserved engine fact. Both validators enforce references, types and ownership; source short
 fact references expand for this new spelling. Current reward/storage content declares API1.7;
-there is no per-feature minimum-version detector for receive, fact.adjust or Put under the
+there is no per-feature minimum-version detector for legacy quest-resolving receive, fact.adjust or Put under the
 [pre-production policy](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
 now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
 single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics are unchanged.
@@ -450,3 +450,31 @@ releases have no compatibility adapter or migration. Native evidence must identi
 exact release; older fight captures do not prove this reward/storage consumer.
 The [M20-B2 evidence](../evidence/2026-10-05-m20-b2-mauds-cellar/README.md) records the
 0.0.10 Release quest/storage walk, independent pin and behavior red controls.
+
+## Q2-C stays return
+
+[The adopted return plan](../decisions/pm-decision-q2-c-stays-2026-10-05.md) completes
+the message path before adding a separately complete rescue path. After the accepted
+riddle, active Q2 offers only carrying Vesper's original message to Elspeth while Wren
+stays. The message starts directly with Vesper; it cannot be Taken or Read there.
+The branch choice binds living, co-located Vesper/Wren and the original item, requires
+player fact `fen.return_branch=unselected` and instance `village.child_status=missing`,
+and atomically receives that same item and assigns branch `stays`. Capacity refusal
+leaves custody, branch and pending continuation unchanged. Q2 stays active.
+
+The bounded player branch has values unselected/stays, default unselected. The instance
+status has missing/rescued/stays/lost, default missing. Only the Elspeth turn-in writes
+status in this release. The message's authored `give_allowed: false` prevents ordinary
+Give of it or a container holding it; ordinary Drop/Take, legal Put/Take and corpse
+recovery retain the original identity.
+
+The ordered Elspeth turn-in requires active actor-owned Q2, branch stays, status missing,
+the original message directly in the actor body and the bound living Elspeth present.
+Acceptance hands that item to Elspeth, resolves Q2 outcome stays and assigns status stays
+in one proposal. Arrival, nested custody and historical possession never resolve Q2.
+The retained branch row binds the original item and participants; terminal binding must
+agree with it. Active journal text requests delivery or recovery without claiming direct
+custody; the resolved text says Wren stays and his mother received the message. Elspeth's
+response and Village Green's description derive from committed status. No escort option,
+follower relation, rescued/lost terminal or dawn scene is exposed. Q1, Maud S1 and the
+reciprocal all-hours fen route remain usable.
