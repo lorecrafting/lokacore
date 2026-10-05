@@ -50,7 +50,7 @@ registerHooks({
 const { default: Book } = await import('./Book.tsx');
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v004_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v005_hash.json', import.meta.url),
     'utf8',
   ),
 );
@@ -320,8 +320,8 @@ test('notice entries use available exact-target aliases and expose unavailable r
           : { op: 'not', item: { op: 'time_window', from: 18, to: 19 } },
       },
     });
-    c.actions['ashmere_missing_child@0.0.4:action/read'] = action('read', false);
-    if (alias) c.actions['ashmere_missing_child@0.0.4:action/consult'] = action('consult', true);
+    c.actions['ashmere_missing_child@0.0.5:action/read'] = action('read', false);
+    if (alias) c.actions['ashmere_missing_child@0.0.5:action/consult'] = action('consult', true);
     const canonical = JSON.stringify(sorted(c));
     return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
   };
@@ -336,4 +336,72 @@ test('notice entries use available exact-target aliases and expose unavailable r
   assert.ok(a.text().includes(landingBody));
   assert.equal(receipts(a.sql), 1);
   assert.deepEqual(a.presenter().screen().log, []);
+});
+
+const storyRows = (a: ReturnType<typeof preview>) =>
+  a.sql
+    .prepare(
+      "SELECT * FROM state_row WHERE section IN ('facts', 'quests', 'created', 'containers') ORDER BY section, key",
+    )
+    .all();
+
+// Breaks: the opening NPC is absent or clock-gated, a direction choice resolves the wrong
+// narration, conversation leaks into World, or informational talk grants quest/fact/reward state.
+test('Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits', (t) => {
+  const a = preview();
+  t.after(() => a.sql.close());
+  const elspeth = '05f6aca0-79cd-83fe-8096-bae95b0730e8';
+  for (let hour = 0; hour < 24; hour++) {
+    assert.ok(
+      a.game
+        .view()
+        .view.entities.find((e) => e.id === elspeth)
+        ?.actions.some((offer) => offer.action_key === 'elspeth' && offer.available),
+    );
+    a.clock.wall += 72000;
+    a.clock.mono += 72000;
+    assert.equal(a.game.pulse().kind, 'ready');
+    a.draw();
+  }
+  const before = storyRows(a);
+  a.tap('Elspeth, open');
+  assert.equal(a.stack().at(-1).id, elspeth);
+  assert.ok(a.text().some((s) => s.includes('her eyes search every face')));
+  for (const [label, key, answer] of [
+    [
+      '“Which way is the village?”',
+      'narration.elspeth.directions',
+      '“North from here, up Well Lane,” Elspeth says. “Keep going north and you’ll reach Village Green. That’s the heart of Ashmere.”',
+    ],
+    [
+      '“Is there an inn nearby?”',
+      'narration.elspeth.inn',
+      '“Go north to Well Lane, then east into the Drowned Lantern. Maud keeps the inn. Speak to her at the bar; she’ll tell you what needs doing.”',
+    ],
+    [
+      '“Who is Wren?”',
+      'narration.elspeth.wren',
+      '“My son.” Elspeth looks back at the river. “He’s always off exploring, but he should have been home by now.”',
+    ],
+  ]) {
+    a.tap('Talk to Elspeth');
+    assert.equal(a.game.view().view.choice?.speaker_id, elspeth);
+    a.tap(label);
+    assert.equal(a.game.lastNarration()?.lines[0].key, key);
+    assert.ok(a.text().includes(answer));
+    assert.deepEqual(a.presenter().screen().log, []);
+  }
+  assert.deepEqual(a.game.view().view.journal, []);
+  assert.deepEqual(storyRows(a), before);
+  a.tap('Talk to Elspeth');
+  a.tap('Leave');
+  assert.deepEqual(a.stack(), []);
+  assert.deepEqual(a.presenter().screen().log, []);
+  a.walk('north');
+  assert.equal(a.game.view().view.place.title.key, 'room.well_lane.title');
+  a.walk('east');
+  assert.ok(a.game.view().view.entities.some((e) => e.name === 'npc.maud.short'));
+  a.walk('west');
+  a.walk('north');
+  assert.equal(a.game.view().view.place.title.key, 'room.village_green.title');
 });
