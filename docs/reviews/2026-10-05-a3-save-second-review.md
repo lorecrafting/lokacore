@@ -1,0 +1,46 @@
+# A3 Green finale: independent save/protocol second opinion
+
+Reviewed integrated head `6a8be6d157d4287148673c36e8c546022534adc1`, source
+`9327b56eb7af4fcec1274ee1d184ad56b2e9be6a`, against base `ec3ab73d`.
+Fresh reviewer authored none of the implementation. Verdict: **CHANGES REQUIRED**.
+
+Requirements derived before reading the diff: [Green finale recovery](../system/save.md#green-finale-recovery-planned-a3)
+requires receipt-backed acknowledged bell and Begin provenance, lawful intermediate
+reopening, atomic final memories/marker/report, and corruption refusal.
+[Continue admission](../system/protocol.md#actionset-and-admission) and the
+[A3 brief](../briefs/chapter-one/a3-green-finale-sol-brief-2026-10-05.md) require bound
+shown-line input, exact replay, current contract pins and compiler/loader parity.
+
+## Findings
+
+- **A3-S1 — blocker:** `mobile/authority/local-story/finale-save.ts:126` accepts the
+  bell's `-1` fact without requiring its accepted Continue chain or terminal
+  `scene_ended` receipt. In a real SQLite completed lost/prior run, deleting all
+  three accepted `bell_rung` Continue receipts leaves cold open successful at
+  chapter index 1. The Ring receipt proves scene start, not final acknowledgement.
+  Validate the bell acknowledgement chain before accepting a begun/completed
+  epilogue; truncated proof must yield `save_corrupt` without altering the save.
+- **A3-S2 — blocker:** `mobile/authority/local-story/finale-save.ts:195` checks the
+  selected Continue sequence without checking its revision relationship to Begin
+  and the saved head. In the same real SQLite route, changing Begin's receipt
+  revision to `head.revision + 1` still cold-opens successfully at chapter index 1.
+  Require valid committed revisions and strict Begin-before-Continue order bounded
+  by the head, including bell-end-before-Begin provenance. A receipt from after
+  the saved head cannot justify current scene facts.
+- **Shared primary finding:** unbound direct Continue still advances `bell_rung`
+  and `bell_silenced` under v0.0.17 (`scene/rule.ts:14`,
+  `protocol/command.schema.json:552`). Independently reproduced for all five
+  ending routes; the primary reviewer owns its finding and fix proof.
+
+## Verification
+
+Focused kernel/SQLite finale tests: 3 passed. Existing real-SQLite faults,
+elapsed-resume, story-point and scene tests: 39 passed. Mix missing-child source
+and contract schema tests: 70 passed. The two damaged-save probes above reproduced
+successful opening rather than the required refusal; source was not modified.
+
+Compiler/loader type-parity concern was disproved: a scene-end assignment outside
+the declared memory enum returns `FACT_TYPE_MISMATCH` at the authored assignment.
+Reviewed generated schema changes and preserved older fixture files; current
+artifact/source hash check passes. No native/browser verification claimed.
+Ponytail Review: **Lean already. Ship.** The correctness blockers remain open.
