@@ -51,3 +51,18 @@ unchanged Q2 retry and real SQLite fault/reopen evidence rather than claiming it
 Ponytail Review: Lean already. Ship. No complexity finding.
 `git diff --check` passes. No gameplay tests, mutations or full code-check run
 for this docs-only plan. Normal review-record hook results are reported at handoff.
+
+## Scoped fix re-check
+
+**Final verdict: APPROVE** at exact planning fix head
+`8e221b49c981ce102f70800d923b0a8044475494`. B6-R1 closed; no open findings.
+The sole fix inserts North Gate into the normative Aldric return path. A
+controlled traversal of the eight literal existing route edges at that exact
+head confirms every edge and its reciprocal, including Village Green ↔ North
+Gate ↔ Chapel Steps. The B6 brief and PM adoption link to this route clause and
+introduce no competing path. No source or other planning behavior changed.
+The initial CHANGES REQUIRED verdict above remains the historical review.
+
+Validation: exact fix diff and direct route references reviewed; reciprocal
+route assertions pass. Normal review-record commit hook results are reported at
+handoff. Approval remains docs-only, without gameplay or durability proof.
