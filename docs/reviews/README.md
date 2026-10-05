@@ -255,3 +255,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Read-once documentation rule](2026-10-05-read-once-docs-review.md): PR #195 at `fe73a47695aa17aa8868e521db626154bff6f7a1`, APPROVE; no findings.
 - [Builder's Guide reuse lessons](2026-10-05-builder-learning-review.md): PR #197 at `8971c7ed`, independent docs-only APPROVE; no findings.
 - [Forward development before release](2026-10-05-forward-development-review.md): PR #198 at `3efa96eb`, independent APPROVE; no findings, active contract wording and links checked.
+- [Book browser save/reopen E2E](2026-10-05-tester-army-book-e2e-review.md): PR #199 at `810c7a41`, APPROVE; browser red control failed as intended; no findings.

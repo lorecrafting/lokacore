@@ -5,8 +5,8 @@ const net = require('node:net');
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 
-const previewPort = 19006;
-const metroPort = 19007;
+const previewPort = Number(process.env.LOKA_PREVIEW_PORT || 19006);
+const metroPort = Number(process.env.LOKA_METRO_PORT || 19007);
 const expo = spawn(
   process.execPath,
   [

@@ -76,8 +76,9 @@ which every agent loads every session.
   `.json` under `docs/`, a `.gen.md`, a code file renamed to `.md`, a mixed range, no `<base>`, a
   non-ancestor `<base>` and an empty diff must say `run`; and a fake `gh` that fails on the run list or the job list must leave `ci_base.sh` with no base).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
-  cancelled; `mobile.yml` and `mobile-bundle.yml` are disabled in GitHub and retain only
-  manual triggers in source for eventual resumption. The simulator (`kernel/ts/test/sim.ts`) runs its
+  cancelled; `book-e2e.yml` runs the local Book browser save/reload path with tester.army e2e
+  (see [preview command](web-preview.md)); `mobile.yml` and `mobile-bundle.yml` are disabled
+  in GitHub and retain only manual triggers in source for eventual resumption. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
