@@ -809,3 +809,21 @@ is needed. No new service DomainEvent is required: existing fact/resource/liquid
 consequences and the bound receipt command prove the result. Register the actual
 command/outcome ownership and invariants; do not invent receipt fields. The receipt command identifies its
 original provider/service for confirmed narration routing and save validation.
+
+## D2 held-readable composition
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) extends
+existing Read targeting to authored readable items, retaining exact actor, item ID,
+pinned definition and ActionSet resolution. Shared held-reach admission governs
+item/contents offers and raw commands. Expose the authored Read label on each
+eligible item detail; closed ancestors hide unreachable contents and leave no raw
+ID bypass. Use current Item/ContentView and offered-action shapes where sufficient;
+add only consumed readable metadata, never a generic document hierarchy.
+
+Topic grants lower to the B6 Boolean owner; no new portable delta, event writer,
+reading cursor or continuation is needed. Accepted receipt binds the exact Read
+command and original book; confirmed topic projection uses B6's sorted topic entries.
+B6 success and book Read compose on the same membership, so already-known grants
+are neutral. Rejected commands write neither knowledge nor read narration. Current
+scene/combat/freshness/retry rules remain in force. Authority commits changed facts
+and receipt together before adopting memory or replying; no full-state copy occurs.

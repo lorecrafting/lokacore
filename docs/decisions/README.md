@@ -224,3 +224,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [B6 all-hours Wisp and usable ward](pm-decision-b6-wisp-2026-10-05.md): doused-light Seek, bounded sitting with immediate retry and a public Aldric ward consumer.
 - [C3 bounded living Fen hounds](pm-decision-c3-living-hounds-2026-10-05.md): exact spawned bundles, day/night slot bounds, deliberate fights and conserved pelt loot.
+
+- [D2 public Priory and held books](pm-decision-d2-priory-books-2026-10-05.md): ten public rooms, exact held/open-container Read, idempotent Ward/Bell and ordinary custody recovery.
