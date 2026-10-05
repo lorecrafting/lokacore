@@ -160,5 +160,6 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [One independent reviewer by default, 2026-10-04](owner-decision-one-reviewer-default-2026-10-04.md): mechanics PRs retain fresh review; a second opinion is reserved for save, contract, foundation and gate risks.
 
 - Owner direction: [pre-production compatibility](owner-decision-preproduction-compatibility-2026-10-04.md); prioritize the current release, preserve explicit mismatch refusal and frozen conformance fixtures.
+- Owner direction (paraphrased): [no required waiting in the opening chapter](owner-decision-no-wait-opening-2026-10-05.md); keep Bram reachable and the rescue route open while retaining the clock for deadlines and world events.
 
 - [Fresh preproduction preview games, 2026-10-04](owner-decision-preproduction-preview-saves-2026-10-04.md): no save continuity across builds; current-build durability and explicit Start over remain required.

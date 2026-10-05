@@ -7,6 +7,7 @@ script is no longer present; keep this planning summary consistent with that inp
 Full chapter-one endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
 R6P and the six-room C1 sampler are separate early proofs.
 This is planning applicability, not a release certificate or a frozen engine registry.
+`tide@1` has no assigned first-required release after the [no-wait opening decision](../decisions/owner-decision-no-wait-opening-2026-10-05.md); assign it only with a later actual consumer.
 
 ## proof
 
@@ -65,7 +66,6 @@ This is planning applicability, not a release certificate or a frozen engine reg
 | `commerce@1` | chapter_one | R8 | TRANSACTION |
 | `service@1` | chapter_one | R8 | TRANSACTION |
 | `calendar@1` | proof | R8 | WORLD |
-| `tide@1` | chapter_one | R8 | WORLD |
 | `light@1` | chapter_one | R8 | WORLD |
 | `liquid@1` | chapter_one | R8 | TRANSACTION |
 | `readable@1` | chapter_one | R8 | RULES |

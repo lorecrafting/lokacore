@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- The opening chapter and current Bram sampler errand have no required idle waits for tides, night, next day or a returning NPC; Bram stays reachable for the opening, the mire has an always-passable non-swim route, and time may still drive deadlines and ambience ([record](../decisions/owner-decision-no-wait-opening-2026-10-05.md)).
+
 - Later Ashmere conflicts follow the [PM-selected future policy](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md); implementation and publication review remain pending, with no active M15/schema change.
 
 - One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
