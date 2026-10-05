@@ -82,6 +82,10 @@ findings were fixed and independently rechecked. Five source-head CI checks and
 final review-head checks passed. The [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md)
 sets the temporary routing; browser preview implementation remains separate.
 
+DOC-READ-ONCE — agents reuse governing documents already loaded in their own
+context — merged in [#195](https://github.com/lorecrafting/lokacore/pull/195)
+after independent approval and green docs-head checks.
+
 M12-B — nested notice-board and notice detail pages — merged in
 [#182](https://github.com/lorecrafting/lokacore/pull/182) after the cold-reopen,
 navigation-label and malformed-save findings were fixed; primary and protocol/save
