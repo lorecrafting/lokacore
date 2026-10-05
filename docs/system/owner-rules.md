@@ -9,6 +9,7 @@ and not repeated here.
 ## Product and scope
 
 - B4 uses the real refillable B3 torch and oil in an optional dark well, with gear-free egress and owned-corpse recovery ([PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md)).
+- C1 teaches swords/dodge immediately through conserved payment and typed acquired membership; current attribute qualification, real equipped weapons and shield defense affect the actual cellar fight ([PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)).
 
 - A3 requires an explicit Green Begin after a lawful terminal pair and acknowledged
   bell; the five fixed local memories and completion report commit only on final

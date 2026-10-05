@@ -393,6 +393,31 @@ or sale narration to Peg's history and refreshes pennies, custody and inventory.
 Stale/refused/fenced results never claim success. Leave retains the existing NPC
 detail behavior and the world clock continues while the page is open.
 
+## C1 teaching and defense details
+
+**Selected, pending implementation.** Tobin's NPC page offers the current bound
+lesson, its authored price and immediate result under ordinary Talk/Choose/Leave,
+with no new trainer screen or idle-wait control. The swords lesson comes first and
+the next conversation offers dodge. Already acquired teaching is unavailable and
+cannot suggest a replacement gift. Learning and qualification are described
+separately: the Character page lists each declared acquired skill and its current
+qualified/unqualified status plus the authored requirement. Unlearned status does
+not imply a combat benefit. Current chapter STR/DEX are shown from GameView.
+
+The gifted sword and actual Peg equipment use ordinary item detail, Wear and Remove.
+Show their authored slot/profile or block chance, plus the skill requirement where
+needed; carrying a sword is visibly distinct from wielding it. Read numbers and labels
+from the projected cartridge data, never renderer literals or inferred item names.
+No active Dodge button, skill percentage bar, proficiency rank or future skill appears.
+
+The existing combat page narrates committed dodge/block prevention once using the
+structured attack-result supplement and authored text; an accuracy miss has its own
+ordinary narration. Pending, stale, refused and faulted actions never claim paid
+training, acquisition, gift or defended damage. Reopen/retry retain confirmed lesson
+history in Tobin detail and combat history in combat detail through the existing
+receipt routing; ordinary World events remain separate. Shared action freshness and
+combat/scene precedence continue to govern all offers and raw invocation admission.
+
 ## B5 herbs and Wick details
 
 Willow Shade's patch detail shows its current finite supply and Harvest for one

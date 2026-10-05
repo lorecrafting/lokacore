@@ -215,3 +215,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [B5 finite Infirmary Herbs](pm-decision-b5-infirmary-herbs-2026-10-05.md): real conserved herb/bandage supply, immediate optional repeat and separate capped S9 contribution.
 
 - [B4 useful light and safe recovery](pm-decision-b4-light-2026-10-05.md): real B3 refillable torch/oil, typed fuel history and optional dark well with gear-free owned-corpse recovery.
+- [C1 Tobin training and armed fight](pm-decision-c1-tobin-training-2026-10-05.md): immediate paid acquisition, separate attribute qualification, exact sword grant and real dodge/shield consumer.

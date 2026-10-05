@@ -189,6 +189,12 @@ B5 Infirmary Herbs has an [adopted finite-stock contract](decisions/pm-decision-
 and [re-pinned brief](briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
 on local base `d41ec0d2`; source implementation and proof remain ahead.
 
+C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
+and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md)
+against corrected provisional B3 integration `9c7e5379`; re-pin its scoped review
+approval before source assignment. C1 source implementation, exact release pins
+and proof remain ahead.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the

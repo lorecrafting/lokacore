@@ -1,49 +1,177 @@
-# C1 — Tobin teaches swords/dodge; learned skills affect a real fight
+# C1 — Tobin training and the first armed/defense fight
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted PM assignment; dependency re-pin required before source GO.** Suggested
+source branch `chapter-1/c1-tobin-training`; developer uses its own isolated worktree.
+Inspected base: provisional B3 integration `9c7e537942e13455a1f64b5afdb90b60faae27dd`,
+chapter0.0.18/API1.16. This incorporates B3 IDs/examples fixes; scoped review
+approval is pending.
+Record the reviewed integrated dependency head before implementation.
+C1 target release/API/hash/IDs, source head, PR and implementation verdicts: null.
+This planning change certifies no runtime, browser or native proof.
 
-2026-10-05. **Provisional PM draft; not adopted spec, developer GO, implementation review or proof.** Row C1 of [the public plan](../../MISSING-CHILD-PLAN.md). Suggested branch: `c1-tobin-training`. Lift: 0.9–1.1 rescue slices. Inspected PM baseline `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, `ashmere_missing_child@0.0.11`, API1.10. Main has passive deliberate-attack rats, equipment slots, dialogue adjustment/receive, resource/death/encounter persistence, but no installed skills or armed-defense resolver. At this initial inspection, PR190 rescue was separate work; it later merged, as recorded in the current roadmap. Target release/API/hash/IDs/source head/PR: **null**; re-pin actual merged dependencies before assignment. No checks, source changes, browser/native operations or owner-save access in this planning task.
+## Goal and governing clauses
 
-## Player result and dependencies
+Deliver actual all-hours Tobin lessons, an exact usable sword grant and armed/dodge/
+shield behavior in the real cellar fight. Follow the [PM adoption](../../decisions/pm-decision-c1-tobin-training-2026-10-05.md),
+[C1 mechanics](../../system/mechanics.md#c1-training-and-armed-defense-selected-contract),
+[production parameters](../../system/cartridge.md#c1-tobin-and-equipment),
+[typed composition](../../system/protocol.md#c1-training-and-defense-composition),
+[save/reopen](../../system/save.md#c1-learned-skill-and-lesson-recovery) and
+[Book](../../system/book-ui.md#c1-teaching-and-defense-details). Installed
+[equipment](../../system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets),
+[attributes](../../system/mechanics.md#attributes1),
+[dialogue receive](../../system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts),
+[combat](../../system/mechanics.md#combat1--first-live-encounter-m6-a) and
+[ActionSet](../../system/protocol.md#actionset-and-admission) still govern their
+existing behaviors. Read [mechanics](../../lessons/mechanics.md),
+[storage](../../lessons/storage.md), [contracts](../../lessons/contracts.md),
+[mobile](../../lessons/mobile.md) and [evidence](../../lessons/evidence.md) lessons
+before touching their areas. Apply Ponytail before source and Ponytail Review plus
+actual-diff correctness review before handoff. Mobile/native verification stays paused.
 
-At the reachable North Gate, Tobin offers real swords and dodge lessons at every hour. A completed lesson persists acquisition; its current qualification is evaluated separately when used. Tobin gives the one authored rusty sword through a real, capacity-checked custody transfer. The player can equip a real weapon and use the learned qualification in a deliberate cellar-rat fight; learned qualified dodge can prevent an otherwise damaging strike. Peg's real equipment, including a usable shield, consumes the same resolver. Tobin has no attack profile. C2 later moves the same trainer to the reachable watch post; no schedule hides required training.
+## Real player path and affordability
 
-Pinned existing contracts: M6-A rounds/Flee/death, M2 recovery, M3 voluntary carrying, equipment@1 slots, dialogue@1 retained choices and changed-row save. **Provisional dependency:** reviewed B3 shop/equipment and its monetary cost representation; the Astra ordering lists B3 before C1. Do not build a second coin service or speculative shop here. If PM intentionally assigns C1 before B3, the exact first sword and a real shield acquisition must be in this slice and the dependency map amended; a fixture-only shield is not the player consumer.
+The inspected source has ferry_landing north → well_lane north → village_green
+north → north_gate. Add the passive original Tobin there. Talk/Choose swords,
+then Talk/Choose dodge, then Wear the exact gifted rusty sword. Selected chapter
+STR10/DEX10 meet both qualification floors; acquired and qualified are distinct projected
+facts. Return south → Green south → Well east → Drowned Lantern down → cellar;
+Attack the existing first rat. Maud's optional S1 acceptance can precede the descent.
+There is no new fight location, unbuilt watch post or required shop purchase.
 
-## Governing clauses and decisions to adopt before source GO
+Literal path from a fresh chapter: player20p/Peg20p/Aldric10p/Tobin0p and no held
+items. Swords gives player18/Tobin2 and one body-held rusty sword, load500g; dodge
+then gives player16/Tobin4 and the same sword. Wear puts it in wield, retaining
+load500g. Cold reopen retains those balances and acquired memberships. The five
+passive rats and earned S1 key/storage remain usable; low or spent pennies never
+block the main story or corpse recovery.
 
-Read `docs/system/architecture.md#building-mechanics-by-composition`; `mechanics.md#equipment1`, `#attributes1`, `#check1`, `#dialogue1`, `#position1`, `#combat1--first-live-encounter-m6-a`; `protocol.md#actionset-and-admission`, `#encounter-and-round-supplements-m6-a`; `cartridge.md#first-encounter-authoring-m6-a`; `save.md#live-encounter-persistence-m6-a`; `book-ui.md#live-combat-response-m6-a`; `docs/spec/conformance/first-encounter.md` A/B/C; `docs/decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md` current policy and future M6-B/M7 acceptance; archived 00a §§4–5 and 00 §4.3/4.5; `docs/NEXT-MECHANICS.md` M6-B/M7-A. Read mechanics/storage/contracts lessons. The active clauses describe installed behavior; amend them before implementation in this PR, with a PM decision and index/owner-rule line.
+For the real shield consumer, detour from Well west → Chandler. Buy the new wooden
+shield: player12/Peg24/Tobin4/Aldric10, total50; Wear off_hand, total carried900g,
+below the authored12000g ceiling. Buying iron sword as well leaves player4/Peg32/
+Tobin4/Aldric10, total50 and load1500g. Remove rusty, Wear iron through ordinary
+custody transitions. Its actual damage profile differs. No S2 reward, sale, time
+wait, replacement gift or fixture-only shield is needed to afford this route.
+Other shopping is optional; the free-with-lesson rusty sword already enables the
+first trained fight. These are hand-checked proposed-content answers, not executed
+C1 proof. Existing route exits, starting funds and B3 stock were inspected;
+the new masses are selected in the cartridge contract.
 
-**Decision packet, currently provisional:** select the minimum actual chapter resolver: a learned, currently qualified swords skill plus a usable sword in `wield` selects its cartridge AttackProfile; otherwise the existing unarmed profile applies. Select accuracy → eligible dodge → eligible shield block → damage, stopping after the first failure/prevention. Dodge requires learned/currently qualified dodge and standing able-to-react posture. Shield block requires an actual usable shield in `off_hand` and standing posture; no seventh chapter skill called block is silently introduced. PM must explicitly adopt that equipment-based block policy or select another complete policy before GO. A sleeping/sitting/resting defender has no active defenses. Fixed damage draws nothing after accuracy/defenses; variable damage draws once through the existing sampler. Keep eight **raw** draws shared by the whole round; fault atomically on exhaustion.
+## Composition and implementation boundary
 
-Production qualification predicates, costs, sword attack values and dodge/block chances are **null pending PM selection**, authored in the cartridge and independently pinned. The `docs/design/provisional-story-mechanics.md` formulas are unadopted alternatives. `docs/reference/legendmud-system.md` distinguishes acquisition/qualification/use but says present Legend dodge/block/weapon equations are unknown; do not report a new Loka formula as verified Legend behavior. No parry, critical, armor mitigation, multi-swing, XP, level, practices, percentages or learn-by-use subsystem enters this first consumer.
+Follow [building mechanics by composition](../../system/architecture.md#building-mechanics-by-composition).
+**Consumer:** real Tobin teaching and actual equipped combat against finite cellar rats.
+**Reads:** actor/body, bound live teacher and item, current acquired fact and qualification
+policy, balances, carrying/slots, HP/life/posture, current encounter/job and RNG.
+**Writes:** reserved acquired fact; exact payer/teacher resources; optional exact gift
+custody; existing choice/narration; combat HP/job/death consequences. **Ownership:**
+skills owns idempotent typed acquisition/usable query; dialogue lowers lesson payment,
+receive and acquisition into its existing group; equipment owns custody; combat owns
+conditional attack/defense ordering; authority owns receipt/commit/adoption. Combat may
+read the shared skills query; it must not invoke another mechanic's player verb.
 
-## Composition and smallest implementation
+**Reused primitives:** Boolean fact assignment, stat policy, exact conserved resource
+transfer, bound dialogue receive, carrying predicate, equipment slots, round/sampler,
+existing death/credit/recovery and changed-row save. **Missing invariant:** acquired
+membership must be unique and reserved to the skill owner, separate from current use
+qualification. Implement the smallest skills definition/query and typed acquisition
+hook, fact-backed as selected; do not add a state section or foundation op. The lesson's
+exact teacher payment is a small dialogue hook reusing B2/B3 payment. Preserve shared
+query budgets, execution-time rechecks, writer conflicts and atomic rollback. No special
+Tobin, swords or chapter branch in kernel code.
 
-**Reads:** actor/body, learned membership, current qualification policy, actual wield/off-hand custody, posture/life, encounter/job binding, cartridge profiles and RNG. **Writes:** one acquisition identity, any declared lesson cost and exact item receive, retained choice result; combat uses existing HP/attack result/job/death consequences. **Owners:** skills owns idempotent acquisition/eligibility; dialogue lowers the bound lesson into its existing writer group with cost/custody; equipment owns slot custody; combat owns conditional resolution and damage; proposal owns one ordered composition; authority owns one changed-row+receipt transaction. Presenter only projects and invokes.
+Likely files: actual chapter manifest/attributes/skills, Tobin/ordered dialogues, three
+new item definitions and Peg offers/text; `kernel/ts/src/content/`, `lib/loka/content/`,
+shared skills/payment helper and dialogue lowering, combat round/shared resolver,
+policy/action/character/item projection, relevant `protocol/` schemas/registry/generated
+contracts; `mobile/authority/local-story/` save receipt/balance validation and Book
+Character/NPC/item/combat rendering. Use current forward-development contracts and
+independently derive the new release/hash/fresh IDs. Keep B3's four existing shelf
+definitions and within-save identities. Out: parry/critical/armor/multi-swing, stat
+writers/modifiers, XP/practices/levels, percentages/learn-by-use, broader skill catalogs,
+NPC defenses, trainer schedules, restock, server adapters, navigation redesign and native
+build/device work. Changed portable foundation semantics would be a scope escalation.
 
-Use the smallest reviewed acquired-membership representation, keyed by CharacterId and declared skill identity. A skills-owned typed row/set or a documented typed-fact lowering is acceptable only if its ownership, uniqueness, save validation and qualification query are explicit. Do not use narrative Booleans as a substitute for these invariants. Define no mastery rank or speculative progression fields. Skills must remain learned when qualification temporarily fails. Reuse the existing VersionedPolicy/attribute reads for qualification; content supplies thresholds. Teach only through a living, co-located bound teacher and an execution-time recheck. Already acquired teaching neither charges nor re-awards the sword. The whole grant/cost/acquisition refuses together when capacity/custody/composition fails.
+## Controlled acceptance and red controls
 
-Extend combat selection at the existing attack resolver, without altering untrained frozen A/B/C semantics or RNG. Only the new consumer activates the supplemental path. Keep current sleep damage/wake settlement and real recovery; a defense cannot retroactively apply to the hit that wakes a sleeping body. Add explicit prevention narration/evidence if `attack_result.hit/loss` alone cannot distinguish dodge/block from accuracy miss; pin this small event supplement, not a second damage event. NPCs without defense metadata use the old path. No trait checks by the names Tobin, sword or chapter belong in kernel code.
+Use real loader and public commands, not test-only production functions. Production
+numbers live only in the cartridge contract; the following are independent controlled
+vectors. Each new test must name a distinct plausible break. Apply its mutant to the
+old focused same-layer suite first; add a test only if existing focused coverage misses it.
+Actually observe the guarded behavior fail, then restore and rerun.
 
-Likely owners, edit only when needed: `cartridges/ashmere_missing_child/{cartridge,facts,text}.json`, Tobin NPC/ordered dialogues, rusty sword and B3 equipment metadata; `kernel/ts/src/mechanics/combat/{round,shared,saved}.ts`, equipment/policy and a small skills owner; content loader/compiler (`kernel/ts/src/content`, `lib/loka/content`); protocol entity/skill-policy/choice/event/state/delta/capability surfaces and generated contracts; local-story load/receipt evidence; GameView and existing Book character/item/combat details. Foundation edits require both portable twins and independent additive fixtures. Out: new native dependencies/builds, mobile navigation redesign, UI blur, server adapters, speculative skill catalogs, altered historical fixtures.
+- **Acquisition does not equal qualification:** controlled STR/DEX9 with learned
+  swords/dodge retains both memberships but usable false; at10 usable true. Missing
+  membership at10 gives neither benefit. Teach in the9-start controlled cartridge
+  through Choose, then fight: the lesson succeeds but does not grant the use benefit.
+  Removing the learned guard and removing the qualification guard are separate red
+  controls. No live mutable-stat claim is made; D11 owns later stat variation.
+- **Atomic one-time lesson:** controlled player10/teacher0 and fee4 yields6/4,
+  one acquired fact and one exact gifted sword. Exact receipt retry and a newly
+  attempted repeated lesson leave6/4 and one sword. Remote/dead/substituted teacher,
+  insufficient pennies, recipient overflow, unavailable original gift and positive
+  carry overflow change none. Learning dodge binds no rusty item after its transfer.
+  Plant omitted acquired check, omitted debit and omitted carry admission only where
+  the prior focused suite does not already catch them.
+- **Profile comes from usable wield custody:** S0, playerHP10/ratHP6, zero recovery,
+  both accuracy100, fixed base1, fixed sword3, NPC fixed1, no defenses. Unlearned or
+  learned-unqualified ends player9/rat5 at S2; qualified wielded sword ends9/3 at S2.
+  Holding/nesting/removing it gives9/5. Attack itself changes no HP/RNG and first round
+  waits for its actual due time. Plant held-item selection or bypassed qualification.
+- **Defense order and strict boundary:** in that sword setup, player accuracy consumes
+  raw11520; NPC accuracy raw0. Eligible dodge next consumes raw5927040 (roll40).
+  Chance41 succeeds: player10/rat3, S3, no block/damage draw. Chance40 fails; eligible
+  shield chance100 consumes raw70819200 (roll0): player10/rat3, S4. Without eligible
+  defenses their draws are absent. Plant inclusive comparison, ineligible defense draw
+  and continued block-after-dodge. Pin hit:false/loss0/prevented_by to the right stage.
+- **Budget and death correctness:** retain existing no-defense A/B/C independent
+  answers. A supplemental sleeping survivor cannot defend the waking hit and uses
+  ordinary multiplier/recovery settlement; lethal armed damage closes before revival,
+  emits one corpse/real credit and prevents retaliation. A controlled supplemental
+  rejection-sampler case must exhaust the shared eight raw draws and leave all prior
+  RNG/HP/jobs/custody. Reuse existing red tests if they already catch those breaks.
+- **Actual content and view:** run the literal route above, show both skills acquired/
+  qualified, exact sword/shield Wear and one committed defended rat strike. Complete
+  S1's five-rat reward/storage and the main-story return paths with trained equipment;
+  no skill or money gate enters them. Book and direct Choose agree on failures; combat
+  still blocks Learn/equipment/raw aliases. Committed lines appear once after reopen,
+  while pending/stale/refused/faulted results claim no success.
 
-## Controlled acceptance and actual red controls
+S0–S4 are the hand-checked raw/state literals in the
+[first-encounter oracle](../../spec/conformance/first-encounter.md#frozen-input-sequence).
+Tests compare to those answers independently of the resolver and the other kernel.
+Do not retain obsolete development pins solely for backward compatibility; keep their
+current-behavior safety/determinism checks or replace them with independent current answers.
 
-The following values are **controlled supplemental inputs, not production tuning decisions**. Use real public commands and the cartridge loader, not production test hooks. Numeric-vector S0–S4 are the independent literal states in the frozen first-encounter document; pin the new expected results independently before implementation. Each new test must catch a distinct break absent from existing coverage.
+## Persistence, checks, review and scope trigger
 
-1. **Acquisition versus qualification:** declare a controlled qualification floor 10; current input 9 with learned swords/dodge stays learned but cannot use either. At 10, both qualify. Missing acquisition at 10 still grants neither benefit. A controlled lesson fee4 transfers through B3's conserved payment: player10/teacher0 becomes **6/4**, membership is one, sword identity transfers once. Retrying that same receipt or repeating Learn leaves 6/4 and one sword. Remote/dead/substituted Tobin, stale choice and rejected capacity grant change none of those values. Red controls: remove acquired/qualification guard; separately omit the idempotent lesson/cost check.
-2. **Real weapon selection and exact draw consumption:** controlled standing HP10/NPC HP6, S0, accuracy100, base fixed1, qualified sword fixed3, NPC accuracy100/fixed1, no defenses. Unlearned or learned-unqualified player ends HP9/NPC HP5, **S2**; qualified equipped sword ends HP9/NPC HP3, **S2**. The same sword held but not worn gives the base result. Attack itself changes no HP or RNG; first round uses its due time. Red controls: select a held weapon, or select trained profile without qualification.
-3. **Conditional defense and strict boundary:** on the qualified sword setup, NPC accuracy consumes raw0 at S2; eligible dodge consumes raw5927040 (roll40). Chance41 prevents loss: player HP10/NPC HP3, **S3**, no block/damage draw. Chance40 fails; with eligible shield chance100, block consumes raw70819200 (roll0) and prevents loss: HP10/HP3, **S4**. Without eligible dodge or shield, the corresponding draw is absent. Fixed damage has no damage draw. Red controls: make `<` inclusive, draw for an unavailable defense, or continue after successful dodge. Observe the focused failures; do not merely list mutants.
-4. **Lethal/posture/recovery composition:** retain old A/B/C exactly. In a supplemental sleeping survivor, defenses are unavailable for the incoming hit, multiplier applies, recovery settles at the damage boundary, and standing only affects a later opportunity. Fatal armed damage creates exactly one corpse, closes the encounter before revival and credits only the real attacker. A refusal/budget fault adopts no equipment, HP, RNG or jobs. Plant one wake/order or dead-actor retaliation mutation if existing tests do not already kill it.
-5. **Player flow:** actual all-hours Tobin teaching → exact sword custody → Wear → deliberate actual rat fight and defense narration. Missing/unqualified/qualified descriptions and offers agree with direct admission. Confirmed teaching/defense lines appear once after cold reopen; pending/stale/unrelated receipts do not claim success. Re-run S1's five-rat completion and main-story return paths with the new player profile; equipment/training must not gate the story.
+Use real SQLite cold reopen after each lesson, each equip transition, Attack, defended/
+lethal round, and death/corpse recovery; the later due consumer must accept each lawful
+saved intermediate state. Run lesson-before-Buy, Buy-before-lesson and S2 payout with
+both in either order. Reconcile historical payments at their revision, with Tobin in
+the existing balance replay. Reject forged grant/actor/skill/teacher/payment/gift evidence
+and contradictory reserved facts as typed save_corrupt, without rewriting the file.
+Current gift custody may lawfully differ after equip, trade, drop or death.
 
-## Save/recovery, review and stop trigger
+Real failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
+must prove old-or-new membership/cost/custody/choice/HP/RNG/jobs/head/receipt. Receipt
+retry pays/grants/draws nothing twice. Keep explicit release mismatch refusal and
+confirmed Start over. No new snapshot, periodic checkpoint or save migration.
 
-Cold reopen after each lesson, equip transition, Attack and defended/lethal round. The later due consumer must accept every legal saved intermediate state. Malformed/null acquired data, wrong actor/skill identity, impossible item/teacher evidence or mismatched supplemental encounter data returns typed `save_corrupt`, never repair, untyped exception or false acquisition. Existing failed-COMMIT and both uncertain-COMMIT outcomes must prove cost, membership, custody, HP/RNG/job/head/receipt all old or all new. Lost acknowledgement replays without another charge/draw. Keep exact release-pin refusal and explicit Start over; no promise of old-preview migration.
+Run focused compiler/loader/short-reference/schema checks, skills/dialogue/payment,
+combat/ActionSet/Book and real SQLite suites, plus applicable generated/shared checks.
+Schema changes need their bound/required-field mutant sweep. The provisional lane
+uses these focused results first; full active `mise exec -- bin/check_all.sh` and red
+controls run once at accumulated-head publication under the normal hook. Report exact
+commands, exit status and actual red failures. Fresh independent primary review plus
+required protocol/save opinion applies; Astra audits `runtime/proposal.ts` if touched.
+A source edit after approval needs its scoped recheck. Do not merge remote or run native
+sessions under this assignment.
 
-Run focused compiler/loader, schema sweep, kernel combat/skills, Book and real SQLite tests, applicable shared checks and the normal full `bin/check_all.sh`/pre-push gate once. Actual Ponytail/correctness self-review precedes fresh independent primary review plus required protocol/save/foundation opinion (Astra if `runtime/proposal.ts` changes), scoped fixes and exact-head CI. Browser-first owner steering needs its reviewed workflow adoption; shared headless `sim` remains engine proof. Native evidence is deferred to prelaunch, never fabricated.
-
-**Stop before source GO** if the decision packet or B3 dependency is unresolved. During development stop/escalate a contradiction with frozen A/B/C, missing reusable qualification contract, any need to change generic RNG/recovery, a free-item replacement loophole, or a required route blocked by equipment. Keep the complete armed/defense consumer; do not ship a learned flag with no effect or fixture-only training.
-
-Planning self-review: applied Ponytail and checked this proposed boundary for correctness. Reuses existing ownership/transactions; no new dependencies or general framework are requested. Production decisions and future source pins remain explicit gates above. This is author self-review only; independent publication/implementation review remains required.
+Stop/escalate an unresolved B3 dependency, spec conflict, needed portable foundation op,
+new attribute writer or defense catalog, inability to reconcile a lawful saved lesson,
+free-item replacement, main route/recovery gear gate, or a footprint too large for the
+complete lesson→armed/defended fight outcome. Do not hand off an acquired flag with no
+real combat effect. Planning self-review: reused installed ownership and storage; the
+new primitive has a concrete consumer. Ponytail Review: lean; no framework/dependency
+or second monetary/state ledger. This is author review, not independent approval.

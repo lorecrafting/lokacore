@@ -619,6 +619,52 @@ S2 ledger or an item later given to her as an offer. B4/B7 may add use metadata 
 these definitions in their own releases without changing B3's item identities or
 shop rules. The satchel has no lid and its contents count toward the ordinary load.
 
+## C1 Tobin and equipment
+
+**Selected, pending implementation.** The [C1 mechanic](mechanics.md#c1-training-and-armed-defense-selected-contract)
+adds `skills@1` and the existing `attributes@1` dependency. Skill definitions declare
+their label and current VersionedPolicy qualification; the compiler creates their
+unique reserved player acquisition facts. Swords and dodge are the only new skills.
+No writable stat, progression or skill-percentage field is introduced.
+
+| Chapter parameter | Selected value |
+|---|---|
+| STR / DEX attribute starts | 10 / 10 |
+| swords qualification | `stat_compare`: STR at least 10 |
+| dodge qualification | `stat_compare`: DEX at least 10 |
+| Each lesson payment | 2 pennies, actor → Tobin |
+| Tobin penny start | 0, under the existing penny bounds |
+| Lesson duration / cooldown | 0 / 0; ordinary authority elapsed settlement still runs |
+| rusty_sword | 500g, `wield`, chance95, fixed damage3; initially Tobin-held |
+| iron_sword | 600g, `wield`, chance95, fixed damage4; initially Peg-held, Buy8p/Sell4p |
+| wooden_shield | 400g, `off_hand`, block chance25; initially Peg-held, Buy4p/Sell2p |
+| Qualified dodge chance | 50 |
+
+Place passive Tobin at reachable `north_gate`, with no attack profile or schedule.
+An ordered swords dialogue receives the single rusty sword while teaching; a later
+dodge dialogue teaches without item roles. A teacher dialogue's typed acquisition
+step identifies the declared skill; its payment binds a live NPC role, penny
+resource and positive amount. The original teacher and item identities are bound
+by ordinary dialogue/receive, not minted on Choose. Learned-status policies use the
+generated typed fact; user content cannot counterfeit an acquired grant.
+
+The iron sword and shield extend [Peg's finite shelf](#pegs-b3-shelf) through its
+existing Buy/Sell contract. Preserve the four B3 definitions and their within-save
+identities; each new release independently derives its own fresh IDs. Gift swords
+are not a shop offer. No renewal/replacement/restock is needed for these optional
+consumers. Add item combat eligibility and the two defense narration keys to the
+smallest current cartridge shape; chance bounds remain integers0..100 and weapon
+damage positive/ordered. Compile and load reject undeclared skills, absent or
+non-Boolean generated facts, unresolved qualification refs, wrong equipment slots,
+invalid profiles/fees, missing teacher balance, collisions and unknown fields.
+
+Production unarmed/rat profiles, combat interval, recovery, carrying ceiling and
+main-story routes stay as currently authored. Training and shop equipment are
+optional; every possession-recovery and required story route stays free of a skill,
+weapon, shield, hour or next-day stock gate. C2 later owns Tobin's reachable watch
+post/patrol. C1 target release/API/hash and generated IDs remain null until source
+work re-pins integrated B3 and any earlier parallel content.
+
 ## B5 herb and bandage stock
 
 The [B5 mechanic](mechanics.md#s9-infirmary-herbs-b5-selected-contract) uses finite

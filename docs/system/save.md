@@ -459,6 +459,40 @@ and changed-row trust boundary, not a second money ledger or save migration.
 Receipt replay cannot pay or move the item again; malformed current-build truth
 leaves the save intact.
 
+## C1 learned-skill and lesson recovery
+
+**Selected, pending implementation.** [C1 acquisition](mechanics.md#c1-training-and-armed-defense-selected-contract)
+uses changed fact, resource, containment and choice rows with the same head/receipt
+transaction. No table or save-format change is required. Derive current qualification
+again from the pinned cartridge policy on every open/use; do not save or repair it.
+Cold reopen must accept every legal state after Talk, each lesson, Wear/Remove,
+Attack, defended round, opponent death, player death and possession recovery.
+
+Extend [B3's revision-ordered balance recovery](#b3-shop-recovery) with Tobin's
+authored penny start and accepted lesson payments. Validate each historical payment
+at its own revision, its exact bound teacher, skill/choice and amount, and both
+debit/credit; subsequent commerce/S2/other accepted transfers may change current
+balances. Validate each true acquired fact against exactly one accepted typed grant
+for that character/declared skill, binding command, continuation, source dialogue,
+choice, roles, root cause and consequence. The swords grant proves its exact
+incoming item identity at that commit; lawful later Wear/Drop/Give/death custody
+must not be compared to the original body-held destination. Ordinary current custody
+validation still applies. False/omitted membership is legal only without a successful
+acquisition receipt; reject contradictory receipts or missing acquired rows.
+
+Null/non-Boolean facts, wrong skill/actor/teacher identities, duplicate successful
+grants, forged payment or gift evidence, unexplained balances, or a defense event
+inconsistent with its hit/loss produce typed `save_corrupt`, leaving the file intact.
+Closed/replaced encounter jobs remain harmless after reopen. Do not cache weapon
+or defense eligibility in an encounter: the later due consumer re-reads saved custody,
+membership, qualification, life and posture.
+
+Real failed COMMIT and both uncertain-COMMIT outcomes prove all prior or all next
+cost/membership/custody/choice/HP/RNG/job/head/receipt state. Fence input and elapsed
+work until reconciliation. Lost acknowledgement and exact receipt replay charge,
+grant, draw and narrate no second time. Existing pin refusal and explicit confirmed
+Start over remain; C1 supplies no old-save migration or silent deletion.
+
 ## B5 stock and repeat recovery
 
 [B5](mechanics.md#s9-infirmary-herbs-b5-selected-contract) stores ordinary authored

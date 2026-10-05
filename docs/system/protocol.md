@@ -521,6 +521,38 @@ narration keys. Each NPC `EntityView.shop` row carries `item_id`, `name` and its
 Buy/Sell price, availability and optional typed refusal reason. Runtime admission
 owns the exchange; this projection reserves nothing.
 
+## C1 training and defense composition
+
+**Selected, pending implementation.** [C1](mechanics.md#c1-training-and-armed-defense-selected-contract)
+reuses Talk/Choose and the existing final combat ActionSet; there is no standalone
+Learn or Dodge invocation, mid-fight equipment verb or new turn clock. The projected
+Tobin lesson and direct Choose share the same acquired/payment/receive admission
+checks. Qualification is evaluated at use, independently of learning admission.
+
+Dialogue lowers its typed `skill.acquire` consequence through the skills owner to
+the reserved acquired fact's ordinary `fact.assign`. Its lesson payment uses the
+installed checked conserved resource transfer; the optional sword receive uses the
+installed `entity.transfer`. Acquisition, payer debit, teacher credit, custody,
+choice resolution, events and narration share writer group0. No acquisition table,
+practice field, custom money ledger or portable foundation op is added. Ordinary
+fact writers refuse the reserved acquisition target. Content and generated contracts
+must describe this actual typed hook and reserved ownership, not a narrative Boolean
+assignment that happens to use a skill name.
+
+The shared skills query projects declared skill identity/name, acquired, qualified
+and usable state; authored requirements and fees reach Book through typed data/text.
+Item detail projects its usable slot/profile or shield chance from current content.
+This is the minimum view supplement for Character, teaching and real equipment.
+Missing acquisition defaults false; malformed current-build acquisition is a fault.
+
+An `attack_result` may add `prevented_by: dodge | block` only for an attempted attack
+stopped by that successful defense, requiring `hit:false` and `loss:0`. An accuracy
+miss omits it. A landed hit also omits it. One existing attack-result event and its
+authored narration distinguish all three outcomes; there is no duplicate damage
+event. Validate this supplement at schema, receipt and view boundaries. Optional
+metadata is absent for an ordinary no-defense encounter. Shared budgets, causal
+event allocation and death closure use the existing round/proposal contracts.
+
 ## B5 harvest and exchange composition
 
 [B5](mechanics.md#s9-infirmary-herbs-b5-selected-contract) needs only a typed
