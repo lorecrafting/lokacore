@@ -659,3 +659,29 @@ mass, missing bounded contribution declaration, increment outside its cap and
 incompatible B2 faction bounds. The exchange quantities are equal for this
 consumer, not a generic barter language. Definitions and all tuning belong to
 this cartridge; no engine or Book fenwort count/faction literal is permitted.
+
+## B4 well and fuel
+
+The planned [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
+adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
+stairs are public at every hour. Its ordinary description exposes an authored
+inspectable `masonry` detail; its separate dark description names only darkness
+and the return stair, with no hidden-object links. The detail is optional flavor.
+Other installed rooms retain their current visibility; sunlight phases do not
+silently darken them. No lantern, cottage, water or enemy is added.
+
+The chapter's source metadata declares the B3 torch as refillable oil wick:
+capacity7200 fuel units, initial7200, burn1 fuel unit per logical clock unit,
+compatible supply `lamp_oil`. The exact B3 oil bottle starts with7200 units,
+capacity7200 and no burn. These give two game hours of torch light per full
+charge under B1's3600 units/hour; they are tuning, never engine defaults.
+The bottle persists at zero and retains its B3 sell eligibility and shell mass;
+prices never depend on charge. Partial refill preserves excess in the same bottle.
+The satchel still has no lid; nesting alone excludes its source from illumination.
+
+Compiler and loader validate exact source/supply references, nonnegative safe
+integer initial charge within positive bounded capacity, positive source burn rate,
+matching fuel units and authored dark text on opted rooms. A supply cannot be lit
+or illuminate. Missing fuel rows are not an implicit fresh charge. Metadata belongs
+to the exact item definitions; fuel state belongs to their real instances, never to
+the player, room or merchant. No generic stacking, destruction, stock or liquid API.

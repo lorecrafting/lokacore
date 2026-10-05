@@ -410,3 +410,20 @@ Drop, stored herbs or corpse custody explain retrieval through the existing item
 and recovery controls. Exhausted or given-away finite supply is an honest optional
 unavailable exchange, never a chapter-blocking wait. No bandage-use or herbalism
 control is exposed before its later real consumer lands.
+
+## B4 light details
+
+Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) uses ordinary
+inventory/item detail for confirmed fuel and Ignite/Douse/Refuel. Refuel identifies
+the exact directly held compatible bottle; Wear/Remove and Put/Take retain their
+existing places. The presenter emits ordinary ActionInvocation and owns no fuel
+arithmetic, automatic ignition or clock. Confirmed receipts refresh light, supply
+and World; stale/refused/fenced results never narrate success.
+
+The dark World description keeps traversable compass/stair exits, inventory and
+recovery controls usable. It displays no hidden detail links or Scan identities.
+Owner-corpse detail and ordinary accessible belongings remain usable in darkness.
+After the same torch is lit directly held or worn, the authored masonry detail is
+visible; Douse, exhaustion or Put into the satchel removes it on the next confirmed
+view. Existing freshness handles a control selected before elapsed exhaustion.
+No required waiting, darkness modal, new native control or unfinished lantern UI.
