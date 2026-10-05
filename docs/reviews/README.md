@@ -232,4 +232,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Opening Elspeth](2026-10-05-opening-elspeth-review.md): PR #183 at `1614da51`, independent APPROVE; no findings, two red controls and full local checks passed.
 - [Opening Elspeth second opinion](2026-10-04-opening-elspeth-second-review.md): PR #183 at `1614da51`, APPROVE; no findings, v005 pin/IDs and explicit Start over checked.
 
-- [FEN-01 first south search route](2026-10-05-fen01-south-search-review.md): PR #184 at `c1764bdd`, independent CHANGES REQUIRED; FEN01-R1 (new clue headings reuse action labels), two red controls detected, restored focused checks and all-hour route/side-effect checks passed.
+- [FEN-01 first south search route](2026-10-05-fen01-south-search-review.md): PR #184 at `c1764bdd`, initial CHANGES REQUIRED; scoped fix `673ec70c`, independent APPROVE, FEN01-R1 closed; heading red control detected, restored focused Book/App/compiler checks and exact-head CI green.

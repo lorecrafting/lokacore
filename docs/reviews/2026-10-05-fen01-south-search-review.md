@@ -53,3 +53,34 @@ older SQLite save. Both planted breaks are detected. FEN01-R1 is the only open f
 
 Ponytail Review: **Lean already. Ship.** No unnecessary abstraction, dependency or duplicate
 machinery found; the finding is resolved through the existing optional title field.
+
+## Scoped fix round 1 — 2026-10-05
+
+- Source fix head: `673ec70c71d2b7cffb9be60088fe582bb7f7b4f8`.
+- Verdict: **APPROVE**. **FEN01-R1 closed; no open findings.**
+- Scope: the seven-file fix and its direct title projection, Book entry/detail rendering,
+  independent artifact oracle and App save-pin dependencies; settled parts were not reopened.
+
+Both room readables now bind authored noun titles, **Fox prints** and **Tracks**, while
+retaining the separate **Inspect fox prints** and **Inspect tracks** action labels.
+The existing projection and Book routes consume these fields without implementation changes.
+The real-Book route test now checks each rendered heading with independent literal answers,
+alongside its existing exact-body and return-route assertions. The independent oracle and
+App expected pin use the updated content hash
+`482e35cc9a5dc73ec43c3afbbd1f5950a648feb4c1029662d3cf6769a3f18b69`.
+
+Verification:
+
+- Focused Book/App/real-SQLite suites passed 12/12; compiler known-answer test passed 1/1.
+- Python regeneration left the current hash and ID fixtures byte-identical. Independently
+  checked canonical/hash consistency; comparison with the original reviewed artifact found
+  only the two title bindings and their two catalog entries changed. ID answers are unchanged.
+- Independent focused red control: temporarily make the Book detail heading use its offered
+  action label while leaving noun entry labels intact. The south-search test failed exactly
+  at the new heading assertion (`Inspect fox prints` versus `Fox prints`, exit 1).
+  Restored the direct caller byte for byte; all 12 focused tests then passed again.
+- All six checks on the exact fix SHA completed successfully: `changes`, `elixir`,
+  `typescript`, `sim`, `lint`, `bundle`. No native preview tools were operated.
+
+Scoped correctness review found no new failure scenario. Ponytail Review: **Lean already.
+Ship.** The fix uses the existing title field and extends the existing behavior test.
