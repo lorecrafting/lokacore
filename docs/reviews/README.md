@@ -266,4 +266,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [A3/B2 integration](2026-10-05-a3-b2-integration-review.md): independent APPROVE of merge `b67d290d`; both append-only spec resolutions, decision/review indexes, roadmap and docs links checked; no findings.
 
-- [Local draft-PR cadence](2026-10-05-local-draft-pr-cadence-review.md): local head `688908fb`, independent CHANGES REQUIRED; fix `39bcf4eb`, APPROVE; revised local-integration scope `4ec61e50` and wording `fa50bceb`, APPROVE, no open findings.
+- [Local draft-PR cadence](2026-10-05-local-draft-pr-cadence-review.md): local head `688908fb`, independent CHANGES REQUIRED; fixes and revised scope APPROVE; integrated worktree head `00fc8e19`, APPROVE, no open findings.

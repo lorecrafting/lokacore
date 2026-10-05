@@ -35,3 +35,9 @@ Checks on `4ec61e50`: `mise exec -- elixir bin/check_docs.exs` passed (507 docs,
 ## Plain-language wording — `fa50bceb`: APPROVE
 
 The two changed paragraphs replace “forge” with the concrete local Git branches, merge commits and review records that preserve the trail. The local and remote merge gates remain unchanged. No findings. `git diff --check 4ec61e50..fa50bceb` and the docs link check pass.
+
+## Integrated worktree cadence — `00fc8e19`: APPROVE
+
+Reviewed the complete integrated docs diff against verified local `main` at `552e00ac`. The owner's worktree choice is recorded in the decision and workflow: each new slice uses its own worktree and branch, and an independent reviewer uses a different worktree. Existing clones need no conversion. The decision, workflow and owner rules agree on locally checked and reviewed units merging into integration `main`, with the merge SHA retained in the next handoff. The one-time hosted-CI exception remains limited to PRs #200–#204; every later remote merge still requires hosted checks present and green on its published exact head.
+
+Both original workflow findings remain closed in the integrated text. This section names the exact integrated head independently of earlier temporary review-branch SHAs. `mise exec -- elixir bin/check_docs.exs` passed (508 docs, 0 broken links, 0 unreachable); `git diff --check 552e00ac..00fc8e19` passed. No findings.
