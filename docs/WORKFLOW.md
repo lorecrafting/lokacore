@@ -142,7 +142,7 @@ result, fresh review record in `docs/reviews/`, and proposed PR description as t
 draft PR. For a complete source outcome, the developer runs focused checks for
 the touched layers and self-reviews; the PM can then merge it into local `main` with a
 **provisional** merge commit before independent review. Record that merge SHA in
-the next handoff and start the next sequential slice while the fresh reviewer
+the next handoff and start the next dependency-ready slice while the fresh reviewer
 checks the exact head. Run required second opinions in parallel. Fix findings
 on the original branch and merge those fixes locally with their review records.
 Keep unresolved findings visible and do not count the slice complete until they
@@ -157,6 +157,16 @@ hosted CI proof. Step 7's hosted-CI gate applies to the later remote merge, not
 to the provisional local integration merge. A settled small spec change may be
 committed before code on the same branch and reviewed with the complete outcome;
 cross-mechanic/save planning still gets a focused review when it prevents rework.
+
+Parallel local work uses one integration owner for local `main`, normally two source
+worktrees whose mechanics do not overlap, and separate worktrees for independent
+plans and reviews. Plan the next dependency-ready slices while source work runs.
+Each source branch keeps its own checks and review head; integrate one branch at a
+time. When branches touch the same cartridge release, generated contract, save
+schema or portable primitive, choose the integration order first and derive the
+successor pin only after its predecessor lands. A plan may leave those values
+unknown. Never have two agents edit one worktree or treat parallel green checks
+as proof of their combined head; run accumulated checks before publication.
 
 The owner has [paused mobile development and verification](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md),
 including Debug and Release Simulator sessions. Browser preview work may provide a local test
@@ -206,13 +216,11 @@ turning into a catch-all. Findings are fixed in the gate PR.
   PM, developer and reviewer each use separate worktrees. The local cadence's
   review-record and merge steps replace the hosted push steps below until batch
   publication. Keep in-flight older clones intact.
-- Every developer works in its own worktree on its own branch. The PM works in one
-  persistent worktree, `../lokacore-pm`, moved with `git checkout --detach <sha>` and never
-  removed; it is the checkout for the PM's commits and for codex's read-only runs. The main checkout is
-  not used for slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
-  Developer worktrees sit beside the repository (`../lokacore-<slice>`), outside
-  the tree the checks scan, and are removed after merge. The reviewer mutates code only in a throwaway detached worktree
-  (`git worktree add --detach`) and removes it before finishing.
+- Every developer and concurrent planner works in a distinct worktree and branch.
+  Keep a single integration worktree for local `main`; keep the owner's checkout
+  out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
+  Place worktrees outside paths the checks scan, and preserve unfinished ones.
+  A reviewer uses a separate detached worktree (`git worktree add --detach`).
 - `.gitattributes` merges `docs/reviews/README.md` and `docs/decisions/README.md` (append-only lists) with
   `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
   check may still report a conflict, so the PM still merges `main` locally and checks the merged index for duplicate or twice-edited lines and for order.
