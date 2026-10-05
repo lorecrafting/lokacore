@@ -190,8 +190,10 @@ turning into a catch-all. Findings are fixed in the gate PR.
   `pr-body.md` once put one PR's description on another).
 - For a hosted PR, the reviewer commits only its record in a detached worktree
   at `origin/<branch>`, pushes from there with `git push origin HEAD:<branch>`,
-  and removes the worktree. During local development, the reviewer keeps the
-  review-only commit local for the slice's integration merge.
+  and removes the worktree. During local development, the reviewer commits
+  the record in a separate worktree; the PM cherry-picks that review-only
+  commit onto the slice branch before its integration merge, then removes
+  the reviewer worktree.
 - A new worktree has no `deps/`, `_build/` or `node_modules`: run `mix deps.get` there
   first, and `npm ci` at the root, in `kernel/ts` and in `mobile/app`. The PM's worktree
   does this once, then `npm ci` only on a lockfile change.
