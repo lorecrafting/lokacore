@@ -3,6 +3,14 @@
 Hard-won lessons for `mobile/` and physical-device runs.
 
 **expo-sqlite and React Native**
+- `expo-sqlite` 57.0.3 on web: first-open WASM/OPFS initialization can outlast a synchronous
+  worker request, so open asynchronously before the existing synchronous authority calls.
+  Its worker also writes a sync result's byte length through `Uint8Array.set(Uint32Array)`,
+  truncating responses over 255 bytes, and serializes Error objects without their messages,
+  hiding SQLite corruption from Start over. `mobile/app/patch-sqlite-web.cjs` guards and fixes
+  that installed web file; remove the workaround only after browser action/reopen and
+  corrupt-save recovery proofs on an updated SDK. The local page needs COOP/COEP headers
+  for SharedArrayBuffer.
 - expo-sqlite 57.0.3 on Android: opening the same database file twice gives both JS
   handles one native database, and garbage collection of either closes it. Symptom:
   `NativeDatabase.execSync` rejected, `NullPointerException`. Open each database once

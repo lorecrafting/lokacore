@@ -78,7 +78,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
   };
   const modules: Record<string, unknown> = {
     react: {},
-    'react-native': {},
+    'react-native': { Platform: { OS: 'ios' } },
     'expo-crypto': {
       randomUUID: () => `aaaaaaaa-0000-4000-8000-${String(++id).padStart(12, '0')}`,
     },
@@ -249,6 +249,7 @@ function appHost() {
     'react/jsx-runtime': { jsx: (type: unknown, props: unknown) => ({ type, props }) },
     'react-native': {
       Alert: {},
+      Platform: { OS: 'ios' },
       AppState: {
         get currentState() {
           return appState;
