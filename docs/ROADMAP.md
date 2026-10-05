@@ -39,10 +39,11 @@ The full 10,000-fresh-sequence CI simulator now runs in two workers ([#163](http
 M1-B3 — still-offered Book controls across live-clock redraws — merged in [#173](https://github.com/lorecrafting/lokacore/pull/173) after independent approval and exact-head CI; it includes the Maud-acceptance west-exit regression.
 NW-01 — always-available sampler Bram — merged in [#175](https://github.com/lorecrafting/lokacore/pull/175) after independent approval, six green source-head checks and a late-hour Release Simulator smoke; the historical development sampler reached 0.0.11, while the engine's schedule fixture remains covered.
 
-CHAPTER-01 — actual chapter cutover — in development: distinct Missing Child cartridge/save,
-retained playable Maud S1, retired temporary Lantern/Bram content. This is an incremental
-chapter release, not full chapter completion. Real Q1 follows owner clarification of
-Bram’s role; M12 readable WIP targets the new source. See the
+CHAPTER-01 — actual chapter cutover — merged in [#176](https://github.com/lorecrafting/lokacore/pull/176)
+after independent approval, a separate save/bundle opinion and six green source-head checks:
+distinct Missing Child cartridge/save, retained playable Maud S1, retired temporary
+Lantern/Bram content. This is an incremental chapter release, not full chapter completion.
+Real Q1 follows owner clarification of Bram’s role; M12 readable WIP targets the new source. See the
 [cutover record](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
