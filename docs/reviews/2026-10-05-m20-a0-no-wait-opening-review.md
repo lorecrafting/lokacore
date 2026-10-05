@@ -40,3 +40,14 @@ conformance fixture.
   describe prior/current schedule work; no claim that the replacement is installed.
 - Ponytail Review: lean already; no additional framework or implementation introduced.
 - Docs-only: mutation testing and device work are inapplicable. No Simulator touched.
+
+## Scoped fix recheck — APPROVE
+
+- Fix reviewed: `d2469f5d9dcb285e4974ef82b7f51d9746bdf3dc`.
+- M20A0-R1 closed: tide is absent from chapter-one applicability in JSON and Markdown;
+  the generated feature map leaves its first-required release unassigned. Registry and
+  frozen conformance fixtures remain intact; no speculative later prerequisite is added.
+- Independently ran `mise exec -- elixir bin/features.exs --check`: exit 0.
+- Exact-head [CI run 37259909968](https://github.com/lorecrafting/lokacore/actions/runs/37259909968):
+  changes, lint, Elixir, simulator and TypeScript all completed SUCCESS.
+- No open findings. Scope was the three fix files and their feature-generation consumer.

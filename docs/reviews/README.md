@@ -214,4 +214,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [M20-B2 playable Maud quest and storage](2026-10-05-m20-b2-mauds-cellar-review.md): PR #172 at `adc0d6715f123bba76601ef9f578e605f3d54a6a`, APPROVE; no findings, two independent mutants red/restored green, current production/compiler/App/transcript checks and 231 evidence hashes verified.
 
-- [M20-A0 no-wait opening plan](2026-10-05-m20-a0-no-wait-opening-review.md): PR #174 at `8ed6615`, CHANGES REQUIRED (M20A0-R1: active release applicability still requires chapter-one tide).
+- [M20-A0 no-wait opening plan](2026-10-05-m20-a0-no-wait-opening-review.md): PR #174 at `8ed6615`, CHANGES REQUIRED (M20A0-R1: active release applicability still requires chapter-one tide); scoped fix `d2469f5d`, APPROVE, M20A0-R1 closed.
