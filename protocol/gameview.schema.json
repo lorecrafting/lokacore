@@ -643,6 +643,28 @@
             "$ref": "#/$defs/ChoiceOption"
           },
           "minItems": 1
+        },
+        "riddle": {
+          "type": "object",
+          "properties": {
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "bank": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Z]$"
+              },
+              "minItems": 1,
+              "maxItems": 32
+            }
+          },
+          "required": [
+            "choice_id",
+            "bank"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

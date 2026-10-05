@@ -341,6 +341,19 @@ dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`.
 
+API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
+The answer is 1–32 lowercase ASCII letters; the displayed bank is 1–32 uppercase ASCII
+letter tiles, including duplicates. Its answer choice must exist and its answer's letter
+multiset must fit the bank. `choose` accepts optional `answer` (1–32 ASCII letters) only
+for that choice, and requires it there. After the ordinary bound-role revalidation,
+ASCII case-folding and bank-multiplicity validation precede comparison. An absent, malformed,
+extra or impossible-bank answer refuses without narration or mutation. A bank-valid wrong
+answer accepts with outcome `riddle_wrong`, one authored wrong line and no operations or
+events: the same pending continuation remains immediately retryable. Correct input follows
+the ordinary atomic choice path, including its authored fact consequences and resolution.
+No duration, cooldown or new continuation is created for an answer. Close stays available
+when a participant leaves or dies. The invocation digest includes the answer.
+
 A quest-resolving choice may declare `receive {item, from}` with bound item/NPC role names,
 excluding `accept` and `hand_over`. Only that choice's incoming item role substitutes direct
 custody by its named NPC for actor-held custody. Every other item role retains its contract.

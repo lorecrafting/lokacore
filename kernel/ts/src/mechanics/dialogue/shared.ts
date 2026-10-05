@@ -52,6 +52,18 @@ export const bind = (world: World, d: DialogueDefinition): RoleBinding[] =>
       return { role, entity_id: world.entityIds[refString(r.role === 'npc' ? r.npc : r.item)]! };
     }) as RoleBinding[];
 
+/** Bounded ASCII input consumes each authored tile at most once, including duplicate letters. */
+export function answerFits(bank: readonly string[], answer: string): boolean {
+  if (!answer.length || answer.length > 32 || /[^a-zA-Z]/.test(answer)) return false;
+  const remaining = [...bank];
+  for (const letter of answer.toUpperCase()) {
+    const at = remaining.indexOf(letter);
+    if (at < 0) return false;
+    remaining.splice(at, 1);
+  }
+  return true;
+}
+
 /** The ids of `d`'s choices, in key order. */
 export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
 
@@ -113,6 +125,7 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
     prompt: { key: d.prompt },
     speaker_id: row.roles.find((r) => r.role === speaker)!.entity_id,
     closable: true,
+    ...(d.riddle && { riddle: { choice_id: d.riddle.choice_id, bank: d.riddle.bank } }),
     choices: row.choice_ids.map((choice_id) => {
       const option = d.choices[choice_id]!;
       const { label, accept } = option;

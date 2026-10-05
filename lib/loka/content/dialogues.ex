@@ -165,9 +165,26 @@ defmodule Loka.Content.Dialogues do
     owned(at(rel, []), "dialogue", ctx.kinds) ++
       own(rel, d, ctx) ++
       texts(rel, [{["prompt"], d["prompt"]}], ctx.text) ++
+      riddle(rel, d, ctx) ++
       refs(rel, d, ctx) ++
       Enum.flat_map(d["choices"], &choice(rel, &1, d, ctx))
   end
+
+  defp riddle(rel, %{"riddle" => r, "choices" => choices}, ctx) do
+    letters = r["answer"] |> String.upcase() |> String.graphemes()
+
+    texts(rel, [{["riddle", "wrong"], r["wrong"]}], ctx.text) ++
+      for {true, diagnostic} <- [
+            {not is_map_key(choices, r["choice_id"]),
+             diag("UNRESOLVED_REFERENCE", at(rel, ["riddle", "choice_id"]), %{
+               "target" => r["choice_id"]
+             })},
+            {letters -- r["bank"] != [], diag("OUTCOME_MISMATCH", at(rel, ["riddle", "bank"]))}
+          ],
+          do: diagnostic
+  end
+
+  defp riddle(_, _, _), do: []
 
   defp refs(rel, d, ctx) do
     for(f <- ~w(npc quest), is_map_key(d, f), do: reference(rel, [], f, d, ctx.m, ctx.defs))

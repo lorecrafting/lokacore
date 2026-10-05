@@ -209,7 +209,7 @@ export function refusal(
 const recipeKeys = (world: World) => Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
-const INPUTS: readonly string[] = ['direction', 'choice_id', 'continuation_id', 'until'];
+const INPUTS: readonly string[] = ['direction', 'choice_id', 'continuation_id', 'until', 'answer'];
 
 /**
  * True when action `a` resolves to `payload`'s Command and accepts its target and input. An
@@ -231,7 +231,9 @@ function accepts(world: World, actor: CharacterId, a: Offered, payload: CommandP
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const id = p.target_id ?? p.item_id;
   if (a.speaker !== undefined && id !== a.speaker) return false;
-  const inputs = Object.keys(payload).filter((k) => INPUTS.includes(k));
+  const inputs = Object.keys(payload).filter(
+    (k) => INPUTS.includes(k) && !(a.command === 'choose' && k === 'answer'),
+  );
   if (inputs.length !== a.input.length || !a.input.every((i) => inputs.includes(i))) return false;
   if (a.target.kind === 'none') return id === undefined;
   const body = bodyOf(world, actor);

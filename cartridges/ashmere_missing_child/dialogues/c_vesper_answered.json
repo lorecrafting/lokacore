@@ -1,0 +1,33 @@
+{
+  "npc": "vesper",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "fen_vesper_riddle_answered",
+          "equals": true
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.c_vesper_answered.prompt",
+  "roles": {
+    "vesper": {
+      "role": "npc",
+      "npc": "vesper"
+    },
+    "wren": {
+      "role": "npc",
+      "npc": "wren"
+    }
+  },
+  "choices": {
+    "acknowledge": {
+      "label": "dialogue.c_vesper_answered.acknowledge",
+      "narration": "narration.c_vesper_answered"
+    }
+  }
+}

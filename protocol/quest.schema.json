@@ -139,7 +139,7 @@
       ]
     },
     "QuestJournal": {
-      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal and hints remain LATER.",
+      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal and hints remain LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies.",
       "type": "object",
       "properties": {
         "active": {
@@ -164,6 +164,27 @@
           },
           "additionalProperties": {
             "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        },
+        "active_variants": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "properties": {
+              "when": {
+                "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+              },
+              "text": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              }
+            },
+            "required": [
+              "when",
+              "text"
+            ],
+            "additionalProperties": false
           }
         }
       },

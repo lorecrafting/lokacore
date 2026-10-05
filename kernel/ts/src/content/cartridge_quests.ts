@@ -19,6 +19,8 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
     text(q, ['title'], at);
     if (q.offer) text(q.offer, ['label'], `${at}.offer`);
     if (q.journal) {
+      for (const [i, v] of (q.journal.active_variants ?? []).entries())
+        text(v, ['text'], `${at}.journal.active_variants[${i}]`);
       text(
         q.journal,
         ['active', 'objectives_met', 'resolved', 'failed', 'abandoned'],
@@ -31,4 +33,30 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
       named(q.objective.item_acquired, 'item', `${at}.objective.item_acquired`);
   }
   return out;
+}
+
+// Policy roots join the existing shared walk for ownership, references and typed comparisons.
+export function questPolicies(c: Obj): [Obj, string][] {
+  return Object.entries((c.quests ?? {}) as Obj).flatMap(([ref, q]) => {
+    const at = `.cartridge.quests${step(ref)}`;
+    return [
+      ...['offer', 'objective']
+        .filter((f) => q[f]?.policy)
+        .map((f): [Obj, string] => [q[f].policy.root, `${at}.${f}.policy.root`]),
+      ...(q.journal?.active_variants ?? []).map((v: Obj, i: number): [Obj, string] => [
+        v.when.root,
+        `${at}.journal.active_variants[${i}].when.root`,
+      ]),
+    ];
+  });
+}
+
+export function riddleApi(c: Obj): Diagnostic[] {
+  const needed =
+    Object.values((c.dialogues ?? {}) as Obj).some((d) => d.riddle) ||
+    Object.values((c.quests ?? {}) as Obj).some((q) => q.journal?.active_variants);
+  const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
+  return needed && (major < 1 || (major === 1 && minor < 9))
+    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : [];
 }

@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.9`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.10`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
@@ -38,7 +38,7 @@ Mire Crossing west, and Mire Crossing south ↔ Fox Hollow north. The plank and 
 use the ordinary move at every hour, before and after Q1, after shrine return and cold
 reopen; no tide, daylight, swimming or equipment gate applies. Visible plank and hollow
 details open the installed Book detail pages with noun titles and descriptive inspection
-only. These two details grant no Q2 credit; Wren/Vesper, items, populations and exits to
+only. These two details grant no Q2 credit; items, populations and exits to
 unbuilt rooms remain deferred ([FEN-02 decision](../decisions/pm-decision-fen02-mire-hollow-2026-10-05.md)).
 The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 keeps Old Bram outside the active cast.
@@ -66,10 +66,10 @@ S1 offer and turn-in remain independently usable in every Q1 state. No hour or w
 apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
 Its Q2 activation consumer is [the staged first search lead below](#source-layout).
 
-The release declares API1.8 for quest-resolution reactions, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
+The release declares API1.9 for bounded riddles and staged journals, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source. Its
-independent answer is `protocol/fixtures/missing_child_v009_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v010_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
@@ -84,6 +84,26 @@ check, cost, duration or cooldown. The journal directs the player to Reed Bank, 
 Fox Hollow and explicitly says Wren remains unfound. The quest remains **active**; this staged
 objective adds no objectives-complete transition, turn-in, rescue or reward. The all-hours
 Mire/Hollow route remains unchanged. See [Q2-A adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
+
+Q2-B places Wren and Vesper at Fox Hollow at every hour, without attack profiles or
+light/PER requirements. Descriptive visits before Q2 activation or Study grant no progress.
+The first eligible Vesper conversation requires active Q2 and studied tracks; accepting
+`meet_wren` binds both living NPCs and assigns player fact `fen.wren_met`. Arrival, Look and
+opening Talk do not. The next ordered conversation offers the letter-bank riddle: answer
+`lantern`, bank `R N A O L T E N S`. Only its correct choice assigns player fact
+`fen.vesper_riddle_answered`. A final informational conversation remains available, and Wren
+has an informational reply. All progress uses the saved, original role identities.
+The journal stages are seek tracks → tracks found/Wren unfound → Wren met/riddle pending →
+riddle accepted/return decision pending. Q2 stays active; there is no rescue/stays status,
+escort, message item, turn-in or Q2 terminal event. Those belong to Q2-C.
+[Q2-B adoption](../decisions/pm-decision-q2-b-wren-riddle-2026-10-05.md) records this boundary.
+
+API1.9 `QuestJournal.active_variants` is an optional ordered list of 1–16
+`{when: VersionedPolicy, text: TextKey}` entries. For an active quest only, the first holding
+policy supplies its journal text; no match uses ordinary active/objectives_met selection.
+This reuses policy evaluation and never changes objective truth or lifecycle. Compiler and
+loader validate each policy/reference/text and require API1.9 for this field or a dialogue
+riddle. Riddle choice references and bank multiplicity are checked before loading.
 
 Reaction authoring accepts exact `on: quest_resolved {quest, outcome}` and
 `apply: quest.activate {quest}` only under that trigger. Both quest references expand from
@@ -354,7 +374,7 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.8; old fixture requirement ranges remain unchanged.
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.9; old fixture requirement ranges remain unchanged.
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 

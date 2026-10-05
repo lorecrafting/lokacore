@@ -45,6 +45,7 @@ import {
 } from '../../runtime/decision.ts';
 import {
   blocked,
+  answerFits,
   bind,
   choiceIds,
   continuationId,
@@ -109,6 +110,15 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
           code,
         }
       : rejected(code);
+  const participants = row.roles.reduce((o, r) => ({ ...o, [r.role]: r.entity_id }), {
+    actor: bodyOf(world, actor_id)!,
+  });
+  const riddle = d.riddle?.choice_id === choice_id ? d.riddle : undefined;
+  const answer = command.payload.answer;
+  if (riddle ? answer === undefined || !answerFits(riddle.bank, answer) : answer !== undefined)
+    return rejected('invalid_state');
+  if (riddle && answer!.toLowerCase() !== riddle.answer)
+    return accepted<never>(world, 'riddle_wrong', [], [], [{ key: riddle.wrong, participants }]);
   const q = quest(world, actor_id, d, option, choice_id, mint, used);
   if (typeof q === 'string') return rejected(q);
   const body = bodyOf(world, actor_id)!;
@@ -136,9 +146,6 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   const resolvedChoice = event(world, command, mint, at, chosen);
   // Minted after choice_resolved, so the earlier ids stay put.
   const reached = storyPoints(world, command, mint, row, at + 1);
-  const participants = row.roles.reduce((o, r) => ({ ...o, [r.role]: r.entity_id }), {
-    actor: body,
-  });
   return accepted(
     world,
     choice_id,

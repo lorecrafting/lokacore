@@ -1,5 +1,5 @@
 // NPC/conversation and Contents views use the existing book controls.
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page } from './model.ts';
@@ -35,12 +35,68 @@ function Choice(p: {
       {absent(p.view) !== '' && <Text style={note}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);
+        if (p.choice.riddle?.choice_id === o.choice_id)
+          return b ? (
+            <Riddle
+              key={`${p.choice.continuation_id}:${p.choice.speaker_id}:${p.choice.riddle.bank.join('')}`}
+              bank={p.choice.riddle.bank}
+              button={b}
+              press={p.press}
+            />
+          ) : (
+            <Text key={o.choice_id} style={note}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
+          );
         return b ? (
           <Act key={o.choice_id} b={b} press={p.press} />
         ) : (
           <Text key={o.choice_id} style={note}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
         );
       })}
+    </View>
+  );
+}
+
+// Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
+// size: allow 45, bounded tile editing and submission share one local buffer
+function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button) => void }) {
+  const [selected, setSelected] = useState<number[]>([]);
+  const answer = selected.map((i) => p.bank[i]).join('');
+  return (
+    <View>
+      <Text style={prose}>{answer || 'Choose letters to answer.'}</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+        {p.bank.map((letter, i) => (
+          <View key={i}>
+            {selected.includes(i) ? (
+              <Text style={note}>{letter}</Text>
+            ) : (
+              <Tap
+                label={`Letter ${letter}, tile ${i + 1}`}
+                onPress={() => setSelected((s) => (s.includes(i) ? s : [...s, i]))}
+              >
+                <Text style={{ ...prose, color: paper.accent }}>{letter}</Text>
+              </Tap>
+            )}
+          </View>
+        ))}
+      </View>
+      {selected.length > 0 && (
+        <View>
+          <Tap label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))}>
+            <Text style={prose}>Backspace</Text>
+          </Tap>
+          <Tap label="Clear" onPress={() => setSelected([])}>
+            <Text style={prose}>Clear</Text>
+          </Tap>
+          <Act
+            b={{ ...p.button, label: 'Submit', input: { ...p.button.input, answer } }}
+            press={(b) => {
+              p.press(b);
+              setSelected([]);
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 }

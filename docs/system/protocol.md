@@ -435,3 +435,11 @@ uses the original fatal writer group and the proposal's hydrated intermediate Wo
 `flee {actor_id}` accepts no direction field. Exit selection, proposal-local RNG and atomic
 movement follow [combat mechanics](mechanics.md#combat1--first-live-encounter-m6-a). The
 receipt pins the actual selected destination and final RNG; replay never chooses again.
+
+## Bounded dialogue answers
+
+API1.9 adds optional `answer` to Choose and ActionInput: 1–32 ASCII letters. PendingChoice
+optionally projects `riddle {choice_id, bank}` with the ordered 1–32 uppercase letter bank,
+never the canonical answer. The ordinary prompt supplies the clue. Projection/admission
+share the saved continuation, choice and bound participant availability; malformed input
+still fails the command/invocation boundary. Ordinary non-riddle choices retain their shape.

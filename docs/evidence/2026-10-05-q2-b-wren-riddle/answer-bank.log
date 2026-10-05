@@ -1,0 +1,38 @@
+✔ only accepted meeting after actual report and Study marks Wren met at every hour (22.012208ms)
+✖ wrong answer retries the same bound row; malformed banks refuse; correct answer is once-only and nonterminal (6.304625ms)
+✔ either original participant leaving or dying disables Choose while Close stays available (25.158791ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 194.017042
+
+✖ failing tests:
+
+test at kernel/ts/test/wren_riddle.test.ts:136:1
+✖ wrong answer retries the same bound row; malformed banks refuse; correct answer is once-only and nonterminal (6.304625ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"accepted","outcome":"riddle_wrong","delta":{"ops":[]},"events":[],"effects":[],"rng":[1,2,3,4],"narration":[{"key":"narration.vesper_wrong","participants":{"actor":"3d4829ad-9e43-81ef-bc10-66b1b267e157","vesper":"2a2d32e5-e113-8dca-a989-b9f1a35c4c78","wren":"b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462"}}]}
+  + actual - expected
+  
+  + 'accepted'
+  - 'invalid_state'
+  
+      at run (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:44:12)
+      at Object.choose (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:55:5)
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:148:7)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'accepted',
+    expected: 'invalid_state',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

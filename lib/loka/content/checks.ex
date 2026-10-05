@@ -132,6 +132,7 @@ defmodule Loka.Content.Checks do
     all = for {_, ds} <- defs, is_map(ds), {_, {_, _, _} = d} <- ds, do: d
 
     Enum.flat_map(all, &depth/1) ++
+      Loka.Content.Requires.riddles(manifest, all) ++
       if(manifest, do: uses(manifest, defs, owners(registry)), else: [])
   end
 

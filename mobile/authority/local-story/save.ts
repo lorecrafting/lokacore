@@ -2,6 +2,7 @@
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
+import { dialogueDetail } from './dialogue-receipt.ts';
 import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
@@ -156,14 +157,21 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
 }
 
 // Routing belongs to this receipt's committed command/evidence, never text or current room.
-// size: allow 50, one receipt trust boundary validates Read and readable-recipe identity
+// size: allow 55, one receipt trust boundary dispatches dialogue and validates Read/recipe identity
 function receiptDetail(
   s: Story,
   r: { command_id: string; command: string },
   d: Extract<DecisionResult, { kind: 'accepted' }>,
 ) {
-  if (d.kind !== 'accepted' || !['read', 'performed', 'success'].includes(d.outcome)) return;
+  if (d.kind !== 'accepted') return;
   const command = JSON.parse(r.command) as Command | null;
+  if (
+    command?.payload?.type === 'choose' ||
+    d.outcome === 'riddle_wrong' ||
+    d.events.some((e) => e.causation_id === r.command_id && e.payload.type === 'choice_resolved')
+  )
+    return dialogueDetail(s, r.command_id, command!, d);
+  if (!['read', 'performed', 'success'].includes(d.outcome)) return;
   if (d.outcome === 'read') {
     if (
       validate('Command', command).length ||

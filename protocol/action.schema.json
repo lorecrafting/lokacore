@@ -29,6 +29,10 @@
         },
         "until": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "answer": {
+          "type": "string",
+          "pattern": "^[a-zA-Z]{1,32}$"
         }
       },
       "required": [],
@@ -265,7 +269,8 @@
         "direction",
         "choice_id",
         "continuation_id",
-        "until"
+        "until",
+        "answer"
       ],
       "examples": [
         "until"

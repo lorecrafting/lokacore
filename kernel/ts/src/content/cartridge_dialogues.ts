@@ -65,6 +65,7 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
   for (const [d, at] of each(c)) {
     if (taken.has(d.key)) out.push(diag('DUPLICATE_DEFINITION', at));
     text(d, ['prompt'], at);
+    if (d.riddle) out.push(...riddle(d, at, checks));
     named(d.npc, 'npc', `${at}.npc`);
     if (d.quest) named(d.quest, 'quest', `${at}.quest`);
     const roles = d.roles as Obj;
@@ -82,6 +83,21 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
       out.push(...choice(o, `${at}.choices${step(id)}`, d, checks, c));
   }
   return [...out, ...storyPoints(c, named), ...chapters(c, checks)];
+}
+
+function riddle(d: Obj, at: string, { text }: Checks): Diagnostic[] {
+  const r = d.riddle,
+    out: Diagnostic[] = [];
+  text(r, ['wrong'], `${at}.riddle`);
+  if (!Object.hasOwn(d.choices, r.choice_id))
+    out.push(diag('UNRESOLVED_REFERENCE', `${at}.riddle.choice_id`, { target: r.choice_id }));
+  const remaining: string[] = [...r.bank];
+  for (const letter of r.answer.toUpperCase()) {
+    const i = remaining.indexOf(letter);
+    if (i < 0) return [...out, diag('OUTCOME_MISMATCH', `${at}.riddle.bank`)];
+    remaining.splice(i, 1);
+  }
+  return out;
 }
 
 function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
