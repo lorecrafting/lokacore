@@ -237,3 +237,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Q1-A — Elspeth’s first lead](2026-10-05-q1-a-first-lead-review.md): PR #185 at `de66051fd61a359d2f1927e1390bce351384169d`, independent APPROVE; explicit acceptance, current-possession clue and once-only report; no findings, two mutation classes detected, restored focused checks pass.
 
 - [FEN-02 — Mire Crossing and Fox Hollow](2026-10-05-fen02-review.md): PR #186 at `5c8e3e27e8e8d63ebfa317700124b278741593f0`, independent APPROVE; no findings, reciprocal all-hours/cold-return route and detail-local Book behavior verified; two independent red controls detected.
+
+- [Q2-A — first Missing Child search lead](2026-10-05-q2-a-first-search-review.md): PR #187 at `85742097dd90193a97ea75963c99e8a25fc9b040`, independent primary CHANGES REQUIRED; blocker Q2A-R1: malformed Study event evidence bypasses typed corruption/Start over recovery. Restored 63 focused Node, 111 neighboring kernel and three compiler/contract tests pass; two independent production mutants detected.
