@@ -31,6 +31,6 @@ for d in . kernel/ts; do
 done
 (cd kernel/ts && m npm run typecheck && m npm test)
 m bin/kernel_red_controls.sh
-git ls-files -z '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 mise exec -- node bin/check_ts_size.mjs
+git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 mise exec -- node bin/check_ts_size.mjs
 m bin/ts_size_red_controls.sh --core-only
 git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check

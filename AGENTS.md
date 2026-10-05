@@ -137,8 +137,9 @@ A test exists to catch a specific break. Adapted from
 
 ## Checks
 
-CI runs them all, each with a planted case that must fail; the list is in
-[docs/CHECKS.md](docs/CHECKS.md). Run everything locally: `bin/check_all.sh` (what pre-push runs).
+CI runs the active checks, each with a planted case that must fail; see
+[docs/CHECKS.md](docs/CHECKS.md) and the [temporary mobile pause](docs/decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
+Run them locally: `bin/check_all.sh` (what pre-push runs).
 
 ## Working rules
 

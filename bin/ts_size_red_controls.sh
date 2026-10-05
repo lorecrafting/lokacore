@@ -66,7 +66,7 @@ want=$(printf '%s\n' "$expected" | LC_ALL=C sort)
 # The production scan selection must find a planted file too.
 scan_status=0
 if [ "${1-}" = --core-only ]; then
-  scan=$(git ls-files -z '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 node bin/check_ts_size.mjs "$L/big.ts") || scan_status=$?
+  scan=$(git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 node bin/check_ts_size.mjs) || scan_status=$?
 else
   scan=$(node bin/check_ts_size.mjs) || scan_status=$?
 fi
