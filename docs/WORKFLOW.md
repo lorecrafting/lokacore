@@ -158,6 +158,20 @@ to the provisional local integration merge. A settled small spec change may be
 committed before code on the same branch and reviewed with the complete outcome;
 cross-mechanic/save planning still gets a focused review when it prevents rework.
 
+### Book interaction delivery
+
+For every mechanic that changes what the player sees or can choose, the brief
+names its existing [Book component pattern](BOOK-UI-COMPONENTS.md), exact
+action/result owner, detail history, nested return and one browser interaction.
+Amend the canonical [Book UI rules](system/book-ui.md) in the **same slice** as
+the mechanic whenever the interaction contract changes. Reuse current pages and
+controls when they fit; add the smallest new component only for a real consumer.
+Fix obvious navigation and UI correctness defects before counting that slice
+complete, including stale actions, misleading pending/refused results, wrong log
+placement and dead-end returns. The Chapter 1 E3 browser walk handles the larger
+cross-page visual consistency pass; it does not defer broken interaction flows
+([owner decision](decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
+
 Parallel local work uses one integration owner for local `main`, normally two source
 worktrees whose mechanics do not overlap, and separate worktrees for independent
 plans and reviews. Plan the next dependency-ready slices while source work runs.
