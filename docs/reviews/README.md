@@ -250,3 +250,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Missing Child complete-chapter plan](2026-10-05-missing-child-complete-plan-review.md): PR #192 at `bc92912f`, CHANGES REQUIRED; scoped fix `bd315ae0`, APPROVE, R192-1 browser-first policy link and R192-2 pre-S27 swim access closed.
 - [Local Book web preview](2026-10-05-web-preview-review.md): PR #194 at `6a878fa2`, CHANGES REQUIRED (R194-1 App host tests fail; R194-2 repeated install rejects its own worker patch).
 - [Chapter 1 implementation and proof briefs](2026-10-05-chapter-one-briefs-review.md): PR #193 at `87b7bbca`, CHANGES REQUIRED; scoped fix `bdec64d8`, APPROVE, R193-1 D1/D6/C6 swim lesson handoff closed.
+- [Local Book web preview](2026-10-05-web-preview-review.md): PR #194 at `6a878fa2`, CHANGES REQUIRED; scoped fix `abef39cc`, APPROVE, R194-1/R194-2 closed; disposable browser corrupt-save recovery and worker red control pass.

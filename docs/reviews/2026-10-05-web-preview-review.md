@@ -18,6 +18,12 @@ At the exact reviewed head, `npm ci` and app `tsc --noEmit` passed. In a fresh, 
 
 Ponytail Review: **Lean already. Ship.** No unnecessary abstraction or dependency found; the two findings concern correctness and workflow, not excess code.
 
+## Scoped fix review — `abef39cc11b0237d47d36fd85269e49b43f2064d`
+
+Verdict: **APPROVE**. R194-1 is closed: both controlled App hosts supply `Platform.OS = 'ios'`; the restored focused suite passes 385 tests with one skip and no failures, and app typechecking passes. R194-2 is closed: a clean `npm ci` followed by an ordinary `npm install` both succeed. The patch accepts exactly one old or patched occurrence of each guarded worker expression and still rejects unexpected source.
+
+The fix also replaces the captured asynchronous SQLite handle with the current handle or a fresh synchronous open after destructive corrupt-file recovery. Its direct session caller closes/deletes the old handle before reopening. In a separate preview on disposable ports and a fresh Chromium profile, corrupting the test OPFS database produced the damaged-save screen with Start over; confirming it opened a fresh Book. Reverting only the new worker error-message serialization in that disposable install produced “The game cannot go on yet” with no Start over, a red control for the recovery path. The worker catches thrown values as `Error`, and both synchronous deserialization and asynchronous rejection now receive the message string. The shared preview and owner save were untouched. No open findings.
+
 ## Separate save opinion (verbatim)
 
 ```text
