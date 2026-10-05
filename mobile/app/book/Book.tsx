@@ -212,6 +212,7 @@ function Bottom(p: BottomProps) {
           )
         ) : (
           <Footer
+            keyboardEnabled={!pending && !fault && !p.screen.catchingUp}
             exits={view.exits}
             text={text}
             go={p.walk}

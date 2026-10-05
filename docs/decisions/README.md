@@ -194,3 +194,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Q2-C stays return](pm-decision-q2-c-stays-2026-10-05.md): complete message custody and Elspeth terminal before a separate complete rescue path.
 
 - [Q2-C rescue](pm-decision-q2-c-rescue-2026-10-05.md): bound Wren escort, death separation/Rejoin and Elspeth rescued terminal, preserving stays.
+
+- [Book keyboard navigation, 2026-10-05](owner-decision-book-keyboard-navigation-2026-10-05.md): arrows walk compass exits and Page Up/Page Down use vertical exits in the web Book.
