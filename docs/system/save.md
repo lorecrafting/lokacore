@@ -486,3 +486,40 @@ repair or deletion. B3's penny/S2 reconciliation remains intact: S9 never change
 pennies. Lost acknowledgement, both uncertain COMMIT outcomes and reopen must
 produce all prior or all next truth. No migration, save reset, fresh replacement
 item or receipt-derived second ledger is introduced.
+
+## B4 fuel and dark recovery
+
+Planned [B4 fuel](protocol.md#b4-fuel-composition) rows initialize once from the
+pinned current release (authored charge, unlit, at the fresh-world clock), then
+persist independently of custody. Source/supply
+changes and their bound receipt commit together before memory adoption or success
+narration. The loader validates required exact authored instance rows, safe bounded
+charge, valid source/supply binding, boolean lit, supply unlit and timestamps not
+later than the saved clock. Missing/wrong-item rows, charge overflow or impossible
+metadata yield typed `save_corrupt` without repair, refill, deletion or repinning.
+A stored lit source whose confirmed fuel has exhausted is lawful; its effective
+state is unlit, and reopening does not restart its interval.
+
+Reconcile accepted fuel-changing receipts in saved revision/clock order from the
+authored initial rows, binding command ID, actor, exact source/supply IDs and their
+historical custody. Each full prior row and settled replacement must match that
+command's burn/ignite/douse/refill semantics; the resulting stored rows must match
+the current save. Reject a missing debit, fabricated refill, wrong participant,
+reordered receipt or unexplained bounded charge as `save_corrupt`. Read historical
+fuel at its commit, not at today's clock; time/custody receipts do not refill rows.
+Reuse the pure fuel transition verifier at this trust boundary rather than create
+a second writer or generic event ledger.
+
+Real SQLite proof covers fresh/unlit, lit, doused, partially refueled, exhausted,
+sold/bought-back, nested and corpse-held states. Failed COMMIT retains all prior
+rows; both unknown-COMMIT branches reconcile all prior or all next rows, including
+supply debit. Lost acknowledgement and exact receipt retry never consume oil or
+fuel twice. B3/S2 receipt and balance reconciliation remains intact.
+
+Prove a real controlled lethal combat occurrence in an opted dark room with the
+only light and a nested bag among the actual corpse roots. Reopen before recovery,
+walk the shrine's equipment-free route, inspect only the owned corpse and Take the
+same roots/descendants through existing carrying and lid checks. Repeated death
+retains previous corpses and exact fuel custody. This is fixture-driven combat,
+not a new production Well Shaft danger or public death command. Keep the existing
+production cellar recovery proof green; darkness adds no dependency on lost gear.

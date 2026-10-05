@@ -543,3 +543,31 @@ cannot act on the latest occurrence merely because its quest definition matches.
 GameView projects remaining harvest availability, exchange readiness, journal
 state and authored refusal reasons from confirmed truth, without a stock ledger,
 created-item origin, expiry job, daily clock cut or unbounded history collection.
+
+## B4 fuel composition
+
+Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`
+with `ignite {actor_id, item_id}`, `douse {actor_id, item_id}` and
+`refuel {actor_id, item_id, supply_id}`. Invocation targets are source then supply
+for Refuel, and source for Ignite/Douse. The amount is derived from confirmed
+headroom and supply, never player input. Extend ActionSet and the exact item view
+only for these real controls, confirmed remaining/capacity and effective lit state.
+An unavailable compatible supply produces no selectable Refuel promise.
+
+The missing primitive is typed per-item fuel history: state rows and
+`fuel.set {item_id, from, to}` targeting that item's fuel row. `from` is the entire
+stored row, not its derived current value; `to` is the settled replacement at the
+current authoritative clock. Both rows carry `remaining`, `at`, `lit` as defined
+by the mechanic. Composition requires exact prior-row equality, a declared fuel
+item, valid bounded charge/time and no lit supply. Conflicting writers retain
+`conflicting_write`; precondition failures adopt nothing. The light rule owns
+Ignite/Douse/Refuel writes. Time and custody changes need no fuel op.
+
+Add only immutable per-item fuel specifications needed to validate those rows.
+Do not encode engine history as untyped cartridge facts or generalize the new op
+into arbitrary item-state assignment. Because a new delta target crosses portable
+composition, both kernels require independently pinned valid/invalid/precondition
+fixtures and differential coverage; the light story rule remains TypeScript-only.
+The next API/release pins and exact generated shape are assigned from the actual
+implementation base, not assumed by this planning contract. Existing error codes,
+writer groups, checked arithmetic and query budgets apply.

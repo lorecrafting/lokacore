@@ -789,3 +789,53 @@ before turn-in; death does not cancel or refill S9. Giving away an herb or banda
 may exhaust this optional supply; explain the unavailable exchange rather than
 minting replacements or making the player wait. Any later required consumer of
 bandages must adopt an immediate recovery/supply route before it is exposed.
+
+## B4 light and darkness (selected contract)
+
+Planned under the [B4 PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md),
+not installed source or proof. The first consumer is the optional Well Shaft detail,
+using the real B3 torch and oil; no chapter-required route gains a light gate.
+The torch is a reusable oil-soaked wick on a handle, with unchanged B3 identity,
+prices, mass and light slot. [Cartridge tuning](cartridge.md#b4-well-and-fuel)
+owns every fuel value. Light adds only per-item fuel history and one effective
+illumination query; it composes equipment, custody, confirmed time and details.
+
+Each authored source or supply has a required exact-instance fuel row
+`{remaining, at, lit}`. Supply is always unlit; a source may be lit. At confirmed
+clock `now`, effective source fuel is stored remaining minus elapsed logical units
+multiplied by its authored burn rate, clamped at zero. Unlit rows and supplies do
+not burn. Arithmetic must remain exact and bounded, including very large elapsed
+intervals; compare exhaustion before multiplying an unsafe interval. A query writes
+nothing. Effective `lit` requires stored lit and positive effective fuel.
+Ignite, Douse and Refuel first settle the old interval to now, then write the new
+row. There is no expiry job, per-second write, UI timer or automatic ignition.
+
+Ignite requires a fueled source directly body-held or in the actor's light slot,
+and refuses an already effectively lit source. Douse requires that same custody
+and stored lit, including an exhausted source. Refuel binds such a source and an
+exact compatible supply directly body-held by the actor. Transfer the lesser of
+source headroom and supply remaining; preserve excess supply. Empty supply and a
+full source refuse unchanged. Refuel preserves effective lit status; exhaustion
+stays unlit. Source settlement and supply debit are one atomic writer group.
+No refuel can consume foreign, nested, worn or corpse-held supply. Ordinary Take/
+Remove must make it directly held first. Custody changes, death, Sell/Buy and reopen
+preserve stored fuel and lit history; a lost lit source continues burning.
+
+In a dark room the player has illumination only from an effectively lit source
+directly body-held or in their own light slot. Nested, ground, NPC and corpse-held
+sources do not illuminate, even when burning. The same bounded query governs
+GameView, Look/Scan, detail links, target resolution and direct-command admission;
+it charges the existing query budget. Without illumination expose the authored dark
+room text and ordinary known traversable exits, inventory, posture and escape controls.
+Hide other room details, items and NPC identities and adjacent sight descriptions;
+raw IDs or guessed keywords cannot bypass this gate. Existing combat restrictions
+still win. A visible Exit into a dark room remains traversable; a hidden object is
+not an equipment gate on movement.
+
+Darkness exempts the actor's own actual corpses and their ordinary accessible
+contents. The ownership/custody walk, locked bag rules and positive-load Take checks
+remain authoritative; foreign corpses gain no exemption. Every known route back
+from the shrine remains equipment-free. Well Shaft has no new enemy, water hazard,
+barrier, required clue or deadline. Exhausted, sold, stored or lost light therefore
+cannot strand chapter progress, egress or possession recovery. No free replacement,
+shrine teleport or forced-overload recovery operation is added.
