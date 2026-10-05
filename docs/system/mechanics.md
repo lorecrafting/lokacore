@@ -1122,6 +1122,66 @@ Combat loss leaves an immediate safe return/recovery route; surviving hounds can
 be deliberately retried now, and defeated hounds' loot is immediately available.
 No required chapter path or Book proof waits for a replacement or night.
 
+## C4 hound response, pack assistance and flight (selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
+extends C3's deliberate fight with bounded pack help and wounded flight. Entry,
+reading, elapsed time and night never initiate hostility. This selects response
+to player aggression and defers the provisional night-auto-aggression proposal
+and archived population's aggressive20–6 behavior. No required route, loss retry,
+owned-corpse recovery or first proof depends on night or replacement.
+
+Attack keeps installed standing/life/co-location/sanctuary/modal admission and
+binds the exact attacked EntityId as primary. For a proven C3 hound whose plan
+declares pack assistance, admit that hound plus all currently living, co-present,
+unengaged members of that exact plan, in canonical EntityId order. Inspect its
+fixed slots before traversal; the roster cannot exceed the plan cap. Members in
+another room/plan, retired generations, corpses and authored NPCs cannot join.
+Admission occurs once in Attack's writer group with one encounter/round job, no
+damage/RNG and narration naming actual helpers. There is no later join, pursuit,
+remote assistance or helper job. Other opponents retain single-member encounters.
+
+The encounter owns an ordered unique active roster, primary and next-opponent ID.
+Initially primary and next opponent are the attacked hound, even when it is not
+the lowest ID. At each round, prune absent/dead members and repair removed primary
+to the lowest remaining ID; repair a removed cursor to its next greater remaining
+ID, wrapping to the lowest. Lock that round's selected opponent before either
+opportunity. Retain exactly two opportunities: player against current primary,
+and the selected opponent against the body. Odd rounds are player-first, even
+rounds opponent-first. If the selected opponent dies/departs during the first
+opportunity, skip its slot without replacement or RNG; another helper does not
+inherit the lost opportunity. At round end set the next opponent to the next
+greater remaining ID after the selected ID, wrapping. Primary stays until it
+leaves. Revalidate exact life/presence/job immediately before each opportunity.
+Thus assistance supplies a real rotating opponent attack, never one attack per
+helper. Share C1's attack/defense resolver and the eight-raw-draw round budget.
+
+Immediately before its selected opponent opportunity, a living co-present hound
+strictly below its cartridge HP-fraction threshold attempts flight before attack.
+Compare with checked integer arithmetic; do not round a percentage. Enumerate
+ordinary legal adjacent NPC transfers inside the declared population area in
+canonical direction order, using shared policy/work budgets. Choose the first
+legal exit deterministically, with the declared zero animal fare, no player MV,
+key use, RNG or clock advance. If none is legal, perform at most that ordinary
+opponent attack. Flight transfers the same hound once, preserving injury and its
+same held pelt, removes it from the encounter and records its slot's last-flight
+clock in the same group. It creates no corpse, kill credit, loot or replacement.
+Nonselected injured members wait only for their bounded rotating opportunity;
+no extra timer or player Wait is introduced. Voluntary wandering stays suppressed
+for active members and at the exact last-flight boundary; see
+[composition](protocol.md#c4-pack-encounter-and-flight-composition).
+
+After departure/death, repair primary/cursor as above and narrate the new exact
+primary. With no remaining members close once and cancel/complete the current job.
+A hound's fatal sequence still writes only its own C3 slot and transfers its actual
+pelt to its own public corpse. Player death closes the entire encounter before
+same-body shrine return; no helper strikes the revived body. Player Flee retains
+its existing standing, legal-exit, fare, RNG and budget checks, moves once and
+closes the entire roster without retaliation. It is an immediate action when its
+ordinary prerequisites hold, not an unconditional free escape. Outside combat,
+all hounds are passive, so gear-free corpse recovery and immediate deliberate
+retry of a surviving hound need no time gate. No behavior framework is required.
+
 ## B8 Maud's immediate services (selected contract)
 
 **Selected, source implementation pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
