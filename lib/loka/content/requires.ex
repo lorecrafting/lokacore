@@ -28,16 +28,18 @@ defmodule Loka.Content.Requires do
         is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
       end)
 
+    escort = is_map_key(m["requires"]["capabilities"], "escort")
     transfers = Enum.any?(all, fn {_, _, d} -> transfer_feature?(d) end)
 
     minimum =
       cond do
+        escort -> [1, 11]
         transfers -> [1, 10]
         riddles -> [1, 9]
-        true -> [1, 0]
+        true -> []
       end
 
-    if (riddles or transfers) and version(m["requires"]["kernel_api"]["at_least"]) < minimum,
+    if version(m["requires"]["kernel_api"]["at_least"]) < minimum,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end

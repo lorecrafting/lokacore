@@ -40,6 +40,7 @@ export const uses = (c: Obj) =>
     ...each(c).flatMap(([d, at]) => [
       ['definition', 'dialogue', at],
       ...Object.entries(d.choices as Obj).flatMap(([id, o]) => [
+        ...(o.escort ? [['definition', 'escort', `${at}.choices${step(id)}.escort`]] : []),
         ...(o.receive ? [['event', 'item_acquired', `${at}.choices${step(id)}.receive`]] : []),
         ...(o.sequence ?? []).map((_: Obj, i: number) => [
           'event',
@@ -169,6 +170,7 @@ function ambiguous(c: Obj, t: Obj): boolean {
 
 // One option's texts, fact.assign steps, accept (a quest of this cartridge, in a dialogue that
 // resolves none, with no hand_over: OUTCOME_MISMATCH) and hand_over (an item role to an npc role).
+// size: allow 47, one authored option validates its mutually constrained effects together
 function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Checks, c: Obj) {
   const roles = d.roles as Obj;
   const out: Diagnostic[] = [];
@@ -196,6 +198,14 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
         out.push(
           diag('UNRESOLVED_REFERENCE', `${path}.receive.${field}`, { target: o.receive[field] }),
         );
+  }
+  if (o.escort) {
+    const e = o.escort;
+    named(e.quest, 'quest', `${path}.escort.quest`);
+    if (!Object.hasOwn(roles, e.npc) || roles[e.npc].role !== 'npc')
+      out.push(diag('UNRESOLVED_REFERENCE', `${path}.escort.npc`, { target: e.npc }));
+    if (e.transition === 'complete' ? !same(d.quest, e.quest) : d.quest !== undefined)
+      out.push(diag('OUTCOME_MISMATCH', `${path}.escort.quest`));
   }
   const h = o.hand_over;
   const wrong = (field: string, role: string) =>

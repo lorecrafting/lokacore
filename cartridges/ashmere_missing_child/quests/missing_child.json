@@ -27,6 +27,48 @@
               {
                 "op": "fact_compare",
                 "fact": "fen_return_branch",
+                "equals": "rescue"
+              },
+              {
+                "op": "escort_state",
+                "quest": "missing_child",
+                "state": "separated"
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.separated"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_return_branch",
+                "equals": "rescue"
+              },
+              {
+                "op": "escort_state",
+                "quest": "missing_child",
+                "state": "following"
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.following"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_return_branch",
                 "equals": "stays"
               }
             ]
@@ -66,6 +108,10 @@
         },
         "text": "quest.missing_child.met"
       }
-    ]
+    ],
+    "outcomes": {
+      "stays": "quest.missing_child.stays",
+      "rescued": "quest.missing_child.rescued"
+    }
   }
 }

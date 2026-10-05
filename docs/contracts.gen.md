@@ -46,6 +46,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | faction@1 | portable | portable_capability |  |
 | narration@1 | portable | portable_capability | client_notification |
 | sense_cue@1 | portable | portable_capability |  |
+| escort@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
 
@@ -236,6 +237,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `encounter.advance`
   - `encounter.close`
   - `job.cancel`
+  - `escort.transition`: Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null→following, following→separated, separated→following, following→completed.
 - **EncounterId**: One finite combat encounter, minted from the Attack command IdSource.
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
@@ -252,6 +254,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `barrier`: A barrier's one shared state.
   - `entity`
   - `encounter`
+  - `escort`
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
 - **StateDelta**: A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.
@@ -492,6 +495,7 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
   - `barrier_state`: The barrier's current state equals `equals` (room.schema.json BarrierState; closed means closed and unlocked). Owned by barrier@1.
   - `stat_compare`: The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attributes@1.
   - `resource_compare`: The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Owned by attributes@1.
+  - `escort_state`: API1.11 escort@1: this actor’s typed escort for the named quest instance has this status.
 - **QuestState**: Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.
 - **VersionedPolicy**: A policy tree with the AST version it was written against (14 §R3A 'core policy AST/versioning'). A new leaf operator is versioned by its owning capability, which the cartridge must lock (capability_registry.json policies); adding an operator to a capability version that is already installed takes that capability's next version. A changed meaning of an existing operator takes a new policy_version.
 
@@ -520,8 +524,11 @@ Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05
   - `authored`: Placed by the cartridge's authored content.
   - `spawned`: Created by the definition `by` (a spawn bundle or population plan).
   - `death`
+- **EscortRelation**: API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.
+- **EscortStatus**: The bounded escort lifecycle: following moves with the actor, separated waits for explicit rejoin, completed never follows again.
 - **Relation**: A typed, capability-owned relation between runtime entities (21 §4 'Typed relations'; Loka is not an untyped graph). One branch per kind in use: containment (containment@1), an entity's one container (03 §23). Equipment, ownership, custody, membership, following, participation and relationship links join as branches with their owning capability.
   - `containment`: entity_id is directly inside container_id (a room, character or container).
+  - `escort`: API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.
 
 ## Resource contracts (`protocol/resource.schema.json`)
 

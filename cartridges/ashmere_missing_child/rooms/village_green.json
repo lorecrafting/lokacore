@@ -19,6 +19,22 @@
             {
               "op": "fact_compare",
               "fact": "village_child_status",
+              "equals": "rescued"
+            }
+          ]
+        }
+      },
+      "description": "room.village_green.rescued"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "village_child_status",
               "equals": "stays"
             }
           ]

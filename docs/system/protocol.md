@@ -3,7 +3,8 @@
 ## Contracts
 
 `protocol/*.schema.json` is a closed JSON Schema 2020-12 subset (`lib/loka/core/contracts/schema.ex:2`);
-anything outside it fails compilation and generation. Nullable scalar unions are supported
+anything outside it fails compilation and generation. Nullable scalar unions and the exact
+object-or-null union needed by escort's full prior-row precondition are supported
 for explicit absent custody and unknown death attribution (M5-B). Both kernels validate values against the
 flattened contracts with the same paths and error codes (`lib/loka/core/contracts.ex:69`,
 `kernel/ts/src/foundation/validate.ts:51`; codes in `protocol/error_registry.json`). Every contract's
@@ -11,7 +12,7 @@ flattened contracts with the same paths and error codes (`lib/loka/core/contract
 errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` generates
 `kernel/ts/src/contracts.gen.ts`, [contracts.gen.md](../contracts.gen.md) and
 [residency.gen.json](../residency.gen.json) and `--check` compares them. Registries
-(`capability_registry.json`, 37 capabilities, all `portable_capability`; `event_registry.json`;
+(`capability_registry.json`, 38 capabilities, all `portable_capability`; `event_registry.json`;
 `error_registry.json`; `effect_registry.json`; `feature_registry.json`; `invariants.json`;
 `residency.json`) are checked in `test/loka/core/registries_test.exs`: every command, event
 and policy op has exactly one owning capability (`:159`).
@@ -453,3 +454,15 @@ and any container that holds it transitively; dialogue
 hand_over remains an independently guarded transfer. PendingChoice availability and
 Choose both re-evaluate the pinned dialogue policy against current actor state, alongside
 bound-role and direct-custody checks. No GameView shape, command or event is added.
+
+## Typed escort relation
+
+API1.11 introduces escort@1's bounded relation branch, actor-keyed mutation target and
+preconditioned escort.transition, plus the authored dialogue effect and escort_state
+policy leaf described in [mechanics](mechanics.md#escort1). Contracts, compiler and loader
+validate typed IDs/references, role/quest agreement, supported transitions and feature
+minimum. The portable delta composer in both kernels checks full prior-row equality, legal
+status edges and immutable binding. Runtime adoption and changed-row persistence add only
+the escorts State section. Choose retains current policy and original-role revalidation.
+Move/Flee and death include escort changes in the same root decision; no new command,
+transcript, SQLite table, save format or UI mode is added.

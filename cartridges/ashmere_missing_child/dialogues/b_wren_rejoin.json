@@ -1,0 +1,54 @@
+{
+  "npc": "wren",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_vesper_riddle_answered",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_return_branch",
+          "equals": "rescue"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "missing"
+        },
+        {
+          "op": "escort_state",
+          "quest": "missing_child",
+          "state": "separated"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.wren_rejoin.prompt",
+  "roles": {
+    "wren": {
+      "role": "npc",
+      "npc": "wren"
+    }
+  },
+  "choices": {
+    "rejoin": {
+      "label": "dialogue.wren_rejoin.rejoin",
+      "narration": "narration.wren_rejoin",
+      "escort": {
+        "npc": "wren",
+        "quest": "missing_child",
+        "transition": "rejoin"
+      }
+    }
+  }
+}

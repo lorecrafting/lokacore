@@ -16,6 +16,7 @@ defmodule Loka.Content.Checks do
     "fact_compare" => "fact",
     "has_item" => "item",
     "quest_state" => "quest",
+    "escort_state" => "quest",
     "fact.assign" => "fact",
     "fact.adjust" => "fact",
     "quest.activate" => "quest",
@@ -92,6 +93,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"accept" => k, "narration" => _} = o, m) when is_binary(k),
     do: o |> Map.delete("accept") |> expand(m) |> Map.put("accept", ref(k, "quest", m))
+
+  def expand(%{"npc" => _, "quest" => q, "transition" => _} = escort, m),
+    do: Map.put(escort, "quest", ref(q, "quest", m))
 
   # A dialogue (DialogueDefinition, its prompt a text key): its short speaker and quest.
   def expand(%{"npc" => n, "prompt" => p} = d, m) when is_binary(p) do

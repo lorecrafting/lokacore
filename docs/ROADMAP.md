@@ -117,7 +117,7 @@ after the forged-terminal-save finding was fixed. Primary and separate save
 rechecks approved, six fix-source checks passed, and the final review-only head
 checks passed. Chapter release 0.0.11 offers one complete return path.
 
-Next, [Q2-C return plan](decisions/pm-decision-q2-c-stays-2026-10-05.md):
+Next, [Q2-C rescue plan](decisions/pm-decision-q2-c-rescue-2026-10-05.md):
 C-rescue completes bound Wren escort → Elspeth alongside the already complete
 message return.
 
