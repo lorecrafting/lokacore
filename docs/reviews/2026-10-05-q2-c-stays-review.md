@@ -81,3 +81,27 @@ Fix source: `bf5a5f2ee0e822443767da4b3e69618523ee5537`. **APPROVE; PS-1 closed.*
 - All six fix-source GitHub checks were independently confirmed green. Five redacted probe/log artifacts are privately retained with verified SHA256SUMS and separate verify output. Record/index commit and push use normal hooks.
 
 **Ponytail Review:** one condition at the existing consistency boundary fixes PS-1 without new machinery. No other source was changed or broadly re-reviewed. No Metro, DeviceHub, Simulator, preview, native tooling or owner-save operations occurred.
+
+## Independent Sol scoped fix recheck
+
+The PM ran a fresh read-only Codex Sol opinion on the exact fix source head. Its answer is reproduced verbatim.
+
+```text
+VERDICT: APPROVE
+PR #189 — SHA bf5a5f2ee0e822443767da4b3e69618523ee5537
+
+PS-1 CLOSED — mobile/authority/local-story/dialogue-save.ts:158
+Forged resolved/stays Q2 without message receive now returns typed save_corrupt. Legitimate absent/active prebranch saves remain valid. No new findings.
+
+VERIFICATION:
+- Required documents, one-line guard/test diff and direct callers reviewed.
+- 18 focused checks passed, including corruption, failed COMMIT and lost acknowledgement.
+- Six independent real-SQLite probes passed: absent/active prebranch, pending branch, received active state, forged terminal refusal, explicit Start over, and valid terminal reopen/replay behind a later receipt.
+- Corrupt-save contents remained unchanged until explicit Start over.
+- Real SQLite evidence-read failure propagated as a storage error without offering Start over.
+- In-memory reversal to the old guard killed the exact committed regression test: forged terminal reopened unexpectedly. The 17 older neighboring checks still passed.
+- Ponytail Review: Lean already. Ship.
+
+LIMITS:
+Read-only; no files modified. Reopen used new sessions over in-memory SQLite, without file-backed close/reopen. No full check_all or CI verification, preview/Metro/Simulator/device/native execution, or owner-save access.
+```
