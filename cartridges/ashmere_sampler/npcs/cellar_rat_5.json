@@ -12,5 +12,10 @@
     "maximum": 6,
     "start": 6,
     "gain": 0
+  },
+  "attack": {
+    "chance": 50,
+    "damage_min": 1,
+    "damage_max": 1
   }
 }

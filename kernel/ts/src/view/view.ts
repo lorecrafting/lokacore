@@ -1,3 +1,4 @@
+import { engaged } from '../mechanics/combat/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
 // The player's GameView (04 §14; 00 §4.10), read from a World.
 import type {
@@ -50,6 +51,7 @@ import { cmp } from '../foundation/validate.ts';
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
 export function gameView(world: World): GameView {
+  const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
   const actions = lists(world, world.character);
   const equipment = Object.entries(world.slots).map(([slot, holder]) => {
@@ -59,13 +61,20 @@ export function gameView(world: World): GameView {
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
-  const choice = choiceView(world, world.character);
+  const choice = fight ? undefined : choiceView(world, world.character);
   const pools = resources(world);
   const current = chapter(world);
   const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
   return {
     actor_id: world.character,
+    ...(fight && {
+      combat: {
+        encounter_id: fight.id,
+        opponent_id: fight.row.npc_id,
+        name: world.entities[fight.row.npc_id].short,
+      },
+    }),
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door),
     actions: actions.place,
@@ -147,7 +156,7 @@ function exits(world: World, door: (direction: Key) => AdvertisedAction[]): Exit
   const room = world.rooms[world.state.containers[world.body]];
   const set = resolved(world, actor_id);
   const tired = !movement.fare(world, world.body); // the move's cost, as movement admits it
-  const seated = !position.standing(world, world.character); // position@1, after the barrier
+  const seated = !!engaged(world, world.body) || !position.standing(world, world.character); // position@1, after the barrier
   return movement.sight(world, world.body).map((seen) => {
     const { direction } = seen;
     const barrier = exitOf(room, direction)!.barrier;

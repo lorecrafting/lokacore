@@ -569,6 +569,56 @@
             "until"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "attack"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "target_id"
+          ],
+          "additionalProperties": false,
+          "examples": [
+            {
+              "type": "attack",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "target_id": "11111111-2222-4333-8444-555555555555"
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "flee"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id"
+          ],
+          "additionalProperties": false,
+          "examples": [
+            {
+              "type": "flee",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            }
+          ],
+          "description": "Escape an active encounter through one randomly selected currently legal exit; no direction is supplied."
         }
       ],
       "examples": [

@@ -10,19 +10,13 @@ import type {
   ErrorCode,
   GameView,
   Key,
-  NarrationRecord,
+  NarrationRecord as CommittedNarration,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 
-export type {
-  ActionInput,
-  ActionInvocation,
-  DecisionResult,
-  EntityId,
-  ErrorCode,
-  GameView,
-  Key,
-  NarrationRecord,
-};
+export type { ActionInput, ActionInvocation, DecisionResult, EntityId, ErrorCode, GameView, Key };
+
+/** Local display routing derived from the committed receipt; omitted for ordinary narration. */
+export type NarrationRecord = CommittedNarration & { combat_lines?: readonly number[] };
 
 /** What a press sends: an invocation without its id and actor, which the session adds. */
 export type Intent = Omit<ActionInvocation, 'invocation_id' | 'actor_id'>;

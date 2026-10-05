@@ -1,3 +1,4 @@
+import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
 // A direction outside the compass is invalid_target; a compass direction without an exit here
@@ -13,71 +14,27 @@ import { living } from '../death/shared.ts';
 import {
   accepted,
   bodyOf,
+  rejected,
   COMPASS,
-  event,
   has,
   keys,
   refString,
-  rejected,
   type Rule,
-  values,
   type World,
+  values,
 } from '../../runtime/decision.ts';
-import { barrierState, exitOf, exitTo } from '../lookups.ts';
-import type { DefinitionRef, EntityId, RoomDefinition } from '../../contracts.gen.ts';
-import { level, pay, resourceRef } from '../resource.ts';
-import { standing } from '../position/shared.ts';
+import type { DefinitionRef, EntityId } from '../../contracts.gen.ts';
+import { exitTo } from '../lookups.ts';
+import { moveSequence } from './sequence.ts';
+import { passage } from './shared.ts';
+export { passage, fare } from './shared.ts';
 
-export const decide: Rule<'movement'> = (world, command, mint) => {
-  if (command.payload.type === 'scan') return accepted(world, 'scanned', [], []);
-  const { direction } = command.payload;
-  if (!COMPASS.includes(direction)) return rejected('invalid_target');
-  const body = bodyOf(world, command.payload.actor_id);
-  if (!body) return rejected('not_found');
-  const here = world.state.containers[body];
-  const to = exitTo(world.rooms[here], direction);
-  const there = to && world.roomIds[refString(to)];
-  if (!there) return rejected('not_found');
-  const barred = passage(world, world.rooms[here], direction);
-  if (barred) return rejected(barred);
-  if (!standing(world, command.payload.actor_id)) return rejected('invalid_state');
-  const paid = fare(world, body);
-  if (!paid) return rejected('insufficient_resource');
-  const transfer = {
-    op: 'entity.transfer',
-    writer_group: 0,
-    entity_id: body,
-    source_id: here,
-    destination_id: there,
-  } as const;
-  const entered = { type: 'entity_entered_room', entity_id: body, room_id: there } as const;
-  const ops = [...paid.ops, transfer];
-  return accepted(world, 'moved', ops, [event(world, command, mint, 1, entered)]);
-};
-
-/**
- * Why the exit in `direction` bars the way while its barrier (barrier@1) is closed or locked;
- * undefined when it has no barrier or its barrier is open. Read-only, shared with the GameView's
- * exits (view/view.ts).
- */
-export function passage(world: World, room: RoomDefinition, direction: string) {
-  const barrier = exitOf(room, direction)?.barrier;
-  const state = barrier && barrierState(world, barrier);
-  return state === 'locked' ? 'exit_locked' : state === 'closed' ? 'exit_closed' : undefined;
-}
-
-/**
- * What a move costs `body`: the cartridge's world.movement.cost, else 1 mv where it declares the
- * pool, else nothing; undefined when the body cannot pay. Read-only, shared with the GameView's
- * exits (view/view.ts).
- */
-export function fare(world: World, body: EntityId) {
-  const mv = resourceRef(world, 'mv');
-  const cost =
-    world.cartridge.world?.movement?.cost ??
-    (level(world, body, mv) === undefined ? undefined : { resource: mv, amount: 1 });
-  return cost ? pay(world, body, [cost]) : { ops: [] };
-}
+export const decide: Rule<'movement'> = (world, command, mint) =>
+  command.payload.type === 'scan'
+    ? accepted(world, 'scanned', [], [])
+    : engaged(world, bodyOf(world, command.payload.actor_id)!)
+      ? rejected('invalid_state')
+      : moveSequence(world, { ...command, payload: command.payload }, mint, 'moved');
 
 /**
  * What `body` sees through each exit of its room, in compass order (00 §4.1 scan): the passage

@@ -12,6 +12,8 @@ import {
   type DecisionResult,
   type DefinitionRef,
   type DomainEvent,
+  type EncounterId,
+  type EncounterRow,
   type EntityId,
   type EntityIdentity,
   type ErrorCode,
@@ -46,6 +48,7 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
  * barrier its initial state, so a world that never writes one keeps its state hash.
  */
 export type State = {
+  readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
   readonly clock: number;
   readonly containers: Readonly<Record<string, EntityId>>;
@@ -78,7 +81,8 @@ export type ChoiceRow = {
 export type JobRow = {
   readonly job: DefinitionRef;
   readonly due_time: number;
-  readonly status: 'pending' | 'completed';
+  readonly status: 'pending' | 'completed' | 'cancelled';
+  readonly encounter_id?: EncounterId;
 };
 
 // The State section each written MutationTarget kind lives in (the clock is State.clock).
@@ -94,8 +98,10 @@ const SECTIONS: Readonly<
     | 'jobs'
     | 'choices'
     | 'created'
+    | 'encounters'
   >
 > = {
+  encounter: 'encounters',
   entity: 'created',
   containment: 'containers',
   fact: 'facts',
@@ -118,13 +124,15 @@ export const row = (t: MutationTarget) =>
     SECTIONS[t.kind]!,
     t.kind === 'containment' || t.kind === 'entity'
       ? t.entity_id
-      : t.kind === 'quest'
-        ? t.instance_id
-        : t.kind === 'job'
-          ? t.job_id
-          : t.kind === 'choice'
-            ? t.continuation_id
-            : key(t),
+      : t.kind === 'encounter'
+        ? t.encounter_id
+        : t.kind === 'quest'
+          ? t.instance_id
+          : t.kind === 'job'
+            ? t.job_id
+            : t.kind === 'choice'
+              ? t.continuation_id
+              : key(t),
   ] as const);
 
 /** A QuestInstance as composition stores it (foundation/compose.ts quest; 03 §12, 06 §4). */
@@ -192,7 +200,8 @@ export type Mint = () => string;
  */
 export const COMPOSES = {
   action_recipe: ['check'],
-  schedule: ['movement'],
+  schedule: ['movement', 'combat', 'death'],
+  combat: ['movement'],
   dialogue: ['quest', 'containment'],
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES

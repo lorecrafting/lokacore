@@ -20,7 +20,12 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'choice', continuation_id: op.continuation_id };
     case 'job.schedule':
     case 'job.complete':
+    case 'job.cancel':
       return { kind: 'job', job_id: op.job_id };
+    case 'encounter.open':
+    case 'encounter.advance':
+    case 'encounter.close':
+      return { kind: 'encounter', encounter_id: op.encounter_id };
     case 'time.advance':
       return { kind: 'clock' };
     case 'resource.adjust':

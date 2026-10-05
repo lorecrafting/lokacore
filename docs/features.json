@@ -536,6 +536,38 @@
       "one_container_per_item",
       "containment_acyclic"
     ],
-    "implemented_in": "M5-B prerequisite corpse/shrine foundation; live lethal producer and native consumer proof carried to M6"
+    "implemented_in": "M5-B corpse/shrine foundation; M6-A live fatal producer, durable custody and same-body return"
+  },
+  "combat": {
+    "spec": "docs/system/mechanics.md combat@1 first live encounter; docs/system/protocol.md encounters and due-time resource settlement",
+    "contracts": [
+      "EncounterRow",
+      "CombatSettings",
+      "AttackProfile",
+      "DeathCredit",
+      "CombatView",
+      "CommandPayload",
+      "EventPayload",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/combat/round.ts",
+      "kernel/ts/src/mechanics/combat/credit.ts",
+      "kernel/ts/src/mechanics/combat/saved.ts",
+      "kernel/ts/src/runtime/proposal.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/encounter_composition.json",
+      "protocol/fixtures/resource_delivery_time.json",
+      "protocol/fixtures/combat_contracts.json",
+      "protocol/fixtures/cartridge_sampler_hash.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "gameview_agrees_with_admission",
+      "fault_discards_whole_proposal"
+    ],
+    "implemented_in": "M6-A first live cellar fight: deliberate Attack, timed rounds, Stand/Flee, death and exact preacceptance rat credit"
   }
 }

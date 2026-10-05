@@ -148,3 +148,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [M3-A carrying ceiling](pm-decision-m3-a-carrying-ceiling-2026-10-04.md): PM selection under mechanics delegation; sampler consumer and bounded admission.
 
 - Owner direction: [shared Story/Realm mechanics and familiar interaction; replaceable story content](owner-decision-story-realm-shared-mechanics-2026-10-04.md); first Realm activity and unchanged-cartridge hosting remain open.
+- [First live fight copy, 2026-10-04](owner-decision-m6-a-combat-copy-2026-10-04.md): owner's exact seven-line combat/brass-key batch and original-wording provenance.
+- [Dedicated combat page, 2026-10-04](owner-decision-m6-a-combat-pane-2026-10-04.md): owner's paraphrased direction for combat in its own pane like dialogue; replaces the bottom strip.
+- [Random Flee, 2026-10-04](owner-decision-m6-a-random-flee-2026-10-04.md): owner selects directionless Flee with an engine-chosen legal exit.
+
+- [Focused combat actions, 2026-10-04](owner-decision-m6-a-combat-actions-2026-10-04.md): owner restricts the composed action set to Flee, Stand, Look and Scan during an open encounter.

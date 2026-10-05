@@ -196,3 +196,8 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Exact fractional recovery, the final player rate/position guard and opted Save validation follow the [M2-A PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
 
 - Carrying admission follows the [M3-A PM selection](../decisions/pm-decision-m3-a-carrying-ceiling-2026-10-04.md) under mechanics delegation.
+- First live fight narration and the corrected brass-key room line use the [owner-approved seven-line copy batch](../decisions/owner-decision-m6-a-combat-copy-2026-10-04.md).
+- Combat uses its own Book page like dialogue, following the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md) and [active Book interaction contract](book-ui.md#live-combat-response-m6-a).
+- Flee takes no player direction and chooses a legal exit through the [owner-approved random-Flee rule](../decisions/owner-decision-m6-a-random-flee-2026-10-04.md).
+
+- Open encounters apply the [owner-approved focused combat ActionSet](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md) after ordinary contributions, with shared admission/projection and normal restoration on close.

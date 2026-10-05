@@ -7,4 +7,6 @@ rule:
   any: [{ kind: string }, { kind: template_string }]
   matches: module-specifier
   not:
-    regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"
+    any:
+      - regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"
+      - regex: "^['\"](\\./(sequence|flee)\\.ts|\\.\\./combat/round\\.ts)['\"]$"

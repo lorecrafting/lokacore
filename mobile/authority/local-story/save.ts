@@ -119,16 +119,30 @@ export function adopt(s: Story) {
  * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
  * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
  */
-export function narration(s: Story): NarrationRecord | undefined {
+export function narration(s: Story): (NarrationRecord & { combat_lines?: number[] }) | undefined {
   if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
-  const r = s.db.getFirstSync<{ command_id: string; lines: string }>(
-    `SELECT command_id, response -> '$.narration' AS lines FROM receipt WHERE scope = ?
+  const r = s.db.getFirstSync<{ command_id: string; response: string }>(
+    `SELECT command_id, response FROM receipt WHERE scope = ?
      AND json_array_length(response, '$.narration') > 0 ORDER BY revision DESC LIMIT 1`,
     scope(s),
   );
-  return r
-    ? ({ command_id: r.command_id, lines: JSON.parse(r.lines) } as NarrationRecord)
-    : undefined;
+  if (!r) return undefined;
+  const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
+  const root =
+    ['engaged', 'fled'].includes(d.outcome) &&
+    d.delta.ops.some(
+      (o) => o.writer_group === 0 && (o.op === 'encounter.open' || o.op === 'encounter.close'),
+    );
+  const keys = d.events.some((e) => e.payload.type === 'attack_result')
+    ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
+    : [];
+  const lines = d.narration!;
+  const combat_lines = lines.flatMap((line, i) => (root || keys.includes(line?.key) ? [i] : []));
+  return {
+    command_id: r.command_id,
+    lines,
+    ...(combat_lines.length && { combat_lines }),
+  } as NarrationRecord;
 }
 
 // The run is in it, so an old run's token is never current again after newGame.

@@ -96,13 +96,14 @@ defmodule Loka.Core.Invariants do
 
   defp preconditions_hold?(s, ops, result) do
     is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
+      Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       replay_preconditions(s, ops, result)
   end
 
   defp replay_preconditions(s, ops, result) do
     horizon =
-      Enum.reduce(ops, s["clock"], fn op, t ->
-        if op["op"] == "time.advance", do: op["to"], else: t
+      Enum.reduce(ops, s["clock"], fn op, at ->
+        if op["op"] == "time.advance", do: op["to"], else: at
       end)
 
     containers = Map.get(s, "containers", %{})
@@ -124,30 +125,29 @@ defmodule Loka.Core.Invariants do
     do:
       Enum.any?(result["changes"], &(Compose.key(&1["target"]) == k and &1["value"] == expected))
 
+  defp replay_op(%{"op" => "encounter." <> _}, _, _, ctx), do: {:cont, ctx}
+  defp replay_op(%{"op" => "job." <> _}, _, _, ctx), do: {:cont, ctx}
+
   defp replay_op(op, s, horizon, {seen, containers, quests, resources}) do
     k = Compose.key(Compose.target(op))
 
-    spec =
-      if op["op"] == "resource.adjust",
-        do: Loka.Core.InvariantsResource.spec(op, s)
-
-    if spec != nil and spec["regen"] != nil do
+    if op["op"] == "resource.adjust" do
       before = Map.get_lazy(resources, k, fn -> get_in(s, ["resources", k]) end)
 
-      case Loka.Core.InvariantsResource.recovered(op, spec, before, s["clock"]) do
+      case Loka.Core.InvariantsResource.resource_after(op, s, before, horizon) do
         nil -> {:halt, false}
         after_row -> {:cont, {seen, containers, quests, Map.put(resources, k, after_row)}}
       end
     else
-      replay_legacy(op, s, horizon, k, {seen, containers, quests, resources})
+      replay_legacy(op, s, k, {seen, containers, quests, resources})
     end
   end
 
-  defp replay_legacy(op, s, horizon, k, {seen, containers, quests, resources}) do
+  defp replay_legacy(op, s, k, {seen, containers, quests, resources}) do
     {need, give} = link(op)
     before = Map.get_lazy(seen, k, fn -> initial(op, s) end)
 
-    if before == need and extra?(op, s, horizon, containers, quests) do
+    if before == need and extra?(op, s, containers, quests) do
       {:cont,
        {Map.put(seen, k, give), moved_container(op, containers), moved_quest(op, quests),
         resources}}
@@ -174,7 +174,7 @@ defmodule Loka.Core.Invariants do
     end
   end
 
-  defp extra?(%{"op" => "entity.transfer"} = op, s, _, containers, _) do
+  defp extra?(%{"op" => "entity.transfer"} = op, s, containers, _) do
     d = op["destination_id"]
     e = op["entity_id"]
     cap = get_in(s, ["capacities", d])
@@ -182,14 +182,14 @@ defmodule Loka.Core.Invariants do
     not inside?(d, e, containers, MapSet.new()) and (cap == nil or held < cap)
   end
 
-  defp extra?(%{"op" => "quest.activate"} = op, _, _, _, quests) do
+  defp extra?(%{"op" => "quest.activate"} = op, _, _, quests) do
     Enum.all?(quests, fn {_, q} ->
       q["quest"] != op["quest"] or q["scope"] != op["scope"] or
         q["state"] not in ~w(active objectives_complete)
     end)
   end
 
-  defp extra?(%{"op" => "quest.transition"} = op, _, _, _, _) do
+  defp extra?(%{"op" => "quest.transition"} = op, _, _, _) do
     to = op["to"]
     outcome = op["outcome"]
 
@@ -197,30 +197,21 @@ defmodule Loka.Core.Invariants do
       if(to == "resolved", do: outcome != nil, else: to == "failed" or outcome == nil)
   end
 
-  defp extra?(%{"op" => "choice.resolve"} = op, s, _, _, _) do
+  defp extra?(%{"op" => "choice.resolve"} = op, s, _, _) do
     row = get_in(s, ["choices", op["continuation_id"]]) || %{}
 
     op["choice_id"] in Map.get(row, "choice_ids", []) and
       row["opened_revision"] == op["expected_revision"]
   end
 
-  defp extra?(%{"op" => "job.schedule"} = op, _, horizon, _, _),
-    do: op["due_time"] > horizon
+  defp extra?(%{"op" => "time.advance"} = op, _, _, _), do: op["to"] > op["from"]
 
-  defp extra?(%{"op" => "job.complete"} = op, s, horizon, _, _),
-    do: get_in(s, ["jobs", op["job_id"], "due_time"]) <= horizon
+  defp extra?(%{"op" => "cooldown.start"} = op, s, _, _), do: op["at"] == s["clock"]
 
-  defp extra?(%{"op" => "time.advance"} = op, _, _, _, _), do: op["to"] > op["from"]
-
-  defp extra?(%{"op" => "resource.adjust"} = op, s, _, _, _),
-    do: Loka.Core.InvariantsResource.legacy_valid?(op, s)
-
-  defp extra?(%{"op" => "cooldown.start"} = op, s, _, _, _), do: op["at"] == s["clock"]
-
-  defp extra?(%{"op" => "barrier.transition"} = op, _, _, _, _),
+  defp extra?(%{"op" => "barrier.transition"} = op, _, _, _),
     do: op["to"] in Map.get(@door, op["from"], [])
 
-  defp extra?(_, _, _, _, _), do: true
+  defp extra?(_, _, _, _), do: true
 
   defp inside?(nil, _, _, _), do: false
 
@@ -257,8 +248,6 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "choice.open"}), do: {nil, "pending"}
   defp link(%{"op" => "choice.resolve"}), do: {"pending", "resolved"}
   defp link(%{"op" => "choice.close"}), do: {"pending", "closed"}
-  defp link(%{"op" => "job.schedule"}), do: {nil, "pending"}
-  defp link(%{"op" => "job.complete"}), do: {"pending", "completed"}
   defp link(%{"op" => "time.advance"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "resource.adjust"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "cooldown.start"} = op), do: {op["from"], op["at"]}
@@ -281,11 +270,7 @@ defmodule Loka.Core.Invariants do
   defp initial(%{"op" => "choice." <> _, "continuation_id" => c}, s),
     do: get_in(s, ["choices", c, "status"])
 
-  defp initial(%{"op" => "job." <> _, "job_id" => j}, s), do: get_in(s, ["jobs", j, "status"])
   defp initial(%{"op" => "time.advance"}, s), do: s["clock"]
-
-  defp initial(%{"op" => "resource.adjust"} = op, s),
-    do: Loka.Core.InvariantsResource.initial(op, s)
 
   defp initial(%{"op" => "cooldown.start"} = op, s),
     do: get_in(s, ["cooldowns", Compose.key(Compose.target(op))])

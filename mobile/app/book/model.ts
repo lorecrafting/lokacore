@@ -18,7 +18,15 @@ export type Thing =
   GameView['entities'][number] | NonNullable<GameView['entities'][number]['contents']>[number];
 export type Page =
   | {
-      kind: 'contents' | 'character' | 'journal' | 'carrying' | 'map' | 'settings' | 'chapter';
+      kind:
+        | 'contents'
+        | 'character'
+        | 'journal'
+        | 'carrying'
+        | 'map'
+        | 'settings'
+        | 'chapter'
+        | 'combat';
     }
   | { kind: 'thing'; id: string }
   | { kind: 'dialogue'; speaker?: string };
@@ -49,6 +57,8 @@ export const things = (v: GameView): Thing[] =>
 
 // Keep the page after a same-room action, stopping at the first item page that disappeared.
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
+  if (after.combat) return stack.at(-1)?.kind === 'combat' ? stack : [{ kind: 'combat' }];
+  if (before.combat || stack.some((page) => page.kind === 'combat')) return [];
   if (after.chapter && before.chapter?.index !== after.chapter.index) return [{ kind: 'chapter' }];
   if (before.place.id !== after.place.id) return [];
   const visible = things(after);
@@ -60,7 +70,7 @@ export function pagesAfter(stack: Page[], before: GameView, after: GameView): Pa
   return stack.slice(0, gone);
 }
 
-const OWN = ['look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']; // drawn in their own places, not as place actions
+const OWN = ['flee', 'look', 'choose', 'close_choice', 'continue', 'stand', 'sit', 'rest', 'sleep']; // drawn in their own places, not as place actions
 
 export function group(buttons: Button[]) {
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
@@ -71,7 +81,8 @@ export function group(buttons: Button[]) {
       b.action_key === 'move' && dir(b) ? [{ direction: dir(b)!, button: b }] : [],
     ),
     door: (direction: string) =>
-      buttons.filter((b) => b.action_key !== 'move' && dir(b) === direction),
+      buttons.filter((b) => !['move', 'flee'].includes(b.action_key) && dir(b) === direction),
+    flee: buttons.filter((b) => b.action_key === 'flee'),
     continue: buttons.find((b) => b.action_key === 'continue'),
     position: buttons.filter((b) => ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key)),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
@@ -148,7 +159,13 @@ export const branch = (t: number) => {
 };
 
 export const initialPages = (v: GameView): Page[] =>
-  v.chapter ? [{ kind: 'chapter' }] : v.choice ? [conversation(v)] : [];
+  v.combat
+    ? [{ kind: 'combat' }]
+    : v.chapter
+      ? [{ kind: 'chapter' }]
+      : v.choice
+        ? [conversation(v)]
+        : [];
 
 // Recover only the actual saved choice: a projected speaker has an ordinary entity page.
 export const conversation = (v: GameView): Page =>
@@ -196,6 +213,20 @@ function asked(v: GameView, label: Say): Press[] {
   ];
 }
 
+// Ordinary travel carries a direction; combat uses only the projected directionless Flee.
+function travel(v: GameView): Press[] {
+  return v.combat
+    ? []
+    : v.exits
+        .filter((e) => e.available)
+        .map((e) => ({
+          label: `Go ${e.direction}`,
+          action_key: 'move',
+          target_ids: [],
+          input: { direction: e.direction },
+        }));
+}
+
 // The view's available actions as buttons: place actions that need no input, each open exit as a
 // move, each entity's or held item's actions aimed at it, then the pending choice's.
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
@@ -206,7 +237,6 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     input: {},
   });
   const place = v.actions.filter((a) => a.available && !a.input.length && a.target.kind === 'none');
-  const moves = v.exits.filter((e) => e.available);
   const doors = v.exits.flatMap((e) =>
     (e.door?.actions ?? [])
       .filter((a) => a.available)
@@ -220,18 +250,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
       .map((a) => button(a, ` ${text(e.name)}`, e.id)),
   );
-  return [
-    ...place.map((a) => button(a, '')),
-    ...moves.map((e) => ({
-      label: `Go ${e.direction}`,
-      action_key: 'move',
-      target_ids: [],
-      input: { direction: e.direction },
-    })),
-    ...doors,
-    ...held,
-    ...asked(v, label),
-  ];
+  return [...place.map((a) => button(a, '')), ...travel(v), ...doors, ...held, ...asked(v, label)];
 }
 
 // The button's plain strings are the wire's branded ones: a button is built from the view's own keys.

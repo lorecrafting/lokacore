@@ -1,0 +1,991 @@
+{
+  "states": {
+    "base": {
+      "clock": 68250,
+      "resource_specs": {
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+          "minimum": 0,
+          "maximum": 12,
+          "start": 4,
+          "gain": 5
+        }
+      },
+      "resources": {
+        "{\"entity_id\":\"00000002-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+          "value": 4,
+          "at": 68250
+        }
+      }
+    },
+    "recovering": {
+      "clock": 68250,
+      "resource_specs": {
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+          "minimum": 0,
+          "maximum": 12,
+          "start": 4,
+          "gain": 5,
+          "regen": {
+            "every": 60,
+            "by_position": {
+              "standing": 2,
+              "sitting": 3,
+              "resting": 4,
+              "sleeping": 5
+            }
+          }
+        }
+      },
+      "resources": {
+        "{\"entity_id\":\"00000002-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+          "value": 4,
+          "at": 68250,
+          "rate": 2,
+          "remainder": 0
+        }
+      }
+    },
+    "override": {
+      "clock": 68250,
+      "resource_specs": {
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+          "minimum": 0,
+          "maximum": 12,
+          "start": 4,
+          "gain": 5
+        }
+      },
+      "resources": {
+        "{\"entity_id\":\"00000002-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+          "value": 4,
+          "at": 68300
+        }
+      },
+      "entity_resource_specs": {
+        "{\"entity_id\":\"00000002-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+          "minimum": 0,
+          "maximum": 12,
+          "start": 4,
+          "gain": 0
+        }
+      }
+    },
+    "old-row": {
+      "clock": 68250,
+      "resource_specs": {
+        "{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}": {
+          "minimum": 0,
+          "maximum": 12,
+          "start": 4,
+          "gain": 5
+        }
+      },
+      "resources": {
+        "{\"entity_id\":\"00000002-0000-4000-8000-000000000000\",\"kind\":\"resource\",\"resource\":{\"cartridge_id\":\"lantern\",\"cartridge_version\":\"0.1.0\",\"key\":\"hp\",\"kind\":\"resource\"}}": {
+          "value": 4,
+          "at": 68000
+        }
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "explicit-at-crosses-hour",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 8,
+          "at": 68400
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 8,
+              "at": 68400
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "omitted-at-keeps-base-clock",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": 68250
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "explicit-base-equality",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3,
+          "at": 68250
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": 68250
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "explicit-at-recovers-old-rate",
+      "state": "recovering",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 8,
+          "at": 68400
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 8,
+              "at": 68400,
+              "rate": 2,
+              "remainder": 0
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "override-valid-at-delivery-after-base",
+      "state": "override",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3,
+          "at": 68400
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": 68400
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "before-base",
+      "state": "old-row",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3,
+          "at": 68249
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": 68249
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "after-horizon",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 8,
+          "at": 68401
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 8,
+              "at": 68401
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "negative",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3,
+          "at": -1
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": -1
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "fractional",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3,
+          "at": 68300.5
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": 68300.5
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "unsafe",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3,
+          "at": 9007199254740992
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": 9007199254740992
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "null",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 4,
+          "to": 3,
+          "at": null
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 3,
+              "at": null
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "explicit-same-time-overlay",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 8,
+          "at": 68400
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 8,
+          "to": 7,
+          "at": 68400
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 7,
+              "at": 68400
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "explicit-backwards-overlay",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 8,
+          "at": 68400
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 3,
+          "to": 2,
+          "at": 68300
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 2,
+              "at": 68300
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    },
+    {
+      "id": "omitted-after-explicit-overlay",
+      "state": "base",
+      "ops": [
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 9,
+          "to": 8,
+          "at": 68400
+        },
+        {
+          "op": "resource.adjust",
+          "writer_group": 0,
+          "resource": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "resource",
+            "key": "hp"
+          },
+          "entity_id": "00000002-0000-4000-8000-000000000000",
+          "from": 3,
+          "to": 2
+        },
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 68250,
+          "to": 68400
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "resource",
+            "resource": {
+              "cartridge_id": "lantern",
+              "cartridge_version": "0.1.0",
+              "kind": "resource",
+              "key": "hp"
+            },
+            "entity_id": "00000002-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "resource",
+              "resource": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "resource",
+                "key": "hp"
+              },
+              "entity_id": "00000002-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "value": 2,
+              "at": 68250
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 68400
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Item and NPC contracts",
-  "description": "Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 §23; 00 §4.4; 00a §5, §12), owned by containment (capability_registry.json). R5 slice 4: what take, drop and give need. Each is a RuntimeEntity: a fresh world gives it an EntityId (numeric profile, Initial world ids) and one container, the only place its location is stored (03 §23); a holder's contents and an actor's inventory are derived from it. Text follows the four LegendMUD tiers (owner decision 2026-09-25, Q1): keywords the player types, a short description for action messages and the inventory, a room line for the room's contents, and a description for examine. An item's equipment slot joins with equipment@1 (chapter-one slice c1-equipment); stacking, weight and put join with their capabilities as optional fields.",
+  "description": "Items and NPCs, the things containment moves and holds (21 \u00a78 Containment; 03 \u00a723; 00 \u00a74.4; 00a \u00a75, \u00a712), owned by containment (capability_registry.json). R5 slice 4: what take, drop and give need. Each is a RuntimeEntity: a fresh world gives it an EntityId (numeric profile, Initial world ids) and one container, the only place its location is stored (03 \u00a723); a holder's contents and an actor's inventory are derived from it. Text follows the four LegendMUD tiers (owner decision 2026-09-25, Q1): keywords the player types, a short description for action messages and the inventory, a room line for the room's contents, and a description for examine. An item's equipment slot joins with equipment@1 (chapter-one slice c1-equipment); stacking, weight and put join with their capabilities as optional fields.",
   "$defs": {
     "ItemLocation": {
-      "description": "Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).",
+      "description": "Where an item starts (00a \u00a712 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).",
       "oneOf": [
         {
           "type": "object",
@@ -89,7 +89,7 @@
       ]
     },
     "SlotKey": {
-      "description": "An equipment slot (equipment@1; 00 §4.4 and 21 §8 as amended by c1-equipment): the twelve keys, finger slots LATER. A fresh world makes one holder entity inside the body per slot some item declares (numeric profile, Slot holder ids).",
+      "description": "An equipment slot (equipment@1; 00 \u00a74.4 and 21 \u00a78 as amended by c1-equipment): the twelve keys, finger slots LATER. A fresh world makes one holder entity inside the body per slot some item declares (numeric profile, Slot holder ids).",
       "enum": [
         "head",
         "neck",
@@ -120,7 +120,7 @@
       ]
     },
     "ItemDefinition": {
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally capacity, the most items it holds directly (any item can hold items; without capacity it has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.",
+      "description": "A portable thing (21 \u00a78): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally capacity, the most items it holds directly (any item can hold items; without capacity it has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.",
       "type": "object",
       "properties": {
         "key": {
@@ -241,7 +241,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides).",
+      "description": "A non-player character (00a \u00a74), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides).",
       "type": "object",
       "properties": {
         "key": {
@@ -273,7 +273,7 @@
           "maximum": 1024
         },
         "daily_schedule": {
-          "description": "behavior@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is an hour of the day, 0 to 23 without a leading zero; from that hour until the next listed one (wrapping at midnight) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "behavior@1 (06 \u00a713 Behavior/schedule profiles; 21 \u00a710; capability_registry.json definitions): a daily location schedule. Each key is an hour of the day, 0 to 23 without a leading zero; from that hour until the next listed one (wrapping at midnight) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 \u00a75.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "type": "object",
           "propertyNames": {
             "pattern": "^(1?[0-9]|2[0-3])$"
@@ -284,6 +284,9 @@
         },
         "hp": {
           "$ref": "resource.schema.json#/$defs/NpcHp"
+        },
+        "attack": {
+          "$ref": "entity.schema.json#/$defs/AttackProfile"
         }
       },
       "required": [
@@ -314,6 +317,38 @@
           "capacity": 1
         }
       ]
+    },
+    "AttackProfile": {
+      "type": "object",
+      "properties": {
+        "chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "damage_min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "damage_max": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "chance",
+        "damage_min",
+        "damage_max"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "chance": 75,
+          "damage_min": 1,
+          "damage_max": 2
+        }
+      ],
+      "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max."
     }
   }
 }

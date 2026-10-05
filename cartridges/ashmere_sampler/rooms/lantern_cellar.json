@@ -3,8 +3,7 @@
   "description": "room.lantern_cellar.description",
   "exits": {
     "up": {
-      "to": "drowned_lantern",
-      "barrier": "cellar_door"
+      "to": "drowned_lantern"
     }
   }
 }

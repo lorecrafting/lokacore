@@ -2,15 +2,8 @@
 // buttons, the log of what each press said, and who came or went. The engine returns structured
 // results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
 // 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
-import type {
-  Game,
-  GameView,
-  Reply,
-  ElapsedStatus,
-  GameSubscription,
-  Projection,
-} from '../../packages/game-view/session.ts';
-import { comings, replyLine, withoutHeading } from './words.ts';
+import type { Game, GameView, Reply, GameSubscription } from '../../packages/game-view/session.ts';
+import { comings, replyLine } from './words.ts';
 import { buttonsOf, intentOf, things } from './model.ts';
 
 /**
@@ -39,42 +32,15 @@ const sayers = (g: Game): { text: Say; label: Say } => ({
       .replace(/^./, (a) => a.toUpperCase()),
 });
 
-export type DetailLine = string | { text: string; event: true };
-type Logs = {
-  log: string[];
-  details: Map<string, DetailLine[]>;
-  retry?: { button: Button; detail?: string; item?: string; invocation?: string };
-  projection: Projection;
-  status: ElapsedStatus;
-  recovered?: boolean;
-  narrationId?: string;
-  returnWorld?: boolean;
-  fault?: string;
-};
-
-function restoredLogs(game: Game, text: Say): Logs {
-  const last = game.lastNarration();
-  const { view } = game.view();
-  const restored = last
-    ? withoutHeading(last.lines, view)
-        .map((t) => text(t.key))
-        .join(' ')
-    : '';
-  const log = restored && !view.choice ? [restored] : [];
-  const details = new Map<string, DetailLine[]>();
-  if (restored && view.choice) details.set(view.choice.speaker_id ?? 'conversation', [restored]);
-  if (view.choice) {
-    const id = view.choice.speaker_id ?? 'conversation';
-    details.set(id, [...(details.get(id) ?? []), text(view.choice.prompt.key)]);
-  }
-  return {
-    log,
-    details,
-    narrationId: last?.command_id,
-    projection: game.view(),
-    status: { kind: 'ready' },
-  };
-}
+export type { DetailLine } from './logs.ts';
+import {
+  narrationLines,
+  restoredLogs,
+  savedNarration,
+  resetLogs,
+  combatResult,
+  type Logs,
+} from './logs.ts';
 
 function detailLines(s: Logs, id: string) {
   if (!s.details.has(id)) s.details.set(id, []);
@@ -112,15 +78,16 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   const itemChanged = !!accepted && ['taken', 'dropped'].includes(accepted.outcome);
   s.returnWorld = itemChanged || accepted?.outcome === 'choice_closed';
   const moved = !!accepted && was.place.id !== now.place.id;
-  if (moved) s.log.length = 0;
-  const lines = attempt.detail && !itemChanged && !moved ? detailLines(s, attempt.detail) : s.log;
-  let retained: ReturnType<Game['lastNarration']>;
-  try {
-    retained = accepted?.narration?.length ? game.lastNarration() : undefined;
-  } catch (e) {
-    s.fault = `Saved result; narration recovery unavailable: ${(e as Error).message}`;
-  }
-  const repeated = !moved && retained && retained.command_id === s.narrationId;
+  resetLogs(s, now);
+  const lines =
+    (was.combat || now.combat) && !accepted?.narration?.length
+      ? s.combatLog
+      : attempt.detail && !itemChanged && !moved
+        ? detailLines(s, attempt.detail)
+        : s.log;
+  const retained = accepted?.narration?.length ? savedNarration(game, s) : undefined;
+  if (s.fault && combatResult(accepted)) return '';
+  const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
   const fallback =
     itemChanged && attempt.item
@@ -128,9 +95,11 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
       : accepted?.outcome === 'choice_closed'
         ? ''
         : undefined;
-  const line = repeated ? '' : replyLine(reply, text, now, fallback);
+  const routed = retained?.combat_lines?.length ? narrationLines(retained, now, text) : undefined;
+  const line = repeated ? '' : routed ? routed[0] : replyLine(reply, text, now, fallback);
   if (line) lines.push(line);
-  lines.push(...comings(was, now, text));
+  if (!repeated && routed?.[1]) s.combatLog.push(routed[1]);
+  s.log.push(...comings(s.projection.view, now, text));
   if (accepted && attempt.detail && journalChanged(was, now, attempt.detail))
     detailLines(s, attempt.detail).push({ text: 'Journal updated', event: true });
   if (
@@ -156,7 +125,7 @@ function background(
   if (s.projection.token === update.projection.token) return;
   const was = s.projection.view,
     now = update.projection.view;
-  if (was.place.id !== now.place.id) s.log.length = 0;
+  resetLogs(s, now);
   s.log.push(...comings(was, now, text));
   s.projection = update.projection;
   let last: ReturnType<Game['lastNarration']>;
@@ -167,9 +136,8 @@ function background(
     return;
   }
   if (last && last.command_id !== s.narrationId) {
-    const line = withoutHeading(last.lines, now)
-      .map((t) => text(t.key))
-      .join(' ');
+    const [line, combat] = narrationLines(last, now, text);
+    if (combat) s.combatLog.push(combat);
     if (line)
       (now.choice ? detailLines(s, now.choice.speaker_id ?? 'conversation') : s.log).push(line);
     s.narrationId = last.command_id;
@@ -227,7 +195,7 @@ function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, tex
   }
   if (game.pending() && reply.kind !== 'pending' && reply.kind !== 'catching_up') {
     const line = replyLine(reply, text, game.view().view);
-    if (line) (detail ? detailLines(s, detail) : s.log).push(line);
+    if (line) (was.combat ? s.combatLog : detail ? detailLines(s, detail) : s.log).push(line);
     return line;
   }
   if (reply.kind === 'pending' || reply.kind === 'catching_up') {
@@ -260,6 +228,7 @@ export function presenter(game: Game) {
   return {
     screen: () => {
       s.log.splice(0, s.log.length - 200);
+      s.combatLog.splice(0, s.combatLog.length - 200);
       for (const lines of s.details.values()) lines.splice(0, lines.length - 200);
       const { view, token } = game.view();
       const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({ ...b, token }));
@@ -268,6 +237,7 @@ export function presenter(game: Game) {
         text,
         buttons,
         log: s.log,
+        combatLog: s.combatLog,
         detail: (id: string) => s.details.get(id) ?? [],
         pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
         catchingUp: s.status.kind === 'catching_up',

@@ -1,11 +1,4 @@
-// The ActionSet algebra (06 §19; ADR-016; action.schema.json ActionContribution): an actor's
-// actions are the contributions of its sources composed by stable action key, then each
-// action's policy is evaluated for the actor and the lists are sorted for the GameView (04 §14,
-// §19). Sources today, in this order: the engine verbs of the capabilities the cartridge locks
-// (union), the cartridge's actions, recipes and quest offers (override: a cartridge may redefine a
-// verb), and
-// the actor's room's contributions (each with its authored op). Later sources (equipment, status
-// effects, skills, quest grants, scripts, modal state) are further contributions in this order.
+// ActionSet: engine, cartridge, room, choice; combat restricts admission/projection (06 §19).
 import {
   CAPABILITY_OWNERS,
   type ActionContribution,
@@ -31,6 +24,7 @@ import { pay } from '../mechanics/resource.ts';
 import { wornIn } from '../mechanics/equipment/rule.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import { holds } from '../mechanics/policy.ts';
+import { engaged } from '../mechanics/combat/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -87,6 +81,8 @@ const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   look: [{ kind: 'none' }, []],
   move: [{ kind: 'none' }, ['direction']],
   scan: [{ kind: 'none' }, []],
+  attack: [{ kind: 'entity', scopes: ['room_occupants'] }, []],
+  flee: [{ kind: 'none' }, []],
   take: [entity('room_contents'), []],
   drop: [entity('inventory'), []],
   give: [entity('inventory'), []],
@@ -151,9 +147,9 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
 /**
  * `actor`'s ActionSet before any policy is evaluated: every source composed, in order, then the
  * answers to a pending choice (modal state, mechanics/dialogue/shared.ts modal; 06 §37: no room contribution
- * removes them, so the actor is never trapped), which the GameView never lists (lists).
+ * removes them; combat filters the result afterward), which lists never renders directly.
  */
-export function resolved(world: World, actor: CharacterId): ActionSet {
+export function composed(world: World, actor: CharacterId): ActionSet {
   if (scene.running(world, actor)) return scene.modal();
   const [verbs, own] = [engine(world), cartridge(world, actor)];
   const all = { ...verbs, ...own };
@@ -169,6 +165,23 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
     apply(apply({}, 'union', verbs), 'override', own),
   );
   return { ...set, ...modal(world, actor) };
+}
+
+const fighting = (world: World, actor: CharacterId) => {
+  const body = bodyOf(world, actor);
+  return body && engaged(world, body);
+};
+
+/** Final actor restriction; only internal escape policy reads the pre-combat composed set. */
+export function resolved(world: World, actor: CharacterId): ActionSet {
+  const set = composed(world, actor);
+  return fighting(world, actor)
+    ? Object.fromEntries(
+        Object.entries(set).filter(([, a]) =>
+          ['flee', 'stand', 'look', 'scan'].includes(a.command),
+        ),
+      )
+    : set;
 }
 
 /** The target id of a recipe's detail (the loader checks it exists). */
@@ -195,7 +208,12 @@ export function refusal(
   action?: Key,
   set?: ActionSet,
 ) {
-  if (payload.type === 'wait' && world.cartridge.manifest.time_policy) return 'permission_denied';
+  if (
+    payload.type === 'wait' &&
+    world.cartridge.manifest.time_policy &&
+    !fighting(world, payload.actor_id)
+  )
+    return 'permission_denied';
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;
   const matching = Object.values(set ?? resolved(world, actor)).filter(
@@ -206,7 +224,12 @@ export function refusal(
   const unknown =
     (perform && !recipeKeys(world).includes(payload.action)) ||
     (payload.type === 'accept_quest' && !world.cartridge.quests?.[refString(payload.quest)]);
-  if (!matching.length) return unknown ? 'not_found' : 'unsupported_capability';
+  if (!matching.length)
+    return unknown
+      ? 'not_found'
+      : fighting(world, actor)
+        ? 'invalid_state'
+        : 'unsupported_capability';
   const p = payload as { target_id?: EntityId; item_id?: EntityId };
   const target = (a: Offered) =>
     a.recipe ? detailOf(world, a.recipe.target) : (p.target_id ?? p.item_id);

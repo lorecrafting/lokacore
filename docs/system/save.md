@@ -279,3 +279,14 @@ Forced death custody does not apply a voluntary carrying ceiling. Unknown COMMIT
 continues fencing input and elapsed work until the existing reconciliation confirms
 all prior or all next rows. The API1.5 content requirement and exact release pin are the
 compatibility gates; this addition uses existing save-v2 rows without a format bump.
+
+## Live encounter persistence (M6-A)
+
+Encounter rows and combat job binding/cancellation commit in the existing changed-row
+transaction with HP, RNG, corpse identities/custody, credit facts, head and receipt.
+Reopen validates participants, authored profile/room, round/current job relationship
+and row shape before exposing play. A saved open encounter resumes its saved due time
+and initiative. Closed/cancelled occurrences cannot attack after reopen. Unknown COMMIT
+fences both input and elapsed work until complete prior/next state is reconciled;
+replay allocates and credits nothing. This uses save-v2 without a table/format migration;
+API1.6 and the exact release pin protect compatibility and existing owner saves.
