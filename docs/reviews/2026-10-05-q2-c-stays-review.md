@@ -67,3 +67,17 @@ VERIFICATION:
 LIMITS:
 No files modified. No full check_all rerun, native/UI execution or owner-save access. Reopen probes used new sessions over in-memory SQLite, not file-backed close/reopen. Six source-head CI successes were supplied in the prompt.
 ```
+
+
+## Scoped primary re-review — PS-1, fix round 1
+
+Fix source: `bf5a5f2ee0e822443767da4b3e69618523ee5537`. **APPROVE; PS-1 closed.** No open primary-review items. The original source verdict and independent Sol finding above remain historical. This pass reviewed only the one-line guard, its new regression test, and the direct load/authority/session callers.
+
+- `mobile/authority/local-story/dialogue-save.ts:158` now rejects a present non-active quest without a completed handoff regardless of whether the receive occurred. It still permits absent or active Q2 before receiving the message, requires active Q2 after receipt but before handoff, and preserves the existing completed-handoff evidence checks. `store.ts:139`, `authority.ts:99` and `session.ts:248` keep the typed corruption/explicit recovery path and propagate genuine SQLite errors.
+- Independent disposable **file-backed** probe closed and reopened absent Q2, active Q2 after the real Q1 report but before the message branch, and the valid post-handoff terminal. All three opened with the expected literal quest state and original message custody. It separately changed only active Q2 to resolved/stays, closed the database, and reopened through localSession: save_corrupt, Start over available, and head/state/receipt rows unchanged before explicit recovery. Start over then opened a fresh game with an empty journal. Exit0.
+- Independent real SQLite error control acquired BEGIN EXCLUSIVE from a second connection exactly when retained dialogue recovery read its original receipt. The resulting locked-database error remained a storage failure: no corruption kind and no Start over offer. Releasing the lock restored normal opening with active Q2 and unchanged state rows. Exit0.
+- Restored the old received-only condition temporarily: both the developer's new regression and the independent file-backed probe failed, **exit1**. The mutant accepted the forged terminal. Restored the fix and removed the temporary probes before validation; no mutant or probe was committed.
+- `mise exec -- node --test mobile/authority/local-story/{vesper_message,session,start_over,faults}.test.ts`: **68 passed**, exit0 after restoration. The focused stays file alone also passed **22 tests** before mutation. This includes valid terminal reopen, old-pin refusal, existing corruption handling, real rollback and both unknown-COMMIT outcomes.
+- All six fix-source GitHub checks were independently confirmed green. Five redacted probe/log artifacts are privately retained with verified SHA256SUMS and separate verify output. Record/index commit and push use normal hooks.
+
+**Ponytail Review:** one condition at the existing consistency boundary fixes PS-1 without new machinery. No other source was changed or broadly re-reviewed. No Metro, DeviceHub, Simulator, preview, native tooling or owner-save operations occurred.
