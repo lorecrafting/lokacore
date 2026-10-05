@@ -8,6 +8,10 @@ and not repeated here.
 
 ## Product and scope
 
+- A3 requires an explicit Green Begin after a lawful terminal pair and acknowledged
+  bell; the five fixed local memories and completion report commit only on final
+  epilogue acknowledgement ([PM adoption](../decisions/pm-decision-a3-green-finale-2026-10-05.md)).
+
 - Q3-F offers an exact Belfry Silence choice only after Q2/rescued or stays,
   resolves fox once and retains a receipt-evidenced silent scene
   ([PM adoption](../decisions/pm-decision-q3-fox-silence-2026-10-05.md)).

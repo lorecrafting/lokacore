@@ -540,6 +540,47 @@ response as narration; he remains present and the chapel route remains open.
 The first accepted Q3 terminal choice closes both recipes. No lost/fox outcome,
 later allegiance switch, dawn scene or export is part of Q3-F.
 
+## A3 Green finale (planned)
+
+[A3 adoption](../decisions/pm-decision-a3-green-finale-2026-10-05.md) selects one
+explicit **Begin epilogue** action at Village Green after actor-owned terminal Q2
+rescued/stays/lost, terminal Q3 prior/fox, and the corresponding bell scene's final
+acknowledgement. The five legal pairs are rescued/prior, rescued/fox, stays/prior,
+stays/fox and lost/prior. The Q2 and Q3 receipt-backed terminals, bell fact and
+allegiance must agree; lost/fox is refused. Eligibility is derived from those durable
+rows and the unseen epilogue scene, without a separate armed flag. Arrival, already
+being at Green, display, elapsed settlement and reopen never start it. Ordinary
+movement and recovery remain available before Begin; no side quest is required.
+
+The existing Green gains an inspectable, non-readable `market_cross` detail, already
+described in its room text. Five exact pair-bound recipes target that detail. Under
+the current recipe projection they appear as ordinary World actions while the actor
+is at Green; no targetless recipe shape is added. The accepted Begin's
+`action_completed` must name that detail as its subject before it can start only its
+selected fixed, three-line modal scene. Begin writes no continuity export. The
+selected scene identity freezes the pair. Its final shown-line acknowledgement ends
+that scene and atomically assigns the following declared player memories and reaches
+`prologue_completed` with the listed outcome. Defaults are `unreached`. The dotted
+memory names express continuity semantics; the declared source fact keys are
+`memory_village_ending`, `memory_fox_fate` and `memory_chapter_1_guild_tilt`.
+
+| Q2 / Q3 | Bell rung | village ending | fox fate | guild tilt | completion outcome |
+|---|---|---|---|---|---|
+| rescued / prior | true | rescued | stilled | prior | rescued_prior |
+| rescued / fox | false | rescued | free | fox | rescued_fox |
+| stays / prior | true | stays | stilled | prior | stays_prior |
+| stays / fox | false | stays | free | fox | stays_fox |
+| lost / prior | true | lost | stilled | prior | lost_prior |
+
+Guild tilt is a categorical continuity preference, not faction points or membership;
+fox fate records the selected bell intent, not NPC removal. These memories are local
+durable facts in A3; cross-cartridge or account transport awaits a consumer. The
+compiler owns a reserved player fact marker for the story point's selected outcome.
+Only the story-point reach writes it. Compiler and loader validate the exact scene-end
+trigger, references, unique ownership, marker vocabulary and required API capability.
+The chapter's source copy is delegated to the content author under the owner's copy
+direction. This section adopts semantics and values, not final prose, IDs or hashes.
+
 ## Selected S2 authoring (pending implementation)
 
 The B2 release will author Peg and her one ledger at the chandler, plus the storeroom,

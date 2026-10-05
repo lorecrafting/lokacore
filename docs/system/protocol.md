@@ -233,6 +233,15 @@ ordinary contribution. Both invocation resolution and direct Command admission
 therefore refuse other commands with existing `unsupported_capability`, before
 clock or state changes. Continue is never a general engine VERBS entry.
 
+For A3, the new chapter's Continue input binds the drawn scene reference and shown
+one-based line. The projected control, invocation resolution, direct Command admission
+and scene rule compare that binding with the durable running scene. A fresh id with
+stale scene or line refuses without advancing, ending or exporting; exact accepted
+invocation replay returns its recorded result first. The implementation advances the
+current API and generated schemas together under the
+[forward-development decision](../decisions/owner-decision-forward-development-2026-10-05.md);
+the resulting API version and wire shape remain unset until implementation.
+
 An open encounter restricts the fully composed ActionSet to actions whose resolved Command
 is exactly `flee`, `stand`, `look` or `scan`. This final restriction follows engine, cartridge,
 room and pending-choice contributions; a key or alias cannot change the allowed command set.
