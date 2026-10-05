@@ -89,10 +89,7 @@ export function group(buttons: Button[]) {
     // scan: the engine verb stays, but the phone shows nothing for it yet (DIFFERENCES 3), so no button.
     place: buttons.filter(
       (b) =>
-        (!aimed(b) || b.action_key === 'read') &&
-        !dir(b) &&
-        !OWN.includes(b.action_key) &&
-        b.action_key !== 'scan',
+        (!aimed(b) || b.place) && !dir(b) && !OWN.includes(b.action_key) && b.action_key !== 'scan',
     ),
     on: (id: string) => buttons.filter((b) => b.target_ids.includes(id)),
   };
@@ -257,7 +254,11 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
         return button(a, ` ${text(e.name)}${destination ? ` in ${text(destination)}` : ''}`, e.id);
       }),
   );
-  return [...place.map((a) => button(a, '')), ...travel(v), ...doors, ...held, ...asked(v, label)];
+  const placed = place.map((a) => ({
+    ...button(a, ''),
+    ...(a.target.kind === 'entity' && { place: true as const }),
+  }));
+  return [...placed, ...travel(v), ...doors, ...held, ...asked(v, label)];
 }
 
 // Capture only the interaction, not clock/resources or the whole GameView.
