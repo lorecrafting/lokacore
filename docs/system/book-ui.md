@@ -490,3 +490,24 @@ and reopen. No new watch page, immunity while reading, countdown, nighttime wait
 optimistic follow or timer-driven movement is added. Browser proof must walk the
 real start→leader departure→player join→pause/rejoin→death/restart→success route;
 native verification remains paused under the owner decision.
+
+## C3 living hound and loot details
+
+**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+projects each co-present living hound as its own existing NPC detail/action target,
+with its exact EntityId and current HP condition. Shared blueprint names may be
+the same; selecting an entry binds that instance, never the first definition match.
+Departure/death prunes its detail route and stale Attack revalidates presence/life;
+a different generation cannot inherit the old invocation. Adjacent Scan includes
+living spawned members through ordinary movement sight. HP0 hounds are absent.
+
+Attack opens the existing Combat page, with C1 defenses and only its current
+Stand/Flee/Look/Scan controls. Committed death closes once; the room then exposes
+the real public hound corpse and its ordinary Contents/Take path. Successful Take
+shows that exact pelt in Carrying, with committed custody narration once. Refused,
+pending or faulted commands claim no spawn, kill or loot. Reopen uses structured
+receipt routing, keeping combat history on Combat and Take history on item detail.
+No ecology status screen, countdown, Skin verb or next-day instruction is needed.
+An all-hours fresh-game Book walk uses existing initial hounds in either allowed
+room, following adjacent sight now when home is empty. Required story, loot/corpse
+recovery and that walk never require waiting for respawn, wandering or darkness.

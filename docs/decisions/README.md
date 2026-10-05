@@ -219,3 +219,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [B7 Well and waterskin](pm-decision-b7-well-waterskin-2026-10-05.md): two real finite Peg offers, mass-accounted water and atomic Fill/Pour/Drink with receipt-backed recovery.
 
 - [C2 finite Watchman's Rounds](pm-decision-c2-watchmans-rounds-2026-10-05.md): all-hours explicit leader steps, causal checkpoint credit, recoverable death failure and trust-only completion.
+
+- [C3 bounded living Fen hounds](pm-decision-c3-living-hounds-2026-10-05.md): exact spawned bundles, day/night slot bounds, deliberate fights and conserved pelt loot.

@@ -1008,3 +1008,53 @@ pennies or item. C1 remains the sole swords/gift lesson consumer. Both resolved
 trust and nonterminal attempt failure have retained causal evidence, not room-count
 inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
 are outside this selected consumer.
+
+## C3 bounded living hounds (selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c3-living-hounds-2026-10-05.md)
+selects the first dynamic population consumer; [cartridge](cartridge.md#c3-hound-population-and-loot)
+owns its bounds, periods, area and profiles. C3 hounds engage only on deliberate
+Attack using C1's single-opponent resolver. C4 owns aggression, pack assistance and
+enemy flight; C5 owns actual bleeding. No hound is a required quest objective.
+
+One instance-scoped plan owns a fixed ordered set of slots. A slot retains its
+generation, exact current hound identity and optional death-to-replacement due time.
+Never-used slots have generation0, null member and null due time. Occupied slots
+start at generation1; a living member has null replacement due. A proven fatal HP
+transition retains the dead member identity and sets due = fatal clock + declared
+replacement delay in the same fatal writer group. Only then may a slot replace it
+at or after due, incrementing generation and allocating a fresh hound and pelt.
+Old identities, HP0, corpses and taken loot remain; they are not active membership.
+
+The first daytime-target slots can fill at every hour; extra nighttime-target
+slots can fill only in the authored night window. Existing live extra members
+remain at dawn. Count all plan-owned living members across both allowed rooms,
+not only the home room; never count authored rats or another plan's animals.
+An eligible never-used slot fills immediately; a dead slot respects its due time
+even when night raises the target. No silent live retirement, corpse decay or
+population-disable consumer is selected. This bounds live membership and scheduled
+work, not total historical corpse/identity/save size.
+
+Fresh worlds initialize the same checked bundle/state transition used by live
+replacement, under the existing genesis allocator. One current plan-owned job
+handles all slots, in slot order. Its successor is due at the earliest next wander
+boundary, day/night target boundary or eligible replacement time, strictly after
+this occurrence. Ignore past due times for night-only slots while ineligible;
+the next night boundary reconsideration prevents a zero-time loop. Fatal changes
+recompute the earliest job only if needed, atomically cancelling/replacing its old
+binding. Existing due ordering, segmentation and shared command budgets apply;
+plan work cannot scan historical created rows to find its six current members.
+
+At a wander boundary each living, unengaged member alternates between the two
+adjacent declared rooms through ordinary legal movement. A blocked edge leaves it
+in place; it spends no RNG or player MV. A newly spawned member stays at home for
+that occurrence. An open encounter suppresses its voluntary wander; dead members
+never move. No hound enters the required rescue/shrine corridor. Replacement and
+wandering grant no quest, skill, kill credit or money. Immutable template metadata
+never stores instance HP or location; every query and combat job uses the actual
+runtime EntityId. The created hound's lethal producer uses its declared hound corpse
+and transfers its same directly held pelt through ordinary death custody once.
+
+Combat loss leaves an immediate safe return/recovery route; surviving hounds can
+be deliberately retried now, and defeated hounds' loot is immediately available.
+No required chapter path or Book proof waits for a replacement or night.

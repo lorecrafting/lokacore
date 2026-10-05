@@ -811,3 +811,46 @@ wrong row identities and ordinary writes to reserved state. World route/count va
 are cartridge data, never presenter/engine chapter literals; existing safety budgets
 bound all validation/traversal. Target C2 release/API/hash/IDs remain null until the
 reviewed C1/B5 integration is re-pinned and independently derived.
+
+## C3 hound population and loot
+
+**Selected, pending implementation.** The [population contract](mechanics.md#c3-bounded-living-hounds-selected-contract)
+adds one instance-scoped `fen_hounds` plan and one fixed bundle. These are PM-selected
+chapter values, not engine/presenter constants or claimed owner preferences.
+
+| Parameter | Selected chapter value |
+|---|---|
+| Live cap / ordered slot count | 6 / 6 |
+| Daytime / nighttime eligible slot targets | 4 / 6 |
+| Night window | calendar hours [20,6), wrapping midnight |
+| Replacement delay | one authored world day (currently 86400 units) after death |
+| Wander interval | one authored world hour (currently 3600 units), aligned from time0 |
+| Home / allowed area | Hound Run / Hound Run and Adder Nest only |
+| Bundle | one hound and one pelt directly held by that new hound |
+| Hound HP minimum / maximum / start / gain | 0 / 8 / 8 / 0 |
+| Hound attack chance / fixed damage | 80 / 1 |
+| Pelt mass / equipment / sale offer | 250g / none / none |
+| Hound corpse | new room-fixed, public NPC corpse template, mass0, ordinary unbounded container |
+
+Add Reed Bank east ↔ Hound Run west and Hound Run east ↔ Adder Nest west,
+with gnawed-bones and empty-nest noun details. All exits are free of gates, light,
+skill and hour requirements; Adder Nest contains no live adder or harvest node in
+C3. No exit points at unbuilt Marsh Light. Other room connections stay deferred
+to their owning slices. The existing Reed Bank–Mire–Fox Hollow main story route
+remains usable at all hours without entering the population area.
+
+Hound/pelt definitions are bundle templates, not additional authored birth spawns.
+The plan binds its exact NPC, item and NPC corpse definitions, home and ordered
+allowed rooms, eligible slot targets, time window and periods. Require resolved
+correct-kind short references, distinct allowed rooms connected by legal reciprocal
+edges, positive safe calendar products/periods, targets <= cap, and the exact bounded
+bundle shape. Hound HP/attack obey existing profile validation; pelt has ordinary
+item metadata and no lid, slot, children or capacity; corpse obeys M5 room-container
+validation. Unknown fields and malformed origin/job/state declarations refuse at
+compile/load; inspect actual slot bounds before traversal or allocation.
+
+No B3 Sell extension is needed to prove real loot: legal Take places the same pelt
+in Carrying, and Drop/Put/death preserve it. Rat corpse selection and five finite
+S1 credits retain their declared consumer. Future deer/crows, bell disable and C4
+must amend their actual additional contracts. Successor release/API/hash/fresh IDs
+remain null until the reviewed integrated predecessor is known.

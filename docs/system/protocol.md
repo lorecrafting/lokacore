@@ -678,3 +678,48 @@ neither relation adds a second player transfer or steals the other's mutation ta
 No due-job chain, new player verb, global objective interpreter or per-frame writer
 is needed. Declare new typed state/transition bounds and planted invalid fixtures;
 update generated contracts and current release pins in the implementation PR.
+
+## C3 spawned bundles and population composition
+
+**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+requires a checked extension to death-only creation, not permission to trust the
+currently schema-only `spawned` origin. Register the minimum typed population row,
+full-prior-row transition/mutation target, plan-owned job binding and invariants.
+One plan row contains fixed ordered slots plus current job ID and next wander due;
+each slot contains generation, member ID and replacement due. State cannot be
+forged through ordinary fact assignment or a player-accessible population verb.
+Story admission remains TypeScript; added state/delta/precondition semantics and
+creation validation retain both-kernel literal conformance then differential proof.
+
+Each immutable spawned identity binds declared plan and bundle, slot, generation,
+creation occurrence and hound member ID, with role hound or pelt. The hound binds
+itself; its one pelt binds that exact hound, with matching origin fields. Allocate
+hound before pelt in slot order using the existing occurrence allocator. IDs must
+be fresh across authored, created and holder identities. Exact paired definition,
+origin and membership proof rejects extra/missing/duplicate children, cross-plan
+parents, reused generations and arbitrary nested spawn trees.
+
+Each create remains immediately followed by same-group null-source placement:
+hound into the declared home room, then pelt into that newly created hound. The
+second destination is the sole new exception to room-only creation placement.
+Initialize the exact hound HP row and commit both identities, placements and slot
+transition in one writer group. Bundle completeness is checked at the complete
+atomic group; valid paired prefixes must hydrate for later proposal reads without
+mistaking a temporarily unfinished pair for a corrupt complete state. Generic
+source/cycle/capacity guards and one-container proof stay in force.
+
+Derived dynamic entities/resource specs/capacity and known-victim observations
+include proven spawned hounds and pelts. `entityIds[DefinitionRef]` remains the
+one-authored-instance map; it cannot pick a population member. Attack, targeting,
+view, HP, death and encounters bind exact runtime IDs. A hound death selects its
+plan's NPC corpse template and validates its actual dynamic victim, retaining the
+ordinary player/default authored NPC corpse contracts. S1 cannot credit a hound.
+
+Population owns membership/eligibility/bounded creation; movement owns legal
+transfer; combat/resource/death own loss, closure, corpse and loot transfer;
+schedule dispatches the exact saved plan/job occurrence under existing causation
+and due ordering. Only that current pending binding may run; replayed, cancelled
+or stale occurrences create/move/draw nothing. All writes use existing root
+proposal, conflicts, shared work counters and changed-row transaction. No public
+spawn action, per-hound job, global ecology service or unbounded history scan is
+required. New schemas get invalid fixtures and required/bound mutant sweeps.
