@@ -13,6 +13,10 @@ and not repeated here.
   ([PM adoption](../decisions/pm-decision-q3-fox-silence-2026-10-05.md)).
 
 - B1 uses the delegated [chapter calendar/status selection](../decisions/pm-decision-b1-calendar-status-2026-10-05.md): cartridge time units and sky phases drive confirmed Book/CLI status; deadline effects follow in B2.
+
+- B2 S2 uses the real public Aldric, Peg's always-reachable offer, an inclusive chapter
+  deadline and a conserved funded penny reward; the selected source contract awaits
+  implementation ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
 - Q3-B uses an exact bell-detail recipe, typed terminal reactions and an evidenced
   quest-resolution scene start for the public prior/lost path ([PM adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md)).
 

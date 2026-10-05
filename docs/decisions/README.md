@@ -162,6 +162,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - PM-selected future planning, review/implementation pending: [later Ashmere story reconciliation](pm-decision-later-story-reconciliation-2026-10-04.md), with [canonical ending selectors](../LATER-ENDINGS.md).
 
 - [M2-A position recovery](pm-decision-m2-a-position-recovery-2026-10-04.md): exact fractions, player rate/position agreement, Save validation and the actual sampler consumer.
+- [B2 Chandler's Debt PM adoption](pm-decision-b2-chandlers-debt-2026-10-05.md): public Aldric handoff, exact deadline, conserved pennies and once-only expiry for the real chapter; source proof pending.
 
 - [M3-A carrying ceiling](pm-decision-m3-a-carrying-ceiling-2026-10-04.md): PM selection under mechanics delegation; sampler consumer and bounded admission.
 

@@ -363,3 +363,15 @@ current shared availability and freshness. Confirmed lines appear once under the
 original speaker after description and before options, including receipt recovery on reopen.
 Pending/refused/stale replies never narrate success. Journal and Green/Elspeth variants read
 committed following/separated/rescued/stays state; there is no new UI mode.
+
+## Selected S2 Book behavior (pending implementation)
+
+Peg's offered choice says the actual on-time deadline before or at 151200, says
+late-only afterward through 237600, and explains an elapsed unaccepted offer at
+237601 or later. Aldric's public S2 delivery appears only when the exact bound
+ledger is directly held and the actor-owned S2 is eligible. The journal and NPC
+history use confirmed quest, fact and receipt truth for on-time, late or expired
+outcomes; a stale displayed choice can refuse safely after due work, without a
+false success entry. Neither the page nor reading suspends the clock or demands a
+Wait. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
+These controls await B2 implementation.

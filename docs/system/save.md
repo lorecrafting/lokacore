@@ -398,3 +398,16 @@ narration. The latest committed escort transition must match the stored relation
 requires the fatal transition's death event and player-body transfer. Unrelated latest
 receipts and current room never prove success. Existing rollback,
 unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchanged.
+
+## Selected S2 recovery (pending implementation)
+
+The B2 S2 occurrence, bound actor/Peg/Aldric/ledger, expiry job and any explicit
+participating penny rows are saved as ordinary changed rows with the same receipt as
+their accepted decision. Reopen validates the original IDs against the pinned release,
+quest terminal state against `priory.tithe_delivered`, the pending/cancelled job against
+the occurrence, exact participating balances and a retained choice/receipt against
+its actual transfer and outcome. A missing, malformed or contradictory row refuses
+as `save_corrupt` without guessed repair. Unknown COMMIT stays fenced; receipt replay
+cannot duplicate the ledger, payout or penalty. The deadline keeps running through
+death and reopen. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
+This is a selected next-release recovery rule, not a claim about current saves.
