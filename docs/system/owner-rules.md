@@ -155,6 +155,8 @@ and not repeated here.
 
 The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sources.
 
+- Local TypeScript/UI edits use an isolated Debug Simulator and Metro with Fast Refresh; PR gates
+  still run at handoff and merge ([record](../decisions/owner-decision-local-edit-loop-2026-10-04.md)).
 - Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
 - A fresh agent of any vendor that authored none of the work is an independent reviewer
   ([record](../archive/decisions/owner-decision-reviewers-2026-09-24.md)).
