@@ -82,3 +82,27 @@ Fix source: `ac43394a1bd15d6bd4a69343b9f361b99a756c82`. **APPROVE; R1 closed.** 
 - Removed the new source guard in the disposable worktree and ran the named `malformed retained riddle source` control. Both null/missing subtests failed, exit1: actual error kind `undefined`, expected literal `save_corrupt`. Restored the guard before validation and committed no mutant.
 - `mise exec -- node --test mobile/authority/local-story/{wren_riddle,session,start_over}.test.ts mobile/app/book/presenter.test.ts`: **40 passed**, exit0 after restoration. Includes existing valid replay/identity, narration routing, malformed receipt, elapsed freshness and failed/lost COMMIT behavior.
 - All **24** retained evidence checksums verified, including the fix's red and restored-green logs. Ponytail Review: one existing boundary-validator call is sufficient; no new catch, abstraction or persistence machinery. Record commit/push uses normal hooks. No native, preview, device or owner-save work occurred.
+
+## Independent Sol scoped fix recheck
+
+The PM ran a fresh read-only Codex Sol opinion on the exact fix source head. Its answer is reproduced verbatim.
+
+```text
+VERDICT: APPROVE
+HEAD: ac43394a1bd15d6bd4a69343b9f361b99a756c82
+
+R1 CLOSED. No new findings.
+mobile/authority/local-story/dialogue-receipt.ts:29 validates saved source before dereferencing it, enabling typed save_corrupt recovery.
+
+VERIFICATION
+- Six focused repository tests and four independent real-SQLite in-memory controls passed.
+- Null/missing and other malformed sources offer Start over without changing authority rows before explicit recovery.
+- Explicit Start over produces a working new run, clears receipts and preserves reports.
+- Valid wrong/correct receipts preserve command and original-speaker identity across reopen; exact replay succeeds and changed-answer replay conflicts.
+- Genuine SQLite errors, including an error injected at opening narration’s read operation, remain operational errors without a Start over offer.
+- Independent red control removed only the guard through an in-memory module hook: both new source cases failed with missing save_corrupt kind, exit 1.
+- Fix and direct callers reviewed; no unnecessary machinery found.
+
+LIMITS
+File-backed/process-restart tests, full checks and remote CI were not rerun. No files modified, owner saves accessed, or preview/Metro/Simulator/device/native tooling run.
+```
