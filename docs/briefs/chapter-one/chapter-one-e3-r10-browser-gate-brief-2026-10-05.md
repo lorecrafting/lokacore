@@ -1,0 +1,74 @@
+# E3 — Full-chapter R10 browser content gate
+
+Provisional PM brief, 2026-10-05. **Provisional until all mechanics/content merge; not source GO, full R10 gate approval, native certification or public-release readiness.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Proof prerequisites: [E1 exact-candidate certification](chapter-one-e1-r9-certification-brief-2026-10-05.md), [E2 interaction cartridge](chapter-one-e2-r9c-interactions-brief-2026-10-05.md).
+
+## Outcome, branch and dependencies
+
+Suggested branch: `proof/e3-r10-browser-content-gate`; developer creates its own worktree. Prove the complete 57-room/ten-quest Missing Child chapter is reachable, coherent and understandable using the existing shared Expo/React Native Book client in a browser, with exact-candidate engine/save proofs. Close a slim browser-content checklist while preserving an explicit native/prelaunch checkpoint. Do not label this subset “full R10 passed”: archived R10's physical-harness clause remains pending.
+
+Final read-only inspected clean baseline PM `f467f75b1e5a68462e61987f078508dafcf97a42` has chapter v012/API1.11, 16 room files and three quests; ROADMAP records PR190 rescue merged with both complete Q2 return paths. All A–D chapter slices and E1/E2 remain dependencies; full completion cannot be inferred from this baseline. Final chapter release/hash/allocation, engine/check/schema/policy revision, E3 head/PR, browser host and receipts remain **null**.
+
+Before assignment, re-pin the actual A–D merges, chosen mechanics/parameters/failure policies and all named carries. Browser-host compatibility, if needed, is a separate minimal prerequisite using the same GameSession/authority boundary; E3 cannot silently substitute a standalone web game or a second save model. Record browser-first/native-deferral in a reviewed decision/workflow amendment and keep shared contract/engine/save CI, including headless `sim`, active. Owner saves/Simulator state stay untouched.
+
+## Governing sources and corrected obligations
+
+| Requirement | Governing clause |
+|---|---|
+| Player-facing product and authoring proof, not synthetic breadth | `docs/archive/spec/14-implementation-plan.md` R10 Objective/Important/Gate R10 |
+| Frozen artifact, mandatory gates and bot/world evidence | `docs/archive/spec/09-cartridge-lab-certification.md` §§1a,9,11–12,18–20,25,36–37,42 |
+| Full chapter places/quests/cast/scenes | Archived `00-first-cartridge-design.md` §11 and `00a-chapter-one-content.md` §§2,4–11, as superseded by current PM/owner content decisions |
+| Three endings, separate stays and 19:00 ambiguity | `docs/decisions/owner-decision-chapter-one-content-2026-10-02.md`; merged A1–A3/D2 clauses at re-pin |
+| No required idle waits, genuine cast and voluntary finale | `docs/decisions/owner-decision-no-wait-opening-2026-10-05.md`, real chapter cast/cutover decisions and A–D adopted content records |
+| Correct shared Book, authority/freshness, exact current save | `docs/system/{book-ui,architecture,protocol,mechanics,cartridge,save}.md` updated governing sections, especially save Story points/Commit, fence, reconcile |
+| Slim gate and independent evidence verification | `docs/WORKFLOW.md` Milestone gate/Verify and review/Merge; `docs/lessons/evidence.md`; E1/E2 briefs |
+
+57 means **25 Ashmere + 22 Fen + 10 public Priory** reachable under legal declared scenarios, including transport, water and barriers. Ten playable quests are current Q1 The First Lead, Q2 Missing Child, Q3 Bell, S1 Maud, S2 Chandler, S3 Watch, S4 Wisp, S9 Herbs, S10 Inn dream and S27 Marsh expedition. The retired Ferryman's Favor/Bram title is not an additional Q1 requirement; verify actual adopted Q1 and ferry service.
+
+Five valid child×allegiance variants are `rescued×prior`, `rescued×fox`, `stays×prior`, `stays×fox`, `lost×prior`. `lost×fox` must not be reachable. Lost occurs only on the adopted committed meeting-before-ring ordering; raw room arrival is not meeting credit. Sides do not gate main finale. Keep the archived under-400-command fresh main-path goal, with actual total command count and separately disclosed elapsed/control/retry counts; never manipulate counting to report a pass.
+
+Content fixture corrections: two novices at cloister **19:00**, North Gate all-hours, no tide gate unless a later actual consumer is explicitly adopted. Five finite cellar rats remain the S1 kill oracle. Hound ≤6/crow-nest ≤8 are expected only if those settings are retained by their consuming PM records; if changed, cite independently selected literal oracle. No obsolete 41-item/16-NPC count is used to resurrect Bram or reject legitimately retired content.
+
+## Files and scope
+
+Reuse full chapter `cartridges/ashmere_missing_child/`, its frozen current artifact/hash/allocation fixtures and transcript/bot helpers; current kernel simulator/invariant checks; real-SQLite chapter/recovery/story-point tests; actual Book client/browser entrypoint from its prerequisite; E1/E2 runner/evidence. Read `docs/lessons/{contracts,storage,evidence,mobile}.md` before the corresponding changes. New files should be bounded player-path transcripts/scenario tests only where the current suite misses a distinct regression, a compact evidence/checklist record, an authoring pain log and review/index links.
+
+In scope: active system/future/roadmap facts reconciled to final implementation; exact reproducible content evidence; small proof-tool corrections if required. Content/mechanic defects go to their owning developer for reviewed fixes, then the candidate is refrozen and affected proofs rerun. Do not hide a last-minute world change in the gate report.
+
+Out of scope: source-generating factory/Builder, native builds/DeviceHub/Simulator/owner save actions, public account sync, store/signing/install proof, paid EAS, Realm, cloud backup, UI blur, broad historical fixture/evidence cleanup or a new game UI. Source checks and archived documents are evidence inputs, not human/browser observations.
+
+## Acceptance and evidence table
+
+Freeze the exact normalized chapter artifact **after** all source/content fixes. Receipts bind final content hash/version, source/engine/check SHA, schemas/locks/policy and toolchain/host identity using E1. A later semantic edit invalidates the affected candidate receipts. Review-only/doc-only final head is separately identified; justify source equivalence rather than falsely say old source checks ran on that head.
+
+| Proof | Required observable evidence |
+|---|---|
+| Static and source coverage | Compiler/loader/static gates admit the final artifact; every shipped room/NPC/item/action/topic/quest/scene has a real source/use and truthful text disposition. No active exit targets an absent room or stale sampler content. Count and lists are derived from artifact identity and independently checked against the selected 25/22/10 ledger; source count alone is insufficient. |
+| All 57 rooms and recovery routes | Legal scenario routes visit all rooms, including fare/transport return, bottom-room water access, coherent barrier faces and hidden adopted links. Test payment/load/policy/skill/light constraints separately from graph edges. Recover from death with money/light/key/follower on the corpse without a sole lost resource or required waiting; demonstrate actual legal commands back to custody and rejoin. Required Q2 route stays all-hours. |
+| Ten complete quests | Each has legal activation, objective credit, complete/fail/abandon/retry/expiry disposition as selected, turn-in/reward where applicable, truthful journal and next consumer. Timed S2 proves literal on-time/late/expiry boundaries; S3/S27 death/route failure cannot falsely credit; S9 repeat cap/supply; S10 actual Rest and acknowledged dream. No selectable unfinished branch. |
+| Five fresh main paths | Deterministic bots start from genuine fresh saves for each valid pair, execute main quests and final Green acknowledgement, and finish under the archived command goal with disclosed counts. The exact terminal facts, scenes, named cast reactions and pending local report are literal and branch-correct. Attempt `lost×fox`, pre-meeting return, prior→fox switch, stale choice and repeated finale; each refuses or replays correctly. |
+| Consequence/report recovery | At every committed scene/consequence boundary, real loader reopen and retry yields once-only reward/fact/custody/export and one local `prologue_completed` report. No final report/export before last acknowledgement, no teleport/time jump on render, no repeated benefit from lost acknowledgement. A report capture test does not claim public authenticated sync. |
+| Completionist and duplicate tapper | Completionist executes every selected optional quest/action/topic and useful content route, recording exact uncovered dispositions. Duplicate tapper repeats/changes IDs around transfer, purchase, reward, riddle, transport and scene transitions; replay is once-only and altered payload conflicts. Credit depends on real actions/participants, not inventory/state fiction. |
+| Ambiguity and touch/text agreement | Cloister 19:00 novice candidates are distinct, ordered and separately selectable; Wren boot/leather boots have real reachable custody and produce literal boot ambiguity. Same chosen target via touch/text gives equal domain result; exact details/Back paths remain usable and identity-bound. |
+| Thirty logical days | Controlled authority elapsed input, never real sleeping, runs all actual schedules/populations/light/jobs/reactions for 30 adopted calendar days. Every scheduled destination is observed; caps/provenance/stock/loot/quantities conserve; fuel/RNG/clock replay identically; due drains are bounded and no reaction loop/unbounded growth. Report seeds/command stream, sample strategy and exact watched invariants, not only final state. Optional tide has an explicit adopted/not-applicable row. |
+| Browser shared client | Controlled fresh isolated browser run uses the reviewed Book and GameSession/authority host. Observe visible opening, discovery/journal, combat/recovery, purchase/transport, choices/scenes/finale, navigation and stale-control behavior. Reload/reopen during representative durable continuations; record the actual browser storage adapter and limits. A screenshot alone is not evidence for a completed action or durable commit. |
+| Human comprehension and authoring | Owner or actual fresh tester walks the shared browser candidate without hidden state commands; record which paths were observed, instruction/help given, outcome comprehension and actual limitations. Keep remaining fresh-touch/native comprehension carries pending. Log repetitive/confusing/error-prone source authoring operations for R11 with concrete file/action examples; do not build generalized tools during this gate. |
+
+Human/browser smoke complements bots; neither is sufficient alone. If an actual human run is unavailable, finish independent headless proof and leave the HUMAN/checklist row pending. Do not invent an observation or close the browser-content gate without its chosen human obligation.
+
+## Red controls, checks and gate review
+
+Reuse demonstrated earlier regression controls; add only uncovered plausible failures and name each new test's realistic break before its body. At minimum the evidence must show a required-route break fails reachability, player-alone/wrong-actor credit fails the quest proof, reward/report duplication fails retry proof, premature export fails acknowledged finale, population cap/provenance loss fails the long run, and unknown applicability fails E1. A controlled blocked ferry return is a useful route red control: restore the actual return policy and rerun, without modifying an owner save. Keep expected room/quest/outcome values literal or independently authored; never infer expected success from the bot's current outcome.
+
+Run `mise exec -- bin/check_all.sh`, focused full-chapter compiler/kernel/Book/local-authority/transcript evidence and E1/E2 exact-candidate checks; normal pre-push plus exact-head shared CI including `sim`. Record executed commands/status, retained raw-output hashes and privacy-redaction controls. Apply Ponytail Review and actual-diff correctness self-review before handoff.
+
+Gate review follows the slim workflow: one Astra audit of the stage's actual riskiest code and one fresh checklist reviewer verifying every applicable proof link, every carry's owner/trigger, and docs tidy over changed live milestone docs. No separate narrative docs-only double review. Tidy removes duplicated facts/stale lessons/catch-all drift; leave archived/review/decision history intact. Owner browser play, when actually done, is identified as browser play. Merge with merge commit only after findings close and all started head jobs finish green.
+
+## Deferred native/prelaunch checkpoint and stop triggers
+
+The gate record must visibly distinguish **browser content complete** from native/full-R10/public readiness. Deferred checkpoint includes actual iOS/Android builds and host fixtures as applicable, Hermes replay/DET-02/08, offline app kill/background/resume/save-error UI, native SQLite integration, input/accessibility/touch/performance, UI-FUZZ-01/UI-PHONE-01 and remaining fresh-tester/device carries. Browser/Node proof cannot mark R10's physical developer-harness smoke passed. Public free release still needs applicable R12/R12A ACCOUNT/RUN, installation/signing/store/human gates. No native step runs until explicitly resumed.
+
+Stop and return exact evidence if a required room/quest/outcome is missing, a recovery route traps the player, the under-400 goal fails, the human run is absent, a policy/expected fixture conflicts with the adopted contract, final source changes invalidate receipts, or unavailable host evidence is being presented as pass. Narrowing to fewer rooms/quests/endings is not a fix. PM separates the owning reviewed fix or policy decision from this closure record. Native deferral is a carry, not a waiver of full release scope.
+
+Handoff reports exact candidate/check identities; real observed 57-room/ten-quest/five-variant and thirty-day receipts; browser-human result; authored pain points; independent reviewer verdict; open/deferred rows. Claim only the scope actually proved. This brief remains provisional and all final pins/verdicts null until that evidence exists.
+
+Planning self-review: Ponytail retained existing shared client/harnesses, one evidence/checklist record and a pain log; no Builder/factory or separate web game. Correctness pass checked the full 57/10/five-pair scope, no-wait/recovery scenarios, exact final candidate and explicit pending human/native/public rows. This author check is not independent implementation review.
