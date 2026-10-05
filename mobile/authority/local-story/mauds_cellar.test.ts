@@ -18,7 +18,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const bundle = read('protocol/fixtures/cartridge_sampler_hash.json');
+const bundle = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),

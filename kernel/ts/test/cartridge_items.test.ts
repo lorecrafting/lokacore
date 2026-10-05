@@ -1,5 +1,5 @@
 // The loader on items and NPCs (R5 S4; protocol/cartridge.schema.json DiagnosticCode). Mutants
-// of the items known answer (protocol/fixtures/cartridge_items_hash.json) are re-hashed with
+// of the items known answer (protocol/fixtures/containers_cartridge_items_hash.json) are re-hashed with
 // node:crypto over sorted-key JSON.stringify (the canonical form for these values), never by
 // the kernel; expected diagnostics are hand-written.
 import assert from 'node:assert/strict';
@@ -10,7 +10,7 @@ import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 import { validate } from '../src/foundation/validate.ts';
 
-const kat = read('protocol/fixtures/cartridge_items_hash.json');
+const kat = read('protocol/fixtures/containers_cartridge_items_hash.json');
 const sorted = (v: any): any =>
   Array.isArray(v)
     ? v.map(sorted)
@@ -137,7 +137,10 @@ test('a touch link naming no detail, item or NPC it may name is UNRESOLVED_REFER
 // reach a room or hold more than their capacity.
 test('items that start in a cycle or over a capacity are rejected', () => {
   fails(
-    (c) => (at(c, 'satchel').location = { in: 'item', item: ref('item', 'lamp_oil') }),
+    (c) => {
+      at(c, 'lamp_oil').container = true;
+      at(c, 'satchel').location = { in: 'item', item: ref('item', 'lamp_oil') };
+    },
     'CONTAINMENT_CYCLE',
     `${item('lamp_oil')}.location.item`, // each item on the cycle; the first in path order
   );
@@ -295,4 +298,38 @@ test('carrying loader requires API 1.3 and containment', () => {
       [old.diagnostic.code, old.diagnostic.path, old.diagnostic.data],
       ['KERNEL_API_UNSUPPORTED', '.cartridge.manifest.requires.kernel_api', { installed: '1.2' }],
     );
+});
+
+// Breaks: keys gain custody from a child reference, capacity or lid without authored eligibility.
+test('only explicit receptacles may start with children or declare capacity and lids', () => {
+  for (const field of ['capacity', 'barrier'])
+    fails(
+      (c) => {
+        at(c, 'lantern')[field] = field === 'capacity' ? 1 : ref('barrier', 'lid');
+      },
+      'SCHEMA_VIOLATION',
+      `${item('lantern')}.${field}`,
+      { error: 'invalid_value' },
+    );
+  fails(
+    (c) => {
+      delete at(c, 'satchel').container;
+      delete at(c, 'satchel').capacity;
+    },
+    'SCHEMA_VIOLATION',
+    `${item('lamp_oil')}.location.item`,
+    { error: 'invalid_value' },
+  );
+  assert.ok(
+    load((c) => {
+      delete at(c, 'satchel').capacity;
+    }).ok,
+  );
+});
+
+// Breaks: a required item property, occupancy/mass bound, closed shape or authority literal
+// disappears. Shared literal cases also run through the compiler's portable validator.
+test('item schema enforces its required fields, bounds and literal container authority', () => {
+  for (const row of read('protocol/fixtures/container_contracts.json'))
+    assert.equal(validate('ItemDefinition', row.value).length === 0, row.valid, row.name);
 });

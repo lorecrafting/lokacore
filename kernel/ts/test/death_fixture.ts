@@ -11,7 +11,7 @@ import { fact } from '../src/mechanics/position/shared.ts';
 import { key } from '../src/foundation/compose.ts';
 import { read } from './read.ts';
 
-export const bundle = read('protocol/fixtures/sampler_v008_hash.json');
+export const bundle = read('protocol/fixtures/containers_sampler_v008_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),

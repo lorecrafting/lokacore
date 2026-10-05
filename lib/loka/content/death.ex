@@ -27,6 +27,7 @@ defmodule Loka.Content.Death do
       death && ref(i["key"], "item", m) in [death["player_corpse"], death["npc_corpse"]]
 
     if(configured, do: [], else: [bad(at(rel, ["location"]))]) ++
+      if(i["container"] == true, do: [], else: [bad(at(rel, ["container"]))]) ++
       for(f <- ~w(capacity slot barrier), is_map_key(i, f), do: bad(at(rel, [f])))
   end
 

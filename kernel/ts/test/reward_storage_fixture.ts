@@ -14,7 +14,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { gameView } from '../src/runtime/world.ts';
 
-export const bundle = read('protocol/fixtures/reward_storage_hash.json');
+export const bundle = read('protocol/fixtures/containers_reward_storage_hash.json');
 export const prefix = 'reward_storage@0.0.1';
 export const ref = (kind: string, name: string) =>
   ({

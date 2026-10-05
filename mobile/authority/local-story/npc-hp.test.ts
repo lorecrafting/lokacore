@@ -27,7 +27,7 @@ import { load, type Receipt } from './store.ts';
 import { save, settle, scope, type Story } from './save.ts';
 import { openStory } from './authority.ts';
 
-const kat = read('protocol/fixtures/sampler_v007_hash.json');
+const kat = read('protocol/fixtures/containers_sampler_v007_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),
   INSTALLED,

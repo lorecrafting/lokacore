@@ -15,6 +15,7 @@ export function death(c: Obj, named: Checks['named']): Diagnostic[] {
     const at = `.cartridge.items${step(ref)}`;
     if (!d || ![d.player_corpse, d.npc_corpse].some((r) => refString(r) === ref))
       bad(`${at}.location`);
+    if (i.container !== true) bad(`${at}.container`);
     for (const field of ['capacity', 'slot', 'barrier'])
       if (i[field] !== undefined) bad(`${at}.${field}`);
   }

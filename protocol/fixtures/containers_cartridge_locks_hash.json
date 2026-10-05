@@ -1,0 +1,387 @@
+{
+  "description": "Current controlled receptacle derivative of cartridge_locks_hash; literal holder list in test/loka/cartridge_containers_hash.py; historical input remains frozen.",
+  "value": {
+    "actions": {},
+    "barriers": {
+      "ashmere_locks@0.0.1:barrier/box_lid": {
+        "initial": "closed",
+        "key": "box_lid",
+        "keywords": [
+          "lid",
+          "box_lid"
+        ],
+        "short": "barrier.box_lid.short"
+      },
+      "ashmere_locks@0.0.1:barrier/coffer_lid": {
+        "initial": "closed",
+        "key": "coffer_lid",
+        "keywords": [
+          "lid",
+          "coffer_lid"
+        ],
+        "short": "barrier.coffer_lid.short"
+      },
+      "ashmere_locks@0.0.1:barrier/trunk_lid": {
+        "initial": "locked",
+        "key": "trunk_lid",
+        "key_item": {
+          "cartridge_id": "ashmere_locks",
+          "cartridge_version": "0.0.1",
+          "key": "brass_key",
+          "kind": "item"
+        },
+        "keywords": [
+          "lid",
+          "trunk_lid"
+        ],
+        "short": "barrier.trunk_lid.short"
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_locks",
+      "cartridge_version": "0.0.1",
+      "key": "inn_rooms",
+      "kind": "room"
+    },
+    "facts": {},
+    "format": "loka-cartridge-v2",
+    "items": {
+      "ashmere_locks@0.0.1:item/brass_key": {
+        "description": "item.brass_key.description",
+        "key": "brass_key",
+        "keywords": [
+          "key",
+          "brass_key"
+        ],
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "sewing_box",
+            "kind": "item"
+          }
+        },
+        "room_line": "item.brass_key.room",
+        "short": "item.brass_key.short"
+      },
+      "ashmere_locks@0.0.1:item/coffer": {
+        "barrier": {
+          "cartridge_id": "ashmere_locks",
+          "cartridge_version": "0.0.1",
+          "key": "coffer_lid",
+          "kind": "barrier"
+        },
+        "description": "item.coffer.description",
+        "key": "coffer",
+        "keywords": [
+          "coffer"
+        ],
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "trunk",
+            "kind": "item"
+          }
+        },
+        "room_line": "item.coffer.room",
+        "short": "item.coffer.short",
+        "container": true
+      },
+      "ashmere_locks@0.0.1:item/letter": {
+        "description": "item.letter.description",
+        "key": "letter",
+        "keywords": [
+          "letter"
+        ],
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "trunk",
+            "kind": "item"
+          }
+        },
+        "room_line": "item.letter.room",
+        "short": "item.letter.short"
+      },
+      "ashmere_locks@0.0.1:item/locket": {
+        "description": "item.locket.description",
+        "key": "locket",
+        "keywords": [
+          "locket"
+        ],
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "coffer",
+            "kind": "item"
+          }
+        },
+        "room_line": "item.locket.room",
+        "short": "item.locket.short"
+      },
+      "ashmere_locks@0.0.1:item/penny": {
+        "description": "item.penny.description",
+        "key": "penny",
+        "keywords": [
+          "penny"
+        ],
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "purse",
+            "kind": "item"
+          }
+        },
+        "room_line": "item.penny.room",
+        "short": "item.penny.short"
+      },
+      "ashmere_locks@0.0.1:item/purse": {
+        "description": "item.purse.description",
+        "key": "purse",
+        "keywords": [
+          "purse"
+        ],
+        "location": {
+          "in": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "maud",
+            "kind": "npc"
+          }
+        },
+        "room_line": "item.purse.room",
+        "short": "item.purse.short",
+        "container": true
+      },
+      "ashmere_locks@0.0.1:item/ribbon": {
+        "description": "item.ribbon.description",
+        "key": "ribbon",
+        "keywords": [
+          "ribbon"
+        ],
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "coffer",
+            "kind": "item"
+          }
+        },
+        "room_line": "item.ribbon.room",
+        "short": "item.ribbon.short"
+      },
+      "ashmere_locks@0.0.1:item/sewing_box": {
+        "barrier": {
+          "cartridge_id": "ashmere_locks",
+          "cartridge_version": "0.0.1",
+          "key": "box_lid",
+          "kind": "barrier"
+        },
+        "description": "item.sewing_box.description",
+        "key": "sewing_box",
+        "keywords": [
+          "box",
+          "sewing_box"
+        ],
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "inn_rooms",
+            "kind": "room"
+          }
+        },
+        "room_line": "item.sewing_box.room",
+        "short": "item.sewing_box.short",
+        "container": true
+      },
+      "ashmere_locks@0.0.1:item/trunk": {
+        "barrier": {
+          "cartridge_id": "ashmere_locks",
+          "cartridge_version": "0.0.1",
+          "key": "trunk_lid",
+          "kind": "barrier"
+        },
+        "description": "item.trunk.description",
+        "key": "trunk",
+        "keywords": [
+          "trunk"
+        ],
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_locks",
+            "cartridge_version": "0.0.1",
+            "key": "inn_attic",
+            "kind": "room"
+          }
+        },
+        "room_line": "item.trunk.room",
+        "short": "item.trunk.short",
+        "container": true
+      }
+    },
+    "lock": {
+      "capabilities": {
+        "barrier": 1,
+        "containment": 1,
+        "movement": 1,
+        "resource": 1,
+        "schedule": 1
+      },
+      "format": "loka-capability-lock-v1"
+    },
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_locks",
+      "requires": {
+        "capabilities": {
+          "barrier": 1,
+          "containment": 1,
+          "movement": 1,
+          "resource": 1,
+          "schedule": 1
+        },
+        "client_features": [],
+        "content_schema": 1,
+        "kernel_api": {
+          "at_least": "1.0",
+          "below": "2.0"
+        },
+        "rule_ir": 1
+      },
+      "supported_profiles": [
+        "offline_private"
+      ],
+      "title": "Ashmere — Locks",
+      "version": "0.0.1"
+    },
+    "npcs": {
+      "ashmere_locks@0.0.1:npc/maud": {
+        "description": "npc.maud.description",
+        "key": "maud",
+        "keywords": [
+          "maud",
+          "seamstress"
+        ],
+        "room": {
+          "cartridge_id": "ashmere_locks",
+          "cartridge_version": "0.0.1",
+          "key": "inn_rooms",
+          "kind": "room"
+        },
+        "room_line": "npc.maud.room",
+        "short": "npc.maud.short"
+      }
+    },
+    "policies": {},
+    "resources": {
+      "ashmere_locks@0.0.1:resource/hp": {
+        "gain": 5,
+        "key": "hp",
+        "maximum": 20,
+        "minimum": 0,
+        "start": 20
+      },
+      "ashmere_locks@0.0.1:resource/ma": {
+        "gain": 4,
+        "key": "ma",
+        "maximum": 100,
+        "minimum": 0,
+        "start": 100
+      },
+      "ashmere_locks@0.0.1:resource/mv": {
+        "gain": 18,
+        "key": "mv",
+        "maximum": 82,
+        "minimum": 0,
+        "start": 82
+      }
+    },
+    "rooms": {
+      "ashmere_locks@0.0.1:room/inn_attic": {
+        "description": "room.inn_attic.description",
+        "exits": {
+          "down": {
+            "to": {
+              "cartridge_id": "ashmere_locks",
+              "cartridge_version": "0.0.1",
+              "key": "inn_rooms",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "inn_attic",
+        "title": "room.inn_attic.title"
+      },
+      "ashmere_locks@0.0.1:room/inn_rooms": {
+        "description": "room.inn_rooms.description",
+        "exits": {
+          "up": {
+            "to": {
+              "cartridge_id": "ashmere_locks",
+              "cartridge_version": "0.0.1",
+              "key": "inn_attic",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "inn_rooms",
+        "title": "room.inn_rooms.title"
+      }
+    },
+    "text": {
+      "barrier.box_lid.short": "the sewing box's lid",
+      "barrier.coffer_lid.short": "the coffer's lid",
+      "barrier.trunk_lid.short": "the trunk's lid",
+      "item.brass_key.description": "A brass key.",
+      "item.brass_key.room": "A [key] lies here.",
+      "item.brass_key.short": "a brass key",
+      "item.coffer.description": "A little coffer.",
+      "item.coffer.room": "A [coffer] lies here.",
+      "item.coffer.short": "a little coffer",
+      "item.letter.description": "A sealed letter.",
+      "item.letter.room": "A [letter] lies here.",
+      "item.letter.short": "a sealed letter",
+      "item.locket.description": "A silver locket.",
+      "item.locket.room": "A [locket] lies here.",
+      "item.locket.short": "a silver locket",
+      "item.penny.description": "A penny.",
+      "item.penny.room": "A [penny] lies here.",
+      "item.penny.short": "a penny",
+      "item.purse.description": "A leather purse.",
+      "item.purse.room": "A [purse] lies here.",
+      "item.purse.short": "a leather purse",
+      "item.ribbon.description": "A blue ribbon.",
+      "item.ribbon.room": "A [ribbon] lies here.",
+      "item.ribbon.short": "a blue ribbon",
+      "item.sewing_box.description": "A sewing box.",
+      "item.sewing_box.room": "A [box] lies here.",
+      "item.sewing_box.short": "a sewing box",
+      "item.trunk.description": "An iron-bound trunk.",
+      "item.trunk.room": "An iron-bound [trunk] stands here.",
+      "item.trunk.short": "an iron-bound trunk",
+      "npc.maud.description": "A seamstress with a purse at her belt.",
+      "npc.maud.room": "[Maud] the seamstress sits here, sewing.",
+      "npc.maud.short": "Maud the seamstress",
+      "room.inn_attic.description": "Low rafters and the smell of old straw.",
+      "room.inn_attic.title": "The Attic",
+      "room.inn_rooms.description": "A narrow passage of doors. A ladder climbs to the attic.",
+      "room.inn_rooms.title": "The Inn's Rooms"
+    }
+  },
+  "canonical": "{\"actions\":{},\"barriers\":{\"ashmere_locks@0.0.1:barrier/box_lid\":{\"initial\":\"closed\",\"key\":\"box_lid\",\"keywords\":[\"lid\",\"box_lid\"],\"short\":\"barrier.box_lid.short\"},\"ashmere_locks@0.0.1:barrier/coffer_lid\":{\"initial\":\"closed\",\"key\":\"coffer_lid\",\"keywords\":[\"lid\",\"coffer_lid\"],\"short\":\"barrier.coffer_lid.short\"},\"ashmere_locks@0.0.1:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"entry\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"facts\":{},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_locks@0.0.1:item/brass_key\":{\"description\":\"item.brass_key.description\",\"key\":\"brass_key\",\"keywords\":[\"key\",\"brass_key\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"sewing_box\",\"kind\":\"item\"}},\"room_line\":\"item.brass_key.room\",\"short\":\"item.brass_key.short\"},\"ashmere_locks@0.0.1:item/coffer\":{\"barrier\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"coffer_lid\",\"kind\":\"barrier\"},\"container\":true,\"description\":\"item.coffer.description\",\"key\":\"coffer\",\"keywords\":[\"coffer\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"trunk\",\"kind\":\"item\"}},\"room_line\":\"item.coffer.room\",\"short\":\"item.coffer.short\"},\"ashmere_locks@0.0.1:item/letter\":{\"description\":\"item.letter.description\",\"key\":\"letter\",\"keywords\":[\"letter\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"trunk\",\"kind\":\"item\"}},\"room_line\":\"item.letter.room\",\"short\":\"item.letter.short\"},\"ashmere_locks@0.0.1:item/locket\":{\"description\":\"item.locket.description\",\"key\":\"locket\",\"keywords\":[\"locket\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"coffer\",\"kind\":\"item\"}},\"room_line\":\"item.locket.room\",\"short\":\"item.locket.short\"},\"ashmere_locks@0.0.1:item/penny\":{\"description\":\"item.penny.description\",\"key\":\"penny\",\"keywords\":[\"penny\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"purse\",\"kind\":\"item\"}},\"room_line\":\"item.penny.room\",\"short\":\"item.penny.short\"},\"ashmere_locks@0.0.1:item/purse\":{\"container\":true,\"description\":\"item.purse.description\",\"key\":\"purse\",\"keywords\":[\"purse\"],\"location\":{\"in\":\"npc\",\"npc\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"maud\",\"kind\":\"npc\"}},\"room_line\":\"item.purse.room\",\"short\":\"item.purse.short\"},\"ashmere_locks@0.0.1:item/ribbon\":{\"description\":\"item.ribbon.description\",\"key\":\"ribbon\",\"keywords\":[\"ribbon\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"coffer\",\"kind\":\"item\"}},\"room_line\":\"item.ribbon.room\",\"short\":\"item.ribbon.short\"},\"ashmere_locks@0.0.1:item/sewing_box\":{\"barrier\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"box_lid\",\"kind\":\"barrier\"},\"container\":true,\"description\":\"item.sewing_box.description\",\"key\":\"sewing_box\",\"keywords\":[\"box\",\"sewing_box\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"room_line\":\"item.sewing_box.room\",\"short\":\"item.sewing_box.short\"},\"ashmere_locks@0.0.1:item/trunk\":{\"barrier\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"trunk_lid\",\"kind\":\"barrier\"},\"container\":true,\"description\":\"item.trunk.description\",\"key\":\"trunk\",\"keywords\":[\"trunk\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"}},\"room_line\":\"item.trunk.room\",\"short\":\"item.trunk.short\"}},\"lock\":{\"capabilities\":{\"barrier\":1,\"containment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_locks\",\"requires\":{\"capabilities\":{\"barrier\":1,\"containment\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.0\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Ashmere — Locks\",\"version\":\"0.0.1\"},\"npcs\":{\"ashmere_locks@0.0.1:npc/maud\":{\"description\":\"npc.maud.description\",\"key\":\"maud\",\"keywords\":[\"maud\",\"seamstress\"],\"room\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"},\"room_line\":\"npc.maud.room\",\"short\":\"npc.maud.short\"}},\"policies\":{},\"resources\":{\"ashmere_locks@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"ashmere_locks@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_locks@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"ashmere_locks@0.0.1:room/inn_attic\":{\"description\":\"room.inn_attic.description\",\"exits\":{\"down\":{\"to\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_attic\",\"title\":\"room.inn_attic.title\"},\"ashmere_locks@0.0.1:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"up\":{\"to\":{\"cartridge_id\":\"ashmere_locks\",\"cartridge_version\":\"0.0.1\",\"key\":\"inn_attic\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"title\":\"room.inn_rooms.title\"}},\"text\":{\"barrier.box_lid.short\":\"the sewing box's lid\",\"barrier.coffer_lid.short\":\"the coffer's lid\",\"barrier.trunk_lid.short\":\"the trunk's lid\",\"item.brass_key.description\":\"A brass key.\",\"item.brass_key.room\":\"A [key] lies here.\",\"item.brass_key.short\":\"a brass key\",\"item.coffer.description\":\"A little coffer.\",\"item.coffer.room\":\"A [coffer] lies here.\",\"item.coffer.short\":\"a little coffer\",\"item.letter.description\":\"A sealed letter.\",\"item.letter.room\":\"A [letter] lies here.\",\"item.letter.short\":\"a sealed letter\",\"item.locket.description\":\"A silver locket.\",\"item.locket.room\":\"A [locket] lies here.\",\"item.locket.short\":\"a silver locket\",\"item.penny.description\":\"A penny.\",\"item.penny.room\":\"A [penny] lies here.\",\"item.penny.short\":\"a penny\",\"item.purse.description\":\"A leather purse.\",\"item.purse.room\":\"A [purse] lies here.\",\"item.purse.short\":\"a leather purse\",\"item.ribbon.description\":\"A blue ribbon.\",\"item.ribbon.room\":\"A [ribbon] lies here.\",\"item.ribbon.short\":\"a blue ribbon\",\"item.sewing_box.description\":\"A sewing box.\",\"item.sewing_box.room\":\"A [box] lies here.\",\"item.sewing_box.short\":\"a sewing box\",\"item.trunk.description\":\"An iron-bound trunk.\",\"item.trunk.room\":\"An iron-bound [trunk] stands here.\",\"item.trunk.short\":\"an iron-bound trunk\",\"npc.maud.description\":\"A seamstress with a purse at her belt.\",\"npc.maud.room\":\"[Maud] the seamstress sits here, sewing.\",\"npc.maud.short\":\"Maud the seamstress\",\"room.inn_attic.description\":\"Low rafters and the smell of old straw.\",\"room.inn_attic.title\":\"The Attic\",\"room.inn_rooms.description\":\"A narrow passage of doors. A ladder climbs to the attic.\",\"room.inn_rooms.title\":\"The Inn's Rooms\"}}",
+  "sha256": "c88c71cda0567633b3feaf36b067986198c1a69f7cbc83bfe9dbde0cd51950e7"
+}

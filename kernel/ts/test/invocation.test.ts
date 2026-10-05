@@ -18,7 +18,7 @@ const world = (fixture: string, seed = SEED) => {
   assert.ok(loaded.ok, JSON.stringify(loaded));
   return newWorld(loaded.cartridge as Cartridge, CONTEXT, seed);
 };
-const items = world('cartridge_items_hash.json');
+const items = world('containers_cartridge_items_hash.json');
 const { cases, dusk_cases } = read('kernel/ts/test/invocation_cases.json');
 // numeric-vectors.json rng_steps[3].state (see invocation_cases.json).
 const dusk = world('cartridge_dusk_hash.json', [

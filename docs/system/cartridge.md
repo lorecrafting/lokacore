@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.2`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.3`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten Ashmere rooms and playable Maud S1 (five rats,
@@ -136,6 +136,10 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   0 and keys unique within the table, else `RESOURCE_SPEC_INVALID` at the table; each key has
   `band.<key>` in the catalog; `world.movement.cost` names a pool of this cartridge
   (`UNRESOLVED_REFERENCE`);
+- item receptacles explicitly declare `container: true`; absence means no children. Only
+  receptacles may declare `capacity` or a lid `barrier` (`SCHEMA_VIOLATION` at the
+  contradictory field). An initial item location must name a receptacle
+  (`SCHEMA_VIOLATION` at `location.item`). NPC and body custody is unchanged.
 - items and NPCs start somewhere real with no containment cycle and within capacity
   (`CONTAINMENT_CYCLE`, `CAPACITY_EXCEEDED`); details are reachable (`UNREACHABLE_DETAIL`);
 - barriers: each exit's barrier and its reciprocal face name the same one (`BARRIER_MISMATCH`);
@@ -292,7 +296,7 @@ Compiler and loader reject actions naming authority-only `elapsed` or `run_job` 
 1.5. It names `player_corpse` and `npc_corpse` item templates, the existing `shrine` room,
 and `restore {hp, mv}` values within the corresponding declared pools. References accept
 source short keys. A corpse template has `location: {in: "template"}` and ordinary item
-text/mass; it has no capacity, slot or barrier. Templates are never minted or placed at
+text/mass and `container: true`; it has no capacity, slot or barrier. Templates are never minted or placed at
 birth, cannot hold authored children, and must be the configured corpse templates.
 Both compiler and loader validate these constraints and reference kinds.
 

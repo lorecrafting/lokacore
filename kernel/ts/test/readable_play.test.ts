@@ -11,7 +11,7 @@ import { read } from './read.ts';
 test('terminal read resolves authored aliases and narrates both chapter details', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-readable-play-'));
   t.after(() => rmSync(dir, { recursive: true }));
-  const pin = read('protocol/fixtures/missing_child_v002_hash.json');
+  const pin = read('protocol/fixtures/missing_child_v003_hash.json');
   const artifact = join(dir, 'chapter.json'),
     script = join(dir, 'script.txt');
   writeFileSync(artifact, `{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`);

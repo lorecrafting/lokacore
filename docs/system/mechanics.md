@@ -117,7 +117,9 @@ Without a carry setting, legacy carrying behavior is unchanged. This mechanic co
 cartridge definitions and the existing conserved transfer; it introduces no persisted load.
 
 `put {item_id, container_id}` moves an existing directly body-held item into a reachable
-item container (omitted capacity is unlimited). Reject missing/non-item targets, a worn or
+item explicitly authored with `container: true` (omitted capacity is unlimited only for
+such receptacles). Missing eligibility refuses `invalid_target`; keys, clothes and ordinary
+items cannot hold children. Reject missing/non-item targets, a worn or
 otherwise non-body-held source (`not_owned`), an inaccessible destination (`not_present`),
 a locked/closed lid (`exit_locked`/`exit_closed`), full immediate capacity (`invalid_state`),
 and self/descendant destinations (`containment_cycle`). Check custody, lid, cycles and capacity

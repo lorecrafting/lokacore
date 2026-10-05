@@ -1,4 +1,4 @@
-// Ferry Landing as the items fixture (protocol/fixtures/cartridge_items_hash.json) offers it: look
+// Ferry Landing as the items fixture (protocol/fixtures/containers_cartridge_items_hash.json) offers it: look
 // and scan on the place, an exit north, and take on the leather satchel (ids here are stand-ins;
 // the controller draws real ones). Literal answers, not computed from the code under test.
 import assert from 'node:assert/strict';

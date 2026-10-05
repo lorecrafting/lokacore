@@ -1,7 +1,7 @@
 defmodule Loka.ContentRewardStorageTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/reward_storage_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/containers_reward_storage_hash.json"))
 
   defp update(dir, rel, fun) do
     path = Path.join(dir, rel)
@@ -23,7 +23,7 @@ defmodule Loka.ContentRewardStorageTest do
       Map.put(npc, "daily_schedule", %{"6" => "ferry_landing", "19" => "drowned_lantern"})
     end)
 
-    prior = JSON.decode!(File.read!("protocol/fixtures/sampler_v009_hash.json"))
+    prior = JSON.decode!(File.read!("protocol/fixtures/containers_sampler_v009_hash.json"))
     File.write!(Path.join(dir, "text.json"), JSON.encode!(prior["value"]["text"]))
   end
 

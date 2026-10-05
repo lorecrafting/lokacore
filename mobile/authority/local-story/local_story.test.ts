@@ -40,7 +40,7 @@ const world = (fixture: string, seed: readonly number[]) => {
 /** The one installed release of a test story. */
 const installed = (s: ReturnType<typeof world>) =>
   [{ content_hash: s.hash, fresh: s.fresh }] as const;
-const items = world('cartridge_items_hash.json', [1, 2, 3, 4]);
+const items = world('containers_cartridge_items_hash.json', [1, 2, 3, 4]);
 // numeric-vectors.json rng_steps[3].state; its next draw fails pick_lock (invocation_cases.json).
 const dusk = world('cartridge_dusk_hash.json', [27274249, 25704967, 31982592, 12605441]);
 const ferry = world('cartridge_ferry_hash.json', [1, 2, 3, 4]);

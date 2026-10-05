@@ -7,7 +7,7 @@ import { read } from './read.ts';
 // Breaks: the active chapter is omitted from simulation or a chapter-only combination
 // violates a registered invariant; the frozen demo corpus alone cannot detect either.
 test('the active Missing Child release keeps the simulator invariants on controlled seeds', () => {
-  const pin = read('protocol/fixtures/missing_child_v002_hash.json');
+  const pin = read('protocol/fixtures/missing_child_v003_hash.json');
   const artifact = `{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`;
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   assert.ok(loaded.ok);

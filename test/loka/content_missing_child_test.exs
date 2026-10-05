@@ -1,6 +1,6 @@
 defmodule Loka.ContentMissingChildTest do
   use ExUnit.Case, async: true
-  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v002_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v003_hash.json"))
 
   # Breaks: active chapter geometry, retired definitions, reward bindings or title drift.
   test "the chapter in progress compiles to its independent answer without warnings" do

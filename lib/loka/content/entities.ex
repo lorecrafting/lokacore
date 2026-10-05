@@ -110,7 +110,22 @@ defmodule Loka.Content.Entities do
     in_cycle = for {key, {rel, _}} <- items, cycle?(key, items), do: rel
 
     Enum.map(in_cycle, &diag("CONTAINMENT_CYCLE", at(&1, ["location", "item"]))) ++
-      over(defs, items)
+      receptacles(items) ++ children(items) ++ over(defs, items)
+  end
+
+  defp receptacles(items) do
+    for {_, {rel, i}} <- items,
+        f <- ~w(capacity barrier),
+        i["container"] != true,
+        is_map_key(i, f),
+        do: diag("SCHEMA_VIOLATION", at(rel, [f]), %{"error" => "invalid_value"})
+  end
+
+  defp children(items) do
+    for {_, {rel, %{"location" => %{"in" => "item", "item" => ref}}}} <- items,
+        {_, holder} <- [items[ref["key"]]],
+        holder["container"] != true,
+        do: diag("SCHEMA_VIOLATION", at(rel, ["location", "item"]), %{"error" => "invalid_value"})
   end
 
   defp over(defs, items) do

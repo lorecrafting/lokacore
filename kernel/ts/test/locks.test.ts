@@ -1,7 +1,7 @@
 // Locked containers (c1-locks; mechanics.md barrier@1 and containment@1 custody; protocol.md
 // GameView): the door verbs on an item by invocation (identify, resolve, step), take through
 // containers, the GameView's container state, verbs and contents, and the loader's item barrier
-// checks. The world is the locks known answer (protocol/fixtures/cartridge_locks_hash.json),
+// checks. The world is the locks known answer (protocol/fixtures/containers_cartridge_locks_hash.json),
 // changed and re-hashed with node:crypto for the loader cases. Expected ids are Python hashlib
 // over the IdSource input (the wear fixture's description holds the code), never the kernel's;
 // codes, ops and views are hand-derived from the cartridge files and the clauses above.
@@ -40,7 +40,7 @@ const lid = (key: string) => ({
 
 // The fixture's artifact (its value changed by `f` and re-hashed), loaded or its first diagnostic.
 const load = (f?: (c: any) => void) => {
-  const kat = read('protocol/fixtures/cartridge_locks_hash.json');
+  const kat = read('protocol/fixtures/containers_cartridge_locks_hash.json');
   let [text, h] = [kat.canonical, kat.sha256];
   if (f) {
     const c = structuredClone(kat.value);
@@ -297,7 +297,7 @@ test('the loader rejects only keys that can never be reached, and checks an item
     Object.assign(barrier(c, 'box_lid'), { initial: 'locked', key_item: inItem('letter').item });
   };
   const all = (f: (c: any) => void) => {
-    const c = JSON.parse(read('protocol/fixtures/cartridge_locks_hash.json').canonical);
+    const c = JSON.parse(read('protocol/fixtures/containers_cartridge_locks_hash.json').canonical);
     f(c);
     return refStage(c).filter((d) => d.code === 'BARRIER_UNREACHABLE_KEY');
   };

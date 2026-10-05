@@ -25,7 +25,7 @@ import { load } from './store.ts';
 
 const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
 const OIL = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
-const kat = read('protocol/fixtures/cartridge_items_hash.json');
+const kat = read('protocol/fixtures/containers_cartridge_items_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),
   INSTALLED,

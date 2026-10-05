@@ -1,11 +1,11 @@
 defmodule Loka.ContentItemsTest do
   # Items, NPCs and touch links in the compiler (R5 S4; entity.schema.json; owner decision
   # 2026-09-25, Q1 and Q3). Expected diagnostics are hand-written from protocol/cartridge.schema.json
-  # DiagnosticCode; the known answer is protocol/fixtures/cartridge_items_hash.json (Python).
+  # DiagnosticCode; the known answer is protocol/fixtures/containers_cartridge_items_hash.json (Python).
   use ExUnit.Case, async: true
 
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_items_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/containers_cartridge_items_hash.json"))
   @src "cartridges/ashmere_items"
 
   # ashmere_items' source with `files` merged over it (nil removes a file).
@@ -67,6 +67,45 @@ defmodule Loka.ContentItemsTest do
              {:ok, expected, []}
   end
 
+  # Breaks: unmarked items gain custody through children, occupancy limits or lids.
+  test "only authored receptacles hold children and declare limits or lids", %{tmp_dir: dir} do
+    for field <- ~w(capacity barrier) do
+      value = if field == "capacity", do: 1, else: "lid"
+
+      assert {:error, ds} =
+               compile(Path.join(dir, field), %{
+                 "items/lantern.json" => Map.put(src("items/lantern.json"), field, value)
+               })
+
+      assert d("SCHEMA_VIOLATION", "items/lantern." <> field, %{"error" => "invalid_value"}) in ds
+    end
+
+    satchel = Map.drop(src("items/satchel.json"), ["container", "capacity"])
+
+    assert compile(Path.join(dir, "child"), %{"items/satchel.json" => satchel}) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "items/lamp_oil.location.item", %{
+                  "error" => "invalid_value"
+                })
+              ]}
+
+    assert {:ok, _, []} =
+             compile(Path.join(dir, "unlimited"), %{
+               "items/satchel.json" => Map.delete(src("items/satchel.json"), "capacity")
+             })
+  end
+
+  # Breaks: required fields, bounds or literal authority differ across portable validators.
+  test "item schema required fields, bounds and literal authority" do
+    cases = JSON.decode!(File.read!("protocol/fixtures/container_contracts.json"))
+
+    for row <- cases do
+      assert Loka.Core.Contracts.validate("ItemDefinition", row["value"]) == :ok == row["valid"],
+             row["name"]
+    end
+  end
+
   # Breaks: a location or NPC room naming nothing, or of the wrong kind, compiles.
   test "a location or NPC room naming no definition of its kind is UNRESOLVED_REFERENCE",
        %{tmp_dir: dir} do
@@ -93,7 +132,10 @@ defmodule Loka.ContentItemsTest do
     lantern = %{src("items/lantern.json") | "location" => %{"in" => "npc", "npc" => "bram"}}
     oil_too = %{src("items/lamp_oil.json") | "location" => %{"in" => "npc", "npc" => "bram"}}
 
-    assert compile(dir, %{"items/satchel.json" => satchel}) ==
+    assert compile(dir, %{
+             "items/satchel.json" => satchel,
+             "items/lamp_oil.json" => Map.put(src("items/lamp_oil.json"), "container", true)
+           }) ==
              {:error,
               [
                 d("CONTAINMENT_CYCLE", "items/lamp_oil.location.item"),

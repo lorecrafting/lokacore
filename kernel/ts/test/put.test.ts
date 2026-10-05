@@ -3,6 +3,8 @@ import { test } from 'node:test';
 import { ready, run, ok, entity, choose, moveTo } from './reward_storage_fixture.ts';
 import { gameView } from '../src/runtime/world.ts';
 import { putRefused } from '../src/mechanics/containment/shared.ts';
+import { apply } from '../src/runtime/apply.ts';
+import { invariants } from '../src/mechanics/containment/rule.ts';
 import { lists } from '../src/view/action_lists.ts';
 
 const unlocked = () => {
@@ -63,7 +65,8 @@ test('capacity one accepts one deposit only; an unlimited own bag permits overlo
   assert.ok(bagDefinition.kind === 'item');
   w = {
     ...w,
-    entities: { ...w.entities, [bag]: { ...bagDefinition, mass_grams: 12001 } },
+    entities: { ...w.entities, [bag]: { ...bagDefinition, container: true, mass_grams: 12001 } },
+    capacities: Object.fromEntries(Object.entries(w.capacities).filter(([id]) => id !== bag)),
     state: { ...w.state, containers: { ...w.state.containers, [bag]: w.body } },
   };
   w = ok(w, { type: 'put', item_id: key, container_id: bag });
@@ -91,9 +94,17 @@ test('Put refuses worn/nonheld, missing/non-item, inaccessible, self and descend
       kind: 'rejected',
       error: { code },
     });
+  const child = entity(w, 'item', 'brass_key');
+  w = {
+    ...w,
+    entities: {
+      ...w.entities,
+      [key]: { ...w.entities[key], container: true } as never,
+      [child]: { ...w.entities[child], container: true } as never,
+    },
+  };
   assert.equal(run(w, { type: 'put', item_id: key, container_id: key }).decision.kind, 'fault');
   assert.equal(putRefused(w, w.body, key, key, { n: 0 }), 'containment_cycle');
-  const child = entity(w, 'item', 'brass_key');
   w = { ...w, state: { ...w.state, containers: { ...w.state.containers, [child]: key } } };
   assert.equal(run(w, { type: 'put', item_id: key, container_id: child }).decision.kind, 'fault');
 });
@@ -116,4 +127,49 @@ test('Put enumeration and pair admission obey the shared query limit with no par
   assert.equal(offers[0].available, false);
   assert.deepEqual(offers[0].reason, { code: 'budget_exceeded' });
   assert.equal(offers[0].target_ids, undefined);
+});
+
+// Breaks: ordinary keys/clothes become destinations, projection offers them, or composition
+// accepts a forged transfer even when command admission correctly refuses it.
+test('only authored receptacles accept Put pairs and conserved transfers', () => {
+  let w = unlocked();
+  const key = entity(w, 'item', 'brass_key');
+  const cloak = entity(w, 'item', 'wool_cloak');
+  const chest = entity(w, 'item', 'reward_chest');
+  w = ok(w, { type: 'take', item_id: cloak });
+  const before = w;
+  for (const destination of [key, cloak]) {
+    const result = run(w, { type: 'put', item_id: cloak, container_id: destination });
+    assert.deepEqual(result.decision, { kind: 'rejected', error: { code: 'invalid_target' } });
+    assert.equal(result.world, before);
+    assert.equal(putRefused(w, w.body, cloak, destination, { n: 0 }), 'invalid_target');
+    assert.equal(
+      lists(w, w.character)
+        .of('inventory', cloak)
+        .some((a) => a.action_key === 'put' && a.target_ids?.[1] === destination),
+      false,
+    );
+  }
+  const forged = apply(w, [
+    {
+      op: 'entity.transfer',
+      writer_group: 0,
+      entity_id: cloak,
+      source_id: w.body,
+      destination_id: key,
+    },
+  ]);
+  assert.ok('fault' in forged);
+  assert.equal(forged.fault.code, 'capacity_exceeded');
+  assert.equal(
+    invariants.containment_acyclic({
+      ...w,
+      state: { ...w.state, containers: { ...w.state.containers, [cloak]: key } },
+    }),
+    false,
+  );
+  assert.equal(
+    run(w, { type: 'put', item_id: cloak, container_id: chest }).decision.kind,
+    'accepted',
+  );
 });

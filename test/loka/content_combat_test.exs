@@ -78,7 +78,8 @@ defmodule Loka.ContentCombatTest do
                   "room_line" => "t",
                   "description" => "t",
                   "location" => %{"in" => "template"},
-                  "mass_grams" => 0
+                  "mass_grams" => 0,
+                  "container" => true
                 }}
              end) do
       path = Path.join(dir, rel)

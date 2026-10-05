@@ -12,5 +12,6 @@
     "in": "room",
     "room": "inn_rooms"
   },
-  "barrier": "storage_chest_lid"
+  "barrier": "storage_chest_lid",
+  "container": true
 }

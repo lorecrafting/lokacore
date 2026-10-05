@@ -9,7 +9,7 @@ import { presenter } from './presenter.ts';
 
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v002_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v003_hash.json', import.meta.url),
     'utf8',
   ),
 );

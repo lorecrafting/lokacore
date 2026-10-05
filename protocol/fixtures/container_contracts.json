@@ -1,0 +1,584 @@
+[
+  {
+    "name": "ordinary item without eligibility",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "explicit receptacle",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "container": true
+    },
+    "valid": true
+  },
+  {
+    "name": "missing key",
+    "value": {
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "missing keywords",
+    "value": {
+      "key": "box",
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "missing short",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "missing room_line",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "missing description",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "missing location",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "empty keywords",
+    "value": {
+      "key": "box",
+      "keywords": [],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "too many keywords",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box",
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "empty variants",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "room_line_variants": []
+    },
+    "valid": false
+  },
+  {
+    "name": "too many variants",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "room_line_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "target_present"
+            }
+          },
+          "description": "item.box.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "capacity zero",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "container": true,
+      "capacity": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "capacity too large",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "container": true,
+      "capacity": 1025
+    },
+    "valid": false
+  },
+  {
+    "name": "negative mass",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "mass_grams": -1
+    },
+    "valid": false
+  },
+  {
+    "name": "mass too large",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "mass_grams": 2147483648
+    },
+    "valid": false
+  },
+  {
+    "name": "false authority",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "container": false
+    },
+    "valid": false
+  },
+  {
+    "name": "string authority",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "container": "true"
+    },
+    "valid": false
+  },
+  {
+    "name": "unknown field",
+    "value": {
+      "key": "box",
+      "keywords": [
+        "box"
+      ],
+      "short": "item.box.short",
+      "room_line": "item.box.room",
+      "description": "item.box.description",
+      "location": {
+        "in": "room",
+        "room": {
+          "cartridge_id": "demo",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "room"
+        }
+      },
+      "contents": []
+    },
+    "valid": false
+  }
+]

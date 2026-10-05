@@ -5,7 +5,7 @@ import { loadCartridge } from '../src/content/cartridge.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { read } from './read.ts';
 
-const base = read('protocol/fixtures/sampler_v008_hash.json').value;
+const base = read('protocol/fixtures/containers_sampler_v008_hash.json').value;
 const prefix = `${base.manifest.id}@${base.manifest.version}`;
 const npcKey = `${prefix}:npc/cellar_rat_1`;
 const factKey = `${prefix}:fact/rat_dead`;

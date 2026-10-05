@@ -13,7 +13,7 @@ import { ROOT } from '../play/obs.ts';
 import { read } from './read.ts';
 
 const dir = mkdtempSync(join(tmpdir(), 'r5s4-play-'));
-const kat = read('protocol/fixtures/cartridge_items_hash.json');
+const kat = read('protocol/fixtures/containers_cartridge_items_hash.json');
 const artifact = join(dir, 'items.json');
 writeFileSync(artifact, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);
 

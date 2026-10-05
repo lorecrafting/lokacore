@@ -22,6 +22,7 @@ defmodule Loka.ContentDeathTest do
            child},
           {"held template", m, i,
            Map.put(child, "location", %{"in" => "item", "item" => "player_corpse"})},
+          {"noncontainer", m, Map.delete(i, "container"), child},
           {"capacity", m, Map.put(i, "capacity", 1), child},
           {"slot", m, Map.put(i, "slot", "cloak"), child},
           {"barrier", m, Map.put(i, "barrier", "trunk_lid"), child},

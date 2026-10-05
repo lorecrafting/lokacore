@@ -50,7 +50,7 @@ registerHooks({
   },
 });
 const { default: Book } = await import('./Book.tsx');
-const bundle = (name = 'cartridge_sampler_hash') =>
+const bundle = (name = 'containers_cartridge_sampler_hash') =>
   JSON.parse(
     readFileSync(new URL(`../../../protocol/fixtures/${name}.json`, import.meta.url), 'utf8'),
   );
@@ -537,7 +537,7 @@ test('inventory Drop returns World with one named event only after confirmation'
 test('other item actions retain their detail and show their consequences there', () => {
   const items = JSON.parse(
     readFileSync(
-      new URL('../../../protocol/fixtures/cartridge_locks_hash.json', import.meta.url),
+      new URL('../../../protocol/fixtures/containers_cartridge_locks_hash.json', import.meta.url),
       'utf8',
     ),
   );
@@ -556,7 +556,7 @@ test('other item actions retain their detail and show their consequences there',
 // Breaks: a confirmed boundary is ignored/coalesced, resets the chapter acknowledgment,
 // flips a same-room page, or removes a departed speaker's actual continuation/history.
 test('elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips', () => {
-  const h = book(bundle('sampler_v010_hash'));
+  const h = book(bundle('containers_sampler_v010_hash'));
   try {
     h.tap('Old Bram, open');
     h.tap('Talk to Old Bram');
@@ -667,7 +667,7 @@ test('delayed Take returns once with its original item name after a conflicting 
 
 // Breaks: delayed quest completion loses original NPC history or repeats the neutral journal event.
 test('delayed actual quest completion adds one authored result and Journal updated in original history', () => {
-  const h = book(bundle('sampler_v010_hash')),
+  const h = book(bundle('containers_sampler_v010_hash')),
     completed: GameSubscription[] = [];
   h.game.subscribe((u) => {
     if (u.kind === 'completion') completed.push(u);

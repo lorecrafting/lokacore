@@ -10,5 +10,6 @@
     "in": "room",
     "room": "ferry_landing"
   },
-  "capacity": 1
+  "capacity": 1,
+  "container": true
 }
