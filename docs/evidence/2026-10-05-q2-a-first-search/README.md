@@ -21,7 +21,7 @@ immediately preceding `0.0.8` save with identical file bytes until explicit Star
 | Actual check | Result |
 | --- | --- |
 | `mise exec -- bin/check_all.sh` | Exit 0; [retained full run](local-check-all.log), including 300 Elixir tests, kernel/app suites and repository red controls |
-| Focused app suite: authority Missing Child, Book Notice/live actions/presenter/combat and chapter | 75 tests passed; real SQLite and controlled Book projections |
+| Focused app suite: authority Missing Child, Book Notice/live actions/presenter/combat and chapter | 55 tests passed; real SQLite and controlled Book projections |
 | `mise exec -- node --test kernel/ts/test/first_search.test.ts` | Eight tests passed, including whole-proposal rollback and mixed consequence order |
 | `mise exec -- mix test test/loka/content_first_search_test.exs test/loka/core/first_search_contracts_test.exs` | Two tests passed |
 | `mise exec -- npm run typecheck` in the kernel package | Exit 0, source/tests/play |
