@@ -1,5 +1,7 @@
 # B2 — S2 Chandler's Debt, actual handoff and deadline
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B2. **Provisional until B1 and A1 merge, PM adopts policy and the brief re-pins them.** Inspected main `0fbd2847`/chapter0.0.11/API1.10 is not the implementation base. Dependency heads, new release/API/hash/IDs/source head/PR: null. Suggested branch `chapter-1/b2-chandlers-debt`, not created. Browser-first shared Book iteration; retain engine/real SQLite/headless sim proof, defer native work. No preview/device/owner-save operation here.
 
 ## Goal and governing clauses

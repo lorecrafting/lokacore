@@ -1,5 +1,7 @@
 # C2 — Watchman's Rounds: follow Tobin, survive and recover an attempt
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 2026-10-05. **Provisional PM draft; not adopted spec or source GO.** Row C2 of [the public plan](../../MISSING-CHILD-PLAN.md). Suggested branch `c2-watchmans-rounds`; lift 0.8–1.0. Inspected PM baseline `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10. Current North Gate and Green have no watch/east exits; no Tobin, patrol or survive objective is installed. Target release/API/hash/IDs/source head/PR are **null**. No tests/source/browser/device/save operation performed by this planning task.
 
 ## Player outcome and prerequisites

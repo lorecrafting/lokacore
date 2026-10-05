@@ -1,5 +1,7 @@
 # D3 — Western Ashmere, the mill and Hob
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Proposed branch: `chapter1/d3-western-ashmere`.
 
 ## Goal, dependencies and governing clauses

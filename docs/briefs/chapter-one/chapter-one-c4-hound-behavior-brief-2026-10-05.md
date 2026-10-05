@@ -1,5 +1,7 @@
 # C4 — Hound aggression, real pack assistance and enemy flight
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 2026-10-05. **Provisional PM draft; not adopted behavior/initiative contract or source GO.** Row C4 of [the public plan](../../MISSING-CHILD-PLAN.md), after [C3](chapter-one-c3-living-hounds-brief-2026-10-05.md). Suggested branch `c4-hound-behavior`; lift 0.8–1.0, high combat risk. Inspected PM baseline `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10; installed encounter has one NPC and excludes a second open encounter for the same body. Pack behavior is absent. Reviewed C3/C1/B1 pins and new release/API/hash/IDs/source/PR: **null**. No code/tests/runtime or owner-save work performed by this brief.
 
 ## Player outcome and dependencies

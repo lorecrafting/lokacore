@@ -1,5 +1,7 @@
 # B9 — S10 actual inn Rest and acknowledged dream
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B9. **Provisional until B8 room policy and A3 acknowledged-consequence/scene identity merge, PM adopts Rest/overlay/export contracts, and actual heads re-pin.** Reading main `0fbd2847` contains only modal current_world scenes, not this overlay. New release/API/hash/IDs/head/PR/dependency heads: null. Suggested branch `chapter-1/b9-inn-dream`, not created. Browser-first existing Book; real SQLite/shared engine/headless sim retained, native proof deferred. No preview/device/owner-save work here.
 
 ## Goal and governing clauses

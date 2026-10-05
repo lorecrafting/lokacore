@@ -1,5 +1,7 @@
 # D7 — Bounded deer, real flight and conserved hide loot
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Proposed branch: `chapter1/d7-deer`.
 
 ## Goal, dependencies and governing clauses

@@ -1,12 +1,14 @@
 # A2 — complete Q3 fox/silence variant: provisional implementation brief
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 2026-10-05. **Provisional until reviewed A1 merge plus PM adoption/re-pin; rescue dependency is now satisfied.** Not source GO, adopted spec, review verdict, checked work or release proof. This is the second main-story slice in the [complete public plan](../../MISSING-CHILD-PLAN.md); depends on the selected composition in [A1](a1-q3-bell-lost-sol-brief-2026-10-05.md).
 
 ## Assignment, pins and governing clauses
 
 Goal: after a complete rescued/stays return, choose silence instead of ringing, resolve Q3/fox immutably and acknowledge its complete resumable scene. Proposed branch `q3-fox-silence`; source head/release/API/hash/allocated IDs = null. No rooms or quest definitions are added. No displayed unfinished branch is allowed.
 
-**Re-pinned rescue dependency:** main/PM HEAD `f467f75b1e5a68462e61987f078508dafcf97a42` (status-only ROADMAP after PR190 merge `05b0cb6ffa1b1245f015e18e1a3ff866c0fb6342`), clean at read-only lookup, chapter `0.0.12` / kernel API1.11, hash `2e05620c7bd1319352aad6b4f0bc7f8479da3a324601b320fb2f9a9b79441a7b`. GitHub shows PR190 MERGED at final head `8f121cde3f6f602b01f31a6077455df7d433eca2`; both rescued/stays returns now exist. A1 remains unbuilt. Before assignment fill A1's actual reviewed merge, exact Q3 activation/terminal reaction/scene schema, bell IDs, policies and release fixture. Preserve prior frozen v011/v012 pins; A2 source/version/API/hash/IDs remain null. No future commits or versions are inferred.
+**Re-pinned rescue dependency:** main/PM HEAD `f467f75b1e5a68462e61987f078508dafcf97a42` (status-only ROADMAP after PR190 merge `05b0cb6ffa1b1245f015e18e1a3ff866c0fb6342`), clean at read-only lookup, chapter `0.0.12` / kernel API1.11, hash `2e05620c7bd1319352aad6b4f0bc7f8479da3a324601b320fb2f9a9b79441a7b`. GitHub shows PR190 MERGED at final head `8f121cde3f6f602b01f31a6077455df7d433eca2`; both rescued/stays returns now exist. At this drafting baseline A1 was unbuilt. Before assignment fill A1's actual reviewed merge, exact Q3 activation/terminal reaction/scene schema, bell IDs, policies and release fixture. Preserve prior frozen v011/v012 pins; A2 source/version/API/hash/IDs remain null. No future commits or versions are inferred.
 
 Read AGENTS, docs/WORKFLOW, .claude/agents/developer.md and docs/lessons/{mechanics,contracts,storage,mobile,evidence}.md. Ponytail applies before source work, Ponytail Review and correctness pass before handoff. Work in an isolated developer worktree; use mise toolchain, hooks and independent review.
 

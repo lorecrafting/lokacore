@@ -1,5 +1,7 @@
 # E1 — Repeatable R9 headless/browser certification
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05. **Provisional until the full mechanics merge; not source GO, an adopted certification policy, a gate pass, or native certification.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md).
 
 ## Outcome, branch and dependencies

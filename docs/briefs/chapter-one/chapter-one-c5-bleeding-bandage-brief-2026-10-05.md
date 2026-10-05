@@ -1,5 +1,7 @@
 # C5 — A real hound hit causes bleeding; trained bandage stops it
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 2026-10-05. **Provisional PM draft; not adopted status/combat-use contract or source GO.** Row C5 of [the public plan](../../MISSING-CHILD-PLAN.md). Suggested branch `c5-bleeding-bandage`; lift 0.7–0.9. Inspected PM main `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10. No installed persistent effects, bandage skill/use or actual consumable removal; combat currently allows only Flee/Stand/Look/Scan and excludes every recipe. Reviewed C4/C1/B5 and any B8 consumption pins, new release/API/hash/IDs/source/PR: **null**. No checks, source/native/browser or owner-save action in this planning task.
 
 ## Player outcome and dependencies

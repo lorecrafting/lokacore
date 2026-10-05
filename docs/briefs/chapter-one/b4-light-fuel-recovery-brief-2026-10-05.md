@@ -1,5 +1,7 @@
 # B4 — useful light, fuel/refill and safe recovery
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B4. **Provisional until B1 timing and B3 supply merge, PM adopts perception/fuel/recovery policy, and actual dependency heads are re-pinned.** Reading baseline main `0fbd2847` is not source GO. Dependency/new release/API/hash/IDs/head/PR: null. Suggested branch `chapter-1/b4-light-fuel`, not created. Browser-first shared React Native Book; retain engine/save/headless sim, defer native. No preview, device or owner-save operation here.
 
 ## Goal and clauses

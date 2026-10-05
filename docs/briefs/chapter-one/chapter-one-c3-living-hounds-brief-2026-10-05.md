@@ -1,5 +1,7 @@
 # C3 — A bounded persistent fen pack, real deaths and conserved loot
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 2026-10-05. **Provisional PM draft; no adoption/source GO/proof claimed.** Row C3 of [the public plan](../../MISSING-CHILD-PLAN.md). Suggested branch `c3-living-hounds`; lift 0.9–1.1. Inspected PM main `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10. Current runtime can create/hydrate only pinned death-origin corpse item templates; generic `spawned` provenance exists in schema but is **not executable population support**. Current jobs bind one authored NPC definition, and authored `entityIds` maps one initial instance. New release/API/hash/allocation/source/PR: **null**. No tests or runtime/device/save work performed here.
 
 ## Player result and dependencies

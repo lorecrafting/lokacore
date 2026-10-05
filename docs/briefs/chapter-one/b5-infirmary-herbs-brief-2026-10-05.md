@@ -1,5 +1,7 @@
 # B5 — S9 harvested herbs, real reward and repeat cap
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B5. **Provisional until B1 calendar and B2 faction/payment merge, PM adopts node/repeat policy, and actual heads are re-pinned.** Main `0fbd2847` is reading baseline only. New release/API/hash/IDs/source/PR/dependency heads: null. Suggested branch `chapter-1/b5-infirmary-herbs`, not created. Browser-first existing Book; keep real SQLite/shared engine/headless sim; defer native. No previews/devices/owner saves here.
 
 ## Goal and governing clauses

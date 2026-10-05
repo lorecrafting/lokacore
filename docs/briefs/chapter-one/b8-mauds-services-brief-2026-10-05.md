@@ -1,5 +1,7 @@
 # B8 — Maud's room, food and drink services
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B8. **Provisional until B3 exact commerce/currency, B7 liquid and installed M2 Rest re-pin, and PM adopts benefits and room entitlement.** Main `0fbd2847` is reading baseline only. New release/API/hash/IDs/head/PR/dependency heads: null. Suggested branch `chapter-1/b8-maud-services`, not created. Browser-first shared Book; engine/SQLite/headless sim stay, native deferred. No preview/device/owner-save operation here.
 
 ## Goal, dependencies and clauses

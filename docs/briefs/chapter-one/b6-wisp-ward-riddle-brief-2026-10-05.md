@@ -1,5 +1,7 @@
 # B6 — S4 all-hours wisp riddle and ward knowledge
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B6. **Provisional until B4 light and Q2's reviewed riddle merge/re-pin, public Aldric exists, and PM adopts perception/retry/topic policy.** B5 is a dependency only for actually reused supplies/access; do not require unused herb mechanics. Reading main `0fbd2847` is not source GO. New release/API/hash/IDs/source/PR/dependency heads: null. Suggested branch `chapter-1/b6-wisp-ward`, not created. Browser-first shared Book, headless engine/real SQLite/sim kept; no native/device/preview/owner-save work here.
 
 ## Goal and governing clauses

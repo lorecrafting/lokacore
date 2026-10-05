@@ -1,6 +1,8 @@
 # A1 — Q3 bell/prior and bell-first lost: provisional implementation brief
 
-2026-10-05. **Provisional PM recommendation. Not source GO, adopted spec, completed work, independent review or gate approval.** Drafted against the [public chapter completion plan](../../MISSING-CHILD-PLAN.md), replacing the assignment details in the older [Q3-B candidate](../../MISSING-CHILD-PLAN.md). Rescue is now reviewed and merged; PM must adopt the selected composition below before assigning a developer. Re-pin again only if the actual base changes.
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
+2026-10-05. **Provisional PM recommendation. Not source GO, adopted spec, completed work, independent review or gate approval.** Drafted against the [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Rescue is now reviewed and merged; PM must adopt the selected composition below before assigning a developer. Re-pin again only if the actual base changes.
 
 ## Assignment and dependency pins
 
@@ -63,6 +65,6 @@ Focused commands: `mise exec -- mix test test/loka/content_missing_child_test.ex
 
 Developer returns actual commands/statuses, planted break/failing test, source SHA, changed contract pins, self-review/Ponytail dispositions and deviations. Fresh independent primary review plus separate protocol/save opinion; proposal.ts change routes the workflow's extra opinion to Astra. Fix/recheck, every job that actually ran green on exact heads, merge commit. No approval or successful checks are claimed by this brief.
 
-Stop for PM if rescue not merged/re-pinned; an existing frozen fixture must change; any lost row would require undoing lawful custody/escort; cross-writer conflict cannot fit the described composition; the only route/speaker requires waiting; Ring needs fake dialogue story progress; or size requires splitting a complete player outcome. Product/scope/spec conflicts escalate under WORKFLOW. PM adoption choices still open: proposed key names, terminal reaction restriction/API shape and exact prose; no new owner permission is implied.
+Stop for PM if the rescue dependency is not re-pinned to its actual merged head; an existing frozen fixture must change; any lost row would require undoing lawful custody/escort; cross-writer conflict cannot fit the described composition; the only route/speaker requires waiting; Ring needs fake dialogue story progress; or size requires splitting a complete player outcome. Product/scope/spec conflicts escalate under WORKFLOW. PM adoption choices still open: proposed key names, terminal reaction restriction/API shape and exact prose; no new owner permission is implied.
 
 Author audit: Ponytail keeps the existing exact-detail recipe, fact trigger, quest lifecycle and scene state; no generic interpreter, extra geography PR or foundation delta. Correctness pass caught and corrected the Q3 objective ordering hazard (a sibling Q2 loss must not invalidate it), and re-pinned the actual dotted source facts/scopes and rescue trust seams. This is author-only planning review; independent source review and every check remain future work.

@@ -1,5 +1,7 @@
 # C6 — Night in the Marsh: start a real survival expedition now
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 2026-10-05. **Provisional PM draft; the no-wait adaptation and route are recommendations, not adopted story specifics or source GO.** Row C6 of [the public plan](../../MISSING-CHILD-PLAN.md). Suggested branch `c6-marsh-expedition`; lift 0.7–0.9. Inspected PM baseline `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10; no S27 or survival-attempt tracking is installed. Reviewed C5/C2/D1/D6/faction pins, target release/API/hash/IDs/source/PR: **null**. This task performed planning only, no checks/source/runtime/device/owner-save action.
 
 ## Player outcome and pinned/provisional prerequisites

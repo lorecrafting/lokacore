@@ -1,5 +1,7 @@
 # B3 — Peg's real immediate shop
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B3. **Provisional until reviewed B2/Peg/currency merges and PM adopts a concrete catalog/stock policy.** Re-pin B2 and installed carrying/custody before GO; reading baseline main `0fbd2847` is not source authorization. New release/API/hash/IDs/head/PR and dependency heads: null. Suggested branch `chapter-1/b3-pegs-shop`, not created. Browser-first shared Book; no mobile Simulator/native/device/owner-save action. Keep Node/real SQLite/TypeScript headless sim.
 
 ## Goal, authority and actual consumer

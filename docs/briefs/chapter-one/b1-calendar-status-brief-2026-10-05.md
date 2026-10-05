@@ -1,12 +1,14 @@
 # B1 — cartridge calendar and truthful Book status
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05, for row B1 of the [public chapter completion plan](../../MISSING-CHILD-PLAN.md). **Provisional: PM adoption, dependency re-pin and spec amendment are required before source GO.** Inspected PM main `0fbd2847`, chapter0.0.11/API1.10, as a reading baseline only. New release/API, content hash, allocated IDs, implementation head and PR: null. Suggested branch `chapter-1/b1-calendar-status`, not created.
 
 ## Goal, dependencies and authority
 
 Show a truthful day/time and deterministic sun/moon status from the cartridge and authoritative logical clock. B1 is the M1-C consumer needed before S2 calendar deadlines, fuel and regrowth. It depends on installed elapsed delivery and M2 recovery; it has no story dependency on A1–A3, but PM serializes edits to shared clock/Book files. Owner browser-first steering supersedes native-per-slice proof; record it in a reviewed workflow decision. Continue using the shared Expo/React Native Book. Do not start Metro, mobile Simulators, devices, native builds or owner saves in this planning task.
 
-Governing installed clauses: `docs/system/mechanics.md` “A fresh world”, “resource@1”, “schedule@1, behavior@1, calendar@1” and “M1-A elapsed authority time”; `docs/system/protocol.md` decision loop, Composition and GameView; `docs/system/save.md` Durable elapsed sessions; `docs/system/book-ui.md` World/status and Live action freshness. Future authority: `docs/NEXT-MECHANICS.md` M1-C; `docs/world-parameters.md` W5–W8/W19–W20/P1/P7; reconciliation decision §§Current mechanics policy and Selected chapter amendments; owner world-parameters, fixed-time and reading-time decisions. The older [icon-only draft](../../MISSING-CHILD-PLAN.md) is input; its fixed-86400-only scope is superseded by this explicitly adopted M1-C consumer.
+Governing installed clauses: `docs/system/mechanics.md` “A fresh world”, “resource@1”, “schedule@1, behavior@1, calendar@1” and “M1-A elapsed authority time”; `docs/system/protocol.md` decision loop, Composition and GameView; `docs/system/save.md` Durable elapsed sessions; `docs/system/book-ui.md` World/status and Live action freshness. Future authority: `docs/NEXT-MECHANICS.md` M1-C; `docs/world-parameters.md` W5–W8/W19–W20/P1/P7; reconciliation decision §§Current mechanics policy and Selected chapter amendments; owner world-parameters, fixed-time and reading-time decisions. An earlier icon-only draft informed this recommendation; its fixed-86400-only scope is superseded by this proposed M1-C consumer.
 
 ## Selected candidate and exact scope
 

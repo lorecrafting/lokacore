@@ -1,5 +1,7 @@
 # E2 — Compact R9C interaction cartridge
 
+> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+
 Provisional PM brief, 2026-10-05. **Provisional until full mechanics merge; not source GO, an implemented cartridge, a gate pass or native proof.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md). Runner/policy dependency: [E1 repeatable certification](chapter-one-e1-r9-certification-brief-2026-10-05.md).
 
 ## Outcome, branch and dependency pin
