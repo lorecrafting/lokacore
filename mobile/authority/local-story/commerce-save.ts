@@ -57,7 +57,7 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
           money,
           shop.resource,
           payment.payer,
-          world.body,
+          payment.recipient,
           payment.amount,
           balances,
           spec.minimum,
@@ -179,11 +179,18 @@ function dialoguePayment(world: World, command: Command) {
   if (p.type !== 'choose') invalid();
   const choice = world.state.choices?.[p.continuation_id];
   const dialogue = choice && world.cartridge.dialogues?.[refString(choice.source)];
-  const payment = dialogue?.choices[p.choice_id]?.payment;
+  const option = dialogue?.choices[p.choice_id];
+  const lesson = option?.lesson_payment;
+  const payment = option?.payment;
+  if (lesson) {
+    const recipient = choice?.roles.find((r) => r.role === lesson.to)?.entity_id;
+    if (!recipient || choice?.status !== 'resolved' || choice.choice_id !== p.choice_id) invalid();
+    return { payer: world.body, recipient, amount: lesson.amount };
+  }
   const payer = choice?.roles.find((r) => r.role === payment?.from)?.entity_id;
   if (!payment || !payer || choice?.status !== 'resolved' || choice.choice_id !== p.choice_id)
     invalid();
-  return { payer, amount: payment.amount };
+  return { payer, recipient: world.body, amount: payment.amount };
 }
 
 function custodyEvidence(

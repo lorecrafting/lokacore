@@ -1,3 +1,4 @@
+import { skillViews } from './skills.ts';
 import { noticeViews } from './notice_boards.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
@@ -75,6 +76,7 @@ export function gameView(world: World): GameView {
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
   return {
     actor_id: world.character,
+    ...skillViews(world),
     ...(fight && {
       combat: {
         encounter_id: fight.id,
@@ -151,6 +153,14 @@ const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]
   name: e.short,
   description: e.description,
   kind: e.kind as Key,
+  ...(e.kind === 'item' && e.slot && { slot: e.slot }),
+  ...(e.kind === 'item' &&
+    e.weapon && {
+      weapon: e.weapon,
+      skill_label: world.cartridge.skills![refString(e.weapon.skill)].label,
+      skill_requirement: world.cartridge.skills![refString(e.weapon.skill)].requirement,
+    }),
+  ...(e.kind === 'item' && e.block_chance !== undefined && { block_chance: e.block_chance }),
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),

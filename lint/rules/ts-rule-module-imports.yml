@@ -8,5 +8,5 @@ rule:
   matches: module-specifier
   not:
     any:
-      - regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"
-      - regex: "^['\"](\\./(sequence|flee)\\.ts|\\.\\./combat/round\\.ts)['\"]$"
+      - regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction|skills)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"
+      - regex: "^['\"](\\./(sequence|flee|payment)\\.ts|\\.\\./combat/round\\.ts)['\"]$"

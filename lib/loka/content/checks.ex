@@ -19,6 +19,7 @@ defmodule Loka.Content.Checks do
     "escort_state" => "quest",
     "fact.assign" => "fact",
     "fact.adjust" => "fact",
+    "skill.acquire" => "skill",
     "quest.activate" => "quest",
     "quest.resolve" => "quest",
     "quest.fail" => "quest",
@@ -97,6 +98,9 @@ defmodule Loka.Content.Checks do
 
   # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
   # map may have a detail keyed resource, whose value is a map).
+  def expand(%{"skill" => s} = n, m) when is_binary(s),
+    do: n |> Map.delete("skill") |> expand(m) |> Map.put("skill", ref(s, "skill", m))
+
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
 
@@ -289,11 +293,11 @@ defmodule Loka.Content.Checks do
     Enum.flat_map(actions, fn {rel, a} ->
       command(rel, a["command"], required, m["time_policy"] != nil)
     end) ++
-      Enum.flat_map(trees(defs, actions), &tree(&1, {m, defs, required}))
+      Enum.flat_map(
+        trees(defs, actions),
+        &Loka.Content.Policies.tree(&1, {m, defs, required}, @ref_fields)
+      )
   end
-
-  defp tree({rel, steps, root}, ctx),
-    do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
   # Every policy tree: a named policy's root, each action's inline one, each variant's, each
   # recipe's, each quest's (its offer's and a current_state objective's), each reaction's and each
@@ -304,7 +308,9 @@ defmodule Loka.Content.Checks do
       RoomParts.conditions(defs) ++
       Entities.conditions(defs) ++
       Recipes.conditions(defs) ++
-      Quests.conditions(defs) ++ Reactions.conditions(defs) ++ Dialogues.conditions(defs)
+      Quests.conditions(defs) ++
+      Reactions.conditions(defs) ++
+      Dialogues.conditions(defs) ++ Loka.Content.Skills.conditions(defs)
   end
 
   # run_job is authority-internal (04 §1): no action builds it.
@@ -314,32 +320,4 @@ defmodule Loka.Content.Checks do
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
   end
-
-  defp nodes(%{"op" => op, "items" => items} = n, steps) when op in ~w(all any) do
-    children =
-      items
-      |> Enum.with_index()
-      |> Enum.flat_map(fn {c, i} -> nodes(c, steps ++ ["items", i]) end)
-
-    [{n, steps} | children]
-  end
-
-  defp nodes(%{"op" => "not", "item" => item} = n, steps),
-    do: [{n, steps} | nodes(item, steps ++ ["item"])]
-
-  defp nodes(n, steps), do: [{n, steps}]
-
-  defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do
-    owned(at(rel, steps ++ ["op"]), op, required) ++
-      empty_window(rel, steps, n) ++
-      case @ref_fields[op] do
-        nil -> []
-        field -> reference(rel, steps, field, n, m, defs)
-      end
-  end
-
-  defp empty_window(rel, steps, %{"op" => "time_window", "from" => t, "to" => t}),
-    do: [diag("EMPTY_TIME_WINDOW", at(rel, steps))]
-
-  defp empty_window(_, _, _), do: []
 end

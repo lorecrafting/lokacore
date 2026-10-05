@@ -232,6 +232,22 @@
                   "amount"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "skill.acquire"
+                  },
+                  "skill": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "required": [
+                  "op",
+                  "skill"
+                ],
+                "additionalProperties": false
               }
             ]
           }
@@ -274,19 +290,35 @@
         "availability": {
           "type": "object",
           "properties": {
-            "from": { "$ref": "command.schema.json#/$defs/LogicalTime" },
-            "through": { "$ref": "command.schema.json#/$defs/LogicalTime" }
+            "from": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            },
+            "through": {
+              "$ref": "command.schema.json#/$defs/LogicalTime"
+            }
           },
           "additionalProperties": false
         },
         "payment": {
           "type": "object",
           "properties": {
-            "from": { "$ref": "action.schema.json#/$defs/Key" },
-            "resource": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "amount": { "type": "integer", "minimum": 1, "maximum": 2147483647 }
+            "from": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
           },
-          "required": ["from", "resource", "amount"],
+          "required": [
+            "from",
+            "resource",
+            "amount"
+          ],
           "additionalProperties": false
         },
         "escort": {
@@ -313,6 +345,28 @@
           ],
           "additionalProperties": false,
           "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest."
+        },
+        "lesson_payment": {
+          "type": "object",
+          "properties": {
+            "to": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "resource": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "to",
+            "resource",
+            "amount"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

@@ -1,3 +1,5 @@
+export { prose, note } from './paper.ts';
+import { SkillDetails, ItemDetails } from './skills.tsx';
 // size: allow 325, established book pages with projected notice entries
 // The book's pages: room, a thing's page, and the Character / Journal / Carrying pages. Each is
 // only drawing; what a tap does is passed in by Book.tsx.
@@ -6,7 +8,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bandPhrase, cap, plain, why, type group, type Pool, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
-import { body, head, paper } from './paper.ts';
+import { body, head, paper, prose, note } from './paper.ts';
 import { reason } from './words.ts';
 
 type Say = (key: string) => string;
@@ -17,9 +19,7 @@ export type { Thing } from './model.ts';
 export const band = (tone: Pool['tone']): string =>
   ({ normal: paper.fg, warning: paper.mid, danger: paper.accent })[tone];
 
-export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
 export const titleStyle = { fontFamily: head, fontSize: 26, color: paper.fg, paddingBottom: 10 };
-export const note = { ...prose, color: paper.dim };
 export const scrollPaper = { backgroundColor: paper.bg };
 
 export function Tap(p: { label: string; onPress: () => void; children: ReactNode }) {
@@ -141,8 +141,7 @@ export function ThingPage(p: {
 }) {
   return (
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
-      {p.thing?.description && <Text style={prose}>{plain(p.text(p.thing.description))}</Text>}
-      {p.thing?.state && <Text style={note}>{cap(p.thing.state)}</Text>}
+      <ItemDetails thing={p.thing} text={p.text} />
       {p.log.map((line, i) => (
         <Text key={i} style={typeof line === 'string' ? prose : { ...note, fontStyle: 'italic' }}>
           {typeof line === 'string' ? line : line.text}
@@ -173,14 +172,17 @@ export function ThingPage(p: {
 export function CharacterPage(p: {
   resources?: readonly Pool[];
   position?: GameView['position'];
+  view?: GameView;
   text: Say;
 }) {
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
-  const { resources = [] } = p;
+  const resources = p.resources ?? p.view?.resources ?? [];
+  const position = p.position ?? p.view?.position;
   return (
     <Sheet title="Character">
       {resources.length === 0 && <Text style={note}>Nothing is known about you yet.</Text>}
-      {p.position && <Text style={prose}>{cap(p.position)}</Text>}
+      {position && <Text style={prose}>{cap(position)}</Text>}
+      <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
         <Text key={r.resource.key} style={{ ...prose, color: band(r.tone) }}>
           {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}

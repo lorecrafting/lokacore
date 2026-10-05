@@ -1,3 +1,4 @@
+import { assignmentEvidence, paymentEvidence } from './dialogue-consequences.ts';
 // Dialogue detail routing is derived from a committed command and its retained bound row.
 import type {
   Command,
@@ -136,23 +137,7 @@ function consequences(
   const events = d.events.filter((e) => e.causation_id === (command.id as string));
   if (!transferEvidence(s, row, option, ops, events)) return false;
   if (!assignmentEvidence(s, row, option, ops, events)) return false;
-  if (option.payment) {
-    const from = row.roles.find((r) => r.role === option.payment!.from)?.entity_id;
-    const paid = ops.filter((o) => o.op === 'resource.adjust');
-    if (
-      paid.length !== 2 ||
-      paid[0].op !== 'resource.adjust' ||
-      paid[1].op !== 'resource.adjust' ||
-      !from ||
-      paid[0].entity_id !== from ||
-      paid[1].entity_id !== bodyOf(s.world, actor) ||
-      !same(paid[0].resource, option.payment.resource) ||
-      !same(paid[1].resource, option.payment.resource) ||
-      paid[0].from - paid[0].to !== option.payment.amount ||
-      paid[1].to - paid[1].from !== option.payment.amount
-    )
-      return false;
-  }
+  if (!paymentEvidence(s, row, option, ops)) return false;
   if (!escortEvidence(s, command, row, option, ops)) return false;
   if (!source.quest) return true;
   const q = questOf(s.world, actor, source.quest);
@@ -250,47 +235,9 @@ function transferEvidence(
     same(acquired[0].payload, { type: 'item_acquired', item_id: item, holder_id: to })
   );
 }
-function assignmentEvidence(
-  s: Story,
-  row: ChoiceRow,
-  option: DialogueChoice,
-  ops: readonly DeltaOp[],
-  events: readonly DomainEvent[],
-) {
-  for (const step of option.sequence ?? []) {
-    if (step.op !== 'fact.assign') continue;
-    const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, step.fact));
-    const op = matching[0];
-    if (
-      matching.length !== 1 ||
-      op.op !== 'fact.assign' ||
-      !same(op.value, step.value) ||
-      !same(op.scope, scopeOf(s.world, row.actor_id, step.fact))
-    )
-      return false;
-    const changed = events.filter(
-      (e) => e.payload.type === 'fact_changed' && same(e.payload.fact, step.fact),
-    );
-    if (same(op.expected, op.value)) {
-      if (changed.length) return false;
-    } else if (
-      changed.length !== 1 ||
-      changed[0].actor_id !== row.actor_id ||
-      !same(changed[0].scope, op.scope) ||
-      !same(changed[0].payload, {
-        type: 'fact_changed',
-        fact: step.fact,
-        old: op.expected,
-        new: step.value,
-      })
-    )
-      return false;
-  }
-  return true;
-}
-
 // Legacy terminal rewards retain their routing; recover the new authored custody path.
 function transferDetail(s: Story, source?: DialogueDefinition, option?: DialogueChoice) {
+  if (option?.sequence?.some((step) => step.op === 'skill.acquire')) return true;
   if (option?.receive && !source?.quest) return true;
   if (source?.quest && s.world.cartridge.quests?.[refString(source.quest)]?.deadline) return true;
   const transfer = option?.receive ?? option?.hand_over;

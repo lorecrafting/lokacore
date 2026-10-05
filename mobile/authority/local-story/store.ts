@@ -1,3 +1,4 @@
+import { receiptRecovery } from './receipt-save.ts';
 // size: allow 304, shared save boundary retains quest reference checks before receipt recovery
 import { encountersValid } from '../../../kernel/ts/src/mechanics/combat/saved.ts';
 import { hydrate } from '../../../kernel/ts/src/runtime/created.ts';
@@ -22,10 +23,6 @@ import type { DecisionResult, StoryPointReport } from '../../../kernel/ts/src/co
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { row } from '../../../kernel/ts/src/runtime/world.ts';
-import { dialogueSave } from './dialogue-save.ts';
-import { commerceSave } from './commerce-save.ts';
-import { deadlineSave } from './deadline-save.ts';
-import { finaleSave } from './finale-save.ts';
 import { recoveryFault } from '../../../kernel/ts/src/mechanics/resource.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
@@ -147,10 +144,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
       if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))
         return undefined;
     const meta = { ...m, parent, seed, pin } as Meta;
-    dialogueSave(world, db, meta);
-    commerceSave(world, db, meta, h.revision);
-    deadlineSave(world, db, meta);
-    finaleSave(world, db, meta, h.revision);
+    receiptRecovery(world, db, meta, h.revision);
     return saved(world, h.revision, meta, db);
   } catch (e) {
     if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;

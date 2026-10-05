@@ -1,3 +1,4 @@
+import { skillSpec } from './cartridge_skills.ts';
 // The loader's engine-fact check (cartridge.md Compiler; DiagnosticCode RESERVED_FACT), twin of
 // lib/loka/content/position.ex: under position@1 the fact position is the engine's, so the
 // scene@1 also reserves each scene_<key> fact. The artifact must carry exactly these FactSpecs,
@@ -33,6 +34,8 @@ export function reserved(c: Obj): Diagnostic[] {
   for (const p of Object.values((c.story_points ?? {}) as Obj))
     if (Object.values(p.outcomes as Obj).some((t: Obj) => !!t.scene))
       expected[`story_point_${p.key}`] = markerSpec(p.key, Object.keys(p.outcomes));
+  for (const s of Object.values((c.skills ?? {}) as Obj))
+    expected[`skill_${s.key}`] = skillSpec(s.key);
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const out: Diagnostic[] = [];
   refs.forEach((ref, i) => {

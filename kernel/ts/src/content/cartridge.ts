@@ -128,6 +128,7 @@ function keyStage(c: Obj): Diagnostic[] {
     'dialogues',
     'story_points',
     'scenes',
+    'skills',
   ]) {
     for (const [ref, def] of Object.entries((c[map] ?? {}) as Obj)) {
       const [, id, version, key] = ref.match(/^(.*)@(.*):[a-z_]+\/(.*)$/)!;
@@ -219,7 +220,7 @@ function lockStage(c: Obj): Diagnostic[] {
           use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`);
       });
   }
-  for (const kind of ['resource', 'attribute', 'scene'])
+  for (const kind of ['resource', 'attribute', 'scene', 'skill'])
     for (const ref of Object.keys((c[`${kind}s`] ?? {}) as Obj))
       use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))

@@ -54,3 +54,14 @@ export function links(c: Obj): Diagnostic[] {
     ),
   );
 }
+
+export function unreachable(details: Obj, at: string): Diagnostic[] {
+  return Object.entries(details).flatMap(([key, d]) => {
+    const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));
+    const [first, ...words] = d.aliases[0].split('_');
+    const typable = ![first, ...words].includes('') && !['at', 'the', 'a', 'an'].includes(first);
+    return !typable || others.includes(d.aliases[0])
+      ? [diag('UNREACHABLE_DETAIL', `${at}.details.${key}`)]
+      : [];
+  });
+}
