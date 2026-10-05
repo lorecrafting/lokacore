@@ -1,3 +1,4 @@
+import { transitionEscort } from './compose_escort.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 // StateDelta composition, twin of lib/loka/core/compose.ex; writes use a target-keyed overlay.
@@ -100,6 +101,7 @@ const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
+// size: allow 41, exhaustive dispatch over the closed delta-op contract
 function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   const row = read(t, ctx);
   switch (op.op) {
@@ -129,6 +131,8 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'encounter.advance':
     case 'encounter.close':
       return encounter(op, row, ctx);
+    case 'escort.transition':
+      return transitionEscort(op, row);
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
     case 'resource.adjust':
@@ -248,6 +252,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'jobs'), t.job_id);
     case 'encounter':
       return get(section(s, 'encounters'), t.encounter_id);
+    case 'escort':
+      return get(section(s, 'escorts'), t.actor_id);
     case 'clock':
       return s.clock;
     case 'resource':

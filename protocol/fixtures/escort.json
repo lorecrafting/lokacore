@@ -1,0 +1,2175 @@
+{
+  "cases": [
+    {
+      "id": "None to following",
+      "state": {
+        "clock": 0
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "body_id": "22222222-2222-4333-8444-555555555555",
+              "npc_id": "33333333-2222-4333-8444-555555555555",
+              "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+              "continuation_id": "55555555-2222-4333-8444-555555555555",
+              "choice_id": "rescue",
+              "status": "following"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "following to separated",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "body_id": "22222222-2222-4333-8444-555555555555",
+              "npc_id": "33333333-2222-4333-8444-555555555555",
+              "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+              "continuation_id": "55555555-2222-4333-8444-555555555555",
+              "choice_id": "rescue",
+              "status": "separated"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "separated to following",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "body_id": "22222222-2222-4333-8444-555555555555",
+              "npc_id": "33333333-2222-4333-8444-555555555555",
+              "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+              "continuation_id": "55555555-2222-4333-8444-555555555555",
+              "choice_id": "rescue",
+              "status": "following"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "following to completed",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "completed"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "body_id": "22222222-2222-4333-8444-555555555555",
+              "npc_id": "33333333-2222-4333-8444-555555555555",
+              "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+              "continuation_id": "55555555-2222-4333-8444-555555555555",
+              "choice_id": "rescue",
+              "status": "completed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "duplicate start",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "stale full expected",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "99999999-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "start actor mismatch",
+      "state": {
+        "clock": 0
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "99999999-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "immutable actor_id",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "99999999-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "immutable body_id",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "99999999-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "immutable npc_id",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "99999999-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "immutable quest_instance_id",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "99999999-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "immutable continuation_id",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "99999999-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "immutable choice_id",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "other",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "illegal None to separated",
+      "state": {
+        "clock": 0
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "illegal following to following",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "illegal separated to completed",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "completed"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "illegal completed to following",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "completed"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "completed"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "same group sequential overlay",
+      "state": {
+        "clock": 0
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        },
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        },
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        },
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          },
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "completed"
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555"
+            },
+            "value": {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "body_id": "22222222-2222-4333-8444-555555555555",
+              "npc_id": "33333333-2222-4333-8444-555555555555",
+              "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+              "continuation_id": "55555555-2222-4333-8444-555555555555",
+              "choice_id": "rescue",
+              "status": "completed"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "cross group conflict before stale precondition",
+      "state": {
+        "clock": 0
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        },
+        {
+          "op": "escort.transition",
+          "writer_group": 1,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "separated"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    },
+    {
+      "id": "malformed stored row",
+      "state": {
+        "clock": 0,
+        "escorts": {
+          "11111111-2222-4333-8444-555555555555": false
+        }
+      },
+      "ops": [
+        {
+          "op": "escort.transition",
+          "writer_group": 0,
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "expected": null,
+          "value": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555",
+            "body_id": "22222222-2222-4333-8444-555555555555",
+            "npc_id": "33333333-2222-4333-8444-555555555555",
+            "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+            "continuation_id": "55555555-2222-4333-8444-555555555555",
+            "choice_id": "rescue",
+            "status": "following"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "escort",
+            "actor_id": "11111111-2222-4333-8444-555555555555"
+          }
+        }
+      }
+    }
+  ],
+  "contracts": [
+    {
+      "name": "valid EscortRelation",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": []
+    },
+    {
+      "name": "EscortRelation requires kind",
+      "contract": "EscortRelation",
+      "value": {
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation requires actor_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation requires body_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/body_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation requires npc_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/npc_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation requires quest_instance_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation requires continuation_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/continuation_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation requires choice_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/choice_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation requires status",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue"
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation closed status",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "lost"
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "EscortRelation closed fields",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following",
+        "extra": true
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "valid Relation",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": []
+    },
+    {
+      "name": "Relation requires kind",
+      "contract": "Relation",
+      "value": {
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation requires actor_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation requires body_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/body_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation requires npc_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/npc_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation requires quest_instance_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation requires continuation_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/continuation_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation requires choice_id",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/choice_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation requires status",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue"
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "Relation closed status",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "lost"
+      },
+      "errors": [
+        {
+          "path": "/status",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "Relation closed fields",
+      "contract": "Relation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following",
+        "extra": true
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "valid status following",
+      "contract": "EscortStatus",
+      "value": "following",
+      "errors": []
+    },
+    {
+      "name": "valid status separated",
+      "contract": "EscortStatus",
+      "value": "separated",
+      "errors": []
+    },
+    {
+      "name": "valid status completed",
+      "contract": "EscortStatus",
+      "value": "completed",
+      "errors": []
+    },
+    {
+      "name": "closed status",
+      "contract": "EscortStatus",
+      "value": "lost",
+      "errors": [
+        {
+          "path": "",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "null expected",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "object expected",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        },
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "separated"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "transition requires op",
+      "contract": "DeltaOp",
+      "value": {
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/op",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "transition requires writer_group",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/writer_group",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "transition requires actor_id",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "expected": null,
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "transition requires expected",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/expected",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "transition requires value",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": null
+      },
+      "errors": [
+        {
+          "path": "/value",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "expected rejects True",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": true,
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/expected",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "expected rejects []",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": [],
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/expected",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "expected rejects 0",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": 0,
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/expected",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "expected rejects row",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": "row",
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        }
+      },
+      "errors": [
+        {
+          "path": "/expected",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "expected validates its object",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "lost"
+        },
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "separated"
+        }
+      },
+      "errors": [
+        {
+          "path": "/expected/status",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "closed transition",
+      "contract": "DeltaOp",
+      "value": {
+        "op": "escort.transition",
+        "writer_group": 0,
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "expected": null,
+        "value": {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
+        },
+        "extra": 0
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "escort target",
+      "contract": "MutationTarget",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "errors": []
+    },
+    {
+      "name": "target actor required",
+      "contract": "MutationTarget",
+      "value": {
+        "kind": "escort"
+      },
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "escort policy",
+      "contract": "Policy",
+      "value": {
+        "op": "escort_state",
+        "quest": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "quest",
+          "key": "rescue"
+        },
+        "state": "following"
+      },
+      "errors": []
+    },
+    {
+      "name": "policy requires op",
+      "contract": "Policy",
+      "value": {
+        "quest": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "quest",
+          "key": "rescue"
+        },
+        "state": "following"
+      },
+      "errors": [
+        {
+          "path": "/op",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "policy requires quest",
+      "contract": "Policy",
+      "value": {
+        "op": "escort_state",
+        "state": "following"
+      },
+      "errors": [
+        {
+          "path": "/quest",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "policy requires state",
+      "contract": "Policy",
+      "value": {
+        "op": "escort_state",
+        "quest": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "quest",
+          "key": "rescue"
+        }
+      },
+      "errors": [
+        {
+          "path": "/state",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "closed policy",
+      "contract": "Policy",
+      "value": {
+        "op": "escort_state",
+        "quest": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "quest",
+          "key": "rescue"
+        },
+        "state": "following",
+        "extra": true
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "escort choice",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "start",
+        "narration": "started",
+        "escort": {
+          "npc": "wren",
+          "quest": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "quest",
+            "key": "rescue"
+          },
+          "transition": "start"
+        }
+      },
+      "errors": []
+    },
+    {
+      "name": "effect requires npc",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "start",
+        "narration": "started",
+        "escort": {
+          "quest": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "quest",
+            "key": "rescue"
+          },
+          "transition": "start"
+        }
+      },
+      "errors": [
+        {
+          "path": "/escort/npc",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "effect requires quest",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "start",
+        "narration": "started",
+        "escort": {
+          "npc": "wren",
+          "transition": "start"
+        }
+      },
+      "errors": [
+        {
+          "path": "/escort/quest",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "effect requires transition",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "start",
+        "narration": "started",
+        "escort": {
+          "npc": "wren",
+          "quest": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "quest",
+            "key": "rescue"
+          }
+        }
+      },
+      "errors": [
+        {
+          "path": "/escort/transition",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "closed effect transition",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "start",
+        "narration": "started",
+        "escort": {
+          "npc": "wren",
+          "quest": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "quest",
+            "key": "rescue"
+          },
+          "transition": "follow"
+        }
+      },
+      "errors": [
+        {
+          "path": "/escort/transition",
+          "code": "not_in_enum"
+        }
+      ]
+    },
+    {
+      "name": "closed effect",
+      "contract": "DialogueChoice",
+      "value": {
+        "label": "start",
+        "narration": "started",
+        "escort": {
+          "npc": "wren",
+          "quest": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "quest",
+            "key": "rescue"
+          },
+          "transition": "start",
+          "extra": true
+        }
+      },
+      "errors": [
+        {
+          "path": "/escort/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "malformed escort quest_instance_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "not-a-uuid",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/quest_instance_id",
+          "code": "pattern_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "malformed escort continuation_id",
+      "contract": "EscortRelation",
+      "value": {
+        "kind": "escort",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "not-a-uuid",
+        "choice_id": "rescue",
+        "status": "following"
+      },
+      "errors": [
+        {
+          "path": "/continuation_id",
+          "code": "pattern_mismatch"
+        }
+      ]
+    }
+  ]
+}

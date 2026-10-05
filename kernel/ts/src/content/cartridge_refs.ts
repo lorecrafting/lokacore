@@ -158,7 +158,7 @@ export function refStage(c: Obj): Diagnostic[] {
     }
     if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
     if (n.op === 'barrier_state') named(n.barrier, 'barrier', `${at}.barrier`);
-    if (n.op === 'quest_state') named(n.quest, 'quest', `${at}.quest`);
+    if (n.op === 'quest_state' || n.op === 'escort_state') named(n.quest, 'quest', `${at}.quest`);
     if (n.op === 'stat_compare') named(n.attribute, 'attribute', `${at}.attribute`);
     if (n.op === 'resource_compare') named(n.resource, 'resource', `${at}.resource`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));

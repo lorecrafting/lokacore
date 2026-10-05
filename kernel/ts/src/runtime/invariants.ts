@@ -1,3 +1,4 @@
+import { escortsHold } from './invariants_escort.ts';
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
 // after STEP read one kernel step and are TypeScript only (rules are TypeScript, ADR-074).
@@ -182,7 +183,8 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     if (!Number.isInteger(state.clock) || !creationsHold(state, delta.ops, result)) return false;
-    if (!encountersHold(state, delta.ops, result)) return false;
+    if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
+      return false;
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
     const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));
@@ -190,6 +192,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
+      if (op.op === 'escort.transition') continue;
       if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
       const k = key(target(op));
       const [need, give] = link(op);

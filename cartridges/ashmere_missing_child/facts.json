@@ -118,14 +118,15 @@
         "type": "enum",
         "values": [
           "unselected",
-          "stays"
+          "stays",
+          "rescue"
         ],
         "default": "unselected"
       },
       "scopes": [
         "player"
       ],
-      "meaning": "The player chose to carry Vesper’s message while Wren stays."
+      "meaning": "The player’s chosen return: Vesper’s message while Wren stays, or escorting Wren to Elspeth."
     },
     "village.child_status": {
       "version": 1,

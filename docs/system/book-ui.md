@@ -345,3 +345,12 @@ and stale replies never print success. Existing live freshness preserves an unch
 choice across elapsed-only redraws; changed custody, continuation, room or speaker
 refuses stale and redraws truthfully. The journal and Green description use committed
 quest/status truth, without a new UI mode.
+
+
+## Escort details
+
+Wren's escort and Rejoin choices and Elspeth's rescued turn-in use ordinary NPC details,
+current shared availability and freshness. Confirmed lines appear once under their own
+original speaker after description and before options, including receipt recovery on reopen.
+Pending/refused/stale replies never narrate success. Journal and Green/Elspeth variants read
+committed following/separated/rescued/stays state; there is no new UI mode.

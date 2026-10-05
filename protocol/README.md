@@ -52,4 +52,8 @@ Current receptacle fixtures are named `containers_*hash.json`; their independent
 derived additions are in `test/loka/cartridge_containers_hash.py`. Original artifacts and
 `historical_transcripts/` retain preproduction bytes; the current loader refuses
 unmarked receptacles. Current feature transcripts remain replayable. The bundled
-chapter uses `missing_child_v011_hash.json` and `missing_child_v011_ids.json`.
+chapter uses `missing_child_v012_hash.json` and `missing_child_v012_ids.json`.
+
+`fixtures/escort.json` pins the API1.11 relation, transition, target, dialogue effect
+and policy supplement, including both portable composers and independent preconditions
+([escort mechanics](../docs/system/mechanics.md#escort1)).

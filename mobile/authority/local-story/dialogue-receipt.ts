@@ -9,11 +9,17 @@ import type {
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
-import { bodyOf, refString, type ChoiceRow } from '../../../kernel/ts/src/runtime/decision.ts';
+import {
+  bodyOf,
+  refString,
+  type ChoiceRow,
+  type World,
+} from '../../../kernel/ts/src/runtime/decision.ts';
 import { answerFits, bind, choiceIds } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { scopeOf } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { questOf } from '../../../kernel/ts/src/mechanics/lookups.ts';
 import type { Story } from './save.ts';
+import type { Db } from './store.ts';
 
 // size: allow 60, one trust boundary checks original command, binding and narration identity
 export function dialogueDetail(
@@ -40,6 +46,7 @@ export function dialogueDetail(
   const option = source?.choices[p.choice_id];
   if (
     !source?.riddle &&
+    !option?.escort &&
     !transferDetail(s, source, option) &&
     p.answer === undefined &&
     d.outcome !== 'riddle_wrong'
@@ -75,7 +82,6 @@ export function dialogueDetail(
   if (!wrong && !consequences(s, command, d, row, source, option)) return invalid();
   return detail;
 }
-
 function evidence(
   d: Extract<DecisionResult, { kind: 'accepted' }>,
   command: Command & { payload: Extract<Command['payload'], { type: 'choose' }> },
@@ -130,6 +136,7 @@ function consequences(
   const events = d.events.filter((e) => e.causation_id === (command.id as string));
   if (!transferEvidence(s, row, option, ops, events)) return false;
   if (!assignmentEvidence(s, row, option, ops, events)) return false;
+  if (!escortEvidence(s, command, row, option, ops)) return false;
   if (!source.quest) return true;
   const q = questOf(s.world, actor, source.quest);
   const transitions = ops.filter((o) => o.op === 'quest.transition' && o.to === 'resolved');
@@ -153,6 +160,49 @@ function consequences(
   );
 }
 
+// size: allow 42, exact authored transition binds original identity and receipt effect
+function escortEvidence(
+  s: Story,
+  command: Command,
+  row: ChoiceRow,
+  option: DialogueChoice,
+  ops: readonly DeltaOp[],
+) {
+  const effect = option.escort;
+  if (!effect) return true;
+  const escort = s.world.state.escorts?.[row.actor_id];
+  const quest = questOf(s.world, row.actor_id, effect.quest);
+  if (
+    !escort ||
+    !quest ||
+    command.payload.type !== 'choose' ||
+    escort.actor_id !== row.actor_id ||
+    escort.body_id !== bodyOf(s.world, row.actor_id) ||
+    escort.npc_id !== row.roles.find((r) => r.role === effect.npc)?.entity_id ||
+    escort.quest_instance_id !== quest[0]
+  )
+    return false;
+  const start = effect.transition === 'start';
+  if (
+    start &&
+    (escort.continuation_id !== command.payload.continuation_id ||
+      escort.choice_id !== command.payload.choice_id)
+  )
+    return false;
+  const transitions = ops.filter((o) => o.op === 'escort.transition');
+  return (
+    transitions.length === 1 &&
+    same(transitions[0], {
+      op: 'escort.transition',
+      writer_group: 0,
+      actor_id: row.actor_id,
+      expected: start
+        ? null
+        : { ...escort, status: effect.transition === 'rejoin' ? 'separated' : 'following' },
+      value: { ...escort, status: effect.transition === 'complete' ? 'completed' : 'following' },
+    })
+  );
+}
 function transferEvidence(
   s: Story,
   row: ChoiceRow,
@@ -183,7 +233,6 @@ function transferEvidence(
     same(acquired[0].payload, { type: 'item_acquired', item_id: item, holder_id: to })
   );
 }
-
 function assignmentEvidence(
   s: Story,
   row: ChoiceRow,
@@ -230,4 +279,22 @@ function transferDetail(s: Story, source?: DialogueDefinition, option?: Dialogue
   const role = transfer && source?.roles[transfer.item];
   const entity = role?.role === 'item' && s.world.entities[s.world.entityIds[refString(role.item)]];
   return entity && entity.kind === 'item' && entity.give_allowed === false;
+}
+
+export function committedDialogue(world: World, db: Db, scope: string, continuation: string) {
+  const receipts = db.getAllSync<{ command_id: string; command: string; response: string }>(
+    `SELECT command_id,command,response FROM receipt WHERE scope=?
+     AND json_extract(command,'$.payload.type')='choose'
+     AND json_extract(command,'$.payload.continuation_id')=?
+     AND json_extract(response,'$.kind')='accepted'
+     AND json_extract(response,'$.outcome')!='riddle_wrong'`,
+    scope,
+    continuation,
+  );
+  if (receipts.length !== 1) throw new SyntaxError('malformed JSON: missing committed dialogue');
+  const r = receipts[0];
+  if (
+    !dialogueDetail({ world } as Story, r.command_id, JSON.parse(r.command), JSON.parse(r.response))
+  )
+    throw new SyntaxError('malformed JSON: missing committed dialogue');
 }

@@ -12,6 +12,7 @@ import {
 import { exitTo } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
+import { travel } from '../escort/shared.ts';
 import { fare, passage } from './shared.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
@@ -33,7 +34,12 @@ export function moveSequence(world: World, command: MoveCommand, mint: Mint, out
   return accepted(
     world,
     outcome,
-    [...paid.ops, transfer, ...closeEncounter(world, body)],
+    [
+      ...paid.ops,
+      transfer,
+      ...travel(world, command.payload.actor_id, here, there),
+      ...closeEncounter(world, body),
+    ],
     [
       event(world, command, mint, 1, {
         type: 'entity_entered_room',
