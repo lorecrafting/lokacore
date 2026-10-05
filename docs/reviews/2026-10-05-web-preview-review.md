@@ -17,3 +17,21 @@ At the exact reviewed head, `npm ci` and app `tsc --noEmit` passed. In a fresh, 
 - **R194-2, should-fix — `mobile/app/patch-sqlite-web.cjs:12`:** The source guard rejects its own successful patch on a later `npm install` in the same checkout. After `npm ci` passed and patched the worker, an immediate ordinary `npm install --no-audit --no-fund` exited 1 with “Review the SQLite web length write upstream.” This prevents normal dependency updates or repeated install commands until `node_modules` is deleted. Accept exactly the known patched form as an idempotent success while continuing to reject an unknown version/source.
 
 Ponytail Review: **Lean already. Ship.** No unnecessary abstraction or dependency found; the two findings concern correctness and workflow, not excess code.
+
+## Separate save opinion (verbatim)
+
+```text
+Verdict: REQUEST_CHANGES at 6a878fa28b833494828ddd7851877fe90d228e27.
+
+1. [P2] mobile/app/App.tsx:170 — Reopen a fresh handle after corrupt-file recovery. The web opener permanently returns `opened`. Confirmed Start over for NOTADB/page corruption closes that handle and deletes the file (:51–53); localSession then calls its opener again and receives the closed handle. Recovery leaves no game and removes the Start over option. The Expo worker likewise removes closed database IDs and rejects later operations. Reuse the primed handle while it remains open, then acquire a new handle after removal.
+
+Evidence:
+- Real SQLite reproduction: corrupt save → confirmed recovery → `database is not open`, game absent, startOver=false. A fresh-handle control recovers successfully.
+- Disposable mutation using the PR’s captured-handle opener makes the existing “elapsed NOTADB and page corruption recover only through explicit working Start over” test fail at its successful-recovery assertion.
+- All 54 focused start_over/recovery/session/faults tests pass unchanged; their fresh opener misses this integration regression.
+- Separate browser origin: accepted quest narration survives reload and closing/reopening the save. Concurrent second-tab opening safely refuses the OPFS lock without offering Start over; reload after releasing the lock restores saved play.
+- Browser corrupt-byte mutation was inconclusive; the finding rests on real SQLite reproduction and the verified Expo handle lifecycle.
+- Disposable servers/copy removed; repository unchanged. No native save accessed.
+
+Ponytail: no unnecessary abstraction or dependency identified.
+```

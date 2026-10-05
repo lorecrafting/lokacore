@@ -24,6 +24,7 @@ play survives reload and a closed/reopened tab. Browser saves have no cross-buil
 migration promise.
 
 `expo-sqlite` 57.0.3's browser worker needs an asynchronous first open before synchronous
-session calls, plus the narrow install-time length fix in `mobile/app/patch-sqlite-web.cjs`.
+session calls, plus the narrow install-time length and error-message fixes in
+`mobile/app/patch-sqlite-web.cjs`.
 Its web support is alpha. On an SDK update, review that guard and repeat real browser
 open, action, reload, tab reopen and Fast Refresh checks before using the preview.

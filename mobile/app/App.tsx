@@ -167,7 +167,7 @@ function useWebSession() {
     g.loka_web_opening ??= openDatabaseAsync(NAME)
       .then((opened) => {
         db = opened;
-        return createSession(() => opened);
+        return createSession(() => (db ??= openDatabaseSync(NAME)));
       })
       .catch((error) =>
         createSession(() => {
