@@ -49,3 +49,25 @@ regression that rejects fresh unbound input without changing the saved line.
 
 Native/browser acceptance and full publication checks are not claimed here. The
 separate save/protocol opinion owns additional receipt-corruption review findings.
+
+## Scoped fix round 1
+
+Fix source `65ed2006`; exact integrated head
+`05e72a3cb831b9facf50c05b08f54581ce7d0c1c`.
+**Primary verdict: APPROVE. A3-P1 closed; no open primary findings.**
+
+The rule now requires matching scene and line for every modal Continue, and the
+schema/generated contract require both fields. Reviewed the new controlled
+non-action-scene regression, updated transcript commands and sampler callers.
+The current v0.0.17 bell route independently refuses two fresh unbound commands
+and a fresh stale bound command without changing the line; a matching bound
+command advances once.
+
+- Scoped scene/finale/transcript and authority scene/sampler tests: **11/11 pass**.
+- Independent temporary mutations removing the rule guard, schema-required scene,
+  and schema-required line each fail the new scene regression. Exact restoration:
+  **5/5 pass**; throwaway worktree removed.
+- Ponytail Review: **Lean already. Ship.** No findings in the fix.
+
+This recheck covers the primary disposition and its direct callers; the separate
+save/protocol reviewer owns its receipt-chain finding dispositions.
