@@ -5,6 +5,8 @@ import importlib.util
 import pathlib
 import subprocess
 import tempfile
+import time
+import sys
 import unittest
 
 loader = importlib.machinery.SourceFileLoader('board', str(pathlib.Path(__file__).with_name('board')))
@@ -50,6 +52,31 @@ class BoardTest(unittest.TestCase):
             data = board.snapshot(repo, repo / 'notes')
             self.assertEqual(data['divergence'].split(), ['0', '1'])
             self.assertEqual(data['remote_label'], 'Cached upstream/main (publication baseline)')
+
+    # Break: reporting activity replaces a running watch page with a non-refreshing snapshot.
+    def test_report_command_keeps_watcher_page_refreshing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            subprocess.run(['git', 'init', '-b', 'main', directory], check=True, capture_output=True)
+            command = [sys.executable, str(pathlib.Path(__file__).with_name('board')), '--repo', directory]
+            output = pathlib.Path(directory) / 'tmp/chapter-board.html'
+            watcher = subprocess.Popen(command + ['--watch'], stdout=subprocess.DEVNULL)
+            try:
+                for _ in range(100):
+                    if output.exists():
+                        break
+                    time.sleep(.02)
+                self.assertTrue(output.exists(), 'watcher did not write its first page')
+                self.assertIn('http-equiv="refresh"', output.read_text())
+                subprocess.run(command + ['--note', 'A3', '--phase', 'checks', '--activity', 'Verifying'],
+                               check=True, capture_output=True, timeout=20)
+                self.assertIsNone(watcher.poll())
+                self.assertIn('http-equiv="refresh"', output.read_text())
+                reports, errors = board.read_notes(pathlib.Path(directory) / 'tmp/chapter-board-status.jsonl')
+                self.assertEqual(errors, 0)
+                self.assertEqual(reports[0]['activity'], 'Verifying')
+            finally:
+                watcher.terminate()
+                watcher.wait(timeout=5)
 
     # Break: concurrent watch/note refreshes rename another writer's shared temporary file.
     def test_concurrent_refreshes_do_not_share_temporary_files(self):

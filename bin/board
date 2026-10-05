@@ -185,6 +185,9 @@ def main():
         notes.parent.mkdir(parents=True, exist_ok=True)
         with notes.open('a') as stream:
             stream.write(json.dumps({k: redact(v) if isinstance(v, str) else v for k, v in note.items()}) + '\n')
+        if not args.watch:
+            print('Operational report recorded; watcher will refresh, or rerun bin/board.')
+            return
     output = args.output or repo / 'tmp/chapter-board.html'
     output.parent.mkdir(parents=True, exist_ok=True)
     try:

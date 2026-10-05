@@ -30,6 +30,8 @@ python3 bin/board --repo tmp/loka-main-integration --note A3 \
 
 Add `--head` with the exact checked commit when known. Leave unknown values out.
 Use a new report for each phase/check or blocker; the history retains check times.
+A report command appends notes without replacing the page. A running watcher picks
+it up on its next refresh; without a watcher, rerun `bin/board` for a new snapshot.
 Phases: `plan`, `build`, `checks`, `provisional`, `reviews`, `fixes`,
 `local complete`, `publication`. A unit can be a chapter slice or a supporting
 work unit. Reports are stored in ignored `tmp/chapter-board-status.jsonl` in the
