@@ -14,9 +14,15 @@ a welcome source of independence. [AGENTS.md](../AGENTS.md) rules apply to every
 
 **Models** ([owner decision](archive/decisions/owner-decisions-review-flow-2026-09-30.md)): a slice is
 reviewed once, with a narrow fix check, by a reviewer on the highest Opus.
-**Cross-vendor review** (codex, prepaid, reviews only) is an everyday second opinion beside
-our own independent review, never instead of it: the PM may add it to any slice beyond
-docs-only or trivial ones. Once CI is green the PM runs `codex exec` (read-only; `-m` Astra on the gate audit and on changes to
+**Review count** ([owner decision](decisions/owner-decision-one-reviewer-default-2026-10-04.md)):
+one fresh independent reviewer is the default for a mechanics PR. Add a separate
+second opinion when the change alters save/reconciliation behavior, protocol or
+portable foundation contracts, `kernel/ts/src/runtime/proposal.ts`, or closes a milestone
+gate; the PM may add one for a concrete risk found in the first review. Small content,
+copy and docs changes receive one short review. A second opinion supplements the
+independent reviewer; it never replaces that reviewer. Prefer another vendor when
+available. When the extra opinion uses Codex and CI is green, the PM runs `codex exec`
+(read-only; `-m` Astra on the gate audit and on changes to
 `kernel/ts/src/runtime/proposal.ts`, Sol for every other review and every fix re-check;
 [owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)) with the
 PR, head SHA, spec sections, focus and the output format (verdict, then findings with id,
@@ -82,7 +88,7 @@ Report at the end of the slice, not at every step.
    developer runs `git pull --rebase` first (the review record is on the branch), never
    force-pushes, fixes or disputes each finding with a reason, reruns the checks once (the pre-push hook is the final run) and pushes.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
-   the same reviewer; the codex Sol fix re-check starts at the same moment, not after it. It checks each disposition and the code the fix touched, plus that
+   the same reviewer; if a second opinion was required, its scoped fix re-check starts at the same moment. The reviewer checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
    result to its record. A broad re-review of the whole PR happens only when the fixes
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
@@ -165,9 +171,9 @@ turning into a catch-all. Findings are fixed in the gate PR.
 
 - The brief is the biggest quality lever: a vague brief yields confident wrong work.
   Acceptance is written as checkable items before any code.
-- Same-model reviewers share blind spots with the developer. Deriving requirements from
-  the spec first, breaking the code to test the tests, and a cross-vendor review are
-  the counterweights; a longer checklist is not.
+- Same-model reviewers share blind spots with the developer. Derive requirements from
+  the spec first and break the code to test the tests; add the second opinion for
+  the risks named above, rather than for every mechanics PR.
 - The developer keeps its context across small fix rounds, so fixes are cheap and consistent;
   a large context makes every call expensive, so a fresh developer takes over (step 5). The
   reviewer stays fresh so its judgment is independent.
@@ -178,6 +184,9 @@ turning into a catch-all. Findings are fixed in the gate PR.
 Review depth scales with risk: a docs-only or config-only slice, or one that only changes
 content numbers or UI styling ([playtest decision](archive/decisions/owner-decision-playtest-2026-09-25.md)),
 gets a short review (no mutation testing), a contract freeze gets the full one.
+For save-affecting work, the developer supplies a compact result from the existing real-SQLite
+reopen, failed-COMMIT, lost-acknowledgement and receipt-replay tests, plus the relevant red
+control. The reviewer reads failures and the changed contract/code, not full passing logs.
 
 Adversarial in proportion: the reviewer tries to break the change, not to redesign it.
 Every finding states a concrete failure scenario (input or state, then the wrong result),

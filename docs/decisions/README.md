@@ -153,3 +153,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Random Flee, 2026-10-04](owner-decision-m6-a-random-flee-2026-10-04.md): owner selects directionless Flee with an engine-chosen legal exit.
 
 - [Focused combat actions, 2026-10-04](owner-decision-m6-a-combat-actions-2026-10-04.md): owner restricts the composed action set to Flee, Stand, Look and Scan during an open encounter.
+- [One independent reviewer by default, 2026-10-04](owner-decision-one-reviewer-default-2026-10-04.md): mechanics PRs retain fresh review; a second opinion is reserved for save, contract, foundation and gate risks.
