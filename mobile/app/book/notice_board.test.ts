@@ -231,7 +231,8 @@ test('the south search reaches the oak and returns through visible fox clues', (
     a.walk(direction);
     assert.equal(a.game.view().view.place.title.key, title);
     if (title === 'room.reed_path.title' && direction === 'south') {
-      a.tap('Inspect fox prints');
+      a.tap('Fox prints');
+      assert.equal(a.text()[0], 'Fox prints');
       assert.ok(
         a
           .text()
@@ -242,7 +243,8 @@ test('the south search reaches the oak and returns through visible fox clues', (
       a.tap('Leave');
     }
     if (title === 'room.reed_bank.title' && direction === 'south') {
-      a.tap('Inspect tracks');
+      a.tap('Tracks');
+      assert.equal(a.text()[0], 'Tracks');
       assert.ok(
         a
           .text()

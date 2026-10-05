@@ -42,8 +42,8 @@ geometry = {
 v['rooms'] = {key('room', name): definition(name, title=f'room.{name}.title', description=f'room.{name}.description', exits={direction: dict(to=ref('room', dest), **(dict(barrier=ref('barrier', barrier)) if barrier else {})) for direction, dest, barrier in exits}) for name, exits in geometry.items()}
 # M12-A independently declared fixed detail metadata; no compiler supplies these answers.
 v['rooms'][key('room', 'ferry_landing')]['details'] = dict(notice=dict(aliases=['notice', 'landing_notice'], description='detail.notice.description', readable=dict(label='actions.read_notice', text='readable.notice', title='detail.notice.title')))
-v['rooms'][key('room', 'reed_path')]['details'] = dict(fox_prints=dict(aliases=['fox_prints', 'prints'], description='detail.fox_prints.description', readable=dict(label='actions.read_fox_prints', text='readable.fox_prints')))
-v['rooms'][key('room', 'reed_bank')]['details'] = dict(tracks=dict(aliases=['tracks'], description='detail.tracks.description', readable=dict(label='actions.read_tracks', text='readable.tracks')))
+v['rooms'][key('room', 'reed_path')]['details'] = dict(fox_prints=dict(aliases=['fox_prints', 'prints'], description='detail.fox_prints.description', readable=dict(label='actions.read_fox_prints', text='readable.fox_prints', title='detail.fox_prints.title')))
+v['rooms'][key('room', 'reed_bank')]['details'] = dict(tracks=dict(aliases=['tracks'], description='detail.tracks.description', readable=dict(label='actions.read_tracks', text='readable.tracks', title='detail.tracks.title')))
 v['rooms'][key('room', 'drowned_lantern')]['details'] = dict(
     rumor_board=dict(aliases=['rumor_board', 'board'], description='detail.rumor_board.description', notice_board=dict(title='detail.rumor_board.title', notices=[dict(detail='lost_whistle', title='detail.lost_whistle.title'), dict(detail='cellar_help', title='detail.cellar_help.title')])),
     lost_whistle=dict(aliases=['lost_whistle'], description='detail.lost_whistle.description', readable=dict(label='actions.read_lost_whistle', text='readable.lost_whistle')),

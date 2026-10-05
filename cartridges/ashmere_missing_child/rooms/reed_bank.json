@@ -11,7 +11,8 @@
       "description": "detail.tracks.description",
       "readable": {
         "label": "actions.read_tracks",
-        "text": "readable.tracks"
+        "text": "readable.tracks",
+        "title": "detail.tracks.title"
       }
     }
   }

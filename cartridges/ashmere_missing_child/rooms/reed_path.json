@@ -11,7 +11,8 @@
       "description": "detail.fox_prints.description",
       "readable": {
         "label": "actions.read_fox_prints",
-        "text": "readable.fox_prints"
+        "text": "readable.fox_prints",
+        "title": "detail.fox_prints.title"
       }
     }
   }
