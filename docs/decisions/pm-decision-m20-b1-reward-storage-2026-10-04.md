@@ -1,5 +1,8 @@
 # PM adoption: M20-B1 atomic reward and usable storage
 
+Compatibility provisions below are superseded by the [owner
+pre-production decision](owner-decision-preproduction-compatibility-2026-10-04.md); other mechanics and validation obligations remain.
+
 The PM authorizes M20-B1 on merged M6-A (`bb7f96a`), adopting the selected mechanics in
 its repinned brief and mandatory pins. This is a mechanical implementation decision, not
 owner approval of production prose or S1 publication.

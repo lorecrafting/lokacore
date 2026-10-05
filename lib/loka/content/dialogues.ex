@@ -50,8 +50,7 @@ defmodule Loka.Content.Dialogues do
       events: {caps, owners(registry, ["events"])}
     }
 
-    reward_api(m, defs) ++
-      Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++
+    Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++
       story_points(defs, ctx) ++
       chapters(Map.get(settings, "chapters", []), ctx)
   end
@@ -266,24 +265,6 @@ defmodule Loka.Content.Dialogues do
   end
 
   defp adjusted(_, _, _, _), do: []
-
-  defp reward_api(m, defs) do
-    choices = for {_, d} <- all(defs), {_, o} <- d["choices"], do: o
-    put = for {_, {_, _, %{"command" => "put"}}} <- defs["action"], do: true
-    used = put != [] or Enum.any?(choices, &new_reward?/1)
-
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    if used and version < [1, 7],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
-  end
-
-  defp new_reward?(o),
-    do: is_map_key(o, "receive") or Enum.any?(o["sequence"] || [], &(&1["op"] == "fact.adjust"))
 
   defp texts(_, _, :unknown), do: []
 

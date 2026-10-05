@@ -81,15 +81,6 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     for (const [id, o] of Object.entries(d.choices as Obj))
       out.push(...choice(o, `${at}.choices${step(id)}`, d, checks, c));
   }
-  const used =
-    each(c).some(([d]) =>
-      Object.values(d.choices as Obj).some(
-        (o: Obj) => o.receive || (o.sequence ?? []).some((s: Obj) => s.op === 'fact.adjust'),
-      ),
-    ) || Object.values(c.actions as Obj).some((a: Obj) => a.command === 'put');
-  const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (used && (major < 1 || (major === 1 && minor < 7)))
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return [...out, ...storyPoints(c, named), ...chapters(c, checks)];
 }
 

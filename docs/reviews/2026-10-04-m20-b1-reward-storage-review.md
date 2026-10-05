@@ -51,3 +51,14 @@ PR: #171. Reviewed commit: `6061cbc80a853a2e920148e556cc04411f42904d`.
 - Ponytail Review: no unnecessary abstraction, dependency or duplicate storage path to cut.
   Required trust-boundary checks remain necessary. No owner save or Simulator was used.
 
+## Round 1 PM disposition: superseding owner policy
+
+M20B1-R1 is **superseded**, not repaired by extending the detector. The
+[owner's pre-production decision](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md)
+removes B1's feature-specific API compatibility requirement. The revised Compiler clause
+keeps current API1.7 declarations, generic manifest validation and exact save-pin refusal;
+the B1 detectors and their focused compatibility tests are removed.
+
+The original finding and verdict above record the reviewed head and remain historical.
+**Broad contract re-review requested** against the revised policy/spec and implementation;
+this disposition is not reviewer approval.

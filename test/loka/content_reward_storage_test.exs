@@ -97,7 +97,7 @@ defmodule Loka.ContentRewardStorageTest do
   end
 
   # Breaks: malformed incoming roles, non-bounded adjustments or reserved writes reach runtime.
-  test "both authoring guards and API gate reject invalid controlled rewards", %{tmp_dir: dir} do
+  test "authoring guards reject invalid controlled rewards", %{tmp_dir: dir} do
     source(dir)
     path = Path.join(dir, "dialogues/maud_turn_in.json")
     original = JSON.decode!(File.read!(path))
@@ -109,11 +109,6 @@ defmodule Loka.ContentRewardStorageTest do
       assert {:error, errors} = Loka.Content.compile(dir)
       assert Enum.any?(errors, &(&1["code"] == code)), inspect(errors)
     end
-
-    File.write!(path, JSON.encode!(original))
-    update(dir, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.6"))
-    assert {:error, errors} = Loka.Content.compile(dir)
-    assert Enum.any?(errors, &(&1["code"] == "KERNEL_API_RANGE_INVALID"))
   end
 
   # Breaks: static key checking ignores direct receive custody or reachable speaker rooms.

@@ -7,14 +7,14 @@ import { validate } from '../src/foundation/validate.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
 
-const load = (change: (c: any) => void, api = INSTALLED) => {
+const load = (change: (c: any) => void) => {
   const c = structuredClone(bundle.value);
   change(c);
   const canonical = encode(c),
     content_hash = createHash('sha256').update(canonical).digest('hex');
   return loadCartridge(
     new TextEncoder().encode(JSON.stringify({ cartridge: c, content_hash })),
-    api,
+    INSTALLED,
   );
 };
 
@@ -24,8 +24,8 @@ test('shared reward/storage schema controls reject malformed fields in the porta
     assert.equal(validate(c.contract, c.value).length === 0, c.valid, c.name);
 });
 
-// Breaks: the loader omits semantic role/type/reserved-write checks or accepts new vocabulary on old API.
-test('portable loader shares reward semantic controls and rejects older declared/installed API', () => {
+// Breaks: the loader omits semantic role/type/reserved-write checks.
+test('portable loader rejects malformed reward roles, types and reserved writes', () => {
   for (const c of read('protocol/fixtures/reward_storage_invalid.json')) {
     const result = load((v) => {
       v.barriers[`${prefix}:barrier/reward_lid`].initial = 'open';
@@ -41,14 +41,6 @@ test('portable loader shares reward semantic controls and rejects older declared
     if (!result.ok)
       assert.equal(result.diagnostic.code, c.loader_code ?? c.code, JSON.stringify(result));
   }
-  const old = load((c) => {
-    c.manifest.requires.kernel_api.at_least = '1.6';
-  });
-  assert.ok(!old.ok);
-  assert.equal(old.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
-  const installed = load(() => {}, { ...INSTALLED, kernel_api: '1.6' });
-  assert.ok(!installed.ok);
-  assert.equal(installed.diagnostic.code, 'KERNEL_API_UNSUPPORTED');
   for (const field of ['minimum', 'maximum']) {
     const result = load((c) => {
       delete c.facts[`${prefix}:fact/maud_trust`].value_type[field];

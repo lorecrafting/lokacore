@@ -240,8 +240,8 @@ while the encounter is open and is derived again when it closes. See the
 [focused combat action decision](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md).
 
 Put uses ActionInvocation `action_key: "put"`, `target_ids: [item_id, container_id]`, `input: {}`.
-Put is additive for valid older cartridge containers on the installed kernel; API1.7 gates
-authored use of the new vocabulary. The engine verb sources its first target from inventory and independently validates both targets.
+The installed engine offers Put on valid item containers, sources its first target from inventory,
+and independently validates both targets.
 
 ## Policy
 
