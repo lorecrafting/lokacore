@@ -225,3 +225,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Book item detail order](2026-10-05-ui-detail-order-review.md): PR #178 at `102a0602`, fresh independent APPROVE; no findings, routing and order mutants red, restored focused tests 14/14 pass.
 
 - [Authored container eligibility](2026-10-05-container-eligibility-review.md): PR #179 at `4b6345ac`, independent APPROVE; no findings, two runtime mutants red/restored green, 15 schema mutants detected, frozen bytes and 24 replay commands verified.
+- [Real chapter cast](2026-10-05-real-chapter-cast-review.md): PR #180 at `6954a41b`, APPROVE; no findings.
