@@ -28,7 +28,7 @@ hash. Existing saves remain pinned to the release that created them ([save model
 
 Start from a small development cartridge such as
 [`ashmere_bell`](../cartridges/ashmere_bell/) for a composed action or
-[`ashmere_sampler`](../cartridges/ashmere_sampler/) for a connected chapter sample. Copy its
+[`ashmere_missing_child`](../cartridges/ashmere_missing_child/) for a connected chapter. Copy its
 source into a new cartridge directory before changing it, including its `cartridge.json`
 manifest and `text.json` catalog. Give your new cartridge its own ID and version. Keep
 references within that cartridge; the compiler resolves short keys by their expected kind.
@@ -57,11 +57,11 @@ compiled artifact is checked again when loaded ([loader](system/cartridge.md#art
 | You want to make… | Source and working example | Engine behavior and limit |
 |---|---|---|
 | A place with exits or examinable details | `rooms/<key>.json`; [Bell cartridge rooms](../cartridges/ashmere_bell/rooms/) | [Movement and inspection](system/mechanics.md#movement1-kerneltssrcmechanicsmovementrulets); exits and targets must resolve. |
-| An item, container, key or piece of equipment | `items/<key>.json`; [Sampler items](../cartridges/ashmere_sampler/items/) | [Containment](system/mechanics.md#containment1-kerneltssrcmechanicscontainmentrulets), [barriers](system/mechanics.md#barrier1-kerneltssrcmechanicsbarrierrulets), [equipment](system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) and carrying settings apply. |
-| An NPC blueprint with a schedule and HP | `npcs/<key>.json`; [one cellar rat](../cartridges/ashmere_sampler/npcs/cellar_rat_1.json) | Its room and text are authored. HP is per entity; [resource rules](system/mechanics.md#resource1-kerneltssrcmechanicsresourcets) govern changes. Schedule is optional. Each file creates one NPC at fresh-world birth. |
-| A fact or condition | `facts.json`, `policies/<key>.json`; [Sampler facts](../cartridges/ashmere_sampler/facts.json) | Typed facts and pure policies drive eligibility; see [policy and fact](system/mechanics.md#target_resolution1-policy1-fact1). |
+| An item, container, key or piece of equipment | `items/<key>.json`; [Missing Child items](../cartridges/ashmere_missing_child/items/) | [Containment](system/mechanics.md#containment1-kerneltssrcmechanicscontainmentrulets), [barriers](system/mechanics.md#barrier1-kerneltssrcmechanicsbarrierrulets), [equipment](system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) and carrying settings apply. |
+| An NPC blueprint with HP | `npcs/<key>.json`; [one cellar rat](../cartridges/ashmere_missing_child/npcs/cellar_rat_1.json) | Its room and text are authored. HP is per entity; [resource rules](system/mechanics.md#resource1-kerneltssrcmechanicsresourcets) govern changes. A schedule is optional. Each file creates one NPC at fresh-world birth. |
+| A fact or condition | `facts.json`, `policies/<key>.json`; [Missing Child facts](../cartridges/ashmere_missing_child/facts.json) | Typed facts and pure policies drive eligibility; see [policy and fact](system/mechanics.md#target_resolution1-policy1-fact1). |
 | A player action | `recipes/<key>.json`; [ring the bell](../cartridges/ashmere_bell/recipes/ring_bell.json) | A target, policy and success/failure sequences compose registered outcomes; see [recipes](system/mechanics.md#action_recipe1-mechanicsaction_reciperulets49). No arbitrary script runs. |
-| A quest and conversations | `quests/<key>.json`, `dialogues/<key>.json`; [lantern quest](../cartridges/ashmere_sampler/quests/lantern.json), [Bram's offer](../cartridges/ashmere_sampler/dialogues/bram_offer.json), [return](../cartridges/ashmere_sampler/dialogues/bram.json) | A choice can accept or resolve the quest; [quest](system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) and [dialogue](system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts) document the supported objective and choice forms. |
+| A quest and conversations | `quests/<key>.json`, `dialogues/<key>.json`; [first lead](../cartridges/ashmere_missing_child/quests/first_lead.json), [Elspeth's dialogue](../cartridges/ashmere_missing_child/dialogues/elspeth.json) | A choice can accept or resolve the quest; [quest](system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) and [dialogue](system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts) document the supported objective and choice forms. |
 | A consequence or story presentation | `reactions/<key>.json`, `story_points/<key>.json`, `scenes/<key>.json`; [bell scene](../cartridges/ashmere_scene/scenes/bell_rung.json) | [Reactions](system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts), [chapters](system/mechanics.md#chapters-kerneltssrcviewviewts) and [scenes](system/mechanics.md#scene1-mechanicsscenerulets) have bounded, typed triggers and steps. |
 
 Put player-facing words in `text.json` and reference their keys from blueprints and story
@@ -74,17 +74,30 @@ The installed core covers deterministic IDs and decisions, typed commands/events
 deltas, admission, save receipts and replay. Its content mechanics include movement,
 barriers, containment, carrying and equipment, position, inspection, facts and policies,
 resources and attributes, checks and recipes, quests and dialogue, journal and chapters,
-scenes, reactions, schedules, narration and the shared GameView. Consult the
+scenes, reactions, schedules, combat, death and same-body return, narration and the
+shared GameView. Consult the
 [capability map](features.gen.md) for the current installed list and
 [mechanics](system/mechanics.md) for exact behavior.
 
-The chapter still needs combat, death/return and later Missing Child story integration
-([mechanics queue](NEXT-MECHANICS.md)). Current quests have one objective, evidenced by
+The chapter already uses combat and same-body death/return; its remaining story and
+mechanics work is tracked in the [completion plan](MISSING-CHILD-PLAN.md). Current
+quests have one objective, evidenced by
 a current-state policy or a post-activation item-acquired event. Dialogues have bounded
 choices rather than an arbitrary dialogue graph, and scenes
 support authored narration/acknowledgement steps. There is no general live blueprint
 spawner or respawn system: the five cellar rats are five authored static NPC blueprints.
 These limits matter when planning a new chapter or a Builder UI.
+
+## Carry lessons into another story
+
+Use the [active mechanics specification](system/mechanics.md) and [examples above](#authoring-paths-and-examples)
+for current behavior. The [review index](reviews/README.md) retains each PR's findings
+and fixes; the [mechanics](lessons/mechanics.md), [storage](lessons/storage.md) and
+[contract](lessons/contracts.md) lessons explain failures that apply beyond one chapter.
+Compiler and loader checks, contract fixtures and regression tests enforce reusable
+rules. A review record preserves the investigation but is not an executable guard.
+When another story needs a missing mechanic, add it for that real consumer, amend
+the active specification and test the failure before updating this guide.
 
 ## Builder app direction
 
