@@ -171,6 +171,11 @@ function receiptDetail(
     d.events.some((e) => e.causation_id === r.command_id && e.payload.type === 'choice_resolved')
   )
     return dialogueDetail(s, r.command_id, command!, d);
+  if (command?.payload.type === 'buy' || command?.payload.type === 'sell') {
+    if (validate('Command', command).length || command.id !== r.command_id)
+      throw new Error('malformed JSON: invalid committed shop exchange');
+    return command.payload.provider_id;
+  }
   if (!['read', 'performed', 'success'].includes(d.outcome)) return;
   if (d.outcome === 'read') {
     if (

@@ -56,7 +56,7 @@ defmodule Loka.Content.Entities do
   @spec parts(map(), String.t()) :: [{list(), String.t()}]
   def parts(e, kind) do
     optional =
-      for {f, k} <- [{"daily_schedule", "schedule"}, {"slot", "slot"}],
+      for {f, k} <- [{"daily_schedule", "schedule"}, {"slot", "slot"}, {"shop", "shop"}],
           is_map_key(e, f),
           do: {[f], k}
 
@@ -86,6 +86,9 @@ defmodule Loka.Content.Entities do
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => key})
   end
 
+  defp shop_texts(%{"shop" => s}), do: for(f <- ~w(bought sold), do: {["shop", f], s[f]})
+  defp shop_texts(_), do: []
+
   defp variant_texts(e),
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
@@ -96,7 +99,7 @@ defmodule Loka.Content.Entities do
   @spec text_keys(map()) :: [{String.t(), String.t(), list(), String.t()}]
   def text_keys(defs) do
     for {_, rel, e} <- all(defs),
-        {steps, key} <- for(f <- @text, do: {[f], e[f]}) ++ variant_texts(e),
+        {steps, key} <- for(f <- @text, do: {[f], e[f]}) ++ variant_texts(e) ++ shop_texts(e),
         do: {rel, e["key"], steps, key}
   end
 

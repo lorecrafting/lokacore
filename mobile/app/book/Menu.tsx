@@ -137,6 +137,19 @@ export function NpcPage(p: NpcProps) {
         </Text>
       ))}
       {!choice && !actions.length && !p.log.length && <Text style={note}>Nothing to do here.</Text>}
+      {!choice &&
+        p.npc &&
+        'shop' in p.npc &&
+        p.npc.shop?.map((o) => (
+          <Text key={o.item_id} style={note}>
+            {p.text(o.name)}: Buy {o.buy.price}p
+            {o.buy.available
+              ? ''
+              : ` (${o.buy.reason === 'not_owned' ? 'sold out' : o.buy.reason?.replaceAll('_', ' ')})`}
+            ; Sell {o.sell.price}p
+            {o.sell.available ? '' : ` (${o.sell.reason?.replaceAll('_', ' ')})`}.
+          </Text>
+        ))}
       {choice && <Choice {...p} choice={choice} />}
       {actions.map((b) => (
         <Act key={b.label} b={b} press={p.press} />

@@ -1,11 +1,12 @@
 # B3 — Peg's immediate shop: adopted developer brief
 
 **Branch:** `chapter-1/b3-pegs-shop` in a new isolated developer worktree.
-**Base:** local `main` `ec3ab73d`, B2 implementation/review merged; chapter
-`ashmere_missing_child@0.0.16`, API1.14. The independent B2 release pin is
-`protocol/fixtures/missing_child_v016_hash.json`. B3 release, hash, generated IDs,
-implementation head, PR and check results: null. Re-pin if the base advances.
-This is an assignment brief, not proof or permission to merge.
+**Base:** provisional A3 integration `05e72a3c`, chapter
+`ashmere_missing_child@0.0.17`, API1.15. B3 advances to `0.0.18`/API1.16;
+independent release/ID pins and local checks are in the
+[B3 check note](../../evidence/2026-10-05-b3-shop/README.md).
+Implementation review head, PR and independent verdicts: null.
+This is an assignment brief, not permission to publish or merge remotely.
 
 ## Goal and contract
 

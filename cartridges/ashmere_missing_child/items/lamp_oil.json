@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "lamp_oil",
+    "oil"
+  ],
+  "short": "item.lamp_oil.short",
+  "room_line": "item.lamp_oil.room",
+  "description": "item.lamp_oil.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  }
+}

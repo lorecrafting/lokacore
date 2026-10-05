@@ -217,6 +217,7 @@ const INPUTS: readonly string[] = [
   'answer',
   'scene',
   'line',
+  'quoted_price',
 ];
 
 /**

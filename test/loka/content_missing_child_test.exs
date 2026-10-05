@@ -1,7 +1,7 @@
 defmodule Loka.ContentMissingChildTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v017_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v018_hash.json"))
 
   # Breaks: active chapter geometry, retired definitions, reward/message custody, return guards or title drift.
   test "the chapter in progress compiles to its independent answer without warnings" do
@@ -28,5 +28,21 @@ defmodule Loka.ContentMissingChildTest do
              &(&1["code"] == "OUTCOME_MISMATCH" and
                  &1["path"] == "scenes/epilogue_lost_prior.on")
            )
+  end
+
+  # Breaks: short shop refs are not expanded, or duplicate/non-Peg stock and unfunded shops compile.
+  test "shop source rejects duplicate, foreign stock and absent funding", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "npcs/peg.json")
+    npc = path |> File.read!() |> JSON.decode!()
+
+    for changed <- [
+          put_in(npc, ["shop", "offers"], npc["shop"]["offers"] ++ [hd(npc["shop"]["offers"])]),
+          put_in(npc, ["shop", "offers", Access.at(0), "item"], "rusted_key"),
+          Map.delete(npc, "resource_starts")
+        ] do
+      File.write!(path, JSON.encode!(changed))
+      assert {:error, _} = Loka.Content.compile(dir)
+    end
   end
 end

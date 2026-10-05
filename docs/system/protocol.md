@@ -513,6 +513,14 @@ one accepted exchange. Existing `query_steps` and failure codes govern each chec
 the developer adds only the command, capability, authored offer and view schema
 needed for this consumer.
 
+The installed wire shape is `buy`/`sell` with `actor_id`, `provider_id`, `item_id`
+and positive `quoted_price`. `ActionInput.quoted_price` carries that displayed quote;
+ordered invocation targets are provider then item. API 1.16 adds NPC `shop` with
+one conserved `resource`, finite `offers` (`item`, `buy`, `sell`) and `bought`/`sold`
+narration keys. Each NPC `EntityView.shop` row carries `item_id`, `name` and its
+Buy/Sell price, availability and optional typed refusal reason. Runtime admission
+owns the exchange; this projection reserves nothing.
+
 ## B5 harvest and exchange composition
 
 [B5](mechanics.md#s9-infirmary-herbs-b5-selected-contract) needs only a typed

@@ -1,3 +1,4 @@
+import { commerce } from './cartridge_commerce.ts';
 import { noticeBoards } from './cartridge_boards.ts';
 import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
@@ -66,6 +67,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   }
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
     add('npc', n, `.cartridge.npcs${step(ref)}`);
+    if (n.shop) out.push(['shop', n.shop, `.cartridge.npcs${step(ref)}.shop`]);
     if (n.daily_schedule)
       out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
   }
@@ -202,7 +204,7 @@ export function refStage(c: Obj): Diagnostic[] {
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
-  out.push(...pools(c, named), ...death(c, named), ...combat(c, named));
+  out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
   return out;
 }
 

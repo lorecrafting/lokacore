@@ -202,6 +202,8 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `flee`: Escape an active encounter through one randomly selected currently legal exit; no direction is supplied.
   - `put`: Put a directly body-held existing item into a reachable open item container, preserving identity and checking cycles/capacity.
   - `read`: Read one present inspectable detail with readable metadata (readable@1).
+  - `buy`
+  - `sell`
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)
@@ -296,6 +298,8 @@ Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 �
   - `item`
   - `template`
 - **NpcDefinition**: A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides).
+- **Shop**: 
+- **ShopOffer**: 
 - **SlotKey**: An equipment slot (equipment@1; 00 §4.4 and 21 §8 as amended by c1-equipment): the twelve keys, finger slots LATER. A fresh world makes one holder entity inside the body per slot some item declares (numeric profile, Slot holder ids).
 
 ## Error contracts (`protocol/error.schema.json`)
@@ -382,6 +386,8 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **QuestView**: A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).
 - **ResourceView**: One of the viewer's body's resources (04 §15 as amended 2026-10-01 and 2026-10-02; 21 §4 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 §15 default table); the UI never computes a threshold (00 §4.10).
 - **SceneView**: Present iff a modal scene runs: its current narrate TextKey, one-based index and narrate count.
+- **ShopAction**: 
+- **ShopItemView**: 
 - **SightView**: What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.
 - **UnavailableReason**: Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.
 - **WornSlotView**: One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.

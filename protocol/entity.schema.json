@@ -296,11 +296,18 @@
         },
         "resource_starts": {
           "type": "object",
-          "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
-          "additionalProperties": { "$ref": "resource.schema.json#/$defs/ResourceInt" }
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "resource.schema.json#/$defs/ResourceInt"
+          }
         },
         "attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
+        },
+        "shop": {
+          "$ref": "entity.schema.json#/$defs/Shop"
         }
       },
       "required": [
@@ -363,6 +370,59 @@
         }
       ],
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max."
+    },
+    "ShopOffer": {
+      "type": "object",
+      "properties": {
+        "item": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "buy": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "sell": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "item",
+        "buy",
+        "sell"
+      ],
+      "additionalProperties": false
+    },
+    "Shop": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "offers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": {
+            "$ref": "entity.schema.json#/$defs/ShopOffer"
+          }
+        },
+        "bought": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "sold": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "resource",
+        "offers",
+        "bought",
+        "sold"
+      ],
+      "additionalProperties": false
     }
   }
 }

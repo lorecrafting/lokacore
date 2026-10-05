@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "satchel",
+    "satchel"
+  ],
+  "short": "item.satchel.short",
+  "room_line": "item.satchel.room",
+  "description": "item.satchel.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  },
+  "container": true,
+  "capacity": 4
+}

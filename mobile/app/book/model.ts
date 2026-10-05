@@ -1,4 +1,4 @@
-// size: allow 320, Notice membership joins the shared button/freshness builder
+// size: allow 350, current shop quotes join the shared button/freshness builder
 // How the book view sorts the controller's flat button list (presenter.ts `buttons`): the place's look,
 // the exits (a move button carries input.direction), the pending choice's answers and Close, other
 // place actions, and a thing's own actions.
@@ -233,7 +233,7 @@ function travel(v: GameView): Press[] {
         }));
 }
 
-// size: allow 50, one offer-to-button conversion serves place/entity/Notice actions
+// size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const button = (
     a: { action_key: string; label: string; target_ids?: readonly string[] },
@@ -283,7 +283,31 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       .filter((a) => a.available && !a.input.length && a.target.kind === 'none')
       .map((a) => ({ ...button(a, ''), detail_id: n.id })),
   );
-  return [...placed, ...notices, ...travel(v), ...doors, ...held, ...asked(v, label)];
+
+  return [
+    ...placed,
+    ...notices,
+    ...travel(v),
+    ...doors,
+    ...held,
+    ...shopButtons(v, text),
+    ...asked(v, label),
+  ];
+}
+
+function shopButtons(v: GameView, text: Say): Press[] {
+  return v.entities.flatMap((e) =>
+    (e.shop ?? []).flatMap((o) =>
+      (['buy', 'sell'] as const)
+        .filter((verb) => o[verb].available)
+        .map((verb) => ({
+          label: `${cap(verb)} ${text(o.name)} — ${o[verb].price}p`,
+          action_key: verb,
+          target_ids: [e.id, o.item_id],
+          input: { quoted_price: o[verb].price },
+        })),
+    ),
+  );
 }
 
 // Capture only the interaction, not clock/resources or the whole GameView.

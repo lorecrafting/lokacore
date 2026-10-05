@@ -76,6 +76,8 @@ defmodule Loka.Content.Checks do
     schedule = Map.get(npc, "daily_schedule", %{})
 
     npc
+    |> Map.delete("shop")
+    |> Map.merge(if npc["shop"], do: %{"shop" => expand(npc["shop"], m)}, else: %{})
     |> Map.update!("room", &ref(&1, "room", m))
     |> Map.merge(if schedule == %{}, do: %{}, else: %{"daily_schedule" => scheduled(schedule, m)})
   end
@@ -83,6 +85,15 @@ defmodule Loka.Content.Checks do
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
+
+  def expand(%{"offers" => offers, "resource" => r} = shop, m),
+    do:
+      shop
+      |> Map.put("resource", ref(r, "resource", m))
+      |> Map.put(
+        "offers",
+        Enum.map(offers, &Map.update!(&1, "item", fn i -> ref(i, "item", m) end))
+      )
 
   # A recipe's cost, threshold check or resource.adjust step: its short resource (a details
   # map may have a detail keyed resource, whose value is a map).
