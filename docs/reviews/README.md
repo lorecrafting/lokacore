@@ -163,6 +163,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [c1-chapters: derived highest reached chapter, trigger-choice mapping and fail-closed references](2026-10-03-c1-chapters-review.md): PR #139 at `83e306e`, APPROVE WITH NOTES (N1 nit: GameView/condition-band source citations shifted; no correctness finding; two independent mutants red; 99 focused Node/SQLite/fault and 18 Elixir tests pass; all 18 source artifacts exact; primary independent Codex under bounded PM selection). Fix round 1 `1be4970`: APPROVE (N1 closed; all three source citations independently land on the intended symbols; documentation-only scoped recheck).
 
+- [Web-first mobile pause](2026-10-05-web-first-mobile-pause-review.md): PR #191 at `aa9628a`, CHANGES REQUIRED (F1 mandatory AGENTS check wording; F2 local TypeScript size scan omits untracked files); mobile workflows disabled, Node sim retained, exact-head CI green.
+
 - [C1 modal scenes](2026-10-03-c1-scenes-modal-review.md): PR #140 at `2c8211477889630cb93a3be95ff68f05a1bc9be3`, primary APPROVE / initial Sol CHANGES REQUIRED; primary round-1 fix head `a7ac604325ce6d49adba69feb3e164f63428d136`, APPROVE, SOL-01 closed. Separate Sol round-1 APPROVE at the same head, SOL-01 closed, no new findings; final combined APPROVE.
 - [C1 sampler](2026-10-03-c1-sampler-review.md): PR #142 at `fc5a6f1`, APPROVE; final native acceptance on integrated Release `9732b0`, SAMP-BAND-01 closed.
 - [C1 riskiest-code Astra audit](2026-10-03-c1-gate-astra-audit.md): `b4d91ea`, APPROVE WITH NOTES; later App diff covered by sampler Sol, native proof linked; whole Gate C1 pending.
