@@ -19,3 +19,10 @@ No further findings in review-record attachment, original-branch fixes, completi
 Ponytail review: no unnecessary machinery; existing branches, worktrees, hooks and records suffice. Docs-only scope: no test mutation required.
 
 Checks: `mise exec -- elixir bin/check_docs.exs` passed (518 docs, zero broken links or unreachable docs); `git diff --check e028dbd3..61873d32` passed. Mise used writable temporary state because its default trusted-config state is outside the sandbox. Normal pre-commit hook verification is recorded by the review-only commit.
+
+## Scoped fix review — `d0674fc4`: APPROVE
+
+- LFL-1 closed: the active owner-rules process entry now links the superseding decision, permits provisional local merges after focused checks/self-review, and reserves completion credit for reviewed units.
+- LFL-2 closed: the Codex second opinion now starts in its own worktree after focused local checks; the hosted-PR procedure retains its CI prerequisite. The workflow's local branch/base/exact-head handoff and parallel-opinion rule apply.
+
+Reviewed only the two fix hunks against `61873d32`, and their governing local-cadence clauses. No open findings. `git diff --check 61873d32..d0674fc4` passed; the final normal pre-commit hook runs the docs check on the fix head with the attached review record.
