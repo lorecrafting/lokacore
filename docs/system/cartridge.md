@@ -811,3 +811,48 @@ wrong row identities and ordinary writes to reserved state. World route/count va
 are cartridge data, never presenter/engine chapter literals; existing safety budgets
 bound all validation/traversal. Target C2 release/API/hash/IDs remain null until the
 reviewed C1/B5 integration is re-pinned and independently derived.
+
+## B6 marsh route and tuning
+
+The planned [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
+adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours
+public path on existing firm footing; preserve the already always-passable mire
+and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway
+east ↔ Tide Flats west are public reciprocal dry walking routes. Tide Flats is
+its public edge, with no swimming, low-tide charm, fare or water hazard in B6.
+The future Hound Run connection waits for C3; no dangling exit is emitted.
+Return to Aldric through Mire Crossing → Reed Bank → Reed Path → Ferry Landing
+→ Well Lane → Village Green → North Gate → Chapel Steps → Chapel Nave.
+His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
+
+Marsh Light opts into B4 darkness and authors ordinary/dark descriptions. Its
+self-luminous Seek marker and discovered wisp have explicit visibility metadata;
+other details have no exemption. Old Causeway's carved fox is flavor in B6 and
+must not silently grant ward before the riddle; D2/D5 own later discoveries.
+Bind one actual authored wisp, resident at every hour, not a timed population.
+
+| Chapter setting | Selected value |
+|---|---:|
+| Immutable attribute key/start | `per` / 5 |
+| Seek attribute difficulty | 5 |
+| Seek duration, costs and cooldown | 0 / none / none |
+| S4 answer / ordered bank | `tide` / `TIDE` |
+| Wrong answers per sitting | 3 |
+| Seek discovery fact | player Boolean `fen_wisp_discovered`, false |
+| Answered fact | player Boolean `fen_wisp_answered`, false |
+| Ward topic key / knowledge fact | `ward` / player Boolean `topic_ward_known`, false |
+
+Add `attributes@1`, `check@1`, `topics@1` and the actual light dependency to the
+chapter lock. The topic definition maps key, localized label and exact knowledge
+fact; no separate membership row or nineteen-topic catalog. Source `topic.grant`
+references that definition and lowers once through fact ownership. Chapter values
+never become engine or presenter defaults. All current fresh characters pass;
+D11 must preserve an immediate passing discovery path before changing attributes.
+
+Compiler and loader independently reject unresolved/wrong-kind attribute/topic/
+fact/role refs, non-Boolean or non-player topic facts, duplicate knowledge mappings,
+invalid threshold integers, nonpositive or non-safe-integer wrong limits, malformed
+bank or answer and an unresolved answer choice. Continuation/load validation rejects
+missing opted attempt fields.
+Short references expand in every new field. Existing bounded answer lengths apply;
+new schemas need their actual negative fixtures and planted guard controls.

@@ -886,7 +886,8 @@ sources do not illuminate, even when burning. The same bounded query governs
 GameView, Look/Scan, detail links, target resolution and direct-command admission;
 it charges the existing query budget. Without illumination expose the authored dark
 room text and ordinary known traversable exits, inventory, posture and escape controls.
-Hide other room details, items and NPC identities and adjacent sight descriptions;
+Hide other room details, items and NPC identities and adjacent sight descriptions
+unless opted into the later [B6 narrow glow exception](#s4-all-hours-wisp-b6-selected-contract);
 raw IDs or guessed keywords cannot bypass this gate. Existing combat restrictions
 still win. A visible Exit into a dark room remains traversable; a hidden object is
 not an equipment gate on movement.
@@ -1008,3 +1009,52 @@ pennies or item. C1 remains the sole swords/gift lesson consumer. Both resolved
 trust and nonterminal attempt failure have retained causal evidence, not room-count
 inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
 are outside this selected consumer.
+
+## S4 all-hours wisp (B6 selected contract)
+
+Planned under the [B6 PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md),
+not installed behavior or proof. [Cartridge](cartridge.md#b6-marsh-route-and-tuning)
+owns the route, attribute, answer, limit and topic. S4 is optional and one-shot;
+no night, tide, purchase, fuel, herb, bell, faction or Q2-completion gate applies.
+
+At Marsh Light an authored self-luminous marker exposes **Seek Wisp**, even when
+ordinary room details are dark. This narrow perception metadata exposes only the
+marker and, after discovery, the original live co-located wisp; it illuminates
+neither other objects nor adjacent rooms. It uses B4's shared visibility/admission
+query, not a Book exception or a global bypass. Seek, Talk acceptance and answers
+require `light_off`: the actor has no effectively lit directly held or light-slot
+source. Nested, dropped, stored and corpse-held lights follow B4 unchanged.
+Known exits and the actor's actual corpse remain accessible under B4 recovery.
+
+Seek uses a deterministic `check@1` attribute-threshold arm. Read the commanded
+actor's declared immutable attribute through the existing attributes query, pass
+at equality, draw no RNG, and emit the owned `check_passed/check_failed` with the
+recipe reference. Its success sequence alone assigns the player discovery Boolean;
+failure leaves it false and offers immediate Seek again. Neither result grants S4
+or ward. This extends checks, not attributes, ancestry, skills or progression.
+After discovery a bound live/present wisp offers explicit S4 acceptance, followed
+by its riddle while that actor's occurrence remains active. These policies are
+rechecked at pending-option projection and Choose. Close always remains available.
+
+The riddle retains the installed ASCII case/bank/multiplicity rules. Only this
+opted dialogue declares a wrong limit. Its typed continuation count starts at zero;
+each bank-valid wrong answer atomically commits one count increment, bound wrong
+line and receipt. Below the limit the same continuation remains. At the limit,
+close that sitting in the same decision and offer **Ask Wisp again** through the
+ordinary bound Talk path, opening a fresh continuation with count zero. S4 stays
+active; no terminal failure, cooldown, spawn, departure, job or time advance occurs.
+Close/reopen Talk also starts a new sitting; the limit is a conversational pause,
+not an anti-cheating quota. No-limit dialogues, including Q2, keep unlimited retry.
+Malformed/impossible-bank input and exact invocation replay consume no attempt.
+
+Correct input resolves the original actor-owned S4, assigns `fen_wisp_answered`,
+grants the declared ward topic and resolves the choice in one atomic writer group.
+A previously known ward never prevents S4 completion or duplicates knowledge.
+Topics use a declared player-scoped Boolean mapping: typed `topic.grant` lowers to
+existing `fact.assign` only when false; the fact writer owns the mutation. Known
+labels derive in key order from those facts. The immediate ward consumer is the
+public original Aldric's **Ask about ward** dialogue; it remains independently
+selectable even when debt/bell dialogues are eligible. Its informational reply
+requires known ward and a live/present Aldric; it changes no spells, resources,
+faction, quest or chapter ending. This is one real topic consumer, not a full
+conversation graph or a promise of all historical topics.

@@ -189,6 +189,11 @@ B5 Infirmary Herbs has an [adopted finite-stock contract](decisions/pm-decision-
 and [re-pinned brief](briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
 on local base `d41ec0d2`; source implementation and proof remain ahead.
 
+B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6-wisp-2026-10-05.md)
+and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
+on local base `98cc60b1`. B4/B5 source dependency pins, independent B6 plan review,
+implementation and successor release/proof pins remain ahead; none is claimed here.
+
 B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
 against local B3 integration at `4bfe252e`. Source implementation, successor

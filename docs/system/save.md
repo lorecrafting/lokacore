@@ -626,3 +626,37 @@ prove all-old/all-new movement/attempt/quest/trust/head/receipt. Exact receipt r
 moves, credits, restarts and rewards nothing twice. Reconcile lawful intermediate
 states with the later consumer, including concurrent Wren following/separation;
 no new snapshot, periodic checkpoint, migration or receipt ledger is introduced.
+
+## B6 discovery, sitting and ward recovery
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) retains discovery,
+S4 state and topic knowledge in ordinary typed player facts/quest rows; only an
+opted riddle adds its typed continuation count. Persist changed rows and receipt
+atomically. Cold reopen at zero/one/two mistakes restores the exact continuation,
+opening revision, actor, original wisp, dialogue/choice/quest references and count;
+exact-selector Talk receipts must justify the selected dialogue source;
+a third mistake restores a closed sitting and immediate Ask again, never an active
+count-at-limit pending row. Unsent tiles are not saved. After correct answer,
+restore resolved S4, both narrative truth and known ward, and the original bound
+success line once; repeated receipt replay adds no grants or attempts.
+
+Validate each attempt at its historical revision against its source, answer-bank
+validity, exact prior count, actor, participants, causal command/receipt and closure
+or resolution, then reconcile with current rows. Close/death/current light changes
+cannot retroactively invalidate a lawful historical answer. Discovery requires
+successful owned Seek evidence; wrong/malformed answers justify no answered fact
+or ward grant. Reconcile topic truth with actual declared grants, including an
+already-known ward, rather than assume S4 is its only possible future source.
+Missing/null/corrupt bounded counts or bindings, forged wrong receipts, unjustified
+facts and pending-at-limit states refuse `save_corrupt` without repair/deletion.
+No defaulting a missing counter to zero on load.
+
+Light changes, location changes and death may make the pending answer unavailable;
+Close stays usable. Death preserves discovery, knowledge and active/resolved S4;
+after ordinary same-body recovery, Close if needed and Talk to the same reachable
+wisp immediately. This adds no item requirement or new danger. From the shrine,
+all new walking routes and the owned-corpse exception remain gear-free. Failed
+COMMIT, both uncertain-COMMIT outcomes and lost acknowledgement retain the existing
+fence/reconciliation rules; prove them with real SQLite at attempt, final wrong
+and correct transitions. Current-release mismatch remains explicit; no adapters,
+silent counter repair or save deletion is authorized.
