@@ -8,7 +8,9 @@ and not repeated here.
 
 ## Product and scope
 
-- The opening chapter and current Bram sampler errand have no required idle waits for tides, night, next day or a returning NPC; Bram stays reachable for the opening, the mire has an always-passable non-swim route, and time may still drive deadlines and ambience ([record](../decisions/owner-decision-no-wait-opening-2026-10-05.md)).
+- Active development targets the real Missing Child chapter, incrementally; the temporary Lantern errand and Bram NPC are absent from its first release, while final real Bram/Q1 scope remains unresolved ([record](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)).
+
+- The opening chapter has no required idle waits for tides, night, next day or a returning NPC; any required opening NPC stays reachable, the mire has an always-passable non-swim route, and time may still drive deadlines and ambience ([record](../decisions/owner-decision-no-wait-opening-2026-10-05.md)).
 
 - Later Ashmere conflicts follow the [PM-selected future policy](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md); implementation and publication review remain pending, with no active M15/schema change.
 

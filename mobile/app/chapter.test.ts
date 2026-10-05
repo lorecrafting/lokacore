@@ -24,10 +24,10 @@ const adapt = (sql: DatabaseSync): Db => ({
   isInTransactionSync: () => sql.isTransaction,
 });
 
-// Breaks: the app bundles Lantern again or opens/deletes the Lantern file for the sampler,
-// including Start over. Actual saved pins and untouched Lantern bytes are the assertions.
-test('the app opens and replaces only its sampler save, preserving an existing Lantern save', () => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-app-sampler-'));
+// Breaks: the app bundles Lantern again or opens/deletes the Lantern file for the chapter,
+// including Start over. Saved pins/title and untouched old save bytes are the assertions.
+test('the app opens and replaces only its chapter save, preserving existing Lantern and sampler saves', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-app-chapter-'));
   const lanternPath = join(dir, 'loka-lantern.db');
   const sql = new DatabaseSync(lanternPath);
   openGame(
@@ -44,7 +44,27 @@ test('the app opens and replaces only its sampler save, preserving an existing L
     },
   );
   sql.close();
-  const checksum = () => createHash('sha256').update(readFileSync(lanternPath)).digest('hex');
+  const samplerPath = join(dir, 'loka-ashmere-sampler.db');
+  const old = new DatabaseSync(samplerPath);
+  openGame(
+    adapt(old),
+    JSON.parse(
+      readFileSync(
+        new URL('../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
+        'utf8',
+      ),
+    ),
+    {
+      kernel_version: `loka-kernel@${'0'.repeat(40)}`,
+      newId: randomUUID,
+      time: { wall: () => 10000, monotonic: () => 0 },
+    },
+  );
+  old.close();
+  const checksum = () =>
+    [lanternPath, samplerPath].map((path) =>
+      createHash('sha256').update(readFileSync(path)).digest('hex'),
+    );
   const before = checksum();
   const connections: DatabaseSync[] = [];
   let id = 0;
@@ -90,22 +110,32 @@ test('the app opens and replaces only its sampler save, preserving an existing L
       performance,
     });
     assert.ok(globals.loka_session!.game());
+    const view = globals.loka_session!.game()!.view().view;
+    assert.equal(view.chapter?.title, 'chapter.missing_child');
+    assert.equal(
+      globals.loka_session!.game()!.text('chapter.missing_child'),
+      'The Missing Child — in progress',
+    );
+    assert.deepEqual(view.entities, []);
+    assert.deepEqual(view.journal, []);
     const pin = () => {
-      const database = new DatabaseSync(join(dir, 'loka-ashmere-sampler.db'), { readOnly: true });
+      const database = new DatabaseSync(join(dir, 'loka-ashmere-missing-child.db'), {
+        readOnly: true,
+      });
       try {
         return JSON.parse(database.prepare('SELECT pin FROM save').get()!.pin as string);
       } finally {
         database.close();
       }
     };
-    assert.equal(pin().cartridge_id, 'ashmere_sampler');
+    assert.equal(pin().cartridge_id, 'ashmere_missing_child');
     assert.equal(
       pin().content_hash,
-      'c731cbac9b9228399a0d485749d7ef4fe781628d589a2ef3db000cbdd977cb84',
+      '0eabdf9865352c02ec78c538ae03164efb8e85debd3d951dfd1adb3603cfd8e2',
     );
     assert.equal(globals.loka_session!.startOver(), undefined);
-    assert.equal(pin().cartridge_id, 'ashmere_sampler');
-    assert.equal(checksum(), before);
+    assert.equal(pin().cartridge_id, 'ashmere_missing_child');
+    assert.deepEqual(checksum(), before);
   } finally {
     connections.at(-1)?.close();
     rmSync(dir, { recursive: true, force: true });
@@ -115,13 +145,13 @@ test('the app opens and replaces only its sampler save, preserving an existing L
 // The actual App module receives controlled platform clocks/events and real rollback-journal SQLite.
 // Native scheduling is controlled input; assertions concern confirmed worlds/checkpoints, not calls.
 function appHost() {
-  const sampler = JSON.parse(
+  const chapter = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/missing_child_v001_hash.json', import.meta.url),
       'utf8',
     ),
   );
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, sampler);
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const state: any[] = [],
     effects = new Map<number, { deps: unknown[]; cleanup?: () => void }>();
   const queued: (() => void)[] = [],
@@ -204,7 +234,7 @@ function appHost() {
     },
     clearTimeout: (id: number) => timers.delete(id),
     require: (name: string) =>
-      name.endsWith('.json') ? sampler : name.endsWith('.ttf') ? 1 : modules[name],
+      name.endsWith('.json') ? chapter : name.endsWith('.ttf') ? 1 : modules[name],
   });
   let book: any;
   const draw = () => {

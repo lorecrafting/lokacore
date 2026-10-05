@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "lid",
+    "storage_chest_lid"
+  ],
+  "short": "barrier.storage_chest_lid.short",
+  "initial": "locked",
+  "key_item": "cellar_key"
+}

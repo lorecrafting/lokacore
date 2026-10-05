@@ -1,0 +1,53 @@
+{
+  "npc": "maud",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "any",
+        "items": [
+          {
+            "op": "quest_state",
+            "quest": "mauds_cellar",
+            "state": "active"
+          },
+          {
+            "op": "quest_state",
+            "quest": "mauds_cellar",
+            "state": "objectives_complete"
+          },
+          {
+            "op": "quest_state",
+            "quest": "mauds_cellar",
+            "state": "resolved"
+          },
+          {
+            "op": "quest_state",
+            "quest": "mauds_cellar",
+            "state": "failed"
+          },
+          {
+            "op": "quest_state",
+            "quest": "mauds_cellar",
+            "state": "abandoned"
+          }
+        ]
+      }
+    }
+  },
+  "prompt": "dialogue.maud_offer.prompt",
+  "roles": {
+    "maud": {
+      "role": "npc",
+      "npc": "maud"
+    }
+  },
+  "choices": {
+    "accept": {
+      "label": "quest.mauds_cellar.accept",
+      "narration": "narration.maud.accept",
+      "accept": "mauds_cellar"
+    }
+  }
+}

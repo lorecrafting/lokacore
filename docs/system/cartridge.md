@@ -20,40 +20,25 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_sampler@0.0.11` in `loka-ashmere-sampler.db`. This elapsed release
-requires kernel API1.7 and declares real_elapsed rate50/start64800. Bram has no
-`daily_schedule` and remains at Ferry Landing at every hour, including19:00 and
-the next day, so his offer and lantern hand-over require no wait, under the
-[no-wait opening decision](../decisions/owner-decision-no-wait-opening-2026-10-05.md).
-The clock and `schedule@1` lock remain for real-elapsed time; separate ferry fixtures
-retain authored NPC schedule and save/reopen coverage. Its MV pool starts at100 under the [first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), pays1 per move, and recovers18 per3600 logical seconds
-standing/sitting or36 resting/sleeping under the
-[M2 adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
-Its compiled artifact matches the independent sampler answer; earlier ten-room content and prose remain. The story is under the
-[approved sampler scope](../decisions/owner-decision-chapter-one-plan-2026-10-02.md#11-c1-sampler-the-gate-story-q2)
-and [identity/prose record](../decisions/owner-decision-sampler-batch-2026-10-03.md).
-Its ten rooms reuse Ashmere geography and prototype prose; its lantern errand,
-chapter transition and landing scene demonstrate the installed mechanics. Its 57
-adopted story strings remain unchanged; eleven existing UI labels and the baseline
-condition-band cuts/tones are authored in `text.json` and `world.bands` under the
-[PM acceptance repair](../decisions/pm-decision-sampler-bands-2026-10-03.md). The
-Lantern source, release pins and `loka-lantern.db` save remain available unchanged;
-the app opens only the sampler file and offers no story picker. The current
-unreleased sampler declares `description_variant@1` for authentic engine Look,
-under the [development replacement ruling](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
-The [0.0.3 chapel approach](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md)
-extends Well Lane north through the green, North Gate and Chapel Steps to the nave,
-with reciprocal exits. Its altar is scenery; the installed death mechanic returns the
-player to this shrine. The night gate and omitted side branches await their actual consumers.
-Its previous runtime release is not bundled; an old missing pin follows the existing
-[explicit Start over path](save.md#opening-a-story), with no automatic deletion or
-migration. The
-[sampler evidence](../evidence/c1-sampler/README.md) records source approval, the
-independent artifact answer and headless play/save checks. The
-[Look review](../reviews/2026-10-03-c1-sampler-look-review.md) records the 0.0.2
-artifact’s independent title-Look device proof; the C1 composed UI proof is
-linked from the [C1 checklist](../C1-GATE.md). Historical pins and captures remain
-labeled with their actual release.
+The phone bundles `ashmere_missing_child@0.0.1`, titled **Ashmere — The Missing Child**,
+in its own `loka-ashmere-missing-child.db` save under the
+[actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
+This chapter in progress retains ten Ashmere rooms and playable Maud S1 (five rats,
+earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
+Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
+— in progress”; Q1 and the main search are not yet playable. The temporary Lantern
+errand, Bram NPC/dialogues, lantern item, story point, scene and `search_plan` are
+absent. Real Bram’s final role remains unresolved in the cutover record.
+
+The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
+ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
+reviewed sampler source; installed mechanics and validation are unchanged. Its
+independent answer is `protocol/fixtures/missing_child_v001_hash.json`, derived
+by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
+release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
+with their actual release and are not bundled.
+The app opens only the chapter file and offers no story picker. Missing pins follow
+[explicit Start over](save.md#opening-a-story), without automatic deletion or migration.
 
 ## Carrying settings and item mass
 
@@ -107,7 +92,7 @@ the pool's `regen`) and require `position@1` (`UNDECLARED_CAPABILITY` at `regen`
 recovery API lower bound1.2 (`KERNEL_API_RANGE_INVALID` at
 `requires.kernel_api.at_least`). `gain` remains required for
 legacy compatibility and is ignored for opted recovery; no new capability or numeric
-profile version is introduced. The current sampler consumes this opt-in under the
+profile version is introduced. The active chapter consumes this opt-in under the
 [M2 adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
 A cartridge whose manifest requires `position@1` gets the engine fact
 `<id>@<version>:fact/position`, exactly `{"key": "position", "version": 1, "value_type":

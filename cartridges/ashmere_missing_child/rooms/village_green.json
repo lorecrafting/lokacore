@@ -1,0 +1,12 @@
+{
+  "title": "room.village_green.title",
+  "description": "room.village_green.description",
+  "exits": {
+    "north": {
+      "to": "north_gate"
+    },
+    "south": {
+      "to": "well_lane"
+    }
+  }
+}

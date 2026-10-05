@@ -1,0 +1,10 @@
+{
+  "title": "room.chapel_nave.title",
+  "description": "room.chapel_nave.description",
+  "exits": {
+    "south": {
+      "to": "chapel_steps"
+    }
+  },
+  "sanctuary": true
+}

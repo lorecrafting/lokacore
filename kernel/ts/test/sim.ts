@@ -114,8 +114,8 @@ const STALE = id(SIM, 'stale', 0); // an id no world of this run mints
 // largest cost), as spending could leave them. Legacy starts retain time 0; opted starts keep
 // their valid birth metadata. ponytail: authored through state since 82 moves do not fit in
 // 64 steps; such a start has no `loka play` transcript (play starts fresh).
-function begin(seed: number, g: Gen) {
-  const loaded = g.pick(CARTRIDGES);
+function begin(seed: number, g: Gen, cartridges: Loaded[]) {
+  const loaded = g.pick(cartridges);
   const rng = [g.draw(), g.draw(), g.draw(), (g.draw() | 1) >>> 0];
   const world = newWorld(loaded.cartridge, id(SIM, String(seed), 0) as World['context'], rng);
   if (g.int(4)) return { loaded, start: world };
@@ -136,9 +136,9 @@ function begin(seed: number, g: Gen) {
 }
 
 /** Generates and checks seed's sequence, stopping at its first failure. */
-export function simulate(seed: number, kernel = KERNEL): Outcome {
+export function simulate(seed: number, kernel = KERNEL, cartridges = CARTRIDGES): Outcome {
   const g = gen(seed);
-  const s: Sequence = { seed, ...begin(seed, g), commands: [] };
+  const s: Sequence = { seed, ...begin(seed, g, cartridges), commands: [] };
   const length = 1 + g.int(64);
   const digest = createHash('sha256');
   const codes: string[] = [];

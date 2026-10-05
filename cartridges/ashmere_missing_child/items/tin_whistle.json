@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "whistle",
+    "tin_whistle"
+  ],
+  "short": "item.tin_whistle.short",
+  "room_line": "item.tin_whistle.room",
+  "description": "item.tin_whistle.description",
+  "location": {
+    "in": "item",
+    "item": "trunk"
+  },
+  "mass_grams": 200
+}

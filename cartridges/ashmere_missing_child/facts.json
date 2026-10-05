@@ -1,0 +1,83 @@
+{
+  "facts": {
+    "rat_1_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 1 in the lantern cellar."
+    },
+    "rat_2_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 2 in the lantern cellar."
+    },
+    "rat_3_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 3 in the lantern cellar."
+    },
+    "rat_4_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 4 in the lantern cellar."
+    },
+    "rat_5_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 5 in the lantern cellar."
+    },
+    "maud_trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": -100,
+        "maximum": 100,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Maud’s trust in the player."
+    },
+    "inn_cellar_cleared": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Maud’s cellar quest has been completed."
+    }
+  }
+}

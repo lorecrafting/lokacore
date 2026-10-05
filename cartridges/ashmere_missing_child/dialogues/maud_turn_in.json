@@ -1,0 +1,45 @@
+{
+  "npc": "maud",
+  "quest": "mauds_cellar",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "mauds_cellar",
+      "state": "active"
+    }
+  },
+  "prompt": "dialogue.maud_turn_in.prompt",
+  "roles": {
+    "maud": {
+      "role": "npc",
+      "npc": "maud"
+    },
+    "key": {
+      "role": "item",
+      "item": "cellar_key"
+    }
+  },
+  "choices": {
+    "done": {
+      "label": "dialogue.maud_turn_in.done",
+      "narration": "narration.maud.done",
+      "receive": {
+        "item": "key",
+        "from": "maud"
+      },
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "maud_trust",
+          "amount": 5
+        },
+        {
+          "op": "fact.assign",
+          "fact": "inn_cellar_cleared",
+          "value": true
+        }
+      ]
+    }
+  }
+}
