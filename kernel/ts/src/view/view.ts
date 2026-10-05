@@ -1,3 +1,4 @@
+import { visible, fuelView } from '../mechanics/light/shared.ts';
 import { noticeViews } from './notice_boards.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
@@ -111,7 +112,12 @@ function within(
   worn?: (id: string) => AdvertisedAction[],
 ): EntityView[] {
   return Object.entries(world.entities)
-    .filter(([id]) => world.state.containers[id] === holder && living(world, id))
+    .filter(
+      ([id]) =>
+        world.state.containers[id] === holder &&
+        living(world, id) &&
+        visible(world, world.character, id),
+    )
     .map(([id, e]) => {
       const scope = holder === world.body ? 'inventory' : SCOPE[e.kind];
       const contents = e.kind === 'item' && !worn ? inside(world, actions, id, scope) : [];
@@ -153,6 +159,7 @@ const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]
   kind: e.kind as Key,
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
+  ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
 });
 

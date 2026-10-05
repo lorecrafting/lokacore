@@ -1,3 +1,4 @@
+import { visible } from '../mechanics/light/shared.ts';
 import { selected } from '../mechanics/containment/stock.ts';
 import type { AdvertisedAction, EntityId, NoticeBoardView } from '../contracts.gen.ts';
 import type { World } from '../runtime/decision.ts';
@@ -11,7 +12,10 @@ export function noticeViews(
   const boards = noticeBoards(world, here, actions);
   const grouped = new Set(boards.flatMap((board) => board.notices.map((notice) => notice.id)));
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
-    detail.room === here && (detail.readable || detail.harvest) && !grouped.has(id as EntityId)
+    detail.room === here &&
+    visible(world, world.character, id) &&
+    (detail.readable || detail.harvest) &&
+    !grouped.has(id as EntityId)
       ? [
           {
             id: id as EntityId,
@@ -46,7 +50,9 @@ function noticeBoards(
   here: EntityId,
   actions: (id: string) => AdvertisedAction[],
 ): NoticeBoardView[] {
-  const details = Object.entries(world.details).filter(([, detail]) => detail.room === here);
+  const details = Object.entries(world.details).filter(
+    ([id, detail]) => detail.room === here && visible(world, world.character, id),
+  );
   const ids = new Map(details.map(([id, detail]) => [detail.key, id as EntityId]));
   return details.flatMap(([id, detail]) => {
     const board = detail.notice_board;

@@ -1,4 +1,5 @@
 // size: allow 350, finite authored exchange checks join the existing reference stage
+import { fuel } from './cartridge_fuel.ts';
 import { exchanges } from './cartridge_exchange.ts';
 import { commerce } from './cartridge_commerce.ts';
 import { noticeBoards } from './cartridge_boards.ts';
@@ -63,6 +64,8 @@ export function parts(c: Obj): [string, Obj, string][] {
   };
   for (const [ref, r] of Object.entries((c.rooms ?? {}) as Obj)) {
     add('room', r, `.cartridge.rooms${step(ref)}`);
+    if (r.dark_description)
+      out.push(['darkness', {}, `.cartridge.rooms${step(ref)}.dark_description`]);
     for (const [key, d] of Object.entries((r.details ?? {}) as Obj))
       add('detail', d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
   }
@@ -73,6 +76,7 @@ export function parts(c: Obj): [string, Obj, string][] {
       out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
   }
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
+    if (i.fuel) out.push(['fuel', i.fuel, `.cartridge.items${step(ref)}.fuel`]);
     add('item', i, `.cartridge.items${step(ref)}`, 'room_line_variants');
     if (i.slot) out.push(['slot', i.slot, `.cartridge.items${step(ref)}.slot`]);
   }
@@ -113,7 +117,7 @@ export function nodes(c: Obj): [Obj, string][] {
 }
 
 const TEXT: Readonly<Record<string, string[]>> = {
-  room: ['title', 'description'],
+  room: ['title', 'description', 'dark_description'],
   npc: ['short', 'room_line', 'description'],
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
@@ -168,7 +172,7 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c));
   if (c.format !== 'loka-cartridge-v2') return out;
-  out.push(...exchanges(c, check));
+  out.push(...exchanges(c, check), ...fuel(c, check));
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;

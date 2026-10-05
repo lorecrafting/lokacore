@@ -142,6 +142,12 @@ export function ThingPage(p: {
   return (
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
       {p.thing?.description && <Text style={prose}>{plain(p.text(p.thing.description))}</Text>}
+      {p.thing?.fuel && (
+        <Text style={note}>
+          Fuel {p.thing.fuel.remaining} of {p.thing.fuel.capacity}
+          {p.thing.fuel.lit ? ', lit' : ', unlit'}
+        </Text>
+      )}
       {p.thing?.state && <Text style={note}>{cap(p.thing.state)}</Text>}
       {p.log.map((line, i) => (
         <Text key={i} style={typeof line === 'string' ? prose : { ...note, fontStyle: 'italic' }}>

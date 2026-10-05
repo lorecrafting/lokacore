@@ -1,3 +1,5 @@
+// size: allow 325, exact light offers join existing item action projection
+import * as light from '../mechanics/light/shared.ts';
 import { harvest } from '../mechanics/containment/harvest.ts';
 import { escapeDirections } from '../mechanics/combat/flee.ts';
 // The GameView lists of an actor's ActionSet (commands/actions.ts resolved; 04 §14, §19; 00 §4.10).
@@ -39,7 +41,7 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
-// size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
+// size: allow 60, one ActionSet projects item, worn light and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
   const at = position.positionOf(world, actor);
@@ -60,7 +62,8 @@ export function lists(world: World, actor: CharacterId) {
   };
   const here = (a: Offered) =>
     !a.recipe ||
-    world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!];
+    (world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!] &&
+      light.visible(world, actor, detailOf(world, a.recipe.target), steps));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
       .filter((a) => fits(a) && here(a) && a.command !== 'read' && !MODAL.includes(a.command))
@@ -94,7 +97,7 @@ export function lists(world: World, actor: CharacterId) {
     ),
     of: (scope: string, id: string, nested = false) =>
       listed((a) => entityOffered(world, actor, a, scope, id, nested), id, scope),
-    worn: (id: string) => listed((a) => a.command === 'remove' && fits(world, actor, a, id), id),
+    worn: (id: string) => listed((a) => entityOffered(world, actor, a, 'worn', id, false), id),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
   };
 }
@@ -107,6 +110,20 @@ function entityOffered(
   id: string,
   nested: boolean,
 ) {
+  if (scope === 'worn' && !light.VERBS.includes(a.command))
+    return a.command === 'remove' && fits(world, actor, a, id);
+  if (light.VERBS.includes(a.command))
+    return (
+      ['inventory', 'worn'].includes(scope) &&
+      !nested &&
+      typeof light.transition(
+        world,
+        actor,
+        a.command,
+        id as EntityId,
+        a.command === 'refuel' ? light.refillSupply(world, actor, id) : undefined,
+      ) !== 'string'
+    );
   return door(a)
     ? lidded(world, id) && usable(world, actor, a, { target_id: id as EntityId })
     : nested
@@ -118,7 +135,7 @@ function entityOffered(
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 50, exact detail harvest joins shared action admission and projection
+// size: allow 52, exact detail harvest and refuel targets share action projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -135,6 +152,13 @@ function advertise(
     label: a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
+    ...(id &&
+      light.VERBS.includes(a.command) && {
+        target_ids: [
+          id as EntityId,
+          ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : []),
+        ],
+      }),
     ...(patch && { label: patch.label, target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
@@ -250,7 +274,8 @@ function readActions(
   for (const id in world.details) {
     if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
     const target_id = id as EntityId;
-    if (readRefused(world, actor, target_id)) continue;
+    if (readRefused(world, actor, target_id) || !light.visible(world, actor, target_id, steps))
+      continue;
     for (const a of actions) {
       if (result.length >= LIMITS.selector_cardinality) throw new KernelError('budget_exceeded');
       const code = refusal(world, { type: 'read', actor_id: actor, target_id }, steps, a.key, set);

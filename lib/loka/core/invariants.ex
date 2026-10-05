@@ -1,4 +1,4 @@
-# size: allow 320, independent retirement pairing joins precondition replay
+# size: allow 335, independent fuel rows join retirement and precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
@@ -153,7 +153,7 @@ defmodule Loka.Core.Invariants do
     if before == need and extra?(op, s, containers, quests) do
       {:cont,
        {Map.put(seen, k, give), moved_container(op, containers), moved_quest(op, quests),
-        resources}}
+        if(op["op"] == "fuel.set", do: Map.put(resources, k, give), else: resources)}}
     else
       {:halt, false}
     end
@@ -175,6 +175,23 @@ defmodule Loka.Core.Invariants do
       MapSet.member?(path, e) -> :cycle
       true -> walk(final[e], final, done, MapSet.put(path, e))
     end
+  end
+
+  defp extra?(%{"op" => "fuel.set"} = op, s, _, _) do
+    spec = get_in(s, ["fuel_specs", op["item_id"]])
+
+    valid = fn r ->
+      is_map(spec) and spec["kind"] in ~w(source supply) and
+        is_integer(spec["capacity"]) and spec["capacity"] > 0 and
+        spec["capacity"] <= 9_007_199_254_740_991 and is_map(r) and map_size(r) == 3 and
+        is_integer(r["remaining"]) and r["remaining"] >= 0 and
+        r["remaining"] <= spec["capacity"] and r["remaining"] <= 9_007_199_254_740_991 and
+        is_integer(r["at"]) and r["at"] >= 0 and r["at"] <= s["clock"] and
+        r["at"] <= 9_007_199_254_740_991 and
+        is_boolean(r["lit"]) and (spec["kind"] == "source" or not r["lit"])
+    end
+
+    valid.(op["from"]) and valid.(op["to"]) and op["to"]["at"] == s["clock"]
   end
 
   defp extra?(%{"op" => "entity.transfer"} = op, s, containers, _) do
@@ -263,6 +280,7 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "choice.resolve"}), do: {"pending", "resolved"}
   defp link(%{"op" => "choice.close"}), do: {"pending", "closed"}
   defp link(%{"op" => "time.advance"} = op), do: {op["from"], op["to"]}
+  defp link(%{"op" => "fuel.set"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "resource.adjust"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "cooldown.start"} = op), do: {op["from"], op["at"]}
   defp link(%{"op" => "barrier.transition"} = op), do: {op["from"], op["to"]}
@@ -284,6 +302,7 @@ defmodule Loka.Core.Invariants do
   defp initial(%{"op" => "choice." <> _, "continuation_id" => c}, s),
     do: get_in(s, ["choices", c, "status"])
 
+  defp initial(%{"op" => "fuel.set", "item_id" => i}, s), do: get_in(s, ["fuel", i])
   defp initial(%{"op" => "time.advance"}, s), do: s["clock"]
 
   defp initial(%{"op" => "cooldown.start"} = op, s),

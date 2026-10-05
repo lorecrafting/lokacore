@@ -708,7 +708,7 @@ this cartridge; no engine or Book fenwort count/faction literal is permitted.
 
 ## B4 well and fuel
 
-The planned [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
+The [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
 adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
 stairs are public at every hour. Its ordinary description exposes an authored
 inspectable `masonry` detail; its separate dark description names only darkness

@@ -12,6 +12,10 @@ actual source/release independently. B4 successor release, API, hash, generated
 IDs, implementation/review head and PR: null. This brief authorizes the selected
 local source outcome under PM adoption; it does not authorize remote publication.
 
+Local [source checkpoint](../../evidence/2026-10-05-b4-light/README.md) implements
+focused light/fuel/recovery behavior on corrected B5 base. Final successor pins and
+independent reviews remain pending C1 integration; this is not publication proof.
+
 ## Goal and player path
 
 At Well Lane, try the public down stair without equipment: enter a truthful dark

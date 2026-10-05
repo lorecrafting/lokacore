@@ -1,4 +1,4 @@
-# size: allow 320, typed terminal quest replacement joins portable composition
+# size: allow 340, exact fuel rows join the closed portable delta dispatch
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
@@ -247,6 +247,18 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "time.advance", "from" => from, "to" => to}, t, ctx),
     do: check(read(t, ctx) == from and to > from, to)
 
+  defp apply_op(%{"op" => "fuel.set"} = op, t, {state, _, _} = ctx) do
+    spec = section(state, "fuel_specs")[op["item_id"]]
+
+    check(
+      read(t, ctx) == op["from"] and
+        Loka.Core.Fuel.valid?(op["from"], spec, state["clock"]) and
+        Loka.Core.Fuel.valid?(op["to"], spec, state["clock"]) and
+        op["to"]["at"] == state["clock"],
+      op["to"]
+    )
+  end
+
   defp apply_op(%{"op" => "resource.adjust"} = op, t, {state, horizon, _} = ctx),
     do: Loka.Core.Resource.compose_adjustment(op, read(t, ctx), state, horizon)
 
@@ -271,6 +283,7 @@ defmodule Loka.Core.Compose do
     end
   end
 
+  defp base(%{"kind" => "fuel", "item_id" => i}, s), do: section(s, "fuel")[i]
   defp base(%{"kind" => "fact"} = t, s), do: section(s, "facts")[key(t)]
   defp base(%{"kind" => "entity", "entity_id" => e}, s), do: section(s, "created")[e]
   defp base(%{"kind" => "containment", "entity_id" => e}, s), do: section(s, "containers")[e]

@@ -1,3 +1,4 @@
+import { dark, illuminated } from '../light/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
@@ -48,7 +49,10 @@ export function sight(world: World, body: EntityId) {
   return COMPASS.filter((d) => has(room.exits, d)).map((direction) => {
     const barred = passage(world, room, direction);
     if (barred) return { direction, code: barred };
+    if (dark(world, world.character)) return { direction };
     const there = world.roomIds[refString(exitTo(room, direction)!)];
+    if (world.rooms[there].dark_description && !illuminated(world, world.character))
+      return { direction };
     const at = (id: string): id is EntityId =>
       world.state.containers[id] === there && living(world, id);
     return { direction, room: there, entities: keys(world.entities).filter(at) };

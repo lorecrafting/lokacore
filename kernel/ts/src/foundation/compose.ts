@@ -1,4 +1,5 @@
-// size: allow 320, typed terminal quest replacement joins portable composition
+// size: allow 325, fuel joins the closed delta dispatch and target reader
+import { composeFuel } from './fuel.ts';
 import { transitionEscort } from './compose_escort.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
@@ -103,7 +104,7 @@ const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
-// size: allow 42, exhaustive dispatch over the closed delta-op contract
+// size: allow 44, exhaustive dispatch over the closed delta-op contract
 function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   const row = read(t, ctx);
   switch (op.op) {
@@ -138,6 +139,8 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
       return transitionEscort(op, row);
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
+    case 'fuel.set':
+      return composeFuel(op, row, ctx.state);
     case 'resource.adjust':
       return composeAdjustment(op, row, ctx.state, ctx.horizon);
     case 'cooldown.start':
@@ -272,6 +275,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'escorts'), t.actor_id);
     case 'clock':
       return s.clock;
+    case 'fuel':
+      return get(section(s, 'fuel'), t.item_id);
     case 'resource':
       return get(section(s, 'resources'), key(t));
     case 'cooldown':

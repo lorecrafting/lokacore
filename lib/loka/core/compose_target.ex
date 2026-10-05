@@ -27,6 +27,8 @@ defmodule Loka.Core.ComposeTarget do
 
   def target(%{"op" => "time.advance"}), do: %{"kind" => "clock"}
 
+  def target(%{"op" => "fuel.set", "item_id" => i}), do: %{"kind" => "fuel", "item_id" => i}
+
   def target(%{"op" => "resource.adjust"} = op),
     do: Map.put(Map.take(op, ~w(resource entity_id)), "kind", "resource")
 

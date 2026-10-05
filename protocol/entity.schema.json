@@ -178,6 +178,9 @@
         "container": {
           "description": "Only explicitly authored receptacles hold items. Absence is false; capacity and barrier require this field.",
           "const": true
+        },
+        "fuel": {
+          "$ref": "#/$defs/FuelSpec"
         }
       },
       "required": [
@@ -372,7 +375,18 @@
       "description": "Cartridge-owned hit chance and positive damage bounds. Compiler and loader enforce damage_min <= damage_max."
     },
     "ShopOffer": {
-      "examples": [{"item":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.18","kind":"item","key":"torch"},"buy":3,"sell":1}],
+      "examples": [
+        {
+          "item": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.18",
+            "kind": "item",
+            "key": "torch"
+          },
+          "buy": 3,
+          "sell": 1
+        }
+      ],
       "description": "One exact authored shop item definition with its positive buy and sell prices; custody determines availability (B3).",
       "type": "object",
       "properties": {
@@ -398,7 +412,30 @@
       "additionalProperties": false
     },
     "Shop": {
-      "examples": [{"resource":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.18","kind":"resource","key":"pennies"},"offers":[{"item":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.18","kind":"item","key":"torch"},"buy":3,"sell":1}],"bought":"shop.bought","sold":"shop.sold"}],
+      "examples": [
+        {
+          "resource": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.18",
+            "kind": "resource",
+            "key": "pennies"
+          },
+          "offers": [
+            {
+              "item": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.18",
+                "kind": "item",
+                "key": "torch"
+              },
+              "buy": 3,
+              "sell": 1
+            }
+          ],
+          "bought": "shop.bought",
+          "sold": "shop.sold"
+        }
+      ],
       "description": "A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).",
       "type": "object",
       "properties": {
@@ -427,6 +464,119 @@
         "sold"
       ],
       "additionalProperties": false
+    },
+    "FuelRow": {
+      "type": "object",
+      "properties": {
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "at": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "lit": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "remaining",
+        "at",
+        "lit"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "remaining": 10,
+          "at": 100,
+          "lit": false
+        }
+      ],
+      "description": "Exact-instance fuel history: bounded remaining charge, confirmed settlement time and stored ignition state. Supplies are never lit."
+    },
+    "FuelSpec": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "source"
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "initial": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "rate": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "unit": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "supply": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "ignited": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "doused": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "refueled": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "kind",
+            "capacity",
+            "initial",
+            "rate",
+            "unit",
+            "supply",
+            "ignited",
+            "doused",
+            "refueled"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "supply"
+            },
+            "capacity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "initial": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "unit": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "kind",
+            "capacity",
+            "initial",
+            "unit"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys."
     }
   }
 }

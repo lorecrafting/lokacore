@@ -1,4 +1,4 @@
-// Repeat exchanges retain only the latest quest row; existing receipts prove their historical revisions.
+// Existing receipts prove repeated exchanges and custody-independent fuel at their original revisions.
 import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
@@ -16,7 +16,11 @@ export function exchangeSave(
   meta: Meta,
   revision: number,
 ): boolean {
-  if (!Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange)) return false;
+  if (
+    !Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange) &&
+    !Object.keys(fresh.fuelSpecs).length
+  )
+    return false;
   const invalid = (): never => {
     throw new SyntaxError('malformed JSON: inconsistent exchange history');
   };

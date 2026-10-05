@@ -31,6 +31,8 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'escort', actor_id: op.actor_id };
     case 'time.advance':
       return { kind: 'clock' };
+    case 'fuel.set':
+      return { kind: 'fuel', item_id: op.item_id };
     case 'resource.adjust':
       return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
     case 'cooldown.start':

@@ -1,4 +1,4 @@
-# size: allow 360, finite stock and exchange refs join the checked expansion boundary
+# size: allow 365, exact fuel supplies join the checked reference expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;
@@ -34,6 +34,9 @@ defmodule Loka.Content.Checks do
   @spec expand(term(), map()) :: term()
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
     do: Map.update!(n, @ref_fields[op], &ref(&1, @ref_fields[op], m))
+
+  def expand(%{"kind" => "source", "capacity" => _, "supply" => supply} = f, m),
+    do: Map.put(f, "supply", ref(supply, "item", m))
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do

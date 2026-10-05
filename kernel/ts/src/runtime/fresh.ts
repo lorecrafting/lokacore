@@ -24,6 +24,7 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * at that time, since an unset legacy resource regenerates from time 0. Opted rows also
  * exist at clock zero, with standing rate and no fractional credit.
  */
+// size: allow 48, fresh fuel history initializes exact opted instances once
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
   const mint = () => id(context, NIL, ordinal++) as EntityId;
@@ -38,7 +39,19 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
   const slots = holders(cartridge, mint);
   for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
   const { resources, entityResourceSpecs } = started(cartridge, body, clock, entities);
+  const fuelSpecs = Object.fromEntries(
+    Object.entries(entities).flatMap(([i, e]) =>
+      e.kind === 'item' && e.fuel ? [[i, e.fuel]] : [],
+    ),
+  );
+  const fuel = Object.fromEntries(
+    Object.entries(fuelSpecs).map(([i, spec]) => [
+      i,
+      { remaining: spec.initial, at: clock, lit: false },
+    ]),
+  );
   return {
+    fuelSpecs,
     cartridge,
     context,
     character,
@@ -57,7 +70,7 @@ export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: Rn
     entityResourceSpecs,
     barrierInitial: byRef(cartridge, 'barrier', cartridge.barriers, (b) => b.initial),
     attributes: byRef(cartridge, 'attribute', cartridge.attributes, (a) => a.start),
-    state: { clock, containers, rng: seed, ...written({ jobs, resources }) },
+    state: { clock, containers, rng: seed, ...written({ jobs, resources, fuel }) },
   };
 }
 

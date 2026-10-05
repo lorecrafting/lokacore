@@ -1,3 +1,4 @@
+import { dark } from '../light/shared.ts';
 import { living } from '../death/shared.ts';
 // description_variant@1 (capability_registry.json): look at the current place, or examine one
 // of its inspectable details, an item or NPC in it, or an item the actor holds (21 §6, §8; 04
@@ -28,6 +29,12 @@ export const decide: Rule<'description_variant'> = (world, command) => {
 export const describe = (
   world: World,
   actor: CharacterId,
-  of: { readonly description: TextKey; readonly variants?: readonly DescriptionVariant[] },
+  of: {
+    readonly description: TextKey;
+    readonly dark_description?: TextKey;
+    readonly variants?: readonly DescriptionVariant[];
+  },
 ): TextKey =>
-  of.variants?.find((v) => holds(world, actor, v.when.root))?.description ?? of.description;
+  of.dark_description && dark(world, actor)
+    ? of.dark_description
+    : (of.variants?.find((v) => holds(world, actor, v.when.root))?.description ?? of.description);

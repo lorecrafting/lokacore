@@ -1,4 +1,4 @@
-// size: allow 315, independent retirement pairing joins precondition replay
+// size: allow 335, independent fuel preconditions join retirement and row replay
 import { escortsHold } from './invariants_escort.ts';
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
@@ -56,6 +56,7 @@ function link(op: Any): [Json | undefined, Json] {
 function initial(op: Any, s: Any): Json | undefined {
   const [family] = op.op.split('.');
   if (op.op === 'fact.assign') return s.facts?.[key(target(op))] ?? s.fact_defaults?.[key(op.fact)];
+  if (op.op === 'fuel.set') return s.fuel?.[op.item_id];
   if (op.op === 'entity.create') return s.created?.[op.identity.id];
   if (op.op === 'entity.transfer') return s.containers?.[op.entity_id];
   if (family === 'quest') return s.quests?.[op.instance_id]?.state;
@@ -127,6 +128,8 @@ function extra(
   quests: Map<string, Any>,
 ): boolean {
   switch (op.op) {
+    case 'fuel.set':
+      return fuelValid(op, s);
     case 'entity.transfer':
       return transferValid(op, containers, s.capacities);
     case 'quest.retire':
@@ -187,7 +190,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   },
   // Replay the contract preconditions on independent overlays; never use compose's result to
   // compute the expected answer. A fault vacuously holds this success-only invariant.
-  // size: allow 45, independent retirement pairing joins existing ordered precondition replay
+  // size: allow 46, fuel row evidence joins independent ordered precondition replay
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     if (
@@ -222,6 +225,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
       )
         return false;
       seen.set(k, give);
+      if (op.op === 'fuel.set') resources.set(k, give);
       if (op.op === 'entity.transfer') containers.set(op.entity_id, op.destination_id);
       if (op.op === 'quest.activate')
         quests.set(op.instance_id, { quest: op.quest, scope: op.scope, state: 'active' });
@@ -302,4 +306,24 @@ function retirementsHold(ops: readonly DeltaOp[]): boolean {
       same(next.scope, op.scope)
     );
   });
+}
+
+function fuelValid(op: Any, s: Any): boolean {
+  const spec = s.fuel_specs?.[op.item_id];
+  const valid = (r: Any) =>
+    !!spec &&
+    ['source', 'supply'].includes(spec.kind) &&
+    Number.isSafeInteger(spec.capacity) &&
+    spec.capacity > 0 &&
+    !!r &&
+    Object.keys(r).length === 3 &&
+    Number.isSafeInteger(r.remaining) &&
+    r.remaining >= 0 &&
+    r.remaining <= spec.capacity &&
+    Number.isSafeInteger(r.at) &&
+    r.at >= 0 &&
+    r.at <= s.clock &&
+    typeof r.lit === 'boolean' &&
+    (spec.kind === 'source' || !r.lit);
+  return valid(op.from) && valid(op.to) && op.to.at === s.clock;
 }

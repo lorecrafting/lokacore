@@ -803,6 +803,35 @@
           ],
           "additionalProperties": false,
           "description": "API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "fuel.set"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "from": {
+              "$ref": "entity.schema.json#/$defs/FuelRow"
+            },
+            "to": {
+              "$ref": "entity.schema.json#/$defs/FuelRow"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "item_id",
+            "from",
+            "to"
+          ],
+          "additionalProperties": false,
+          "description": "Replace one declared item fuel history with exact whole-row precondition at the authoritative clock."
         }
       ],
       "examples": [
@@ -1197,6 +1226,22 @@
           "required": [
             "kind",
             "actor_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "fuel"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "item_id"
           ],
           "additionalProperties": false
         }

@@ -159,10 +159,11 @@ const BARRED: Record<string, string> = { exit_closed: ' (closed)', exit_locked: 
  */
 export function scan(cartridge: Cartridge, world: World): string {
   const lines = sight(world, world.body).map((s) => {
+    if (!s.entities && !s.code) return `${s.direction}: darkness.`;
     if (!s.entities)
       return `${s.direction}: ${door(cartridge, world, s.direction)}${BARRED[s.code]}.`;
     const seen = s.entities.map((id) => say(cartridge, world.entities[id].short)).join(', ');
-    return `${s.direction} (${say(cartridge, world.rooms[s.room].title)})${seen && `: ${seen}`}.`;
+    return `${s.direction} (${say(cartridge, world.rooms[s.room!].title)})${seen && `: ${seen}`}.`;
   });
   return lines.length ? `${lines.join('\n')}\n` : 'You see no exits.\n';
 }

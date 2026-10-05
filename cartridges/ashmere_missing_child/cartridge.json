@@ -31,7 +31,8 @@
       "action_recipe": 1,
       "escort": 1,
       "scene": 1,
-      "commerce": 1
+      "commerce": 1,
+      "light": 1
     },
     "client_features": []
   },
