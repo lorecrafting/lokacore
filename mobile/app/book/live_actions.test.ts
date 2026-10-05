@@ -138,6 +138,11 @@ test('Maud acceptance, position and item buttons survive elapsed-only redraws', 
       .view.journal.some((q) => q.quest.key === 'mauds_cellar' && q.state === 'active'),
   );
   assert.equal(a.book.screen().log.includes('The page had changed; here it is again.'), false);
+  const west = a.button('Go west');
+  a.pulse();
+  a.book.press(west);
+  assert.equal(a.book.screen().view.place.title.key, 'room.well_lane.title');
+  assert.equal(a.book.screen().log.includes('The page had changed; here it is again.'), false);
 });
 
 // Breaks: a handler reuses an old button's captured context but alters the choice it sends;
