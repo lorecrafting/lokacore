@@ -220,7 +220,8 @@ test('closed answers and a stale answer give their reason in words, not their co
 });
 
 // Breaks: a per-exit unlock/open button loses its direction or is sent as an item action,
-// so the real authority cannot transition the gate despite the held key.
+// so the real authority cannot transition the gate despite the held key, or a captured move
+// becomes a fresh invocation after the gate closes.
 test('the Lantern gate unlocks and opens through its projected exit buttons', () => {
   const a = fresh();
   a.tap(...FETCH);
@@ -236,5 +237,12 @@ test('the Lantern gate unlocks and opens through its projected exit buttons', ()
   const west = a.screen().view.exits.find((e) => e.direction === 'west')!;
   assert.equal(west.door!.state, 'open');
   assert.equal(west.available, true);
+  const drawnMove = a.find('Go west');
+  a.tap('Close the old gate (west)');
+  const revision = a.revision();
+  a.smoke.press(drawnMove);
+  assert.equal(a.revision(), revision);
+  assert.equal(a.screen().view.place.title.key, 'room.landing.title');
+  assert.equal(a.screen().log.at(-1), 'The page had changed; here it is again.');
   a.sql.close();
 });

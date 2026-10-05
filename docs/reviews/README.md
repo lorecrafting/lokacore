@@ -213,3 +213,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [M20-B1 atomic reward and usable storage](2026-10-04-m20-b1-reward-storage-review.md): PR #171 at `6061cbc`, CHANGES REQUIRED; broad contract re-review at `3ab0d237`, APPROVE; M20B1-R1 superseded by the explicit pre-production policy, current validation/save safeguards verified.
 
 - [M20-B2 playable Maud quest and storage](2026-10-05-m20-b2-mauds-cellar-review.md): PR #172 at `adc0d6715f123bba76601ef9f578e605f3d54a6a`, APPROVE; no findings, two independent mutants red/restored green, current production/compiler/App/transcript checks and 231 evidence hashes verified.
+
+- [M1-B3 still-offered Book controls across live-clock redraws](2026-10-04-m1-b3-live-clock-actions-review.md): PR #173 at `0c0e44e401bcf37cbed6db72e817c5a834724542`, APPROVE; no findings, four independent mutations red, 287 mobile tests pass plus one existing skip, post-Maud west movement and presenter placement verified.

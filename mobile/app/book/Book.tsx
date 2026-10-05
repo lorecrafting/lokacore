@@ -82,7 +82,7 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
 function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
   pr.press(b, detail);
-  if (stale) return s.redraw((n) => n + 1);
+  if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
     before = s.current.current;
   let next = pagesAfter(before.stack, before.view, after.view);

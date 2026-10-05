@@ -122,6 +122,8 @@ and not repeated here.
   migrations are not required; advance current releases and independently re-pin known answers.
   Preserve frozen conformance fixtures and safe explicit mismatch refusal, never silent save
   deletion ([superseding decision](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md)).
+- Preproduction previews may start fresh across builds; current-build save/retry/reopen and
+  explicit Start over remain required ([clarification](../decisions/owner-decision-preproduction-preview-saves-2026-10-04.md)).
 - Saves reopen on an available exact pin; missing pins and unsupported formats are typed refusals
   ([save contract](save.md#opening-a-story); [original scope](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md)).
 - The book UI's departures from 00 §4.10 (map joystick, full pages, status line) are documented

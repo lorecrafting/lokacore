@@ -4,11 +4,11 @@
 // 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
 import type { Game, GameView, Reply, GameSubscription } from '../../packages/game-view/session.ts';
 import { comings, replyLine } from './words.ts';
-import { buttonsOf, intentOf, things } from './model.ts';
+import { actionContext, buttonsOf, intentOf, things } from './model.ts';
 
 /**
  * A tappable action: its text and the intent it sends (the session adds id and actor), with the
- * view freshness token of the screen it was drawn from (04 §16), never the token at the press.
+ * drawn freshness token and action context, revalidated before a fresh press (Book UI).
  */
 export type Button = {
   label: string;
@@ -16,6 +16,7 @@ export type Button = {
   target_ids: string[];
   input: object;
   token?: string; // none: no freshness check (a test's hand-made button)
+  context?: string; // only projected buttons can refresh across an unchanged live update
 };
 
 type Say = (key: string) => string;
@@ -172,6 +173,20 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
   return line;
 }
 
+function liveButton(game: Game, b: Button, label: Say, text: Say, generation: number): Button {
+  const { view, token } = game.view();
+  return b.token &&
+    b.token !== token &&
+    !game.pending() &&
+    b.context &&
+    b.context === actionContext(view, b, generation) &&
+    buttonsOf(view, label, text).some(
+      (offered) => actionContext(view, offered, generation) === b.context,
+    )
+    ? { ...b, token }
+    : b;
+}
+
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
@@ -221,34 +236,49 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   return true;
 }
 
+function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) {
+  s.log.splice(0, s.log.length - 200);
+  s.combatLog.splice(0, s.combatLog.length - 200);
+  for (const lines of s.details.values()) lines.splice(0, lines.length - 200);
+  const { view, token } = game.view();
+  const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
+    ...b,
+    token,
+    context: actionContext(view, b, generation),
+  }));
+  return {
+    view,
+    text,
+    buttons,
+    log: s.log,
+    combatLog: s.combatLog,
+    detail: (id: string) => s.details.get(id) ?? [],
+    pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
+    catchingUp: s.status.kind === 'catching_up',
+    fault: s.fault,
+    returnWorld: s.returnWorld,
+  };
+}
+
 /** World/detail logs, buttons and presses for one game. */
 export function presenter(game: Game) {
   const { text, label } = sayers(game);
   const s = restoredLogs(game, text);
+  let generation = 0; // Player receipts invalidate old controls even if the context cycles back.
   return {
-    screen: () => {
-      s.log.splice(0, s.log.length - 200);
-      s.combatLog.splice(0, s.combatLog.length - 200);
-      for (const lines of s.details.values()) lines.splice(0, lines.length - 200);
-      const { view, token } = game.view();
-      const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({ ...b, token }));
-      return {
-        view,
-        text,
-        buttons,
-        log: s.log,
-        combatLog: s.combatLog,
-        detail: (id: string) => s.details.get(id) ?? [],
-        pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
-        catchingUp: s.status.kind === 'catching_up',
-        fault: s.fault,
-        returnWorld: s.returnWorld,
-      };
+    screen: () => screen(game, s, label, text, generation),
+    update: (update: GameSubscription) => {
+      const terminal = updated(game, update, s, text);
+      if (terminal && s.recovered) generation++;
+      return terminal;
     },
-    update: (update: GameSubscription) => updated(game, update, s, text),
     recovered: () => !!s.recovered,
     // A pending retry keeps the original detail, even when retried from the world.
-    press: (b: Button, detail?: string) => pressed(game, b, detail, s, text),
+    press: (b: Button, detail?: string) => {
+      const line = pressed(game, liveButton(game, b, label, text, generation), detail, s, text);
+      if (s.recovered) generation++;
+      return line;
+    },
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },

@@ -180,7 +180,7 @@ The app shell imports the local authority's session controller
 
 The phone book consumes the host-neutral [GameSession](../decisions/owner-decision-presenter-split-2026-10-02.md)
 boundary and [GameView](protocol.md#gameview); it sends only the actions offered by that
-view, with the freshness token captured when the button was drawn. Cartridge text supplies
+view, retaining its drawn action/context under [Book live action freshness](book-ui.md#live-action-freshness). Cartridge text supplies
 resource-band phrases (`band.<key>`), journal text, chapter titles and scene lines; projected
 resource tones map to the paper palette without presenter thresholds.
 
