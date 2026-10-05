@@ -79,10 +79,12 @@ after independent primary and pin/save approvals, six green source-head checks a
 green review-only head checks. Chapter release 0.0.5 does not yet offer Q1.
 
 FEN-01 — the first south search route from Ferry Landing through Reed Path, Reed Bank,
-Willow Shade and Drowned Oak — is the next incremental chapter slice. Four authored
-fen rooms, reciprocal exits and inspectable fox clues use existing mechanics. Release
-0.0.6 remains pre-Q2; the rest of the fen and rescue route follow separately under
-the [FEN-01 decision](decisions/pm-decision-fen01-south-search-2026-10-05.md).
+Willow Shade and Drowned Oak — merged in
+[#184](https://github.com/lorecrafting/lokacore/pull/184) after the clue-title finding
+was fixed and primary and pin/save reviewers approved. All six source-head checks
+passed, with green review-only head checks. Release 0.0.6 remains pre-Q2; the rest
+of the fen and rescue route follow separately under the
+[FEN-01 decision](decisions/pm-decision-fen01-south-search-2026-10-05.md).
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
