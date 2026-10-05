@@ -211,6 +211,12 @@ against local main `98cc60b1`. C1 source and shared cartridge predecessors must
 be re-pinned before source assignment; successor release pins, independent plan
 review, implementation and proof remain ahead. C4 behavior is a separate slice.
 
+C4 Hound behavior has a [selected bounded pack/flight contract](decisions/pm-decision-c4-hound-behavior-2026-10-05.md)
+and [implementation brief](briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md)
+against local main `10b023e8`. C1/C3 source and intervening shared release edits
+must be reviewed and re-pinned before assignment. C4 independent plan review,
+implementation, successor release/API/hash/IDs and proof remain ahead.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
