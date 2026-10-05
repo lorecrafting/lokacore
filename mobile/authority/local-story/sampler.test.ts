@@ -21,7 +21,7 @@ const fresh = newWorld(
   '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
   [1, 2, 3, 4],
 );
-// Independent Python IdSource oracle: character/body, ten sorted rooms, then Bram/five rats/Maud/seven items/scheduled job/slot.
+// Independent Python IdSource oracle: character/body, ten sorted rooms, then Bram/five rats/Maud/seven items/slot (no scheduled job).
 // Context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f; see the independent sampler oracle for literal ordinals.
 const ids = {
   bram: '15349791-fa65-81f7-b378-bb8212b808d2',
@@ -96,7 +96,7 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
   try {
     let p = open(sql);
     assert.equal(fresh.character, 'bd595711-ea5f-89a5-abb0-046cd349d2f9');
-    assert.equal(fresh.slots.cloak, '169f9a28-2c18-8ffe-8c39-fdb5ddd42d67');
+    assert.equal(fresh.slots.cloak, 'b9181a03-2e08-88cc-8cb0-c137170489b8');
     // Breaks: missing authored bands fall back to perfect_health, or the band label is absent.
     const hp = p.view().resources!.find((r) => r.resource.key === 'hp')!;
     assert.deepEqual([hp.band, hp.tone], ['ready', 'normal']);

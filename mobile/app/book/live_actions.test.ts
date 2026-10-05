@@ -2,22 +2,23 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
-import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import {
+  elapsedBundle,
+  elapsedHost,
+} from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { intentOf } from './model.ts';
 import { gesture, ZOOM } from './joystick.ts';
 import { presenter } from './presenter.ts';
 
-function preview() {
-  const a = elapsedHost(
-    ':memory:',
-    { wall: 10000, mono: 0 },
-    JSON.parse(
-      readFileSync(
-        new URL('../../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
-        'utf8',
-      ),
+function preview(
+  bundle = JSON.parse(
+    readFileSync(
+      new URL('../../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
+      'utf8',
     ),
-  );
+  ),
+) {
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
   const book = presenter(a.game);
   a.game.subscribe(book.update);
   const button = (label: string) =>
@@ -81,6 +82,43 @@ test('after Bram acceptance an unchanged north drag crosses a pulse and commits 
   assert.equal(a.revision(), revision + 2); // one elapsed receipt and one movement receipt
   assert.equal(a.book.recovered(), true);
   assert.equal(a.book.screen().log.includes('The page had changed; here it is again.'), false);
+});
+
+// Breaks: retaining Bram's old daily schedule hides the offer at19:00 or blocks
+// the lantern hand-over the next day, forcing the sampler player to wait.
+test('sampler Bram offers at19:00 and receives the fetched lantern the next day without waiting', (t) => {
+  const a = preview();
+  t.after(() => a.sql.close());
+  a.clock.wall += 72000;
+  a.clock.mono += 72000;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(a.book.screen().view.time, 68400);
+  a.tap('Talk to Old Bram', 'Close', 'Talk to Old Bram');
+  a.book.press(a.book.screen().buttons.find((b) => b.action_key === 'choose')!);
+  assert.equal(a.book.screen().view.journal[0]!.state, 'active');
+  a.tap('Go north');
+  a.clock.wall += 1728000;
+  a.clock.mono += 1728000;
+  assert.equal(a.game.pulse().kind, 'ready');
+  assert.equal(a.book.screen().view.time, 154800);
+  a.tap('Take a brass lantern', 'Go south', 'Talk to Old Bram');
+  const leave = a.book
+    .screen()
+    .buttons.find(
+      (b) =>
+        b.action_key === 'choose' && (b.input as { choice_id?: string }).choice_id === 'leave_it',
+    )!;
+  assert.ok(leave);
+  a.book.press(leave);
+  assert.equal(a.book.screen().view.journal[0]!.state, 'resolved');
+  assert.equal(
+    JSON.parse(
+      a.sql
+        .prepare("SELECT value FROM state_row WHERE section='containers' AND key=?")
+        .get('05f6aca0-79cd-83fe-8096-bae95b0730e8')!.value as string,
+    ),
+    '15349791-fa65-81f7-b378-bb8212b808d2',
+  );
 });
 
 // Breaks: refreshing a held north action after another move turns it into a second move from
@@ -163,13 +201,14 @@ test('an altered captured choice is refused without sending a new decision', (t)
 // Breaks: a previous Leave button closes the next conversation because both close actions have
 // no input or targets. A departed Bram must also never be substituted by a new current target.
 test('old Leave and departed Bram actions keep stale refusal after context changes', (t) => {
-  const a = preview();
+  const a = preview(elapsedBundle());
   t.after(() => a.sql.close());
-  const talk = a.button('Talk to Old Bram');
+  a.book.press(a.book.screen().buttons.find((b) => b.action_key === 'lantern')!);
+  const talk = a.button('Talk Bram the ferryman');
   a.book.press(talk);
   const close = a.button('Close');
   a.book.press(close);
-  a.tap('Talk to Old Bram');
+  a.tap('Talk Bram the ferryman');
   const continuation = a.book.screen().view.choice!.continuation_id;
   const revision = a.revision();
   a.book.press(close);
@@ -177,12 +216,12 @@ test('old Leave and departed Bram actions keep stale refusal after context chang
   assert.equal(a.book.screen().view.choice!.continuation_id, continuation);
   assert.equal(a.book.screen().log.at(-1), 'The page had changed; here it is again.');
   a.tap('Close');
-  const beforeDeparture = a.button('Talk to Old Bram');
+  const beforeDeparture = a.button('Talk Bram the ferryman');
   a.clock.wall += 720000;
   a.clock.mono += 720000;
   assert.equal(a.game.pulse().kind, 'ready');
   assert.equal(
-    a.book.screen().buttons.some((b) => b.label === 'Talk to Old Bram'),
+    a.book.screen().buttons.some((b) => b.label === 'Talk Bram the ferryman'),
     false,
   );
   const afterDeparture = a.revision();
@@ -195,9 +234,10 @@ test('old Leave and departed Bram actions keep stale refusal after context chang
 // Breaks: the same saved continuation is mistaken for a still-offered answer after its speaker
 // departs; rebinding would send a new action instead of preserving the captured stale refusal.
 test('a held answer refuses after its speaker departs during the elapsed pulse', (t) => {
-  const a = preview();
+  const a = preview(elapsedBundle());
   t.after(() => a.sql.close());
-  a.tap('Talk to Old Bram');
+  a.book.press(a.book.screen().buttons.find((b) => b.action_key === 'lantern')!);
+  a.tap('Take a brass lantern', 'Talk Bram the ferryman');
   const answer = a.book.screen().buttons.find((b) => b.action_key === 'choose')!;
   assert.ok(answer);
   const continuation = a.book.screen().view.choice!.continuation_id;
@@ -212,7 +252,7 @@ test('a held answer refuses after its speaker departs during the elapsed pulse',
   const revision = a.revision();
   a.book.press(answer);
   assert.equal(a.revision(), revision);
-  assert.equal(a.book.screen().view.journal.length, 0);
+  assert.equal(a.book.screen().view.journal[0]!.state, 'active');
   assert.equal(a.book.screen().log.at(-1), 'The page had changed; here it is again.');
 });
 

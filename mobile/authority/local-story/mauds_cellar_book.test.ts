@@ -76,7 +76,7 @@ test('production Maud completion leaves World free of story-ended claims and sto
   const ref = (kind: string, name: string) =>
     ({
       cartridge_id: 'ashmere_sampler',
-      cartridge_version: '0.0.10',
+      cartridge_version: '0.0.11',
       kind,
       key: name,
     }) as DefinitionRef;
@@ -86,7 +86,7 @@ test('production Maud completion leaves World free of story-ended claims and sto
       ...w.state,
       containers: {
         ...w.state.containers,
-        [w.body]: w.roomIds['ashmere_sampler@0.0.10:room/drowned_lantern'],
+        [w.body]: w.roomIds['ashmere_sampler@0.0.11:room/drowned_lantern'],
       },
       facts: Object.fromEntries(
         [1, 2, 3, 4, 5].map((n) => [

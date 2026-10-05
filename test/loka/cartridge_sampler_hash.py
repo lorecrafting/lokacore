@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.10'
+VERSION = '0.0.11'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -50,7 +50,7 @@ v['items'][key('item', 'trunk')]['barrier'] = ref('barrier', 'trunk_lid')
 v['items'][key('item', 'wool_cloak')]['slot'] = 'cloak'
 for name in ['player_corpse', 'rat_corpse']:
     v['items'][key('item', name)] = definition(name, keywords=['corpse', name], short=f'item.{name}.short', room_line=f'item.{name}.room', description=f'item.{name}.description', location=dict(**{'in': 'template'}), mass_grams=0)
-v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'), daily_schedule={'6': ref('room', 'ferry_landing'), '19': ref('room', 'drowned_lantern')})}
+v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'))}
 # Five authored finite attackable rats; numeric values are literal PM-approved inputs.
 for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5']:
     v['npcs'][key('npc', name)] = definition(name, keywords=['rat', name], short='npc.cellar_rat.short', room_line=f'npc.{name}.room', description='npc.cellar_rat.description', room=ref('room', 'lantern_cellar'), hp=dict(minimum=0, maximum=6, start=6, gain=0), attack=dict(chance=50, damage_min=1, damage_max=1))
@@ -112,8 +112,8 @@ sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the preserved adopted catalog and eight approved prototype-derived room strings are copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
 Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram/five rats/Maud, seven items, the next scheduled Bram job, cloak holder.
-names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/'+name for name in ['bram', 'cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'lantern', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['job/bram'] + ['slot/cloak']
+# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram/five rats/Maud, seven items, cloak holder (no sampler NPC schedule).
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/'+name for name in ['bram', 'cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'lantern', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):
     b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])
