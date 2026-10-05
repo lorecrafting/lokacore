@@ -2,7 +2,7 @@
 
 These 33 briefs support the [Missing Child completion plan](../../MISSING-CHILD-PLAN.md). They are **provisional PM recommendations** unless their own text links an adopted decision; a brief is not implementation proof, review approval or proof of a playable chapter. Before assigning a slice, the PM must reconcile recommendations with current `docs/system/` and owner decisions, and re-pin the actual merged dependencies, source head, fixtures, release identity and checks. Unknown future pins remain null. The [delivery workflow](../../WORKFLOW.md) governs implementation and review.
 
-The public plan owns the 33-row order and dependencies. These briefs add candidate implementation detail. If they differ, the public plan and governing decisions control until the PM resolves the conflict. B7 now adopts an untimed water path with B3 as its sole new-slice dependency; B8 and C6 contain proposed recovery, service and reward policies requiring adoption. B6 now links its selected all-hours Seek, bounded retry and usable ward contract; B4/B5 source dependencies remain unknown. B4 now links its selected light/fuel/recovery contract; B3 dependency pins and reviews remain provisional. A1–A3 contain inspected PR190 status and older historical lookups; use the merged status in the public roadmap and re-pin before source work. E1–E3 are proof plans, not gate verdicts.
+The public plan owns the 33-row order and dependencies. These briefs add candidate implementation detail. If they differ, the public plan and governing decisions control until the PM resolves the conflict. B7 now adopts an untimed water path with B3 as its sole new-slice dependency; B8 now adopts immediate Maud services with durable bed eligibility and finite stock MV recovery; B7 source must merge before assignment. C6 contains proposed recovery and reward policies requiring adoption. B6 now links its selected all-hours Seek, bounded retry and usable ward contract; B4/B5 source dependencies remain unknown. B4 now links its selected light/fuel/recovery contract; B3 dependency pins and reviews remain provisional. A1–A3 contain inspected PR190 status and older historical lookups; use the merged status in the public roadmap and re-pin before source work. E1–E3 are proof plans, not gate verdicts.
 
 ## A. Main story
 
@@ -19,7 +19,7 @@ The public plan owns the 33-row order and dependencies. These briefs add candida
 - **B5:** [B5 — S9 harvested herbs, real reward and repeat cap](b5-infirmary-herbs-brief-2026-10-05.md)
 - **B6:** [B6 — S4 all-hours wisp riddle and ward knowledge](b6-wisp-ward-riddle-brief-2026-10-05.md)
 - **B7 (adopted plan):** [B7 — Well and waterskin: fill, pour and drink conserved liquid](b7-well-waterskin-brief-2026-10-05.md)
-- **B8:** [B8 — Maud's room, food and drink services](b8-mauds-services-brief-2026-10-05.md)
+- **B8 (adopted plan):** [B8 — Maud's room, food and drink services](b8-mauds-services-brief-2026-10-05.md)
 - **B9:** [B9 — S10 actual inn Rest and acknowledged dream](b9-inn-dream-brief-2026-10-05.md)
 
 ## C. Watch, combat and survival

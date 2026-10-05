@@ -1,38 +1,149 @@
 # B8 — Maud's room, food and drink services
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted planning brief, source implementation pending.** Planning branch
+`planning/b8-maud-services`, inspected local base
+`4ec52632d510e45214e43a1fe5beca0ec5addbad`. B3 is locally implemented and reviewed
+at chapter `ashmere_missing_child@0.0.18`/API1.16; accumulated publication remains
+pending. B7 has an adopted plan, not merged source. Installed Rest/position and
+MV recovery exist; Inn/meal/Eat/service implementations do not. Re-pin actual
+B3/B7 integration and review heads before assignment. Implementation branch
+`chapter-1/b8-maud-services` (not created). Successor release/API/hash/entity IDs,
+implementation head, PR and verdicts: null. Docs only; no merge/push/play claim.
 
-Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B8. **Provisional until B3 exact commerce/currency, B7 liquid and installed M2 Rest re-pin, and PM adopts benefits and room entitlement.** Main `0fbd2847` is reading baseline only. New release/API/hash/IDs/head/PR/dependency heads: null. Suggested branch `chapter-1/b8-maud-services`, not created. Browser-first shared Book; engine/SQLite/headless sim stay, native deferred. No preview/device/owner-save operation here.
+## Consumer, dependencies and governing clauses
 
-## Goal, dependencies and clauses
+At the actual Drowned Lantern, open original Maud's detail, buy the room, eat a
+paid bread meal and drink a paid ale serving. Each has a complete immediate
+outcome. Walk upstairs to the real Inn Rooms bed and use ordinary Rest after
+payment. B8 adds no rooms; S10/dream remains B9. Services stay available before,
+during and after S1 without hiding its offer or turn-in. Upstairs, attic, cellar,
+S1 key/chest and the owned-corpse recovery route remain free of service gates.
 
-Pay present Maud for real room eligibility, food or drink, then use the declared benefit through actual Rest/Eat/Drink. This consumes M19-B/M11-B only; S10 dream stays B9. Maud's existing S1 quest/chest/first-eligible dialogue must remain usable in every S1 state. Ordinary upstairs access, free cellar entry and actual corpse retrieval cannot become paid services.
+The [PM adoption](../../decisions/pm-decision-b8-mauds-services-2026-10-05.md)
+selects [mechanics](../../system/mechanics.md#b8-mauds-immediate-services-selected-contract),
+[tuning](../../system/cartridge.md#b8-mauds-service-declarations),
+[composition](../../system/protocol.md#b8-immediate-service-composition),
+[save](../../system/save.md#b8-service-recovery) and
+[Book](../../system/book-ui.md#b8-maud-and-bed-details). These supersede the old
+purchase-item-then-consume candidate. Food/ale are eaten/drunk in the service
+transaction itself; Room grants immediately usable entitlement, not recovery.
+B7 water remains benefit-free. Historical00a §§2/4/5 and primitive21 §§14/22 Inn
+supply consumer direction, not installed hunger/drunk/occupancy defaults.
+Follow world-parameters, fixed elapsed time, no-wait, forward-development and
+[composition](../../system/architecture.md#building-mechanics-by-composition).
 
-Amend active mechanics dialogue/containment/position/resource and B3/B7 service/consumption contracts; protocol shared admission/Composition/GameView; cartridge source/compiler/loader; save transaction/recovery; Book NPC/detail/freshness. Intended consumers: `docs/NEXT-MECHANICS.md` M19-B/M11-B; archived00a §§2/4/5/7(S10) and archived00 §4.6; primitive21 §§14/22 Inn. Owner fixed-time/background/read-time/no-wait/world-parameters rules govern; old broad hunger/thirst/drunk defaults are not adopted automatically.
+## Minimal implementation and composition record
 
-## Exact recommended candidate for PM adoption
+- **Real consumer:** three exact original-Maud service offers and actual Inn
+  Rooms bed; prices/benefits/starts live only in the tuning clause. Service keys
+  and refs bind identity, never English labels or first-eligible Talk order.
+- **Shared reads:** actor→bodyOf, living actor/provider, original provider's
+  authored offers and current room, current quote, exact pennies/stock bounds,
+  actor entitlement, settled MV/headroom, exact provider-held opted ale vessel
+  kind/quantity and immutable serving metadata. One shared query budget covers
+  all candidates, custody and arithmetic before allocation.
+- **Typed writes/owners:** service owns admission and lowering; reuse B3 exact
+  payment helper and existing resource/fact ops. Liquid owns the reusable pure
+  serving transition; service uses it for its exact bound provider vessel, not
+  a public actor-owned Drink call. Position owns actual Rest and MV rate changes.
+  Proposal owns atomic writer conflict/adoption; authority owns changed-row
+  transaction/history validation; Book only emits captured ActionInvocations.
+- **Missing primitive/invariant:** the smallest typed immediate service command,
+  declaration and shared projection/admission query. Payment and stock must be
+  exact; MV benefit may cap after ordinary settlement. No new portable delta
+  op, service row, entitlement ledger, issuer or registry of arbitrary effects.
+- **Reuse:** room is narrative Boolean truth, meals are finite nonregenerating
+  resource stock, ale is the B7 finite row. Meal/drink require positive MV
+  headroom; no carrying acquisition occurs. Existing replay, combat/scene
+  precedence, receipt narration and unknown-COMMIT fencing compose directly.
+- **Named exceptions:** provider-owned serving debit is deliberately distinct
+  from B7 actor-owned Drink admission, using the same checked row transition.
+  No Maud/named room/ale switch in the kernel. B9 alone adds actual accepted
+  Rest credit at Inn Rooms after entitlement; unpaid prior Rest never credits.
+  D4's later foraged food remains a separate real Eat consumer, not certified
+  or implemented here. No idle wait, service duration, hunger/drunk or HP bonus.
 
-Recommend one immediate, actor/provider-bound payment-and-benefit transaction using B3's exact currency transfer, real stock/issuance and carrying admission. Maud is present/all-hours. Quote/entitlement/item availability is rechecked at execution, including a stale menu after a different purchase. Same invocation retries replay one debit and one benefit. Unavailable/insufficient/full-load cases leave money and result unchanged. No escrow, queued job, hireling broker or generic service marketplace.
+Scope: chapter manifest/text/facts/resources, original Maud, a provider-held
+`lantern_ale_cask`, Inn Rooms bed detail; minimal source service declarations and
+compiler/loader short refs, capability dependencies and invalid cases; pure
+`mechanics/service` rule/shared query, reused commerce/resource/liquid helpers,
+commands/targets/actions, GameView service projection, world dispatch/feature
+map; only consumed protocol command/action/offer/consequence/event/capability
+contracts and generated artifacts/current fixtures; local Story store/save
+verifier and receipt narration recovery; shared Book Maud/bed detail/freshness.
+No mobile native changes, new dependencies, portable-foundation rewrites,
+extra source rooms, stock regeneration, shop buyback, edible inventory,
+bartering, passive physiology, B9 overlay, timed Inn reservation or Realm.
 
-**Room:** a once-per-current-run paid bed entitlement, permanent for this chapter, no time skip or paid-hour expiration. This is an authored player fact read by the actual inn bed/S10 consumer. Purchasing is not Rest, does not change position/recovery rate, and cannot set slept/dream facts. Ordinary Rest elsewhere and legal movement remain installed behavior; paying never locks/unlocks the sole corpse route. Recommend S10's first *qualifying* accepted Rest at Inn Rooms after entitlement, with no retrospective credit for a prior ordinary unpaid Rest. PM must record this explicit consumer policy before GO. A repeated rental refuses or projects already-rented with no new charge, rather than stacking invisible nights.
+## Independent literal acceptance and mutation plan
 
-**Food/drink benefit:** recommend the smallest complete policy, intentional consumption restoring only an authored amount of existing MV. This is a proposed PM adaptation, not an installed historical formula. Purchase itself grants the real edible item or filled ale vessel, not resource recovery. Actual Eat/Drink consumes its declared remaining quantity and applies the selected MV adjustment atomically; cap at the existing maximum. No HP healing, accelerated elapsed recovery, passive menu bonus, global hunger/thirst decay or intoxication engine. If PM selects a bounded need/drunk model instead, replace this paragraph and freeze its producers/values/oracles before assignment; do not build both models. B7 water receives a benefit only if PM expressly authors it.
+Test only a distinct break missed by the old focused suite in that layer. Name
+that break before the test, apply its mutant to the old suite first, and use
+hand-checked literals below rather than production helpers for expected values.
+Freeze elapsed input at0 for these arithmetic tests; test genuine settlement
+separately. Production values come from the governing tuning clause.
 
-Food has an exact instance with minimal remaining servings; a used-up food has declared depleted custody/identity policy. Ale uses B7 liquid quantity/kind and the same Drink consumer, not a second quantity store. Use the existing created-item/stock and consumption source rules; do not delete/recreate the consumed item or conjure unlimited money. Ale1p is an archived price candidate; meal/room prices, quantities, MV amounts and initial stock remain null until PM adoption. Rest keeps M2's standing18/resting36 per3600 and rate50 behavior; explicit consumption is the only added MV producer.
+| Controlled input | Independent expected result | Realistic mutation |
+|---|---|---|
+| Actor20p/Maud10p, unpaid, standing, MV50; rent3p | 17p/13p, paid=true, standing/MV50/clock0; no S10/slept/dream grant | Rental calls Rest or grants recovery |
+| Exact replay, then distinct already-paid rental | remains17/13/true; distinct attempt refuses with no stock/event/payment | Replay or repeated room double-charges |
+| Actor20/Maud10, meals4, MV50/max100; meal2p/+12 | 18/12, meals3, MV62, unchanged HP and position; replay stays same | Debit omitted, benefit early or serving not consumed |
+| Actor20/Maud10, meals4, MV95/max100; meal | 18/12, meals3, MV100 | MV overflow or payment treated as saturating |
+| FullMV100; meal or drink | refusal, balances20/10, meals4, ale4 | Pay despite zero benefit |
+| Actor20/Maud10, ale4, MV50; drink1p/+4 | 19/11, ale3, MV54; exact replay identical | Separate ale store or second consumption |
+| Ale1, MV96; drink then another distinct drink | first ale null/0, MV100; second refuses; shell ID retained | Partial serving, refill-on-empty or shell deletion |
+| Controlled serving2, ale1, MV50 | refuse; ale1/MV50 and money unchanged | B7 strict-last policy silently weakened |
+| Controlled Maud999p, actor20p, meal2p | refuse overflow; money/stock/MV all prior | Credit saturation destroys conserved pennies |
+| All three from20/10, meals4, ale4, MV50 | actor14/Maud16, paid=true/meals3/ale3/MV66 | One benefit shares wrong provider/stock |
+| MV5, remainder0, standing rate18/3600; elapsed1800 then meal+12 | clock1800, MV26, remainder0; then accepted Rest and1800 at resting36/3600 yieldMV44 | Service discards settlement or grants menu rate |
 
-## Literal acceptance and red controls
+Table-drive insufficient pennies, zero meals, empty/mismatched/foreign/ground
+ale stock, departed/dead/forged provider, stale quote/ref, scene/combat block and
+budget exhaustion. Verify whole-proposal rollback, RNG, head and receipt rules;
+never silently substitute stock/service. A controlled second provider catches
+reading world.character/original-Maud constants instead of bound command identity.
+Bed paid/unpaid rendering and actual Rest admission prove entitlement is consumed
+without denying ordinary unpaid position controls. Already-resting Rest refuses;
+Stand→Rest accepts. S1 not accepted, active before five kills, objective met,
+resolved: service controls plus the correct existing Talk/turn-in remain reachable.
 
-- Controlled room price3p, player20p/Maud10p: rental gives17/13 and one entitlement; position/clock/MV/slept/dream facts unchanged apart from normal trusted elapsed. Exact replay and second distinct already-rented attempt charge0 more. Unpaid normal Rest before rental grants no S10 credit under the adopted qualifying rule.
-- Controlled meal price2p, servings1, Eat benefit4MV, currentMV5/max10: purchase gives18/12, one actual meal and MV5; Eat gives meal0/MV9; retry remains0/9. CurrentMV9 Eat caps10, not13. There is no HP increase. Ground/inaccessible/other-provider/substitute food cannot be consumed.
-- Controlled ale price1p, liquid2, Drink amount1/benefit2MV, currentMV5: purchase gives19/11, liquid2/MV5; Drink gives1/MV7; retry retains1/7. If B7's strict last-drink case is selected, it stays consistent. Opening/leaving menus leaves the same clock-based recovery rate as World.
-- At insufficient funds, full carrying load, missing stock or departed provider, payment/entitlement/item/liquid are all prior. Losing acknowledgment/cold reopen restores the original confirmed purchase/consumption, never inferred from a menu or unrelated latest receipt. Malformed opted entitlement/servings/liquid/receipt is typed save_corrupt.
-- S1 before acceptance, accepted-four-kills, five kills and resolved: Maud offer/turn-in/service actions all remain reachable and correct. Execute the existing lethal six-edge free corpse recovery after rental/consumption; service menus cannot close it or heal combat by rendering.
-- Plant early benefit at purchase/menu render, omitted money debit, duplicate entitlement, unconsumed food/liquid or S1 hidden by first-eligible dialogue. Observe focused red controls. Preserve real failed and both unknown-COMMIT outcomes.
+Real SQLite cold-reopen unpaid, paid-before-Rest, used meal, partial/empty ale,
+and actual same-body death/corpse/recovery then use their next real consumer.
+Current bounded values alone do not prove history: mutate paid false→true,
+meals3→4, ale3→4, swap a receipt service/provider/quote or remove one valid
+payment/stock/benefit op and require `save_corrupt` without rewriting the file.
+Keep B3/S2 payment provenance and B7 liquid provenance; later valid elapsed,
+travel, body death, payments and custody cannot invalidate historical receipts.
 
-## Files, checks, review and stop
+For room/meal/drink inject real failed COMMIT and both unknown-COMMIT outcomes
+by operation, not SQL text. Failed/unknown-not-committed reopen all old; committed
+lost acknowledgement reopens all new; exact replay repeats no charge/benefit.
+While unknown input/elapsed are fenced. Reuse existing unchanged fault/replay
+proofs when they detect the mutant; retain only missing service integration cases.
+Plant early adoption, omitted debit/stock and wrong bound service, observe focused
+failures. Schema required/bound sweep covers changed contracts. If any portable
+composition semantics actually change, stop to amend this no-new-op brief and
+supply both kernels' independently pinned fixtures/differential obligations.
 
-Chapter manifest/catalog/facts, exact Maud service source, meal/ale vessel/food definitions and Inn Rooms bed detail; preserve existing S1 dialogue ordering/source. Reuse B3 `mechanics/commerce` payment/stock and B7 `mechanics/liquid`; add only a small immediate service/Eat helper/rule if the capability boundary requires it. Existing position/resource/containment/view actions, compiler/loader service/consumable checks, state/item/command/action/capability/GameView contracts and generated artifacts actually consumed. Host `store.ts`/receipt recovery and Book Maud/item/bed/freshness. Out: dream overlay, physiology catalog, HP healer, time-skipping Rest, paid storage replacing earned S1 chest, Realm/native edits or old fixture rewrites.
+## Checks, review and stop triggers
 
-Read contract/storage/mobile/evidence lessons. Focused compiler/load/service/consume/S1 ordering/Book/recovery tests, changed-schema sweep, full `mise exec -- bin/check_all.sh`, exact-head CI including TS headless sim. Later authorized browser buy room/food/ale→actual consume/Rest→refresh proves shared flow only. Developer Ponytail Review and correctness pass; fresh primary plus protocol/save opinion, Astra if proposal/foundation changes. Independently derive the release pin.
+Read mechanics/contracts/storage/mobile/evidence lessons before applicable work.
+Run focused compiler/loader, service/admission/settlement/S1/bed, Book freshness
+and real SQLite checks, schema mutants, then `mise exec -- bin/check_all.sh`
+once for publication. TS headless sim stays active; native/Hermes proof remains
+deferred under the mobile pause. Independently derive integrated release/API and
+known answers after dependencies merge, never predict another lane's ID/version.
 
-Stop until PM explicitly adopts benefit/entitlement policy and prices; stop for a model needing unconsumed broad physiology, circular S10 payment/Rest credit, paid corpse access, broken S1 first-eligible ordering, incompatible B7 depletion or frozen-fixture conflict. The current recommendation is complete minimal MV consumption, not permission to silently change historical needs. No fabricated release/check claim.
+Apply Ponytail Review and actual-diff correctness self-review. Fresh independent
+primary plus separate protocol/save opinion are required; Astra applies if
+proposal/foundation changes become authorized. Retain actual red-control commands
+and failing assertions. Later authorized browser proof uses Maud room→meal→drink,
+Leave→upstairs→bed Rest→refresh, repeated rental refusal and S1 control reachability.
+Browser refresh does not certify native SQLite/background/Hermes; no owner-save
+or simulator operation is authorized by this plan.
+
+Stop for a missing B7 integration/review, incompatible quote/liquid/save producer,
+unsafe arithmetic, arbitrary effect framework, required edible item/Eat policy,
+paid-only movement/corpse route, S1 first-eligible interference, rental-as-Rest,
+HP/physiology/time-skip expansion or governing/frozen-fixture conflict. Return
+concrete evidence to PM; do not weaken payment, custody or save validation.

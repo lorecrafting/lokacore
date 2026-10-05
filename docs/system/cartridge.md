@@ -856,3 +856,40 @@ bank or answer and an unresolved answer choice. Continuation/load validation rej
 missing opted attempt fields.
 Short references expand in every new field. Existing bounded answer lengths apply;
 new schemas need their actual negative fixtures and planted guard controls.
+
+## B8 Maud's service declarations
+
+The [selected services](mechanics.md#b8-mauds-immediate-services-selected-contract)
+add no rooms. The original Maud remains all-hours in `drowned_lantern`, declares
+an explicit **10p** initial balance within the existing **0..1000** pennies
+bounds, and offers the following finite chapter values. Values are source-owned,
+never kernel/presenter defaults.
+
+| Service | Price | Immediate benefit | Finite source |
+|---|---:|---|---|
+| Room | 3p | actor `lantern_bed_paid=true`; paid bed detail/Rest at Inn Rooms | once per actor/save lineage |
+| Bread meal | 2p | up to +12 MV, capped at current authored maximum | Maud `lantern_meals`, 0..4, start4, gain0; debit1 |
+| Ale serving | 1p | up to +4 MV, capped at current authored maximum | exact Maud-held `lantern_ale_cask`; debit1 liquid unit |
+
+Declare `lantern_bed_paid` Boolean/player/default false. Add one actual `bed`
+detail at `inn_rooms` with free/paid description variants and a paid ordinary
+Rest action. S10 facts/quest/dream remain B9 work. The meal stock is an ordinary
+bounded ResourceSpec initialized only for Maud, not a second inventory count.
+Add one real provider-held ale vessel with capacity4, initial ale4, drink_amount1,
+shell mass500g; declare `ale` density250g/unit (the B7 quarter-litre unit).
+Empty shell persists as null/0; no Fill source for ale is authored. The cask is
+Maud's stock, not a shop offer or actor-issued mug. It stays Maud-held in this
+slice. No dead Maud stock resurrection/refill occurs.
+
+Declare the three finite offers as `services/<key>.json` definitions, referenced
+by Maud; the typed immediate benefit alternatives are entitlement, meal-stock
+recovery and provider-vessel recovery. No free-form operations list is authored.
+Compiler and loader check typed service keys/labels/narration, original provider
+binding, positive integer quote/benefit/stock debit, resource declarations and
+bounds, Boolean fact scope, exact directly provider-held opted ale vessel/kind,
+compatible complete serving and short-reference expansion. Reject duplicate
+service keys, absent balances, regenerating stock/currency, mismatched stock
+owner, non-MV recovery declarations and unbounded/unknown consequences. The
+minimal service subset covers only these consumed consequences, not an arbitrary
+Effect interpreter. Independently re-pin the integrated bundled release/API and
+known answers after B7 source merges; future hashes/IDs/versions are null now.

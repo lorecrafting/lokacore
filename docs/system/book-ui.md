@@ -514,3 +514,28 @@ must target its authored dialogue rather than Talk's first eligible key. Its rep
 is informational and promises no spell. Cold reopen restores the exact committed
 wrong/success speaker line once, using that invocation's receipt; never borrow an
 unrelated latest receipt or treat selected tiles as a grant.
+
+## B8 Maud and bed details
+
+**Selected, source pending.** Original Maud's detail follows the canonical
+[detail order](#detail-page-order), with authored description, nonempty committed
+history, then current S1 dialogue and separate Room/Meal/Drink service offers.
+Each offer states its projected exact price and declared benefit, including
+capped MV recovery and availability reasons. Sold-out,
+already-paid, full-MV and unaffordable offers cannot appear actionable. Existing
+Leave, scene/combat precedence, live freshness and pending-save fence remain.
+Services do not steal S1's first-eligible Talk/turn-in, open a synthetic dialogue
+or create success merely by rendering the menu.
+
+Accepted service narration stays in Maud's history and refreshes confirmed
+pennies/MV/availability once, also after lost reply, cold reopen and exact replay.
+Pending/refused/stale/fault outcomes claim no purchase or recovery. Bed rental
+narration points upstairs; the actual Inn Rooms bed detail shows confirmed free
+or paid text and offers the existing ordinary Rest only when entitled and
+currently admitted. This control emits the existing targetless Rest invocation;
+its bed identity belongs to the local detail route, not a new command target.
+Rest uses position's existing stable-route behavior and
+confirmed outcome. It never narrates a dream or sleep for rental. Ordinary
+position controls remain accessible without payment; Leave returns to World.
+No optimistic balances, local entitlement flags, recovery-rate bonus, time
+pause or new store/UI framework is introduced.
