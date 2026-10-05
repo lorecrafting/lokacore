@@ -265,3 +265,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [B2 Chandler's Debt specification](2026-10-05-b2-chandlers-spec-review.md): PR #203 at `8ef3e58b`, independent APPROVE WITH NOTES; scoped fix `7d3b7d46`, APPROVE, B2-N1 closed; A2 integration `5be784fa`, APPROVE.
 
 - [A3/B2 integration](2026-10-05-a3-b2-integration-review.md): independent APPROVE of merge `b67d290d`; both append-only spec resolutions, decision/review indexes, roadmap and docs links checked; no findings.
+- [B2 Chandler's Debt primary implementation](2026-10-05-b2-chandlers-primary-review.md): local draft PR at integrated `8da75b87`, CHANGES REQUIRED; B2-P1 saved-axis corruption and B2-P2 undisclosed offer cutoff open.
