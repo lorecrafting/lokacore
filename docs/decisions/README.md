@@ -31,6 +31,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Pause mobile development and verification](owner-decision-web-first-mobile-pause-2026-10-05.md): keep the Node engine simulator while mobile checks, builds and sessions wait for resumption.
+
 - [FEN-02 — Mire Crossing and Fox Hollow](pm-decision-fen02-mire-hollow-2026-10-05.md): all-hours crossing and safe return, descriptive details only.
 
 - [Q1-A — Elspeth’s first lead](pm-decision-q1-a-first-lead-2026-10-05.md): explicit acceptance and a current-possession village clue.

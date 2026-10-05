@@ -207,6 +207,9 @@ never changes a decision, a commit or a retry (`mobile/authority/local-story/tra
 ## Checks and CI
 
 Every check, its planted violation and the CI workflows: [CHECKS.md](../CHECKS.md).
+During the [mobile verification pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md),
+automated gates cover the Elixir and TypeScript kernels, including the Node game simulator,
+and documentation. Native builds, Hermes mobile bundles and mobile source checks are deferred.
 `bin/check_all.sh` is the local line and what pre-push runs (`.githooks/pre-push`, TypeScript
 checks only when a pushed ref touches TypeScript inputs).
 

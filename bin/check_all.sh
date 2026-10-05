@@ -19,19 +19,18 @@ m mix test
 m mix credo --strict
 m elixir bin/check_size.exs
 m elixir bin/red_controls.exs
-m ast-grep test --skip-snapshot-tests
-m ast-grep scan --error
-m bin/lint_red_controls.sh
+m ast-grep test --skip-snapshot-tests --filter '^(elixir-kernel-pure|ts-.*)$'
+m ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
+m bin/lint_red_controls.sh --core-only
 m bin/docs_only_red_controls.sh
 m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
 [ "${1-}" = --no-ts ] && exit 0
-for d in . kernel/ts mobile/app; do
+for d in . kernel/ts; do
   [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }
 done
 (cd kernel/ts && m npm run typecheck && m npm test)
 m bin/kernel_red_controls.sh
-m node bin/check_ts_size.mjs
-m bin/ts_size_red_controls.sh
-git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' | xargs -0 mise exec -- node_modules/.bin/prettier --check
-cd mobile/app && m npx tsc --noEmit && m npm test
+git ls-files -z '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 mise exec -- node bin/check_ts_size.mjs
+m bin/ts_size_red_controls.sh --core-only
+git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 mise exec -- node_modules/.bin/prettier --check

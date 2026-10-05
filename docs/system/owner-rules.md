@@ -210,6 +210,7 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - PM reconciliation under mechanics delegation: [current Legend/M mechanics and chapter selections](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md); original owner records and provisional alternatives remain dated history.
 
 - Current mechanics validation follows [simulator-first routing](../decisions/owner-decision-simulator-first-validation-2026-10-04.md); historical device carries stay recorded, future physical proof is deferred rather than completed.
+- Current [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md): no Android/iOS development, builds or verification until the owner resumes it; retain the Node TypeScript game simulator as an engine correctness check. This supersedes current device/Simulator routing above.
 - App lifecycle, resume reservations and confirmed touch updates follow the [M1-B2 PM adoption](../decisions/pm-decision-m1-b2-lifecycle-2026-10-04.md).
 
 - Exact fractional recovery, the final player rate/position guard and opted Save validation follow the [M2-A PM adoption](../decisions/pm-decision-m2-a-position-recovery-2026-10-04.md).
