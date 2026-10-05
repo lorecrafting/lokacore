@@ -40,7 +40,7 @@ valid combinations become playable before the whole world's optional surfaces.
 | **B3 Peg's shop:** buy and sell useful goods with conserved money, stock and carrying load ([adopted contract](decisions/pm-decision-b3-pegs-shop-2026-10-05.md)). | B2 | 0.8–1.0 |
 | **B4 Light:** use and refuel a light source in an optional dark well passage, with a safe possession-recovery route. | B1, B3 | 0.8–1.0 |
 | **B5 S9 Infirmary Herbs:** harvest real fenwort and exchange three for bandages and bounded faction gain ([adopted contract](decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)). | B1, B2 | 0.8–1.0 |
-| **B6 S4 Wisp:** start an all-hours marsh riddle, retry promptly and learn its ward. | B4, B5, Q2 riddle | 0.6–0.8 |
+| **B6 S4 Wisp:** start an all-hours marsh riddle, retry promptly and learn its ward ([adopted contract](decisions/pm-decision-b6-wisp-2026-10-05.md)). | B4, B5, Q2 riddle | 0.6–0.8 |
 | **B7 Well and waterskin:** fill, pour and drink conserved liquid. | B3 | 0.6–0.8 |
 | **B8 Maud's services:** buy a room, food or drink and receive an immediate, declared benefit. | B3, B7, Rest | 0.7–0.9 |
 | **B9 S10 Room at the Lantern:** an actual Rest opens a resumable dream and an acknowledged memory. | A3, B8 | 0.8–1.0 |

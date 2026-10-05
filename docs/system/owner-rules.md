@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- B6 offers an all-hours doused-light Seek, three-wrong sitting with immediate retry, and a once-known ward with a public Aldric consumer ([PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md)).
+
 - C2 offers an all-hours finite original-Tobin patrol; player death resets only the attempt, immediate Rejoin/Restart preserves reachable recovery, and completion grants trust alone ([PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)).
 
 - B4 uses the real refillable B3 torch and oil in an optional dark well, with gear-free egress and owned-corpse recovery ([PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md)).

@@ -490,3 +490,27 @@ and reopen. No new watch page, immunity while reading, countdown, nighttime wait
 optimistic follow or timer-driven movement is added. Browser proof must walk the
 real start→leader departure→player join→pause/rejoin→death/restart→success route;
 native verification remains paused under the owner decision.
+
+## B6 Seek, retry and ward details
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) uses the shared
+Book at every hour. Marsh Light shows truthful darkness, known return exits and
+its authored glow marker with Seek Wisp; reveal the actual wisp detail only after
+confirmed discovery. A lit carried source explains unavailable Seek/Talk/answer
+through the same confirmed admission result. Ordinary dark objects stay hidden.
+
+Wisp detail follows description → committed history → offered controls. Explicit
+Accept leads to the existing letter-bank controls with committed attempts/limit;
+wrong lines stay with the original speaker. At the third wrong line, discard the
+old tile buffer and show Ask Wisp again immediately, with an active quest journal.
+Fresh Talk resets the sitting, never the quest or learned facts. Close remains
+available through stale light, departure, death, scenes and save recovery under
+existing precedence; stale invocations retain their sent answer for exact retry.
+
+After confirmed success the journal names the ward discovery and the declared ward
+label appears once. At public Aldric, Ask about ward is absent before knowledge,
+then independently selectable beside eligible debt/bell conversations; opening it
+must target its authored dialogue rather than Talk's first eligible key. Its reply
+is informational and promises no spell. Cold reopen restores the exact committed
+wrong/success speaker line once, using that invocation's receipt; never borrow an
+unrelated latest receipt or treat selected tiles as a grant.
