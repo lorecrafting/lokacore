@@ -93,4 +93,3 @@ query budget, Book freshness, changed-row transaction and recovery requirements 
   **108 tests passed** afterward. No mutation, fixture change or owner-save access retained.
 - Ponytail Review: deleting the superseded detector is the smallest compliant change;
   no unnecessary replacement machinery and no new findings.
-
