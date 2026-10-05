@@ -70,3 +70,15 @@ LIMITS
 - File-backed/process-restart tests and full CI were not rerun; six green source-head jobs were supplied by the requester.
 - No files modified, native/preview/device tooling run, or owner saves accessed.
 ```
+
+
+## Scoped primary re-review — fix round 1
+
+Fix source: `ac43394a1bd15d6bd4a69343b9f361b99a756c82`. **APPROVE; R1 closed.** No open primary findings. This pass reviewed only the fix and its direct receipt/narration/session callers; the original source verdict and independent Sol finding above remain historical.
+
+- `mobile/authority/local-story/dialogue-receipt.ts:29` now validates the stored `DefinitionRef` before `refString` dereferences it. Invalid saved identity uses the existing malformed-JSON corruption route. `save.ts:161` and `session.ts:60` preserve the receipt dispatch and narrow corruption classification; genuine database errors are not caught or relabeled by this guard.
+- Independent disposable file-backed SQLite probe followed actual report → Study → meeting → correct answer, closed the connection, and verified the intact saved receipt still reopens resolved with narration `narration.b_vesper_riddle` routed to the literal Vesper identity. Separately wrote null and omitted `source` into the retained resolved ChoiceRow, closed/reopened each database, and observed `save_corrupt`, Start over available, and explicit Start over opening a fresh game with empty journal and no pending choice. Exit0; test databases removed.
+- Independent adjacent-error control acquired a real SQLite `BEGIN EXCLUSIVE` lock from a second connection at the narration SELECT. The resulting `SQLITE_BUSY` remained a storage failure, with no corruption kind and `startOver=false`; no file replacement or reset was offered. Exit0.
+- Removed the new source guard in the disposable worktree and ran the named `malformed retained riddle source` control. Both null/missing subtests failed, exit1: actual error kind `undefined`, expected literal `save_corrupt`. Restored the guard before validation and committed no mutant.
+- `mise exec -- node --test mobile/authority/local-story/{wren_riddle,session,start_over}.test.ts mobile/app/book/presenter.test.ts`: **40 passed**, exit0 after restoration. Includes existing valid replay/identity, narration routing, malformed receipt, elapsed freshness and failed/lost COMMIT behavior.
+- All **24** retained evidence checksums verified, including the fix's red and restored-green logs. Ponytail Review: one existing boundary-validator call is sufficient; no new catch, abstraction or persistence machinery. Record commit/push uses normal hooks. No native, preview, device or owner-save work occurred.
