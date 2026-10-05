@@ -18,7 +18,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v007_hash.json');
+const bundle = read('protocol/fixtures/missing_child_v008_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -32,16 +32,16 @@ const fresh = newWorld(
   [1, 2, 3, 4],
 );
 // Independent Python IdSource literals for this release, not allocated by the test.
-const keyId = 'e918a5af-fc77-8a97-86ea-4a5ac3047213';
-const chestId = '8a20c3d3-0f0f-84ec-b058-d27c85d5ba17' as EntityId;
-const brassId = 'aae69ad9-ea5d-8dc0-b84a-5b427bedb688';
-const maudId = '71697171-efcc-8028-9a88-60b32e4a73ad';
+const keyId = 'b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462';
+const chestId = '329aae20-7fc7-8e3d-9119-ad44c022c439' as EntityId;
+const brassId = '2a2d32e5-e113-8dca-a989-b9f1a35c4c78';
+const maudId = '8a20c3d3-0f0f-84ec-b058-d27c85d5ba17';
 const entity = (kind: string, name: string) =>
-  fresh.entityIds[`ashmere_missing_child@0.0.7:${kind}/${name}`];
+  fresh.entityIds[`ashmere_missing_child@0.0.8:${kind}/${name}`];
 const ref = (name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.7',
+    cartridge_version: '0.0.8',
     kind: 'fact',
     key: name,
   }) as DefinitionRef;
@@ -113,7 +113,7 @@ function setup(path = ':memory:') {
 // or the chest uses the attic key / loses deposited custody on a real cold reopen.
 test('active chapter five actual kills, shrine return, Maud reward and cold-reopen storage', (t) => {
   // Breaks: adding details shifts entity allocation but release bindings retain stale IDs.
-  const expectedIds = read('protocol/fixtures/missing_child_v007_ids.json');
+  const expectedIds = read('protocol/fixtures/missing_child_v008_ids.json');
   assert.deepEqual(
     {
       character: fresh.character,
@@ -183,11 +183,15 @@ test('active chapter five actual kills, shrine return, Maud reward and cold-reop
   p.invoke('open', [chestId]);
   p.invoke('take', [brassId]);
   assert.equal(p.story.world().state.containers[brassId], fresh.body);
+  p.move('down', 'west', 'south', 'south', 'south', 'south', 'south');
+  assert.equal(p.view().place.title.key, 'room.fox_hollow.title');
+  p.move('north', 'north', 'north', 'north');
+  assert.equal(p.view().place.title.key, 'room.ferry_landing.title');
   p.sql.close();
 });
 
-const elspethId = '169f9a28-2c18-8ffe-8c39-fdb5ddd42d67';
-const drawingId = 'a443f590-c8d3-86d8-9972-75e09b637bed';
+const elspethId = 'a443f590-c8d3-86d8-9972-75e09b637bed';
+const drawingId = '1f15fe56-3e56-8cfa-812b-1f231844c782';
 const lead = (p: ReturnType<typeof setup>) =>
   p.view().journal.find((q) => q.quest.key === 'first_lead');
 const acceptLead = (p: ReturnType<typeof setup>) => {
@@ -325,6 +329,65 @@ test('Q1 acceptance, Green pickup, report and Maud offer work throughout the day
       p.offer();
     } finally {
       p.sql.close();
+    }
+  }
+});
+
+// Breaks: an hour/Q1 gate, wrong approach or missing reciprocal strands the player;
+// a saved hollow reopens without its north return. Expected destinations are literal geography.
+test('Mire Crossing and Fox Hollow offer both approaches and cold return at every hour', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-fen02-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  for (const phase of ['unaccepted', 'resolved']) {
+    for (let hour = 0; hour < 24; hour++) {
+      const path = join(dir, `${phase}-${hour}.db`);
+      let p = setup(path);
+      const walk = (direction: string, destination: string) => {
+        assert.ok(p.view().exits.some((e) => e.direction === direction && e.available));
+        p.move(direction);
+        assert.equal(p.view().place.title.key, `room.${destination}.title`);
+      };
+      try {
+        if (phase === 'resolved') {
+          acceptLead(p);
+          p.move('north', 'north');
+          p.invoke('take', [drawingId]);
+          p.move('south', 'south');
+          p.invoke('elspeth', [elspethId]);
+          p.answer('report');
+        }
+        const from = p.story.world().state.clock;
+        assert.equal(
+          p.story.elapsed({ expected_run_id: p.story.runId(), from, until: from + hour * 3600 })
+            .kind,
+          'saved',
+        );
+        walk('south', 'reed_path');
+        walk('south', 'reed_bank');
+        walk('south', 'mire_crossing');
+        walk('south', 'fox_hollow');
+        assert.deepEqual(
+          p.view().exits.map((e) => [e.direction, e.available]),
+          [['north', true]],
+        );
+        p.sql.close();
+        p = setup(path);
+        assert.equal(p.view().place.title.key, 'room.fox_hollow.title');
+        walk('north', 'mire_crossing');
+        walk('west', 'drowned_oak');
+        walk('north', 'willow_shade');
+        walk('east', 'reed_bank');
+        walk('west', 'willow_shade');
+        walk('south', 'drowned_oak');
+        walk('east', 'mire_crossing');
+        walk('north', 'reed_bank');
+        assert.deepEqual(
+          p.view().journal.map((q) => [q.quest.key, q.state]),
+          phase === 'resolved' ? [['first_lead', 'resolved']] : [],
+        );
+      } finally {
+        p.sql.close();
+      }
     }
   }
 });

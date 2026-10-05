@@ -1,0 +1,20 @@
+{
+  "title": "room.mire_crossing.title",
+  "description": "room.mire_crossing.description",
+  "exits": {
+    "north": { "to": "reed_bank" },
+    "west": { "to": "drowned_oak" },
+    "south": { "to": "fox_hollow" }
+  },
+  "details": {
+    "plank": {
+      "aliases": ["plank"],
+      "description": "detail.plank.description",
+      "readable": {
+        "label": "actions.read_plank",
+        "text": "readable.plank",
+        "title": "detail.plank.title"
+      }
+    }
+  }
+}

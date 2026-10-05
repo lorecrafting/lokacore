@@ -52,4 +52,4 @@ Current receptacle fixtures are named `containers_*hash.json`; their independent
 derived additions are in `test/loka/cartridge_containers_hash.py`. Original artifacts and
 `historical_transcripts/` retain preproduction bytes; the current loader refuses
 unmarked receptacles. Current feature transcripts remain replayable. The bundled
-chapter uses `missing_child_v007_hash.json` and `missing_child_v007_ids.json`.
+chapter uses `missing_child_v008_hash.json` and `missing_child_v008_ids.json`.

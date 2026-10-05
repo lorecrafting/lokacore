@@ -50,13 +50,13 @@ registerHooks({
 const { default: Book } = await import('./Book.tsx');
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v007_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v008_hash.json', import.meta.url),
     'utf8',
   ),
 );
-const landing = '58ee172d-aa6f-8023-a3c1-a1d46af6d167';
-const whistle = '58cfbca8-0448-8e2e-af98-49d0a71d1a04';
-const cellar = 'b0711280-2a6c-8b4e-844c-3e902e0c2184';
+const landing = '05f6aca0-79cd-83fe-8096-bae95b0730e8';
+const whistle = '58ee172d-aa6f-8023-a3c1-a1d46af6d167';
+const cellar = 'f14e477f-cecc-897a-bee7-c573aa5c76c3';
 const whistleBody = 'Lost a tin whistle? Ask at the Drowned Lantern.';
 const cellarBody = 'Maud needs help clearing rats from the cellar. Speak to her at the bar.';
 const landingBody = 'Keep the landing clear. Tie boats to the mooring post.';
@@ -243,6 +243,7 @@ test('the south search reaches the oak and returns through visible fox clues', (
       a.tap('Leave');
     }
     if (title === 'room.reed_bank.title' && direction === 'south') {
+      const before = storyRows(a);
       a.tap('Tracks');
       assert.equal(a.text()[0], 'Tracks');
       assert.ok(
@@ -253,6 +254,7 @@ test('the south search reaches the oak and returns through visible fox clues', (
           ),
       );
       a.tap('Leave');
+      assert.deepEqual(storyRows(a), before);
     }
   }
   assert.deepEqual(a.game.view().view.journal, []);
@@ -364,8 +366,8 @@ test('notice entries use available exact-target aliases and expose unavailable r
           : { op: 'not', item: { op: 'time_window', from: 18, to: 19 } },
       },
     });
-    c.actions['ashmere_missing_child@0.0.7:action/read'] = action('read', false);
-    if (alias) c.actions['ashmere_missing_child@0.0.7:action/consult'] = action('consult', true);
+    c.actions['ashmere_missing_child@0.0.8:action/read'] = action('read', false);
+    if (alias) c.actions['ashmere_missing_child@0.0.8:action/consult'] = action('consult', true);
     const canonical = JSON.stringify(sorted(c));
     return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
   };
@@ -394,7 +396,7 @@ const storyRows = (a: ReturnType<typeof preview>) =>
 test('Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
-  const elspeth = '169f9a28-2c18-8ffe-8c39-fdb5ddd42d67';
+  const elspeth = 'a443f590-c8d3-86d8-9972-75e09b637bed';
   for (let hour = 0; hour < 24; hour++) {
     assert.ok(
       a.game
@@ -473,4 +475,25 @@ test('Q1 drawing opens full item detail with Take and local Leave', (t) => {
   assert.deepEqual(a.stack(), []);
   assert.ok(a.text().includes('You pick up a fox drawing.'));
   assert.deepEqual(a.game.view().view.journal, []);
+});
+
+// Breaks: details lose their visible Book link, noun title or authored body, or inspection
+// silently grants quest/fact/custody state. Route traversal alone cannot detect these omissions.
+test('plank and hollow open descriptive noun detail pages without story credit', (t) => {
+  const a = preview();
+  t.after(() => a.sql.close());
+  for (const direction of ['south', 'south', 'south']) a.walk(direction);
+  for (const [title, body] of [
+    ['Plank', 'The plank is worn but steady, with a dry line across the mire.'],
+    ['Hollow', 'Flattened grass and old fox bones mark a place where something has rested.'],
+  ]) {
+    const before = storyRows(a);
+    a.tap(title);
+    assert.equal(a.text()[0], title);
+    assert.ok(a.text().includes(body));
+    a.tap('Leave');
+    assert.deepEqual(storyRows(a), before);
+    assert.deepEqual(a.game.view().view.journal, []);
+    if (title !== 'Hollow') a.walk('south');
+  }
 });

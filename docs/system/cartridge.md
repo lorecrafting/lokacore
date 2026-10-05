@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.7`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.8`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
@@ -34,6 +34,13 @@ its reciprocal; a visible fox-prints detail at Reed Path and tracks at Reed Bank
 inspected without accepting a quest or waiting for the clock. This is geography and an
 optional clue, not Q2 discovery credit, a swim/tide gate, an item, a population, or a
 promise of onward exits ([FEN-01 decision](../decisions/pm-decision-fen01-south-search-2026-10-05.md)).
+FEN-02 extends that route: Reed Bank south ↔ Mire Crossing north, Drowned Oak east ↔
+Mire Crossing west, and Mire Crossing south ↔ Fox Hollow north. The plank and firm path
+use the ordinary move at every hour, before and after Q1, after shrine return and cold
+reopen; no tide, daylight, swimming or equipment gate applies. Visible plank and hollow
+details open the installed Book detail pages with noun titles and descriptive inspection
+only. No Q2 state or credit, Wren/Vesper, items, populations or exits to unbuilt rooms enter
+this release ([FEN-02 decision](../decisions/pm-decision-fen02-mire-hollow-2026-10-05.md)).
 The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 keeps Old Bram outside the active cast.
 
@@ -63,7 +70,7 @@ Q2 activation waits for its playable consumer; Q1 adds no pending Q2 state.
 The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source; installed mechanics and validation are unchanged. Its
-independent answer is `protocol/fixtures/missing_child_v007_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v008_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
