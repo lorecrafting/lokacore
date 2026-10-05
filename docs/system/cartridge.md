@@ -822,7 +822,7 @@ east ↔ Tide Flats west are public reciprocal dry walking routes. Tide Flats is
 its public edge, with no swimming, low-tide charm, fare or water hazard in B6.
 The future Hound Run connection waits for C3; no dangling exit is emitted.
 Return to Aldric through Mire Crossing → Reed Bank → Reed Path → Ferry Landing
-→ Well Lane → Village Green → Chapel Steps → Chapel Nave.
+→ Well Lane → Village Green → North Gate → Chapel Steps → Chapel Nave.
 His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
 
 Marsh Light opts into B4 darkness and authors ordinary/dark descriptions. Its
