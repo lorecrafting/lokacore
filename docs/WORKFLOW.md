@@ -112,20 +112,15 @@ Report at the end of the slice, not at every step.
 
 ## Local edit loop
 
-The owner's test view is a dedicated iOS **Debug Simulator** served by Metro. Metro serves one
-source worktree at a time: at a playable checkpoint, the PM switches it to the active feature
-worktree; subsequent TypeScript/UI edits appear through Fast Refresh. Run focused tests as
-needed; individual edits do not need full checks, CI or a fresh review. Batch related small WIP
-edits into one coherent PR; unrelated kernel or save contract changes need their own PR review.
-The full local check, independent review and exact-head CI gate the PR before merge (steps 3–7).
+The owner has [paused mobile development and verification](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md),
+including Debug and Release Simulator sessions. Browser preview work may provide a local test
+view in a separate slice. Use focused kernel tests and the headless Node simulator during
+development; batch related WIP edits into one coherent PR. The active local checks,
+independent review and exact-head CI gate the PR before merge (steps 3–7).
 
-Keep the Debug Simulator and its save separate from the **Release Simulator** and its save.
-Release runs only for separate automated milestone proof when needed; keep it closed otherwise
-and leave the owner's Debug view in place. A content pin or save identity change requires an
-explicit **Start over**; never silently reset or re-pin a save. Ordinary UI edits keep the current
-save. Native dependency or configuration changes require a native rebuild. No paid service or
-EAS is needed
-([owner decision](decisions/owner-decision-local-edit-loop-2026-10-04.md)).
+The prior [Debug/Release Simulator procedure](decisions/owner-decision-local-edit-loop-2026-10-04.md)
+remains historical guidance for when the owner resumes native work. Do not silently reset or
+re-pin a save when that happens.
 
 ## Token hygiene
 

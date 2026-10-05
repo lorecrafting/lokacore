@@ -13,6 +13,13 @@ The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-202
 sets the active development source and save. The [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 retires Old Bram from active Q1 planning; the [queue](NEXT-MECHANICS.md) routes Q1
 design from Ashmere’s actual cast and retains the no-wait route rule.
+The [Missing Child completion plan](MISSING-CHILD-PLAN.md), merged in
+[#192](https://github.com/lorecrafting/lokacore/pull/192) after independent review,
+maps 33 proposed PRs through the remaining player outcomes, dependencies, relative
+lift and proof. Its rows are plans, not completed slices. The
+[33 provisional slice briefs](briefs/chapter-one/README.md), merged in
+[#193](https://github.com/lorecrafting/lokacore/pull/193) after a dependency finding
+was fixed and independently rechecked, provide candidate assignment detail.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
@@ -67,6 +74,13 @@ approval and green docs-head checks; Q1 giver remains to be designed.
 LOCAL-FAST-LOOP — owner testing on Debug/Metro with playable-checkpoint source switches
 and coherent PR batching — merged in [#181](https://github.com/lorecrafting/lokacore/pull/181)
 after independent approval and green docs-head checks.
+
+WEB-FIRST-PAUSE — mobile-specific CI checks, native builds and device Simulator
+verification paused while headless engine simulation stays active — merged in
+[#191](https://github.com/lorecrafting/lokacore/pull/191) after two workflow-review
+findings were fixed and independently rechecked. Five source-head CI checks and
+final review-head checks passed. The [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md)
+sets the temporary routing; browser preview implementation remains separate.
 
 M12-B — nested notice-board and notice detail pages — merged in
 [#182](https://github.com/lorecrafting/lokacore/pull/182) after the cold-reopen,

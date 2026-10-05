@@ -1,10 +1,8 @@
 name: mobile-bundle
 
-# Compiles the Hermes bundle for both platforms, without Gradle or Xcode, on pull requests
-# that touch the kernel or mobile code; native builds are in mobile.yml.
+# Hermes mobile bundle compilation is paused with native verification.
 on:
-  pull_request:
-    paths: ['mobile/**', 'kernel/**', '.github/workflows/mobile-bundle.yml']
+  workflow_dispatch:
 
 concurrency:
   group: mobile-bundle-${{ github.ref }}
