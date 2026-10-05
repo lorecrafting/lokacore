@@ -138,7 +138,7 @@
       "version": 1,
       "value_type": { "type": "enum", "values": ["unknown", "prior", "fox"], "default": "unknown" },
       "scopes": ["player"],
-      "meaning": "The player's committed chapel allegiance; first set by Ring."
+      "meaning": "The player's committed chapel allegiance; first set by Ring or Silence."
     },
     "village.child_status": {
       "version": 1,

@@ -171,7 +171,7 @@ test('solar and lunar cuts include their start and wrap at their cycle', () => {
 
 // Breaks: the bundled chapter day/time or phase pin drifts from its authored release.
 test('chapter time renders the hand-checked evening and following days', () => {
-  const c = read('protocol/fixtures/missing_child_v014_hash.json').value as Cartridge;
+  const c = read('protocol/fixtures/missing_child_v015_hash.json').value as Cartridge;
   for (const [time, day, hour, subdivision, solar, lunar] of [
     [64800, 1, 18, 0, 'dusk', 'new'],
     [86399, 1, 23, 59, 'night', 'new'],

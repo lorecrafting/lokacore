@@ -1,4 +1,4 @@
-// The authored bell outcome must agree with its typed quest rows and original Ring receipt.
+// The authored bell outcome must agree with its typed quest rows and original choice receipt.
 import type {
   Command,
   DecisionResult,
@@ -30,32 +30,54 @@ export function bellSave(world: World, db: Db, scope: string, rows: [string, Cho
   const q3 = questOf(world, world.character, ref(world, 'quest', 'bell_of_ashmere'));
   const q2 = questOf(world, world.character, ref(world, 'quest', 'missing_child'));
   const rung = fact('chapel_bell_rung');
-  const prior = fact('chapel_allegiance');
-  const scene = fact('scene_bell_rung');
-  const sceneType =
-    world.cartridge.facts[refString(ref(world, 'fact', 'scene_bell_rung'))]?.value_type;
-  if (
-    sceneType?.type !== 'int' ||
-    typeof scene !== 'number' ||
-    !Number.isSafeInteger(scene) ||
-    typeof sceneType.minimum !== 'number' ||
-    typeof sceneType.maximum !== 'number' ||
-    scene < sceneType.minimum ||
-    scene > sceneType.maximum ||
-    (q3 && !q2)
-  )
-    invalid();
+  const allegiance = fact('chapel_allegiance');
+  const scene = (name: string) => {
+    const line = fact(name);
+    const type = world.cartridge.facts[refString(ref(world, 'fact', name))]?.value_type;
+    if (
+      type?.type !== 'int' ||
+      typeof line !== 'number' ||
+      !Number.isSafeInteger(line) ||
+      typeof type.minimum !== 'number' ||
+      typeof type.maximum !== 'number' ||
+      line < type.minimum ||
+      line > type.maximum
+    )
+      invalid();
+    return line as number;
+  };
+  const rungScene = scene('scene_bell_rung');
+  const silentScene = scene('scene_bell_silenced');
+  if (q3 && !q2) invalid();
   const lost = q2?.[1].state === 'failed' && q2[1].outcome === 'lost';
   if (rung) {
     if (
-      prior !== 'prior' ||
+      allegiance !== 'prior' ||
       q3?.[1].state !== 'resolved' ||
       q3[1].outcome !== 'prior' ||
-      scene === 0 ||
+      rungScene === 0 ||
+      silentScene !== 0 ||
       !q2
     )
       invalid();
-  } else if (prior !== 'unknown' || scene !== 0 || (q3 && q3[1].state !== 'active')) invalid();
+  } else if (allegiance === 'fox') {
+    if (
+      q3?.[1].state !== 'resolved' ||
+      q3[1].outcome !== 'fox' ||
+      q2?.[1].state !== 'resolved' ||
+      !['rescued', 'stays'].includes(q2[1].outcome ?? '') ||
+      fact('village_child_status') !== q2[1].outcome ||
+      rungScene !== 0 ||
+      silentScene === 0
+    )
+      invalid();
+  } else if (
+    allegiance !== 'unknown' ||
+    rungScene !== 0 ||
+    silentScene !== 0 ||
+    (q3 && q3[1].state !== 'active')
+  )
+    invalid();
   if (q3 && !['active', 'resolved'].includes(q3[1].state)) invalid();
   if (lost) {
     if (
@@ -81,11 +103,21 @@ export function bellSave(world: World, db: Db, scope: string, rows: [string, Cho
     (rung && q2?.[1].state === 'active' && fact('fen_wren_met') === false)
   )
     invalid();
-  if (rung && !ringReceipt(world, db, scope, q3![0], q2![0], lost)) invalid();
+  if (rung && !choiceReceipt(world, db, scope, q3![0], q2![0], lost, 'prior')) invalid();
+  if (allegiance === 'fox' && !choiceReceipt(world, db, scope, q3![0], q2![0], false, 'fox'))
+    invalid();
   return !!lost;
 }
 
-function ringReceipt(world: World, db: Db, scope: string, q3: string, q2: string, lost: boolean) {
+function choiceReceipt(
+  world: World,
+  db: Db,
+  scope: string,
+  q3: string,
+  q2: string,
+  lost: boolean,
+  choice: 'prior' | 'fox',
+) {
   const rows = db.getAllSync<{
     command_id: string;
     actor_id: string;
@@ -104,7 +136,7 @@ function ringReceipt(world: World, db: Db, scope: string, q3: string, q2: string
       c.id !== command_id ||
       actor_id !== world.character ||
       c.payload.type !== 'perform' ||
-      c.payload.action !== 'ring_bell' ||
+      c.payload.action !== (choice === 'prior' ? 'ring_bell' : 'silence_bell') ||
       c.payload.actor_id !== world.character ||
       c.world_context_id !== world.context ||
       world.details[c.payload.target_id!]?.key !== 'bell' ||
@@ -119,6 +151,8 @@ function ringReceipt(world: World, db: Db, scope: string, q3: string, q2: string
     const childChanged = ops.some(
       (o) => o.op === 'fact.assign' && same(o.fact, ref(world, 'fact', 'village_child_status')),
     );
+    const assignedCount = (name: string) =>
+      ops.filter((o) => o.op === 'fact.assign' && same(o.fact, ref(world, 'fact', name))).length;
     const assigned = (name: string, old: unknown, next: unknown, at: object) =>
       ops.some(
         (o) =>
@@ -143,44 +177,69 @@ function ringReceipt(world: World, db: Db, scope: string, q3: string, q2: string
           e.payload.type === 'fact_changed' &&
           same(e.payload.fact, ref(world, 'fact', name)) &&
           same(e.scope, at) &&
+          (e.actor_id === undefined
+            ? name !== 'chapel_bell_rung' && name !== 'chapel_allegiance'
+            : e.actor_id === world.character) &&
           e.world_context_id === world.context &&
           e.causation_id === cause &&
           e.correlation_id === (c.id as string) &&
           same(e.payload.old, old) &&
           same(e.payload.new, next),
       );
-    const bell = changed('chapel_bell_rung', false, true, player, c.id);
-    const allegiance = changed('chapel_allegiance', 'unknown', 'prior', player, c.id);
+    const bell =
+      choice === 'prior' ? changed('chapel_bell_rung', false, true, player, c.id) : undefined;
+    const allegiance = changed('chapel_allegiance', 'unknown', choice, player, c.id);
     const resolved = d.events.find(
       (e) =>
         e.payload.type === 'quest_resolved' &&
         e.payload.instance_id === q3 &&
         same(e.payload.quest, ref(world, 'quest', 'bell_of_ashmere')) &&
-        e.payload.outcome === 'prior' &&
+        e.payload.outcome === choice &&
         e.actor_id === world.character &&
         same(e.scope, player) &&
         e.world_context_id === world.context &&
-        e.causation_id === (bell?.id as string | undefined) &&
+        e.causation_id === ((choice === 'prior' ? bell?.id : allegiance?.id) as string) &&
         e.correlation_id === (c.id as string),
     );
     return (
-      !!bell &&
-      bell.actor_id === world.character &&
+      (choice === 'fox' || (!!bell && bell.actor_id === world.character)) &&
       !!allegiance &&
       allegiance.actor_id === world.character &&
       !!resolved &&
-      assigned('chapel_bell_rung', false, true, player) &&
-      assigned('chapel_allegiance', 'unknown', 'prior', player) &&
-      assigned('scene_bell_rung', 0, 1, player) &&
-      terminal(q3, 'objectives_complete', 'resolved', 'prior') &&
+      (choice === 'fox' || assigned('chapel_bell_rung', false, true, player)) &&
+      assigned('chapel_allegiance', 'unknown', choice, player) &&
+      assigned(choice === 'prior' ? 'scene_bell_rung' : 'scene_bell_silenced', 0, 1, player) &&
+      terminal(q3, 'objectives_complete', 'resolved', choice) &&
       q2Changed === lost &&
       childChanged === lost &&
+      (choice === 'prior' ||
+        (assignedCount('chapel_bell_rung') === 0 &&
+          assignedCount('scene_bell_rung') === 0 &&
+          assignedCount('chapel_allegiance') === 1 &&
+          assignedCount('scene_bell_silenced') === 1 &&
+          !d.events.some(
+            (e) =>
+              e.payload.type === 'fact_changed' &&
+              (same(e.payload.fact, ref(world, 'fact', 'chapel_bell_rung')) ||
+                same(e.payload.fact, ref(world, 'fact', 'scene_bell_rung'))),
+          ) &&
+          d.events.filter(
+            (e) =>
+              e.payload.type === 'fact_changed' &&
+              same(e.payload.fact, ref(world, 'fact', 'scene_bell_silenced')),
+          ).length === 1)) &&
       (lost
         ? terminal(q2, 'active', 'failed', 'lost') &&
           assigned('village_child_status', 'missing', 'lost', instance) &&
-          !!changed('village_child_status', 'missing', 'lost', instance, bell.id)
+          !!changed('village_child_status', 'missing', 'lost', instance, bell!.id)
         : true) &&
-      !!changed('scene_bell_rung', 0, 1, player, resolved.id) &&
+      !!changed(
+        choice === 'prior' ? 'scene_bell_rung' : 'scene_bell_silenced',
+        0,
+        1,
+        player,
+        resolved.id,
+      ) &&
       !d.events.some((e) => e.payload.type === 'story_point_reached')
     );
   });

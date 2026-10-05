@@ -257,4 +257,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Book keyboard navigation](2026-10-05-book-keyboard-navigation-review.md): PR #200 at `f80ac75d`, CHANGES REQUIRED; scoped fix `9ef3bf15`, APPROVE, R200-1/R200-2 closed.
 - [Forward development before release](2026-10-05-forward-development-review.md): PR #198 at `3efa96eb`, independent APPROVE; no findings, active contract wording and links checked.
 - [Book browser save/reopen E2E](2026-10-05-tester-army-book-e2e-review.md): PR #199 at `810c7a41`, APPROVE; browser red control failed as intended; no findings.
+- [Q3-F fox/silent bell spec adoption](2026-10-05-q3-fox-spec-review.md): independent planning review APPROVE at `2b235074ab65621d15d2a0436dd2acd1e84db742`; no findings.
+- [Q3-F fox/silent bell save opinion](2026-10-05-q3-fox-save-second-review.md): independent APPROVE at `f43e232a`; A2-S1 actor-bound receipt finding closed by a real SQLite corruption control.
+- [Q3-F fox/silent bell primary implementation](2026-10-05-q3-fox-primary-review.md): independent APPROVE of `f43e232a` through review-only `37f37d17`; no open findings, focused suites green and three red controls observed. PR pending.
 - [B1 cartridge calendar and truthful Book status](2026-10-05-b1-calendar-status-review.md): at `8efa48bc`, independent APPROVE WITH NOTES; no correctness findings, one nonblocking Ponytail nit, focused suites green and phase-boundary mutant red. PR pending.

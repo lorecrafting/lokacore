@@ -253,5 +253,10 @@
   "quest.missing_child.lost": "The bell rang before you met Wren. The search has ended without bringing him home; Elspeth has not received a message or a rescue.",
   "dialogue.elspeth_lost.prompt": "Elspeth has heard the bell. She looks past you toward the river. “You haven't found him, have you?”",
   "dialogue.elspeth_lost.acknowledge": "Tell Elspeth what happened.",
-  "narration.elspeth_lost": "You tell her the bell was rung before Wren was found. Elspeth lowers her eyes. “Then I'll keep watching the landing.”"
+  "narration.elspeth_lost": "You tell her the bell was rung before Wren was found. Elspeth lowers her eyes. “Then I'll keep watching the landing.”",
+  "actions.silence_bell": "Leave the bell silent",
+  "narration.silence_bell": "You leave the bell rope untouched. In the hush, the fox has your answer.",
+  "quest.bell.fox": "You left the bell silent. The fox has your allegiance.",
+  "scene.bell_silenced.bell": "The bell hangs still above Ashmere. Far below, the fen keeps its own counsel.",
+  "scene.bell_silenced.aldric": "Aldric sees the untouched rope. His face goes cold. “Then you have made your choice,” he says."
 }

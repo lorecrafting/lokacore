@@ -8,6 +8,7 @@
     "root": { "op": "all", "items": [
       { "op": "quest_state", "quest": "bell_of_ashmere", "state": "active" },
       { "op": "fact_compare", "fact": "chapel_bell_rung", "equals": false },
+      { "op": "fact_compare", "fact": "chapel_allegiance", "equals": "unknown" },
       { "op": "any", "items": [
         { "op": "all", "items": [
           { "op": "quest_state", "quest": "missing_child", "state": "active" },

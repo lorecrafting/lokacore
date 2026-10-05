@@ -354,21 +354,36 @@ separated permits player departure or later co-location before explicit Rejoin. 
 requires the proven rescued terminal and NPC beside the terminal speaker. Every committed
 intermediate state must reopen and reconcile under the same boundary.
 
-## Bell-first return recovery
+## Bell choice return recovery
 
 In the Q3-B release, load checks the retained bell, allegiance, Q3 terminal and
 scene line together. An accepted Q3 requires its eligible Q2 row, even before Ring.
-The scene line must be an integer in the compiler-generated scene fact bounds.
+Each bell scene line must be an integer in its compiler-generated scene fact bounds.
 Resolved Q3/prior requires a committed Ring receipt whose stored command identity,
 full fact references and scopes, Q3 transition, and resolved event quest/actor/cause
 match that actor's save. The receipt must assign the bell and allegiance, resolve
-that actor's Q3 instance and start the bell scene. A failed Q2/lost additionally requires the same Ring receipt to
+that actor's Q3 instance and start the `bell_rung` scene. A failed Q2/lost additionally requires the same Ring receipt to
 fail that Q2 instance and assign lost child status; Wren's accepted meeting,
 return selection and escort must be absent. A completed stays/rescued Q2 or an
 active Q2 after the accepted Wren meeting remains legal after Ring. A retained
-Q2/lost transition against a current non-lost Q2 row is contradictory. Missing or
+Q2/lost transition against a current non-lost Q2 row is contradictory.
+
+The Q3-F release extends this check for a silent bell. Resolved Q3/fox requires resolved
+Q2/rescued or Q2/stays with the corresponding retained child status, bell false,
+allegiance fox, `scene_bell_rung` still 0 and `scene_bell_silenced` started or
+ended. Its own committed Silence receipt must identify the actor, exact Belfry
+bell detail and action, assign player-scope allegiance unknown → fox, resolve
+that actor's Q3/fox from the fact-change consequence and start
+`scene_bell_silenced` from the matching quest-resolved event. It may not change
+Q2, child status or bell, or emit a story point. The original Q2 terminal
+evidence remains required; a forged Q2 row does not become valid through a
+Silence receipt. Before either choice, both scene facts are 0; after Ring, the
+silent scene fact stays 0. A retained opposing scene, changed bell or allegiance,
+or a Q3 outcome inconsistent with its causal receipt is contradictory. An exact
+receipt replay cannot start a second scene or reverse the terminal choice.
+Missing or
 contradictory quest rows, facts, scene state or receipt are `save_corrupt`, with
-the existing Start over path and no silent repair. The saved Ring receipt and
+the existing Start over path and no silent repair. Both choice receipts and
 every scene continuation use the existing changed-row transaction and unknown
 COMMIT fence.
 

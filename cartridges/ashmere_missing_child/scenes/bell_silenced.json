@@ -1,0 +1,23 @@
+{
+  "on": {
+    "quest": "bell_of_ashmere",
+    "outcome": "fox"
+  },
+  "control": "modal",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "scene.bell_silenced.bell"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.bell_silenced.aldric"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ]
+}
