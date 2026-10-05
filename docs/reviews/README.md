@@ -208,3 +208,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [M6-A first live fight](2026-10-05-m6-a-first-live-fight-review.md): PR #168 at `53f1d4c`, CHANGES REQUIRED; scoped fix head `f023eff`, APPROVE; M6A-R1 closed, scheduled departure reopens/reconciles and closes harmlessly; independent red controls fail and restored focused suites pass.
 - [Verified mechanics lessons](2026-10-05-mechanics-lessons-review.md): PR #169 at `dd6d7da`, APPROVE; two verified incident lessons, accurate evidence/test pointers, no findings.
+- [One independent reviewer by default](2026-10-04-one-reviewer-default-review.md): PR #170 at `107564e`, APPROVE; fresh review and CI/merge gates retained, no findings.
