@@ -210,4 +210,6 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Q3-F fox through a silent bell](pm-decision-q3-fox-silence-2026-10-05.md): after either complete Q2 return, exact Belfry Silence resolves Q3/fox with its own evidenced scene.
 - [A3 voluntary Green finale](pm-decision-a3-green-finale-2026-10-05.md): five fixed ending memories, explicit Begin and final-line acknowledgement before one local completion report.
 
+- [Chapter-closure browser E2E loop](owner-decision-chapter-closure-e2e-loop-2026-10-05.md): deterministic chapter routes/UI, exploratory pass, visible owner evidence, isolated fixes and exact-head review.
+
 - [B5 finite Infirmary Herbs](pm-decision-b5-infirmary-herbs-2026-10-05.md): real conserved herb/bandage supply, immediate optional repeat and separate capped S9 contribution.

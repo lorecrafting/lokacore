@@ -164,6 +164,8 @@ view in a separate slice. Use focused kernel tests and the headless Node simulat
 development; batch related WIP edits into one coherent PR. The active local checks,
 closed independent reviews and exact-head CI gate remote publication (steps 3–7).
 
+At each chapter closure, follow the [owner's browser E2E loop](decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md): add and walk deterministic tests for required chapter routes and UI, run an exploratory E2E pass, show the owner a headed run or its video, and fix findings on an isolated chapter-polish branch. Rerun each failed path and the complete chapter walk after fixes, then get a fresh independent review of the exact final head. This browser loop complements the kernel, authority, save and contract checks. Deep mechanics or save findings become narrow tests and reviewed fixes in the owning slice; do not accumulate a large unreviewed polish batch.
+
 The prior [Debug/Release Simulator procedure](decisions/owner-decision-local-edit-loop-2026-10-04.md)
 remains historical guidance for when the owner resumes native work. Do not silently reset or
 re-pin a save when that happens.

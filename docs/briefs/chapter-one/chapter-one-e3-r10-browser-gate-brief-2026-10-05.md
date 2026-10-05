@@ -14,6 +14,8 @@ Before assignment, re-pin the actual A–D merges, chosen mechanics/parameters/f
 
 ## Governing sources and corrected obligations
 
+E3 follows the [chapter-closure browser E2E loop](../../decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md). Its browser evidence must include deterministic walks of required routes and UI, an exploratory pass, and a headed run or video visible to the owner. Findings are fixed on an isolated chapter-polish branch; rerun each failed path and the entire chapter walk, then obtain a fresh independent review of the exact final head. Deep mechanics/save defects use narrow tests and reviewed fixes in their owning slices. The current local E2E test only checks that one saved move survives reload; it does not cover this chapter or its routes.
+
 | Requirement | Governing clause |
 |---|---|
 | Player-facing product and authoring proof, not synthetic breadth | `docs/archive/spec/14-implementation-plan.md` R10 Objective/Important/Gate R10 |
