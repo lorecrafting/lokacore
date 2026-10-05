@@ -26,6 +26,11 @@
     "wren": {
       "label": "dialogue.elspeth.wren",
       "narration": "narration.elspeth.wren"
+    },
+    "accept": {
+      "label": "dialogue.elspeth.accept",
+      "narration": "narration.elspeth.accept",
+      "accept": "first_lead"
     }
   }
 }

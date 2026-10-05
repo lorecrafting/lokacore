@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_missing_child'
-VERSION = '0.0.6'
+VERSION = '0.0.7'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -73,9 +73,14 @@ v['resources'][key('resource', 'mv')].update(
            dict(at_percent=0, key='exhausted', tone='danger')])
 v['quests'] = {}
 v['dialogues'] = {}
-# Opening Elspeth: fixed landing placement and three informational choices, no quest/facts.
+# Opening Elspeth: fixed landing placement, informational directions and explicit Q1 acceptance.
 v['npcs'][key('npc', 'elspeth')] = definition('elspeth', keywords=['elspeth', 'mother'], short='npc.elspeth.short', room_line='npc.elspeth.room', description='npc.elspeth.description', room=ref('room', 'ferry_landing'))
 v['dialogues'][key('dialogue', 'elspeth')] = definition('elspeth', npc=ref('npc', 'elspeth'), policy=policy(dict(op='all', items=[])), prompt='dialogue.elspeth.prompt', roles=dict(elspeth=dict(role='npc', npc=ref('npc', 'elspeth'))), choices={name: dict(label=f'dialogue.elspeth.{name}', narration=f'narration.elspeth.{name}') for name in ['directions', 'inn', 'wren']})
+# Q1-A independently declared village clue, current possession and report priority.
+v['items'][key('item', 'fox_drawing')] = definition('fox_drawing', keywords=['drawing', 'fox_drawing'], short='item.fox_drawing.short', room_line='item.fox_drawing.room', description='item.fox_drawing.description', mass_grams=20, location={'in': 'room', 'room': ref('room', 'village_green')})
+v['quests'][key('quest', 'first_lead')] = definition('first_lead', title='quest.first_lead.title', objective=dict(evidence='current_state', policy=policy(dict(op='has_item', item=ref('item', 'fox_drawing')))), journal={state: f'quest.first_lead.{text}' for state, text in [('active', 'active'), ('objectives_met', 'ready'), ('resolved', 'resolved'), ('failed', 'failed'), ('abandoned', 'abandoned')]})
+v['dialogues'][key('dialogue', 'elspeth')]['choices']['accept'] = dict(label='dialogue.elspeth.accept', narration='narration.elspeth.accept', accept=ref('quest', 'first_lead'))
+v['dialogues'][key('dialogue', 'a_elspeth_report')] = definition('a_elspeth_report', npc=ref('npc', 'elspeth'), quest=ref('quest', 'first_lead'), policy=policy(dict(op='all', items=[dict(op='quest_state', quest=ref('quest', 'first_lead'), state='active'), dict(op='has_item', item=ref('item', 'fox_drawing'))])), prompt='dialogue.elspeth_report.prompt', roles=dict(elspeth=dict(role='npc', npc=ref('npc', 'elspeth'))), choices=dict(report=dict(label='dialogue.elspeth_report.report', narration='narration.elspeth.report')))
 # PM acceptance repair: hand-literal baseline table, independently declared.
 v['world'] = {'bands': [
     {'at_percent': 100, 'key': 'ready', 'tone': 'normal'},
@@ -116,10 +121,10 @@ v['text'] = json.loads(Path('cartridges/ashmere_missing_child/text.json').read_t
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved chapter semantics and compiler-owned defaults; only the chapter text catalog is copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
-Path('protocol/fixtures/missing_child_v006_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
+Path('protocol/fixtures/missing_child_v007_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed allocation order: character, body, fourteen rooms, six details, seven NPCs, six items, cloak holder.
-names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice', 'detail/tracks', 'detail/fox_prints'] + ['npc/'+name for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
+# Reviewed allocation order: character, body, fourteen rooms, six details, seven NPCs, seven items, cloak holder.
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice', 'detail/tracks', 'detail/fox_prints'] + ['npc/'+name for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'fox_drawing', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):
     b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])
@@ -127,4 +132,4 @@ for ordinal, name in enumerate(names):
     b[8] = (b[8] & 63) | 128
     s = b.hex()
     ids[name] = '-'.join([s[:8], s[8:12], s[12:16], s[16:20], s[20:]])
-Path('protocol/fixtures/missing_child_v006_ids.json').write_text(json.dumps(ids, indent=2)+'\n')
+Path('protocol/fixtures/missing_child_v007_ids.json').write_text(json.dumps(ids, indent=2)+'\n')

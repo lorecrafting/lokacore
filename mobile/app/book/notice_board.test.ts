@@ -50,7 +50,7 @@ registerHooks({
 const { default: Book } = await import('./Book.tsx');
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v006_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v007_hash.json', import.meta.url),
     'utf8',
   ),
 );
@@ -364,8 +364,8 @@ test('notice entries use available exact-target aliases and expose unavailable r
           : { op: 'not', item: { op: 'time_window', from: 18, to: 19 } },
       },
     });
-    c.actions['ashmere_missing_child@0.0.6:action/read'] = action('read', false);
-    if (alias) c.actions['ashmere_missing_child@0.0.6:action/consult'] = action('consult', true);
+    c.actions['ashmere_missing_child@0.0.7:action/read'] = action('read', false);
+    if (alias) c.actions['ashmere_missing_child@0.0.7:action/consult'] = action('consult', true);
     const canonical = JSON.stringify(sorted(c));
     return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
   };
@@ -448,4 +448,29 @@ test('Elspeth stays reachable all day and her Book replies direct a newcomer alo
   a.walk('west');
   a.walk('north');
   assert.equal(a.game.view().view.place.title.key, 'room.village_green.title');
+});
+
+// Breaks: a village clue is routed as a place control or loses authored identity/options.
+test('Q1 drawing opens full item detail with Take and local Leave', (t) => {
+  const a = preview();
+  t.after(() => a.sql.close());
+  a.walk('north');
+  a.walk('north');
+  const before = receipts(a.sql);
+  a.tap('a fox drawing, open');
+  assert.deepEqual(a.text().slice(0, 4), [
+    'A fox drawing',
+    "A child's charcoal drawing shows a fox among tall reeds. The paper is creased and muddy. There is no name on it.",
+    'Take a fox drawing',
+    'Leave',
+  ]);
+  assert.equal(receipts(a.sql), before);
+  a.tap('Leave');
+  assert.deepEqual(a.stack(), []);
+  assert.equal(receipts(a.sql), before);
+  a.tap('a fox drawing, open');
+  a.tap('Take a fox drawing');
+  assert.deepEqual(a.stack(), []);
+  assert.ok(a.text().includes('You pick up a fox drawing.'));
+  assert.deepEqual(a.game.view().view.journal, []);
 });
