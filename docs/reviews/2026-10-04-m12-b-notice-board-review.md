@@ -24,3 +24,34 @@ PR [#182](https://github.com/lorecrafting/lokacore/pull/182), reviewed source he
 - An independent alias mutation selected the first exact offer even when blocked; the alias Book test failed. Source was restored. A separate temporary cold-reopen Book control failed as described in R1; it too was removed. The review worktree was clean before this record.
 - Inspected compiler/loader membership and TextKey validation, literal fixture cases, projection, ActionSet Read enumeration, presenter routing and receipt SELECT. The save writer, format and gameplay proposal were untouched. No Simulator, Metro or owner save was operated. Exact-head CI green was reported by the PM; I did not rerun the full gate.
 - Ponytail Review: lean already. Existing detail, action, receipt and page-stack machinery is reused; no actionable simplification or dependency finding.
+
+## Round 1 scoped fix review — APPROVE
+
+Reviewed exact source head `1a9967cbecffe457f602e63ad001a2935845db12` against
+R1–R3, the changed code and its direct callers. **All three findings are closed.**
+
+- **R1:** A cold reopen now places the restored Landing notice or board child beneath the
+  chapter page. Continue exposes its confirmed body once with the correct return route,
+  without another command or receipt. Missing current-room notice targets and active
+  combat do not restore a route. The new real-SQLite Book test checks both notice shapes,
+  whole receipt rows, World log isolation, Leave/Back and the route after Continue.
+- **R2:** The child control is now labeled **Back to board** and still pops to the board;
+  the Book test uses that exact accessible label.
+- **R3:** The protocol map now identifies the bundled v004 artifact and IDs.
+
+The fix also classifies a stored Read command's JSON `SyntaxError` as typed `save_corrupt`
+at the existing session refusal boundary. The controlled SQLite test proves an older pin
+stays explicitly refused until Start over and an intact unrelated table survives in-place
+replacement. Storage I/O and lock errors still take their existing path. No save writer,
+format, proposal or chapter pin changed.
+
+Focused Book, chapter, session, recovery and saves tests passed **45/45**. I independently
+restored the old chapter-Continue behavior and saw only the new cold-reopen test fail;
+removing `SyntaxError` classification failed only the new corrupt-command test. Both
+mutations were restored; the source tree was clean before this record. The developer's
+fix evidence reports its full check and three red controls; I inspected the claims and
+independently exercised two controls, without rerunning the full gate or using a device.
+
+Ponytail Review: Lean already. Ship. The fix reuses presenter histories, page stack and
+the existing refusal boundary; no actionable complexity finding. Correctness review found
+no remaining failure in the scoped paths.
