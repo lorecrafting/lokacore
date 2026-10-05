@@ -35,7 +35,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - Owner direction (paraphrased): [detail-page order](owner-decision-detail-page-order-2026-10-05.md), conditional chronological logs before offered options.
 
-- Owner direction (paraphrased): [actual Missing Child cutover](owner-decision-actual-chapter-cutover-2026-10-05.md), incremental chapter identity/save, retired temporary errand and unresolved real Bram scope.
+- Owner direction (paraphrased): [actual Missing Child cutover](owner-decision-actual-chapter-cutover-2026-10-05.md), incremental chapter identity/save and retired temporary errand; its Bram question is superseded by the [real chapter cast decision](owner-decision-real-chapter-cast-2026-10-05.md).
 
 - [ADR-074](../archive/decisions/adr-074-ts-first-proposal.md): TypeScript-only story rules until a server first
   consumes them ([accepted by the owner](../archive/decisions/owner-decision-adr-074-2026-09-24.md)).
