@@ -18,7 +18,7 @@ local authority; the online Realm authority (BEAM, Phoenix transport) is not bui
 | `mobile/authority/local-story/` | the local Story authority: admission, receipts, the SQLite save, recovery, the trace, story point delivery, the session controller | built |
 | `mobile/app/` | the Expo shell (`App.tsx`) and the book-style touch UI (`book/`) | built |
 | `mobile/authority/remote-realm/`, `mobile/features/*`, `mobile/packages/*` | Realm transport, Story and Realm UX, shared packages: `export {}` stubs that pin the import rules | empty |
-| `protocol/` | the frozen contracts, registries and fixtures both kernels validate against ([map](../../protocol/README.md)) | frozen |
+| `protocol/` | the current contracts, registries and fixtures both kernels validate against ([map](../../protocol/README.md)) | active |
 | `cartridges/` | development cartridge sources and their replayable transcripts | content |
 | `bin/` | checks and generators; `bin/check_all.sh` runs them all; `bin/loka` the CLI | tooling |
 
@@ -134,7 +134,7 @@ chest rule belongs in the kernel. See [PM adoption](../decisions/pm-decision-m20
 ## Two kernels, one semantic contract
 
 The foundation (encoding, hash, integers, RNG, ids, composition, validation, the
-`elixir_and_typescript` invariants) is built in both languages and held to the frozen fixtures
+`elixir_and_typescript` invariants) is built in both languages and held to the current fixtures
 (`numeric-vectors.json`, `adverse-cases.json`, `composition.json`), then to each other:
 `test/loka/core/compose_test.exs` "differential: Elixir and TypeScript compose identically" and
 "differential on 300 simulator proposals" call the TypeScript peer (`:353`). Story rules are

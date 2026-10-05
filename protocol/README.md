@@ -1,6 +1,6 @@
 # protocol/
 
-The frozen contracts both kernels validate against (spec 04 §12, 14 §R3). The contracts in
+The current contracts both kernels validate against (spec 04 §12, 14 §R3). The contracts in
 each file, with fields and examples: [contracts.gen.md](../docs/contracts.gen.md)
 (generated). Before changing anything here, read the [contract lessons](../docs/lessons/contracts.md).
 

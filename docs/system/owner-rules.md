@@ -30,7 +30,6 @@ and not repeated here.
 
 - NPC/item views carry explicit authored full descriptions; the compatible optional wire field is always populated by current projections ([PM adoption](../decisions/pm-decision-description-projection-2026-10-03.md)).
 
-- The current unreleased sampler may replace its previous development runtime release; the bounded `0.0.2` Look repair independently rederives its known answer while other fixtures stay frozen ([record](../decisions/owner-decision-sampler-development-look-2026-10-03.md)).
 - The development sampler chapel approach follows the [delegated PM content selection](../decisions/pm-decision-sampler-shrine-approach-2026-10-04.md).
 - NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
 - C1 room output stays focused; NPCs open full details, section detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
@@ -128,10 +127,11 @@ and not repeated here.
   ([record](../archive/decisions/owner-decision-roadmap-2026-09-24.md), [ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
 - The due-job drain landed with the first real job; `real_elapsed` time is carried until a
   cartridge declares it ([record](../archive/decisions/owner-decision-s4-scope-2026-09-30.md)).
-- Pre-production: backward API/release/save compatibility and older-development adapters or
-  migrations are not required; advance current releases and independently re-pin known answers.
-  Preserve frozen conformance fixtures and safe explicit mismatch refusal, never silent save
-  deletion ([superseding decision](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md)).
+- Pre-production: work forward from the current contract without older API/release/save
+  compatibility, adapters or migrations. Update or remove obsolete fixtures and documentation
+  when the contract changes, while retaining current-behavior guards, current-build save integrity,
+  explicit pin refusal and no silent save deletion
+  ([superseding decision](../decisions/owner-decision-forward-development-2026-10-05.md)).
 - Preproduction previews may start fresh across builds; current-build save/retry/reopen and
   explicit Start over remain required ([clarification](../decisions/owner-decision-preproduction-preview-saves-2026-10-04.md)).
 - Saves reopen on an available exact pin; missing pins and unsupported formats are typed refusals
