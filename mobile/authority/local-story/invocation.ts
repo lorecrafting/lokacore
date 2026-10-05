@@ -62,9 +62,18 @@ export function invoke(s: Story, value: unknown, driver?: ClockDriver): Reply {
     if (!same || !intact || old.intent_digest !== intent_digest) return { kind: 'conflict' };
     if (reservations.get(s)?.id.invocation.invocation_id === i.invocation_id)
       reservations.delete(s);
-    return { kind: 'saved', replay: true, revision: old.revision, decision: old.response };
+    return {
+      kind: 'saved',
+      replay: true,
+      revision: old.revision,
+      decision: old.response,
+      ...((old.response as { kind?: string }).kind === 'accepted' && { command_id }),
+    };
   }
-  return reserved(s, id, driver);
+  const reply = reserved(s, id, driver);
+  return reply.kind === 'saved' && (reply.decision as { kind?: string }).kind === 'accepted'
+    ? { ...reply, command_id }
+    : reply;
 }
 
 function reserved(s: Story, id: Identified, driver?: ClockDriver): Reply {

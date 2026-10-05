@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_missing_child'
-VERSION = '0.0.9'
+VERSION = '0.0.10'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -17,7 +17,7 @@ def policy(root):
 def definition(name, **parts):
     return dict(key=name, **parts)
 caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'resource', 'schedule', 'description_variant', 'calendar', 'death', 'combat', 'inspectable_detail', 'readable', 'reaction', 'action_recipe'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Ashmere — The Missing Child', requires=dict(kernel_api=dict(at_least='1.8', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.missing_child')])
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Ashmere — The Missing Child', requires=dict(kernel_api=dict(at_least='1.9', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.missing_child')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
 v['facts'] = {key('fact', 'position'): definition('position', version=1, value_type=dict(type='enum', values=['standing', 'sitting', 'resting', 'sleeping'], default='standing'), scopes=['player'], meaning="The character's position (position@1): only its rule writes it.")}
@@ -126,14 +126,36 @@ v['facts'][key('fact', 'fen_tracks_found')] = definition('fen_tracks_found', ver
 v['quests'][key('quest', 'missing_child')] = definition('missing_child', title='quest.missing_child.title', objective=dict(evidence='current_state', policy=policy(dict(op='fact_compare', fact=ref('fact', 'fen_tracks_found'), equals=True))), journal={state: f'quest.missing_child.{text}' for state, text in [('active', 'active'), ('objectives_met', 'lead'), ('resolved', 'resolved'), ('failed', 'failed'), ('abandoned', 'abandoned')]})
 v['reactions'] = {key('reaction', 'start_search'): definition('start_search', on=dict(event='quest_resolved', quest=ref('quest', 'first_lead'), outcome='report'), apply=[dict(op='quest.activate', quest=ref('quest', 'missing_child'))])}
 v['recipes'] = {key('recipe', 'study_tracks'): definition('study_tracks', label='actions.study_tracks', aliases=['study'], target=dict(kind='detail', room=ref('room', 'reed_bank'), detail='tracks'), priority=10, policy=policy(dict(op='all', items=[dict(op='quest_state', quest=ref('quest', 'missing_child'), state='active'), dict(op='fact_compare', fact=ref('fact', 'fen_tracks_found'), equals=False)])), outcomes=dict(success=dict(sequence=[dict(op='fact.assign', fact=ref('fact', 'fen_tracks_found'), value=True)], narration=dict(actor='narration.study_tracks'))))}
+# Q2-B literal encounter roles, progression and answer bank, independent of the compiler/source.
+for name, meaning in [('fen_wren_met', 'The player accepted the bound meeting with Wren and Vesper.'), ('fen_vesper_riddle_answered', 'Vesper accepted the player’s letter-bank answer.')]:
+    v['facts'][key('fact', name)] = definition(name, version=1, value_type=dict(type='bool', default=False), scopes=['player'], meaning=meaning)
+for name in ['vesper', 'wren']:
+    v['npcs'][key('npc', name)] = definition(name, keywords=[name], short=f'npc.{name}.short', room_line=f'npc.{name}.room', description=f'npc.{name}.description', room=ref('room', 'fox_hollow'))
+def flag(name, value):
+    return dict(op='fact_compare', fact=ref('fact', name), equals=value)
+search_active = dict(op='quest_state', quest=ref('quest', 'missing_child'), state='active')
+for name, conditions, choice, assignment in [
+    ('a_vesper_meeting', [search_active, flag('fen_tracks_found', True), flag('fen_wren_met', False)], 'meet_wren', 'fen_wren_met'),
+    ('b_vesper_riddle', [search_active, flag('fen_wren_met', True), flag('fen_vesper_riddle_answered', False)], 'answer', 'fen_vesper_riddle_answered'),
+    ('c_vesper_answered', [flag('fen_vesper_riddle_answered', True)], 'acknowledge', None),
+    ('vesper', [], 'greet', None)]:
+    option = dict(label=f'dialogue.{name}.{choice}', narration=f'narration.{name}')
+    if assignment:
+        option['sequence'] = [dict(op='fact.assign', fact=ref('fact', assignment), value=True)]
+    d = definition(name, npc=ref('npc', 'vesper'), policy=policy(dict(op='all', items=conditions)), prompt=f'dialogue.{name}.prompt', roles={role: dict(role='npc', npc=ref('npc', role)) for role in ['vesper', 'wren']}, choices={choice: option})
+    if name == 'b_vesper_riddle':
+        d['riddle'] = dict(choice_id='answer', answer='lantern', bank=['R', 'N', 'A', 'O', 'L', 'T', 'E', 'N', 'S'], wrong='narration.vesper_wrong')
+    v['dialogues'][key('dialogue', name)] = d
+v['dialogues'][key('dialogue', 'wren')] = definition('wren', npc=ref('npc', 'wren'), policy=policy(dict(op='all', items=[])), prompt='dialogue.wren.prompt', roles=dict(wren=dict(role='npc', npc=ref('npc', 'wren'))), choices=dict(greet=dict(label='dialogue.wren.greet', narration='narration.wren')))
+v['quests'][key('quest', 'missing_child')]['journal']['active_variants'] = [dict(when=policy(dict(op='all', items=[flag('fen_vesper_riddle_answered', True)])), text='quest.missing_child.answered'), dict(when=policy(dict(op='all', items=[flag('fen_wren_met', True)])), text='quest.missing_child.met')]
 v['text'] = json.loads(Path('cartridges/ashmere_missing_child/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved chapter semantics and compiler-owned defaults; only the chapter text catalog is copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
-Path('protocol/fixtures/missing_child_v009_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
+Path('protocol/fixtures/missing_child_v010_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed allocation order: character, body, sixteen rooms, eight details, seven NPCs, seven items, cloak holder.
-names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice', 'detail/hollow', 'detail/plank', 'detail/tracks', 'detail/fox_prints'] + ['npc/'+name for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'fox_drawing', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
+# Reviewed allocation order: character, body, sixteen rooms, eight details, nine NPCs, seven items, cloak holder.
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice', 'detail/hollow', 'detail/plank', 'detail/tracks', 'detail/fox_prints'] + ['npc/'+name for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud', 'vesper', 'wren']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'fox_drawing', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):
     b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])
@@ -141,4 +163,4 @@ for ordinal, name in enumerate(names):
     b[8] = (b[8] & 63) | 128
     s = b.hex()
     ids[name] = '-'.join([s[:8], s[8:12], s[12:16], s[16:20], s[20:]])
-Path('protocol/fixtures/missing_child_v009_ids.json').write_text(json.dumps(ids, indent=2)+'\n')
+Path('protocol/fixtures/missing_child_v010_ids.json').write_text(json.dumps(ids, indent=2)+'\n')

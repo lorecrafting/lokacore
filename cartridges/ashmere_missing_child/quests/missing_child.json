@@ -16,6 +16,40 @@
     "objectives_met": "quest.missing_child.lead",
     "resolved": "quest.missing_child.resolved",
     "failed": "quest.missing_child.failed",
-    "abandoned": "quest.missing_child.abandoned"
+    "abandoned": "quest.missing_child.abandoned",
+    "active_variants": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_vesper_riddle_answered",
+                "equals": true
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.answered"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "fen_wren_met",
+                "equals": true
+              }
+            ]
+          }
+        },
+        "text": "quest.missing_child.met"
+      }
+    ]
   }
 }

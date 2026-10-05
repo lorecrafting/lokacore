@@ -295,7 +295,9 @@ export function actionContext(
     b.action_key,
     b.target_ids,
     b.detail_id,
-    Object.entries(b.input).sort(([a], [z]) => a.localeCompare(z)),
+    Object.entries(b.input)
+      .filter(([key]) => !(b.action_key === 'choose' && key === 'answer'))
+      .sort(([a], [z]) => a.localeCompare(z)),
     view.actor_id,
     view.place.id,
     view.choice,

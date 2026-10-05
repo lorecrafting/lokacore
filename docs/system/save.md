@@ -32,7 +32,7 @@ successful readable-recipe receipt also requires a valid committed Command bound
 `action_completed` naming that action and its canonical detail subject. Missing or mismatched
 evidence follows the same corruption path. This structured receipt derives detail identity for
 replay and reopen, without a new row or transcript. Unrelated receipts retain ordinary routing.
-Dialogue Choose narration also derives its original speaker from the committed command's
+Riddle Choose narration also derives its original speaker from the committed command's
 continuation and the saved ChoiceRow, which persists after resolution. Command identity,
 choice ID, row source/beat/roles, outcome and root resolution evidence must agree; riddle
 wrong receipts instead prove a bank-valid wrong answer with no root mutation/event. Conflict
@@ -73,7 +73,8 @@ and `bram` choices, and narration ids follow them; outcome `accept` is the kerne
 `Reply` (`authority.ts:24`): `invalid`, `unauthorized`, `conflict`, `fault {code}`,
 `pending` (a COMMIT whose outcome is unknown; retry the same invocation), `stale_view` (a NEW
 invocation whose `view_freshness_token` starts with `view:` and is not the current
-`view:<run_id>:<revision>`, `:121`; any other token is not checked), or `saved {replay, revision, decision}`. A failed commit throws with memory and
+`view:<run_id>:<revision>`, `:121`; any other token is not checked), or `saved {replay, revision, decision}`. Accepted invocation replies also identify their committed
+`command_id` for exact narration recovery, including eventless wrong answers. A failed commit throws with memory and
 storage unchanged.
 
 ## Commit, fence, reconcile

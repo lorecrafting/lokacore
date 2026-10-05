@@ -89,6 +89,28 @@
         "player"
       ],
       "meaning": "The player studied the Reed Bank tracks during the search for Wren."
+    },
+    "fen.wren_met": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player accepted the bound meeting with Wren and Vesper."
+    },
+    "fen.vesper_riddle_answered": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Vesper accepted the player’s letter-bank answer."
     }
   }
 }

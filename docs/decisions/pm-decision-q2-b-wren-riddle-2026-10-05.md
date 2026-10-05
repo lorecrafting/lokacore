@@ -22,3 +22,5 @@ writer, event kind, row/table, transcript, timer, generic objective tree or depe
 Full rollback/unknown-COMMIT controls remain applicable. API1.9 and chapter0.0.10 require new
 independent release/allocation pins; historical fixtures stay frozen. Headless behavior,
 schema mutation controls and full checks precede independent primary and protocol/save reviews.
+
+Developer validation: [headless checks and deliberate-break controls](../evidence/2026-10-05-q2-b-wren-riddle/README.md).

@@ -83,8 +83,12 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   s.returnWorld = itemChanged || accepted?.outcome === 'choice_closed';
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
-  const command_id = accepted?.events[0]?.causation_id; // FIFO starts with root events
-  const retained = accepted?.narration?.length ? savedNarration(game, s, command_id) : undefined;
+  const command_id =
+    reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
+  const retained =
+    accepted?.narration?.length && (command_id || accepted.outcome !== 'riddle_wrong')
+      ? savedNarration(game, s, command_id)
+      : undefined;
   const readableDetail = retained?.detail_id ?? attempt.button.detail_id;
   const detail =
     readableDetail ??

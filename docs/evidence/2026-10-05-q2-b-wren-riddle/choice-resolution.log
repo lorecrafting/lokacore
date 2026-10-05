@@ -1,0 +1,89 @@
+✖ only accepted meeting after actual report and Study marks Wren met at every hour (9.504584ms)
+✖ wrong answer retries the same bound row; malformed banks refuse; correct answer is once-only and nonterminal (2.889167ms)
+✖ either original participant leaving or dying disables Choose while Close stays available (1.724875ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 158.615541
+
+✖ failing tests:
+
+test at kernel/ts/test/wren_riddle.test.ts:100:1
+✖ only accepted meeting after actual report and Study marks Wren met at every hour (9.504584ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"invalid_state"}}
+  + actual - expected
+  
+  + 'invalid_state'
+  - 'accepted'
+  
+      at run (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:44:12)
+      at talk (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:64:34)
+      at Object.report (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:68:5)
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:109:5)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'invalid_state',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/wren_riddle.test.ts:136:1
+✖ wrong answer retries the same bound row; malformed banks refuse; correct answer is once-only and nonterminal (2.889167ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"invalid_state"}}
+  + actual - expected
+  
+  + 'invalid_state'
+  - 'accepted'
+  
+      at run (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:44:12)
+      at talk (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:64:34)
+      at report (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:73:5)
+      at Object.meeting (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:77:5)
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:138:5)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'invalid_state',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/wren_riddle.test.ts:192:1
+✖ either original participant leaving or dying disables Choose while Close stays available (1.724875ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"invalid_state"}}
+  + actual - expected
+  
+  + 'invalid_state'
+  - 'accepted'
+  
+      at run (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:44:12)
+      at talk (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:64:34)
+      at report (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:73:5)
+      at Object.meeting (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:77:5)
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:196:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'invalid_state',
+    expected: 'accepted',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,36 @@
+✔ only accepted meeting after actual report and Study marks Wren met at every hour (21.820292ms)
+✖ wrong answer retries the same bound row; malformed banks refuse; correct answer is once-only and nonterminal (7.7475ms)
+✔ either original participant leaving or dying disables Choose while Close stays available (25.304208ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 195.453042
+
+✖ failing tests:
+
+test at kernel/ts/test/wren_riddle.test.ts:136:1
+✖ wrong answer retries the same bound row; malformed banks refuse; correct answer is once-only and nonterminal (7.7475ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'answer'
+  - 'riddle_wrong'
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/wren_riddle.test.ts:154:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'answer',
+    expected: 'riddle_wrong',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,23 @@
+{
+  "npc": "wren",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.wren.prompt",
+  "roles": {
+    "wren": {
+      "role": "npc",
+      "npc": "wren"
+    }
+  },
+  "choices": {
+    "greet": {
+      "label": "dialogue.wren.greet",
+      "narration": "narration.wren"
+    }
+  }
+}

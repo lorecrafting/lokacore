@@ -19,7 +19,13 @@ import { catchUp } from './trace.ts';
 import { elapsed, fenced, type Elapsed } from './delivery.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
-export type Saved = { kind: 'saved'; replay: boolean; revision: number; decision: Json };
+export type Saved = {
+  kind: 'saved';
+  replay: boolean;
+  revision: number;
+  decision: Json;
+  command_id?: string;
+};
 
 export type Reply =
   | Exclude<ReturnType<typeof identify>, { kind: 'identified' }>

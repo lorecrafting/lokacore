@@ -1,0 +1,24 @@
+✔ only accepted meeting after actual report and Study marks Wren met at every hour (24.765084ms)
+✔ wrong answer retries the same bound row; malformed banks refuse; correct answer is once-only and nonterminal (12.560125ms)
+✔ either original participant leaving or dying disables Choose while Close stays available (30.084041ms)
+(node:75517) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/riddle.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ NPC detail tiles edit a bounded word and submit retry/correct results after history (92.41625ms)
+(node:75518) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ file-backed riddle cold opens before, after wrong and after success with exact replay/conflict (152.871125ms)
+✔ stored riddle command, binding and root evidence mismatches become typed save corruption (211.434167ms)
+✔ answer input refreshes only across unchanged offered riddle context and reads its own eventless receipt (24.743916ms)
+✔ failed and lost COMMIT answers retain the exact invocation and answer until reconciliation (93.321167ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 669.497292

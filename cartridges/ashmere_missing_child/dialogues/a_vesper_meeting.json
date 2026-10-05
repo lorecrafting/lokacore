@@ -1,0 +1,50 @@
+{
+  "npc": "vesper",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_tracks_found",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_wren_met",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.a_vesper_meeting.prompt",
+  "roles": {
+    "vesper": {
+      "role": "npc",
+      "npc": "vesper"
+    },
+    "wren": {
+      "role": "npc",
+      "npc": "wren"
+    }
+  },
+  "choices": {
+    "meet_wren": {
+      "label": "dialogue.a_vesper_meeting.meet_wren",
+      "narration": "narration.a_vesper_meeting",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "fen_wren_met",
+          "value": true
+        }
+      ]
+    }
+  }
+}

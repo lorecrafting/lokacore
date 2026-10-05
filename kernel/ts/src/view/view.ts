@@ -27,6 +27,7 @@ import * as description_variant from '../mechanics/description_variant/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
+import { holds } from '../mechanics/policy.ts';
 import { holdsNow } from '../mechanics/quest/lifecycle.ts';
 import { cmp } from '../foundation/validate.ts';
 
@@ -219,11 +220,14 @@ function journal(world: World): QuestView[] {
       const shown = { quest: q.quest, state: q.state, title: d.title };
       const j = d.journal;
       if (!j) return shown;
+      const variant =
+        q.state === 'active'
+          ? j.active_variants?.find((v) => holds(world, world.character, v.when.root))?.text
+          : undefined;
       const journal =
         q.state === 'active'
-          ? holdsNow(world, world.character, q.quest, { n: 0 })
-            ? j.objectives_met
-            : j.active
+          ? (variant ??
+            (holdsNow(world, world.character, q.quest, { n: 0 }) ? j.objectives_met : j.active))
           : q.state === 'objectives_complete'
             ? j.objectives_met
             : ((q.outcome && j.outcomes?.[q.outcome]) ?? j[q.state]);

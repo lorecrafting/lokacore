@@ -26,7 +26,7 @@ export type Intent = Omit<ActionInvocation, 'invocation_id' | 'actor_id'>;
 
 /** The answer to one press (03 §14, 04 §16). */
 export type Reply =
-  | { kind: 'saved'; decision: DecisionResult }
+  | { kind: 'saved'; decision: DecisionResult; command_id?: string }
   | { kind: 'save_corrupt'; message: string }
   | { kind: 'stale_view' } // sent against an older view; nothing changed
   | { kind: 'conflict' }

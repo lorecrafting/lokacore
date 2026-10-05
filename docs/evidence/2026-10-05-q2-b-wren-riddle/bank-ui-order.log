@@ -1,0 +1,52 @@
+(node:81246) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/riddle.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✖ NPC detail tiles edit a bounded word and submit retry/correct results after history (58.892125ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 341.696916
+
+✖ failing tests:
+
+test at mobile/app/book/riddle.test.ts:68:1
+✖ NPC detail tiles edit a bounded word and submit retry/correct results after history (58.892125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'Letter S, tile 1',
+  -   'Letter R, tile 1',
+      'Letter N, tile 2',
+  +   'Letter E, tile 3',
+  +   'Letter T, tile 4',
+  -   'Letter A, tile 3',
+  -   'Letter O, tile 4',
+      'Letter L, tile 5',
+  +   'Letter O, tile 6',
+  +   'Letter A, tile 7',
+  -   'Letter T, tile 6',
+  -   'Letter E, tile 7',
+      'Letter N, tile 8',
+  +   'Letter R, tile 9'
+  -   'Letter S, tile 9'
+    ]
+  
+      at TestContext.<anonymous> (file://<worktree>/mobile/app/book/riddle.test.ts:158:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'Letter S, tile 1', 'Letter N, tile 2', 'Letter E, tile 3', 'Letter T, tile 4', 'Letter L, tile 5', 'Letter O, tile 6', 'Letter A, tile 7', 'Letter N, tile 8', 'Letter R, tile 9' ],
+    expected: [ 'Letter R, tile 1', 'Letter N, tile 2', 'Letter A, tile 3', 'Letter O, tile 4', 'Letter L, tile 5', 'Letter T, tile 6', 'Letter E, tile 7', 'Letter N, tile 8', 'Letter S, tile 9' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
