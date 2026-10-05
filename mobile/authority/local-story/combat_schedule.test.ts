@@ -6,7 +6,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bundle, fresh, ref, rat, room } from '../../../kernel/ts/test/combat_fixture.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
-import { loadCartridge, INSTALLED, newWorld } from '../../../kernel/ts/src/index.ts';
+import {
+  loadCartridge,
+  INSTALLED,
+  newWorld,
+  type Cartridge,
+} from '../../../kernel/ts/src/index.ts';
+import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -32,8 +38,8 @@ test('scheduled opponent departure reopens and reconciles before a harmless due 
   );
   assert.ok(loaded.ok);
   if (!loaded.ok) return;
-  const initial = newWorld(loaded.cartridge, fresh.context, [1, 2, 3, 4]);
-  const releases = [{ fresh: initial, content_hash: sha256 }];
+  const initial = newWorld(loaded.cartridge as Cartridge, fresh.context, [1, 2, 3, 4]);
+  const releases = [{ fresh: initial, content_hash: sha256 }] as const;
   const dir = mkdtempSync(join(tmpdir(), 'loka-departure-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const path = join(dir, 'save.db');
@@ -78,10 +84,11 @@ test('scheduled opponent departure reopens and reconciles before a harmless due 
   const round = reopened.elapsed({ ...departure, from: 3600, until: 3700 });
   assert.equal(round.kind, 'saved');
   if (round.kind !== 'saved') return;
-  assert.equal(round.decision.kind, 'accepted');
-  if (round.decision.kind !== 'accepted') return;
-  assert.deepEqual(round.decision.events, []);
-  assert.ok(!round.decision.delta.ops.some((op) => op.op === 'resource.adjust'));
+  const decision = round.decision as DecisionResult;
+  assert.equal(decision.kind, 'accepted');
+  if (decision.kind !== 'accepted') return;
+  assert.deepEqual(decision.events, []);
+  assert.ok(!decision.delta.ops.some((op) => op.op === 'resource.adjust'));
   const after = reopened.world();
   assert.deepEqual(after.state.rng, [1, 2, 3, 4]);
   assert.equal(level(after, after.body, resourceRef(after, 'hp')), 10);
