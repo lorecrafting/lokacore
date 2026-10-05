@@ -18,8 +18,7 @@ export function encountersValid(world: World): boolean {
       row.body_id === row.npc_id
     )
       return false;
-    const npc = world.entities[row.npc_id];
-    const job = world.state.jobs?.[row.job_id];
+    const [npc, job] = [world.entities[row.npc_id], world.state.jobs?.[row.job_id]];
     if (
       npc?.kind !== 'npc' ||
       !npc.attack ||
@@ -28,9 +27,8 @@ export function encountersValid(world: World): boolean {
       !same(job.job, npcRef(world, row.npc_id))
     )
       return false;
-    if (row.status === 'closed') {
-      if (job.status === 'pending') return false;
-    } else {
+    if (row.status === 'closed' && job.status === 'pending') return false;
+    if (row.status === 'open') {
       if (
         job.status !== 'pending' ||
         job.due_time <= world.state.clock ||
