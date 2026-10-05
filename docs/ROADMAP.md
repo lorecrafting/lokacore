@@ -68,6 +68,11 @@ LOCAL-FAST-LOOP — owner testing on Debug/Metro with playable-checkpoint source
 and coherent PR batching — merged in [#181](https://github.com/lorecrafting/lokacore/pull/181)
 after independent approval and green docs-head checks.
 
+M12-B — nested notice-board and notice detail pages — merged in
+[#182](https://github.com/lorecrafting/lokacore/pull/182) after the cold-reopen,
+navigation-label and malformed-save findings were fixed; primary and protocol/save
+rechecks approved, with six green source-head checks and green review-only head checks.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
