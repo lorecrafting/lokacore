@@ -78,3 +78,24 @@ Independent validation:
 - Correctness and Ponytail review: the single optional local membership flag is sufficient; no new abstraction, wire contract, persistent state or dependency. No further finding in the fix or direct callers.
 
 This verdict covers the approved current Read contract. Any separately proposed nested board/notice navigation is outside this scoped review. No Simulator or native preview was run.
+
+## Separate protocol opinion — scoped fix recheck
+
+```text
+APPROVE
+PR177 source head: 372d06e9bc667c7bad912f0d85e8f1a4c05036cc
+Scope: R1 grouping fix and direct callers.
+
+Findings: none.
+
+The local place marker preserves projected place membership for aliased Read controls. intentOf explicitly omits it; actionContext and invocation identity/digest retain their existing fields. No protocol schema, generated contract, loader, capability or feature-map changes occurred after the previously approved head.
+
+Validation:
+- Alias and production Read tests: 5 passed.
+- Direct model/C1 caller tests: 17 passed.
+- Controlled wire probe: marked and unmarked buttons produce identical intents and identified digests; adding place to ActionInvocation is rejected.
+- Meaningful red control: restoring the old literal-read grouping condition in memory makes the new alias regression fail, exit 1.
+- contracts.exs --check: exit 0.
+- Optional combat-suite rerun was unavailable because the isolated checkout lacked its TypeScript dependency.
+- Ponytail: no unnecessary machinery identified. No source edits; isolated checkout removed.
+```
