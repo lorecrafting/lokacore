@@ -1,4 +1,4 @@
-// The phone app shell (R6 SM, SM2): the book view over the real local authority and
+// The Expo app shell (R6 SM, SM2): the book view over the real local authority and
 // expo-sqlite, or the screen for a save that does not open. The shell owns every phone-only API
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
