@@ -1,51 +1,158 @@
-# C2 — Watchman's Rounds: follow Tobin, survive and recover an attempt
+# C2 — Watchman's Rounds: finite patrol and immediate recovery
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted PM assignment; reviewed dependency re-pin required before source GO.**
+Suggested source branch `chapter-1/c2-watchmans-rounds`; developer uses its own worktree.
+Inspected local main `4bfe252e`, which contains the approved
+[C1 plan review](../../reviews/2026-10-05-c1-tobin-plan-review.md), installed B1 clock/status
+and Q2-C-rescue. C1 source and B5 source are concurrent. Their reviewed integration,
+actual release/API/hash/IDs and source head must be recorded before implementation;
+C2 target release/API/hash/IDs/source head/PR/verdicts remain null. No source, tests,
+browser/native sessions or save operations are performed by this planning change.
 
-2026-10-05. **Provisional PM draft; not adopted spec or source GO.** Row C2 of [the public plan](../../MISSING-CHILD-PLAN.md). Suggested branch `c2-watchmans-rounds`; lift 0.8–1.0. Inspected PM baseline `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10. Current North Gate and Green have no watch/east exits; no Tobin, patrol or survive objective is installed. Target release/API/hash/IDs/source head/PR are **null**. No tests/source/browser/device/save operation performed by this planning task.
+## Goal and governing clauses
 
-## Player outcome and prerequisites
+C2: accompany Tobin on a finite patrol, with failure recovery and no nighttime wait.
+Deliver the complete optional S3 outcome through four real checkpoints, honest
+pause/failure, immediate Rejoin/Restart and durable trust. Follow the
+[PM adoption](../../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md),
+[selected mechanics](../../system/mechanics.md#s3-finite-watch-patrol-c2-selected-contract),
+[route/production settings](../../system/cartridge.md#c2-watch-route-and-trust),
+[typed composition/admission](../../system/protocol.md#c2-patrol-composition-and-admission),
+[save/reopen](../../system/save.md#c2-patrol-attempt-recovery) and
+[Book](../../system/book-ui.md#c2-watch-patrol-details). Installed movement, combat/Flee,
+death/shrine/corpse custody, escort, quest, dialogue and receipt contracts govern their
+existing behaviors. Read mechanics/storage/contracts/mobile/evidence lessons before
+their areas. Apply Ponytail before implementation, Ponytail Review and actual-diff
+correctness review before handoff. Native work remains paused.
 
-The player can start S3 with the same living Tobin now, accompany his real route through four distinct watch checkpoints, and finish a meaningful patrol alive. Tobin leads; the player walks ordinary legal exits to join him. The journal identifies the next stop and any separation/failure. Completion grants `watch.gate_trusts_player` and the swords lesson once, even if C1 already taught swords. A failed attempt or temporary separation has an immediate reachable recovery action; neither midnight nor retired Old Bram is required.
+## Real route and ownership
 
-Re-pin **reviewed C1** skill acquisition/Tobin identity, **reviewed PR190** movement/death relation helpers and **reviewed B1** cartridge clock/calendar. These are provisional future dependencies, not merged assertions. Wren-follow-player is not player-follow-Tobin: reuse its identity/life/location queries and atomic transition discipline, not its orientation or quest fields. C3/C4 hounds can later add real patrol danger; this slice's distinct survive proof uses an actual fatal combat producer and does not claim hounds exist before their PRs. S3 still offers a complete patrol without them.
+Existing Ferry Landing north → Well Lane north → Green north → North Gate east
+(new) → Watch Post reaches the same original C1 Tobin. Keep his pennies, skills,
+dialogues and exact rusty gift; there is no substitute Tobin. Add exactly Watch
+Post, Watch Cell, Gate Tower and East Gate with the links in the cartridge clause.
+All four rooms have equipment-free egress. Read the actual duty roster and road
+sign; no gate key or outside-chapter road target is needed.
 
-## Governing clauses and PM choices
+Talk/Start at Watch Post earns0 checkpoints. Continue rounds moves Tobin west alone
+into North Gate; the player then moves west, earning1. Continue south/player south
+joins Green for2. Continue east/player east joins East Gate for3. Continue west/player
+west through Green and north/player north through North Gate remain3. Continue east/
+player east joins Watch Post for4, resolving S3/completed and trust true once.
+No clock wait, money, learning, light, hound combat or automatic player movement is
+part of this route. Trust grants no extra item/skill/gate; C1 teaching remains optional.
 
-Govern by `docs/system/architecture.md` composition; `mechanics.md` movement, dialogue, quest, schedule/behavior, death and combat; `protocol.md` composition, admission, due jobs and any merged escort supplement; `save.md` receipts/commit/reconcile and the merged escort recovery clause; `cartridge.md` chapter source/compiler/loader; `book-ui.md` NPC/journal/live-action freshness. Future source: `docs/NEXT-MECHANICS.md` M16-C/M20-C/D, archived 00a §§2,4,7 (S3), 00 §4.7/4.8 and 21 §10/§28. Read mechanics/storage/contracts lessons. Amend the installed clauses and record the adopted S3 policy in this PR before code.
+**Composition record:** real consumer is original Tobin leading ordinary player
+travel, with actual fatal player death invalidating the current attempt. Reads are
+bound actor/body/Tobin/S3/activation, attempt/cursor/status/credit, actual accepted
+entered-room/fatal events and life/location/passage. Writes are one typed patrol
+row, leader containment, choice/quest progression and reserved player trust;
+movement/death retain their own player/corpse writes. Patrol owns leader progression
+and credit, movement owns edge admission/transfer, quest owns activation/terminal,
+death owns fatal reset before revival, authority owns receipt/commit/adoption.
 
-**Required explicit PM adaptation:** the archived night-only offer, mortal Tobin+Bram alternate turn-in and closed North Gate conflict with the no-wait/real-cast/recovery direction. Recommend all-hours player-started rounds, **noncombatant Tobin**, and an always-passable north–south chapel/corpse corridor. Trust is committed and narrated distinctly; it must never become a prerequisite for returning to the shrine or reaching this required trainer. Do not mark the old 18:00 gate fixture applicable without a reviewed compatible optional-boundary policy. Watch Cell can remain an ordinary authored optional lock only if its key producer and inside egress/recovery are complete; never expose a locked room with an unavailable key. If PM elects a mortal Tobin, this PR must include his actual death/failure and an approved real-cast recovery/hand-in before offering S3; this draft does not choose that larger option.
+Reuse body/life/location queries, ordinary passage/transfer/entered occurrence,
+quest/choice hooks, reserved facts, changed-row receipts and full-prior transition
+preconditions. Missing invariant is durable bounded player-follow-leader attempt
+identity and ordered causal checkpoint credit. Implement only its typed row and
+transition, keyed to this actor's exact quest instance; do not repurpose Wren's
+actor-keyed NPC-follow-player row. Use accepted start/restart command IDs as attempt
+identity, without another identity allocator or unbounded event history in the row.
+The existing receipt history proves transitions. No named Tobin/S3/room branch belongs
+in kernel code. Bounds and route values live in cartridge data; shared safety budgets
+apply to projection/admission/validation before work. Any new foundation composition
+branch requires independent literal fixtures and two-kernel differential proof.
 
-**Recommended finite route policy:** a closed physical walk `watch_post → north_gate → village_green → east_gate → village_green → north_gate → watch_post`. The checkpoint rooms are North Gate, Green, East Gate and Watch Post; the repeated connecting rooms do not create additional credit. Starting co-presence at Watch Post is not an entered-room credit. Before each next leg, a currently bound, living, co-located player/Tobin may choose **Continue rounds**. That command requests Tobin's one legal next-edge move; the player then uses the ordinary Move/Flee path to catch up. No automatic player transfer, time jump, fixed-night dwell or hidden periodic reading deadline. The leader waits at that leg's destination until its actual checkpoint is joined. This is a narrow player-triggered patrol, not a universal daily NPC scheduler.
+Likely files: chapter manifest/rooms/Tobin/S3/dialogues/facts/text; minimal patrol
+owner and shared movement/dialogue/death hooks; compiler/loader; typed protocol
+state/delta/invariant/action/view shapes and generated outputs; both compose twins
+only if needed for the new transition; local-story save validation; existing NPC/
+Journal/World projection and Book details. Serialize shared generated/protocol/
+proposal files after C1/B5 integration. Preserve unrelated C1/B5 definitions within
+the current release and derive fresh successor pins independently. Out: daily NPC
+patrol AI, hounds/assist/arrest, NPC death/replacement, survival duration/timer,
+general quest interpreter, skill/reward changes, extra rooms, server adapters,
+new native work, navigation redesign and save migrations.
 
-Temporary voluntary departure produces a separated/pause state with explicit co-located Rejoin; no arrival silently resumes it. Actual player death invalidates all current attempt credit before shrine return; Restart at the same reachable Tobin creates a new attempt starting at his actual route position. Rotate the same closed walk from that position until four distinct post-start checkpoints have been physically entered together. Do not teleport Tobin back to the watch post. Production prose and any optional timing values remain PM selection, **null here**.
+## Independent expected behavior and red controls
 
-## Composition and implementation boundary
+Use actual loader/public commands, hand-checked route answers and real disposable
+SQLite. Each new test names a distinct realistic break. Apply its mutant to the old
+focused same-layer suite first; if existing focused coverage fails, add no duplicate.
+Observe red, restore and rerun; expected results never come from the implementation.
 
-**Reads:** S3 actor/instance/attempt, original Tobin EntityId/body, current legal route leg, player/Tobin life and containment, actual accepted entered-room/death events, acquired swords and trust. **Writes:** activate S3 once; a bounded patrol-attempt row; Tobin's one containment transfer; causally validated checkpoint progress; death/separation/rejoin/restart; completion/trust/acquisition in one final group. **Ownership:** behavior/patrol owns the leader route and its transitions; movement owns the legal edge; quest owns attempt evidence and completion; skills owns idempotent learning; fatal producer invalidates survive in the existing death group; authority commits only changed rows plus receipt. A Book render/timer never moves or credits anyone.
+- **Leader entry credited before player join:** Start0; leader west leaves player at
+  Post and credit0; player west gives1. Continue/player south2, east3, west3, north3,
+  east4, S3/completed, trust true. Four North Gate repeats never give4. Plant leader-
+  event credit, missing deduplication or source/attempt validation and observe reds.
+- **Wrong orientation or competing escort:** keep an active following original Wren
+  while starting S3; Continue moves only Tobin, while the correct player Move carries
+  Wren once and credits S3 once. Failed passage/insufficient player movement leaves
+  that join pending with player/Wren behind. Replay neither departure nor join twice.
+  Plant a second player transfer, swapped relation target or free movement admission.
+- **Departure silently resumes:** after credit1 at North Gate, player north to chapel
+  pauses with credit1; Tobin remains North Gate. Player south returns but remains
+  paused/credit1; explicit Rejoin gives together/credit1. From cursor1, legal paired
+  joins Green→East Gate→Green→North Gate→Post give2→3→3→3→4. A fresh-id stale
+  Continue carrying old attempt/cursor/status refuses atomically. Plant implicit
+  arrival Rejoin or omitted drawn-cursor guard. Close stays usable when an action is unavailable.
+- **Death retains old survive credit:** credit2 at Green; player leaves to the real
+  cellar and suffers an actual fatal installed rat round. Death marks failed/credit0,
+  same-body shrine return, Tobin still Green/cursor2, S3 active/trust false. Return by
+  ordinary exits and Restart at Green gives a new attempt/credit0, cursor2. Paired
+  entries East Gate→Green→North Gate→Post give1→2→3→4; resolve once. Old attempts,
+  revival and player-alone visits give no credit. Plant omitted fatal reset or old-
+  attempt acceptance. Also kill while awaiting with Tobin ahead in a controlled
+  actual combat setup; lawful leader-ahead death must fail, not fault.
+- **Trust without terminal proof:** final join commits one S3/completed/trust true,
+  with no penny, skill or item change. Repeat, exact retry and later travel/death
+  retain terminal truth and no movement/reward. Starting skills acquired or absent
+  both remain unchanged; the old C1 lesson/gift behavior stays governed by C1.
+  Plant omitted terminal guard or unrelated-receipt evidence acceptance.
+- **Recovery gated by trust/hour:** walk all four new rooms, Read both details and
+  return from Cell/Tower. At18:00,23:00 and next-day06:00 an untrusted/untrained
+  actor can use the real chapel/village/fen/cellar route and recover the actual owned
+  corpse/items. Plant a required-route trust/hour barrier and observe the journey fail.
+  Perform actual patrol starts at those phases; elapsed-only delivery never moves Tobin,
+  fails a reading pause or skips a leg. If existing focused coverage catches a break,
+  retain it instead of adding source-text checks.
 
-Prefer one capability-owned row bound to the S3 instance: original actor/body/Tobin, start/attempt identity, route cursor, expected current leg and bounded checkpoint set, status active/separated/failed/completed. Use the merged typed relation primitive only where its actual orientation supports this consumer. Register any missing transition/target invariant rather than store an unowned JSON patrol blob. Bound all route/candidate work before evaluating it. Keep the one active quest instance on a failed attempt, with honest journal failure and immediate new-attempt action; do not reopen every terminal quest by weakening generic quest transitions. Attempt reset must compare the old attempt and clear its old checkpoint/survive credit atomically. Current co-location alone cannot fabricate historical completion.
+Death is proved with the existing fatal combat producer, not a synthetic surviving
+flag; C3 hounds are not claimed installed. The player may finish a safe patrol without
+combat. The four-checkpoint survival contract means no fatal event during the attempt.
+Controlled temporary gates/faults do not add production keys/locks/danger.
 
-Credit comes only from the accepted movement occurrence at its hydrated proposal prefix: active current attempt, exact living actor/body/Tobin, expected route stage and destination, both physically present, first qualifying entry for that checkpoint. A replayed/foreign/forged entered-room event, player-alone walk, replacement Tobin, pre-activation visit or repeated-room loop earns nothing. The shared ordinary player Move/Flee consumer can also carry Wren under a legitimate concurrent rescue relation; neither relation steals the other's identity or writes the player twice. Complete S3/trust/learning once with retained proof; a learned swords skill receives no duplicate grant or charge.
+## Save, checks, review and stop trigger
 
-Add exactly four rooms (`watch_post`, `watch_cell`, `gate_tower`, `east_gate`), reciprocal links from North Gate/Green, appropriate readable duty roster/road sign and real Tobin dialogue. Keep higher-chapter King's Road closed without a dangling target. Use installed Read/detail/container/key mechanics, not a new watch UI. Likely code: chapter rooms/Tobin/quest/dialogues/facts/text; behavior and quest evidence reducer; movement/death hooks only for the typed consumer; protocol relation/job/event/quest/state/delta contracts as actually needed; compiler/loader and generated contracts; local-story load and retained-choice evidence; GameView/Book NPC/journal projection. No source is changed here. Out: hound population/pack AI, guards/arrest, daily patrol framework, NPC replacement, new native/UI work and retired Bram.
+Use real cold reopen after every selected boundary and later consume that state:
+activation, leader ahead, each join, pause, arrival before Rejoin, fatal failure,
+player return, Restart and completion. Replay accepted transition receipts in
+revision order and verify causal entries/death and current row in both directions.
+Mutate exact identities/refs/scopes, cause/correlation, attempt/cursor/status/credit,
+start/restart proof and terminal trust in actual SQLite rows; require typed
+save_corrupt with file unchanged. Keep lawful player travel after completion and
+pause/failure distinct from corruption; keep storage errors and release mismatch typed.
 
-## Literal acceptance and red controls
+Failed COMMIT, unknown-not-committed, unknown-committed and lost reply must retain
+all-old/all-new transfer/patrol/choice/quest/trust/head/receipt and no duplicate credit
+or allocation. Test concurrent Wren escort/death and C1 lesson payments/reopen; new
+patrol validation cannot reject those lawful independent state changes. No snapshot,
+manual bookmark, migration or silent reset is introduced.
 
-Use controlled literal identities P (actor/body) and T (original Tobin) pinned independently to the new fixture; use actual source rooms, public commands, existing frozen RNG and disposable SQLite. These route answers implement the proposed policy only after PM adopts it.
+Run focused compiler/loader/short-ref/schema invalid cases, both-kernel composition
+fixtures/differential when changed, patrol/dialogue/movement/Flee/death/quest/escort,
+Book and real SQLite tests. Each changed schema gets its required/bound mutant sweep.
+Report commands, exits, actual red controls and failures. The provisional lane uses
+focused checks; full active mise check_all and red controls run once at accumulated
+publication under the normal hook. Fresh primary plus required save/protocol opinion
+applies; Astra audits runtime/proposal if touched. Later source changes require scoped
+review. Browser proof walks the real Book route, refresh, pause/recovery and terminal
+narration; no native or owner-save operation is authorized by this assignment.
 
-1. Fresh accepted attempt at Watch Post has **0** checkpoint credit. Continue moves **T alone** to North Gate; P remains Watch Post, credit0. P's legal west Move reaches North Gate and makes credit **1**. Next physical joins at Green and East Gate produce **2**, **3**. Return through Green/North Gate keeps **3**; final Watch Post join produces **4**, resolves S3 once and trust=true. Four repeats of North Gate yield **1**, never4. Mutate checkpoint deduplication or causal actor binding; the focused route tests fail.
-2. NPC movement admits exactly the next legal adjacent edge from the same co-located living participants. Remote/substituted/dead T, stale Continue, failed gate/fare/compose and extra player-alone walk do not credit or move T. Rejoining at T's actual destination resumes exactly that same leg/attempt; an arrival without Rejoin does not. Mutate exact T/presence or route cursor guard. Confirm no speculative pathfinding/teleport appeared.
-3. At credit2, a real lethal player combat event returns the same body to the configured shrine and marks the attempt failed, credit **0**; revived entry/old due event cannot award success. T remains at his actual route room. Legal equipment-free return to T and Restart is available immediately; the new attempt receives four new distinct checkpoint occurrences, resolves once and has no old-attempt credit. Mutate death invalidation or attempt identity comparison and observe failures.
-4. Swords already learned: S3 completion leaves one acquisition, no charge and no second rusty sword. Unknown swords: completion offers/grants the same adopted C1 learning semantics exactly once. Retry/lost acknowledgement/reopen grants trust/learning once; current trust alone cannot forge a resolved S3 row. Mutate the final terminal/reward guard.
-5. Walk all four new rooms by actual legal exits, with correct details/Read and legal return. The mandatory chapel→village→fen/cellar recovery route remains passable for an untrusted actor at **18:00**, **23:00** and next-day **06:00**. This is the reviewed no-wait/recovery policy, not the archived closed-gate answer. A planted required-exit block or trust gate must fail the real lethal-corpse-return journey.
-
-## Save, reviews and stop trigger
-
-Cold-open each committed boundary: activation, leader departure with player still behind, joined checkpoint, paused separation, failed attempt, restart and completion. A leader ahead/player behind is a **lawful** saved intermediate state; do not repeat M6's rejected-lawful-departure bug. Due/next-leg consumers re-read identity/cursor/status. Malformed/null row, duplicate/unknown checkpoint, invalid route position, wrong actor/T/quest/attempt or forged terminal evidence returns typed `save_corrupt`; legal separation/failure does not. Real failed and both unknown-COMMIT outcomes keep movement, attempt, rewards and receipt all old/all new; replay allocates/credits nothing. Keep exact release refusal and explicit Start over.
-
-Run focused actual route/death/quest/skill, compiler/loader/schema, Book and real SQLite proof, normal shared full gate, actual Ponytail and correctness self-review. Fresh primary plus protocol/save/foundation opinion is required; Astra when `runtime/proposal.ts` is touched. Exact-head CI/scoped fixes precede merge. Owner browser-first iteration must be adopted in workflow; headless sim/shared engine checks stay; native proof deferred to prelaunch. No owner-save operation.
-
-**Stop trigger:** unresolved PM mortality/no-wait/failure choices, unmerged prerequisite pins, a need to silently reuse Wren's follow orientation, weaken terminal/save evidence, invent Bram, close the only shrine route, or make player teleportation/time waiting the patrol mechanic. Preserve complete route, actual survive invalidation and immediate recovery in the same vertical PR.
-
-Planning self-review: applied Ponytail and checked this proposed boundary for correctness. Reuses existing ownership/transactions; no new dependencies or general framework are requested. Production decisions and future source pins remain explicit gates above. This is author self-review only; independent publication/implementation review remains required.
+Stop/escalate unreviewed dependency pins, a current-spec conflict, unsupported mortal
+Tobin, blocked required recovery route, silent reuse of escort orientation, a second
+location writer, unbounded route/history work, general objective machinery or a source
+footprint larger than this complete outcome. Planning author review found no current
+spec conflict: the archived swords/night/gate/Bram choices are explicitly amended.
+Ponytail Review: lean; one concrete typed continuation, existing ownership/transactions,
+no scheduler, reward framework or dependency. This is self-review, not independent approval.

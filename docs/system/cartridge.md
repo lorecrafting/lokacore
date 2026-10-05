@@ -765,3 +765,49 @@ the existing compiler path. Reject initial contents over capacity, null with
 positive quantity, unknown kind, unsafe density product and source declarations
 on non-detail entities. Non-opted items and historical frozen artifacts retain
 their existing representation; B4's fuel rows are not liquid vessels.
+## C2 watch route and trust
+
+**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+adds four Ashmere rooms with reciprocal, all-hours exits: North Gate east ↔
+Watch Post west; Watch Post east ↔ Watch Cell west; Watch Post up ↔ Gate Tower
+down; Village Green east ↔ East Gate west. The cell is vacant with an open,
+unlocked door: no missing-key producer. Gate Tower uses existing adjacent sight;
+no far scan is promised. Watch Post's duty roster and East Gate's flooded-road
+sign use installed readable details. The sign explains that the King's Road is
+outside this chapter; no dangling exit or higher-chapter room is added.
+
+Move the same original C1 Tobin spawn from North Gate to Watch Post, retaining
+his pennies, lesson definitions and exact rusty sword identity. He is a passive
+noncombatant with no attack profile, daily schedule or other location writer.
+His C1 lessons remain available at his current reachable location, including
+between patrol legs; after completion he stays at the terminal checkpoint.
+No paid training, skill, trust, equipment, light or hour condition gates S3.
+
+| Chapter parameter | Selected value |
+|---|---|
+| Cyclic route cursor0..5, initial0 | Watch Post → North Gate → Village Green → East Gate → Village Green → North Gate → Watch Post |
+| Distinct checkpoints | North Gate, Village Green, East Gate, Watch Post |
+| Required new checkpoint entries per attempt | 4; starting co-presence earns0 |
+| Leader movement trigger | One explicit Continue rounds per edge |
+| Patrol duration, deadline, cooldown | 0, none, 0; authority elapsed settlement still applies |
+| S3 success outcome | `completed` |
+| `watch.gate_trusts_player` | Reserved player Boolean, initially false, true only on S3 success |
+| S3 other reward | None; C1 owns swords teaching and the rusty gift |
+
+The closing Watch Post is cursor0 again, not a seventh route occurrence. Route
+cursor denotes the leader's current occurrence, including the repeated Green/North
+Gate positions. On Restart it is retained, not reconstructed
+from room alone. Completing four unique post-start entries takes at most six edges
+from any cursor; repeated connecting rooms count once. Open all North Gate–chapel
+and village/fen/cellar/corpse routes at every hour, without a trust barrier. Watch
+Post, Cell and Tower are safe, equipment-free optional destinations, with usable
+return exits. No hound producer or survive timer is introduced.
+
+Compiler/loader validate the bounded finite adjacent route, unique nonempty declared
+checkpoint subset and achievable checkpoint count, original NPC/quest references,
+shared location-writer exclusion, reserved trust ownership and complete room/link/
+readable definitions. Reject malformed cursors, duplicate/unknown checkpoint credit,
+wrong row identities and ordinary writes to reserved state. World route/count values
+are cartridge data, never presenter/engine chapter literals; existing safety budgets
+bound all validation/traversal. Target C2 release/API/hash/IDs remain null until the
+reviewed C1/B5 integration is re-pinned and independently derived.

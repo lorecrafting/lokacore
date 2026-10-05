@@ -950,3 +950,61 @@ load at or below the authored ceiling; it never partially fills to evade that
 ceiling. Pour within actor custody is neutral even when overloaded, and Drink
 reduces load. Take, Buy and incoming transfer must include current liquid mass;
 Drop and recovery move the same contents without refilling them.
+## S3 finite watch patrol (C2 selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
+selects an all-hours, player-started patrol led by the original noncombatant Tobin.
+The [cartridge route](cartridge.md#c2-watch-route-and-trust) supplies its finite
+walk and checkpoints. This is player-follow-leader behavior; it does not change
+[escort@1](#escort1)'s NPC-follow-player relation or occupy its actor-keyed row.
+
+The patrol owner retains one typed row per actor's S3 quest instance: original
+actor/body/leader, accepted activation choice, current attempt identity, route
+cursor, bounded unique checkpoint credit and status together/awaiting/paused/
+failed/completed. Start and Restart use their accepted command identity as the
+attempt identity; a restart never allocates another quest instance. Every mutation
+compares the complete prior row. The leader identity and activation binding never
+change; cursor/attempt/status/credit changes obey the transitions below. Authoring
+cannot assign patrol state or forge checkpoint credit through ordinary facts.
+
+Start requires standing living co-located participants and activates S3 once, status
+together, credit empty, at the authored initial route cursor. Continue rounds, from together, moves
+Tobin alone along exactly the next adjacent legal edge and changes to awaiting.
+It rechecks the original participants, current cursor, standing living actor and
+ordinary passage admission. It invokes shared movement queries, never another
+mechanic's player command. Tobin has no scheduled movement. Continue emits only
+Tobin's actual movement occurrence; it never transfers the player, skips time,
+spends RNG or fabricates a player entry.
+
+While awaiting, the actor's accepted Move/Flee over that exact pending edge joins
+Tobin, changes to together and credits the entered checkpoint at most once. Credit
+requires the same attempt, living original participants, expected source/destination
+and their co-location at the hydrated proposal prefix. Leader departure, starting
+co-presence, pre-activation visits, repeated checkpoints and foreign/replayed events
+earn nothing. Ordinary stance, passage, movement cost, combat and Flee remain
+owned by their existing mechanics. A refusal/fault changes neither movement nor credit.
+
+Any other accepted player departure while together/awaiting pauses the attempt,
+retaining its credit and Tobin's actual location/cursor. Walking while paused grants
+no credit, including arrival beside Tobin. Explicit standing, living co-located Rejoin changes paused
+to together without credit; the next legal leg proceeds from that actual cursor.
+An uncredited checkpoint is earned only by a later qualifying entry, at most one
+more circuit away. No player inactivity or reading duration fails an attempt.
+
+A real fatal event for the bound player body in together/awaiting/paused changes
+the attempt to failed and clears all credit in the same death writer group as corpse
+custody and shrine return. Tobin stays where he was. S3 remains active with a failed
+attempt, rather than terminally failing and reopening generic quests. Immediate
+standing, living co-located Restart replaces the attempt identity, clears credit and sets together
+at Tobin's current cursor; the cyclic walk needs at most one circuit for four new
+checkpoints. Old-attempt commands/events cannot resume or credit it. Failed-state
+walking/revival grants no credit. Existing Wren death separation composes independently.
+
+The fourth distinct qualifying checkpoint atomically marks completed, resolves S3
+as `completed` and assigns its reserved player trust fact true, with committed
+narration. Completed patrols never move Tobin again or offer restart/rewards.
+Trust is recognition only; it opens no required gate and grants no skill, sword,
+pennies or item. C1 remains the sole swords/gift lesson consumer. Both resolved
+trust and nonterminal attempt failure have retained causal evidence, not room-count
+inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
+are outside this selected consumer.

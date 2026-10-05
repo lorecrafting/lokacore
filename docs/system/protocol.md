@@ -648,3 +648,33 @@ labels and exact legal Fill/Pour/Drink actions; existing details and target
 selection remain the UI boundary. No renderer arithmetic creates permission or
 adjusts liquid/mass. Shared aggregate query, delta, event and writer budgets stay
 in force; pair enumeration is bounded before work, not an unmetered all-item scan.
+## C2 patrol composition and admission
+
+**Selected, pending implementation.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses a typed patrol row and full-prior-row transition, keyed to the actor's exact
+quest instance, independently of the unchanged escort row. Register its minimal
+state/mutation target/transition and invariant under the patrol owner. Preserve
+foundation precondition/conflict semantics; any new delta/state composition branch
+must have Elixir and TypeScript literal conformance and differential proof. Patrol
+RPG admission and credit remain TypeScript story semantics, with no new server adapter.
+
+Start, Continue rounds, Rejoin and Restart are bound dialogue consequences using
+ordinary Talk/Choose and choice rows. Projection and direct Choose share current
+identity, presence, life, posture, quest, attempt/cursor/status admission. Structured
+input binds the quest instance, attempt and cursor/status drawn, as well as ordinary
+continuation/choice identity; a fresh invocation id cannot convert an old leg into
+the next leg. Normal combat/modal restrictions and Close/Leave remain in force.
+
+Movement owns legal edge transfer and typed entered-room occurrence; patrol owns
+leader progression/credit; quest owns S3 activation/resolution; death owns fatal
+invalidation before revival; fact owns lowering of reserved trust in the same group.
+No raw fact assignment or independently delivered entered-room event can mint credit.
+Use actual accepted causal command/event identity, scope, ordering and proposal-prefix
+presence. All reads share the command budget; bound the finite route before work.
+Continue's leader transfer, player join/progress, pause, fatal reset and final
+quest/trust consequence each commit or roll back as one root proposal. Concurrent
+Wren follow transfers Wren once and preserves both relations' original identities;
+neither relation adds a second player transfer or steals the other's mutation target.
+No due-job chain, new player verb, global objective interpreter or per-frame writer
+is needed. Declare new typed state/transition bounds and planted invalid fixtures;
+update generated contracts and current release pins in the implementation PR.

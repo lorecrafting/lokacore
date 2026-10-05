@@ -592,3 +592,37 @@ reopen covers fresh, filled, partially poured, drunk-empty, nested, sold/bought
 back and death/recovered states; explicit release mismatch refusal and Start
 over authorization remain unchanged. Unknown successor pins stay unknown until
 the final integration release is compiled and independently re-pinned.
+## C2 patrol attempt recovery
+
+**Selected, pending implementation.** The [typed patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses existing changed-row state storage and receipts. Load/reconcile validate its
+original actor/body/Tobin, exact S3 instance/activation choice, attempt start or
+restart command identity, bounded route cursor/status/credit and revision-ordered
+transition evidence. Each credited checkpoint must trace to that attempt's accepted
+player movement, expected edge and co-present original leader; the leader's own
+entry alone is insufficient. Rejoin never retroactively supplies missing entry proof.
+
+Together requires co-location; awaiting permits leader at the cursor destination
+and player at the preceding source. Paused/failed permit lawful later player travel,
+including co-location before explicit recovery. Leader stays at the saved route
+cursor in all states. Completed requires all four proven distinct entries, S3's
+own resolved `completed` receipt and matching reserved trust. Historical final
+co-location must not reject later player travel, gear loss, lesson payments or death.
+No patrol row exists before activation; failed attempts keep S3 active and credit
+empty, with a same-body fatal event/return receipt. Restart has its own new attempt
+identity and cannot reuse historical credit. Completed trust and retained rows must
+agree in both directions; current co-location/trust is never terminal proof.
+
+Cold reopen each boundary: start, leader ahead/player behind, joined checkpoint,
+pause, arrival before Rejoin, failed death, player return, Restart and completion.
+Cross-check full definition refs/scopes, choice/command IDs, event cause/correlation,
+transfer source/destination and complete prior/result rows. Malformed/missing rows,
+unknown or duplicate credit, impossible cursor/location, swapped leader/actor/quest,
+forged terminal or old-attempt credit return typed `save_corrupt` without repair or
+file rewriting. Existing storage-error and pin-mismatch distinctions remain.
+
+Failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
+prove all-old/all-new movement/attempt/quest/trust/head/receipt. Exact receipt retry
+moves, credits, restarts and rewards nothing twice. Reconcile lawful intermediate
+states with the later consumer, including concurrent Wren following/separation;
+no new snapshot, periodic checkpoint, migration or receipt ledger is introduced.
