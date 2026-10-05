@@ -84,9 +84,9 @@ jobs:
         with:
           node-version: '24.21.0'
       - run: npm install --global @ast-grep/cli@0.45.3
-      - run: ast-grep test --skip-snapshot-tests
-      - run: ast-grep scan --error
-      - run: bin/lint_red_controls.sh
+      - run: ast-grep test --skip-snapshot-tests --filter '^(elixir-kernel-pure|ts-.*)$'
+      - run: ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src
+      - run: bin/lint_red_controls.sh --core-only
       - run: bin/docs_only_red_controls.sh
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
         with:
@@ -130,13 +130,11 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: '24.21.0'
-      - run: npm ci --no-audit --no-fund && npx tsc --noEmit && npm test
-        working-directory: mobile/app
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
-      - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' | xargs -0 npx prettier --check
-      - run: node bin/check_ts_size.mjs
-      - run: bin/ts_size_red_controls.sh
+      - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
+      - run: git ls-files -z '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 node bin/check_ts_size.mjs
+      - run: bin/ts_size_red_controls.sh --core-only
       - run: bin/kernel_red_controls.sh
       - if: failure() # a failing run's game trace (ADR-075 §2), fault corpus or simulator
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

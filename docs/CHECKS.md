@@ -1,6 +1,9 @@
 # Checks
 
-CI runs all of them; each has a planted case that must fail. Run everything locally with `bin/check_all.sh` (what pre-push runs). Moved out of [AGENTS.md](../AGENTS.md), which every agent loads every session.
+The active checks run in CI and locally through `bin/check_all.sh` (what pre-push runs).
+Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
+their rules and red controls remain available for resumption. Moved out of [AGENTS.md](../AGENTS.md),
+which every agent loads every session.
 
 - `boundary` (strict, every boundary): the dependency directions in
   [architecture.md](system/architecture.md#elixir-boundaries-compile-checked) are a compile error. Declared in each boundary's top module (`lib/loka/*.ex`, `lib/loka_web.ex`).
@@ -8,8 +11,8 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   `mix xref graph --label compile-connected --fail-above 0`: zero cycles, zero
   compile-connected edges. When a compile edge is justified, replace the zero with a
   reviewed allowed list.
-- `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): the Elixir kernel
-  (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) stay pure; in `mobile/`,
+- `ast-grep test` and `ast-grep scan --error` (`sgconfig.yml`, `lint/`): active CI checks the Elixir kernel
+  (`lib/loka/core`) and the TypeScript kernel (`kernel/ts/src`) rules and paths. The deferred mobile rules say that, in `mobile/`,
   shared packages never import an authority, Story and Realm never import each other, and
   only `authority/local-story` imports the kernel ([mobile import rules](system/architecture.md#mobile-import-rules)) and
   `packages/game-view/session.ts` imports only the generated contracts, as types
@@ -24,19 +27,21 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
   and `step`'s event-ownership check keep each to its capability's commands and events. The foundation
   imports only its own modules and generated contracts (`ts-foundation-imports`). Every
-  rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh` plants a
-  violation at each rule's real path and requires the scan to report it.
+  rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh --core-only` plants
+  kernel violations and requires each active rule to report them. The full mode remains for later mobile work.
 - TypeScript: Prettier (`.prettierrc.json`, scope in `.prettierignore`, `npm ci` at the
   root) formats on edit and is checked in pre-commit and CI (run from the repo root;
-  `.prettierignore` only applies there);
-  `npx tsc --noEmit` in `mobile/app` (covers all of `mobile/`) and
+  `.prettierignore` only applies there). CI and `bin/check_all.sh` currently select
+  non-mobile files; `mobile/` formatting is deferred. The mobile app's
+  `npx tsc --noEmit` and `npm test` are also deferred. Active TypeScript verification is
   `npm run typecheck && npm test` in `kernel/ts` (Node's built-in test runner).
   `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
   passing test, failures printed in full.
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
-  40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt):
-  `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs` (red control
-  `bin/ts_size_red_controls.sh`). Escape hatch: a `size: allow N, reason` comment in lines
+  40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt); current
+  TypeScript CI and local checks select non-mobile files, with mobile files deferred:
+  `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs` (CI red control
+  `bin/ts_size_red_controls.sh --core-only`). Escape hatch: a `size: allow N, reason` comment in lines
   1-5 (file) or right above a function after line 5, at most 1.5x; the reviewer must agree
   a split would be worse. Source files: a file at its limit (300 lines, or its existing
   `size: allow`) splits instead of growing; no new `size: allow` is added to a source file and
@@ -71,9 +76,8 @@ CI runs all of them; each has a planted case that must fail. Run everything loca
   `.json` under `docs/`, a `.gen.md`, a code file renamed to `.md`, a mixed range, no `<base>`, a
   non-ancestor `<base>` and an empty diff must say `run`; and a fake `gh` that fails on the run list or the job list must leave `ci_base.sh` with no base).
 - CI (`.github/workflows/`): `ci.yml` on pull requests and pushes to main, superseded runs
-  cancelled; `mobile.yml` builds the native apps on pull requests that change native
-  inputs, pushes to main and manual runs; `mobile-bundle.yml` compiles the Hermes bundle
-  on pull requests that touch `mobile/` or `kernel/`. The simulator (`kernel/ts/test/sim.ts`) runs its
+  cancelled; `mobile.yml` and `mobile-bundle.yml` are disabled in GitHub and retain only
+  manual triggers in source for eventual resumption. The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
   sets it, in its own `sim` job via `npm run test:sim`; the `typescript` job runs `test:nosim`; locally, `npm test`, `bin/check_all.sh` and pre-push run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
