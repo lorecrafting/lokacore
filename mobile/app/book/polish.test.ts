@@ -533,8 +533,8 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.sql.close();
 });
 
-// Breaks: NPC history scoping also captures container results in a hidden item-only log.
-test('other item actions retain their detail and World consequences', () => {
+// Breaks: a retained container result is hidden or leaks into World instead of its item detail.
+test('other item actions retain their detail and show their consequences there', () => {
   const items = JSON.parse(
     readFileSync(
       new URL('../../../protocol/fixtures/cartridge_locks_hash.json', import.meta.url),
@@ -546,7 +546,8 @@ test('other item actions retain their detail and World consequences', () => {
   h.tap('Open a sewing box');
   assert.ok(h.labels().includes('Leave'));
   assert.ok(h.labels().includes('Close a sewing box'));
-  assert.equal(h.p.screen().log.at(-1), 'Opened.');
+  assert.ok(h.text().includes('Opened.'));
+  assert.equal(h.p.screen().log.includes('Opened.'), false);
   h.tap('Leave');
   assert.ok(h.labels().includes('a sewing box, open'));
   h.sql.close();

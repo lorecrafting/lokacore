@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bandPhrase, cap, plain, why, type group, type Pool, type Thing } from './model.ts';
-import type { Button } from './presenter.ts';
+import type { Button, DetailLine } from './presenter.ts';
 import { body, head, paper } from './paper.ts';
 import { reason } from './words.ts';
 
@@ -122,6 +122,7 @@ export function ThingPage(p: {
   thing?: Thing;
   text: Say;
   actions: Button[];
+  log: DetailLine[];
   press: (b: Button) => void;
   contents: Thing[];
   open: (id: string) => void;
@@ -131,6 +132,11 @@ export function ThingPage(p: {
     <Sheet title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}>
       {p.thing?.description && <Text style={prose}>{plain(p.text(p.thing.description))}</Text>}
       {p.thing?.state && <Text style={note}>{cap(p.thing.state)}</Text>}
+      {p.log.map((line, i) => (
+        <Text key={i} style={typeof line === 'string' ? prose : { ...note, fontStyle: 'italic' }}>
+          {typeof line === 'string' ? line : line.text}
+        </Text>
+      ))}
       {p.thing?.actions
         .filter((a) => !a.available && a.reason.code === 'too_heavy')
         .map((a) => (
@@ -138,9 +144,7 @@ export function ThingPage(p: {
             {p.text(a.label)}: {reason('too_heavy')}.
           </Text>
         ))}
-      {p.actions.length === 0 && p.contents.length === 0 && (
-        <Text style={note}>Nothing to do here.</Text>
-      )}
+      {!p.actions.length && !p.contents.length && <Text style={note}>Nothing to do here.</Text>}
       {p.actions.map((b) => (
         <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
