@@ -252,3 +252,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Chapter 1 implementation and proof briefs](2026-10-05-chapter-one-briefs-review.md): PR #193 at `87b7bbca`, CHANGES REQUIRED; scoped fix `bdec64d8`, APPROVE, R193-1 D1/D6/C6 swim lesson handoff closed.
 - [Local Book web preview](2026-10-05-web-preview-review.md): PR #194 at `6a878fa2`, CHANGES REQUIRED; scoped fix `abef39cc`, APPROVE, R194-1/R194-2 closed; disposable browser corrupt-save recovery and worker red control pass.
 - [Read-once documentation rule](2026-10-05-read-once-docs-review.md): PR #195 at `fe73a47695aa17aa8868e521db626154bff6f7a1`, APPROVE; no findings.
+- [Builder's Guide reuse lessons](2026-10-05-builder-learning-review.md): PR #197 at `8971c7ed`, independent docs-only APPROVE; no findings.
