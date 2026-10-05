@@ -13,8 +13,10 @@ The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-202
 sets the active development source and save. The [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 retires Old Bram from active Q1 planning; the [queue](NEXT-MECHANICS.md) routes Q1
 design from Ashmere’s actual cast and retains the no-wait route rule.
-The [Missing Child completion plan](MISSING-CHILD-PLAN.md) maps the remaining
-player outcomes, dependencies, relative lift and proof through the full chapter.
+The [Missing Child completion plan](MISSING-CHILD-PLAN.md), merged in
+[#192](https://github.com/lorecrafting/lokacore/pull/192) after independent review,
+maps 33 proposed PRs through the remaining player outcomes, dependencies, relative
+lift and proof. Its rows are plans, not completed slices.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
