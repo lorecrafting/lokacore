@@ -291,3 +291,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C1 Tobin training plan](2026-10-05-c1-tobin-plan-review.md): exact planning head `f55536bc`, independent APPROVE; optional immediate acquisition, separate qualification, real armed/dodge/shield consumer and composed save recovery checked. Docs-only, no implementation proof.
 
 - [Parallel local slice workflow](2026-10-05-parallel-local-lanes-review.md): exact local draft head `681e1f8e`, independent docs-only APPROVE; no findings, shared-pin ordering, isolated worktrees and accumulated publication gates checked.
+- [B7 Well and waterskin plan](2026-10-05-b7-waterskin-plan-review.md): exact planning head `de7e65ca`, independent APPROVE; finite two-vessel route, owned reach, liquid-aware carrying, portable row boundary and historical receipt recovery checked. No findings; docs-only, no implementation proof.
