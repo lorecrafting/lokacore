@@ -1,7 +1,7 @@
 // The footer: the map joystick between two hairline rules (the drawing: MapDrawing.tsx; the drag
 // maths: joystick.ts). Press to zoom, drag toward a path to light it, release to walk, drag back
 // to the middle to cancel; a tap opens the Map page. RN Animated and PanResponder only.
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, PanResponder, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, ZOOM, type Ui } from './joystick.ts';
@@ -11,6 +11,7 @@ import { band, Tap } from './pages.tsx';
 import { body, paper } from './paper.ts';
 
 type Props = {
+  keyboardEnabled: boolean;
   exits: readonly GameView['exits'][number][];
   text: (key: string) => string;
   go: (direction: string) => void; // walks to an open exit
@@ -20,6 +21,14 @@ type Props = {
 };
 const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize: 15 };
 const rule = { flex: 1, height: 1, backgroundColor: paper.line };
+const keys: Record<string, string> = {
+  ArrowUp: 'north',
+  ArrowDown: 'south',
+  ArrowLeft: 'west',
+  ArrowRight: 'east',
+  PageUp: 'up',
+  PageDown: 'down',
+};
 
 // ponytail: react-native-web's announceForAccessibility is a no-op; a web build needs a live region.
 // A walk keeps the action/context from `at` (drag start); the presenter revalidates its token.
@@ -41,6 +50,35 @@ export function Footer(p: Props) {
       at.refused(refused(e, at.text));
     }
   };
+  useEffect(() => {
+    if (!p.keyboardEnabled || typeof document === 'undefined') return;
+    const keydown = (event: KeyboardEvent) => {
+      const direction = keys[event.key];
+      if (
+        !direction ||
+        event.defaultPrevented ||
+        event.isComposing ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey
+      )
+        return;
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest(
+          'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="dialog"], [aria-modal="true"]',
+        )
+      )
+        return;
+      if (!now.current.exits.some((exit) => exit.direction === direction)) return;
+      event.preventDefault();
+      walk(direction, now.current);
+    };
+    window.addEventListener('keydown', keydown);
+    return () => window.removeEventListener('keydown', keydown);
+  }, [p.keyboardEnabled]);
   const openMap = () => (now.current.openMap(), learn());
   const [pan] = useState(() => responder({ now, walk, openMap, setLit, setNote }, zoom, setKnob));
   const e = p.exits.find((x) => x.direction === lit);

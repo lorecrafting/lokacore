@@ -91,6 +91,12 @@ Map is a scrolling current-room projection, distinct from the enlarged joystick.
 exits and unavailable reasons, adjacent authored sight/entity names, door names/states and
 currently offered door/place actions. It invents no discovered multiroom coordinate map.
 
+In the web Book, unmodified Arrow Up/Down/Left/Right walk north/south/west/east and
+Page Up/Page Down use offered up/down exits. Keyboard movement uses the same captured
+exit, refusal and freshness path as the footer. A missing exit does nothing. Keys act only
+on World when no scene, combat, pending save, catch-up or fault owns the flow. Editable
+controls and dialogs keep their keys; handled movement keys do not scroll the page.
+
 Full detail openings turn the arriving page forward; local World return turns backward. Ordinary
 NPC results and direct position changes are stable-route exceptions below. The existing paper palette, bundled IM Fell
 English/EB Garamond fonts, explicit button labels/roles, section headings and minimum 44px button
