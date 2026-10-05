@@ -39,7 +39,7 @@ Example transcripts replay in `kernel/ts/test/transcripts.test.ts`.
 | commerce@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | service@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | calendar@1 | portable_capability, portable | proof on (R8) | Early R7/R8 S the start time of a fresh world; units stay the kernel's fixed ones | 21 §4 Time; command.schema.json LogicalTime | `calendar`, `Calendar`, `LogicalTime` | `kernel/ts/src/runtime/world.ts` | `protocol/fixtures/cartridge_ferry_hash.json` | `rejection_consumes_nothing` | none | no: TypeScript only (ADR-074) |
-| tide@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
+| tide@1 | portable_capability, portable | — | not yet | — | none | none | — | — | none | — |
 | light@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | liquid@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | readable@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |

@@ -268,14 +268,6 @@
       ]
     },
     {
-      "id": "tide@1",
-      "first_required": "chapter_one",
-      "phase": "R8",
-      "gates": [
-        "WORLD"
-      ]
-    },
-    {
       "id": "light@1",
       "first_required": "chapter_one",
       "phase": "R8",
