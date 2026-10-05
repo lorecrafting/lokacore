@@ -199,6 +199,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [Q2-C rescue](pm-decision-q2-c-rescue-2026-10-05.md): bound Wren escort, death separation/Rejoin and Elspeth rescued terminal, preserving stays.
 
+- [Local draft-PR cadence and scoped CI exception, 2026-10-05](owner-decision-local-draft-pr-cadence-2026-10-05.md): review and merge work units into local `main`, then publish accumulated work periodically; PRs #200–#204 merged under the owner's one-time hosted-runner exception.
+
 - [Book keyboard navigation, 2026-10-05](owner-decision-book-keyboard-navigation-2026-10-05.md): arrows walk compass exits and Page Up/Page Down use vertical exits in the web Book.
 - [Q3-B bell-first prior and lost](pm-decision-q3-bell-prior-lost-2026-10-05.md): public Aldric, exact Belfry Ring, typed Q3/prior and bell-first Q2/lost.
 - [Q3-F fox through a silent bell](pm-decision-q3-fox-silence-2026-10-05.md): after either complete Q2 return, exact Belfry Silence resolves Q3/fox with its own evidenced scene.

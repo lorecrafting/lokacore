@@ -167,6 +167,8 @@ Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book k
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
 adopts the A3 Green finale and five-outcome plan; neither is a completed source slice.
+The owner's [one-time hosted-CI exception](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
+applied to these five merges while GitHub Actions delayed and cancelled runners.
 B2 source implementation remains local; A3 source work remains ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
