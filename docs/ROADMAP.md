@@ -9,7 +9,7 @@ estimate are the PM's planning, not owner decisions.
 
 The complete [M1–M23 mechanics slice list](NEXT-MECHANICS.md) gives each lettered slice,
 its dependencies, lift and acceptance. Prepared assignments are in the [brief index](briefs/README.md).
-The [no-wait opening decision](decisions/owner-decision-no-wait-opening-2026-10-05.md) keeps Bram available and removes tide/night/next-day wait gates from the planned Missing Child route. The [queue](NEXT-MECHANICS.md) records the sampler replacement and chapter content follow-on; the current preview still has Bram's old schedule.
+The [no-wait opening decision](decisions/owner-decision-no-wait-opening-2026-10-05.md) merged in [#174](https://github.com/lorecrafting/lokacore/pull/174) after independent approval and exact-head CI. It keeps Bram available and removes tide/night/next-day wait gates from the planned Missing Child route. The [queue](NEXT-MECHANICS.md) records the sampler replacement and chapter content follow-on; the current preview still has Bram's old schedule.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
