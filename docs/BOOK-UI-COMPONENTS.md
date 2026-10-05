@@ -33,7 +33,7 @@ words remain in the cartridge; Book owns layout and navigation.
 | NPC and choice | `NpcPage`/`NpcDetail` in [`Menu.tsx`](../mobile/app/book/Menu.tsx) | Dialogue, quests, shop offers and exact speaker-local results. |
 | Board and notice | `NoticeEntries`/`NoticePage` in [`notices.tsx`](../mobile/app/book/notices.tsx) | Board → notice → board → World and confirmed Read on entry. |
 | Combat | [`Combat.tsx`](../mobile/app/book/Combat.tsx) | Foreground combat log and currently legal response list. |
-| Scene and chapter | `ScenePage`/`ChapterPage` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Resumable scene choices and chapter acknowledgement. |
+| Current scene and chapter | `ScenePage`/`ChapterPage` in [`pages.tsx`](../mobile/app/book/pages.tsx) | Modal scene continuation and chapter acknowledgement. |
 | Action/log adapter | [`presenter.ts`](../mobile/app/book/presenter.ts), [`logs.ts`](../mobile/app/book/logs.ts), `buttonsOf` in [`model.ts`](../mobile/app/book/model.ts) | Fresh offers, receipt-bound detail narration and recovery. |
 
 These are current code locations, not an instruction to wrap every mechanic in a
@@ -47,10 +47,13 @@ new component. If a piece moves, update this map in the same UI change.
 | Inspect, take, equip or use an item/container | Item detail and nested `Page` route | Exact item/custody, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
-| Begin/continue a scene or dream | Scene/chapter foreground page | Saved cursor, choice/acknowledgement, Close/Resume and no premature consequence. |
+| Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
+| Resume B9's planned bed dream | Ordinary bed → dream detail nesting; component still to be built | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([selected rule](system/book-ui.md#b9-bed-and-resumable-dream-details)). |
 | Show room travel or status | World/status shell | Confirmed room, legal exits, current time/status and no optimistic move. |
 
 Use the [Book UI rules](system/book-ui.md) for each pattern's exact behavior.
+The B9 dream is a selected future consumer, not a capability of the current
+`ScenePage`.
 When a mechanic genuinely needs a new interaction, amend that specification first,
 identify the real consumer, and add the smallest reusable page/control that serves
 it. Do not create a new screen merely because a mechanic has a new name.
