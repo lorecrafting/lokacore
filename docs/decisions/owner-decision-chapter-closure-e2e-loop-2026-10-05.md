@@ -3,7 +3,7 @@
 After each chapter, run a chapter-closure E2E loop against the shared Book browser client:
 
 - Walk the required chapter routes and UI with deterministic browser tests. Keep these model-free and assert observable behavior; do not infer chapter coverage from the existing saved-move test.
-- Run an exploratory E2E pass to find usability and route defects that the deterministic list misses. Agent-driven exploration may require a configured model provider, subscription or API key; it is a separate cost-bearing activity from deterministic tests.
+- Run an exploratory E2E pass to find usability and route defects that the deterministic list misses, using only an already authorized provider or subscription, or a local model. Do not purchase or add a paid service for this loop. If none is available, leave agent exploration pending and complete the deterministic and human walks.
 - Give the owner a visible headed browser run or a video of the chapter walk.
 - Fix findings on an isolated chapter-polish branch. Rerun each failed path and the whole chapter walk after fixes.
 - Finish with a fresh independent review of the exact final head before closing the chapter.
