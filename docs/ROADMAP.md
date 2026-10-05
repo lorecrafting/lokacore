@@ -92,6 +92,11 @@ Village Green and report it as a possible lead — merged in
 approvals, six green source-head checks and green review-only head checks. Chapter
 release 0.0.7 leaves Q2 search and rescue for later slices.
 
+FEN-02 — the all-hours route through Mire Crossing to Fox Hollow with two descriptive
+detail pages — merged in [#186](https://github.com/lorecrafting/lokacore/pull/186)
+after primary and pin/save approvals, six green source-head checks and green
+review-only head checks. Chapter release 0.0.8 remains pre-Q2 discovery and rescue.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
