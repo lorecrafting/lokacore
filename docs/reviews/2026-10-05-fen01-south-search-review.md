@@ -3,7 +3,7 @@
 - PR: [#184](https://github.com/lorecrafting/lokacore/pull/184) — first four south-fen search rooms and selectable clue details.
 - Source head reviewed: `c1764bddf3ee9af91941f541bb71c7902411c020`.
 - Reviewer: fresh independent Codex reviewer; authored none of the source change.
-- Verdict: **CHANGES REQUIRED**.
+- Final verdict: **APPROVE** after scoped fix round 1; the initial source verdict was **CHANGES REQUIRED**.
 
 ## Acceptance derived before reading the diff
 
@@ -84,3 +84,48 @@ Verification:
 
 Scoped correctness review found no new failure scenario. Ponytail Review: **Lean already.
 Ship.** The fix uses the existing title field and extends the existing behavior test.
+
+## Independent chapter-pin/save second opinion
+
+The separate reviewer authored none of the source or primary review. Its scoped results are reproduced below verbatim.
+
+```text
+APPROVE — scoped pin/save second opinion
+PR #184, head c1764bddf3ee9af91941f541bb71c7902411c020
+Findings: none.
+
+Verified:
+- test/loka/cartridge_missing_child_hash.py:116: independent generator exactly reproduces committed v006 hash and IDs; allocation follows the numeric-profile contract.
+- Historical v005 hash/ID fixtures are unchanged from the PR base.
+- mobile/app/App.tsx:14 bundles v006; its chapter save identity remains unchanged.
+- mobile/app/chapter.test.ts:185: real SQLite v005 opening refuses pinned_release_missing with identical file checksum and no removal. Explicit Start over produces the v006 pin.
+- mobile/app/App.tsx:169 routes refused-save recovery through the confirmation alert at :64.
+
+Commands:
+- mise exec -- python3 test/loka/cartridge_missing_child_hash.py
+- git diff --exit-code -- protocol/fixtures/missing_child_v006_hash.json protocol/fixtures/missing_child_v006_ids.json
+- mise exec -- mix test --force test/loka/content_missing_child_test.exs
+- mise exec -- node --test mobile/app/chapter.test.ts mobile/app/book/notice_board.test.ts mobile/authority/local-story/missing_child.test.ts
+
+Results: compiler KAT passed; 13 Node tests passed.
+Red control: authority.ts:87 fallback to newest when the saved pin is missing made the focused old-pin test fail (save_corrupt versus pinned_release_missing). Restored guard; focused test passed.
+
+Ponytail Review: Lean already. Ship.
+Disposable worktree removed; no source/record push, native tools, or owner-save reset.
+```
+
+```text
+APPROVE — scoped fix recheck
+PR #184, head 673ec70c71d2b7cffb9be60088fe582bb7f7b4f8
+Findings: none.
+
+- test/loka/cartridge_missing_child_hash.py:44: independent generator reproduces committed v006 artifact and IDs byte for byte.
+- Updated hash: 482e35cc9a5dc73ec43c3afbbd1f5950a648feb4c1029662d3cf6769a3f18b69.
+- Artifact changes only the two readable.title bindings and their catalog text. v006 IDs and historical v005 fixtures remain unchanged.
+- mobile/authority/local-story/authority.ts:87: exact-hash matching remains unchanged. A controlled real SQLite save on the prior v006 hash was refused as pinned_release_missing with identical file bytes; explicit Start over installed the updated pin.
+- mobile/app/chapter.test.ts:185: existing v005 refusal still passes. App bundle opening pins the updated hash.
+
+Validation: independent generator comparison; focused compiler KAT (1 passed); focused App/Book tests (3 passed); controlled prior-v006 SQLite refusal/Start over check passed.
+
+No unintended source changes or review edits. Disposable worktree removed; no preview, Simulator, Metro, or owner-save operation.
+```
