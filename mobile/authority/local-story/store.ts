@@ -1,3 +1,4 @@
+// size: allow 304, shared save boundary retains quest reference checks before receipt recovery
 import { encountersValid } from '../../../kernel/ts/src/mechanics/combat/saved.ts';
 import { hydrate } from '../../../kernel/ts/src/runtime/created.ts';
 import { validOverrideRow } from '../../../kernel/ts/src/foundation/resource.ts';
@@ -97,7 +98,7 @@ const whole = (m: Record<string, Json>) =>
  * or lacks a field play relies on: the head's numbers, the receipt scope and replay ids (03 §14),
  * the binding (null: a guest) (OFF-07). A corrupt save is reported, never replaced by `fresh`.
  */
-// size: allow 45, one save-load boundary checks elapsed and required pinned resource rows
+// size: allow 52, one save-load boundary checks elapsed, quest references and pinned resource rows
 export function load(db: Db, fresh: World, first: () => Meta) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
@@ -131,6 +132,13 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = hydrate(fresh, { ...state, clock: h.clock, rng } as World['state'], true);
     if (!world || !encountersValid(world)) return undefined;
+    if (
+      Object.values(world.state.quests ?? {}).some(
+        (q) =>
+          validate('DefinitionRef', q?.quest).length || validate('StateScope', q?.scope).length,
+      )
+    )
+      return undefined;
     if (recoveryFault(world)) return undefined;
     for (const [target, spec] of Object.entries(world.entityResourceSpecs))
       if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))

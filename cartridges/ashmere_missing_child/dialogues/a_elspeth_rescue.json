@@ -1,0 +1,66 @@
+{
+  "npc": "elspeth",
+  "quest": "missing_child",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_vesper_riddle_answered",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_return_branch",
+          "equals": "rescue"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "missing"
+        },
+        {
+          "op": "escort_state",
+          "quest": "missing_child",
+          "state": "following"
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.elspeth_rescue.prompt",
+  "roles": {
+    "elspeth": {
+      "role": "npc",
+      "npc": "elspeth"
+    },
+    "wren": {
+      "role": "npc",
+      "npc": "wren"
+    }
+  },
+  "choices": {
+    "rescued": {
+      "label": "dialogue.elspeth_rescue.rescued",
+      "narration": "narration.elspeth_rescue",
+      "escort": {
+        "npc": "wren",
+        "quest": "missing_child",
+        "transition": "complete"
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "village_child_status",
+          "value": "rescued"
+        }
+      ]
+    }
+  }
+}

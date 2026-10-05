@@ -581,3 +581,30 @@ matching event/victim/owner origin, configured NPC corpse definition and room cu
 Only then does it assign that player's mapped Boolean fact. Order is attack_result,
 entity_died, fact_changed. Corpse Take, forged events, duplicate instances and replay do
 not earn credit. Quest acceptance/rewards are later consumers of these facts.
+
+## escort@1
+
+API1.11 adds one actor-keyed typed escort relation. Its immutable identity is
+`{kind: escort, actor_id, body_id, npc_id, quest_instance_id, continuation_id, choice_id}`
+and its status is following/separated/completed. The continuation and choice name the
+original accepted start and bind the same authored NPC. No duplicate start or identity
+swap is legal. `escort.transition {actor_id, expected, value}` compares the complete prior
+row (null at start); the only transitions are null→following, following→separated,
+separated→following and following→completed, retaining every identity field.
+
+An authored dialogue choice may declare `escort {npc, quest, transition}` where npc is
+a bound NPC role, quest is a local quest reference and transition is start/rejoin/complete.
+Start requires no existing relation, active actor quest, original living co-located NPC
+and ordinary dialogue policy/role admission. Rejoin requires the same separated binding,
+active quest and physical presence; complete requires following, active quest and physical
+presence. Complete must resolve that dialogue's same quest. The shared predicate guards
+pending-option availability and Choose. `escort_state {quest, state}` reads only the
+actor's typed relation for that quest instance and supports policy and journal selection.
+
+Shared Move/Flee sequence appends the bound living NPC's transfer from the player's
+actual source to the same actual destination when following. Ordinary stance, exit,
+gate, fare and Flee choice/RNG remain authoritative. Invalid escort presence is a controlled
+fault/refusal, never detachment or teleport; refused/composition-failed movement changes
+neither. Fatal player death writes following→separated in death's existing writer group
+beside shrine return, leaving NPC custody unchanged. No independent fare, roll, pathfinding
+or after-commit write exists. Completed relations never follow subsequent movement.

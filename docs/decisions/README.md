@@ -31,6 +31,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Pause mobile development and verification](owner-decision-web-first-mobile-pause-2026-10-05.md): keep the Node engine simulator while mobile checks, builds and sessions wait for resumption.
+
 - [FEN-02 — Mire Crossing and Fox Hollow](pm-decision-fen02-mire-hollow-2026-10-05.md): all-hours crossing and safe return, descriptive details only.
 
 - [Q1-A — Elspeth’s first lead](pm-decision-q1-a-first-lead-2026-10-05.md): explicit acceptance and a current-possession village clue.
@@ -188,3 +190,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Q2-B — Wren encounter and letter-bank riddle](pm-decision-q2-b-wren-riddle-2026-10-05.md): all-hours bound meeting, durable retry and honest active search stages.
 
 - [Q2-C stays return](pm-decision-q2-c-stays-2026-10-05.md): complete message custody and Elspeth terminal before a separate complete rescue path.
+
+- [Q2-C rescue](pm-decision-q2-c-rescue-2026-10-05.md): bound Wren escort, death separation/Rejoin and Elspeth rescued terminal, preserving stays.

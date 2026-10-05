@@ -26,6 +26,59 @@
             "container_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "escort"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "npc_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "quest_instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            },
+            "continuation_id": {
+              "$ref": "delta.schema.json#/$defs/ContinuationId"
+            },
+            "choice_id": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "status": {
+              "$ref": "relation.schema.json#/$defs/EscortStatus"
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id",
+            "body_id",
+            "npc_id",
+            "quest_instance_id",
+            "continuation_id",
+            "choice_id",
+            "status"
+          ],
+          "additionalProperties": false,
+          "description": "API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.",
+          "examples": [
+            {
+              "kind": "escort",
+              "actor_id": "11111111-2222-4333-8444-555555555555",
+              "body_id": "22222222-2222-4333-8444-555555555555",
+              "npc_id": "33333333-2222-4333-8444-555555555555",
+              "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+              "continuation_id": "55555555-2222-4333-8444-555555555555",
+              "choice_id": "rescue",
+              "status": "following"
+            }
+          ]
         }
       ],
       "examples": [
@@ -33,6 +86,16 @@
           "kind": "containment",
           "entity_id": "11111111-2222-4333-8444-555555555555",
           "container_id": "12121212-3434-4565-8787-909090909090"
+        },
+        {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
         }
       ]
     },
@@ -174,6 +237,72 @@
             "kind": "player",
             "character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
           }
+        }
+      ]
+    },
+    "EscortStatus": {
+      "enum": [
+        "following",
+        "separated",
+        "completed"
+      ],
+      "examples": [
+        "following",
+        "separated",
+        "completed"
+      ],
+      "description": "The bounded escort lifecycle: following moves with the actor, separated waits for explicit rejoin, completed never follows again."
+    },
+    "EscortRelation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "escort"
+        },
+        "actor_id": {
+          "$ref": "identity.schema.json#/$defs/CharacterId"
+        },
+        "body_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "npc_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "quest_instance_id": {
+          "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+        },
+        "continuation_id": {
+          "$ref": "delta.schema.json#/$defs/ContinuationId"
+        },
+        "choice_id": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "status": {
+          "$ref": "relation.schema.json#/$defs/EscortStatus"
+        }
+      },
+      "required": [
+        "kind",
+        "actor_id",
+        "body_id",
+        "npc_id",
+        "quest_instance_id",
+        "continuation_id",
+        "choice_id",
+        "status"
+      ],
+      "additionalProperties": false,
+      "description": "API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.",
+      "examples": [
+        {
+          "kind": "escort",
+          "actor_id": "11111111-2222-4333-8444-555555555555",
+          "body_id": "22222222-2222-4333-8444-555555555555",
+          "npc_id": "33333333-2222-4333-8444-555555555555",
+          "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+          "continuation_id": "55555555-2222-4333-8444-555555555555",
+          "choice_id": "rescue",
+          "status": "following"
         }
       ]
     }

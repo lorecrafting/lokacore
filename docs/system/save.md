@@ -13,7 +13,12 @@ call (`newId`), an optional account binding read once when a run starts, an opti
 for latency, and an optional random source shaped like `getRandomValues` (`:44`). It opens the
 save on the release its pin names, or saves a fresh world of the newest release at revision 0 as
 a new save: with a random source, under a world context and RNG seed drawn for the new lineage
-(below), else the release's own fresh world. Refusals, nothing written:
+(below), else the release's own fresh world.
+
+Saved quest rows require valid `DefinitionRef` quest and `StateScope` scope fields before
+receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped.
+
+Refusals, nothing written:
 
 | Reply | When | New game offered |
 |---|---|---|
@@ -334,7 +339,29 @@ committed Choose command and retained bound row, with matching choice/outcome, o
 item transfer, fact consequences and quest resolution when declared. Unrelated latest
 receipts cannot supply authority. Load validates retained role identities and the branch
 and terminal evidence against authored definitions: malformed rows, impossible custody,
-or terminal status without the original message directly with the terminal NPC are
+or stays terminal status without the original message directly with the terminal NPC are
 `save_corrupt`. Legal ground, held-container and corpse custody before turn-in remain
 valid. No repair, transcript or save table is added; rollback and either unknown-COMMIT
 outcome retain the existing confirmed-disk adoption fence.
+
+
+## Escort and alternate return recovery
+
+The existing state_row table persists actor-keyed escorts through the ordinary changed-row
+transaction. Load validates each typed row against its actor/body, original start ChoiceRow
+and quest instance, original living NPC and physical state. Following requires co-location;
+separated permits player departure or later co-location before explicit Rejoin. Completed
+requires the proven rescued terminal and NPC beside the terminal speaker. Every committed
+intermediate state must reopen and reconcile under the same boundary.
+
+Bound return validation admits mutually exclusive alternatives: no branch keeps the message
+with its original source; stays requires its original receive and optional stays handoff;
+rescue keeps the message with the original source and requires its original escort path.
+Branch, quest outcome, status, escort and own committed receipts must agree. The forged
+terminal refusal applies before either selection. Missing/swapped/malformed roles or escort
+rows, cross-branch evidence and impossible locations are typed save_corrupt without repair.
+Own committed start/Rejoin/terminal receipts validate escort effects and derive original NPC
+narration. The latest committed escort transition must match the stored relation; separated
+requires the fatal transition's death event and player-body transfer. Unrelated latest
+receipts and current room never prove success. Existing rollback,
+unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchanged.

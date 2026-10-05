@@ -13,6 +13,10 @@ The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-202
 sets the active development source and save. The [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 retires Old Bram from active Q1 planning; the [queue](NEXT-MECHANICS.md) routes Q1
 design from Ashmere’s actual cast and retains the no-wait route rule.
+The [Missing Child completion plan](MISSING-CHILD-PLAN.md), merged in
+[#192](https://github.com/lorecrafting/lokacore/pull/192) after independent review,
+maps 33 proposed PRs through the remaining player outcomes, dependencies, relative
+lift and proof. Its rows are plans, not completed slices.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
@@ -68,6 +72,13 @@ LOCAL-FAST-LOOP — owner testing on Debug/Metro with playable-checkpoint source
 and coherent PR batching — merged in [#181](https://github.com/lorecrafting/lokacore/pull/181)
 after independent approval and green docs-head checks.
 
+WEB-FIRST-PAUSE — mobile-specific CI checks, native builds and device Simulator
+verification paused while headless engine simulation stays active — merged in
+[#191](https://github.com/lorecrafting/lokacore/pull/191) after two workflow-review
+findings were fixed and independently rechecked. Five source-head CI checks and
+final review-head checks passed. The [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md)
+sets the temporary routing; browser preview implementation remains separate.
+
 M12-B — nested notice-board and notice detail pages — merged in
 [#182](https://github.com/lorecrafting/lokacore/pull/182) after the cold-reopen,
 navigation-label and malformed-save findings were fixed; primary and protocol/save
@@ -117,9 +128,13 @@ after the forged-terminal-save finding was fixed. Primary and separate save
 rechecks approved, six fix-source checks passed, and the final review-only head
 checks passed. Chapter release 0.0.11 offers one complete return path.
 
-Next, [Q2-C return plan](decisions/pm-decision-q2-c-stays-2026-10-05.md):
-C-rescue completes bound Wren escort → Elspeth alongside the already complete
-message return.
+Q2-C-rescue — escort the original Wren, recover after death separation, and return
+him to Elspeth for the `rescued` path — merged in
+[#190](https://github.com/lorecrafting/lokacore/pull/190) after malformed saved Q1
+references were fixed. Primary and separate Sol save rechecks approved, five
+scheduled source-head checks (including headless `sim`) passed, and the final
+review-record head passed its checks. Chapter release 0.0.12 offers both complete
+return paths; the `lost` outcome and Q3 bell/finale are still ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

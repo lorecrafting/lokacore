@@ -16,8 +16,8 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v011_hash.json');
-const ids = read('protocol/fixtures/missing_child_v011_ids.json');
+const bundle = read('protocol/fixtures/missing_child_v012_hash.json');
+const ids = read('protocol/fixtures/missing_child_v012_ids.json');
 const message = ids['item/vesper_message'];
 const vesperLine = 'Vesper places his folded message in your hand.';
 const elspethLine = 'Elspeth accepts Vesper’s message and reads it slowly.';
@@ -196,7 +196,7 @@ test('original message branch and terminal reopen with their own NPC narration a
   assert.equal(a.row('containers', message), ids['npc/elspeth']);
   assert.equal(
     a.view().journal.find((q) => q.quest.key === 'missing_child')!.journal,
-    'quest.missing_child.resolved',
+    'quest.missing_child.stays',
   );
   a.ok('b_elspeth_stays', [ids['npc/elspeth']]);
   assert.equal(a.view().choice!.prompt.key, 'dialogue.elspeth_stays.prompt');
@@ -510,8 +510,8 @@ test('failed and lost branch/terminal COMMIT keep narration and custody behind c
     }
 });
 
-// Breaks: the v011 app silently opens or replaces a v010 save despite its different release pin.
-test('v011 refuses the frozen v010 SQLite save and offers explicit Start over without changing it', (t) => {
+// Breaks: the v012 app silently opens or replaces a v010 save despite its different release pin.
+test('v012 refuses the frozen v010 SQLite save and offers explicit Start over without changing it', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-message-old-pin-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const old = elapsedHost(

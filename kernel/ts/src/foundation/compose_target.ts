@@ -26,6 +26,8 @@ export function target(op: DeltaOp): MutationTarget {
     case 'encounter.advance':
     case 'encounter.close':
       return { kind: 'encounter', encounter_id: op.encounter_id };
+    case 'escort.transition':
+      return { kind: 'escort', actor_id: op.actor_id };
     case 'time.advance':
       return { kind: 'clock' };
     case 'resource.adjust':

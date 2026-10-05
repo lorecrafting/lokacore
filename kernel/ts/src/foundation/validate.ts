@@ -104,7 +104,7 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
       return (arg as string[]).flatMap((key) =>
         Object.hasOwn(v, key) ? [] : err(child(path, key), 'missing_property'),
       );
-    // The subset gives each anyOf branch a different scalar JSON type, so the type selects it.
+    // The subset gives each anyOf branch a different JSON type, so the type selects it.
     case 'anyOf': {
       const branch = (arg as Schema[]).find((b) => types[jsonType(b, defs)](v));
       return branch ? errors(branch, v, path, defs) : err(path, 'invalid_type');

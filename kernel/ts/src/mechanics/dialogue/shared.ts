@@ -1,3 +1,4 @@
+import { refused as escortRefused } from '../escort/shared.ts';
 import { living } from '../death/shared.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
 // (mechanics/dialogue/rule.ts), admission (commands/actions.ts) and the GameView (view/view.ts) share: a dialogue's
@@ -103,6 +104,8 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
       if (!holder || world.state.containers[r.entity_id] !== holder) return 'not_owned' as const;
     }
   }
+  const escort = escortRefused(world, row, option);
+  if (escort) return escort;
   if (option.receive) {
     const item = bound(option.receive.item);
     if (!body || !item) return 'not_owned' as const;

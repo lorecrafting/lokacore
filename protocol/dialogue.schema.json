@@ -270,6 +270,31 @@
             "from"
           ],
           "additionalProperties": false
+        },
+        "escort": {
+          "type": "object",
+          "properties": {
+            "npc": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "transition": {
+              "enum": [
+                "start",
+                "rejoin",
+                "complete"
+              ]
+            }
+          },
+          "required": [
+            "npc",
+            "quest",
+            "transition"
+          ],
+          "additionalProperties": false,
+          "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest."
         }
       },
       "required": [

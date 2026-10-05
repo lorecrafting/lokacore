@@ -8,6 +8,7 @@ import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
 import { value } from './fact.ts';
 import { level } from './resource.ts';
+import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
 
 /**
@@ -37,6 +38,8 @@ export function holds(
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':
       return barrierState(world, p.barrier) === p.equals;
+    case 'escort_state':
+      return stateIs(world, actor, p.quest, p.state);
     case 'quest_state': // false in every state while the actor has no instance
       return questOf(world, actor, p.quest)?.[1].state === p.state;
     case 'time_window': {
