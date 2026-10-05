@@ -134,7 +134,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
     assert.equal(
       pin().content_hash,
-      'c328230a4bcd26c443843a640241591866df30d22bb65e3df959be761c1e8b6b',
+      '739aad02c1328bd4348f7968df5b6dd1dfc71b96ae248714436f89b48038b48a',
     );
     assert.equal(globals.loka_session!.startOver(), undefined);
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');

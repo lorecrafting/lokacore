@@ -83,6 +83,15 @@ function setup() {
   };
 }
 
+function deliverOnTime(a: ReturnType<typeof setup>) {
+  a.move('north', 'west');
+  a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
+  a.answer('accept_on_time');
+  a.move('east', 'north', 'north', 'north', 'north');
+  a.invoke('a_aldric_debt', [a.entity('npc', 'aldric')]);
+  a.answer('on_time');
+}
+
 // Breaks: cold reopen loses the bound acceptance, payment or original ledger custody.
 test('saved B2 acceptance and funded turn-in reopen with their exact rows', () => {
   const a = setup();
@@ -128,5 +137,79 @@ test('expired B2 obligation reopens with one trust penalty', () => {
     Object.values(a.world().state.quests ?? {}).find((q) => q.quest.key === 'chandlers_debt')
       ?.outcome,
     'never',
+  );
+});
+
+// Breaks: a forged bounded Priory/Fen value survives despite the committed +2 turn-in.
+test('on-time saved axis must agree with its turn-in receipt', () => {
+  const a = setup();
+  deliverOnTime(a);
+  const axis = Object.keys(a.world().state.facts ?? {}).find(
+    (k) => JSON.parse(k).fact.key === 'priory_fen_axis',
+  )!;
+  a.sql.prepare("UPDATE state_row SET value=? WHERE section='facts' AND key=?").run('9', axis);
+  assert.equal(
+    openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind,
+    'save_corrupt',
+  );
+});
+
+// Breaks: a receipt claims a ten-penny transfer from unrelated prior balances.
+test('on-time receipt balances must match funded and saved rows', () => {
+  const a = setup();
+  deliverOnTime(a);
+  const row = a.sql
+    .prepare(
+      "SELECT rowid,response FROM receipt WHERE json_extract(command,'$.payload.choice_id')='on_time'",
+    )
+    .get() as { rowid: number; response: string };
+  const response = JSON.parse(row.response);
+  const paid = response.delta.ops.filter((o: { op: string }) => o.op === 'resource.adjust');
+  assert.equal(paid.length, 2);
+  Object.assign(paid[0], { from: 100, to: 90 });
+  Object.assign(paid[1], { from: 50, to: 60 });
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE rowid=?')
+    .run(JSON.stringify(response), row.rowid);
+  assert.equal(
+    openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind,
+    'save_corrupt',
+  );
+});
+
+// Breaks: the expiry receipt moves Peg's trust at a different valid player's scope.
+test('expiry receipt trust scope must name its bound actor', () => {
+  const a = setup();
+  a.move('north', 'west');
+  a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
+  a.answer('accept_on_time');
+  const story = a.story();
+  const from = story.world().state.clock;
+  assert.equal(
+    story.elapsed({ expected_run_id: story.runId(), from, until: 237601 }).kind,
+    'saved',
+  );
+  const rows = a.sql.prepare('SELECT rowid,response FROM receipt').all() as {
+    rowid: number;
+    response: string;
+  }[];
+  const row = rows.find(({ response }) =>
+    JSON.parse(response).delta?.ops?.some(
+      (o: { op: string; fact?: { key: string } }) =>
+        o.op === 'fact.assign' && o.fact?.key === 'peg_trust',
+    ),
+  )!;
+  const response = JSON.parse(row.response);
+  const trust = response.delta.ops.find(
+    (o: { op: string; fact?: { key: string } }) =>
+      o.op === 'fact.assign' && o.fact?.key === 'peg_trust',
+  );
+  trust.scope = { kind: 'player', character_id: 'aaaaaaaa-1111-4222-8333-444444444444' };
+  a.sql
+    .prepare('UPDATE receipt SET response=? WHERE rowid=?')
+    .run(JSON.stringify(response), row.rowid);
+  assert.equal(
+    openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind,
+    'save_corrupt',
   );
 });

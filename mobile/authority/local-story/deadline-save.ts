@@ -8,10 +8,10 @@ import type {
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validOverrideRow } from '../../../kernel/ts/src/foundation/resource.ts';
-import { elapsedCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
+import { elapsedCommandId, jobCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { bind } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
-import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
+import { scopeOf, value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { refString, type ChoiceRow, type World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
 import type { Db, Meta } from './store.ts';
@@ -158,6 +158,22 @@ export function deadlineSave(world: World, db: Db, meta: Meta) {
       const terminalReceipt = choiceReceipt(world, db, scope, complete[0][0]);
       if (!within(terminalReceipt, terminal.choices[outcome!]!.availability)) invalid();
       committedDialogue(world, db, scope, complete[0][0]);
+      const selected = terminal.choices[outcome!]!;
+      const axis = selected.sequence?.filter((s) => s.op === 'fact.adjust') ?? [];
+      if (axis.length !== 1 || !terminalAxis(world, terminalReceipt, axis[0])) invalid();
+      if (paid) {
+        const transfers = terminalReceipt.delta.ops.filter((o) => o.op === 'resource.adjust');
+        if (
+          transfers.length !== 2 ||
+          transfers[0].op !== 'resource.adjust' ||
+          transfers[1].op !== 'resource.adjust' ||
+          transfers[0].from !== start ||
+          transfers[0].to !== npcBalance!.value ||
+          transfers[1].from !== spec.start ||
+          transfers[1].to !== actorBalance!.value
+        )
+          invalid();
+      }
     } else if (q.state === 'failed') {
       if (
         outcome ||
@@ -181,6 +197,48 @@ export function deadlineSave(world: World, db: Db, meta: Meta) {
     )
       invalid();
   }
+}
+
+function terminalAxis(
+  world: World,
+  receipt: Extract<DecisionResult, { kind: 'accepted' }>,
+  step: { fact: DefinitionRef; amount: number },
+) {
+  const type = world.cartridge.facts[refString(step.fact)]?.value_type;
+  const scope = scopeOf(world, world.character, step.fact);
+  const ops = receipt.delta.ops.filter((o) => o.op === 'fact.assign' && same(o.fact, step.fact));
+  const op = ops[0];
+  if (
+    type?.type !== 'int' ||
+    ops.length !== 1 ||
+    op.op !== 'fact.assign' ||
+    op.writer_group !== 0 ||
+    !same(op.scope, scope) ||
+    typeof op.expected !== 'number' ||
+    op.expected !== world.factDefaults[key(step.fact)] ||
+    op.value !==
+      Math.min(type.maximum!, Math.max(type.minimum!, (op.expected as number) + step.amount)) ||
+    op.value !== value(world, world.character, step.fact)
+  )
+    return false;
+  const events = receipt.events.filter(
+    (e) => e.payload.type === 'fact_changed' && same(e.payload.fact, step.fact),
+  );
+  const choice = receipt.events.find((e) => e.payload.type === 'choice_resolved');
+  return (
+    events.length === 1 &&
+    !!choice &&
+    events[0].actor_id === world.character &&
+    events[0].causation_id === choice.causation_id &&
+    events[0].logical_time === choice.logical_time &&
+    same(events[0].scope, scope) &&
+    same(events[0].payload, {
+      type: 'fact_changed',
+      fact: step.fact,
+      old: op.expected,
+      new: op.value,
+    })
+  );
 }
 
 function within(
@@ -270,23 +328,42 @@ function expiryReceipt(
       const ops: readonly DeltaOp[] = decision.delta.ops;
       const fact = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, deadline.fact));
       const trust = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, deadline.trust_fact));
+      const completed = ops.find((o) => o.op === 'job.complete' && o.job_id === job);
+      const due = jobCommandId(job, deadline.at);
+      const changed = (ref: DefinitionRef, old: string | number, next: string | number) =>
+        decision.events.filter(
+          (e) =>
+            e.payload.type === 'fact_changed' &&
+            same(e.payload.fact, ref) &&
+            e.causation_id === due &&
+            same(e.scope, scopeOf(world, world.character, ref)) &&
+            same(e.payload, { type: 'fact_changed', fact: ref, old, new: next }),
+        ).length === 1;
       return (
-        ops.some((o) => o.op === 'job.complete' && o.job_id === job && o.writer_group > 0) &&
+        completed?.op === 'job.complete' &&
+        completed.writer_group > 0 &&
         ops.some(
           (o) =>
             o.op === 'quest.transition' &&
             o.instance_id === instance &&
             o.to === 'failed' &&
-            o.outcome === deadline.outcome,
+            o.outcome === deadline.outcome &&
+            o.writer_group === completed.writer_group,
         ) &&
         fact.length === 1 &&
         fact[0].op === 'fact.assign' &&
+        fact[0].writer_group === completed.writer_group &&
+        same(fact[0].scope, scopeOf(world, world.character, deadline.fact)) &&
         fact[0].expected === 'pending' &&
         fact[0].value === deadline.outcome &&
         trust.length === 1 &&
         trust[0].op === 'fact.assign' &&
+        trust[0].writer_group === completed.writer_group &&
+        same(trust[0].scope, scopeOf(world, world.character, deadline.trust_fact)) &&
         trust[0].expected === 0 &&
-        trust[0].value === deadline.trust_amount
+        trust[0].value === deadline.trust_amount &&
+        changed(deadline.fact, 'pending', deadline.outcome) &&
+        changed(deadline.trust_fact, 0, deadline.trust_amount)
       );
     });
 }

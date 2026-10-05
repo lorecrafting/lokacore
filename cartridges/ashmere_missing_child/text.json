@@ -270,7 +270,7 @@
   "item.tithe_ledger.room": "A [tithe ledger] lies here.",
   "item.tithe_ledger.description": "A narrow ledger lists the tithe owed to the Priory.",
   "dialogue.peg_debt.prompt": "“Aldric at the Chapel Nave is still waiting for my ledger,” Peg says.",
-  "dialogue.peg_debt.accept_on_time": "Take the ledger; promise to deliver it by the deadline.",
+  "dialogue.peg_debt.accept_on_time": "Take the ledger; promise to deliver it by the second day at six.",
   "dialogue.peg_debt.accept_late": "Take the ledger; accept that only late delivery remains.",
   "dialogue.peg_debt.elapsed": "Ask about the ledger after the deadline.",
   "narration.peg_debt.accept_on_time": "Peg puts her ledger in your hands and names the second day at six as the deadline.",
