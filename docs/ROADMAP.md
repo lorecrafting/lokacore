@@ -91,6 +91,11 @@ DOC-READ-ONCE — agents reuse governing documents already loaded in their own
 context — merged in [#195](https://github.com/lorecrafting/lokacore/pull/195)
 after independent approval and green docs-head checks.
 
+BUILDER-LEARNING — the Builder's Guide uses real chapter examples and points
+future story authors from review findings to reusable lessons, contracts and
+tests — merged in [#197](https://github.com/lorecrafting/lokacore/pull/197)
+after independent approval and green docs-head checks.
+
 M12-B — nested notice-board and notice detail pages — merged in
 [#182](https://github.com/lorecrafting/lokacore/pull/182) after the cold-reopen,
 navigation-label and malformed-save findings were fixed; primary and protocol/save
