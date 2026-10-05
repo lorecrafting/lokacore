@@ -42,20 +42,25 @@ registerHooks({
   },
 });
 const { Footer } = await import('./Footer.tsx');
+const { BookView } = await import('./Book.tsx');
 
-// Breaks: a keyboard shortcut chooses the wrong exit or steals an editable control's arrow keys.
-test('web keyboard uses offered exits only on an eligible World footer', () => {
+function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
   const originalDocument = globalThis.document;
   const originalElement = globalThis.Element;
   const listeners = new Map<string, (event: any) => void>();
   class Target {
-    editable: boolean;
-    constructor(editable = false) {
-      this.editable = editable;
+    tag: string;
+    role?: string;
+    constructor(tag = 'div', role?: string) {
+      this.tag = tag;
+      this.role = role;
     }
-    closest() {
-      return this.editable ? this : null;
+    closest(selector: string) {
+      const choices = selector.split(',').map((part) => part.trim());
+      return choices.includes(this.tag) || (this.role && choices.includes(`[role="${this.role}"]`))
+        ? this
+        : null;
     }
   }
   (globalThis as any).Element = Target;
@@ -65,58 +70,118 @@ test('web keyboard uses offered exits only on an eligible World footer', () => {
     removeEventListener: (type: string) => listeners.delete(type),
   };
   (globalThis as any).document = {};
-  try {
-    const walked: string[] = [];
-    const refusals: string[] = [];
-    const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
-      direction,
-      available: true,
-    }));
-    const draw = (keyboardEnabled: boolean) =>
-      Footer({
-        keyboardEnabled,
-        exits,
-        text: (key: string) => key,
-        go: (direction: string) => walked.push(direction),
-        refused: (line: string) => refusals.push(line),
-        openMap: () => {},
-        learned: { seen: () => true, see: () => {} },
-      });
-    const key = (name: string, more: Record<string, unknown> = {}) => {
-      let prevented = false;
-      listeners.get('keydown')?.({
-        key: name,
-        target: new Target(),
-        defaultPrevented: false,
-        preventDefault: () => {
-          prevented = true;
-        },
-        ...more,
-      });
-      return prevented;
-    };
-    draw(true);
-    for (const name of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'])
-      assert.equal(key(name), true);
-    assert.deepEqual(walked, ['north', 'south', 'west', 'east', 'up', 'down']);
-    assert.equal(key('ArrowUp', { target: new Target(true) }), false);
-    assert.equal(key('ArrowUp', { ctrlKey: true }), false);
-    assert.equal(key('ArrowUp', { defaultPrevented: true }), false);
-    assert.equal(key('Home'), false);
-    assert.equal(walked.length, 6);
-    exits.pop(); // no down exit is offered here
-    assert.equal(key('PageDown'), false);
-    exits[0] = { direction: 'north', available: false, reason: { code: 'exit_closed' } } as any;
-    assert.equal(key('ArrowUp'), true);
-    assert.equal(walked.length, 6);
-    assert.deepEqual(refusals, ['The way north is closed.']);
-    listeners.clear();
-    draw(false);
-    assert.equal(key('ArrowUp'), false);
-    assert.equal(walked.length, 6);
-  } finally {
+  t.after(() => {
     (globalThis as any).window = originalWindow;
     (globalThis as any).document = originalDocument;
     (globalThis as any).Element = originalElement;
-  }
+  });
+  const key = (name: string, more: Record<string, unknown> = {}) => {
+    let prevented = false;
+    listeners.get('keydown')?.({
+      key: name,
+      target: new Target(),
+      defaultPrevented: false,
+      preventDefault: () => {
+        prevented = true;
+      },
+      ...more,
+    });
+    return prevented;
+  };
+  return { listeners, key, Target };
+}
+
+// Breaks: a shortcut chooses the wrong exit or steals a focused input's arrow keys.
+test('web keyboard uses offered exits and keeps focused controls', (t) => {
+  const { key, Target } = browser(t);
+  const walked: string[] = [];
+  const refusals: string[] = [];
+  const exits = ['north', 'south', 'west', 'east', 'up', 'down'].map((direction) => ({
+    direction,
+    available: true,
+  }));
+  Footer({
+    keyboardEnabled: true,
+    exits,
+    text: (key: string) => key,
+    go: (direction: string) => walked.push(direction),
+    refused: (line: string) => refusals.push(line),
+    openMap: () => {},
+    learned: { seen: () => true, see: () => {} },
+  });
+  for (const name of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'])
+    assert.equal(key(name), true);
+  assert.deepEqual(walked, ['north', 'south', 'west', 'east', 'up', 'down']);
+  for (const tag of ['input', 'textarea', 'select'])
+    assert.equal(key('ArrowUp', { target: new Target(tag) }), false);
+  assert.equal(key('ArrowUp', { target: new Target('div', 'dialog') }), false);
+  assert.equal(key('ArrowUp', { ctrlKey: true }), false);
+  assert.equal(key('ArrowUp', { defaultPrevented: true }), false);
+  assert.equal(key('Home'), false);
+  assert.equal(walked.length, 6);
+  exits.pop(); // no down exit is offered here
+  assert.equal(key('PageDown'), false);
+  exits[0] = { direction: 'north', available: false, reason: { code: 'exit_closed' } } as any;
+  assert.equal(key('ArrowUp'), true);
+  assert.equal(walked.length, 6);
+  assert.deepEqual(refusals, ['The way north is closed.']);
+});
+
+// Breaks: Book installs a World keyboard handler while a detail or save state owns input.
+test('Book captures movement keys only on an active World page', (t) => {
+  const { listeners, key } = browser(t);
+  const pressed: string[] = [];
+  const move = {
+    label: 'North',
+    action_key: 'move',
+    target_ids: [],
+    input: { direction: 'north' },
+  };
+  const screen = {
+    buttons: [move],
+    view: {
+      place: { id: 'room' },
+      time: 0,
+      position: 'standing',
+      exits: [{ direction: 'north', available: true }],
+    },
+    text: (key: string) => key,
+    log: [],
+    pending: false,
+    catchingUp: false,
+    fault: undefined,
+  };
+  const attempt = (change: Record<string, unknown> = {}, stack: unknown[] = []) => {
+    listeners.clear();
+    const current = { ...screen, ...change, view: { ...screen.view, ...(change.view as object) } };
+    const book = BookView({
+      screen: current as any,
+      stack: stack as any,
+      flip: { turn: 0, dir: 1 },
+      go: () => {},
+      press: (button: any) => pressed.push(button.input.direction),
+      refused: () => {},
+      startOver: () => {},
+      shell: { confirm: () => {}, learned: { seen: () => true, see: () => {} } },
+    });
+    const bottom = book.props.children[1];
+    const footer = bottom
+      .type(bottom.props)
+      .props.children.find((child: any) => child?.type === Footer);
+    if (footer) Footer(footer.props);
+    return key('ArrowUp');
+  };
+  assert.equal(attempt(), true);
+  assert.deepEqual(pressed, ['north']);
+  for (const change of [
+    { pending: true },
+    { catchingUp: true },
+    { fault: 'save failed' },
+    { view: { scene: {} } },
+    { view: { combat: {} } },
+  ])
+    assert.equal(attempt(change), false);
+  for (const page of [{ kind: 'dialogue' }, { kind: 'thing', id: 'npc' }, { kind: 'chapter' }])
+    assert.equal(attempt({}, [page]), false);
+  assert.deepEqual(pressed, ['north']);
 });
