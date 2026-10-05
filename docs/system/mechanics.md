@@ -620,3 +620,60 @@ fault/refusal, never detachment or teleport; refused/composition-failed movement
 neither. Fatal player death writes following→separated in death's existing writer group
 beside shrine return, leaving NPC custody unchanged. No independent fare, roll, pathfinding
 or after-commit write exists. Completed relations never follow subsequent movement.
+
+## S2 Chandler's Debt selected contract (pending implementation)
+
+This is the B2 source contract for the real Missing Child chapter, adopted in the
+[PM decision](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md). It is not an
+installed capability until the B2 source and its proof merge. Reuse quest, dialogue,
+containment, resource, fact, reaction and schedule composition; add only the missing
+typed binding and expiry operation required by this consumer.
+
+Peg is always reachable at the chandler. Before logical time 237601 and only while the
+actor has never held S2, her accepted offer atomically activates one actor-owned S2,
+binds the original Peg, Aldric and ledger EntityIds, transfers that ledger from Peg
+directly into the actor's body, and schedules one expiry for that occurrence at 237601.
+Activation precedes `item_acquired` credit. A carrying refusal leaves every row and the
+pending choice unchanged. No second acceptance or substitute ledger is allowed. At or
+after 237601, a never-accepted player may hear that the offer elapsed, without S2,
+transfer, job or penalty. The offer before or at 151200 states the on-time cutoff;
+between 151201 and 237600 it states that only late delivery remains. The clock continues
+through conversation; an offered option is rechecked when chosen.
+
+The turn-in requires the bound living Aldric, present with the actor in the public Chapel
+Nave, the actor-owned active S2, and that exact ledger directly in the actor's body.
+Ground, bag, corpse, historical possession and an item with the same definition are not
+delivery. A command settled at 151200 resolves `on_time`; one at 151201 through 237600
+resolves `late`. It transfers the original item to Aldric, records the matching
+`priory.tithe_delivered` fact and adjusts the Priory/Fen axis exactly once. On time it
+also pays exactly 10 pennies from Aldric's explicit balance to the player; late pays
+none. A missing or insufficient funding row refuses the whole outcome without a partial
+handoff. Bell allegiance, study closure and unrelated scenes do not change Aldric's
+public S2 eligibility. A held modal choice can be closed and the public route remains
+available.
+
+At 237601 the actor-bound expiry job runs before input at that clock. If its exact S2
+occurrence is still active, it fails with outcome `never`, writes the matching fact and
+adjusts Peg trust by −5 once. It leaves the ledger wherever ordinary custody or death
+placed it. If the occurrence resolved, was already failed, or the job is stale, it has
+no quest, fact, trust or payment effect. Completion cancels or otherwise makes its
+pending job inert; a replay cannot act on another occurrence. While S2 is active,
+ordinary Give/sale of the ledger or an ancestor container is refused, while Drop,
+legal Put/Take and owned-corpse recovery remain available. Expiry removes that active
+restriction without restoring custody or extending the deadline.
+
+Pennies use a content-declared, zero-gain ResourceSpec with exact nonnegative balances
+on the player body and the bound funding NPC. The chapter declares their starts and
+bounds. Payment and later commerce use checked debit/credit in one proposal; neither
+saturating `resource.adjust` nor `fact.adjust` counts as a conserved transfer. Missing,
+malformed, out-of-range or insufficient participating rows refuse or fault before any
+adoption, as appropriate to the trust boundary. Death preserves the same body's balance.
+The Priory/Fen axis and Peg trust are separately bounded typed facts, with clamped
+adjustments. Resource, fact, quest, binding, job and custody changes commit as changed
+rows with one receipt before the host adopts or replies. Reopen validates the occurrence,
+participants, item, job, status, facts and participating balances; inconsistent saved
+truth is `save_corrupt`, never repaired in place.
+
+The four deadline answers are literal: 151200 on_time, 151201 late, 237600 late,
+237601 never for an accepted still-active obligation. These use the B1 chapter calendar
+and existing due-before-input order; player Wait and clock skips remain unavailable.

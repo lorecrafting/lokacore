@@ -261,3 +261,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Q3-F fox/silent bell save opinion](2026-10-05-q3-fox-save-second-review.md): independent APPROVE at `f43e232a`; A2-S1 actor-bound receipt finding closed by a real SQLite corruption control.
 - [Q3-F fox/silent bell primary implementation](2026-10-05-q3-fox-primary-review.md): independent APPROVE of `f43e232a` through review-only `37f37d17`; no open findings, focused suites green and three red controls observed. PR pending.
 - [B1 cartridge calendar and truthful Book status](2026-10-05-b1-calendar-status-review.md): at `8efa48bc`, independent APPROVE WITH NOTES; no correctness findings, one nonblocking Ponytail nit, focused suites green and phase-boundary mutant red. PR pending.
+- [B2 Chandler's Debt specification](2026-10-05-b2-chandlers-spec-review.md): slice B2, PR pending, at `8ef3e58b`, independent APPROVE WITH NOTES; scoped fix `7d3b7d46`, APPROVE, B2-N1 closed.

@@ -475,3 +475,17 @@ status edges and immutable binding. Runtime adoption and changed-row persistence
 the escorts State section. Choose retains current policy and original-role revalidation.
 Move/Flee and death include escort changes in the same root decision; no new command,
 transcript, SQLite table, save format or UI mode is added.
+
+## Selected S2 composition (pending implementation)
+
+S2's accepted offer and turn-in use one typed proposal under the
+[selected mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
+An occurrence-bound expiry job identifies its actor and quest instance; completion
+cancels or invalidates only that job. Due jobs settle before an input at the same
+logical time. Exact payment debits and credits the two named resource targets in the
+same proposal, with nonnegative, in-range preconditions; saturation is not payment.
+The admitted choice and projected availability share current time, bound identity,
+presence, custody, carrying and funding checks. Extend schemas and composition twins
+only for the actual new operation/row fields, and retain the registered event,
+writer-group, budget and deterministic-ID rules. This is a selected source contract,
+not an installed operation.

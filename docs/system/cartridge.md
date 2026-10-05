@@ -539,3 +539,17 @@ The final Continue acknowledges and ends it. The scene carries Aldric's cold
 response as narration; he remains present and the chapel route remains open.
 The first accepted Q3 terminal choice closes both recipes. No lost/fox outcome,
 later allegiance switch, dawn scene or export is part of Q3-F.
+
+## Selected S2 authoring (pending implementation)
+
+The B2 release will author Peg and her one ledger at the chandler, plus the storeroom,
+while reusing the existing public Aldric in the Chapel Nave. Peg's offer has no hours
+gate. Source declares S2's fixed absolute deadlines through the authored chapter
+calendar, 10-penny payout, 20-penny player start, Aldric's explicit 10-penny funding,
+the 0..1000 penny resource bound, and the typed fact bounds and outcomes. The
+[selected mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation)
+owns timing, identity and atomic consequences. Compiler and loader must validate the
+receive-plus-accept choice, bound original participants/item, absolute due time,
+resource ownership and exact participating balances. Source may use a narrow typed
+expiry declaration; it must not encode the job as a free-form Effect interpreter.
+This section describes the selected next release, not content already installed.
