@@ -229,3 +229,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Local fast edit loop](2026-10-04-local-fast-loop-review.md): PR #181 at `d32b3620`, independent docs-only APPROVE; no findings, Debug/Release separation and PR gates retained.
 - [M12-B nested notice board](2026-10-04-m12-b-notice-board-review.md): PR #182 at `0b8cb02`, CHANGES REQUIRED; scoped fix `1a9967c`, APPROVE (R1–R3 closed; two independent fix mutants red).
 - [M12-B protocol/save second opinion](2026-10-04-m12-b-protocol-save-second-review.md): PR #182 at `0b8cb02`, CHANGES REQUIRED (R182-S1 invalid stored Read JSON loses typed corruption recovery); scoped fix `1a9967cb`, APPROVE, R182-S1 closed.
+- [Opening Elspeth](2026-10-05-opening-elspeth-review.md): PR #183 at `1614da51`, independent APPROVE; no findings, two red controls and full local checks passed.
