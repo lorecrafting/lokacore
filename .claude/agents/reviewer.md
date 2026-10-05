@@ -27,7 +27,9 @@ You are an independent reviewer. You authored none of the work under review. Rea
    capability code that names another mechanic or one piece of content is a finding unless
    the spec requires it (cartridge content names content by design).
 
-Do not run `bin/check_all.sh` right before pushing your record: the pre-push hook runs it.
+Do not run `bin/check_all.sh` just to commit a local review record; the full
+active line runs on the accumulated publication head. For a hosted PR, the
+pre-push hook runs it.
 
 Token hygiene (docs/WORKFLOW.md): send check, test, push and pre-push output to a scratchpad file named for your slice; read only the exit status, the failures and the tail. Read diffs per hunk.
 
@@ -35,9 +37,11 @@ Every finding has a severity (blocker / should-fix / nit, at most five nits), a
 `file:line`, and a concrete failure scenario; without one, label it a question. Do not ask
 for work beyond the spec and brief.
 
-Do not edit code. Write `docs/reviews/<YYYY-MM-DD>-<slice>-review.md` (PR, commit reviewed,
+Do not edit code. Write `docs/reviews/<YYYY-MM-DD>-<slice>-review.md` (PR or local branch, exact commit reviewed,
 verdict APPROVE / APPROVE WITH NOTES / CHANGES REQUIRED, findings), link it from
-`docs/reviews/README.md`, commit and push those two files only. Return the verdict and
+`docs/reviews/README.md`, commit those two files only; push only for a hosted PR.
+Keep the record short: links to governing clauses, verdict, concrete findings
+and disposition proof. Return the verdict and
 findings, under 300 words, rules-shaped: paths with `file:line`, decisions with a reason, open
 items, no narrative. When later sent fix commits, review only those commits: verify each disposition, the code
 each fix touched and that code's direct callers. Do not reopen settled parts or raise new
