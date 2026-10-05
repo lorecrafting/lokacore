@@ -207,3 +207,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [M5-B durable corpses and same-body shrine return](2026-10-04-m5-b-corpse-return-review.md): PR #167 at `288cee0`, CHANGES REQUIRED; scoped fix `4e05545`, APPROVE (M5B-R1/R2 closed; five independent provenance/order mutants killed).
 
 - [M6-A first live fight](2026-10-05-m6-a-first-live-fight-review.md): PR #168 at `53f1d4c`, CHANGES REQUIRED; scoped fix head `f023eff`, APPROVE; M6A-R1 closed, scheduled departure reopens/reconciles and closes harmlessly; independent red controls fail and restored focused suites pass.
+- [Verified mechanics lessons](2026-10-05-mechanics-lessons-review.md): PR #169 at `dd6d7da`, APPROVE; two verified incident lessons, accurate evidence/test pointers, no findings.
