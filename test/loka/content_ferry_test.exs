@@ -128,8 +128,7 @@ defmodule Loka.ContentFerryTest do
               ]}
   end
 
-  # Breaks: an hour outside 0-23 (or with a leading zero), a calendar without start or a start
-  # past day 1 (its first job's due time could leave the safe integers) compiling.
+  # Breaks: an invalid schedule key or a calendar without start compiling.
   test "schedule hours and the calendar are schema-checked", %{tmp_dir: dir} do
     assert compile(Path.join(dir, "a"), schedule(%{"06" => "ferry_landing"})) ==
              {:error,
@@ -138,12 +137,6 @@ defmodule Loka.ContentFerryTest do
                   "error" => "pattern_mismatch"
                 })
               ]}
-
-    late = Map.put(src("cartridge.json"), "calendar", %{"start" => 86_400})
-
-    assert compile(Path.join(dir, "c"), %{"cartridge.json" => late}) ==
-             {:error,
-              [d("SCHEMA_VIOLATION", "cartridge.calendar.start", %{"error" => "above_maximum"})]}
 
     m = Map.put(src("cartridge.json"), "calendar", %{})
 

@@ -282,10 +282,10 @@
           "maximum": 1024
         },
         "daily_schedule": {
-          "description": "behavior@1 (06 \u00a713 Behavior/schedule profiles; 21 \u00a710; capability_registry.json definitions): a daily location schedule. Each key is an hour of the day, 0 to 23 without a leading zero; from that hour until the next listed one (wrapping at midnight) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 \u00a75.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "behavior@1 (06 \u00a713 Behavior/schedule profiles; 21 \u00a710; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler and loader check it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 \u00a75.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
           "type": "object",
           "propertyNames": {
-            "pattern": "^(1?[0-9]|2[0-3])$"
+            "pattern": "^(0|[1-9][0-9]*)$"
           },
           "additionalProperties": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"

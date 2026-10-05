@@ -1,7 +1,6 @@
 import { replayRecords } from './replay.ts';
 // size: allow 315, one terminal session: its loop, each command's dispatch and the replay
-// `loka play <artifact> [script]` or `loka play <artifact> --replay <transcript>`.
-// The game_trace header and Commands by ordinal are complete replay input (ADR-075 §4).
+// `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4).
 // Replay requires a byte-identical transcript.
 import { randomUUID, getRandomValues } from 'node:crypto';
 import { createReadStream, readFileSync } from 'node:fs';
@@ -11,6 +10,7 @@ import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts'
 import { commandId } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { gameView } from '../src/view/view.ts';
+import { units } from '../src/mechanics/calendar.ts';
 import { sha256Hex } from '../src/foundation/sha256.ts';
 import { doors, normalize } from '../src/commands/target.ts';
 import { detailOf, resolved, type Offered } from '../src/commands/actions.ts';
@@ -94,8 +94,11 @@ async function session(script: string | undefined) {
     else if (parsed && 'choose' in parsed) answer(r, parsed);
     else if (parsed && 'lookup' in parsed) lookup(r, parsed);
     else if (parsed && 'wait' in parsed) {
-      const payload = { type: 'wait', until: r.world.state.clock + parsed.wait * 3600 };
-      append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+      const until = r.world.state.clock + parsed.wait * units(r.world.cartridge).hour;
+      if (Number.isSafeInteger(until)) {
+        const payload = { type: 'wait', until };
+        append('game_trace', r.ids.run_id, turn(r, command(r, payload)));
+      } else process.stdout.write('Wait how many hours?\n');
     } else if (parsed) append('game_trace', r.ids.run_id, turn(r, command(r, parsed)));
     if (tty) input.prompt();
   }
@@ -168,7 +171,7 @@ function played(r: Run, cmd: Command, result: Turn, measured: boolean): string {
     taken: `You take ${name(p.item_id)}.\n`,
     dropped: `You drop ${name(p.item_id)}.\n`,
     given: `You give ${name(p.item_id)} to ${name((p as { recipient_id?: string }).recipient_id)}.\n`,
-    waited: `Time passes. It is ${clock(r.world.state.clock)}.\n`,
+    waited: `Time passes. It is ${clock(r.world.state.clock, r.world.cartridge)}.\n`,
     opened: `You open ${it}.\n`,
     closed: `You close ${it}.\n`,
     locked: `You lock ${it}.\n`,

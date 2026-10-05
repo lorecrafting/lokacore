@@ -23,6 +23,7 @@ import { scenes } from './cartridge_scenes.ts';
 import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
+import { calendarStage } from './cartridge_calendar.ts';
 
 /** What the installed kernel and app implement (05 §3, §6); the host supplies it. */
 export interface Installed {
@@ -73,6 +74,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
           ],
     () => keyStage(c),
     () => timeStage(c),
+    () => calendarStage(c),
     () => lockStage(c),
     () => scenes(c),
     () => refStage(c),

@@ -8,6 +8,7 @@ and not repeated here.
 
 ## Product and scope
 
+- B1 uses the delegated [chapter calendar/status selection](../decisions/pm-decision-b1-calendar-status-2026-10-05.md): cartridge time units and sky phases drive confirmed Book/CLI status; deadline effects follow in B2.
 - Q3-B uses an exact bell-detail recipe, typed terminal reactions and an evidenced
   quest-resolution scene start for the public prior/lost path ([PM adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md)).
 

@@ -10,6 +10,7 @@ import { value } from './fact.ts';
 import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
+import { hourOf } from './calendar.ts';
 
 /**
  * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
@@ -43,8 +44,7 @@ export function holds(
     case 'quest_state': // false in every state while the actor has no instance
       return questOf(world, actor, p.quest)?.[1].state === p.state;
     case 'time_window': {
-      // One unit is one second and time 0 is midnight (command.schema.json LogicalTime).
-      const hour = Math.floor(world.state.clock / 3600) % 24;
+      const hour = hourOf(world.cartridge, world.state.clock);
       return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
     }
     case 'target_present':

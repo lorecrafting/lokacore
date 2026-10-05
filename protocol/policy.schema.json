@@ -176,7 +176,7 @@
           "additionalProperties": false
         },
         {
-          "description": "06 §21 time_window, a window of hours of the day: the world's hour of day (command.schema.json LogicalTime: floor(time / 3600) mod 24) is in the window from `from` (inclusive) to `to` (exclusive), wrapping midnight when `to` is less than `from`: from 18 to 6 is dusk to dawn (00 §4.2). from equal to to is no window: the compiler and the loader reject it (EMPTY_TIME_WINDOW). Owned by schedule@1.",
+          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler and loader reject endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -184,13 +184,11 @@
             },
             "from": {
               "type": "integer",
-              "minimum": 0,
-              "maximum": 23
+              "minimum": 0
             },
             "to": {
               "type": "integer",
-              "minimum": 0,
-              "maximum": 23
+              "minimum": 0
             }
           },
           "required": [

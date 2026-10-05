@@ -1,8 +1,8 @@
 # B1 — cartridge calendar and truthful Book status
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+> **Publication note:** The PM adopted the calendar fields and chapter sky values in the [B1 decision](../../decisions/pm-decision-b1-calendar-status-2026-10-05.md). Acceptance below describes the implementation target; review and merge remain separate gates.
 
-Provisional PM brief, 2026-10-05, for row B1 of the [public chapter completion plan](../../MISSING-CHILD-PLAN.md). **Provisional: PM adoption, dependency re-pin and spec amendment are required before source GO.** Inspected PM main `0fbd2847`, chapter0.0.11/API1.10, as a reading baseline only. New release/API, content hash, allocated IDs, implementation head and PR: null. Suggested branch `chapter-1/b1-calendar-status`, not created.
+PM brief, 2026-10-05, for row B1 of the [public chapter completion plan](../../MISSING-CHILD-PLAN.md). The adopted source advances the chapter to 0.0.14/API1.13 with independently derived hash `ed81f319bc98e0658bcd24986ede82eec01b86f605ad73dcdf1faa915d82e3af`. Implementation review and PR: pending.
 
 ## Goal, dependencies and authority
 
@@ -12,7 +12,7 @@ Governing installed clauses: `docs/system/mechanics.md` “A fresh world”, “
 
 ## Selected candidate and exact scope
 
-Recommend validated cartridge `calendar` units-per-hour, hours-per-day and displayed subdivisions; ordered solar periods; lunar period/origin and named phase thresholds. PM must freeze the field names and production sky/subdivision values before GO; unselected production lunar values remain null. Preserve this chapter's 3600 units/hour, 24 hours/day, start64800 and elapsed rate50. LogicalTime stays a safe integer in engine units; calendar conversion does not alter the frozen numeric/RNG/ID profile. Labels and accessibility wording belong to the presenter/catalog; sky classification is shared structured projection, never wall date or renderer JSON parsing.
+The adopted cartridge `calendar` has units-per-hour, hours-per-day and displayed subdivisions; ordered solar periods; lunar period/origin and named phase thresholds. The [PM decision](../../decisions/pm-decision-b1-calendar-status-2026-10-05.md) owns the production values. Preserve this chapter's 3600 units/hour, 24 hours/day, start64800 and elapsed rate50. LogicalTime stays a safe integer in engine units; calendar conversion does not alter the frozen numeric/RNG/ID profile. Labels and accessibility wording belong to the presenter/catalog; sky classification is shared structured projection, never wall date or renderer JSON parsing.
 
 Thread the same validated calendar through the actual schedule and time_window consumers. Lift existing fixed hour/day schema limits into compiler/loader checks against the authored calendar. Preserve half-open/wrapping period semantics and strictly-next job scheduling. Resource fractional `regen.every` already belongs to content and must retain its existing interpretation. Move only the legacy hourly boundary still consumed by this chapter/controlled calendar to an authored interval using matched portable composition checks; do not silently retime M2. Missing optional sky data projects no invented phase. Every declared period/product must be positive/exact; malformed ordering, unsafe multiplication, duplicate phase keys and impossible schedule/window references refuse at compile/load.
 
@@ -32,4 +32,4 @@ Likely files: `protocol/cartridge.schema.json`, `policy.schema.json`, `entity.sc
 
 Run focused calendar/schedule/resource/compiler/loader/Book and real SQLite elapsed recovery tests, full `mise exec -- bin/check_all.sh`, schema sweep and exact-head CI, **including TypeScript headless `sim`**. Browser status interaction is required during authorized later implementation; browser persistence is separately observed and never called SQLite/native proof. Read contract/storage/mobile/evidence lessons as relevant. Developer performs Ponytail Review and actual-diff correctness review. Fresh independent primary plus protocol/save opinion; Astra opinion if `runtime/proposal.ts` or foundation changes.
 
-Stop for a frozen-fixture conflict, incompatible calendar meaning, changed rate50/M2 answers, unsupported Elixir port shortcut, missing confirmed Game transport or a second unconsumed timing surface. Split only if concrete footprint exceeds rescue: complete calendar/status first, then its next real missing interval consumer. PM settles final production sky numbers; no silent fallback or invented pin.
+Stop for an incompatible calendar meaning, changed rate50/M2 answers, unsupported Elixir port shortcut, missing confirmed Game transport or a second unconsumed timing surface. Split only if concrete footprint exceeds rescue: complete calendar/status first, then its next real missing interval consumer. No silent fallback or invented pin.

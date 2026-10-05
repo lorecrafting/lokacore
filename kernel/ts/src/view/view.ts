@@ -30,6 +30,7 @@ import * as position from '../mechanics/position/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import { holdsNow } from '../mechanics/quest/lifecycle.ts';
 import { cmp } from '../foundation/validate.ts';
+import { status as calendarStatus } from '../mechanics/calendar.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -69,6 +70,7 @@ export function gameView(world: World): GameView {
   const current = chapter(world);
   const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
+  const calendar_status = calendarStatus(world.cartridge, world.state.clock);
   return {
     actor_id: world.character,
     ...(fight && {
@@ -90,6 +92,7 @@ export function gameView(world: World): GameView {
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
     time: world.state.clock,
+    ...(calendar_status && { calendar_status }),
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
   };

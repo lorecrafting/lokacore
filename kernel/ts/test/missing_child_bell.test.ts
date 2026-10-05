@@ -14,8 +14,8 @@ import { value } from '../src/mechanics/fact.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v013_hash.json');
-const ids = read('protocol/fixtures/missing_child_v013_ids.json');
+const bundle = read('protocol/fixtures/missing_child_v014_hash.json');
+const ids = read('protocol/fixtures/missing_child_v014_ids.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -27,7 +27,7 @@ const cartridge = loaded.cartridge as Cartridge;
 const ref = (kind: string, name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.13',
+    cartridge_version: '0.0.14',
     kind,
     key: name,
   }) as DefinitionRef;
