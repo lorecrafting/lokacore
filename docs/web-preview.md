@@ -28,3 +28,9 @@ session calls, plus the narrow install-time length and error-message fixes in
 `mobile/app/patch-sqlite-web.cjs`.
 Its web support is alpha. On an SDK update, review that guard and repeat real browser
 open, action, reload, tab reopen and Fast Refresh checks before using the preview.
+
+Run the deterministic Book browser test from `mobile/app` with `mise exec -- npm run
+test:e2e`. The tester.army e2e runner starts and stops its own preview on ports 19106 and
+19107, uses a fresh browser profile, and checks a saved move after reload. It does not
+touch the usual preview at 19006 or its save. Install its browser once with `mise exec --
+npx e2e-web install chromium`. The test uses no model or API key, and telemetry is disabled.
