@@ -51,6 +51,10 @@ M12-A — read the Missing Child landing notice and inn rumor board — merged i
 Book finding was fixed, independently rechecked and approved; a separate protocol
 opinion and six green source-head checks cover chapter release 0.0.2.
 
+UI-DETAIL — item-detail event history before options — merged in
+[#178](https://github.com/lorecrafting/lokacore/pull/178) after independent approval,
+three killed UI regressions and exact-head CI; item narration stays in the detail pane.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
