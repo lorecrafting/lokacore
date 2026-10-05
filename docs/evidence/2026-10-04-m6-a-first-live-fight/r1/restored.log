@@ -1,0 +1,31 @@
+✔ frozen M4 A runs through real Attack and two trusted elapsed proposals (6.55975ms)
+✔ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (2.957917ms)
+✔ frozen M4 C dies sleeping on the rat-first round and returns the same body (17.681625ms)
+✔ one-exit Flee pays once and cancels its future round without drawing (1.809083ms)
+✔ a surviving sleeper wakes before its remaining opportunity, other positions skip (9.66675ms)
+✔ accuracy20 misses on roll20; endpoint chances still draw accuracy (4.358209ms)
+✔ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.520333ms)
+✔ admission refuses absent, dead, sanctuary, nonstanding and already engaged participants (7.396916ms)
+✔ eight raw draws including damage rejections exhaust the whole round atomically (4.08625ms)
+✔ encounter ActionSet filters ordinary raw verbs and aliases while retaining harmless inspection (13.608125ms)
+✔ pending choices disappear during combat and ordinary actions return after Flee or death (7.03075ms)
+✔ two-exit Flee selects canonical north/west using independent seeded answers (8.066208ms)
+✔ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (4.916708ms)
+✔ active combat exposes one directionless Flee and refuses directional movement (8.8245ms)
+✔ random Flee candidate policies share the command query budget and fault atomically (17.148125ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (52.928708ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.654541ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (17.6905ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (24.228917ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (30.79ms)
+✔ input at the due deadline settles lethal combat before attempting Flee (7.930833ms)
+✔ random Flee destination and RNG reopen and replay one SQLite receipt (7.388958ms)
+✔ scheduled opponent departure reopens and reconciles before a harmless due combat round (54.465708ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 525.81325

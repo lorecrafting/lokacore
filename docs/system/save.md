@@ -286,7 +286,11 @@ Encounter rows and combat job binding/cancellation commit in the existing change
 transaction with HP, RNG, corpse identities/custody, credit facts, head and receipt.
 Reopen validates participants, authored profile/room, round/current job relationship
 and row shape before exposing play. A saved open encounter resumes its saved due time
-and initiative. Closed/cancelled occurrences cannot attack after reopen. Unknown COMMIT
+and initiative. A living NPC may have lawfully left the encounter room through its daily
+schedule while the current combat job remains pending. Reopen accepts that intermediate
+state when the NPC is in a valid room; the player body must still occupy the encounter room.
+The due round revalidates presence and closes the encounter without attacks or RNG when
+the NPC remains absent. Closed/cancelled occurrences cannot attack after reopen. Unknown COMMIT
 fences both input and elapsed work until complete prior/next state is reconciled;
 replay allocates and credits nothing. This uses save-v2 without a table/format migration;
 API1.6 and the exact release pin protect compatibility and existing owner saves.

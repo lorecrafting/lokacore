@@ -1,0 +1,27 @@
+✖ scheduled opponent departure reopens and reconciles before a harmless due combat round (32.601792ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 202.505666
+
+✖ failing tests:
+
+test at mobile/authority/local-story/combat_schedule.test.ts:15:1
+✖ scheduled opponent departure reopens and reconciles before a harmless due combat round (32.601792ms)
+  Error: save corrupt
+      at adopt (file://<repo>/mobile/authority/local-story/save.ts:113:21)
+      at s.fence (file://<repo>/mobile/authority/local-story/save.ts:66:14)
+      at settle (file://<repo>/mobile/authority/local-story/save.ts:103:15)
+      at fenced (file://<repo>/mobile/authority/local-story/delivery.ts:100:18)
+      at elapsed (file://<repo>/mobile/authority/local-story/delivery.ts:19:7)
+      at Object.elapsed (file://<repo>/mobile/authority/local-story/authority.ts:127:37)
+      at TestContext.<anonymous> (file://<repo>/mobile/authority/local-story/combat_schedule.test.ts:63:27)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17) {
+    kind: 'save_corrupt'
+  }

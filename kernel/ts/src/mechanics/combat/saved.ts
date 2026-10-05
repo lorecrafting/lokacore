@@ -1,7 +1,8 @@
 import { validate } from '../../foundation/validate.ts';
 import { same } from '../../foundation/compose.ts';
 import { bodyOf, type World } from '../../runtime/decision.ts';
-import { npcRef, participantsPresent } from './shared.ts';
+import { npcRef } from './shared.ts';
+import { living } from '../death/shared.ts';
 
 /** Validate persisted combat authority before exposing a loaded/reconciled world. */
 export function encountersValid(world: World): boolean {
@@ -35,7 +36,10 @@ export function encountersValid(world: World): boolean {
         job.due_time <= world.state.clock ||
         occupied.has(row.body_id) ||
         occupied.has(row.npc_id) ||
-        !participantsPresent(world, row)
+        world.state.containers[row.body_id] !== row.room_id ||
+        !world.rooms[world.state.containers[row.npc_id]] ||
+        !living(world, row.body_id) ||
+        !living(world, row.npc_id)
       )
         return false;
       occupied.add(row.body_id);

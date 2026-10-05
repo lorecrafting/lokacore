@@ -1,0 +1,14 @@
+[
+  {
+    "mutation": "restore-same-room",
+    "exit": 1
+  },
+  {
+    "mutation": "allow-nonroom",
+    "exit": 1
+  },
+  {
+    "mutation": "allow-dead-npc",
+    "exit": 1
+  }
+]

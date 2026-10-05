@@ -147,3 +147,24 @@ Capture 28 finds the automatically completed fight: the rat is dead and World is
 Captures 29–30 start a second actual Attack and immediately use the current directionless
 Flee, reaching The Drowned Lantern at MV98 with no combat narration in World. The final
 build/code hash is in `native/final-build.json`; no owner device or save was used.
+
+## Review round 1: lawful scheduled departure
+
+M6A-R1 is addressed by separating saved encounter integrity from due-round co-presence.
+The NPC may occupy another valid room after its daily schedule runs; player-body presence,
+living participants, identity/profile, current job, future due time and unique occupancy
+remain checked. The unchanged due round closes an absent-opponent encounter without attacks
+or draws. No schema, sampler pin, frozen oracle or combat UI contract changes.
+
+`combat_schedule.test.ts` loads a canonical, hashed controlled cartridge into real file SQLite:
+Attack at3550, scheduled departure at3600, lost-COMMIT acknowledgement and reconciliation,
+cold reopen before3700, then due completion with no events/resource adjustments/RNG draws.
+The original validator fails with `save corrupt`. `r1/` retains that reproduction, three actual
+red controls (old same-room requirement, missing valid-room check and missing living-NPC
+check), and 23 restored focused tests. Existing corruption cases now cover those last two
+boundaries. Author Ponytail/correctness review found no extra framework or producer change.
+
+The original evidence and native fingerprints above remain immutable records of their named
+heads; the native run predates this save-validator correction. Review-fix proof uses the actual
+SQLite authority. `r1/SHA256SUMS` and its verification output cover the additive fix evidence;
+the root manifest continues to verify the original 320 artifacts.

@@ -264,13 +264,23 @@ test('genuine FULL and both unknown-COMMIT outcomes fence a real fatal round', (
 
 // Breaks: corrupt participant/binding rows silently resume a different fight after load.
 test('saved encounter corruption refuses before exposing play without repairing rows', () => {
-  for (const field of ['body_id', 'job_id', 'round'] as const) {
+  for (const field of ['body_id', 'job_id', 'round', 'npc_room', 'npc_dead'] as const) {
     const p = setup();
     try {
       p.story.invoke(p.invocation('attack', [rat(fresh)]));
       const fight = engaged(p.story.world(), fresh.body)!;
-      const row = { ...fight.row, [field]: field === 'round' ? 0 : rat(fresh, 2) };
-      p.write('encounters', fight.id, row);
+      if (field === 'npc_room') p.write('containers', rat(fresh), fresh.body);
+      else if (field === 'npc_dead')
+        p.write(
+          'resources',
+          key({ kind: 'resource', resource: resourceRef(fresh, 'hp'), entity_id: rat(fresh) }),
+          { value: 0, at: 64800 },
+        );
+      else
+        p.write('encounters', fight.id, {
+          ...fight.row,
+          [field]: field === 'round' ? 0 : rat(fresh, 2),
+        });
       const before = disk(p);
       assert.equal(
         load(p.db, fresh, () => {
