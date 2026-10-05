@@ -28,7 +28,9 @@ earned key/trust, upstairs storage), combat, shrine return and real-elapsed time
 Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
 — in progress”; Q1 and the main search are not yet playable. The temporary Lantern
 errand, Bram NPC/dialogues, lantern item, story point, scene and `search_plan` are
-absent. Real Bram’s final role remains unresolved in the cutover record.
+absent. The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
+keeps Old Bram outside the active cast; Q1 awaits design from the actual Ashmere cast
+and rooms.
 
 The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from

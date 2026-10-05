@@ -10,8 +10,9 @@ estimate are the PM's planning, not owner decisions.
 The complete [M1–M23 mechanics slice list](NEXT-MECHANICS.md) gives each lettered slice,
 its dependencies, lift and acceptance. Prepared assignments are in the [brief index](briefs/README.md).
 The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
-sets the new active development source and save. The [queue](NEXT-MECHANICS.md) routes
-real Q1 after owner clarification of Bram’s role and retains the no-wait route rule.
+sets the active development source and save. The [real chapter cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)
+retires Old Bram from active Q1 planning; the [queue](NEXT-MECHANICS.md) routes Q1
+design from Ashmere’s actual cast and retains the no-wait route rule.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.
@@ -43,8 +44,8 @@ CHAPTER-01 — actual chapter cutover — merged in [#176](https://github.com/lo
 after independent approval, a separate save/bundle opinion and six green source-head checks:
 distinct Missing Child cartridge/save, retained playable Maud S1, retired temporary
 Lantern/Bram content. This is an incremental chapter release, not full chapter completion.
-Real Q1 follows owner clarification of Bram’s role. See the
-[cutover record](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
+Real Q1 awaits design from the actual Ashmere cast and rooms, without the sampler
+errand or Old Bram ([cast decision](decisions/owner-decision-real-chapter-cast-2026-10-05.md)).
 
 M12-A — read the Missing Child landing notice and inn rumor board — merged in
 [#177](https://github.com/lorecrafting/lokacore/pull/177) after the authored-alias
