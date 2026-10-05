@@ -281,4 +281,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [A3 Green finale primary implementation](2026-10-05-a3-green-primary-review.md): exact integrated local head `6a8be6d1`, initial CHANGES REQUIRED; scoped fix head `05e72a3c`, independent APPROVE, A3-P1 closed by bound Continue across all scenes; three independent guard/schema red controls and 11 scoped tests pass. Separate save/protocol disposition remains its own review.
 
-- [A3 Green finale save/protocol second opinion](2026-10-05-a3-save-second-review.md): integrated local head `6a8be6d1`, CHANGES REQUIRED; missing bell acknowledgement receipts and future Begin receipt revision survive real-SQLite cold reopen; shared primary unbound Continue finding independently reproduced.
+- [A3 Green finale save/protocol second opinion](2026-10-05-a3-save-second-review.md): integrated local head `6a8be6d1`, CHANGES REQUIRED; scoped fix at integrated `05e72a3c`, APPROVE, A3-S1/A3-S2 closed by independent guard mutants and SQLite refusal probes; shared primary Continue fix verified.
