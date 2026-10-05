@@ -43,7 +43,7 @@ registerHooks({
     };
   },
 });
-const { RoomPage } = await import('../../app/book/pages.tsx');
+const { RoomPage } = await import(new URL('../../app/book/pages.tsx', import.meta.url).href);
 const nodes = (element: any): any[] => {
   if (Array.isArray(element)) return element.flatMap(nodes);
   if (!element || typeof element !== 'object') return [];
