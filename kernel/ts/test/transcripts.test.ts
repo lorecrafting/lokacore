@@ -15,14 +15,18 @@ import { ROOT } from '../play/obs.ts';
 import { read } from './read.ts';
 
 const dir = mkdtempSync(join(tmpdir(), 'r5s2-transcripts-'));
-const kats = globSync('protocol/fixtures/cartridge_*hash.json', { cwd: ROOT }).map(read);
+const kats = [
+  ...globSync('protocol/fixtures/cartridge_*hash.json', { cwd: ROOT }),
+  'protocol/fixtures/sampler_v009_hash.json',
+].map(read);
 const transcripts = globSync('cartridges/*/transcripts/*.jsonl', { cwd: ROOT });
 
 test('every example transcript replays and exercises its capability', () => {
   assert.ok(transcripts.length >= 2);
   for (const rel of transcripts) {
     const [, cartridge, , file] = rel.split('/');
-    const kat = kats.find((k) => k.value.manifest.id === cartridge);
+    const pin = JSON.parse(readFileSync(ROOT + rel, 'utf8').split('\n')[0]).ids.content_hash;
+    const kat = kats.find((k) => k.value.manifest.id === cartridge && k.sha256 === pin);
     assert.ok(kat, `${rel}: no known answer for ${cartridge}`);
     const artifact = join(dir, `${cartridge}.json`);
     writeFileSync(artifact, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);

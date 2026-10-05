@@ -70,6 +70,30 @@
         "player"
       ],
       "meaning": "The player defeated the authored cellar rat 5 in the lantern cellar."
+    },
+    "maud_trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": -100,
+        "maximum": 100,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Maud’s trust in the player."
+    },
+    "inn_cellar_cleared": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Maud’s cellar quest has been completed."
     }
   }
 }

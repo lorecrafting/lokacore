@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.9'
+VERSION = '0.0.10'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -18,7 +18,7 @@ def quest_state(state):
 def definition(name, **parts):
     return dict(key=name, **parts)
 caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior', 'death', 'combat'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.6', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.7', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
 v['facts'] = {
@@ -94,14 +94,26 @@ v['world']['combat']['narration'] = {name: f'combat.{name}' for name in ['player
 v['world']['death_credit'] = [dict(npc=ref('npc', f'cellar_rat_{i}'), room=ref('room', 'lantern_cellar'), fact=ref('fact', f'rat_{i}_killed')) for i in range(1, 6)]
 for i in range(1, 6):
     v['facts'][key('fact', f'rat_{i}_killed')] = definition(f'rat_{i}_killed', version=1, value_type=dict(type='bool', default=False), scopes=['player'], meaning=f'The player defeated the authored cellar rat {i} in the lantern cellar.')
+# M20-B2 independently declared production reward/storage consumer, not fixture bindings.
+v['npcs'][key('npc', 'maud')] = definition('maud', keywords=['maud', 'widow', 'innkeeper'], short='npc.maud.short', room_line='npc.maud.room', description='npc.maud.description', room=ref('room', 'drowned_lantern'))
+v['items'][key('item', 'cellar_key')] = definition('cellar_key', keywords=['key', 'storage_key', 'cellar_key'], short='item.cellar_key.short', room_line='item.cellar_key.room', description='item.cellar_key.description', mass_grams=100, location={'in': 'npc', 'npc': ref('npc', 'maud')})
+v['items'][key('item', 'storage_chest')] = definition('storage_chest', keywords=['chest', 'storage_chest'], short='item.storage_chest.short', room_line='item.storage_chest.room', description='item.storage_chest.description', mass_grams=8000, capacity=12, location={'in': 'room', 'room': ref('room', 'inn_rooms')}, barrier=ref('barrier', 'storage_chest_lid'))
+v['barriers'][key('barrier', 'storage_chest_lid')] = definition('storage_chest_lid', keywords=['lid', 'storage_chest_lid'], short='barrier.storage_chest_lid.short', initial='locked', key_item=ref('item', 'cellar_key'))
+v['facts'][key('fact', 'maud_trust')] = definition('maud_trust', version=1, value_type=dict(type='int', minimum=-100, maximum=100, default=0), scopes=['player'], meaning='Maud’s trust in the player.')
+v['facts'][key('fact', 'inn_cellar_cleared')] = definition('inn_cellar_cleared', version=1, value_type=dict(type='bool', default=False), scopes=['instance'], meaning='Maud’s cellar quest has been completed.')
+v['quests'][key('quest', 'mauds_cellar')] = definition('mauds_cellar', title='quest.mauds_cellar.title', objective=dict(evidence='current_state', policy=policy(dict(op='all', items=[dict(op='fact_compare', fact=ref('fact', f'rat_{i}_killed'), equals=True) for i in range(1, 6)]))), journal={state: f'quest.mauds_cellar.{text}' for state, text in [('active', 'active'), ('objectives_met', 'ready'), ('resolved', 'resolved'), ('failed', 'failed'), ('abandoned', 'abandoned')]})
+maud_state = lambda state: dict(op='quest_state', quest=ref('quest', 'mauds_cellar'), state=state)
+maud_roles = dict(maud=dict(role='npc', npc=ref('npc', 'maud')))
+v['dialogues'][key('dialogue', 'maud_offer')] = definition('maud_offer', npc=ref('npc', 'maud'), policy=policy(dict(op='not', item=dict(op='any', items=[maud_state(s) for s in ['active', 'objectives_complete', 'resolved', 'failed', 'abandoned']]))), prompt='dialogue.maud_offer.prompt', roles=maud_roles, choices=dict(accept=dict(label='quest.mauds_cellar.accept', narration='narration.maud.accept', accept=ref('quest', 'mauds_cellar'))))
+v['dialogues'][key('dialogue', 'maud_turn_in')] = definition('maud_turn_in', npc=ref('npc', 'maud'), quest=ref('quest', 'mauds_cellar'), policy=policy(maud_state('active')), prompt='dialogue.maud_turn_in.prompt', roles=dict(**maud_roles, key=dict(role='item', item=ref('item', 'cellar_key'))), choices=dict(done=dict(label='dialogue.maud_turn_in.done', narration='narration.maud.done', receive=dict(item='key', **{'from': 'maud'}), sequence=[dict(op='fact.adjust', fact=ref('fact', 'maud_trust'), amount=5), dict(op='fact.assign', fact=ref('fact', 'inn_cellar_cleared'), value=True)])))
 v['text'] = json.loads(Path('cartridges/ashmere_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the preserved adopted catalog and eight approved prototype-derived room strings are copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
 Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram/five rats, five items, the next scheduled Bram job, cloak holder.
-names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/'+name for name in ['bram', 'cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5']] + ['item/'+row[0] for row in items] + ['job/bram'] + ['slot/cloak']
+# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram/five rats/Maud, seven items, the next scheduled Bram job, cloak holder.
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/'+name for name in ['bram', 'cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'lantern', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['job/bram'] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):
     b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])
