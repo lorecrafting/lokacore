@@ -937,3 +937,39 @@ owner, non-MV recovery declarations and unbounded/unknown consequences. The
 minimal service subset covers only these consumed consequences, not an arbitrary
 Effect interpreter. Independently re-pin the integrated bundled release/API and
 known answers after B7 source merges; future hashes/IDs/versions are null now.
+
+## B9 Lantern dream declarations
+
+The [S10 contract](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+adds no rooms, payment or entitlement writer. Reuse the actual B8 `bed` detail
+at `inn_rooms` and declared `lantern_bed_paid`. Declare player Boolean
+`slept_at_lantern` and `dream_seen`, both default false; the latter is the local
+continuity memory `player.dream_seen`. Define quest `a_room_at_the_lantern` with
+no manual offer, no repeat/failure reward, objective `dream_seen=true`, and honest
+active/resolved journal text. It is optional for the Green ending, while E3's ten
+playable quests must still exercise it.
+
+Declare one exact room/entitlement/first-Rest/S10 binding and scene
+`dream_of_the_fen`, `presentation_only`, anchored at `inn_rooms`. Source-owned
+beats are: 1 opening, 2 fen, 3 fox; after Continue at3, a choice at4 offers exactly
+`follow_fox` and `wake`; the selected branch shows its authored final line at5;
+Continue at5 acknowledges/end. Both branches assign the same `dream_seen=true`
+and resolve S10 as `acknowledged`. Three opening lines, two choices and two final
+texts are content values; final prose is delegated, not an engine constant.
+Choice resolution must retain its branch after end in its existing durable row.
+No reward, additional story point, chapter index advance or ambient sound system
+is implied. Resume is a local route over the exact scene checkpoint at the bed;
+no new gameplay Start/Resume command is added.
+
+Compiler and loader validate this consumed source subset in both languages:
+full/short references, exact anchor/detail membership, Boolean player fact
+scopes/defaults, unique trigger and consequence ownership, position/scene/quest
+capability dependencies, bounded reachable beat graph, exactly declared choices,
+choice source/actor/anchor bindings and final-only memory/quest consequence.
+Reject unknown targets/branches, repeated/unreachable consequence beats, modal
+choice mixing, body/container operations and a dream end declaring a completion
+report. Reserve engine cursor/choice ownership as for existing scenes; content
+cannot assign their state. Extend A3's terminal consequence only enough to admit
+memory assignment plus typed quest resolution without a story-point declaration.
+Future integrated release/API/hash/allocated IDs remain null until B8 source and
+review merge and independent current answers are derived.

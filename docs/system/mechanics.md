@@ -1164,3 +1164,61 @@ share one writer group and query budget. Normal authority elapsed preflight,
 scene/combat admission, freshness and receipt replay precede this work. S1 Talk,
 accept/turn-in and earned chest/key remain reachable in every quest state;
 services are separate direct offers, not a first-eligible dialogue replacement.
+
+## S10 Lantern Rest and dream (B9 selected contract)
+
+**Selected, source pending.** The [PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
+extends position/scene/quest at this first consumer. The first accepted actor-owned
+`rest` transition at actual `inn_rooms`, with B8 `lantern_bed_paid=true` and
+`slept_at_lantern=false`, sets that declared player fact true and activates the
+actor's sole S10 instance in the same proposal. This is causal post-payment
+credit: unpaid earlier Rest, rental, Sleep, menu/display, elapsed time, reopen,
+refused already-resting Rest and another actor's transition never count. Payment
+while already resting requires a new accepted Stand→Rest. No wait for night,
+MV deficit, elapsed sleep duration or chapter/quest prerequisite is required.
+
+Position emits typed `rested {body_id, room_id}` only after the actual accepted
+transition and old-rate settlement; actor/scope/root cause identify that exact
+occurrence. The consequence reads the causal hydrated prefix, including paid
+eligibility, actual body/room and prior position, not today's unrelated last
+receipt. Reaction owns the guarded first-Rest fact/quest activation; scene owns
+its checkpoint start. Shared delivery ordering, query/output budgets and one
+writer per target apply. No named Lantern switch or second Rest writer belongs
+in position. The room/fact/quest/scene binding is cartridge data.
+
+S10 has no failure/repeat/abandon reward path. Its current-state objective is
+`dream_seen=true`, but only the exact acknowledged dream end may set it and
+resolve S10 with outcome `acknowledged`. First Rest starts one durable dream
+checkpoint at beat1 in that same proposal. Confirmed presentation opens only
+when safe; another interaction defers presentation, never the saved start.
+Resume at the actual bed reads this checkpoint. No second Start command, armed
+fact, queue or timer is required.
+
+Extend scene@1 only with this bounded `presentation_only`, room-anchored subset:
+three narration beats, one two-option scene-owned choice, one selected final
+narration and final acknowledgement/end. Reuse reserved scene cursor facts and
+existing choice rows, adding the exact scene source/beat/actor/anchor binding.
+Continue at beat3 atomically advances to choice4 and opens its one ChoiceRow;
+Choose atomically resolves that row and advances to the selected final beat5.
+The choice persists `follow_fox` or `wake`; both reach the same memory consequence.
+Neither is movement or sleep. No ambience entity, map, body, inventory copy,
+spatial SceneSpace instance or arbitrary consequence/script interpreter is built.
+
+A presentation-only checkpoint does not replace the ordinary ActionSet or count
+as a running modal scene. Its choice is offered only through its dream detail,
+not as an ordinary pending dialogue choice; it neither blocks another dialogue
+nor overwrites one. Close returns to the real bed/World without a gameplay write.
+A saved checkpoint is resumable only by a living actor at its exact room anchor,
+with no encounter, modal or ordinary pending choice. Travel, damage/return or
+another modal makes presentation unavailable, preserves the beat/branch, and
+leaves normal Stand/Flee/movement/recovery available. Return legally and Resume;
+no teleport, immunity, time pause, rerun of first Rest or mandatory dream screen.
+
+Every fresh Continue/choice binds the shown scene, beat and exact choice occurrence
+where applicable; direct Command and projected admission agree. Final Continue
+requires the selected final line in the safe anchor context. It atomically ends
+this scene, assigns `dream_seen=true` and resolves only the bound S10 once. This
+Boolean is the durable local memory `player.dream_seen`; no second export marker,
+`prologue_completed` point/report, account transfer or numerical reward is added.
+Exact accepted replay retains its receipt before current-state admission; new
+stale controls cannot skip a beat, change the branch or repeat the consequence.

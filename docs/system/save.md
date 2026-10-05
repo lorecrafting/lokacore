@@ -734,3 +734,43 @@ again. Reopen unpaid, paid-before-Rest, meal-used, ale-partial/empty and actual
 same-body death/recovered states, then invoke their next consumer. Confirmed
 service narration is retained once at the original Maud detail through the
 committed command identity, never inferred from an unrelated latest receipt.
+
+## B9 dream recovery
+
+**Selected, source pending.** The [S10 Rest/dream](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+uses existing fact, quest, choice and receipt tables. There is no snapshot, new
+save format, dream ledger or save-on-display. First-Rest credit, S10 activation
+and scene beat1 start commit together even when presentation is deferred.
+Each Continue/branch writes its checkpoint/choice with its receipt.
+Final end, `dream_seen=true`, S10 `resolved/acknowledged` and receipt commit in one
+transaction before adoption and confirmed narration. No dream completion report
+is allocated. Closing or resuming presentation never manufactures an end.
+
+Cold reopen and reconciliation validate the exact revision-ordered chain: B8
+paid entitlement/payment before the qualifying Rest; stored root Rest command,
+actor/body/prior position/actual Inn Rooms, full refs/scopes and causal event;
+first-Rest fact and unique S10 instance; scene start and each bound beat/choice;
+final acknowledged scene end and its sole memory/quest resolution. Bounded
+current facts alone do not prove history. Choice source/beat/anchor/actor,
+continuation id, root cause/correlation and branch must agree with receipts;
+a swapped unrelated Continue cannot justify the memory. Check evidence in both
+directions so a terminal receipt cannot justify today's active S10 or vice versa.
+Lawful later payment, travel, elapsed, body death/return and other modal scenes
+must not invalidate original anchor/body proof. Ending preserves the chosen
+branch; neither reopening nor death changes it or resets entitlement/credit.
+
+Admit unseen/unpaid, paid-before-Rest, started/deferred, each shown narration,
+pending choice, each selected final line, closed/away/combat/returned and ended
+states, then exercise their next actual consumer. Wrong/null rows, impossible
+cursor/branch, duplicate S10/start/end, forged paid/Rest/memory, missing/wrong
+receipt event, early memory or mismatched terminal quest yield typed
+`save_corrupt`, preserve the file and offer existing recovery; never silently
+repair, export, delete or repin. Explicit missing-release refusal still applies.
+
+For qualifying Rest, choice and final acknowledgement, real
+failed COMMIT and unknown-not-committed reopen all old; unknown-committed/lost
+reply reopen all new. Fence both input and elapsed until reconciliation. Exact
+invocation replay preserves the original result and adds no credit/branch/memory.
+Confirmed narration restores to the actual bed/dream nesting by committed command
+identity; when away, retain honest history and Resume availability on legal return,
+never an invented Inn Rooms backdrop or unconfirmed completion.
