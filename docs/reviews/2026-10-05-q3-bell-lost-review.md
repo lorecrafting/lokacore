@@ -40,3 +40,13 @@ Ponytail: No over-engineering finding; tighten existing validation predicates.
 On the fix-round head `45332c26293ca31d2ff21adf6c85ee2f8346776d`, the save reviewer found that a genuine bell-first loss receipt still permitted current Q2 to be changed back to active when the child and meeting facts were also changed. The controlled real SQLite case returned `open` before this follow-up fix. Ring receipt recovery now always binds Q2's instance ID and requires the receipt's Q2 transition and child-status assignment to agree with the current lost branch in both directions. The same case returns `save_corrupt` without changing saved rows; lawful late Ring and lost states still reopen. The separate reviewer will recheck this response independently.
 
 The primary recheck requested a distinct red control for that Q2 predicate. A lawful late Ring after Wren's meeting, with current Q2 active and child missing, was given a forged Q2/lost transition in its retained receipt and no child-status assignment. The new SQLite test returns `save_corrupt` with unchanged rows. Removing only the Q2 receipt predicate made that test fail with `open`; restoring the predicate made it pass.
+
+## Separate save/protocol opinion — final scoped recheck
+
+**APPROVE.** Reviewed source head `93b3531219685795e47a26577ae948101db0059d`. I authored none of the implementation.
+
+**S1 resolved.** Ring recovery always binds Q2's instance and requires both the receipt's Q2 transition and child-status assignment to agree with the current lost branch. A genuine loss receipt can no longer justify a forged active Q2, missing child status and manufactured meeting fact. The real SQLite control returns `save_corrupt` without changing saved rows; lawful bell-first loss and late Ring paths remain valid. S2–S4 were closed in the preceding scoped recheck; no findings remain open in this separate opinion.
+
+Verification: all 12 focused kernel/SQLite bell tests passed, including intermediate scene reopen, both late returns, linked-field forgeries, receipt replay, genuinely failed COMMIT and lost acknowledgement. Removing the bidirectional comparisons made the retained resurrection control fail. The added late-Ring receipt-only Q2 loss control also passes; changing only `q2Changed === lost` to `true` makes it fail with `open` instead of `save_corrupt`, proving that comparison catches a distinct contradiction. Both mutants were restored. I traced the unchanged dialogue/save load and reconciliation callers. Native and shared browser checks were not run.
+
+Ponytail: the fix adds two comparisons at the existing receipt boundary; no over-engineering finding.
