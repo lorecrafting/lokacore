@@ -19,9 +19,38 @@
         "board"
       ],
       "description": "detail.rumor_board.description",
+      "notice_board": {
+        "title": "detail.rumor_board.title",
+        "notices": [
+          {
+            "detail": "lost_whistle",
+            "title": "detail.lost_whistle.title"
+          },
+          {
+            "detail": "cellar_help",
+            "title": "detail.cellar_help.title"
+          }
+        ]
+      }
+    },
+    "lost_whistle": {
+      "aliases": [
+        "lost_whistle"
+      ],
+      "description": "detail.lost_whistle.description",
       "readable": {
-        "label": "actions.read_rumor_board",
-        "text": "readable.rumor_board"
+        "label": "actions.read_lost_whistle",
+        "text": "readable.lost_whistle"
+      }
+    },
+    "cellar_help": {
+      "aliases": [
+        "cellar_help"
+      ],
+      "description": "detail.cellar_help.description",
+      "readable": {
+        "label": "actions.read_cellar_help",
+        "text": "readable.cellar_help"
       }
     }
   }

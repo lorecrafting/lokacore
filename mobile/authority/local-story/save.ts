@@ -1,6 +1,7 @@
 // The local Story authority's in-memory story and the save of one NEW attempt (03 §§14-15):
 // commit, then adopt, or fence an unknown COMMIT until the store settles it.
-import type { DecisionResult, NarrationRecord } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { NarrationRecord } from '../../packages/game-view/session.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
 import { commit, load, receipt, reconcile, identityOf } from './store.ts';
@@ -119,10 +120,10 @@ export function adopt(s: Story) {
  * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
  * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
  */
-export function narration(s: Story): (NarrationRecord & { combat_lines?: number[] }) | undefined {
+export function narration(s: Story): NarrationRecord | undefined {
   if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
-  const r = s.db.getFirstSync<{ command_id: string; response: string }>(
-    `SELECT command_id, response FROM receipt WHERE scope = ?
+  const r = s.db.getFirstSync<{ command_id: string; command: string; response: string }>(
+    `SELECT command_id, command, response FROM receipt WHERE scope = ?
      AND json_array_length(response, '$.narration') > 0 ORDER BY revision DESC LIMIT 1`,
     scope(s),
   );
@@ -138,10 +139,15 @@ export function narration(s: Story): (NarrationRecord & { combat_lines?: number[
     : [];
   const lines = d.narration!;
   const combat_lines = lines.flatMap((line, i) => (root || keys.includes(line?.key) ? [i] : []));
+  const command = d.outcome === 'read' ? (JSON.parse(r.command) as Command | null) : undefined;
+  const detail_id = command?.payload?.type === 'read' ? command.payload.target_id : undefined;
+  if (d.outcome === 'read' && (typeof detail_id !== 'string' || !detail_id))
+    throw new Error('malformed JSON: Read without a target');
   return {
     command_id: r.command_id,
     lines,
     ...(combat_lines.length && { combat_lines }),
+    ...(detail_id && { detail_id }),
   } as NarrationRecord;
 }
 

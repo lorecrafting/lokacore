@@ -86,11 +86,48 @@
             },
             "text": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "required": [
             "label",
             "text"
+          ],
+          "additionalProperties": false
+        },
+        "notice_board": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "notices": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "detail": {
+                    "$ref": "action.schema.json#/$defs/Key"
+                  },
+                  "title": {
+                    "$ref": "text.schema.json#/$defs/TextKey"
+                  }
+                },
+                "required": [
+                  "detail",
+                  "title"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 64
+            }
+          },
+          "required": [
+            "title",
+            "notices"
           ],
           "additionalProperties": false
         }

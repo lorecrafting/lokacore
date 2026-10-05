@@ -73,7 +73,7 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
     if (last?.lines.some((t) => typeof (t as { key?: unknown } | null)?.key !== 'string'))
       throw new Error('malformed JSON: a narration line without a key');
   } catch (e) {
-    if (!/malformed JSON/.test(String(e))) throw e; // a full disk or I/O: the save may be intact
+    if (!(e instanceof SyntaxError) && !/malformed JSON/.test(String(e))) throw e; // I/O may leave an intact save
     throw refusal(e);
   }
 }

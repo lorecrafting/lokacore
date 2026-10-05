@@ -4,23 +4,24 @@ import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { localSession } from '../../authority/local-story/session.ts';
 import { group, intentOf } from './model.ts';
 import { presenter } from './presenter.ts';
 
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v003_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v004_hash.json', import.meta.url),
     'utf8',
   ),
 );
 // Independent Python IdSource literals for the harness context and Missing Child release.
-const notice = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2';
-const board = '15349791-fa65-81f7-b378-bb8212b808d2';
+const notice = '251e7a71-b5ad-8d22-858b-533e52cc5415';
+const board = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2';
 const noticeBody = 'Keep the landing clear. Tie boats to the mooring post.';
 const boardBody = 'Lost a tin whistle? Ask at the Drowned Lantern.';
 
-function preview(path = ':memory:') {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+function preview(path = ':memory:', bundled = bundle) {
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundled);
   const book = presenter(a.game);
   a.game.subscribe(book.update);
   const button = (label: string) =>
@@ -33,14 +34,14 @@ function preview(path = ':memory:') {
   return { ...a, book, button, tap, state };
 }
 
-// Breaks: Read loses its projected detail target, disappears from World controls,
-// mutates gameplay state, or substitutes a generic description for authored body text.
-test('production notice and rumor board read through World controls without changing state', (t) => {
+// Breaks: Read loses its exact target, mutates gameplay state, substitutes observational prose,
+// or appends confirmed writing to World rather than the notice detail.
+test('production Read targets retain confirmed detail messages without changing state', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
   for (const [label, target, body] of [
     ['Read the notice', notice, noticeBody],
-    ['Read the rumor board', board, boardBody],
+    ['Read Lost tin whistle', board, boardBody],
   ]) {
     const before = a.state();
     for (let repetition = 0; repetition < 2; repetition++) {
@@ -60,10 +61,16 @@ test('production notice and rumor board read through World controls without chan
           ),
       );
       a.book.press(control);
-      assert.equal(a.book.screen().log.at(-1), body);
-      assert.equal(a.book.screen().log.filter((line) => line === body).length, repetition + 1);
+      assert.equal(a.book.screen().detail(target).at(-1), body);
+      assert.equal(
+        a.book
+          .screen()
+          .detail(target)
+          .filter((line) => line === body).length,
+        repetition + 1,
+      );
       assert.deepEqual(a.book.screen().combatLog, []);
-      assert.deepEqual(a.book.screen().detail(target), []);
+      assert.equal(a.book.screen().log.includes(body), false);
       assert.deepEqual(a.state(), before);
     }
     if (target === notice) a.tap('Go north', 'Go east');
@@ -101,7 +108,8 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   assert.equal(a.game.pending(), false);
   assert.deepEqual(a.sql.prepare('SELECT * FROM receipt WHERE invocation_id = ?').get(id), receipt);
   assert.equal(receipts(a.sql), 1);
-  assert.deepEqual(a.book.screen().log, [noticeBody]);
+  assert.deepEqual(a.book.screen().detail(notice), [noticeBody]);
+  assert.deepEqual(a.book.screen().log, []);
   assert.deepEqual(control.target_ids, [notice]);
   assert.equal(control.token, token);
   assert.deepEqual(a.state(), before);
@@ -109,10 +117,12 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   a = preview(path);
   assert.equal(a.sql.prepare('SELECT pin FROM save').get()!.pin, pin);
   assert.deepEqual(a.state(), before);
-  assert.deepEqual(a.book.screen().log, [noticeBody]);
+  assert.deepEqual(a.book.screen().detail(notice), [noticeBody]);
+  assert.deepEqual(a.book.screen().log, []);
   assert.deepEqual(a.button('Read the notice').target_ids, [notice]);
   a.tap('Read the notice');
-  assert.deepEqual(a.book.screen().log, [noticeBody, noticeBody]);
+  assert.deepEqual(a.book.screen().detail(notice), [noticeBody, noticeBody]);
+  assert.deepEqual(a.book.screen().log, []);
   assert.equal(receipts(a.sql), 2);
   assert.deepEqual(a.state(), before);
 });
@@ -132,7 +142,7 @@ test('stale and refused Read retain their target and never narrate an unread bod
   assert.deepEqual(intentOf(stale), captured);
   assert.equal(a.book.screen().log.at(-1), 'The page had changed; here it is again.');
   a.book.press({
-    ...a.button('Read the rumor board'),
+    ...a.button('Read Lost tin whistle'),
     target_ids: [notice],
   });
   assert.equal(receipts(a.sql), count + 1);
@@ -167,9 +177,71 @@ test('held Read survives the authored 68350 to 68400 pulse with authority freshn
   const before = a.state();
   a.book.press(control);
   assert.equal(receipts(a.sql), count + 2);
-  assert.equal(a.book.screen().log.at(-1), noticeBody);
+  assert.equal(a.book.screen().detail(notice).at(-1), noticeBody);
   assert.equal(a.book.screen().view.time, 68400);
   assert.deepEqual(a.state(), before);
   assert.deepEqual(control.target_ids, [notice]);
   assert.equal(control.token, token);
+});
+
+// Breaks: the new receipt reader accepts a missing or non-string Read target, losing
+// its detail identity or leaking restored writing into World on cold reopen.
+test('cold reopen refuses a committed Read whose stored target is malformed', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-read-target-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  for (const [name, command] of [
+    ['missing', { payload: { type: 'read' } }],
+    ['numeric', { payload: { type: 'read', target_id: 7 } }],
+    ['payload', {}],
+  ] as const) {
+    const path = join(dir, name + '.db');
+    const a = preview(path);
+    a.tap('Read the notice');
+    a.sql.prepare('UPDATE receipt SET command = ?').run(JSON.stringify(command));
+    a.sql.close();
+    assert.throws(
+      () => preview(path),
+      (error: any) => error.cause?.kind === 'save_corrupt',
+    );
+  }
+});
+
+// Break: invalid stored command JSON escapes typed corruption/Start over, or handling it
+// silently replaces an unavailable older pin instead of preserving it until explicit reset.
+test('invalid Read JSON offers in-place Start over and leaves older pins explicitly refused', (t) => {
+  const older = JSON.parse(
+    readFileSync(
+      new URL('../../../protocol/fixtures/missing_child_v003_hash.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  for (const [bundled, refusal] of [
+    [bundle, 'save_corrupt'],
+    [older, 'pinned_release_missing'],
+  ]) {
+    const a = preview(':memory:', bundled);
+    t.after(() => a.sql.close());
+    a.tap('Read the notice');
+    a.sql.prepare('UPDATE receipt SET command = ?').run('{broken');
+    a.sql.exec("CREATE TABLE retained(marker TEXT); INSERT INTO retained VALUES ('keep')");
+    const pin = a.sql.prepare('SELECT pin FROM save').get()!.pin;
+    const session = localSession(
+      () => a.db,
+      () => assert.fail('an intact database must be repaired in place'),
+      bundle,
+      a.host,
+    );
+    assert.equal(session.failed()?.kind, refusal);
+    assert.equal(session.failed()?.startOver, true);
+    assert.equal(session.game(), undefined);
+    assert.equal(a.sql.prepare('SELECT pin FROM save').get()!.pin, pin);
+    assert.equal(session.startOver(), undefined);
+    assert.equal(session.failed(), undefined);
+    assert.ok(session.game());
+    assert.equal(a.sql.prepare('SELECT marker FROM retained').get()!.marker, 'keep');
+    assert.equal(
+      JSON.parse(a.sql.prepare('SELECT pin FROM save').get()!.pin as string).content_hash,
+      'e8ea74aa3fc1cf9f26ae2349c4a4d2a99d54d69a636c24745f03670ddf2eb43f',
+    );
+  }
 });

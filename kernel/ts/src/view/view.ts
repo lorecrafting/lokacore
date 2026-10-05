@@ -1,3 +1,4 @@
+import { noticeViews } from './notice_boards.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
 // The player's GameView (04 §14; 00 §4.10), read from a World.
@@ -50,6 +51,7 @@ import { cmp } from '../foundation/validate.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
+// size: allow 45, current snapshot composes optional notice metadata with existing projections
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
@@ -78,6 +80,7 @@ export function gameView(world: World): GameView {
     place: { id: here, title: text(room.title), description },
     exits: exits(world, actions.door),
     actions: actions.place,
+    ...noticeViews(world, here),
     entities: within(world, actions, here),
     inventory: within(world, actions, world.body),
     ...(equipment.length > 0 && { equipment }),

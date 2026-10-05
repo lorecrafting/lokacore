@@ -890,6 +890,22 @@
         },
         "combat": {
           "$ref": "gameview.schema.json#/$defs/CombatView"
+        },
+        "notice_boards": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NoticeBoardView"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NoticeView"
+          },
+          "minItems": 1,
+          "maxItems": 64
         }
       },
       "required": [
@@ -1529,6 +1545,78 @@
         }
       ],
       "description": "The current encounter and visible opponent presented to the player."
+    },
+    "NoticeView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description"
+      ],
+      "additionalProperties": false,
+      "description": "Current-room readable detail identity, authored page title and selected description; no body.",
+      "examples": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "detail.notice.title",
+          "description": "detail.notice.description"
+        }
+      ]
+    },
+    "NoticeBoardView": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "title": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "notices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NoticeView"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "notices"
+      ],
+      "additionalProperties": false,
+      "description": "Current-room board identity, title, selected description and ordered notice membership; no bodies.",
+      "examples": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "detail.notice.title",
+          "description": "detail.notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "detail.notice.title",
+              "description": "detail.notice.description"
+            }
+          ]
+        }
+      ]
     }
   }
 }

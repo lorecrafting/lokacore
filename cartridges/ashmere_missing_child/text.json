@@ -93,9 +93,17 @@
   "barrier.storage_chest_lid.short": "the storage chest’s lid",
   "chapter.missing_child": "The Missing Child — in progress",
   "detail.notice.description": "A weathered notice is nailed to the mooring post.",
-  "detail.rumor_board.description": "Pinned notes cover a wooden board beside Maud’s bar.",
+  "detail.rumor_board.description": "Two notices are pinned to a wooden board beside the bar.",
   "actions.read_notice": "Read the notice",
-  "actions.read_rumor_board": "Read the rumor board",
   "readable.notice": "Keep the landing clear. Tie boats to the mooring post.",
-  "readable.rumor_board": "Lost a tin whistle? Ask at the Drowned Lantern."
+  "detail.rumor_board.title": "Notice board",
+  "detail.lost_whistle.title": "Lost tin whistle",
+  "detail.lost_whistle.description": "A small handwritten notice asks about a missing whistle.",
+  "detail.cellar_help.title": "Help in the cellar",
+  "detail.cellar_help.description": "A notice from Maud asks for help below the inn.",
+  "actions.read_lost_whistle": "Read Lost tin whistle",
+  "actions.read_cellar_help": "Read Help in the cellar",
+  "readable.lost_whistle": "Lost a tin whistle? Ask at the Drowned Lantern.",
+  "readable.cellar_help": "Maud needs help clearing rats from the cellar. Speak to her at the bar.",
+  "detail.notice.title": "Landing notice"
 }

@@ -36,8 +36,10 @@ defmodule Loka.Content.RoomParts do
     details = for {k, _} <- Map.get(r, "details", %{}), do: {["details", k], "detail"}
 
     readables =
-      for {k, %{"readable" => _}} <- Map.get(r, "details", %{}),
-          do: {["details", k, "readable"], "readable"}
+      for {k, d} <- Map.get(r, "details", %{}),
+          field <- ~w(readable notice_board),
+          is_map_key(d, field),
+          do: {["details", k, field], "readable"}
 
     [{[], "room"} | details] ++
       readables ++
@@ -61,7 +63,9 @@ defmodule Loka.Content.RoomParts do
     for {_, {rel, [], r}} <- defs["room"],
         ds = Map.get(r, "details", %{}),
         {key, detail} <- ds,
-        d <- detail_text(rel, key, detail, text) ++ reachable(rel, key, detail, ds),
+        d <-
+          detail_text(rel, key, detail, text) ++
+            board_refs(rel, key, detail, ds) ++ reachable(rel, key, detail, ds),
         do: d
   end
 
@@ -70,11 +74,44 @@ defmodule Loka.Content.RoomParts do
   defp detail_text(rel, key, detail, text) do
     fields =
       [{["description"], detail["description"]}] ++
-        for {field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value}
+        for({field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value}) ++
+        board_text(detail)
 
     for {steps, value} <- fields,
         not is_map_key(text, value),
         do: diag("UNRESOLVED_REFERENCE", at(rel, ["details", key] ++ steps), %{"target" => value})
+  end
+
+  defp board_text(%{"notice_board" => board}) do
+    [{["notice_board", "title"], board["title"]}] ++
+      for {notice, i} <- Enum.with_index(board["notices"]),
+          do: {["notice_board", "notices", i, "title"], notice["title"]}
+  end
+
+  defp board_text(_), do: []
+
+  defp board_refs(rel, key, %{"notice_board" => board} = detail, ds) do
+    at = at(rel, ["details", key, "notice_board"])
+    own = if is_map_key(detail, "readable"), do: [diag("UNRESOLVED_REFERENCE", at)], else: []
+
+    {errors, _} =
+      Enum.reduce(Enum.with_index(board["notices"]), {[], MapSet.new()}, fn {notice, i},
+                                                                            {errors, seen} ->
+        {errors ++ board_ref(at, key, notice, i, ds, seen), MapSet.put(seen, notice["detail"])}
+      end)
+
+    own ++ errors
+  end
+
+  defp board_refs(_, _, _, _), do: []
+
+  defp board_ref(at, key, notice, i, ds, seen) do
+    target = notice["detail"]
+    sibling = ds[target] || %{}
+
+    if target != key and not MapSet.member?(seen, target) and is_map_key(sibling, "readable"),
+      do: [],
+      else: [diag("UNRESOLVED_REFERENCE", at <> ".notices[#{i}].detail", %{"target" => target})]
   end
 
   defp reachable(rel, key, detail, ds) do

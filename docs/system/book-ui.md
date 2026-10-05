@@ -104,8 +104,38 @@ Implementation details live in [book](../../mobile/app/book/Book.tsx),
 
 Detail pages show title/identity, authored description and projected item state, then their
 chronological event log only when entries exist, then currently offered options in the same
-scrolling content. An empty log has no heading or placeholder. NPC, item and combat details
-follow this order; World retains its [room-page order](#world-and-status-entry).
+scrolling content. An empty log has no heading or placeholder. NPC, item, notice, board and
+combat details follow this order; World retains its [room-page order](#world-and-status-entry).
+
+## Notice-board details
+
+Every readable notice opens its own detail page. A standalone notice, including Ferry Landing’s
+Landing notice, opens directly from World and invokes its captured Read offer. Its Leave
+option returns to World. Its page title is an authored noun distinct from the action label.
+Read text never enters the room event log.
+
+A projected notice board opens locally from World, with its title and selected description,
+nonempty chronological detail log, then its ordered notice options. Notice Read offers are
+shown through their detail entry rather than repeated as World actions. A notice option uses the
+current available place offer with exactly that notice ID and inspectable-details target
+scope, including an authored Read alias. Unavailable offers show their reason; absent offers
+are not actionable. Neither English labels nor cartridge internals determine membership.
+
+Tapping a notice pushes its detail and invokes that captured offer. Its title and selected
+description precede the confirmed message and any nonempty detail-local history, then
+options. Entry shows the message immediately when Read confirms; no second Read option is
+shown. A pending entry can be retried by returning and opening it again. Body text comes only
+from confirmed Read narration; pending, refused, stale and replayed attempts never invent or
+duplicate it. Back to board pops to the board, then Back to World clears the board. Opening
+a board or returning/backing creates no command or receipt; entering a notice invokes its one existing
+Read. Room changes prune these routes; elapsed-only redraws retain them. Scene/combat
+precedence and live action freshness apply unchanged. These local pages add no pause,
+deadline extension or persisted transcript. On cold reopen, the resolved Read target from
+the existing committed receipt restores its message once to that notice’s detail history
+and its visible detail route after the chapter Continue. A board child restores its parent
+board beneath it. This creates no command or receipt. A missing current-room target restores
+no notice route; scene/combat precedence still applies. Ordinary unclassified narration
+continues to follow the existing World recovery rule.
 
 ## NPC dialogue and action details
 

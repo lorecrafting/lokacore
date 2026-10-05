@@ -40,9 +40,11 @@ export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
   const [restored, combat] = narrationLines(last, view, text);
-  const log = restored && !view.choice ? [restored] : [];
+  const log = restored && !view.choice && !last?.detail_id ? [restored] : [];
   const details = new Map<string, DetailLine[]>();
-  if (restored && view.choice) details.set(view.choice.speaker_id ?? 'conversation', [restored]);
+  if (restored && last?.detail_id) details.set(last.detail_id, [restored]);
+  else if (restored && view.choice)
+    details.set(view.choice.speaker_id ?? 'conversation', [restored]);
   if (view.choice) {
     const id = view.choice.speaker_id ?? 'conversation';
     details.set(id, [...(details.get(id) ?? []), text(view.choice.prompt.key)]);

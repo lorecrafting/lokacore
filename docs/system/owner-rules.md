@@ -220,3 +220,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Open encounters apply the [owner-approved focused combat ActionSet](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md) after ordinary contributions, with shared admission/projection and normal restoration on close.
 
 - M20-B1 mechanical scope: [PM adoption](../decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md); controlled consumer only, production S1 copy/publication stays B2.
+
+- Nested chapter notice board: [M12-B owner direction](../decisions/owner-decision-m12-b-notice-board-2026-10-05.md).

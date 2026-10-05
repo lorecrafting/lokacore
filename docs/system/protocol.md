@@ -344,6 +344,18 @@ action's exact target ID and selected action key; an available matching offer ca
 refuse `invalid_target`, `not_present`, `invalid_state` or `unsupported_capability`. Missing
 or non-readable targets and remote readable targets follow [readable@1](mechanics.md#readable1-mechanicsreadablerulets).
 
+## Notice-board projection
+
+GameView optionally supplies `notice_boards` only when the current room has boards, and
+`notices` for its standalone readable details outside board membership. Each board
+has `id`, `title: TextKey`, selected `description: TextKey` and ordered `notices`, each
+with `id`, `title: TextKey`, selected `description: TextKey`. Board and notice arrays are
+nonempty and bounded to 64. IDs are existing detail target IDs; bodies are never projected.
+Standalone notices have the same `id`, `title` and selected `description` shape. The view is
+descriptive even when Read is unavailable. Existing exact-target place actions
+remain the sole offered invocation authority, including policy, alias and modal restrictions.
+Older snapshots without these optional fields keep their meaning and wire tag.
+
 An AdvertisedAction may supply optional concrete `target_ids`; Put supplies its final item/container
 pair on a directly held item, with destinations among reachable projected item containers. Ordinary
 actions retain implicit targeting. Pair availability shares the containment refusal query.

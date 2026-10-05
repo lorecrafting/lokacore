@@ -187,9 +187,12 @@ Text with the authored `text` key, empty delta operations/events and unchanged R
 Reading and re-reading grant no facts, quests or topics and consume no logical duration.
 Normal authority elapsed preflight still advances the clock. Scene/combat admission wins.
 
-The real consumers are the chapter landing notice and Drowned Lantern rumor board.
+The real consumers are the chapter landing notice and the Drowned Lantern board’s two
+readable notices. [Board metadata](cartridge.md#notice-board-metadata) and
+[local navigation](book-ui.md#notice-board-details) add no Read rule or gameplay write.
 This composes existing detail identity/presence, ActionSet admission and authored narration
-with receipt replay and Book's World log; there is no gameplay writer or saved reading state.
+with receipt replay and Book’s notice detail history; there is no gameplay writer or saved
+reading state.
 Projection offers each exact present readable target with its authored label and shares
 command eligibility. Held books, pagination and topic grants remain later M12 work.
 The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records scope.

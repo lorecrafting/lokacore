@@ -15,7 +15,8 @@
       "description": "detail.notice.description",
       "readable": {
         "label": "actions.read_notice",
-        "text": "readable.notice"
+        "text": "readable.notice",
+        "title": "detail.notice.title"
       }
     }
   }

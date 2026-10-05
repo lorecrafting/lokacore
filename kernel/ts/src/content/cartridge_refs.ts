@@ -1,3 +1,4 @@
+import { noticeBoards } from './cartridge_boards.ts';
 import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
 // size: allow 340, one reference stage preserves diagnostic ordering for custody eligibility, carrying and NPC HP
@@ -51,7 +52,9 @@ export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (kind: string, d: Obj, at: string, field = 'variants') => {
     out.push([kind, d, at]);
-    if (kind === 'detail' && d.readable) out.push(['readable', d.readable, `${at}.readable`]);
+    if (kind === 'detail')
+      for (const field of ['readable', 'notice_board'])
+        if (d[field]) out.push(['readable', d[field], `${at}.${field}`]);
     (d[field] ?? []).forEach((v: Obj, i: number) =>
       out.push(['variant', v, `${at}.${field}[${i}]`]),
     );
@@ -115,7 +118,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   npc: ['short', 'room_line', 'description'],
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
-  readable: ['label', 'text'],
+  readable: ['label', 'text', 'title'],
 };
 
 // Shared reference, fact-type and text-catalog checks append diagnostics to `out`.
@@ -171,7 +174,7 @@ export function refStage(c: Obj): Diagnostic[] {
     const at = `.cartridge.rooms${step(ref)}`;
     for (const [dir, exit] of Object.entries(r.exits as Obj))
       named(exit.to, 'room', `${at}.exits.${dir}.to`);
-    out.push(...unreachable(r.details ?? {}, at));
+    out.push(...unreachable(r.details ?? {}, at), ...noticeBoards(r.details ?? {}, at, text));
   }
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj)) {
@@ -288,9 +291,6 @@ const npcRooms = (c: Obj): [Obj, string][] =>
       `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
     ]),
   ]);
-
-// UNREACHABLE_DETAIL for each detail of the room at `at` whose first alias another detail has
-// or no lookup produces.
 function unreachable(details: Obj, at: string): Diagnostic[] {
   return Object.entries(details).flatMap(([key, d]) => {
     const others = Object.entries(details).flatMap(([k, o]) => (k === key ? [] : o.aliases));

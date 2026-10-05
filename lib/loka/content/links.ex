@@ -35,15 +35,26 @@ defmodule Loka.Content.Links do
         do: {rel, steps, t, key, entities, if(room_line?(steps), do: [key], else: [])}
   end
 
-  # A room's texts (targets its details too): its descriptions must link every detail.
+  # A room's descriptions link root details; a board supplies its children's touch entries.
   defp room_uses(defs, entities) do
     for {_, {rel, [], r}} <- defs["room"],
         details = Map.keys(Map.get(r, "details", %{})),
         targets = MapSet.union(entities, MapSet.new(details)),
         {steps, key} <- texts(r) do
       self = detail_of(steps)
-      {rel, steps, key, self, targets, if(self || steps == ["title"], do: [], else: details)}
+
+      {rel, steps, key, self, targets,
+       if(self || steps == ["title"], do: [], else: root_details(r, details))}
     end
+  end
+
+  defp root_details(r, details) do
+    grouped =
+      for {_, d} <- Map.get(r, "details", %{}),
+          n <- get_in(d, ["notice_board", "notices"]) || [],
+          do: n["detail"]
+
+    details -- grouped
   end
 
   # The title, description and variants of room `r`, then each detail's description and
