@@ -35,7 +35,7 @@ test('a pending start over whose retry fails shows that error, not "not confirme
   const c = localSession(
     () => db,
     () => {},
-    read('protocol/fixtures/cartridge_items_hash.json') as never,
+    read('protocol/fixtures/containers_cartridge_items_hash.json') as never,
     {
       newId: randomUUID,
       kernel_version: `loka-kernel@${'0'.repeat(40)}`,

@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- Only authored receptacles can hold items ([record](../decisions/owner-decision-container-eligibility-2026-10-05.md)).
+
 - Detail pages follow the [canonical Book order](book-ui.md#detail-page-order), with no empty event-log heading or placeholder ([record](../decisions/owner-decision-detail-page-order-2026-10-05.md)).
 
 - Active development targets the real Missing Child chapter, incrementally; the temporary Lantern errand and Bram NPC are absent from its first release, while final real Bram/Q1 scope remains unresolved ([record](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)).

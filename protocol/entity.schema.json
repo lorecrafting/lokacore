@@ -120,7 +120,7 @@
       ]
     },
     "ItemDefinition": {
-      "description": "A portable thing (21 \u00a78): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally capacity, the most items it holds directly (any item can hold items; without capacity it has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.",
+      "description": "A portable thing (21 \u00a78): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.",
       "type": "object",
       "properties": {
         "key": {
@@ -170,6 +170,10 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647
+        },
+        "container": {
+          "description": "Only explicitly authored receptacles hold items. Absence is false; capacity and barrier require this field.",
+          "const": true
         }
       },
       "required": [
@@ -236,7 +240,8 @@
               "key": "bram"
             }
           },
-          "capacity": 2
+          "capacity": 2,
+          "container": true
         }
       ]
     },

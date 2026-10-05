@@ -105,7 +105,10 @@ function place(
     entityIds,
     containers,
     capacities: Object.fromEntries(
-      defs.flatMap(([r, e]) => (e.capacity === undefined ? [] : [[entityIds[r], e.capacity]])),
+      defs.flatMap(([r, e]) => {
+        const capacity = e.kind === 'item' && e.container !== true ? 0 : e.capacity;
+        return capacity === undefined ? [] : [[entityIds[r], capacity]];
+      }),
     ),
   };
 }

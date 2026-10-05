@@ -10,7 +10,7 @@ import { gameView, INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Saved } from './authority.ts';
 
-const kat = read('protocol/fixtures/cartridge_sampler_hash.json');
+const kat = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),
   INSTALLED,

@@ -9,5 +9,6 @@
   "location": {
     "in": "template"
   },
-  "mass_grams": 0
+  "mass_grams": 0,
+  "container": true
 }

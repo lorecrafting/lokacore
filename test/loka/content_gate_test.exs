@@ -241,6 +241,7 @@ defmodule Loka.ContentGateTest do
     satchel =
       src("items/iron_key.json")
       |> Map.put("keywords", ["satchel"])
+      |> Map.put("container", true)
       |> Map.put("capacity", 1)
 
     files = %{

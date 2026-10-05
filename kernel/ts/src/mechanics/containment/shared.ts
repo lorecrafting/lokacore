@@ -137,6 +137,7 @@ export function putRefused(
   if (
     world.entities[item].kind !== 'item' ||
     world.entities[destination].kind !== 'item' ||
+    world.entities[destination].container !== true ||
     world.state.created?.[item]
   )
     return 'invalid_target' as const;

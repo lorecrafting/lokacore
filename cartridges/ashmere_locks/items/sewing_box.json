@@ -10,5 +10,6 @@
     "in": "room",
     "room": "inn_rooms"
   },
-  "barrier": "box_lid"
+  "barrier": "box_lid",
+  "container": true
 }

@@ -155,6 +155,7 @@ test('lock and unlock need the key, held directly or in a carried bag', () => {
   const bag = world((c) => {
     c.items[`${G}:item/satchel`] = {
       key: 'satchel',
+      container: true,
       keywords: ['satchel'],
       short: 'item.iron_key.short',
       room_line: 'item.iron_key.room',

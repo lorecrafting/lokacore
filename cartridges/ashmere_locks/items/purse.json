@@ -8,5 +8,6 @@
   "location": {
     "in": "npc",
     "npc": "maud"
-  }
+  },
+  "container": true
 }

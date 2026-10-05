@@ -91,7 +91,7 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 | Op | Target | Precondition |
 |---|---|---|
 | `fact.assign` | fact at scope | current value (or the default) equals `expected` |
-| `entity.transfer` | the entity's container | container is `source_id`; no cycle (`containment_cycle`); destination under its capacity (`capacity_exceeded`) |
+| `entity.transfer` | the entity's container | container is `source_id`; no cycle (`containment_cycle`); destination under its capacity (`capacity_exceeded`); runtime item destinations without authored `container: true` have effective capacity zero |
 | `quest.activate` | quest instance | new id; no open instance of that quest at that scope |
 | `quest.transition` | quest instance | `from` is the state; legal (`:24`): active→objectives_complete/failed/abandoned, objectives_complete→resolved/failed/abandoned, failed/abandoned→active; `resolved` needs an outcome |
 | `choice.open` / `resolve` / `close` | continuation | open: new id; resolve: pending, offers `choice_id`, `opened_revision` equals `expected_revision` (`:215`); close: pending |

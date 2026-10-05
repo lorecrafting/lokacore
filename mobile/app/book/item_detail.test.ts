@@ -47,7 +47,7 @@ function nodes(element: any): any[] {
 test('retained item results appear chronologically between description and options, empty log omitted', (t) => {
   const bundle = JSON.parse(
     readFileSync(
-      new URL('../../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
+      new URL('../../../protocol/fixtures/containers_cartridge_sampler_hash.json', import.meta.url),
       'utf8',
     ),
   );
@@ -76,13 +76,7 @@ test('retained item results appear chronologically between description and optio
     button.props.onPress();
   };
   const cloak = ['A wool cloak', 'Heavy grey wool. Rain runs off it.'];
-  assert.deepEqual(text(), [
-    ...cloak,
-    'Drop a wool cloak',
-    'Put a wool cloak in a brass key',
-    'Wear a wool cloak',
-    'Leave',
-  ]);
+  assert.deepEqual(text(), [...cloak, 'Drop a wool cloak', 'Wear a wool cloak', 'Leave']);
   tap('Wear a wool cloak');
   assert.deepEqual(text(), [...cloak, 'You put it on.', 'Remove a wool cloak', 'Leave']);
   tap('Remove a wool cloak');
@@ -91,7 +85,6 @@ test('retained item results appear chronologically between description and optio
     'You put it on.',
     'You take it off.',
     'Drop a wool cloak',
-    'Put a wool cloak in a brass key',
     'Wear a wool cloak',
     'Leave',
   ]);

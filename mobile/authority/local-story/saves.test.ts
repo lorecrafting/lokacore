@@ -52,7 +52,7 @@ const dusk = release(kat, SEED, { jobs: JOBS });
 // Two other real releases, for an app update (protocol/fixtures): neither has pick_lock.
 const bell = release(read('protocol/fixtures/cartridge_bell_hash.json'), [1, 2, 3, 4]);
 const BELL = bell.content_hash;
-const items = release(read('protocol/fixtures/cartridge_items_hash.json'), [1, 2, 3, 4]);
+const items = release(read('protocol/fixtures/containers_cartridge_items_hash.json'), [1, 2, 3, 4]);
 type Releases = Parameters<typeof openStory>[1];
 const KERNEL = `loka-kernel@${'0123456789'.repeat(4)}`;
 /** The n-th id a test's allocator hands out. */

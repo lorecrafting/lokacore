@@ -10,6 +10,13 @@ test('corpse content requires templates, valid shrine/restoration and its capabi
   const player = 'ashmere_sampler@0.0.8:item/player_corpse';
   for (const [name, mutate, code] of [
     [
+      'noncontainer',
+      (c: any) => {
+        delete c.items[player].container;
+      },
+      'SCHEMA_VIOLATION',
+    ],
+    [
       'old API',
       (c: any) => {
         c.manifest.requires.kernel_api.at_least = '1.4';

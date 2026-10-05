@@ -9,5 +9,6 @@
     "in": "item",
     "item": "trunk"
   },
-  "barrier": "coffer_lid"
+  "barrier": "coffer_lid",
+  "container": true
 }

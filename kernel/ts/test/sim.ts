@@ -31,7 +31,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 16;
+export const GENERATOR = 17;
 /** Each registered invariant, by how a step checks it (runtime/world.ts holds on the world after it, */
 /** runtime/invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -71,7 +71,9 @@ export const CARTRIDGES: Loaded[] = globSync('protocol/fixtures/cartridge_*hash.
   cwd: ROOT,
 })
   .sort()
-  .map(read)
+  .map((path) =>
+    read(path.replace(/cartridge_(items|locks|sampler)_hash/, 'containers_cartridge_$1_hash')),
+  )
   .filter((k) => k.value.format === 'loka-cartridge-v2')
   .map((k) => {
     const artifact = `{"cartridge":${k.canonical},"content_hash":"${k.sha256}"}`;

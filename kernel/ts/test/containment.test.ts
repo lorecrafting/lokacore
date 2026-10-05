@@ -1,7 +1,7 @@
 // size: allow 555, containment and carrying behavior share the same minimal custody fixture
 // Containment: take, drop, give, has_item, items and NPCs in the world, target resolution and
 // examine over them (R5 S4; 21 §7, §8; 03 §23; 04 §5.3). The world is built from the items
-// known answer (protocol/fixtures/cartridge_items_hash.json). Ids and the state hash are
+// known answer (protocol/fixtures/containers_cartridge_items_hash.json). Ids and the state hash are
 // Python's hashlib over the IdSource input and the canonical state (numeric profile), never the
 // kernel's; outcomes and rejection codes are hand-written from the rule's header.
 import assert from 'node:assert/strict';
@@ -20,7 +20,7 @@ import { resolve } from '../src/commands/target.ts';
 import { admit, adopt, gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
-const kat = read('protocol/fixtures/cartridge_items_hash.json');
+const kat = read('protocol/fixtures/containers_cartridge_items_hash.json');
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CHARACTER = 'bd595711-ea5f-89a5-abb0-046cd349d2f9'; // ordinal 0
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157'; // 1
@@ -77,7 +77,7 @@ test('a fresh world mints NPCs then items after the details and places each', ()
     [LANTERN]: GREEN,
     [SATCHEL]: FERRY,
   });
-  assert.deepEqual(w.capacities, { [BRAM]: 1, [SATCHEL]: 1 });
+  assert.deepEqual(w.capacities, { [BRAM]: 1, [SATCHEL]: 1, [OIL]: 0, [LANTERN]: 0 });
   const view = gameView(w);
   assert.deepEqual(view.entities, [
     {

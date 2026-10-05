@@ -13,7 +13,7 @@ import { presenter } from './presenter.ts';
 function preview(
   bundle = JSON.parse(
     readFileSync(
-      new URL('../../../protocol/fixtures/cartridge_sampler_hash.json', import.meta.url),
+      new URL('../../../protocol/fixtures/containers_cartridge_sampler_hash.json', import.meta.url),
       'utf8',
     ),
   ),

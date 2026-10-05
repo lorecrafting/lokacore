@@ -347,7 +347,7 @@ test("a command no offered action's target or input accepts is refused like an u
 // (#44 N4) room_contents admitting an NPC or room_occupants an item (items known answer: the
 // satchel starts at the ferry landing with Bram, a detail is the mooring post).
 test("an entity target in the action's scope is admitted", () => {
-  const items = read('protocol/fixtures/cartridge_items_hash.json');
+  const items = read('protocol/fixtures/containers_cartridge_items_hash.json');
   const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
   const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
   const POST = '953a909b-3a29-8c5c-9e3f-4105b9a47c4b';

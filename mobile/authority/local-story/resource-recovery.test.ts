@@ -166,7 +166,7 @@ test('bundled sampler pays MV1 and rests twice as fast before reaching its pool 
   const p = elapsedHost(
     ':memory:',
     { wall: 10000, mono: 0 },
-    read('protocol/fixtures/cartridge_sampler_hash.json'),
+    read('protocol/fixtures/containers_cartridge_sampler_hash.json'),
   );
   try {
     const mv = () => p.game.view().view.resources!.find((r) => r.resource.key === 'mv')!;

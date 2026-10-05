@@ -132,7 +132,7 @@ test('an older release list refuses the corpse release without rewriting it', ()
   const p = setup();
   try {
     assert.equal(save(p.story, p.next, () => {}, [], p.receipt).kind, 'saved');
-    const prior = read('protocol/fixtures/sampler_v007_hash.json');
+    const prior = read('protocol/fixtures/containers_sampler_v007_hash.json');
     const loaded = loadCartridge(
       new TextEncoder().encode(
         JSON.stringify({ cartridge: prior.value, content_hash: prior.sha256 }),

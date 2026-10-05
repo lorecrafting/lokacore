@@ -1,12 +1,12 @@
 defmodule Loka.ContentLocksTest do
   # barrier@1 on items (c1-locks; entity.schema.json ItemDefinition barrier) in the compiler. The
-  # known answer is protocol/fixtures/cartridge_locks_hash.json (Python); diagnostics are
+  # known answer is protocol/fixtures/containers_cartridge_locks_hash.json (Python); diagnostics are
   # hand-written from protocol/cartridge.schema.json DiagnosticCode, twins of the loader cases in
   # kernel/ts/test/locks.test.ts.
   use ExUnit.Case, async: true
 
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_locks_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/containers_cartridge_locks_hash.json"))
   @src "cartridges/ashmere_locks"
 
   # ashmere_locks' source in `dir` with `files` (relative path => JSON value) written over it.

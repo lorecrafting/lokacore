@@ -31,6 +31,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Authored receptacles only](owner-decision-container-eligibility-2026-10-05.md): explicit item eligibility, with historical fixture bytes retained.
+
 - Owner direction (paraphrased): [detail-page order](owner-decision-detail-page-order-2026-10-05.md), conditional chronological logs before offered options.
 
 - Owner direction (paraphrased): [actual Missing Child cutover](owner-decision-actual-chapter-cutover-2026-10-05.md), incremental chapter identity/save, retired temporary errand and unresolved real Bram scope.

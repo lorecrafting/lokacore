@@ -60,7 +60,7 @@ const words = (element: any): string =>
 // Breaks: resolving the only accepted side quest falsely announces the whole story
 // has ended while the unaccepted lantern errand and earned storage are still playable.
 test('production Maud completion leaves World free of story-ended claims and storage usable', () => {
-  const bundle = read('protocol/fixtures/cartridge_sampler_hash.json');
+  const bundle = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
   const loaded = loadCartridge(
     new TextEncoder().encode(
       JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),

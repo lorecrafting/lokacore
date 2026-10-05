@@ -1,6 +1,6 @@
 // The smoke screen's controller on Node with real SQLite (node:sqlite), one connection per
 // simulated process, as local_story.test.ts does. Expected values are literals read from the
-// items fixture (protocol/fixtures/cartridge_items_hash.json): the Ferry Landing holds Bram and
+// items fixture (protocol/fixtures/containers_cartridge_items_hash.json): the Ferry Landing holds Bram and
 // a leather satchel with an exit north to the Village Green.
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
@@ -16,7 +16,7 @@ import { localSession, openGame } from './session.ts';
 import type { Db } from './store.ts';
 
 type P = (string | number | null)[];
-const ITEMS = read('protocol/fixtures/cartridge_items_hash.json') as never;
+const ITEMS = read('protocol/fixtures/containers_cartridge_items_hash.json') as never;
 const adapt = (
   sql: DatabaseSync,
   tap: (s: string, run: () => unknown) => unknown = (_, r) => r(),

@@ -1,6 +1,6 @@
 import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
-// size: allow 340, one reference stage preserves diagnostic ordering including carrying and NPC HP opt-ins
+// size: allow 340, one reference stage preserves diagnostic ordering for custody eligibility, carrying and NPC HP
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -46,8 +46,7 @@ export const diag = (
 export const step = (name: string) =>
   /^[a-z0-9_]+$/.test(name) ? `.${name}` : `[${encode(name)}]`;
 
-// Each room, detail, NPC, NPC daily schedule, item, item slot, barrier, description variant (v2;
-// an item's room-line variants) and the calendar, with its kind (registry definitions) and path.
+// Definition parts with their registry kind and diagnostic path.
 export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (kind: string, d: Obj, at: string, field = 'variants') => {
@@ -77,8 +76,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   return out;
 }
 
-// Each node, with its path, of every action's, named policy's, recipe's, variant's, quest offer's,
-// current_state objective's, reaction's and dialogue's condition.
+// Policy nodes with diagnostic paths, across every definition that declares a condition.
 export function nodes(c: Obj): [Obj, string][] {
   const walk = (p: Obj, at: string): [Obj, string][] => [
     [p, at],
@@ -120,10 +118,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   readable: ['label', 'text'],
 };
 
-// The reference checks refStage and recipes share, each pushing its diagnostic to `out`: named,
-// a DefinitionRef naming a definition of `kind` in this cartridge's map of that kind; typedValue,
-// a value of this cartridge's fact that is not of its type (FACT_TYPE_MISMATCH, the FactType
-// check adopt uses; the fact's own absence is named's); text, a text key without a catalog entry.
+// Shared reference, fact-type and text-catalog checks append diagnostics to `out`.
 export type Checks = ReturnType<typeof checkers>;
 
 export function checkers(c: Obj, out: Diagnostic[]) {
@@ -315,6 +310,14 @@ function holders(c: Obj): Diagnostic[] {
   const inside = (i?: Obj) => (i?.location.in === 'item' ? refString(i.location.item) : undefined);
   const held: Record<string, number> = {};
   for (const [ref, i] of Object.entries(items)) {
+    const path = `.cartridge.items${step(ref)}`;
+    if (i.container !== true)
+      for (const field of ['capacity', 'barrier'])
+        if (i[field] !== undefined)
+          out.push(diag('SCHEMA_VIOLATION', `${path}.${field}`, { error: 'invalid_value' }));
+    const holder = items[inside(i) ?? ''];
+    if (holder && holder.container !== true)
+      out.push(diag('SCHEMA_VIOLATION', `${path}.location.item`, { error: 'invalid_value' }));
     if (i.location.in === 'template') continue;
     const at = refString(i.location[i.location.in]);
     held[at] = (held[at] ?? 0) + 1;

@@ -18,7 +18,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v002_hash.json');
+const bundle = read('protocol/fixtures/missing_child_v003_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -37,11 +37,11 @@ const chestId = 'd68b48e6-93a5-8899-81ec-808f7be333f8' as EntityId;
 const brassId = '19785203-d373-8973-8e64-1a9d8e50be82';
 const maudId = '58ee172d-aa6f-8023-a3c1-a1d46af6d167';
 const entity = (kind: string, name: string) =>
-  fresh.entityIds[`ashmere_missing_child@0.0.2:${kind}/${name}`];
+  fresh.entityIds[`ashmere_missing_child@0.0.3:${kind}/${name}`];
 const ref = (name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.2',
+    cartridge_version: '0.0.3',
     kind: 'fact',
     key: name,
   }) as DefinitionRef;
@@ -111,7 +111,7 @@ function setup(path = ':memory:') {
 // or the chest uses the attic key / loses deposited custody on a real cold reopen.
 test('active chapter five actual kills, shrine return, Maud reward and cold-reopen storage', (t) => {
   // Breaks: adding details shifts entity allocation but release bindings retain stale IDs.
-  const expectedIds = read('protocol/fixtures/missing_child_v002_ids.json');
+  const expectedIds = read('protocol/fixtures/missing_child_v003_ids.json');
   assert.deepEqual(
     {
       character: fresh.character,

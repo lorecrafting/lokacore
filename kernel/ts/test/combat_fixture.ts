@@ -17,7 +17,7 @@ import { resourceRef } from '../src/mechanics/resource.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as World['context'];
 const RUN = '6f6f6f6f-1111-4222-8333-444444444444' as StoryRunId;
-export const bundle = read('protocol/fixtures/sampler_v009_hash.json');
+export const bundle = read('protocol/fixtures/containers_sampler_v009_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),

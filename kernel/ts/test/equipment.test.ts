@@ -135,8 +135,8 @@ test('a cartridge with equipment@1 but no slot keeps its ids and fresh state', (
     c.lock.capabilities.equipment = 1;
   };
   const [before, after] = [
-    world('cartridge_items_hash.json'),
-    world('cartridge_items_hash.json', lock),
+    world('containers_cartridge_items_hash.json'),
+    world('containers_cartridge_items_hash.json', lock),
   ];
   const I = 'ashmere_items@0.0.1';
   assert.deepEqual([after.character, after.body], [ID[0], ID[1]]);

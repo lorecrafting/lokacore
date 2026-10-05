@@ -19,7 +19,7 @@ import { check } from '../src/runtime/invariants.ts';
 import { read } from './read.ts';
 
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as World['context'];
-const pin = read('protocol/fixtures/missing_child_v002_hash.json');
+const pin = read('protocol/fixtures/missing_child_v003_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
   INSTALLED,

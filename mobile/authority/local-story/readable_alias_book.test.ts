@@ -9,8 +9,8 @@ import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 // Breaks: World hides an authored Read alias, or target-bearing entity actions leak into World.
 test('Book preserves an aliased Read place offer and exact target through a live redraw', (t) => {
-  const c = structuredClone(read('protocol/fixtures/missing_child_v002_hash.json').value);
-  c.actions['ashmere_missing_child@0.0.2:action/peruse'] = {
+  const c = structuredClone(read('protocol/fixtures/missing_child_v003_hash.json').value);
+  c.actions['ashmere_missing_child@0.0.3:action/peruse'] = {
     key: 'peruse',
     command: 'read',
     label: 'actions.read_notice',
@@ -20,10 +20,10 @@ test('Book preserves an aliased Read place offer and exact target through a live
     priority: 0,
     policy: { policy_version: 1, root: { op: 'all', items: [] } },
   };
-  c.rooms['ashmere_missing_child@0.0.2:room/ferry_landing'].actions = [
+  c.rooms['ashmere_missing_child@0.0.3:room/ferry_landing'].actions = [
     { op: 'subtract', actions: ['read'] },
   ];
-  c.items['ashmere_missing_child@0.0.2:item/brass_key'].location.room.key = 'ferry_landing';
+  c.items['ashmere_missing_child@0.0.3:item/brass_key'].location.room.key = 'ferry_landing';
   const canonical = encode(c);
   const a = elapsedHost(
     ':memory:',

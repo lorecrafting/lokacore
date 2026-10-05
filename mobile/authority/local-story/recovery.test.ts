@@ -19,7 +19,7 @@ const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
 // ashmere_items ids (kernel/ts/test/invocation_cases.json): the satchel and the NPC.
 const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
 const NPC = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
-const kat = read('protocol/fixtures/cartridge_items_hash.json');
+const kat = read('protocol/fixtures/containers_cartridge_items_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),
   INSTALLED,
