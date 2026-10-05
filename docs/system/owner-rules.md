@@ -128,10 +128,11 @@ and not repeated here.
   ([record](../archive/decisions/owner-decision-roadmap-2026-09-24.md), [ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
 - The due-job drain landed with the first real job; `real_elapsed` time is carried until a
   cartridge declares it ([record](../archive/decisions/owner-decision-s4-scope-2026-09-30.md)).
-- Pre-production: backward API/release/save compatibility and older-development adapters or
-  migrations are not required; advance current releases and independently re-pin known answers.
-  Preserve frozen conformance fixtures and safe explicit mismatch refusal, never silent save
-  deletion ([superseding decision](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md)).
+- Pre-production: work forward from the current contract without older API/release/save
+  compatibility, adapters or migrations. Update or remove obsolete fixtures and documentation
+  when the contract changes, while retaining current-behavior guards, current-build save integrity,
+  explicit pin refusal and no silent save deletion
+  ([superseding decision](../decisions/owner-decision-forward-development-2026-10-05.md)).
 - Preproduction previews may start fresh across builds; current-build save/retry/reopen and
   explicit Start over remain required ([clarification](../decisions/owner-decision-preproduction-preview-saves-2026-10-04.md)).
 - Saves reopen on an available exact pin; missing pins and unsupported formats are typed refusals
