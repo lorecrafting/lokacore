@@ -1,5 +1,6 @@
 id: mobile-renderer-imports
 valid:
+  - import { NoticeEntries, NoticePage } from './notices.tsx';
   - "import { Combat } from './Combat.tsx';"
   - "import { restoredLogs } from './logs.ts';"
   - "import { useState } from 'react';"

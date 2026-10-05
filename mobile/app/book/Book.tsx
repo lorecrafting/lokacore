@@ -1,3 +1,4 @@
+// size: allow 325, notice routes join the existing Book shell without another controller
 // The Book draws GameView through its presenter; App injects the shell.
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
@@ -27,6 +28,7 @@ import {
   ScenePage,
   SettingsPage,
 } from './pages.tsx';
+import { NoticeEntries, NoticePage } from './notices.tsx';
 import { Turn } from './Turn.tsx';
 
 type Presenter = ReturnType<typeof presenter>;
@@ -150,7 +152,14 @@ export function BookView(p: ViewProps) {
   const page = p.stack.at(-1);
   const open = (page: Page) => p.go([...p.stack, page], 1);
   const walk = (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button);
-  const ctx = { ...p, g, open, walk, world: () => p.go([], -1) };
+  const ctx = {
+    ...p,
+    g,
+    open,
+    walk,
+    world: () => p.go([], -1),
+    back: () => p.go(p.stack.slice(0, -1), -1),
+  };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={p.flip.turn} dir={p.flip.dir}>
@@ -175,20 +184,28 @@ type BottomProps = {
   open: (p: Page) => void;
   page?: Page;
   world: () => void;
+  back: () => void;
   startOver: () => void;
   shell: Shell;
 };
 
+// size: allow 45, footer keeps standalone Leave and nested Back alongside status and faults
 function Bottom(p: BottomProps) {
   const { view, text, pending, fault } = p.screen;
   const position = nextPosition(view.position, p.g.position);
+  const notice = p.page?.kind === 'notice' ? p.page.id : undefined;
   return (
     <View style={{ padding: 8 }}>
       {!view.scene &&
         !view.combat &&
         (p.page ? (
-          p.page.kind === 'thing' || p.page.kind === 'dialogue' ? null : (
-            <Back onPress={p.world} />
+          p.page.kind === 'thing' ||
+          p.page.kind === 'dialogue' ||
+          (notice && view.notices?.some((n) => n.id === notice)) ? null : (
+            <Back
+              label={p.page.kind === 'notice' ? 'Back' : 'Back to World'}
+              onPress={p.page.kind === 'notice' || p.page.kind === 'board' ? p.back : p.world}
+            />
           )
         ) : (
           <Footer
@@ -234,15 +251,15 @@ function Fault(p: { fault: string; startOver: () => void }) {
   );
 }
 
-function Back({ onPress }: { onPress: () => void }) {
+function Back({ onPress, label }: { onPress: () => void; label: string }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Back to World"
+      accessibilityLabel={label}
       onPress={onPress}
       style={{ minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
     >
-      <Text style={{ ...small, fontSize: 17, color: paper.fg }}>Back to World</Text>
+      <Text style={{ ...small, fontSize: 17, color: paper.fg }}>{label}</Text>
     </Pressable>
   );
 }
@@ -258,6 +275,7 @@ type BodyProps = {
   world: () => void;
 };
 
+// size: allow 45, current Book page dispatch including board and notice details
 function Body(p: BodyProps) {
   const { view, text, log } = p.screen;
   const { page } = p;
@@ -276,6 +294,7 @@ function Body(p: BodyProps) {
         press={p.press}
         open={openThing}
         openChoice={() => p.open(conversation(view))}
+        details={<NoticeEntries {...p} />}
       />
     );
   if (page.kind === 'dialogue' || npcPage(page, view))
@@ -287,6 +306,7 @@ function Body(p: BodyProps) {
         }
       />
     );
+  if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
   if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;
   if (page.kind === 'character')

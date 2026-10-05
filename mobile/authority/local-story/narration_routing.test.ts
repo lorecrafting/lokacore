@@ -28,7 +28,9 @@ test('committed combat line indices come from pinned keys and structured receipt
       },
     }) as unknown as Story;
   try {
-    sql.exec('CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER)');
+    sql.exec(
+      "CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER, command TEXT DEFAULT 'null')",
+    );
     const lines = [
       { key: 'bell' },
       { key: 'authored.strike' },
@@ -43,7 +45,7 @@ test('committed combat line indices come from pinned keys and structured receipt
       narration: lines,
     };
     sql
-      .prepare('INSERT INTO receipt VALUES (?, ?, ?, ?)')
+      .prepare('INSERT INTO receipt(command_id, response, scope, revision) VALUES (?, ?, ?, ?)')
       .run('round', JSON.stringify(decision), 'story/lineage/player', 1);
     assert.deepEqual(narration(story()), { command_id: 'round', lines, combat_lines: [1, 3] });
     sql.close();

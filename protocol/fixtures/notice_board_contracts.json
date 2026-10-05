@@ -1,0 +1,3966 @@
+[
+  {
+    "name": "valid board metadata",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          }
+        ]
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "optional readable noun title",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "notice"
+      ],
+      "description": "notice.description",
+      "readable": {
+        "label": "action.read",
+        "text": "notice.body",
+        "title": "notice.title"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "valid board view",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "valid notice view",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description"
+    },
+    "valid": true
+  },
+  {
+    "name": "InspectableDetail missing ['notice_board'].title",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "notices": [
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "InspectableDetail missing ['notice_board'].notices",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "InspectableDetail unknown ['notice_board']",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          }
+        ],
+        "extra": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "InspectableDetail missing ['notice_board', 'notices', 0].detail",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "title": "notice.title"
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "InspectableDetail missing ['notice_board', 'notices', 0].title",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "notice"
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "InspectableDetail unknown ['notice_board', 'notices', 0]",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "notice",
+            "title": "notice.title",
+            "extra": true
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView missing [].id",
+    "contract": "NoticeBoardView",
+    "value": {
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView missing [].title",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView missing [].description",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView missing [].notices",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView unknown []",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ],
+      "extra": true
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeView missing [].id",
+    "contract": "NoticeView",
+    "value": {
+      "title": "notice.title",
+      "description": "notice.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeView missing [].title",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "description": "notice.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeView missing [].description",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title"
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeView unknown []",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description",
+      "extra": true
+    },
+    "valid": false
+  },
+  {
+    "name": "InspectableDetail ['notice_board', 'notices'] count 0",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": []
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "InspectableDetail ['notice_board', 'notices'] count 64",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          }
+        ]
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "InspectableDetail ['notice_board', 'notices'] count 65",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          },
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView ['notices'] count 0",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": []
+    },
+    "valid": false
+  },
+  {
+    "name": "NoticeBoardView ['notices'] count 64",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "NoticeBoardView ['notices'] count 65",
+    "contract": "NoticeBoardView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": "notice.description",
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "GameView ['notice_boards'] count 0",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "place": {
+        "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "title": {
+          "key": "room.title"
+        },
+        "description": {
+          "key": "room.description"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "notice_boards": []
+    },
+    "valid": false
+  },
+  {
+    "name": "GameView ['notice_boards'] count 64",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "place": {
+        "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "title": {
+          "key": "room.title"
+        },
+        "description": {
+          "key": "room.description"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "notice_boards": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "GameView ['notice_boards'] count 65",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "place": {
+        "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "title": {
+          "key": "room.title"
+        },
+        "description": {
+          "key": "room.description"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "notice_boards": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description",
+          "notices": [
+            {
+              "id": "aaaaaaaa-0000-4000-8000-000000000001",
+              "title": "notice.title",
+              "description": "notice.description"
+            }
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "GameView ['notices'] count 0",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "place": {
+        "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "title": {
+          "key": "room.title"
+        },
+        "description": {
+          "key": "room.description"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "notices": []
+    },
+    "valid": false
+  },
+  {
+    "name": "GameView ['notices'] count 64",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "place": {
+        "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "title": {
+          "key": "room.title"
+        },
+        "description": {
+          "key": "room.description"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "GameView ['notices'] count 65",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "place": {
+        "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "title": {
+          "key": "room.title"
+        },
+        "description": {
+          "key": "room.description"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "notices": [
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        },
+        {
+          "id": "aaaaaaaa-0000-4000-8000-000000000001",
+          "title": "notice.title",
+          "description": "notice.description"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed metadata ['notice_board', 'title']",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "",
+        "notices": [
+          {
+            "detail": "notice",
+            "title": "notice.title"
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed metadata ['notice_board', 'notices', 0, 'detail']",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "bad key",
+            "title": "notice.title"
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed metadata ['notice_board', 'notices', 0, 'title']",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "board"
+      ],
+      "description": "board.description",
+      "notice_board": {
+        "title": "board.title",
+        "notices": [
+          {
+            "detail": "notice",
+            "title": ""
+          }
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed notice id",
+    "contract": "NoticeView",
+    "value": {
+      "id": "",
+      "title": "notice.title",
+      "description": "notice.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed notice title",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "",
+      "description": "notice.description"
+    },
+    "valid": false
+  },
+  {
+    "name": "malformed notice description",
+    "contract": "NoticeView",
+    "value": {
+      "id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "title": "notice.title",
+      "description": ""
+    },
+    "valid": false
+  }
+]

@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.3`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.4`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten Ashmere rooms and playable Maud S1 (five rats,
@@ -35,7 +35,7 @@ and rooms.
 The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source; installed mechanics and validation are unchanged. Its
-independent answer is `protocol/fixtures/missing_child_v002_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v004_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
@@ -60,10 +60,27 @@ uses the existing containment capability and source/world settings seams, withou
 capability or format tag.
 
 Room details may embed `readable {label, text}` under the `readable@1` lock; both
-fields resolve to catalog TextKeys in compiler and loader. The current chapter adds
-`ferry_landing.notice` (aliases `notice`, `landing_notice`) and
-`drowned_lantern.rumor_board` (aliases `rumor_board`, `board`). Their authored labels
-and bodies live in the chapter text catalog; Look keeps a separate observational description.
+fields resolve to catalog TextKeys in compiler and loader. Optional `readable.title` supplies
+a noun page title; absent titles fall back to the label for older fixture content. Ferry
+Landing retains its direct notice; Drowned Lantern groups two readable sibling notices under
+its rumor board.
+
+## Notice-board metadata
+
+An inspectable detail may declare `notice_board: {title: TextKey, notices:
+[{detail: Key, title: TextKey}]}`. The ordered list has 1–64 entries (the existing room-detail
+ceiling), all distinct, each naming an ordinary readable sibling in the same room. Self,
+missing, non-readable and board references are rejected as `UNRESOLVED_REFERENCE` at the
+notice's `detail`; duplicate references are rejected at their repeated `detail`. A board
+itself cannot also be readable (`UNRESOLVED_REFERENCE` at `notice_board`). Its title and
+every notice title resolve in the catalog. Board metadata requires the existing readable@1
+lock. These are local detail Keys, not DefinitionRefs or recursive document nodes. Grouped
+notices are reached through their board; room touch-link warnings require the board and
+standalone details, without requiring separate room links to its children.
+
+The chapter's Lost tin whistle body is “Lost a tin whistle? Ask at the Drowned Lantern.”;
+Help in the cellar says “Maud needs help clearing rats from the cellar. Speak to her at the
+bar.” Reading either grants no quest, fact or reward.
 
 ## Compiler
 

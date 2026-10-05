@@ -63,7 +63,10 @@ test('Book preserves an aliased Read place offer and exact target through a live
   assert.equal(a.game.pulse().kind, 'ready');
   book.press(control);
   assert.equal(book.screen().view.time, 64850);
-  assert.deepEqual(book.screen().log, ['Keep the landing clear. Tie boats to the mooring post.']);
+  assert.deepEqual(book.screen().log, []);
+  assert.deepEqual(book.screen().detail('e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2'), [
+    'Keep the landing clear. Tie boats to the mooring post.',
+  ]);
   assert.deepEqual(intentOf(control), {
     action_key: 'peruse',
     target_ids: ['e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2'],

@@ -1,4 +1,4 @@
-// size: allow 315, established book pages with the current carrying refusal note
+// size: allow 325, established book pages with projected notice entries
 // The book's pages: room, a thing's page, and the Character / Journal / Carrying pages. Each is
 // only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
@@ -53,6 +53,7 @@ export function Leave(p: { leave: () => void }) {
 
 // The place: its title (a tap looks), description, who and what is here, its own actions (an
 // offered quest among them) and the log. NPCs open full details, as items do.
+// size: allow 50, room layout retains local detail entries and ordinary place actions
 export function RoomPage(p: {
   view: GameView;
   text: Say;
@@ -61,6 +62,7 @@ export function RoomPage(p: {
   press: (b: Button) => void;
   open: (id: string) => void;
   openChoice: () => void;
+  details: ReactNode;
 }) {
   const title = (
     <Text style={{ ...titleStyle, textAlign: 'center' }}>{p.text(p.view.place.title.key)}</Text>
@@ -84,9 +86,18 @@ export function RoomPage(p: {
             <Text style={{ ...prose, color: paper.accent }}>Continue conversation</Text>
           </Tap>
         )}
-        {p.g.place.map((b) => (
-          <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
-        ))}
+        {p.details}
+        {p.g.place
+          .filter(
+            (b) =>
+              ![
+                ...(p.view.notices ?? []),
+                ...(p.view.notice_boards ?? []).flatMap((board) => board.notices),
+              ].some((n) => b.target_ids.includes(n.id)),
+          )
+          .map((b) => (
+            <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
+          ))}
         {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
       </ScrollView>
     </View>

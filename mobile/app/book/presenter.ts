@@ -72,6 +72,7 @@ function journalChanged(was: GameView, now: GameView, detail: string) {
   );
 }
 
+// size: allow 45, confirmed Read routing joins existing item, combat and conversation histories
 function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): string {
   const attempt = s.retry!;
   const now = game.view().view;
@@ -81,13 +82,17 @@ function received(game: Game, reply: Reply, was: GameView, s: Logs, text: Say): 
   s.returnWorld = itemChanged || accepted?.outcome === 'choice_closed';
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
+  const retained = accepted?.narration?.length ? savedNarration(game, s) : undefined;
+  const detail =
+    accepted?.outcome === 'read'
+      ? (retained?.detail_id ?? attempt.button.target_ids[0])
+      : attempt.detail;
   const lines =
     (was.combat || now.combat) && !accepted?.narration?.length
       ? s.combatLog
-      : attempt.detail && !itemChanged && !moved
-        ? detailLines(s, attempt.detail)
+      : detail && !itemChanged && (!moved || accepted?.outcome === 'read')
+        ? detailLines(s, detail)
         : s.log;
-  const retained = accepted?.narration?.length ? savedNarration(game, s) : undefined;
   if (s.fault && combatResult(accepted)) return '';
   const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;

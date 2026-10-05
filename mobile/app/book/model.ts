@@ -28,7 +28,7 @@ export type Page =
         | 'chapter'
         | 'combat';
     }
-  | { kind: 'thing'; id: string }
+  | { kind: 'thing' | 'board' | 'notice'; id: string }
   | { kind: 'dialogue'; speaker?: string };
 
 export const npcPage = (page: Page | undefined, view: GameView) =>
@@ -55,13 +55,20 @@ export const things = (v: GameView): Thing[] =>
     ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].flatMap((e) => [e, ...(e.contents ?? [])]);
 
-// Keep the page after a same-room action, stopping at the first item page that disappeared.
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
   if (after.combat) return stack.at(-1)?.kind === 'combat' ? stack : [{ kind: 'combat' }];
   if (before.combat || stack.some((page) => page.kind === 'combat')) return [];
   if (after.chapter && before.chapter?.index !== after.chapter.index) return [{ kind: 'chapter' }];
   if (before.place.id !== after.place.id) return [];
   const visible = things(after);
+  const boards = after.notice_boards ?? [];
+  const notices = [...(after.notices ?? []), ...boards.flatMap((b) => b.notices)];
+  const missing = stack.findIndex(
+    (p) =>
+      (p.kind === 'board' && !boards.some((b) => b.id === p.id)) ||
+      (p.kind === 'notice' && !notices.some((n) => n.id === p.id)),
+  );
+  if (missing >= 0) return stack.slice(0, missing);
   const gone = stack.findIndex((p) => p.kind === 'thing' && !visible.some((e) => e.id === p.id));
   if (gone < 0) return stack;
   const page = stack[gone];
@@ -95,12 +102,13 @@ export function group(buttons: Button[]) {
   };
 }
 
-// Cartridge text marks touch details as [label](detail_key); the controller has no detail action
-// yet, so show the label as plain prose. ponytail: details become tappable when one is offered.
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
 
 // Why an exit or a choice is closed: the reason's own message if it has one, else its code in words.
-type Offered = GameView['exits'][number] | NonNullable<GameView['choice']>['choices'][number];
+type Offered =
+  | GameView['exits'][number]
+  | GameView['actions'][number]
+  | NonNullable<GameView['choice']>['choices'][number];
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 
@@ -220,8 +228,6 @@ function travel(v: GameView): Press[] {
         }));
 }
 
-// The view's available actions as buttons: place actions that need no input, each open exit as a
-// move, each entity's or held item's actions aimed at it, then the pending choice's.
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   const button = (
     a: { action_key: string; label: string; target_ids?: readonly string[] },

@@ -9,13 +9,13 @@ import { presenter } from './presenter.ts';
 
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v003_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v004_hash.json', import.meta.url),
     'utf8',
   ),
 );
 // Independent Python IdSource literals for the harness context and Missing Child release.
-const notice = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2';
-const board = '15349791-fa65-81f7-b378-bb8212b808d2';
+const notice = '251e7a71-b5ad-8d22-858b-533e52cc5415';
+const board = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2';
 const noticeBody = 'Keep the landing clear. Tie boats to the mooring post.';
 const boardBody = 'Lost a tin whistle? Ask at the Drowned Lantern.';
 
@@ -33,14 +33,14 @@ function preview(path = ':memory:') {
   return { ...a, book, button, tap, state };
 }
 
-// Breaks: Read loses its projected detail target, disappears from World controls,
-// mutates gameplay state, or substitutes a generic description for authored body text.
-test('production notice and rumor board read through World controls without changing state', (t) => {
+// Breaks: Read loses its exact target, mutates gameplay state, substitutes observational prose,
+// or appends confirmed writing to World rather than the notice detail.
+test('production Read targets retain confirmed detail messages without changing state', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
   for (const [label, target, body] of [
     ['Read the notice', notice, noticeBody],
-    ['Read the rumor board', board, boardBody],
+    ['Read Lost tin whistle', board, boardBody],
   ]) {
     const before = a.state();
     for (let repetition = 0; repetition < 2; repetition++) {
@@ -60,10 +60,16 @@ test('production notice and rumor board read through World controls without chan
           ),
       );
       a.book.press(control);
-      assert.equal(a.book.screen().log.at(-1), body);
-      assert.equal(a.book.screen().log.filter((line) => line === body).length, repetition + 1);
+      assert.equal(a.book.screen().detail(target).at(-1), body);
+      assert.equal(
+        a.book
+          .screen()
+          .detail(target)
+          .filter((line) => line === body).length,
+        repetition + 1,
+      );
       assert.deepEqual(a.book.screen().combatLog, []);
-      assert.deepEqual(a.book.screen().detail(target), []);
+      assert.equal(a.book.screen().log.includes(body), false);
       assert.deepEqual(a.state(), before);
     }
     if (target === notice) a.tap('Go north', 'Go east');
@@ -101,7 +107,8 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   assert.equal(a.game.pending(), false);
   assert.deepEqual(a.sql.prepare('SELECT * FROM receipt WHERE invocation_id = ?').get(id), receipt);
   assert.equal(receipts(a.sql), 1);
-  assert.deepEqual(a.book.screen().log, [noticeBody]);
+  assert.deepEqual(a.book.screen().detail(notice), [noticeBody]);
+  assert.deepEqual(a.book.screen().log, []);
   assert.deepEqual(control.target_ids, [notice]);
   assert.equal(control.token, token);
   assert.deepEqual(a.state(), before);
@@ -109,10 +116,12 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   a = preview(path);
   assert.equal(a.sql.prepare('SELECT pin FROM save').get()!.pin, pin);
   assert.deepEqual(a.state(), before);
-  assert.deepEqual(a.book.screen().log, [noticeBody]);
+  assert.deepEqual(a.book.screen().detail(notice), [noticeBody]);
+  assert.deepEqual(a.book.screen().log, []);
   assert.deepEqual(a.button('Read the notice').target_ids, [notice]);
   a.tap('Read the notice');
-  assert.deepEqual(a.book.screen().log, [noticeBody, noticeBody]);
+  assert.deepEqual(a.book.screen().detail(notice), [noticeBody, noticeBody]);
+  assert.deepEqual(a.book.screen().log, []);
   assert.equal(receipts(a.sql), 2);
   assert.deepEqual(a.state(), before);
 });
@@ -132,7 +141,7 @@ test('stale and refused Read retain their target and never narrate an unread bod
   assert.deepEqual(intentOf(stale), captured);
   assert.equal(a.book.screen().log.at(-1), 'The page had changed; here it is again.');
   a.book.press({
-    ...a.button('Read the rumor board'),
+    ...a.button('Read Lost tin whistle'),
     target_ids: [notice],
   });
   assert.equal(receipts(a.sql), count + 1);
@@ -167,9 +176,31 @@ test('held Read survives the authored 68350 to 68400 pulse with authority freshn
   const before = a.state();
   a.book.press(control);
   assert.equal(receipts(a.sql), count + 2);
-  assert.equal(a.book.screen().log.at(-1), noticeBody);
+  assert.equal(a.book.screen().detail(notice).at(-1), noticeBody);
   assert.equal(a.book.screen().view.time, 68400);
   assert.deepEqual(a.state(), before);
   assert.deepEqual(control.target_ids, [notice]);
   assert.equal(control.token, token);
+});
+
+// Breaks: the new receipt reader accepts a missing or non-string Read target, losing
+// its detail identity or leaking restored writing into World on cold reopen.
+test('cold reopen refuses a committed Read whose stored target is malformed', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-read-target-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  for (const [name, command] of [
+    ['missing', { payload: { type: 'read' } }],
+    ['numeric', { payload: { type: 'read', target_id: 7 } }],
+    ['payload', {}],
+  ] as const) {
+    const path = join(dir, name + '.db');
+    const a = preview(path);
+    a.tap('Read the notice');
+    a.sql.prepare('UPDATE receipt SET command = ?').run(JSON.stringify(command));
+    a.sql.close();
+    assert.throws(
+      () => preview(path),
+      (error: any) => error.cause?.kind === 'save_corrupt',
+    );
+  }
 });
