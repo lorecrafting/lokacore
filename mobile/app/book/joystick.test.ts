@@ -55,9 +55,9 @@ test('stair nodes are reached by dragging out to them, only when the exit exists
   assert.equal(pick(31, -3.4, ['up']), null); // 5.6 from the node: outside the hit radius
 });
 
-// Breaks (04 §16): a release that walks on the footer's props now shown (read at release) rather
-// than those the drag began on, so a redraw during the drag turns it into a press on the new screen
-// and commits. The Lantern on real SQLite; Book's walk presses that screen's move button.
+// Breaks: a newly opened choice is ignored while refreshing a drag's token, or release reads
+// the new footer's button instead of retaining the action/context from grant. Real SQLite.
+// Elapsed-only redraw success is proved separately in live_actions.test.ts.
 const LANTERN = '../../../protocol/fixtures/cartridge_lantern_hash.json';
 function lantern() {
   type P = (string | number | null)[];
@@ -77,7 +77,7 @@ function lantern() {
   );
   return { sql, smoke };
 }
-test('a drag begun before a redraw walks on its own screen: stale_view, no commit', () => {
+test('a choice opened during a drag keeps the original context stale and commits no move', () => {
   const { sql, smoke } = lantern();
   const props = (s = smoke.screen()) => ({
     exits: s.view.exits,

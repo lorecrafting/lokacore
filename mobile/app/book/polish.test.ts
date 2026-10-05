@@ -336,7 +336,11 @@ test('NPC history has distinct journal events and one confirmed Leave after the 
   h.map();
   h.tap('Go north');
   h.tap('a brass lantern, open');
-  h.tap('Take a brass lantern');
+  const drawnTake = h.draw().find((n) => n.props.accessibilityLabel === 'Take a brass lantern');
+  h.clock.wall += 250;
+  h.clock.mono += 250;
+  assert.equal(h.game.pulse().kind, 'ready');
+  drawnTake.props.onPress(); // Breaks: the old-token shortcut keeps an item page after confirmed pickup.
   h.map();
   h.tap('Go south');
   h.tap('Old Bram, open');

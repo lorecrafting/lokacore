@@ -20,7 +20,7 @@ its carries are scheduled in [ROADMAP](../ROADMAP.md#c1-carry-checkpoints).
 
 World is one current-room page. Its centered title remains fixed above the scrolling authored
 description, projected entities, offered place actions and event log. Tapping that title invokes
-the current offered Look with its drawn freshness token; it invents no refresh command. The [current sampler](cartridge.md)
+the current offered Look under the [live action freshness rule](#live-action-freshness); it invents no refresh command. The [current sampler](cartridge.md)
 projects authentic Look under the
 [sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 Cartridges that do not offer Look retain a fixed text title.
@@ -50,18 +50,33 @@ projected resource, and shows the game clock as its earthly branch under the
 Only World's current-position label is a distinct position tap target. Each tap directly invokes
 the next currently offered legal action in standing → sitting → resting → sleeping → standing
 order, skipping unavailable/absent actions. If none is offered, position stays informational.
-The button retains its drawn freshness token; pending/refused/stale results never advance the
+The button follows [live action freshness](#live-action-freshness); pending/refused/stale results never advance the
 shown position optimistically. This opens no detail page or Contents and does not turn the
 ordinary World page. Position in all details is informational; modal scenes expose no position
 shortcut. Movement and position admission remain kernel-owned.
+
+## Live action freshness
+
+Buttons and gestures capture the offered action and interaction context when drawn or granted.
+Before a fresh invocation, the presenter may refresh the token only if no player invocation
+has been confirmed since capture and the exact action remains available: same action key, ordered target IDs and structured input, same actor and room, and
+unchanged pending choice/continuation, scene and combat context. Movement also retains its
+projected destination and door state; position controls retain their drawn position. Elapsed-only
+clock/resource updates therefore do not strand unchanged controls. A changed room, unavailable
+exit, departed target, altered choice or other changed interaction context keeps its old token:
+the authority refuses the stale invocation, the Book redraws and nothing acts. No substituted
+target, extra movement or optimistic success is permitted. The clock and schedules keep running.
+
+A pending retry keeps its original invocation, token, receipt and presentation context; this
+rule never refreshes an already-sent invocation or weakens authority freshness/admission.
 
 ## Minimap, Map and presentation controls
 
 The World endpaper minimap sits between hairlines: a center dot, existing compass paths/rings,
 barred-exit ticks and offered up/down stair nodes. Holding enlarges it; dragging highlights an
 existing direction and releasing attempts that exit. Returning to center cancels; a short tap
-opens Map; a terminated gesture walks nowhere. Release uses the action/freshness captured at
-drag start, never a new target after redraw. An unavailable exit announces its projected reason
+opens Map; a terminated gesture walks nowhere. Release keeps the action/context captured at
+drag start and follows [live action freshness](#live-action-freshness), never a new target after redraw. An unavailable exit announces its projected reason
 and logs the refusal without movement. Direction/reason appears opposite the finger. The existing
 tip explains hold/drag/tap; Got it, a map tap or walking dismisses it, persisted separately with
 memory fallback. The accessible Map activation opens the section; Go-direction actions use the
@@ -96,7 +111,7 @@ add no false event; rerenders and receipt retry do not duplicate it. This is loc
 metadata, not story prose, a new game event or transcript persistence.
 
 There is one **Leave** control and no separate Close. When a matching `close_choice` is actually
-offered, Leave invokes it with its captured token and returns to World only after confirmation.
+offered, Leave invokes it under [live action freshness](#live-action-freshness) and returns to World only after confirmation.
 An unconfirmed/refused/faulted close retains the detail and honest save/error UI; a retry keeps
 its original context. Without a matching closable choice, Leave is local World navigation and
 preserves any unmatched saved choice. Routine `choice_closed` fallback narration is suppressed
