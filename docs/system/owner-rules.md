@@ -105,6 +105,8 @@ and not repeated here.
 
 ## Architecture and engine
 
+- C3 living hounds have a [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; implementation and independent proof remain ahead.
+
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable
   rule before each concrete consumer; adopted adaptations and historical proposals follow the
   [current PM reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md)

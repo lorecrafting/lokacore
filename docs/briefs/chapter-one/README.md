@@ -26,7 +26,7 @@ The public plan owns the 33-row order and dependencies. These briefs add candida
 
 - **C1:** [C1 — Tobin teaches swords/dodge; learned skills affect a real fight](chapter-one-c1-tobin-training-brief-2026-10-05.md)
 - **C2:** [C2 — adopted finite Tobin patrol, failure recovery and trust](chapter-one-c2-watchmans-rounds-brief-2026-10-05.md)
-- **C3:** [C3 — A bounded persistent fen pack, real deaths and conserved loot](chapter-one-c3-living-hounds-brief-2026-10-05.md)
+- **C3 (adopted plan):** [C3 — Living Fen hounds, bounded persistence and real fight loot](chapter-one-c3-living-hounds-brief-2026-10-05.md)
 - **C4:** [C4 — Hound aggression, real pack assistance and enemy flight](chapter-one-c4-hound-behavior-brief-2026-10-05.md)
 - **C5:** [C5 — A real hound hit causes bleeding; trained bandage stops it](chapter-one-c5-bleeding-bandage-brief-2026-10-05.md)
 - **C6:** [C6 — Night in the Marsh: start a real survival expedition now](chapter-one-c6-marsh-expedition-brief-2026-10-05.md)

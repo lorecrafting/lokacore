@@ -664,3 +664,44 @@ COMMIT, both uncertain-COMMIT outcomes and lost acknowledgement retain the exist
 fence/reconciliation rules; prove them with real SQLite at attempt, final wrong
 and correct transitions. Current-release mismatch remains explicit; no adapters,
 silent counter repair or save deletion is authorized.
+
+## C3 living population recovery
+
+**Selected, pending implementation.** [C3 composition](protocol.md#c3-spawned-bundles-and-population-composition)
+saves immutable spawned identities, containment, HP, separately keyed slot rows
+and plan control/current job, RNG, encounter/death changes, head and receipt through
+the existing changed-row
+transaction. Genesis binds the same checked initialization to revision0; later
+origins bind their exact accepted creation command/job occurrence. No loader
+reconciliation spawns an animal, heals HP, replaces an identity or repairs a slot.
+
+Validate full pinned plan/bundle/template refs, slot/generation/member/role and
+creation occurrence, paired initial parent, actual HP rows and current job/due
+binding. Require exactly the declared ordinal slot keys; control stores no duplicate
+membership index. A fatal receipt changes only its bound slot, while a plan-job
+receipt advances control and actual birth/replacement slots. Equal-time combined
+receipts keep their canonical job-ID order and distinct writer groups; cold reopen
+and uncertain-COMMIT reconciliation accept both legal orders with the same conserved
+fatal slot/corpse/pelt and one current plan successor. No-op rewrites of other slots
+are not valid transition evidence. Later ordinary pelt custody may be its hound,
+public corpse, room, player, bag or other legal owner; validate revision-ordered transfer/death evidence rather
+than requiring its original parent forever. Old HP0 hound identities remain valid
+corpse victims after their slot advances. A due time must trace to that member's
+positive-to-zero fatal event at fatal clock + declared delay. Fresh/never-used,
+living and replacement-eligible slots have the mechanics' distinct row shapes.
+
+Require matching causal command IDs, full refs/scopes, writer groups, event cause/
+correlation and complete prior/result slot rows for creation, fatal eligibility
+and replacement. Reopen accepts every lawful complete intermediate state, including
+live members in either area room, partially injured or engaged members, retained
+dawn surplus, dead slots before/at due and old pelts already taken after replacement.
+Invalid/missing HP, orphan bundle, swapped plan/parent/generation, impossible member
+or job/receipt proof is typed `save_corrupt`, with no rewriting or skipped rows.
+
+Real failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
+must reconcile all-prior/all-next identities, slot/generation/due, custody, HP,
+RNG, jobs, encounters, head and receipt. Fence input and elapsed until resolved;
+receipt replay allocates/transfers/schedules nothing twice. Exact unavailable or
+mismatched release pins refuse explicitly; only explicit Start over replaces the
+save. No save migration, periodic checkpoint or second population receipt ledger
+is selected. Browser reload/Book evidence is distinct from real SQLite faults.

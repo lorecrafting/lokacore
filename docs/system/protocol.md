@@ -717,3 +717,68 @@ TypeScript-first. `topic.grant` is typed cartridge consequence lowering to the
 existing Boolean fact assignment, with no new portable topic operation or writer.
 Definition/participant/quest binding, causal ordering, query budgets and authority
 commit/adopt/response ordering retain their existing contracts.
+
+## C3 spawned bundles and population composition
+
+**Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
+requires a checked extension to death-only creation, not permission to trust the
+currently schema-only `spawned` origin. Register separately keyed full-prior-row
+transitions: target `{kind: population_plan, plan}` contains only current job ID
+and next wander due; target `{kind: population_slot, plan, slot}` contains generation,
+member ID and replacement due. `plan` is the full pinned DefinitionRef; `slot` is
+one ordinal1..declared cap. Genesis creates every slot, including never-used rows.
+Plan control duplicates no member list, count, generation or mutable slot index.
+The declared fixed ordinal range is the only membership index: projection, dispatch
+and load read those exact slot keys and reject absent, extra or foreign keys. Each
+transition compares its own complete prior row; no transition rewrites the plan
+plus all slots. State cannot be forged through ordinary fact assignment or a
+player-accessible population verb.
+Story admission remains TypeScript; added state/delta/precondition semantics and
+creation validation retain both-kernel literal conformance then differential proof.
+
+Each immutable spawned identity binds declared plan and bundle, slot, generation,
+creation occurrence and hound member ID, with role hound or pelt. The hound binds
+itself; its one pelt binds that exact hound, with matching origin fields. Allocate
+hound before pelt in slot order using the existing occurrence allocator. IDs must
+be fresh across authored, created and holder identities. Exact paired definition,
+origin and membership proof rejects extra/missing/duplicate children, cross-plan
+parents, reused generations and arbitrary nested spawn trees.
+
+Each create remains immediately followed by same-group null-source placement:
+hound into the declared home room, then pelt into that newly created hound. The
+second destination is the sole new exception to room-only creation placement.
+Initialize the exact hound HP row and commit both identities, placements and slot
+transition in one writer group. Bundle completeness is checked at the complete
+atomic group; valid paired prefixes must hydrate for later proposal reads without
+mistaking a temporarily unfinished pair for a corrupt complete state. Generic
+source/cycle/capacity guards and one-container proof stay in force.
+
+Derived dynamic entities/resource specs/capacity and known-victim observations
+include proven spawned hounds and pelts. `entityIds[DefinitionRef]` remains the
+one-authored-instance map; it cannot pick a population member. Attack, targeting,
+view, HP, death and encounters bind exact runtime IDs. A hound death selects its
+plan's NPC corpse template and validates its actual dynamic victim, retaining the
+ordinary player/default authored NPC corpse contracts. S1 cannot credit a hound.
+
+Population owns membership/eligibility/bounded creation; movement owns legal
+transfer; combat/resource/death own loss, closure, corpse and loot transfer;
+schedule dispatches the exact saved plan/job occurrence under existing causation
+and canonical `(due_time, job_id)` ordering. Each due job keeps its existing distinct
+writer group. A fatal combat group writes only its victim's slot, with the ordinary
+HP/encounter/corpse/loot ops; it never writes plan control. The plan-job group advances
+control and only newly filled/replaced slots. No-op transitions of other slots are
+forbidden. If population is first at an equal deadline, the still-engaged victim is
+not moved or rewritten; if combat is first, that newly dead slot's future eligibility
+prevents a replacement or rewrite. Other eligible slots use different mutation
+targets. Control still binds one current pending successor; the plan's declared
+ordinal range and all unchanged slot identities agree in either order. Wander <= replacement
+delay ensures fatal eligibility cannot require an earlier plan-control write.
+
+Ordinary same-target cross-group writes still fault `conflicting_write`, including
+two attempted transitions of one population slot; there is no population exemption,
+writer-group coalescing, job-priority change or last-writer-wins overlay. Only the
+exact current pending binding may run; replayed, cancelled
+or stale occurrences create/move/draw nothing. All writes use existing root
+proposal, conflicts, shared work counters and changed-row transaction. No public
+spawn action, per-hound job, global ecology service or unbounded history scan is
+required. New schemas get invalid fixtures and required/bound mutant sweeps.
