@@ -14,9 +14,17 @@ defmodule Loka.Content.Quests do
   @doc "Each schema-valid quest's offer policy root and current_state objective's, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs) do
-    for {rel, q} <- all(defs),
-        {field, %{"policy" => p}} <- [{"offer", q["offer"]}, {"objective", q["objective"]}],
-        do: {rel, [field, "policy", "root"], p["root"]}
+    for {rel, q} <- all(defs), {steps, p} <- policies(q), do: {rel, steps, p}
+  end
+
+  defp policies(q) do
+    base =
+      for {field, %{"policy" => p}} <- [{"offer", q["offer"]}, {"objective", q["objective"]}],
+          do: {[field, "policy", "root"], p["root"]}
+
+    base ++
+      for {v, i} <- Enum.with_index(get_in(q, ["journal", "active_variants"]) || []),
+          do: {["journal", "active_variants", i, "when", "root"], v["when"]["root"]}
   end
 
   defp all(defs), do: for({_, {rel, [], q}} <- defs["quest"], do: {rel, q})
@@ -61,7 +69,12 @@ defmodule Loka.Content.Quests do
       for k <- ~w(active objectives_met resolved failed abandoned), do: {["journal", k], j[k]}
 
     outcomes = for {k, v} <- j["outcomes"] || %{}, do: {["journal", "outcomes", k], v}
-    stages ++ outcomes
+
+    variants =
+      for {v, i} <- Enum.with_index(Map.get(j, "active_variants", [])),
+          do: {["journal", "active_variants", i, "text"], v["text"]}
+
+    stages ++ outcomes ++ variants
   end
 
   defp item(rel, %{"item_acquired" => _} = o, m, defs),

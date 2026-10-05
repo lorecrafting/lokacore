@@ -18,7 +18,7 @@ import { typed } from '../mechanics/fact.ts';
 import { barriers } from './cartridge_barriers.ts';
 import { links } from './cartridge_links.ts';
 import { dialogues } from './cartridge_dialogues.ts';
-import { quests } from './cartridge_quests.ts';
+import { quests, questPolicies, riddleApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
@@ -99,11 +99,7 @@ export function nodes(c: Obj): [Obj, string][] {
     ...parts(c).flatMap(([k, v, at]) =>
       k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
     ),
-    ...Object.entries((c.quests ?? {}) as Obj).flatMap(([ref, q]) =>
-      ['offer', 'objective']
-        .filter((f) => q[f]?.policy)
-        .flatMap((f) => walk(q[f].policy.root, `.cartridge.quests${step(ref)}.${f}.policy.root`)),
-    ),
+    ...questPolicies(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),
@@ -167,7 +163,7 @@ export function refStage(c: Obj): Diagnostic[] {
     if (n.op === 'resource_compare') named(n.resource, 'resource', `${at}.resource`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }
-  out.push(...reserved(c));
+  out.push(...reserved(c), ...riddleApi(c));
   if (c.format !== 'loka-cartridge-v2') return out;
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {

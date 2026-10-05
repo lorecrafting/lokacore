@@ -455,6 +455,10 @@
             },
             "choice_id": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "answer": {
+              "type": "string",
+              "pattern": "^[a-zA-Z]{1,32}$"
             }
           },
           "required": [

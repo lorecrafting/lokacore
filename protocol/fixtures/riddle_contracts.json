@@ -1,0 +1,2744 @@
+[
+  {
+    "name": "authored riddle",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "DialogueDefinition riddle.choice_id missing",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "answer": "lantern",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer missing",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank missing",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.wrong missing",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer ''",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer 'A'",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "A",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer 'a0'",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "a0",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer 'é'",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "é",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer 'a\\n'",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "a\n",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.answer 0",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": 0,
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank []",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A']",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank ['a']",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "a"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank ['AA']",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "AA"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank ['A\\n']",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "A\n"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank ['Å']",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "Å"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.bank [1]",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          1
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.choice_id malformed",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "bad key",
+        "answer": "lantern",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.wrong malformed",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "bad key"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "DialogueDefinition riddle.unexpected unknown",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "lantern",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "wrong": "narration.bram.leave",
+        "unexpected": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "authored boundary 1",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "a",
+        "bank": [
+          "A"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "authored boundary 32",
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "bram",
+      "npc": {
+        "cartridge_id": "ashmere_ferry",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "bram"
+      },
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.bram.prompt",
+      "roles": {
+        "bram": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "bram"
+          }
+        },
+        "lantern": {
+          "role": "item",
+          "item": {
+            "cartridge_id": "ashmere_ferry",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "lantern"
+          }
+        }
+      },
+      "choices": {
+        "leave": {
+          "label": "dialogue.bram.leave",
+          "narration": "dialogue.bram.leave.narration",
+          "hand_over": {
+            "item": "lantern",
+            "to": "bram"
+          }
+        }
+      },
+      "riddle": {
+        "choice_id": "carry",
+        "answer": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "bank": [
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        "wrong": "narration.bram.leave"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "pending riddle hides canonical answer",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ]
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "PendingChoice riddle.choice_id missing",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PendingChoice riddle.bank missing",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PendingChoice riddle.bank []",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry",
+        "bank": []
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PendingChoice riddle.bank ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A']",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry",
+        "bank": [
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A"
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PendingChoice riddle.bank ['a']",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry",
+        "bank": [
+          "a"
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PendingChoice riddle.bank ['AA']",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry",
+        "bank": [
+          "AA"
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PendingChoice riddle.bank ['A\\n']",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry",
+        "bank": [
+          "A\n"
+        ]
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "PendingChoice riddle.answer canonical answer leak",
+    "contract": "PendingChoice",
+    "value": {
+      "continuation_id": "0f0e0d0c-0b0a-4908-8706-050403020100",
+      "speaker_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "prompt": {
+        "key": "dialogue.bram.search_plan"
+      },
+      "closable": true,
+      "choices": [
+        {
+          "available": true,
+          "choice_id": "carry",
+          "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "leave",
+          "label": "choice.leave"
+        }
+      ],
+      "riddle": {
+        "choice_id": "carry",
+        "bank": [
+          "R",
+          "N",
+          "A",
+          "O",
+          "L",
+          "T",
+          "E",
+          "N",
+          "S"
+        ],
+        "answer": "lantern"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "ordinary input preserved",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry"
+    },
+    "valid": true
+  },
+  {
+    "name": "valid answer 1",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": "a"
+    },
+    "valid": true
+  },
+  {
+    "name": "valid answer 7",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": "Lantern"
+    },
+    "valid": true
+  },
+  {
+    "name": "valid answer 32",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+    },
+    "valid": true
+  },
+  {
+    "name": "invalid answer ''",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": ""
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'a0'",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": "a0"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'é'",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": "é"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer ' a'",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": " a"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'a\\n'",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": "a\n"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 0",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer None",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "choose",
+      "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "continuation_id": "aaaaaaaa-0000-4000-8000-000000000002",
+      "choice_id": "carry",
+      "answer": null
+    },
+    "valid": false
+  },
+  {
+    "name": "ordinary input preserved",
+    "contract": "ActionInput",
+    "value": {},
+    "valid": true
+  },
+  {
+    "name": "valid answer 1",
+    "contract": "ActionInput",
+    "value": {
+      "answer": "a"
+    },
+    "valid": true
+  },
+  {
+    "name": "valid answer 7",
+    "contract": "ActionInput",
+    "value": {
+      "answer": "Lantern"
+    },
+    "valid": true
+  },
+  {
+    "name": "valid answer 32",
+    "contract": "ActionInput",
+    "value": {
+      "answer": "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+    },
+    "valid": true
+  },
+  {
+    "name": "invalid answer ''",
+    "contract": "ActionInput",
+    "value": {
+      "answer": ""
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'",
+    "contract": "ActionInput",
+    "value": {
+      "answer": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'a0'",
+    "contract": "ActionInput",
+    "value": {
+      "answer": "a0"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'é'",
+    "contract": "ActionInput",
+    "value": {
+      "answer": "é"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer ' a'",
+    "contract": "ActionInput",
+    "value": {
+      "answer": " a"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 'a\\n'",
+    "contract": "ActionInput",
+    "value": {
+      "answer": "a\n"
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer 0",
+    "contract": "ActionInput",
+    "value": {
+      "answer": 0
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid answer None",
+    "contract": "ActionInput",
+    "value": {
+      "answer": null
+    },
+    "valid": false
+  },
+  {
+    "name": "answer action parameter",
+    "contract": "ActionInputParameter",
+    "value": "answer",
+    "valid": true
+  },
+  {
+    "name": "active journal variant",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "sixteen journal variants",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "QuestJournal active_variants 0",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": []
+    },
+    "valid": false
+  },
+  {
+    "name": "QuestJournal active_variants 17",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "QuestJournal active_variants.0.when missing",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "text": "quest.lantern.find"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "QuestJournal active_variants.0.text missing",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "QuestJournal active_variants.0.extra unknown",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find",
+          "extra": true
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "QuestJournal active_variants.0.text malformed",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "bad key"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "QuestJournal active_variants.0.when.policy_version unsupported",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 2,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "quest.lantern.find"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "QuestJournal active_variants.0.when.root malformed",
+    "contract": "QuestJournal",
+    "value": {
+      "active": "quest.lantern.find",
+      "objectives_met": "quest.lantern.return",
+      "resolved": "quest.lantern.done",
+      "failed": "quest.lantern.failed",
+      "abandoned": "quest.lantern.abandoned",
+      "outcomes": {
+        "carry": "quest.lantern.carried"
+      },
+      "active_variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "invented"
+            }
+          },
+          "text": "quest.lantern.find"
+        }
+      ]
+    },
+    "valid": false
+  }
+]

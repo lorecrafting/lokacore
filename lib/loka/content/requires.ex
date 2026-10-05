@@ -18,6 +18,21 @@ defmodule Loka.Content.Requires do
       Enum.flat_map(req["capabilities"], &capability(rel, &1, offline?, registry))
   end
 
+  @doc "API1.9 gates for bounded riddles and active journal variants."
+  @spec riddles(map() | nil, list()) :: [map()]
+  def riddles(nil, _), do: []
+
+  def riddles(m, all) do
+    needed =
+      Enum.any?(all, fn {_, _, d} ->
+        is_map_key(d, "riddle") or get_in(d, ["journal", "active_variants"]) != nil
+      end)
+
+    if needed and version(m["requires"]["kernel_api"]["at_least"]) < [1, 9],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
   defp elapsed(rel, %{"time_policy" => _} = m) do
     range =
       if version(m["requires"]["kernel_api"]["at_least"]) < [1, 1],
