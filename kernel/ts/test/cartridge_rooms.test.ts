@@ -18,6 +18,7 @@ const installed: Installed = {
     fact: [1],
     policy: [1],
     inspectable_detail: [1],
+    readable: [1],
     resource: [1],
     schedule: [1],
   },
@@ -195,4 +196,23 @@ test('a detail whose first alias is shared or untypable is UNREACHABLE_DETAIL', 
       `.cartridge.rooms["${DFL}"].details.notice`,
       {},
     );
+});
+
+// Breaks: readable content loads without its capability or leaves either catalog key unresolved.
+test('readables require their lock and resolve label and text', () => {
+  const c = withDetails((c) => {
+    c.rooms[DFL].details.notice.readable = { label: 'read.label', text: 'read.text' };
+    c.text['read.label'] = 'Read notice';
+    c.text['read.text'] = 'The ferry leaves at dawn.';
+  });
+  const at = `.cartridge.rooms["${DFL}"].details.notice.readable`;
+  fails(c, 'UNDECLARED_CAPABILITY', at, { capability: 'readable' }, ['readable@1']);
+  c.manifest.requires.capabilities.readable = 1;
+  c.lock.capabilities.readable = 1;
+  assert.ok(load(c).ok);
+  for (const field of ['label', 'text']) {
+    const missing = structuredClone(c);
+    delete missing.text[`read.${field}`];
+    fails(missing, 'UNRESOLVED_REFERENCE', `${at}.${field}`, { target: `read.${field}` });
+  }
 });

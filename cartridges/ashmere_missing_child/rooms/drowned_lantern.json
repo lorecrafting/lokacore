@@ -11,5 +11,18 @@
     "down": {
       "to": "lantern_cellar"
     }
+  },
+  "details": {
+    "rumor_board": {
+      "aliases": [
+        "rumor_board",
+        "board"
+      ],
+      "description": "detail.rumor_board.description",
+      "readable": {
+        "label": "actions.read_rumor_board",
+        "text": "readable.rumor_board"
+      }
+    }
   }
 }

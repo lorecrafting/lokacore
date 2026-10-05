@@ -126,7 +126,7 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
   - `none`: No candidate matched.
   - `unique`: Exactly one candidate.
   - `ambiguous`: Two or more candidates.
-- **TargetSpec**: The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. equipped, connections, inspectable_details, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.
+- **TargetSpec**: The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.
   - `none`: The action takes no target.
   - `entity`: One entity from the listed scopes.
 
@@ -199,6 +199,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `attack`
   - `flee`: Escape an active encounter through one randomly selected currently legal exit; no direction is supplied.
   - `put`: Put a directly body-held existing item into a reachable open item container, preserving identity and checking cycles/capacity.
+  - `read`: Read one present inspectable detail with readable metadata (readable@1).
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the world calendar; until calendar@1 (R8) the kernel fixes them (PM ruling, R5 S6): one unit is one game second, a day is 24 hours (86400 units), and time 0 is midnight of day 1, so the hour of day is floor(t / 3600) mod 24 (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)
@@ -352,7 +353,7 @@ R3B versioned feature envelopes (14 §R3B): the closed kind list, a version, and
 
 The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15).
 
-- **AdvertisedAction**: One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (an entity target is the entity it is listed under) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10).
+- **AdvertisedAction**: One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10).
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
 - **ChapterView**: The highest reached chapter declaration, else the opening chapter (mechanics.md Chapters); derived from the player quest state, never persisted.

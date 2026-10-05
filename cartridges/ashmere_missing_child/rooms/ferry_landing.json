@@ -5,5 +5,18 @@
     "north": {
       "to": "well_lane"
     }
+  },
+  "details": {
+    "notice": {
+      "aliases": [
+        "notice",
+        "landing_notice"
+      ],
+      "description": "detail.notice.description",
+      "readable": {
+        "label": "actions.read_notice",
+        "text": "readable.notice"
+      }
+    }
   }
 }

@@ -28,6 +28,7 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as combat from '../mechanics/combat/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as position from '../mechanics/position/rule.ts';
+import * as readable from '../mechanics/readable/rule.ts';
 import * as quest from '../mechanics/quest/rule.ts';
 import * as scene from '../mechanics/scene/rule.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
@@ -48,6 +49,7 @@ const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   equipment: equipment.decide,
   position: position.decide,
   scene: scene.decide,
+  readable: readable.decide,
 };
 
 // Capabilities that own no command, so no rule: what the rules and the GameView call implements

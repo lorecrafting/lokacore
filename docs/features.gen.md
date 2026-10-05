@@ -42,7 +42,7 @@ Example transcripts replay in `kernel/ts/test/transcripts.test.ts`.
 | tide@1 | portable_capability, portable | — | not yet | — | none | none | — | — | none | — |
 | light@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | liquid@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
-| readable@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
+| readable@1 | portable_capability, portable | chapter_one on (R8) | M12-A fixed current-room written details; authored narration, no gameplay writes | system/mechanics.md readable@1; system/protocol.md GameView; system/cartridge.md Source layout | `read`, `readable`, `InspectableDetail`, `CommandPayload`, `TargetSpec` | `kernel/ts/src/mechanics/readable/rule.ts` | `protocol/fixtures/missing_child_v002_hash.json` | `gameview_agrees_with_admission` | `cartridges/ashmere_missing_child/transcripts/readable.jsonl` | no: TypeScript only (ADR-074) |
 | topics@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | relationship@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |
 | faction@1 | portable_capability, portable | chapter_one on (R8) | not yet | — | none | none | — | — | none | — |

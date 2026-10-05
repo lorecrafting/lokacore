@@ -18,7 +18,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v001_hash.json');
+const bundle = read('protocol/fixtures/missing_child_v002_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -32,16 +32,16 @@ const fresh = newWorld(
   [1, 2, 3, 4],
 );
 // Independent Python IdSource literals for this release, not allocated by the test.
-const keyId = '58ee172d-aa6f-8023-a3c1-a1d46af6d167';
-const chestId = '19785203-d373-8973-8e64-1a9d8e50be82' as EntityId;
-const brassId = 'f14e477f-cecc-897a-bee7-c573aa5c76c3';
-const maudId = '58cfbca8-0448-8e2e-af98-49d0a71d1a04';
+const keyId = '05f6aca0-79cd-83fe-8096-bae95b0730e8';
+const chestId = 'd68b48e6-93a5-8899-81ec-808f7be333f8' as EntityId;
+const brassId = '19785203-d373-8973-8e64-1a9d8e50be82';
+const maudId = '58ee172d-aa6f-8023-a3c1-a1d46af6d167';
 const entity = (kind: string, name: string) =>
-  fresh.entityIds[`ashmere_missing_child@0.0.1:${kind}/${name}`];
+  fresh.entityIds[`ashmere_missing_child@0.0.2:${kind}/${name}`];
 const ref = (name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.1',
+    cartridge_version: '0.0.2',
     kind: 'fact',
     key: name,
   }) as DefinitionRef;
@@ -110,8 +110,8 @@ function setup(path = ':memory:') {
 // Breaks: a production leaf/binding loses preacceptance credit, pays a new/wrong key,
 // or the chest uses the attic key / loses deposited custody on a real cold reopen.
 test('active chapter five actual kills, shrine return, Maud reward and cold-reopen storage', (t) => {
-  // Breaks: removing the sampler entities shifts IDs but the new release retains old bindings.
-  const expectedIds = read('protocol/fixtures/missing_child_ids.json');
+  // Breaks: adding details shifts entity allocation but release bindings retain stale IDs.
+  const expectedIds = read('protocol/fixtures/missing_child_v002_ids.json');
   assert.deepEqual(
     {
       character: fresh.character,
@@ -121,6 +121,9 @@ test('active chapter five actual kills, shrine return, Maud reward and cold-reop
           ref.split(':')[1],
           id,
         ]),
+      ),
+      ...Object.fromEntries(
+        Object.entries(fresh.details).map(([id, detail]) => [`detail/${detail.key}`, id]),
       ),
       'slot/cloak': fresh.slots.cloak,
     },

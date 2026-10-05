@@ -204,8 +204,8 @@ function lookup(r: Run, p: Extract<Parsed, { lookup: string }>) {
   const payload =
     p.verb === 'give'
       ? { type: 'give', item_id: id, recipient_id: to }
-      : p.verb === 'talk'
-        ? { type: 'talk', target_id: id }
+      : p.verb === 'talk' || p.verb === 'read'
+        ? { type: p.verb, target_id: id }
         : p.verb
           ? { type: p.verb, item_id: id }
           : { type: 'look', target_id: id };

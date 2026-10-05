@@ -569,5 +569,20 @@
       "fault_discards_whole_proposal"
     ],
     "implemented_in": "M6-A first live cellar fight: deliberate Attack, timed rounds, Stand/Flee, death and exact preacceptance rat credit"
+  },
+  "readable": {
+    "spec": "system/mechanics.md readable@1; system/protocol.md GameView; system/cartridge.md Source layout",
+    "contracts": [
+      "InspectableDetail",
+      "CommandPayload",
+      "TargetSpec"
+    ],
+    "fixtures": [
+      "protocol/fixtures/missing_child_v002_hash.json"
+    ],
+    "invariants": [
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "M12-A fixed current-room written details; authored narration, no gameplay writes"
   }
 }

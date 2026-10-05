@@ -334,6 +334,16 @@ any available place action resolving to that command qualifies. An available exi
 never refused `invalid_state` or `unsupported_capability`; a
 `take` listed on an item is never refused `not_present` (`kernel/ts/src/view/invariants_view.ts:29`, `:76`).
 
+Read uses `read {actor_id, target_id}` and ActionInvocation `action_key: "read"`,
+`target_ids: [detail_id]`, `input: {}`. Its entity TargetSpec has scope
+`inspectable_details`: detail identity does not imply a runtime entity. A current-room
+readable is advertised as a place action with its authored label and exact detail ID;
+projection respects the composed ActionSet, policy and scene/combat exclusions.
+`gameview_agrees_with_admission` requires an accepted Read to match an available place
+action's exact target ID and selected action key; an available matching offer cannot
+refuse `invalid_target`, `not_present`, `invalid_state` or `unsupported_capability`. Missing
+or non-readable targets and remote readable targets follow [readable@1](mechanics.md#readable1-mechanicsreadablerulets).
+
 An AdvertisedAction may supply optional concrete `target_ids`; Put supplies its final item/container
 pair on a directly held item, with destinations among reachable projected item containers. Ordinary
 actions retain implicit targeting. Pair availability shares the containment refusal query.

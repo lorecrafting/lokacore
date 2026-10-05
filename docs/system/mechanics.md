@@ -175,6 +175,23 @@ room description is the first variant whose `when` holds, else the base (`descri
 `not_found`, elsewhere `not_present`; accepted `examined`. A detail's own description is
 chosen the same way. Details are named through their aliases ([target resolution](protocol.md#target-resolution)).
 
+## readable@1 (`mechanics/readable/rule.ts`)
+
+A room detail may declare `readable {label, text}`, both catalog TextKeys.
+`read {actor_id, target_id}` reads exactly that detail in the actor body's current room.
+An unknown ID, entity, room or non-readable detail is `invalid_target`; a declared
+readable in another room is `not_present`. Accepted `read` returns exactly one narration
+Text with the authored `text` key, empty delta operations/events and unchanged RNG.
+Reading and re-reading grant no facts, quests or topics and consume no logical duration.
+Normal authority elapsed preflight still advances the clock. Scene/combat admission wins.
+
+The real consumers are the chapter landing notice and Drowned Lantern rumor board.
+This composes existing detail identity/presence, ActionSet admission and authored narration
+with receipt replay and Book's World log; there is no gameplay writer or saved reading state.
+Projection offers each exact present readable target with its authored label and shares
+command eligibility. Held books, pagination and topic grants remain later M12 work.
+The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records scope.
+
 ## target_resolution@1, policy@1, fact@1
 
 Ruleless. `target_present` is true when the action's target is in reach (`mechanics/policy.ts:47`,

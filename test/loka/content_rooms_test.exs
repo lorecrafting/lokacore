@@ -250,6 +250,58 @@ defmodule Loka.ContentRoomsTest do
     assert {:ok, _, _} = compile(dir, %{"rooms/b.json" => Map.put(room(%{}), "details", shared)})
   end
 
+  # Breaks: readable metadata compiles without its owner or with either unresolved text key.
+  test "readables require their capability and resolve both catalog keys", %{tmp_dir: dir} do
+    readable = %{"label" => "read.label", "text" => "read.text"}
+    notice = Map.put(detail(["notice"]), "readable", readable)
+
+    files = %{
+      "rooms/b.json" => Map.put(room(%{}), "details", %{"notice" => notice}),
+      "text.json" => %{
+        "r.t" => "Room",
+        "r.d" => "A room.",
+        "read.label" => "Read notice",
+        "read.text" => "The ferry leaves at dawn."
+      }
+    }
+
+    assert compile(dir, files) ==
+             {:error,
+              [
+                d(
+                  "UNDECLARED_CAPABILITY",
+                  "rooms/b.details.notice.readable",
+                  %{"capability" => "readable"},
+                  ["readable@1"]
+                )
+              ]}
+
+    manifest = put_in(@manifest, ["requires", "capabilities", "readable"], 1)
+    files = Map.put(files, "cartridge.json", Map.put(manifest, "entry", ref("a")))
+    assert {:ok, bytes, _} = compile(dir, files)
+
+    assert get_in(JSON.decode!(bytes), [
+             "cartridge",
+             "rooms",
+             "c@1.0.0:room/b",
+             "details",
+             "notice",
+             "readable"
+           ]) == readable
+
+    for field <- ["label", "text"] do
+      missing = update_in(files, ["text.json"], &Map.delete(&1, "read." <> field))
+
+      assert compile(dir, missing) ==
+               {:error,
+                [
+                  d("UNRESOLVED_REFERENCE", "rooms/b.details.notice.readable." <> field, %{
+                    "target" => "read." <> field
+                  })
+                ]}
+    end
+  end
+
   # R5 S3. Breaks: variants dropped or reshaped, facts not keyed, or a short fact reference in a
   # room's or detail's variant left short (owner decision 2026-09-25; the loader would reject it).
   test "ashmere_facts compiles to its Python known answer" do

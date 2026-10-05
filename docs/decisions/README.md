@@ -165,3 +165,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner direction (paraphrased): [no required waiting in the opening chapter](owner-decision-no-wait-opening-2026-10-05.md); keep Bram reachable and the rescue route open while retaining the clock for deadlines and world events.
 
 - [Fresh preproduction preview games, 2026-10-04](owner-decision-preproduction-preview-saves-2026-10-04.md): no save continuity across builds; current-build durability and explicit Start over remain required.
+
+- [M12-A first readable details](pm-decision-m12-a-readable-2026-10-05.md): PM adoption of read-only notice/board text and exact current-room targets.

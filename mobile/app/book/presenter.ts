@@ -15,6 +15,7 @@ export type Button = {
   action_key: string;
   target_ids: string[];
   input: object;
+  place?: true; // a concrete target offered among GameView's place actions
   token?: string; // none: no freshness check (a test's hand-made button)
   context?: string; // only projected buttons can refresh across an unchanged live update
 };

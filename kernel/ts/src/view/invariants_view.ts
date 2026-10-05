@@ -51,21 +51,35 @@ export const gameview_agrees_with_admission = ({
     const listed = actions?.some((a: AdvertisedAction) => commandOf(a) === type);
     return listed ? !VERB_CODES.includes(code) : decision.kind !== 'accepted';
   }
-  if (Object.hasOwn(POSITION_VERBS, type)) {
-    const listed = view.actions.some(
-      (a: AdvertisedAction) =>
-        (action_key === undefined || a.action_key === action_key) &&
-        a.available &&
-        commandOf(a) === type,
-    );
-    return listed ? code !== 'invalid_state' : decision.kind !== 'accepted';
-  }
+  if (type === 'read' || Object.hasOwn(POSITION_VERBS, type))
+    return placeAgrees(view, command.payload, decision, action_key, commandOf);
   const entry = advertised(view, command.payload, action_key, commandOf);
   const shown = Object.hasOwn(SHOWN, type) ? SHOWN[type]! : [];
   if (!entry) return true;
   if (entry.available) return !shown.includes(code);
   return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
 };
+
+// Read targets one concrete detail; position targets the place. Respect the selected action key.
+function placeAgrees(
+  view: GameView,
+  payload: Any,
+  decision: Any,
+  action_key: string | undefined,
+  commandOf: (a: AdvertisedAction) => string | undefined,
+) {
+  const listed = view.actions.some(
+    (a) =>
+      (action_key === undefined || a.action_key === action_key) &&
+      a.available &&
+      commandOf(a) === payload.type &&
+      (payload.type !== 'read' ||
+        (a.target_ids?.length === 1 && a.target_ids[0] === payload.target_id)),
+  );
+  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  const refusals = payload.type === 'read' ? VERB_CODES : ['invalid_state'];
+  return listed ? !refusals.includes(code) : decision.kind !== 'accepted';
+}
 
 // The codes the view can show on an entry: an exit's passage, position (position@1) and fare; a
 // recipe's policy and admission. ponytail: an engine verb's policy is always true, so it shows none; a cartridge
