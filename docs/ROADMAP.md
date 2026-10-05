@@ -171,6 +171,9 @@ The owner's [one-time hosted-CI exception](decisions/owner-decision-local-draft-
 applied to these five merges while GitHub Actions delayed and cancelled runners.
 B2 Chandler's Debt quest mechanics are implemented and independently reviewed on
 local `main` at chapter 0.0.16/API1.14. A3 Green finale source work remains ahead.
+B3 Peg's shop has an [adopted PM contract](decisions/pm-decision-b3-pegs-shop-2026-10-05.md)
+and a [re-pinned brief](briefs/chapter-one/b3-pegs-shop-brief-2026-10-05.md)
+on local B2 base `ec3ab73d`; source implementation and review remain ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 

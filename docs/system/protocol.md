@@ -498,3 +498,17 @@ presence, custody, carrying and funding checks. Extend schemas and composition t
 only for the actual new operation/row fields, and retain the registered event,
 writer-group, budget and deterministic-ID rules. This is a selected source contract,
 not an installed operation.
+
+## B3 shop composition
+
+Commerce exposes exact Buy and Sell commands with actor, provider, item and quoted
+price; the current ActionSet and NPC GameView projection use the same availability
+query as direct admission. The NPC detail shows each eligible exact item with its
+price and current availability, including sold-out and unaffordable states. A
+displayed offer is never a reservation. The command rechecks the quote, stock,
+custody, balances and carrying admission after elapsed-time settlement. Composition
+uses existing `entity.transfer` and B2's two exact `resource.adjust` operations in
+one writer group; no stock-count or creation operation is needed. The receipt records
+one accepted exchange. Existing `query_steps` and failure codes govern each check;
+the developer adds only the command, capability, authored offer and view schema
+needed for this consumer.

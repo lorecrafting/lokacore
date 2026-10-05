@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [B3 Peg's immediate shop PM decision](pm-decision-b3-pegs-shop-2026-10-05.md): finite authored shelf, identity-conserving buyback and no restock.
+
 - [B1 chapter calendar and Book status PM decision](pm-decision-b1-calendar-status-2026-10-05.md): authored hour/day, solar/lunar cycle and confirmed status consumer.
 
 - [Reuse documents already read](owner-decision-read-once-docs-2026-10-05.md): avoid redundant reads when links loop through the same governing files.

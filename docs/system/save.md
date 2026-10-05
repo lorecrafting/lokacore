@@ -435,3 +435,26 @@ as `save_corrupt` without guessed repair. Unknown COMMIT stays fenced; receipt r
 cannot duplicate the ledger, payout or penalty. The deadline keeps running through
 death and reopen. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
 This is a selected next-release recovery rule, not a claim about current saves.
+
+## B3 shop recovery
+
+The selected [B3 exchange](mechanics.md#pegs-immediate-shop-b3-selected-contract)
+changes the exact item's containment row and both penny rows with one receipt.
+Failed or unknown COMMIT follows the existing fence and reconciliation path. Reopen
+validates the offered item identity, current custody and participating balances;
+it does not rebuild stock from an independent count or mint a missing shelf item.
+
+B3 extends B2's S2 balance/receipt validator, including its unaccepted, active,
+resolved and expired branches. For pennies in this chapter, reconcile the actual
+accepted B3 exchanges and the optional S2 payout in saved revision order from the
+authored player, Peg and Aldric starts. Each receipt's exact debit/credit must match
+the balances at *that commit*, its bound participants, price or payout and item/
+quest outcome; the final replayed balances must match the current saved rows.
+An S2 payout receipt may therefore begin after a Buy or end before a later Buy.
+Do not compare its historical `from`/`to` directly with current balances, or
+require a player still to hold the authored start or start-plus-reward. Reject
+missing, reordered, forged or unexplained transfers, wrong recipients and
+contradictory custody/outcome evidence as `save_corrupt`. Use the existing receipt
+and changed-row trust boundary, not a second money ledger or save migration.
+Receipt replay cannot pay or move the item again; malformed current-build truth
+leaves the save intact.
