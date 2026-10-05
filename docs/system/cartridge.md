@@ -195,6 +195,20 @@ Each development cartridge compiles to its independent known answer
 (`protocol/fixtures/cartridge_<name>_hash.json`, derived by `test/loka/cartridge_lantern_hash.py`
 for the Lantern; `test/loka/content_*_test.exs`).
 
+Static locked-barrier reachability also treats an item as potentially obtainable when it
+starts directly held by the NPC named by an authored receive choice, the bound item matches,
+and that NPC and the dialogue speaker start in the same reachable room. This is an authoring
+potential check, not proof that quest/policy/carry conditions will be met. Unreachable speakers,
+wrong custody, and keys behind inaccessible rooms or lids retain the lockout diagnostic.
+
+Dialogue `receive` role references must name an item and NPC; it requires a resolving quest
+and excludes accept/hand_over. Dialogue `fact.adjust` must name a bounded integer fact, never
+a reserved engine fact. Both validators enforce references, types and ownership; source short
+fact references expand for this new spelling. This vocabulary (and authored Put actions)
+requires kernel API at least 1.7. Historical requirement minimums remain unchanged. An unknown dialogue sequence operation
+now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
+single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics are unchanged.
+
 ## Artifact and loader
 
 `loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:48`) returns the decoded
@@ -273,7 +287,7 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 
 ## M1-A elapsed policy
 
-Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.5; old fixture requirement ranges remain unchanged.
+Optional manifest `time_policy {profile: "real_elapsed", rate}` declares logical seconds per real second; rate is an integer in `1..9007199254740991`. Absence retains frozen legacy play_time. Opt-in requires `schedule@1` and `requires.kernel_api.at_least >= 1.1` (`KERNEL_API_RANGE_INVALID` at that lower bound otherwise). Installed kernel API is 1.7; old fixture requirement ranges remain unchanged.
 
 Compiler and loader reject actions naming authority-only `elapsed` or `run_job` (`UNKNOWN_COMMAND`), and actions naming Wait when the policy opts into elapsed (`UNKNOWN_COMMAND`); custom action keys cannot alias around this. Elapsed recipes with duration are `INVALID_TIME_POLICY` at the recipe's duration; elapsed rate/profile fields are schema checked. Duration omission is zero, while legacy duration semantics are unchanged. The policy itself requires schedule (`UNDECLARED_CAPABILITY`). This additive optional manifest field keeps artifact tags and old canonical bytes. See [contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md).
 

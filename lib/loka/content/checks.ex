@@ -16,11 +16,11 @@ defmodule Loka.Content.Checks do
     "has_item" => "item",
     "quest_state" => "quest",
     "fact.assign" => "fact",
+    "fact.adjust" => "fact",
     "barrier_state" => "barrier",
     "stat_compare" => "attribute",
     "resource_compare" => "resource"
   }
-  # A definition sits inside the artifact, the cartridge and its kind's map.
   @enclosing 3
 
   @doc """

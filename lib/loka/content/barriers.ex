@@ -79,7 +79,7 @@ defmodule Loka.Content.Barriers do
          else: (_ -> nil)
   end
 
-  # ponytail: initial states and item locations only, no recipes, facts or NPCs; 05 §17
+  # ponytail: initial states, item locations and explicit receive custody only; no policy search; 05 §17
   # reachability and the Lab's state-space search replace it. Rooms are reached from the entry
   # through exits without a barrier or whose barrier starts open, closed, or locked with a key
   # in reach; an item is in reach when it starts in a reached room or inside an item in reach
@@ -126,7 +126,39 @@ defmodule Loka.Content.Barriers do
     i in keys and passable?(barrier_of(elem(resolve(i, "item", m, defs), 2), m, defs), keys)
   end
 
+  defp starts_in?(
+         %{"key" => key, "location" => %{"in" => "npc", "npc" => npc}},
+         rooms,
+         _,
+         {m, defs}
+       ) do
+    room = npc_room(npc, m, defs)
+    item = ref(key, "item", m)
+    dialogues = for {_, {_, [], d}} <- defs["dialogue"], do: d
+
+    room in rooms and
+      Enum.any?(dialogues, fn d ->
+        npc_room(d["npc"], m, defs) == room and receives?(d, npc, item)
+      end)
+  end
+
   defp starts_in?(_, _, _, _), do: false
+
+  defp npc_room(npc, m, defs) do
+    case resolve(npc, "npc", m, defs) do
+      {_, _, n} -> n["room"]
+      _ -> nil
+    end
+  end
+
+  defp receives?(d, npc, item) do
+    Enum.any?(d["choices"], fn {_, o} ->
+      h = o["receive"]
+
+      h != nil and d["roles"][h["from"]] == %{"role" => "npc", "npc" => npc} and
+        d["roles"][h["item"]] == %{"role" => "item", "item" => item}
+    end)
+  end
 
   # A reached room's exits (reached rooms resolve).
   defp exits_of(r, m, defs), do: elem(resolve(r, "room", m, defs), 2)["exits"]

@@ -75,7 +75,8 @@ function lockout(c: Obj): Diagnostic[] {
       if (i.location.in === 'template') continue;
       const at = refString(i.location[i.location.in]);
       const inside = i.location.in === 'item' && keys.has(at) && open(c.items[at].barrier);
-      if ((i.location.in === 'room' && rooms.has(at)) || inside) reach(keys, ref);
+      if ((i.location.in === 'room' && rooms.has(at)) || inside || receivable(c, ref, i, rooms))
+        reach(keys, ref);
     }
     for (const r of rooms)
       for (const e of Object.values((c.rooms[r]?.exits ?? {}) as Obj))
@@ -94,4 +95,27 @@ function lockout(c: Obj): Diagnostic[] {
   return [...stuck].map((ref) =>
     diag('BARRIER_UNREACHABLE_KEY', `.cartridge.barriers${step(ref)}`),
   );
+}
+
+// Static potential only: runtime still requires live/present bound roles and quest/carry admission.
+function receivable(c: Obj, item: string, i: Obj, rooms: Set<string>): boolean {
+  if (i.location.in !== 'npc') return false;
+  const npc = refString(i.location.npc);
+  const holder = c.npcs?.[npc];
+  if (!holder || !rooms.has(refString(holder.room))) return false;
+  return Object.values((c.dialogues ?? {}) as Obj).some((d) => {
+    const speaker = c.npcs?.[refString(d.npc)];
+    if (!speaker || refString(speaker.room) !== refString(holder.room)) return false;
+    return Object.values(d.choices as Obj).some((o) => {
+      const h = o.receive;
+      const from = h && d.roles[h.from];
+      const reward = h && d.roles[h.item];
+      return (
+        from?.role === 'npc' &&
+        refString(from.npc) === npc &&
+        reward?.role === 'item' &&
+        refString(reward.item) === item
+      );
+    });
+  });
 }

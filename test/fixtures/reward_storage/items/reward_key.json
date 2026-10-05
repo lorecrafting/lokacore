@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "reward_key"
+  ],
+  "short": "fixture.reward_key",
+  "room_line": "fixture.reward_key.room",
+  "description": "fixture.reward_key",
+  "mass_grams": 100,
+  "location": {
+    "in": "npc",
+    "npc": "maud"
+  }
+}

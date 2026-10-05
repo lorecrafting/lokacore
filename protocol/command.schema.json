@@ -619,6 +619,31 @@
             }
           ],
           "description": "Escape an active encounter through one randomly selected currently legal exit; no direction is supplied."
+        },
+        {
+          "description": "Put a directly body-held existing item into a reachable open item container, preserving identity and checking cycles/capacity.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "put"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "container_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "item_id",
+            "container_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

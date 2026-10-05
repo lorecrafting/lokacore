@@ -164,6 +164,11 @@ Take's reach prerequisite shares this projection counter; it cannot hang before 
 Boolean reach results are cached per item within the same projection, preserving established reach
 after later exhaustion without establishing an unknown result.
 
+Put pair projection shares that projection counter. Charge destination enumeration and each
+pair inspection before work against `query_steps` (32768). If enumeration cannot finish,
+show the source Put unavailable with `budget_exceeded`, never a partial set of destinations.
+Admission independently revalidates its pair under the decision counter.
+
 ## Invariants
 
 `protocol/invariants.json` registers 18 invariants, each with a spec citation that must be a
@@ -233,6 +238,10 @@ check ordinary authored movement policy without exposing a player Move bypass. I
 movement gates, standing and fare checks still apply. Pending choice projection is suppressed
 while the encounter is open and is derived again when it closes. See the
 [focused combat action decision](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md).
+
+Put uses ActionInvocation `action_key: "put"`, `target_ids: [item_id, container_id]`, `input: {}`.
+Put is additive for valid older cartridge containers on the installed kernel; API1.7 gates
+authored use of the new vocabulary. The engine verb sources its first target from inventory and independently validates both targets.
 
 ## Policy
 
@@ -324,6 +333,12 @@ the observation supplies it: an available matching place action is never refused
 any available place action resolving to that command qualifies. An available exit's move is
 never refused `invalid_state` or `unsupported_capability`; a
 `take` listed on an item is never refused `not_present` (`kernel/ts/src/view/invariants_view.ts:29`, `:76`).
+
+An AdvertisedAction may supply optional concrete `target_ids`; Put supplies its final item/container
+pair on a directly held item, with destinations among reachable projected item containers. Ordinary
+actions retain implicit targeting. Pair availability shares the containment refusal query.
+`item_acquired` names the actual destination holder; depositing into a container does not count
+as acquiring an item into the body for an acquisition quest.
 
 ## Trusted local elapsed replay
 

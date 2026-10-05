@@ -25,7 +25,7 @@ and not repeated here.
 - NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
 - C1 room output stays focused; NPCs open full details, section detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
 
-- The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); substantive story prose remains subject to batch approval.
+- The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); descriptions, action text and other in-game copy are now PM-delegated without per-batch owner approval ([superseding decision](../decisions/owner-decision-copy-delegation-2026-10-04.md)).
 - Sampler identity and complete prose follow the [owner delegation and PM selections](../decisions/owner-decision-sampler-batch-2026-10-03.md).
 
 - World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
@@ -201,3 +201,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Flee takes no player direction and chooses a legal exit through the [owner-approved random-Flee rule](../decisions/owner-decision-m6-a-random-flee-2026-10-04.md).
 
 - Open encounters apply the [owner-approved focused combat ActionSet](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md) after ordinary contributions, with shared admission/projection and normal restoration on close.
+
+- M20-B1 mechanical scope: [PM adoption](../decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md); controlled consumer only, production S1 copy/publication stays B2.

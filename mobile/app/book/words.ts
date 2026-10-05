@@ -11,6 +11,7 @@ export const detail = (f: Failed) =>
 // No entry or '': no answer line (a move, look or scan turns to a fresh page; a talk shows its
 // choice in the NPC menu).
 export const OUTCOME: Record<string, string> = {
+  put: 'Stored.',
   taken: 'Taken.',
   dropped: 'Dropped.',
   opened: 'Opened.',

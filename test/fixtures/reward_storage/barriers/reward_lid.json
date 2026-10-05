@@ -1,0 +1,8 @@
+{
+  "keywords": [
+    "reward_lid"
+  ],
+  "short": "fixture.reward_chest",
+  "initial": "locked",
+  "key_item": "reward_key"
+}

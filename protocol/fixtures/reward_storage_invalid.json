@@ -1,0 +1,122 @@
+[
+  {
+    "path": [
+      "choices",
+      "done",
+      "receive",
+      "item"
+    ],
+    "value": "missing",
+    "code": "UNRESOLVED_REFERENCE"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "receive",
+      "item"
+    ],
+    "value": "maud",
+    "code": "UNRESOLVED_REFERENCE"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "receive",
+      "from"
+    ],
+    "value": "missing",
+    "code": "UNRESOLVED_REFERENCE"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "receive",
+      "from"
+    ],
+    "value": "key",
+    "code": "UNRESOLVED_REFERENCE"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "sequence"
+    ],
+    "value": [
+      {
+        "op": "fact.adjust",
+        "fact": "inn_cellar_cleared",
+        "amount": 5
+      }
+    ],
+    "code": "FACT_TYPE_MISMATCH"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "sequence"
+    ],
+    "value": [
+      {
+        "op": "fact.adjust",
+        "fact": "position",
+        "amount": 5
+      }
+    ],
+    "code": "RESERVED_FACT",
+    "loader_code": "FACT_TYPE_MISMATCH"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "sequence"
+    ],
+    "value": [
+      {
+        "op": "fact.adjust",
+        "fact": "scene_lantern_kept",
+        "amount": 5
+      }
+    ],
+    "code": "RESERVED_FACT"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "receive"
+    ],
+    "value": {
+      "item": "key"
+    },
+    "code": "SCHEMA_VIOLATION"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "receive"
+    ],
+    "value": {
+      "from": "maud"
+    },
+    "code": "SCHEMA_VIOLATION"
+  },
+  {
+    "path": [
+      "choices",
+      "done",
+      "hand_over"
+    ],
+    "value": {
+      "item": "key",
+      "to": "maud"
+    },
+    "code": "OUTCOME_MISMATCH"
+  }
+]

@@ -45,12 +45,13 @@ defmodule Loka.Content.Dialogues do
       m: m,
       defs: defs,
       text: text,
-      taken: MapSet.new(commands() ++ keys),
+      taken: commands() ++ keys,
       kinds: {caps, owners(registry, ["definitions"])},
       events: {caps, owners(registry, ["events"])}
     }
 
-    Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++
+    reward_api(m, defs) ++
+      Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++
       story_points(defs, ctx) ++
       chapters(Map.get(settings, "chapters", []), ctx)
   end
@@ -169,7 +170,6 @@ defmodule Loka.Content.Dialogues do
       Enum.flat_map(d["choices"], &choice(rel, &1, d, ctx))
   end
 
-  # Its speaker, quest and roles name definitions of this cartridge.
   defp refs(rel, d, ctx) do
     for(f <- ~w(npc quest), is_map_key(d, f), do: reference(rel, [], f, d, ctx.m, ctx.defs))
     |> Enum.concat()
@@ -208,13 +208,16 @@ defmodule Loka.Content.Dialogues do
       [{steps ++ ["label"], o["label"]}, {steps ++ ["narration"], o["narration"]}],
       ctx.text
     ) ++
-      sequence(rel, steps, o, ctx) ++ accept(rel, steps, o, d, ctx) ++ hand_over(rel, steps, o, d)
+      sequence(rel, steps, o, ctx) ++
+      accept(rel, steps, o, d, ctx) ++
+      hand_over(rel, steps, o, d) ++ receive_item(rel, steps, o, d, ctx)
   end
 
   defp sequence(rel, steps, o, ctx) do
     Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
       owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
-        reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs)
+        reference(rel, steps ++ ["sequence", i], "fact", s, ctx.m, ctx.defs) ++
+        adjusted(rel, steps ++ ["sequence", i], s, ctx)
     end)
   end
 
@@ -231,16 +234,56 @@ defmodule Loka.Content.Dialogues do
 
   defp accept(_, _, _, _, _), do: []
 
-  defp hand_over(rel, steps, %{"hand_over" => h}, %{"roles" => roles}) do
-    for {field, kind} <- [{"item", "item"}, {"to", "npc"}],
-        not match?(%{"role" => ^kind}, roles[h[field]]),
-        do:
-          diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["hand_over", field]), %{
-            "target" => h[field]
-          })
-  end
+  defp hand_over(rel, steps, %{"hand_over" => h}, %{"roles" => roles}),
+    do: transfer_roles(rel, steps ++ ["hand_over"], h, roles, "to")
 
   defp hand_over(_, _, _, _), do: []
+
+  defp receive_item(rel, steps, %{"receive" => h} = o, d, ctx) do
+    steps = steps ++ ["receive"]
+
+    owned(at(rel, steps), "item_acquired", ctx.events) ++
+      transfer_roles(rel, steps, h, d["roles"], "from") ++
+      if not is_map_key(d, "quest") or is_map_key(o, "accept") or is_map_key(o, "hand_over"),
+        do: [diag("OUTCOME_MISMATCH", at(rel, steps))],
+        else: []
+  end
+
+  defp receive_item(_, _, _, _, _), do: []
+
+  defp transfer_roles(rel, steps, h, roles, recipient) do
+    for {field, kind} <- [{"item", "item"}, {recipient, "npc"}],
+        not match?(%{"role" => ^kind}, roles[h[field]]),
+        do: diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => h[field]})
+  end
+
+  defp adjusted(rel, steps, %{"op" => "fact.adjust"} = s, ctx) do
+    case resolve(s["fact"], "fact", ctx.m, ctx.defs) do
+      {_, _, %{"value_type" => %{"type" => "int", "minimum" => _, "maximum" => _}}} -> []
+      {_, _, _} -> [diag("FACT_TYPE_MISMATCH", at(rel, steps ++ ["fact"]))]
+      _ -> []
+    end
+  end
+
+  defp adjusted(_, _, _, _), do: []
+
+  defp reward_api(m, defs) do
+    choices = for {_, d} <- all(defs), {_, o} <- d["choices"], do: o
+    put = for {_, {_, _, %{"command" => "put"}}} <- defs["action"], do: true
+    used = put != [] or Enum.any?(choices, &new_reward?/1)
+
+    version =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    if used and version < [1, 7],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp new_reward?(o),
+    do: is_map_key(o, "receive") or Enum.any?(o["sequence"] || [], &(&1["op"] == "fact.adjust"))
 
   defp texts(_, _, :unknown), do: []
 

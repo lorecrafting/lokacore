@@ -140,6 +140,10 @@ Successful Take/Drop are the specific exceptions to item-page retention. Other s
 retain the page while that item remains projected; leaving the room or losing the item closes
 obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
 
+Put appears as a concrete pair button using projected source/destination names and IDs.
+Each button captures its projection freshness and follows the normal GameSession invocation
+and confirmed receipt routing. There is no separate storage session or recipient selector.
+
 ## Chapters, scenes and recovery
 
 A declared chapter opens a title page on launch and on index change, once per presenter session.

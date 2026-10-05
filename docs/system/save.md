@@ -63,6 +63,9 @@ Memory never serves a state the store did not confirm. Tests: `faults.test.ts` (
 leaves the prior or next revision), `saves.test.ts` ("a new game whose COMMIT is unknown is
 fenced; settling it moves play to the new run").
 
+The [M20-B1 reward and Put](mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts)
+use these same changed containers/facts/quests/choices/head/receipt rows, with no new table or format.
+
 ## The save file (`loka-save-v1`)
 
 `store.ts:46`, STRICT tables:

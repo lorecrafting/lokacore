@@ -1,0 +1,721 @@
+[
+  {
+    "name": "valid choice 0",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "receive": {
+        "item": "key",
+        "from": "maud"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "valid choice 1",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "amount": 5
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "valid choice 2",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "valid put",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": true
+  },
+  {
+    "name": "receive missing/closed item",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "receive": {
+        "from": "maud"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "receive missing/closed from",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "receive": {
+        "item": "key"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "receive missing/closed extra",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "receive": {
+        "item": "key",
+        "from": "maud",
+        "extra": true
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "receive wrong type item",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "receive": {
+        "item": false,
+        "from": "maud"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "receive wrong type from",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "receive": {
+        "item": "key",
+        "from": false
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust missing/closed op",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "amount": 5
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust missing/closed fact",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "amount": 5
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust missing/closed amount",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust missing/closed extra",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "amount": 5,
+          "extra": true
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust wrong type op",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": false,
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "amount": 5
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust wrong type fact",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": false,
+          "amount": 5
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust wrong type amount",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "amount": false
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "adjust unknown discriminator",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "invalid_operation",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "amount": 5
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign missing/closed op",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign missing/closed fact",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "value": 3
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign missing/closed value",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign missing/closed extra",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "value": 3,
+          "extra": true
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign wrong type op",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": false,
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign wrong type fact",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": false,
+          "value": 3
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign wrong type value",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "value": {}
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "assign unknown discriminator",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "label",
+      "narration": "narration",
+      "sequence": [
+        {
+          "op": "invalid_operation",
+          "fact": {
+            "cartridge_id": "reward_storage",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "maud_trust"
+          },
+          "value": 3
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "put missing/closed type",
+    "contract": "CommandPayload",
+    "value": {
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "put missing/closed actor_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "put missing/closed item_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "put missing/closed container_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "put missing/closed extra",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555",
+      "extra": true
+    },
+    "valid": false
+  },
+  {
+    "name": "put wrong type type",
+    "contract": "CommandPayload",
+    "value": {
+      "type": false,
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "put wrong type actor_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "actor_id": false,
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "put wrong type item_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": false,
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "put wrong type container_id",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "put",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": false
+    },
+    "valid": false
+  },
+  {
+    "name": "put unknown discriminator",
+    "contract": "CommandPayload",
+    "value": {
+      "type": "invalid_operation",
+      "actor_id": "11111111-2222-4333-8444-555555555555",
+      "item_id": "11111111-2222-4333-8444-555555555555",
+      "container_id": "11111111-2222-4333-8444-555555555555"
+    },
+    "valid": false
+  },
+  {
+    "name": "valid pair True",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": true,
+      "target_ids": [
+        "11111111-2222-4333-8444-555555555555",
+        "11111111-2222-4333-8444-555555555555"
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "bad pair True False",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": true,
+      "target_ids": false
+    },
+    "valid": false
+  },
+  {
+    "name": "bad pair True [False]",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": true,
+      "target_ids": [
+        false
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "bad pair True ['not-an-id']",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": true,
+      "target_ids": [
+        "not-an-id"
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "valid pair False",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": false,
+      "target_ids": [
+        "11111111-2222-4333-8444-555555555555",
+        "11111111-2222-4333-8444-555555555555"
+      ],
+      "reason": {
+        "code": "budget_exceeded"
+      }
+    },
+    "valid": true
+  },
+  {
+    "name": "bad pair False False",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": false,
+      "target_ids": false,
+      "reason": {
+        "code": "budget_exceeded"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "bad pair False [False]",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": false,
+      "target_ids": [
+        false
+      ],
+      "reason": {
+        "code": "budget_exceeded"
+      }
+    },
+    "valid": false
+  },
+  {
+    "name": "bad pair False ['not-an-id']",
+    "contract": "AdvertisedAction",
+    "value": {
+      "action_key": "put",
+      "label": "action.put",
+      "target": {
+        "kind": "entity",
+        "scopes": [
+          "inventory"
+        ]
+      },
+      "input": [],
+      "available": false,
+      "target_ids": [
+        "not-an-id"
+      ],
+      "reason": {
+        "code": "budget_exceeded"
+      }
+    },
+    "valid": false
+  }
+]

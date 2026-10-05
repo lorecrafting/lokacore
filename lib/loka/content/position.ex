@@ -43,7 +43,7 @@ defmodule Loka.Content.Position do
     refs = reserved_refs(m, defs)
 
     for {rel, steps, s} <- sites(defs),
-        s["op"] == "fact.assign",
+        s["op"] in ["fact.assign", "fact.adjust"],
         s["fact"] in refs,
         do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
   end

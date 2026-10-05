@@ -53,7 +53,7 @@ import {
   speaks,
   spokenBy,
 } from './shared.ts';
-import { assigned } from '../fact.ts';
+import { assigned, adjusted, type Assigned } from '../fact.ts';
 import { acceptRefused, activation, resolution } from '../quest/lifecycle.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
@@ -93,19 +93,35 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
   return accepted(world, 'choice_opened', [op], [event(world, command, mint, 1, opened)]);
 }
 
+// size: allow 60, one atomic choice validates reward and lowers the ordered sequence before event allocation
 function choose(world: World, command: Command<'choose'>, mint: Mint, row: ChoiceRow, used: Steps) {
   const { actor_id, choice_id, continuation_id } = command.payload;
   if (!row.choice_ids.includes(choice_id)) return rejected('invalid_state');
-  const code = blocked(world, row);
-  if (code) return rejected(code);
   const d = definition(world, row.source);
   const option = d.choices[choice_id]!;
+  const code = blocked(world, row, option, used);
+  if (code)
+    return code === 'budget_exceeded' ||
+      code === 'precondition_failed' ||
+      code === 'containment_cycle'
+      ? {
+          kind: 'fault' as const,
+          code,
+        }
+      : rejected(code);
   const q = quest(world, actor_id, d, option, choice_id, mint, used);
   if (typeof q === 'string') return rejected(q);
   const body = bodyOf(world, actor_id)!;
+  let run: Assigned = { ops: [], position: option.receive || option.hand_over ? 1 : 0, facts: {} };
+  for (const step of option.sequence ?? []) {
+    const next =
+      step.op === 'fact.adjust'
+        ? adjusted(world, actor_id, run, step)
+        : assigned(world, actor_id, run, step);
+    if (!next) return { kind: 'fault' as const, code: 'precondition_failed' as const };
+    run = next;
+  }
   const given = handOver(world, command, mint, row, option, body);
-  const start = { ops: given.ops, position: given.events.length, facts: {} };
-  const run = (option.sequence ?? []).reduce((r, s) => assigned(world, actor_id, r, s), start);
   const quests = q ? [event(world, command, mint, run.position + 1, q.payload)] : [];
   const expected_revision = row.opened_revision;
   const op = {
@@ -126,7 +142,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   return accepted(
     world,
     choice_id,
-    [...run.ops, ...(q ? q.ops : []), op],
+    [...given.ops, ...run.ops, ...(q ? q.ops : []), op],
     [...given.events, ...quests, resolvedChoice, ...reached],
     [{ key: option.narration, participants }],
   );
@@ -149,23 +165,24 @@ function quest(
   return acceptRefused(world, actor, accept, used) ?? activation(mint, actor, accept);
 }
 
-// The option's hand_over: the bound item from the body to the bound NPC and its item_acquired.
+// The bound transfer: outgoing hand_over or incoming receive, with the actual acquisition holder.
 function handOver(
   world: World,
   command: Command<'choose'>,
   mint: Mint,
   row: ChoiceRow,
-  { hand_over: h }: DialogueChoice,
+  { hand_over: h, receive: r }: DialogueChoice,
   body: EntityId,
 ) {
-  if (!h) return { ops: [], events: [] };
+  if (!h && !r) return { ops: [], events: [] };
   const bound = (role: string) => row.roles.find((r) => r.role === role)!.entity_id;
-  const [item_id, holder_id] = [bound(h.item), bound(h.to)];
+  const item_id = bound((r ?? h)!.item);
+  const holder_id = r ? body : bound(h!.to);
   const op = {
     op: 'entity.transfer',
     writer_group: 0,
     entity_id: item_id,
-    source_id: body,
+    source_id: r ? bound(r.from) : body,
     destination_id: holder_id,
   } as const;
   const acquired = { type: 'item_acquired', item_id, holder_id } as const;

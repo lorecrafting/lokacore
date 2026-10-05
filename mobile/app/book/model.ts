@@ -230,10 +230,14 @@ function travel(v: GameView): Press[] {
 // The view's available actions as buttons: place actions that need no input, each open exit as a
 // move, each entity's or held item's actions aimed at it, then the pending choice's.
 export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
-  const button = (a: { action_key: string; label: string }, name: string, id?: string) => ({
+  const button = (
+    a: { action_key: string; label: string; target_ids?: readonly string[] },
+    name: string,
+    id?: string,
+  ) => ({
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
-    target_ids: id ? [id] : [],
+    target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
   const place = v.actions.filter((a) => a.available && !a.input.length && a.target.kind === 'none');
@@ -245,10 +249,15 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
         input: { direction: e.direction },
       })),
   );
-  const held = things(v).flatMap((e) =>
+  const projected = things(v);
+  const names = new Map(projected.map((e) => [e.id, e.name]));
+  const held = projected.flatMap((e) =>
     e.actions
       .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
-      .map((a) => button(a, ` ${text(e.name)}`, e.id)),
+      .map((a) => {
+        const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
+        return button(a, ` ${text(e.name)}${destination ? ` in ${text(destination)}` : ''}`, e.id);
+      }),
   );
   return [...place.map((a) => button(a, '')), ...travel(v), ...doors, ...held, ...asked(v, label)];
 }

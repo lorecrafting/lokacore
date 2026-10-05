@@ -1,6 +1,7 @@
 // Typed scoped facts (fact@1; 03 §7, §13; 21 §3.9, §4 Fact): the value an actor reads, and the
 // facts_typed invariant. A world keeps each fact's default (newWorld) and the facts set since
 // (State.facts, by canonical MutationTarget text, the key composition writes).
+import { add } from '../foundation/int.ts';
 import { decode } from '../foundation/canonical.ts';
 import { key, same } from '../foundation/compose.ts';
 import type {
@@ -63,6 +64,44 @@ export function assigned<R extends Assigned>(
   } as const;
   const position = r.position + (same(expected, s.value) ? 0 : 1);
   return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
+}
+
+/** Dialogue bounded adjustment lowers to the existing assignment and sequence overlay. */
+export function adjusted<R extends Assigned>(
+  world: World,
+  actor: CharacterId,
+  run: R,
+  step: { readonly fact: DefinitionRef; readonly amount: number },
+): R | undefined {
+  const spec = world.cartridge.facts[refString(step.fact)];
+  const type = spec?.value_type;
+  const reserved =
+    (step.fact.key === 'position' && world.cartridge.lock.capabilities.position) ||
+    (world.cartridge.lock.capabilities.scene &&
+      Object.values(world.cartridge.scenes ?? {}).some(
+        (scene) => step.fact.key === `scene_${scene.key}`,
+      ));
+  if (
+    reserved ||
+    type?.type !== 'int' ||
+    !Number.isSafeInteger(type.minimum) ||
+    !Number.isSafeInteger(type.maximum) ||
+    type.minimum! > type.maximum! ||
+    !Number.isSafeInteger(step.amount)
+  )
+    return;
+  const at = key({ kind: 'fact', fact: step.fact, scope: scopeOf(world, actor, step.fact) });
+  const current = Object.hasOwn(run.facts, at)
+    ? run.facts[at]
+    : Object.hasOwn(world.state.facts ?? {}, at)
+      ? world.state.facts![at]
+      : world.factDefaults[key(step.fact)];
+  if (!typed(current, type)) return;
+  const next = Math.min(
+    type.maximum!,
+    Math.max(type.minimum!, add(current as number, step.amount)),
+  );
+  return assigned(world, actor, run, { fact: step.fact, value: next });
 }
 
 /** True when `v` is of FactType `t` (the loader checks authored values with it too). */

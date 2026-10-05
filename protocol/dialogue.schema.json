@@ -149,7 +149,7 @@
       ]
     },
     "DialogueChoice": {
-      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id.",
+      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest and never with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign.",
       "type": "object",
       "properties": {
         "label": {
@@ -161,24 +161,48 @@
         "sequence": {
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "op": {
-                "const": "fact.assign"
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "fact.assign"
+                  },
+                  "fact": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "value": {
+                    "$ref": "delta.schema.json#/$defs/FactValue"
+                  }
+                },
+                "required": [
+                  "op",
+                  "fact",
+                  "value"
+                ],
+                "additionalProperties": false
               },
-              "fact": {
-                "$ref": "identity.schema.json#/$defs/DefinitionRef"
-              },
-              "value": {
-                "$ref": "delta.schema.json#/$defs/FactValue"
+              {
+                "type": "object",
+                "properties": {
+                  "op": {
+                    "const": "fact.adjust"
+                  },
+                  "fact": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "amount": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "op",
+                  "fact",
+                  "amount"
+                ],
+                "additionalProperties": false
               }
-            },
-            "required": [
-              "op",
-              "fact",
-              "value"
-            ],
-            "additionalProperties": false
+            ]
           }
         },
         "accept": {
@@ -197,6 +221,22 @@
           "required": [
             "item",
             "to"
+          ],
+          "additionalProperties": false
+        },
+        "receive": {
+          "type": "object",
+          "properties": {
+            "item": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "from": {
+              "$ref": "action.schema.json#/$defs/Key"
+            }
+          },
+          "required": [
+            "item",
+            "from"
           ],
           "additionalProperties": false
         }

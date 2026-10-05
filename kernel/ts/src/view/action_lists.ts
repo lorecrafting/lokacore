@@ -1,5 +1,6 @@
 import { escapeDirections } from '../mechanics/combat/flee.ts';
 // The GameView lists of an actor's ActionSet (commands/actions.ts resolved; 04 §14, §19; 00 §4.10).
+import { LIMITS } from '../contracts.gen.ts';
 import type {
   AdvertisedAction,
   CharacterId,
@@ -17,7 +18,7 @@ import * as barrier from '../mechanics/barrier/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
-import { carrying } from '../mechanics/containment/shared.ts';
+import { carrying, putRefused } from '../mechanics/containment/shared.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
@@ -35,7 +36,7 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
-// size: allow 50, existing action lists share one lazy carrying context across their item offers
+// size: allow 60, item offers share one query counter for carrying and bounded Put pairs
 export function lists(world: World, actor: CharacterId) {
   const set = resolved(world, actor);
   const at = position.positionOf(world, actor);
@@ -64,7 +65,12 @@ export function lists(world: World, actor: CharacterId) {
       .filter((a) => combatOffered(world, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
-      .map((a) => advertise(world, actor, a, take, id, scope));
+      .flatMap((a) => {
+        const shown = advertise(world, actor, a, take, id, scope);
+        return a.command === 'put' && id && body
+          ? putPairs(world, body, id as EntityId, shown, steps)
+          : [shown];
+      });
   return {
     place: listed(
       (a) => a.target.kind === 'none' && !door(a) && !equip(a) && a.command !== current,
@@ -167,4 +173,26 @@ function combatOffered(world: World, body: EntityId | undefined, a: Offered, id?
   if (a.command === 'flee') return !!body && !!engaged(world, body);
   const entity = id && world.entities[id];
   return a.command !== 'attack' || (entity && entity.kind === 'npc' && !!entity.attack);
+}
+
+// Enumerate bounded concrete pairs; exhaustion replaces the whole source offer, never a prefix.
+function putPairs(
+  world: World,
+  body: EntityId,
+  item: EntityId,
+  shown: AdvertisedAction,
+  steps: { n: number },
+): AdvertisedAction[] {
+  if (world.state.containers[item] !== body) return [];
+  const pairs: AdvertisedAction[] = [];
+  for (const id in world.entities) {
+    if (!Object.hasOwn(world.entities, id)) continue;
+    if (++steps.n > LIMITS.query_steps)
+      return [{ ...shown, available: false, reason: { code: 'budget_exceeded' } }];
+    if (world.entities[id].kind !== 'item' || id === item) continue;
+    const code = putRefused(world, body, item, id as EntityId, steps);
+    if (code === 'budget_exceeded') return [{ ...shown, available: false, reason: { code } }];
+    if (!code) pairs.push({ ...shown, target_ids: [item, id as EntityId] });
+  }
+  return pairs;
 }

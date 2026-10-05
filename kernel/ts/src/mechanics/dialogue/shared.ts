@@ -11,6 +11,7 @@ import type {
   ContinuationId,
   DefinitionRef,
   DialogueDefinition,
+  DialogueChoice,
   EntityId,
   Key,
   PendingChoice,
@@ -28,7 +29,8 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
-import { acceptRefused } from '../quest/lifecycle.ts';
+import { carrying } from '../containment/shared.ts';
+import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
@@ -62,15 +64,32 @@ export const pending = (world: World, actor: CharacterId) =>
 /**
  * Why no option of `row` can be chosen now (06 §43: a NEW choice revalidates actual custody and
  * presence): not_present while a bound NPC is not in the actor's room, else not_owned while a
- * bound item is not held by the actor's body; choose and the GameView both ask this.
+ * bound item is not held by the actor body (or the selected receive NPC); Choose and GameView agree.
  */
-export function blocked(world: World, row: ChoiceRow): 'not_present' | 'not_owned' | undefined {
+export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, steps: Steps) {
   const body = bodyOf(world, row.actor_id);
-  const at = (r: RoleBinding) => world.state.containers[r.entity_id];
-  const of = (kind: string) => row.roles.filter((r) => world.entities[r.entity_id]?.kind === kind);
-  if (of('npc').some((r) => !living(world, r.entity_id) || at(r) !== world.state.containers[body!]))
-    return 'not_present';
-  if (of('item').some((r) => at(r) !== body)) return 'not_owned';
+  const d = definition(world, row.source);
+  const bound = (role: string) => row.roles.find((r) => r.role === role)?.entity_id;
+  for (const r of row.roles) {
+    const expected = d.roles[r.role];
+    const entity = world.entities[r.entity_id];
+    if (!expected || entity?.kind !== expected.role) return 'not_owned' as const;
+    if (
+      expected.role === 'npc' &&
+      (!living(world, r.entity_id) ||
+        world.state.containers[r.entity_id] !== world.state.containers[body!])
+    )
+      return 'not_present' as const;
+    if (expected.role === 'item') {
+      const holder = option.receive?.item === r.role ? bound(option.receive.from) : body;
+      if (!holder || world.state.containers[r.entity_id] !== holder) return 'not_owned' as const;
+    }
+  }
+  if (option.receive) {
+    const item = bound(option.receive.item);
+    if (!body || !item) return 'not_owned' as const;
+    return carrying(world, body, steps)(item);
+  }
 }
 
 /**
@@ -88,15 +107,21 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
     const r = d.roles[n]!;
     return r.role === 'npc' && same(r.npc, d.npc);
   });
-  const code = blocked(world, row);
+  const steps = { n: 0 };
   return {
     continuation_id,
     prompt: { key: d.prompt },
     speaker_id: row.roles.find((r) => r.role === speaker)!.entity_id,
     closable: true,
     choices: row.choice_ids.map((choice_id) => {
-      const { label, accept } = d.choices[choice_id]!;
-      const why = code ?? (accept && acceptRefused(world, actor, accept, { n: 0 }));
+      const option = d.choices[choice_id]!;
+      const { label, accept } = option;
+      const code = blocked(world, row, option, steps);
+      const quest = !code && d.quest && resolution(world, actor, d.quest, choice_id, 0, steps);
+      const why =
+        code ??
+        (typeof quest === 'string' ? quest : undefined) ??
+        (accept && acceptRefused(world, actor, accept, steps));
       return why
         ? { available: false, choice_id, label, reason: { code: why } }
         : { available: true, choice_id, label };

@@ -84,8 +84,8 @@ A worn item ([equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)) is 
 not directly in the body: `drop` and `give` of it are `not_owned`, `take` is `not_present`
 (the rule is unchanged; remove it first).
 
-With authored [`world.carry`](cartridge.md#carrying-settings-and-item-mass), only a voluntary
-positive-load Take has a carrying ceiling. After the existing target, directly-held and reach
+With authored [`world.carry`](cartridge.md#carrying-settings-and-item-mass), a voluntary
+positive-load Take or dialogue receive has a carrying ceiling. After the existing target, directly-held and reach
 checks, a candidate whose custody already reaches the actor's body is neutral. Otherwise its
 subtree includes its own shell and every nested item, even behind closed or locked lids. A
 zero-mass subtree is neutral; for a positive subtree, Take refuses `too_heavy` exactly when
@@ -115,6 +115,16 @@ There is no global overload invariant: an overloaded body can take a zero-mass s
 extract its own reachable child and rearrange worn gear, then Remove and Drop to shed load.
 Without a carry setting, legacy carrying behavior is unchanged. This mechanic composes custody, equipment,
 cartridge definitions and the existing conserved transfer; it introduces no persisted load.
+
+`put {item_id, container_id}` moves an existing directly body-held item into a reachable
+item container (omitted capacity is unlimited). Reject missing/non-item targets, a worn or
+otherwise non-body-held source (`not_owned`), an inaccessible destination (`not_present`),
+a locked/closed lid (`exit_locked`/`exit_closed`), full immediate capacity (`invalid_state`),
+and self/descendant destinations (`containment_cycle`). Check custody, lid, cycles and capacity
+before transfer/event allocation, charging each inspected row/edge to the decision query counter.
+Accepted `put` is one conserved transfer and `item_acquired` with the destination item as holder.
+Put has no positive acquisition ceiling: overloaded deposits and body-to-own-bag rearrangements work.
+Projection and admission share this pair legality query.
 
 ## equipment@1 (`kernel/ts/src/mechanics/equipment/rule.ts`)
 
@@ -173,6 +183,11 @@ its one declared scope: the actor's for `player`, the world's for `instance`
 (`mechanics/fact.ts:21`); unset means its default; `fact_compare` compares equality. The host appends a
 `fact_changed {fact, old, new}` for each `fact.assign` that changes its value, at the assign's
 causal position (`mechanics/fact.ts:108`); an unchanged assign emits nothing. Invariant `facts_typed`.
+Dialogue-only `fact.adjust {fact, amount}` requires a declared bounded integer fact and a safe
+integer amount. Read the current value (including earlier sequence steps), check its type and
+bounds, use checked safe addition, then clamp to the authored bounds. Lower to the existing
+`fact.assign` in writer group 0; unchanged values emit no event. Corrupt values, unsafe sums
+and reserved engine-fact writes fault, never repair. This adds no foundation delta operation.
 The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1)'s.
 
 ## resource@1 (`kernel/ts/src/mechanics/resource.ts`)
@@ -303,6 +318,16 @@ offers its talk (`:138`), one per dialogue under the dialogue's key, available w
 dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`.
+
+A quest-resolving choice may declare `receive {item, from}` with bound item/NPC role names,
+excluding `accept` and `hand_over`. Only that choice's incoming item role substitutes direct
+custody by its named NPC for actor-held custody. Every other item role retains its contract.
+Choose and its projected availability recheck the same bound live/present NPC, direct reward
+custody, current quest objective and terminal state, and shared positive acquisition carry with
+one query counter before event allocation. Transfer the saved item identity to the actor body,
+emitting `item_acquired` with that body as holder; lower receive, bounded adjustments,
+assignments, quest resolution and choice resolution together in writer group 0. The ordinary
+proposal joins acquisition quests and reactions. Close remains usable when reward admission fails.
 
 ## Chapters (`kernel/ts/src/view/view.ts`)
 
