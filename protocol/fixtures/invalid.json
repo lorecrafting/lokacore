@@ -15849,6 +15849,14 @@
       {
         "path": "/actor_id",
         "code": "missing_property"
+      },
+      {
+        "path": "/line",
+        "code": "missing_property"
+      },
+      {
+        "path": "/scene",
+        "code": "missing_property"
       }
     ]
   },
@@ -15864,6 +15872,14 @@
       {
         "path": "/extra",
         "code": "unknown_property"
+      },
+      {
+        "path": "/line",
+        "code": "missing_property"
+      },
+      {
+        "path": "/scene",
+        "code": "missing_property"
       }
     ]
   },

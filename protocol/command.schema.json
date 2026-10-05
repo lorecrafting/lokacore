@@ -547,7 +547,9 @@
           },
           "required": [
             "type",
-            "actor_id"
+            "actor_id",
+            "scene",
+            "line"
           ],
           "additionalProperties": false,
           "description": "Advance one shown modal scene line; last line acknowledges and ends. Offered only while a scene runs."
