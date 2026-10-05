@@ -3,7 +3,8 @@ import { skillSpec } from './cartridge_skills.ts';
 // lib/loka/content/position.ex: under position@1 the fact position is the engine's, so the
 // scene@1 also reserves each scene_<key> fact. The artifact must carry exactly these FactSpecs,
 // and no recipe outcome, reaction apply or
-// dialogue choice may fact.assign it. Reading it (fact_compare, on.fact) is allowed.
+// dialogue choice or scene ending may assign it. Skill acquisition and story-point markers
+// have the same ownership check. Reading it (fact_compare, on.fact) is allowed.
 import { markerSpec, spec } from './cartridge_scenes.ts';
 import { encode } from '../foundation/canonical.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
@@ -59,5 +60,9 @@ export function reserved(c: Obj): Diagnostic[] {
       (o.sequence ?? []).forEach((s: Obj, i: number) =>
         write(s, `.cartridge.dialogues${step(k)}.choices${step(id)}.sequence[${i}]`),
       );
+  for (const [k, s] of each('scenes'))
+    (s.on_end?.assign ?? []).forEach((a: Obj, i: number) =>
+      write({ ...a, op: 'fact.assign' }, `.cartridge.scenes${step(k)}.on_end.assign[${i}]`),
+    );
   return out;
 }

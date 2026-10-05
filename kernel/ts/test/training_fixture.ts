@@ -143,7 +143,16 @@ export function bundleOf(c: any) {
   return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 }
 export function productionBundle() {
-  const artifact = JSON.parse(readFileSync(process.env.C1_ARTIFACT!, 'utf8'));
+  if (!process.env.C1_ARTIFACT) {
+    const fixture = JSON.parse(
+      readFileSync(
+        new URL('../../../protocol/fixtures/missing_child_v020_hash.json', import.meta.url),
+        'utf8',
+      ),
+    );
+    return { canonical: fixture.canonical, sha256: fixture.sha256 };
+  }
+  const artifact = JSON.parse(readFileSync(process.env.C1_ARTIFACT, 'utf8'));
   return { canonical: encode(artifact.cartridge), sha256: artifact.content_hash };
 }
 export function trainingWorld(stat = 10, chance = 0): World {

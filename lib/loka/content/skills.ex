@@ -50,7 +50,7 @@ defmodule Loka.Content.Skills do
 
       _ ->
         []
-    end) ++ equipment(m, defs) ++ dodge(m, defs, settings)
+    end) ++ equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
   end
 
   defp equipment(m, defs) do
@@ -82,6 +82,20 @@ defmodule Loka.Content.Skills do
       d ->
         reference("cartridge.json", ["world", "combat", "dodge"], {"skill", "skill"}, d, m, defs)
     end
+  end
+
+  defp defense_narration(defs, settings) do
+    combat = get_in(settings, ["world", "combat"]) || %{}
+
+    shield =
+      Enum.any?(defs["item"], fn
+        {_, {_, _, item}} -> is_map_key(item, "block_chance")
+        _ -> false
+      end)
+
+    for {enabled, field} <- [{!!combat["dodge"], "dodge"}, {shield, "block"}],
+        enabled and !get_in(combat, ["narration", field]),
+        do: bad(at("cartridge.json", ["world", "combat", "narration", field]))
   end
 
   def choice(rel, steps, o, d, ctx) do

@@ -4,8 +4,8 @@ defmodule Loka.Content.Position do
   requires position, the compiler adds the fact `position` (@engine) and fact@1, whose
   fact_changed its rule's fact.assign logs, and content may read the fact but never write it:
   an authored fact named position, or a fact.assign of it in a recipe outcome, a reaction's
-  apply or a dialogue choice, is RESERVED_FACT. The same write-site walk also reserves
-  scene_<key> facts under scene@1 (Scenes supplies their engine FactSpecs).
+  apply, dialogue choice or scene ending, is RESERVED_FACT. The same write-site walk also
+  reserves scene_<key>, story-point markers and skill_<key> facts.
   Twin of kernel/ts/src/content/cartridge_position.ts.
   """
   import Loka.Content.Source, only: [diag: 2, at: 2]
@@ -37,7 +37,7 @@ defmodule Loka.Content.Position do
 
   def facts(facts, _), do: {facts, []}
 
-  @doc "RESERVED_FACT for content writes to position@1 and scene@1 engine facts."
+  @doc "RESERVED_FACT for content writes to engine-owned facts."
   @spec check(map() | nil, map()) :: [map()]
   def check(m, defs) when m != nil do
     refs = reserved_refs(m, defs)
@@ -88,18 +88,24 @@ defmodule Loka.Content.Position do
 
   # Each authored step that may fact.assign: {rel, steps to it, step}.
   defp sites(defs) do
-    for kind <- ~w(recipe reaction dialogue),
+    for kind <- ~w(recipe reaction dialogue scene),
         {_, {rel, steps, v}} <- defs[kind],
         {at, list} <- lists(kind, v),
         {s, i} <- Enum.with_index(list),
         do: {rel, steps ++ at ++ [i], s}
   end
 
-  # A recipe's outcome sequences, a reaction's apply, a dialogue's choice sequences: {steps, list}.
+  # Each author's write list: {steps, list}.
   defp lists("recipe", r),
     do: for({name, o} <- r["outcomes"], do: {["outcomes", name, "sequence"], o["sequence"]})
 
   defp lists("reaction", r), do: [{["apply"], r["apply"]}]
+
+  defp lists("scene", s),
+    do: [
+      {["on_end", "assign"],
+       Enum.map(get_in(s, ["on_end", "assign"]) || [], &Map.put(&1, "op", "fact.assign"))}
+    ]
 
   defp lists("dialogue", d),
     do: for({id, o} <- d["choices"], do: {["choices", id, "sequence"], o["sequence"] || []})

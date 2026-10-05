@@ -186,6 +186,7 @@ function fits(world: World, actor: CharacterId, a: Offered, item: string) {
 // True when step would accept door verb `a` by `actor` at `site` (an exit's direction or an
 // item's id) now: admission (refusal), then barrier@1's checks (barrier.transition).
 function usable(world: World, actor: CharacterId, a: Offered, site: barrier.Site) {
+  const steps = { n: 0 };
   const payload = { type: a.command, ...site, actor_id: actor } as CommandPayload;
   return (
     !refusal(world, payload, steps, a.key) &&

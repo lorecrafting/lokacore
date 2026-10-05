@@ -395,20 +395,26 @@ detail behavior and the world clock continues while the page is open.
 
 ## C1 teaching and defense details
 
-**Selected, pending implementation.** Tobin's NPC page offers the current bound
+**API1.18 interaction contract.** Tobin's NPC page offers the current bound
 lesson, its authored price and immediate result under ordinary Talk/Choose/Leave,
 with no new trainer screen or idle-wait control. The swords lesson comes first and
 the next conversation offers dodge. Already acquired teaching is unavailable and
 cannot suggest a replacement gift. Learning and qualification are described
 separately: the Character page lists each declared acquired skill and its current
 qualified/unqualified status plus the authored requirement. Unlearned status does
-not imply a combat benefit. Current chapter STR/DEX are shown from GameView.
+not imply a combat benefit. Current chapter STR/DEX are shown from GameView. The
+Character page reads `attributes` and `skills` from confirmed GameView data, filters
+skills by `acquired`, and shows each authored label, requirement and current qualification.
+Known attributes or acquired skills suppress the empty Character placeholder.
 
 The gifted sword and actual Peg equipment use ordinary item detail, Wear and Remove.
 Show their authored slot/profile or block chance, plus the skill requirement where
 needed; carrying a sword is visibly distinct from wielding it. Read numbers and labels
 from the projected cartridge data, never renderer literals or inferred item names.
 No active Dodge button, skill percentage bar, proficiency rank or future skill appears.
+A held sword offers Wear; its worn item offers Remove. Its detail describes the declared
+wield slot, attack chance/damage and projected skill label/requirement. Shield detail
+shows the off-hand slot and authored block chance. These descriptions do not grant use.
 
 The existing combat page narrates committed dodge/block prevention once using the
 structured attack-result supplement and authored text; an accuracy miss has its own
@@ -417,6 +423,11 @@ training, acquisition, gift or defended damage. Reopen/retry retain confirmed le
 history in Tobin detail and combat history in combat detail through the existing
 receipt routing; ordinary World events remain separate. Shared action freshness and
 combat/scene precedence continue to govern all offers and raw invocation admission.
+The ordinary NPC controls open swords first, then dodge after the committed swords
+lesson. After both grants there is no lesson control. The focused Book scenario clicks
+these actual controls and cold reopens after each lesson, recovering the returned
+committed line once under Tobin; it also checks Character and equipment detail data.
+This headless component/authority proof supplies no browser layout or native claim.
 
 ## B5 herbs and Wick details
 

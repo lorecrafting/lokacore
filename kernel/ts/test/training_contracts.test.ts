@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { validate } from '../src/foundation/validate.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
-import { trainingBundle, bundleOf } from './training_fixture.ts';
+import { trainingBundle, productionBundle, bundleOf } from './training_fixture.ts';
 const c = JSON.parse(trainingBundle().canonical);
 const ref = (kind: string, key: string) => ({
   cartridge_id: 'ashmere_sampler',
@@ -110,6 +110,9 @@ test('skill loader owns reserved acquisition, qualifications, teacher funding an
       )),
     (c) => (c.items['ashmere_sampler@0.0.9:item/sword'].slot = 'off_hand'),
     (c) => (c.items['ashmere_sampler@0.0.9:item/shield'].slot = 'wield'),
+    (c) => (c.items['ashmere_sampler@0.0.9:item/sword'].weapon.attack.damage_min = 4),
+    (c) => (c.items['ashmere_sampler@0.0.9:item/sword'].weapon.skill = ref('skill', 'missing')),
+    (c) => delete c.world.combat.narration.block,
     (c) => delete c.npcs['ashmere_sampler@0.0.9:npc/teacher'].resource_starts,
     (c) =>
       delete c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'].choices.learn
@@ -124,4 +127,16 @@ test('skill loader owns reserved acquisition, qualifications, teacher funding an
     mutate(m);
     assert.equal(load(m).ok, false);
   }
+  const chapter = JSON.parse(productionBundle().canonical);
+  const prefix = `${chapter.manifest.id}@${chapter.manifest.version}`;
+  chapter.scenes[`${prefix}:scene/epilogue_lost_prior`].on_end.assign[0] = {
+    fact: {
+      cartridge_id: chapter.manifest.id,
+      cartridge_version: chapter.manifest.version,
+      kind: 'fact',
+      key: 'skill_swords',
+    },
+    value: true,
+  };
+  assert.equal(load(chapter).ok, false);
 });

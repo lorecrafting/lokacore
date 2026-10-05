@@ -5,8 +5,8 @@ import { validate } from '../src/foundation/validate.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
 import { bundle, ref, patch, fresh } from './infirmary_fixture.ts';
-const qkey = 'ashmere_missing_child@0.0.19:quest/infirmary_herbs';
-const roomkey = 'ashmere_missing_child@0.0.19:room/willow_shade';
+const qkey = 'ashmere_missing_child@0.0.20:quest/infirmary_herbs';
+const roomkey = 'ashmere_missing_child@0.0.20:room/willow_shade';
 const quest = bundle.value.quests[qkey];
 const detail = bundle.value.rooms[roomkey].details.fenwort_patch;
 
@@ -55,13 +55,13 @@ test('loader independently rejects invalid authored exchange and harvest stock',
       c.quests[qkey].exchange.incoming[0] = c.quests[qkey].exchange.outgoing[0];
     },
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.19:item/bandage_01'].location = {
+      c.items['ashmere_missing_child@0.0.20:item/bandage_01'].location = {
         in: 'room',
         room: ref('room', 'infirmary'),
       };
     },
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.19:item/fenwort_01'].mass_grams = 0;
+      c.items['ashmere_missing_child@0.0.20:item/fenwort_01'].mass_grams = 0;
     },
     (c: any) => {
       c.quests[qkey].exchange.quantity = 13;
@@ -70,7 +70,7 @@ test('loader independently rejects invalid authored exchange and harvest stock',
       c.quests[qkey].exchange.increment = 4;
     },
     (c: any) => {
-      delete c.facts['ashmere_missing_child@0.0.19:fact/infirmary_contribution'];
+      delete c.facts['ashmere_missing_child@0.0.20:fact/infirmary_contribution'];
     },
     (c: any) => {
       delete c.rooms[roomkey].details.fenwort_patch;

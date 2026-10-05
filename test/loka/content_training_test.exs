@@ -39,6 +39,12 @@ defmodule Loka.ContentTrainingTest do
            &put_in(&1, ["choices", "learn", "sequence"], [
              %{"op" => "fact.assign", "fact" => "skill_swords", "value" => true}
            ])},
+          {"scenes/epilogue_lost_prior.json",
+           &update_in(&1, ["on_end", "assign"], fn [first | rest] ->
+             [Map.merge(first, %{"fact" => "skill_swords", "value" => true}) | rest]
+           end)},
+          {"cartridge.json",
+           &update_in(&1, ["world", "combat", "narration"], fn n -> Map.delete(n, "block") end)},
           {"npcs/tobin.json", &Map.delete(&1, "resource_starts")},
           {"items/rusty_sword.json", &Map.put(&1, "slot", "off_hand")},
           {"skills/swords.json", &put_in(&1, ["qualification", "root", "attribute"], "missing")}

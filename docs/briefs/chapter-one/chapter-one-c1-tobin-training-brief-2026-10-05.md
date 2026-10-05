@@ -1,13 +1,15 @@
 # C1 — Tobin training and the first armed/defense fight
 
-**Adopted PM assignment; dependency re-pin required before source GO.** Suggested
-source branch `chapter-1/c1-tobin-training`; developer uses its own isolated worktree.
-Inspected base: provisional B3 integration `9c7e537942e13455a1f64b5afdb90b60faae27dd`,
-chapter0.0.18/API1.16. This incorporates B3 IDs/examples fixes; scoped review
-approval is pending.
-Record the reviewed integrated dependency head before implementation.
-C1 target release/API/hash/IDs, source head, PR and implementation verdicts: null.
-This planning change certifies no runtime, browser or native proof.
+**Adopted PM assignment; local source implemented, independent review pending.**
+Source branch `chapter-one/c1-tobin-training`. Corrected B3 dependency
+`9c7e537942e13455a1f64b5afdb90b60faae27dd` is an ancestor of assigned base
+`4bfe252e`; C1 subsequently merged corrected B5 integration
+`2df52d328adbfdea39a0cde623f6a9f34fffb186`. B5 scoped rechecks were pending at
+that handoff. C1's current release/API is chapter0.0.20/API1.18; its independent
+[payload/hash](../../../protocol/fixtures/missing_child_v020_hash.json) and
+[92-ID answer](../../../protocol/fixtures/missing_child_v020_ids.json) bind the source.
+Source head is supplied with the developer handoff. PR and implementation verdicts:
+null. Focused headless checks are implementation evidence, not hosted, browser or native proof.
 
 ## Goal and governing clauses
 

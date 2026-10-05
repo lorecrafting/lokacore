@@ -621,11 +621,14 @@ shop rules. The satchel has no lid and its contents count toward the ordinary lo
 
 ## C1 Tobin and equipment
 
-**Selected, pending implementation.** The [C1 mechanic](mechanics.md#c1-training-and-armed-defense-selected-contract)
+**API1.18 source contract.** The [C1 mechanic](mechanics.md#c1-training-and-armed-defense-selected-contract)
 adds `skills@1` and the existing `attributes@1` dependency. Skill definitions declare
 their label and current VersionedPolicy qualification; the compiler creates their
 unique reserved player acquisition facts. Swords and dodge are the only new skills.
-No writable stat, progression or skill-percentage field is introduced.
+The source `skills/<key>.json` supplies `label`, `requirement` and `qualification`;
+its key comes from its file. The acquisition fact is the exact player Boolean
+`skill_<key>`, default false, reserved to `skills@1`. No writable stat, progression
+or skill-percentage field is introduced.
 
 | Chapter parameter | Selected value |
 |---|---|
@@ -662,8 +665,10 @@ Production unarmed/rat profiles, combat interval, recovery, carrying ceiling and
 main-story routes stay as currently authored. Training and shop equipment are
 optional; every possession-recovery and required story route stays free of a skill,
 weapon, shield, hour or next-day stock gate. C2 later owns Tobin's reachable watch
-post/patrol. C1 target release/API/hash and generated IDs remain null until source
-work re-pins integrated B3 and any earlier parallel content.
+post/patrol. The current C1 chapter answer and fresh identities are pinned in
+[the independent v020 payload](../../protocol/fixtures/missing_child_v020_hash.json) and
+[ID answer](../../protocol/fixtures/missing_child_v020_ids.json). Source and checks remain
+local until independent review.
 
 ## B5 herb and bandage stock
 

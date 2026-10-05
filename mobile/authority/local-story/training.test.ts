@@ -1,3 +1,6 @@
+import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
+import { living } from '../../../kernel/ts/src/mechanics/death/shared.ts';
+import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -147,6 +150,7 @@ test('forged lesson receipts and contradictory acquired rows reopen as save_corr
     'actor',
     'correlation',
     'wrong-command',
+    'foreign-actor-fact',
   ]) {
     const a = setup();
     a.learn();
@@ -172,6 +176,17 @@ test('forged lesson receipts and contradictory acquired rows reopen as save_corr
     if (mutant === 'correlation')
       d.events.find((e: any) => e.payload.type === 'fact_changed').correlation_id =
         'aaaaaaaa-0000-4000-8000-000000000099';
+    if (mutant === 'foreign-actor-fact') {
+      a.sql.prepare('INSERT INTO state_row VALUES (?,?,?)').run(
+        'facts',
+        key({
+          kind: 'fact',
+          fact: grant.fact,
+          scope: { kind: 'player', character_id: 'aaaaaaaa-0000-4000-8000-000000000099' },
+        }),
+        'true',
+      );
+    }
     if (mutant === 'wrong-command') {
       a.invoke('look');
       const fake = {
@@ -255,42 +270,153 @@ test('defense hit/loss conjunction is guarded at saved-receipt and narration bou
   }
 });
 
-// Breaks: actual chapter training/shop routes require unaffordable gear or do not feed the real rat resolver.
-test(
-  'authored Tobin route learns, shops, equips and fights with reopening at each intermediate state',
-  { skip: !process.env.C1_ARTIFACT },
-  () => {
+// Breaks: a lawful corpse-held lesson gift is rejected on reopen or death loses permanent learned facts.
+test('trained player death cold reopens and recovers the exact worn lesson sword', () => {
+  const a = setup(':memory:', trainingBundle(10, 0, 1));
+  a.learn();
+  a.learn();
+  a.invoke('wear', [a.entity('item', 'sword')]);
+  a.sql
+    .prepare("UPDATE state_row SET value=? WHERE section='resources' AND key=?")
+    .run(
+      JSON.stringify({ value: 1, at: 1, rate: 0, remainder: 0 }),
+      key({ kind: 'resource', resource: resourceRef(a.fresh, 'hp'), entity_id: a.fresh.body }),
+    );
+  a.reopen();
+  a.invoke('attack', [a.entity('npc', 'cellar_rat_1')]);
+  assert.equal(
+    a.story().elapsed({ expected_run_id: a.story().runId(), from: 1, until: 151 }).kind,
+    'saved',
+  );
+  a.reopen();
+  assert.equal(level(a.world(), a.fresh.body, resourceRef(a.fresh, 'hp')), 10);
+  assert.equal(engaged(a.world(), a.fresh.body), undefined);
+  const sword = a.entity('item', 'sword'),
+    corpse = a.world().state.containers[sword];
+  assert.equal(a.world().state.created![corpse].definition.key, 'player_corpse');
+  assert.deepEqual(
+    gameView(a.world()).skills?.map((s) => s.acquired),
+    [true, true],
+  );
+  for (const direction of ['south', 'south', 'south', 'south', 'east', 'down'])
+    a.invoke('move', [], { direction });
+  a.invoke('take', [sword]);
+  a.reopen();
+  a.invoke('wear', [sword]);
+  a.reopen();
+  assert.equal(a.world().state.containers[sword], a.world().slots.wield);
+  a.sql.close();
+});
+
+// Breaks: historical lesson, shop and S2 order is reconciled against today's balance or trained gear gates S1/storage.
+test('authored training/shop/S2 orders retain conserved pennies and trained five-rat reward/storage', () => {
+  for (const order of [
+    ['learn', 'shop', 'debt'],
+    ['shop', 'learn', 'debt'],
+    ['debt', 'learn', 'shop'],
+    ['debt', 'shop', 'learn'],
+  ]) {
     const a = setup(':memory:', productionBundle());
     const move = (...ds: string[]) =>
       ds.forEach((direction) => a.invoke('move', [], { direction }));
-    move('north', 'north', 'north');
-    a.learn('tobin');
-    a.reopen();
-    a.learn('tobin');
-    a.reopen();
+    const choose = (choice_id: string) =>
+      a.invoke('choose', [], {
+        continuation_id: gameView(a.world()).choice!.continuation_id,
+        choice_id,
+      });
     const balances = () =>
       [a.fresh.body, ...['peg', 'aldric', 'tobin'].map((n) => a.entity('npc', n))].map((e) =>
         level(a.world(), e, resourceRef(a.fresh, 'pennies')),
       );
-    assert.deepEqual(balances(), [16, 20, 10, 4]);
-    a.invoke('wear', [a.entity('item', 'rusty_sword')]);
-    a.reopen();
-    move('south', 'south', 'west');
-    a.invoke('buy', [a.entity('npc', 'peg'), a.entity('item', 'wooden_shield')], {
-      quoted_price: 4,
-    });
-    a.reopen();
-    a.invoke('wear', [a.entity('item', 'wooden_shield')]);
-    a.reopen();
-    assert.deepEqual(balances(), [12, 24, 10, 4]);
-    move('east', 'east', 'down');
+    move('north'); // Well Lane is the hub for each optional consumer.
+    for (const part of order) {
+      if (part === 'learn') {
+        move('north', 'north');
+        a.learn('tobin');
+        a.reopen();
+        a.learn('tobin');
+        a.reopen();
+        a.invoke('wear', [a.entity('item', 'rusty_sword')]);
+        a.reopen();
+        move('south', 'south');
+      } else if (part === 'shop') {
+        move('west');
+        a.invoke('buy', [a.entity('npc', 'peg'), a.entity('item', 'wooden_shield')], {
+          quoted_price: 4,
+        });
+        a.reopen();
+        a.invoke('wear', [a.entity('item', 'wooden_shield')]);
+        a.reopen();
+        move('east');
+      } else {
+        move('west');
+        a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
+        choose('accept_on_time');
+        a.reopen();
+        move('east', 'north', 'north', 'north', 'north');
+        a.invoke('a_aldric_debt', [a.entity('npc', 'aldric')]);
+        choose('on_time');
+        a.reopen();
+        move('south', 'south', 'south', 'south');
+      }
+    }
+    assert.deepEqual(balances(), [22, 24, 0, 4]);
+    move('east', 'down');
     a.invoke('attack', [a.entity('npc', 'cellar_rat_1')]);
     a.reopen();
-    const from = a.world().state.clock;
-    assert.equal(
-      a.story().elapsed({ expected_run_id: a.story().runId(), from, until: from + 150 }).kind,
-      'saved',
-    );
+    const round = () => {
+      const from = a.world().state.clock;
+      const r = a.story().elapsed({ expected_run_id: a.story().runId(), from, until: from + 150 });
+      assert.equal(r.kind, 'saved');
+      if (r.kind === 'saved') assert.equal((r.decision as { kind: string }).kind, 'accepted');
+      a.reopen();
+      return r;
+    };
+    const first = round();
+    if (first.kind === 'saved') {
+      const events = (first.decision as { events: any[] }).events.filter(
+        (e) => e.payload.type === 'attack_result',
+      );
+      assert.deepEqual(
+        events.map((e) => [e.payload.hit, e.payload.loss, e.payload.prevented_by]),
+        [
+          [true, 3, undefined],
+          [false, 0, 'dodge'],
+        ],
+      );
+    }
+    for (let n = 0; engaged(a.world(), a.fresh.body) && n < 12; n++) round();
+    assert.equal(living(a.world(), a.entity('npc', 'cellar_rat_1')), false);
+    move('up', 'west', 'west');
+    a.invoke('buy', [a.entity('npc', 'peg'), a.entity('item', 'iron_sword')], { quoted_price: 8 });
+    a.reopen();
+    a.invoke('remove', [a.entity('item', 'rusty_sword')]);
+    a.reopen();
+    a.invoke('wear', [a.entity('item', 'iron_sword')]);
+    a.reopen();
+    assert.deepEqual(balances(), [14, 32, 0, 4]);
+    move('east', 'east', 'down');
+    for (const number of [2, 3, 4, 5]) {
+      a.invoke('attack', [a.entity('npc', `cellar_rat_${number}`)]);
+      a.reopen();
+      for (let n = 0; engaged(a.world(), a.fresh.body) && n < 12; n++) round();
+      assert.equal(living(a.world(), a.entity('npc', `cellar_rat_${number}`)), false);
+    }
+    move('up');
+    a.invoke('maud_offer', [a.entity('npc', 'maud')]);
+    choose('accept');
+    a.reopen();
+    a.invoke('maud_turn_in', [a.entity('npc', 'maud')]);
+    choose('done');
+    a.reopen();
+    assert.equal(a.world().state.containers[a.entity('item', 'cellar_key')], a.fresh.body);
+    move('up');
+    const chest = a.entity('item', 'storage_chest');
+    a.invoke('unlock', [chest]);
+    a.invoke('open', [chest]);
+    a.invoke('put', [a.entity('item', 'rusty_sword'), chest]);
+    a.reopen();
+    a.invoke('take', [a.entity('item', 'rusty_sword')]);
     a.reopen();
     assert.deepEqual(
       gameView(a.world()).skills?.map((s) => [s.acquired, s.qualified]),
@@ -300,5 +426,5 @@ test(
       ],
     );
     a.sql.close();
-  },
-);
+  }
+});

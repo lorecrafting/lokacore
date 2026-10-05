@@ -1,3 +1,4 @@
+import { decode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { acquisition } from '../../../kernel/ts/src/mechanics/skills.ts';
@@ -6,6 +7,7 @@ import type {
   DefinitionRef,
   DecisionResult,
   Command,
+  MutationTarget,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
 import { checkRow } from './dialogue-save.ts';
@@ -73,6 +75,16 @@ function memberships(world: World, grants: Map<string, string[]>) {
   const invalid = () => {
     throw new SyntaxError('malformed JSON: inconsistent skill acquisition');
   };
+  for (const text of Object.keys(world.state.facts ?? {})) {
+    const target = decode(text) as Extract<MutationTarget, { kind: 'fact' }>;
+    if (
+      Object.values(world.cartridge.skills ?? {}).some(
+        (s) => `skill_${s.key}` === target.fact.key,
+      ) &&
+      !same(target.scope, { kind: 'player', character_id: world.character })
+    )
+      invalid();
+  }
   for (const [ref, skill] of Object.entries(world.cartridge.skills ?? {})) {
     const definition: DefinitionRef = {
       cartridge_id: world.cartridge.manifest.id,
