@@ -174,3 +174,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [M12-A first readable details](pm-decision-m12-a-readable-2026-10-05.md): PM adoption of read-only notice/board text and exact current-room targets.
 
 - [2026-10-05 — M12-B nested notice board](owner-decision-m12-b-notice-board-2026-10-05.md).
+
+- [2026-10-05 — opening NPC direction and PM selection of Elspeth](owner-decision-opening-elspeth-2026-10-05.md).

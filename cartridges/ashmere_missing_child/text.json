@@ -105,5 +105,15 @@
   "actions.read_cellar_help": "Read Help in the cellar",
   "readable.lost_whistle": "Lost a tin whistle? Ask at the Drowned Lantern.",
   "readable.cellar_help": "Maud needs help clearing rats from the cellar. Speak to her at the bar.",
-  "detail.notice.title": "Landing notice"
+  "detail.notice.title": "Landing notice",
+  "npc.elspeth.short": "Elspeth",
+  "npc.elspeth.room": "[Elspeth] stands beside the mooring post, watching each boat come in.",
+  "npc.elspeth.description": "A woman in a worn shawl keeps turning toward the river. One hand worries the edge of her sleeve; her eyes search every face on the landing.",
+  "dialogue.elspeth.prompt": "“My boy Wren hasn’t come home. I keep thinking the next boat might bring word of him.” She gathers herself. “You’re new to Ashmere, aren’t you?”",
+  "dialogue.elspeth.directions": "“Which way is the village?”",
+  "narration.elspeth.directions": "“North from here, up Well Lane,” Elspeth says. “Keep going north and you’ll reach Village Green. That’s the heart of Ashmere.”",
+  "dialogue.elspeth.inn": "“Is there an inn nearby?”",
+  "narration.elspeth.inn": "“Go north to Well Lane, then east into the Drowned Lantern. Maud keeps the inn. Speak to her at the bar; she’ll tell you what needs doing.”",
+  "dialogue.elspeth.wren": "“Who is Wren?”",
+  "narration.elspeth.wren": "“My son.” Elspeth looks back at the river. “He’s always off exploring, but he should have been home by now.”"
 }

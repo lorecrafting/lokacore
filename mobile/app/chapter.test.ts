@@ -116,7 +116,10 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
       globals.loka_session!.game()!.text('chapter.missing_child'),
       'The Missing Child — in progress',
     );
-    assert.deepEqual(view.entities, []);
+    assert.deepEqual(
+      view.entities.map((e) => [e.kind, e.name]),
+      [['npc', 'npc.elspeth.short']],
+    );
     assert.deepEqual(view.journal, []);
     const pin = () => {
       const database = new DatabaseSync(join(dir, 'loka-ashmere-missing-child.db'), {
@@ -131,7 +134,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
     assert.equal(
       pin().content_hash,
-      'e8ea74aa3fc1cf9f26ae2349c4a4d2a99d54d69a636c24745f03670ddf2eb43f',
+      '0994fec6833a701e20f6b2ba1dd896f691922a65ab5e74434126edcdf0371ad5',
     );
     assert.equal(globals.loka_session!.startOver(), undefined);
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
@@ -147,7 +150,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
 function appHost() {
   const chapter = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v004_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/missing_child_v005_hash.json', import.meta.url),
       'utf8',
     ),
   );

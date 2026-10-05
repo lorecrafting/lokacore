@@ -222,3 +222,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - M20-B1 mechanical scope: [PM adoption](../decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md); controlled consumer only, production S1 copy/publication stays B2.
 
 - Nested chapter notice board: [M12-B owner direction](../decisions/owner-decision-m12-b-notice-board-2026-10-05.md).
+
+- Opening room NPC for conversation and directions: [owner direction and PM selection of Elspeth](../decisions/owner-decision-opening-elspeth-2026-10-05.md).

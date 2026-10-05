@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.4`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.5`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten Ashmere rooms and playable Maud S1 (five rats,
@@ -32,10 +32,19 @@ absent. The [real chapter cast decision](../decisions/owner-decision-real-chapte
 keeps Old Bram outside the active cast; Q1 awaits design from the actual Ashmere cast
 and rooms.
 
+Elspeth, Wren's mother, stands at Ferry Landing at every hour. Her opening conversation
+introduces Wren and directs newcomers north through Well Lane to Village Green, or east
+from Well Lane to the Drowned Lantern and Maud. Her selectable NPC detail uses the existing
+[Book dialogue flow](book-ui.md#npc-dialogue-and-action-details); directions remain in that
+detail's history rather than the World log. Talking and choosing a reply grant no quest,
+fact or reward, and Leave preserves the north route. This fixed placement supersedes the
+archived Elspeth Green/cottage schedule for the current opening
+([opening NPC decision](../decisions/owner-decision-opening-elspeth-2026-10-05.md)).
+
 The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source; installed mechanics and validation are unchanged. Its
-independent answer is `protocol/fixtures/missing_child_v004_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v005_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
