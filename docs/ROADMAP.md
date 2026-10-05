@@ -162,7 +162,7 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local `main` has completed **6 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3).
+Local `main` has completed **7 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3, B5).
 GitHub `main` has three (A1, B1, A2).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
@@ -183,39 +183,48 @@ approved after its ID-pin and schema-example findings were fixed
 accumulated-head publication checks and a GitHub PR. B4 refillable light and
 safe dark-well recovery have an [adopted plan](decisions/pm-decision-b4-light-2026-10-05.md)
 and [independent plan approval](reviews/2026-10-05-b4-light-plan-review.md);
-implementation remains ahead.
+source implementation is active in an isolated local branch.
 
-B5 Infirmary Herbs has an [adopted finite-stock contract](decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)
-and [re-pinned brief](briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
-on local base `d41ec0d2`; source implementation and proof remain ahead.
+B5 Infirmary Herbs is implemented on local `main` at chapter 0.0.19/API1.17.
+Its finite fenwort harvest, four bandage exchanges and bounded Priory contribution
+passed focused source proof. Trusted elapsed replay, pinned dialogue roles and
+paired quest retirement findings were fixed and independently approved
+([primary review](reviews/2026-10-05-b5-infirmary-herbs-primary-review.md),
+[save/portable review](reviews/2026-10-05-b5-infirmary-herbs-save-second-review.md)).
+It awaits accumulated-head publication checks and a GitHub PR.
 
 B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6-wisp-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
-on local base `98cc60b1`. B4/B5 source dependency pins, independent B6 plan review,
-implementation and successor release/proof pins remain ahead; none is claimed here.
+on local base `98cc60b1`. The route finding was fixed and its
+[independent plan review](reviews/2026-10-05-b6-wisp-plan-review.md) approved.
+B4 source dependency, implementation and successor release/proof pins remain ahead.
 
 B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
-against local B3 integration at `4bfe252e`. Source implementation, successor
-release pins, independent plan review and proof remain ahead.
+against local B3 integration at `4bfe252e`. Its
+[independent plan review](reviews/2026-10-05-b7-waterskin-plan-review.md) approved;
+source implementation, successor release pins and proof remain ahead.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
 on local base `10b023e8`. A3 is integrated; B8 has an approved plan but no source.
-B8 source/review re-pins, independent B9 plan review, implementation and successor
+B8 source/review re-pins, [independent B9 plan review](reviews/2026-10-05-b9-lantern-dream-plan-review.md) approved; implementation and successor
 release/API/hash/ID/proof pins remain ahead; no playable S10 is claimed here.
 
 C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md)
-against corrected provisional B3 integration `9c7e5379`; re-pin its scoped review
-approval before source assignment. C1 source implementation, exact release pins
-and proof remain ahead.
+against corrected B3 integration `9c7e5379`; its
+[independent plan review](reviews/2026-10-05-c1-tobin-plan-review.md) approved.
+Source implementation is active in an isolated local branch; exact release pins
+and final proof remain ahead.
 
 C3 Living hounds has an [adopted bounded population/fight-loot contract](decisions/pm-decision-c3-living-hounds-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c3-living-hounds-brief-2026-10-05.md)
 against local main `98cc60b1`. C1 source and shared cartridge predecessors must
-be re-pinned before source assignment; successor release pins, independent plan
-review, implementation and proof remain ahead. C4 behavior is a separate slice.
+be re-pinned before source assignment; the equal-time conflict finding was fixed
+and its [independent plan review](reviews/2026-10-05-c3-living-hounds-plan-review.md)
+approved. Successor release pins, implementation and proof remain ahead. C4
+hound aggression, pack assistance and flight is a separate planned slice.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
