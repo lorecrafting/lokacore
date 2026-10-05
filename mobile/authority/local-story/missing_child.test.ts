@@ -545,10 +545,13 @@ test('SQLite report/Study reopen and exact replay preserve active Q2 and receipt
 });
 
 // Breaks: successful readable recipes without bound committed command/root completion
-// evidence are guessed into a detail; corrupt receipts must keep explicit Start over recovery.
-test('malformed Study receipt evidence is save_corrupt on reopen', async () => {
-  const { openGame } = await import('./session.ts');
+// evidence are guessed into a detail or throw before typed, explicit Start over recovery.
+test('malformed Study receipt evidence offers typed Start over on reopen', async () => {
+  const { localSession } = await import('./session.ts');
   for (const mutate of [
+    (r: any) => delete r.response.events,
+    (r: any) => (r.response.events = null),
+    (r: any) => delete r.response.events[0].payload,
     (r: any) => (r.command.id = 'aaaaaaaa-0000-4000-8000-000000000099'),
     (r: any) => (r.command.payload.action = 'absent'),
     (r: any) =>
@@ -590,10 +593,12 @@ test('malformed Study receipt evidence is save_corrupt on reopen', async () => {
           JSON.stringify(receipt.response),
           row.rowid as number,
         );
-      assert.throws(
-        () => openGame(p.db, bundle, p.host),
-        (e: any) => e.cause?.kind === 'save_corrupt',
-      );
+      const session = localSession(() => p.db, assert.fail, bundle, p.host);
+      assert.equal(session.game(), undefined);
+      assert.equal(session.failed()?.kind, 'save_corrupt');
+      assert.equal(session.failed()?.startOver, true);
+      assert.equal(session.startOver(), undefined);
+      assert.deepEqual(session.game()!.view().view.journal, []);
     } finally {
       p.sql.close();
     }

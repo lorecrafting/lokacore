@@ -134,6 +134,8 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
   );
   if (!r) return undefined;
   const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
+  if (!Array.isArray(d.events) || d.events.some((e) => typeof e?.payload?.type !== 'string'))
+    throw new Error('malformed JSON: invalid committed event evidence');
   const root =
     ['engaged', 'fled'].includes(d.outcome) &&
     d.delta.ops.some(
