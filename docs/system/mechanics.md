@@ -1087,7 +1087,8 @@ row and grants its authored capped MV increment. Strict B7 last-serving refusal
 applies: insufficient quantity never buys a partial drink. Exhaustion preserves
 the same empty vessel shell. The shared service query proves original provider,
 living actor/provider, co-location, exact service reference/quote, unowned room
-entitlement or available stock, exact conserved funding and positive MV headroom.
+entitlement or available stock and exact conserved funding. Positive MV headroom
+is required only for meal/drink; room rental remains available at full MV.
 Meal/drink at full MV refuse before charging or consuming. Near the maximum the
 benefit caps; the displayed offer declares that cap. No HP/MA recovery, passive
 hunger/thirst, intoxication, carrying acquisition, food issuance or restock job

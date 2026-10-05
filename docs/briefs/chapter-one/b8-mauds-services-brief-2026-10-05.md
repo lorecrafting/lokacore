@@ -85,7 +85,7 @@ separately. Production values come from the governing tuning clause.
 
 | Controlled input | Independent expected result | Realistic mutation |
 |---|---|---|
-| Actor20p/Maud10p, unpaid, standing, MV50; rent3p | 17p/13p, paid=true, standing/MV50/clock0; no S10/slept/dream grant | Rental calls Rest or grants recovery |
+| Actor20p/Maud10p, unpaid, standing, fullMV100; rent3p | 17p/13p, paid=true, standing/MV100/clock0; no S10/slept/dream grant | Rental calls Rest or grants recovery |
 | Exact replay, then distinct already-paid rental | remains17/13/true; distinct attempt refuses with no stock/event/payment | Replay or repeated room double-charges |
 | Actor20/Maud10, meals4, MV50/max100; meal2p/+12 | 18/12, meals3, MV62, unchanged HP and position; replay stays same | Debit omitted, benefit early or serving not consumed |
 | Actor20/Maud10, meals4, MV95/max100; meal | 18/12, meals3, MV100 | MV overflow or payment treated as saturating |
