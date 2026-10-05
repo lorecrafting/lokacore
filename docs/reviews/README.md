@@ -292,3 +292,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Parallel local slice workflow](2026-10-05-parallel-local-lanes-review.md): exact local draft head `681e1f8e`, independent docs-only APPROVE; no findings, shared-pin ordering, isolated worktrees and accumulated publication gates checked.
 - [B7 Well and waterskin plan](2026-10-05-b7-waterskin-plan-review.md): exact planning head `de7e65ca`, independent APPROVE; finite two-vessel route, owned reach, liquid-aware carrying, portable row boundary and historical receipt recovery checked. No findings; docs-only, no implementation proof.
+- [C2 Watchman's Rounds plan](2026-10-05-c2-watchmans-rounds-plan-review.md): exact planning head `5fc478e3`, independent APPROVE; six-edge/four-entry route, original leader authority, explicit pause/Rejoin, fatal reset/Restart, independent Wren/C1 and receipt-backed recovery checked. Docs-only; dependency re-pins remain required before source GO.
