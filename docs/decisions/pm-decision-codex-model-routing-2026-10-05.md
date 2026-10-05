@@ -18,8 +18,9 @@ Role independence and the review count come from the [workflow](../WORKFLOW.md)
 and [one-reviewer default](owner-decision-one-reviewer-default-2026-10-04.md),
 not from model size. An authored brief narrows exploration but does not make
 save, receipt, or protocol implementation mechanical. The B2 Chandler's Debt
-implementation needed four real review findings closed by independent SQLite
-red controls; A3 Green finale spans bound input, story-point and save evidence.
+implementation needed four review fixes: three save guards were proved by
+independent SQLite red controls, and one clarified Peg's visible deadline.
+A3 Green finale spans bound input, story-point and save evidence.
 These are Sol implementation jobs even after planning. Luna is for genuinely
 bounded edits, never a blanket default for all chapter code.
 
