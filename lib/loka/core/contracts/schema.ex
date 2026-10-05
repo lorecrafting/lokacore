@@ -34,7 +34,7 @@ defmodule Loka.Core.Contracts.Schema do
   @annotations ~w($schema $id title description examples)
   @by_type %{
     "object" =>
-      ~w(type properties required exactlyOneRequired additionalProperties propertyNames maxProperties),
+      ~w(type properties required requiredUnless exactlyOneRequired additionalProperties propertyNames maxProperties),
     "array" => ~w(type items minItems maxItems),
     "string" => ~w(type enum const pattern minLength maxLength),
     "integer" => ~w(type enum const minimum maximum),
@@ -116,6 +116,16 @@ defmodule Loka.Core.Contracts.Schema do
   end
 
   defp keyword("required", r, _, at, _), do: ok(is_list(r) and Enum.all?(r, &is_binary/1), at)
+
+  defp keyword("requiredUnless", r, %{"properties" => ps}, at, _) when is_map(r) do
+    case Map.to_list(r) do
+      [{key, fields}] ->
+        ok(is_map_key(ps, key) and is_list(fields) and Enum.all?(fields, &is_map_key(ps, &1)), at)
+
+      _ ->
+        ["#{at}: invalid"]
+    end
+  end
 
   defp keyword("exactlyOneRequired", keys, %{"properties" => ps}, at, _) when is_map(ps) do
     ok(

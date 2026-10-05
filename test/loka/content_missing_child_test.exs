@@ -1,10 +1,32 @@
 defmodule Loka.ContentMissingChildTest do
   use ExUnit.Case, async: true
-  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v016_hash.json"))
+  @moduletag :tmp_dir
+  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v017_hash.json"))
 
   # Breaks: active chapter geometry, retired definitions, reward/message custody, return guards or title drift.
   test "the chapter in progress compiles to its independent answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile("cartridges/ashmere_missing_child") == {:ok, expected, []}
+  end
+
+  # Breaks: an action-started scene can bind a different Green detail than its Begin recipe.
+  test "Green scene source detail must match its Begin recipe", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "scenes/epilogue_lost_prior.json")
+    source = path |> File.read!() |> JSON.decode!()
+    File.write!(path, JSON.encode!(put_in(source, ["on", "detail"], "notice")))
+    room_path = Path.join(dir, "rooms/village_green.json")
+    room = room_path |> File.read!() |> JSON.decode!()
+
+    notice = put_in(room["details"]["market_cross"], ["aliases"], ["notice"])
+    File.write!(room_path, JSON.encode!(put_in(room, ["details", "notice"], notice)))
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.any?(
+             diagnostics,
+             &(&1["code"] == "OUTCOME_MISMATCH" and
+                 &1["path"] == "scenes/epilogue_lost_prior.on")
+           )
   end
 end

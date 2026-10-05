@@ -53,7 +53,9 @@ function play(o: ReturnType<typeof open>) {
     const input =
       action_key === 'choose'
         ? { choice_id: 'carry', continuation_id: gameView(o.world()).choice!.continuation_id }
-        : {};
+        : action_key === 'continue'
+          ? { scene: gameView(o.world()).scene!.scene, line: gameView(o.world()).scene!.index }
+          : {};
     const invocation = {
       invocation_id: host.newId(),
       action_key,

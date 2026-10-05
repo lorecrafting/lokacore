@@ -173,7 +173,7 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
       ['continue'],
     );
     assert.equal(p.view().scene!.line, 'scene.lantern_kept.bram');
-    p.invoke('continue');
+    p.invoke('continue', { scene: p.view().scene!.scene, line: p.view().scene!.index });
     assert.equal(p.view().scene!.index, 2);
     assert.equal(p.view().scene!.line, 'scene.lantern_kept.brass');
     const revision = sql.prepare('SELECT revision FROM head').get()!.revision;

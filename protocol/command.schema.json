@@ -536,6 +536,13 @@
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "scene": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "line": {
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [

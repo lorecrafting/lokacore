@@ -32,6 +32,8 @@ function setup(path: string) {
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
   const view = () => a.game.view().view;
   const ok = (action_key: string, target_ids: string[] = [], input: object = {}) => {
+    if (action_key === 'continue')
+      input = { scene: view().scene!.scene, line: view().scene!.index };
     const r = a.game.invoke({ action_key, target_ids, input } as never);
     assert.equal(r.kind, 'saved', JSON.stringify(r));
     if (r.kind === 'saved') assert.equal(r.decision.kind, 'accepted', JSON.stringify(r));

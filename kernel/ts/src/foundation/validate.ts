@@ -58,7 +58,13 @@ export function validate(contract: string, value: Value, defs = DEFS as Defs): C
 function errors(s: Schema, v: Value, path: string, defs: Defs): ContractError[] {
   if (typeof s.type === 'string' && !types[s.type](v)) return err(path, 'invalid_type');
   if (s.oneOf && !isObj(v)) return err(path, 'invalid_type');
-  return Object.entries(s).flatMap(([k, arg]) => keyword(k, arg, v, path, defs));
+  return Object.entries(s).flatMap(([k, arg]) =>
+    k === 'exactlyOneRequired' &&
+    s.requiredUnless &&
+    (arg as string[]).every((key) => !Object.hasOwn(v as Obj, key))
+      ? []
+      : keyword(k, arg, v, path, defs),
+  );
 }
 
 // Keywords that test the value against their argument: [holds, code]. Each sees a value that
@@ -77,7 +83,7 @@ const tests: Record<string, [(v: any, arg: any) => boolean, ErrorCode]> = {
   pattern: [(v, arg) => new RegExp(arg, 'u').test(v), 'pattern_mismatch'],
 };
 
-// size: allow 44, one closed-keyword dispatch includes the scene trigger exclusivity check
+// size: allow 55, closed-keyword dispatch includes scene trigger alternatives
 function keyword(k: string, arg: any, v: any, path: string, defs: Defs): ContractError[] {
   if (Object.hasOwn(tests, k)) return check(tests[k][0](v, arg), path, tests[k][1]);
   switch (k) {
@@ -105,6 +111,14 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
       return (arg as string[]).flatMap((key) =>
         Object.hasOwn(v, key) ? [] : err(child(path, key), 'missing_property'),
       );
+    case 'requiredUnless': {
+      const [key, fields] = Object.entries(arg as Record<string, string[]>)[0]!;
+      return Object.hasOwn(v, key)
+        ? []
+        : fields.flatMap((field) =>
+            Object.hasOwn(v, field) ? [] : err(child(path, field), 'missing_property'),
+          );
+    }
     case 'exactlyOneRequired':
       return check(
         (arg as string[]).filter((key) => Object.hasOwn(v, key)).length === 1,

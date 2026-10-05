@@ -21,10 +21,13 @@
           "properties": {
             "story_point": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
             "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "action": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "detail": { "$ref": "action.schema.json#/$defs/Key" },
             "outcome": { "$ref": "action.schema.json#/$defs/Key" }
           },
           "required": ["outcome"],
-          "exactlyOneRequired": ["story_point", "quest"],
+          "exactlyOneRequired": ["story_point", "quest", "action"],
           "additionalProperties": false
         },
         "control": {
@@ -35,6 +38,29 @@
           "items": {
             "$ref": "#/$defs/SceneStep"
           }
+        },
+        "on_end": {
+          "type": "object",
+          "properties": {
+            "assign": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "value": { "$ref": "delta.schema.json#/$defs/FactValue" }
+                },
+                "required": ["fact", "value"],
+                "additionalProperties": false
+              }
+            },
+            "story_point": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+          },
+          "required": ["assign", "story_point", "outcome"],
+          "additionalProperties": false
         }
       },
       "required": [

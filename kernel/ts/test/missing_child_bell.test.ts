@@ -43,6 +43,12 @@ function setup() {
   let world = newWorld(cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
   let n = 0;
   const run = (payload: object, expected = 'accepted') => {
+    if ((payload as { type?: string }).type === 'continue')
+      payload = {
+        ...payload,
+        scene: gameView(world).scene!.scene,
+        line: gameView(world).scene!.index,
+      };
     const command = {
       id: `eeeeeeee-0000-4000-8000-${String(++n).padStart(12, '0')}`,
       world_context_id: world.context,

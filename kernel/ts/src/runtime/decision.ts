@@ -1,4 +1,4 @@
-// size: allow 305, bound quest and job rows join the existing runtime decision model
+// size: allow 310, bound quest, job and scene rows join the runtime decision model
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -212,6 +212,7 @@ export const COMPOSES = {
   schedule: ['movement', 'combat', 'death'],
   combat: ['movement'],
   dialogue: ['quest', 'containment'],
+  scene: ['dialogue'],
   reaction: ['quest'],
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES

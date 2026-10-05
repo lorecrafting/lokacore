@@ -103,7 +103,10 @@ function riddle(d: Obj, at: string, { text }: Checks): Diagnostic[] {
 
 function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const site = (t: Obj) => `${refString(t.dialogue as DefinitionRef)} ${t.choice}`;
+  const site = (t: Obj) =>
+    t.scene
+      ? `scene/${refString(t.scene as DefinitionRef)}`
+      : `dialogue/${refString(t.dialogue as DefinitionRef)} ${t.choice}`;
   const all = Object.entries((c.story_points ?? {}) as Obj);
   const sites = all.flatMap(([, p]) => Object.values(p.outcomes as Obj).map(site));
   for (const [ref, p] of all) {
@@ -112,9 +115,21 @@ function storyPoints(c: Obj, named: Checks['named']): Diagnostic[] {
       out.push(diag('SCHEMA_VIOLATION', `${at}.outcomes`, { error: 'too_few_items' }));
     for (const [name, t] of Object.entries(p.outcomes as Obj)) {
       const path = `${at}.outcomes${step(name)}`;
-      named(t.dialogue, 'dialogue', `${path}.dialogue`);
+      if (!!t.scene === !!t.dialogue || (t.scene ? !!t.choice : !t.choice))
+        out.push(diag('SCHEMA_VIOLATION', path));
+      if (t.scene) {
+        named(t.scene, 'scene', `${path}.scene`);
+        if (p.key.length > 52) out.push(diag('SCHEMA_VIOLATION', `${at}.key`));
+        const scene = (c.scenes ?? {})[refString(t.scene as DefinitionRef)];
+        if (
+          scene &&
+          (scene.on_end?.outcome !== name || refString(scene.on_end.story_point) !== ref)
+        )
+          out.push(diag('OUTCOME_MISMATCH', path));
+      } else named(t.dialogue, 'dialogue', `${path}.dialogue`);
       if (sites.filter((s) => s === site(t)).length > 1)
         out.push(diag('DUPLICATE_DEFINITION', path));
+      if (t.scene) continue;
       const d = (c.dialogues ?? {})[refString(t.dialogue as DefinitionRef)];
       if (d && !Object.hasOwn(d.choices, t.choice))
         out.push(diag('UNRESOLVED_REFERENCE', `${path}.choice`, { target: t.choice }));
@@ -148,7 +163,7 @@ function chapters(c: Obj, { named, text }: Checks): Diagnostic[] {
     const counted: Obj[] = chapter.outcome
       ? [point.outcomes[chapter.outcome]]
       : Object.values(point.outcomes);
-    if (counted.some((t) => ambiguous(c, t)))
+    if (counted.some((t) => !t.scene && ambiguous(c, t)))
       out.push(diag('OUTCOME_MISMATCH', `${at}.story_point`));
   }
   return out;

@@ -9,7 +9,7 @@ import type {
   Key,
   TextKey,
 } from '../../contracts.gen.ts';
-import { has, values, refString, type World } from '../../runtime/decision.ts';
+import { bodyOf, has, values, refString, type World } from '../../runtime/decision.ts';
 import { value } from '../fact.ts';
 import { ALWAYS } from '../dialogue/shared.ts';
 import type { ActionSet } from '../../commands/actions.ts';
@@ -40,18 +40,27 @@ export function running(world: World, actor: CharacterId): SceneView | undefined
 export function starts(world: World, e: DomainEvent): ReactionRule[] {
   if (
     !has(world.cartridge.lock.capabilities, 'scene') ||
-    (e.payload.type !== 'story_point_reached' && e.payload.type !== 'quest_resolved')
+    (e.payload.type !== 'story_point_reached' &&
+      e.payload.type !== 'quest_resolved' &&
+      e.payload.type !== 'action_completed')
   )
     return [];
   const p = e.payload;
   return values(world.cartridge.scenes ?? {})
     .filter(
       (s) =>
-        ('story_point' in s.on && p.type === 'story_point_reached'
-          ? refString(s.on.story_point!) === refString(p.story_point)
-          : 'quest' in s.on &&
-            p.type === 'quest_resolved' &&
-            refString(s.on.quest!) === refString(p.quest)) && s.on.outcome === p.outcome,
+        ('action' in s.on && p.type === 'action_completed'
+          ? s.on.action!.key === p.action &&
+            e.actor_id !== undefined &&
+            world.details[p.subject_id]?.key === s.on.detail &&
+            world.details[p.subject_id]?.room === world.roomIds[refString(s.on.room!)] &&
+            world.state.containers[bodyOf(world, e.actor_id)!] === world.details[p.subject_id]?.room
+          : 'story_point' in s.on && p.type === 'story_point_reached'
+            ? refString(s.on.story_point!) === refString(p.story_point)
+            : 'quest' in s.on &&
+              p.type === 'quest_resolved' &&
+              refString(s.on.quest!) === refString(p.quest)) &&
+        (p.type === 'action_completed' || s.on.outcome === p.outcome),
     )
     .map((s) => ({
       key: s.key as Key,
@@ -68,7 +77,7 @@ export const modal = (): ActionSet => ({
     command: 'continue' as Key,
     label: 'action.continue' as TextKey,
     target: { kind: 'none' },
-    input: [],
+    input: ['scene', 'line'],
     priority: 0,
     policy: ALWAYS,
     engine: true,
