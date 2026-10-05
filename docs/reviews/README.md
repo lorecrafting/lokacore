@@ -239,3 +239,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [FEN-02 — Mire Crossing and Fox Hollow](2026-10-05-fen02-review.md): PR #186 at `5c8e3e27e8e8d63ebfa317700124b278741593f0`, independent APPROVE; no findings, reciprocal all-hours/cold-return route and detail-local Book behavior verified; two independent red controls detected.
 
 - [Q2-A — first Missing Child search lead](2026-10-05-q2-a-first-search-review.md): PR #187, initial primary/Astra CHANGES REQUIRED at `85742097`; scoped primary fix-round 1 APPROVE at `c8186f663cfb293e2a3de0b180ad62428f56c062`, Q2A-R1 closed. All three malformed event shapes retain typed corruption and working Start over on independent file-backed cold reopen; 79 scoped tests pass and both new guard branches have independent red controls. Historical reviews retained; no open findings.
+
+- [Q2-B — Wren encounter and durable riddle](2026-10-05-q2-b-wren-riddle-review.md): PR #188 at `e4a802997ee9cda671fed8742b1094df1cf83070`, independent APPROVE; no findings, 116 restored headless tests and 5 Elixir tests pass, two independent behavior mutants red and all 19 schema mutants killed.
