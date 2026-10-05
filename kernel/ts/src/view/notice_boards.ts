@@ -1,3 +1,4 @@
+import { selected } from '../mechanics/containment/stock.ts';
 import type { AdvertisedAction, EntityId, NoticeBoardView } from '../contracts.gen.ts';
 import type { World } from '../runtime/decision.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
@@ -10,11 +11,23 @@ export function noticeViews(
   const boards = noticeBoards(world, here, actions);
   const grouped = new Set(boards.flatMap((board) => board.notices.map((notice) => notice.id)));
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
-    detail.room === here && detail.readable && !grouped.has(id as EntityId)
+    detail.room === here && (detail.readable || detail.harvest) && !grouped.has(id as EntityId)
       ? [
           {
             id: id as EntityId,
-            title: detail.readable.title ?? detail.readable.label,
+            title: detail.harvest?.title ?? detail.readable!.title ?? detail.readable!.label,
+            ...(detail.harvest && {
+              remaining: (() => {
+                const ids = selected(
+                  world,
+                  detail.harvest.items,
+                  here,
+                  detail.harvest.items.length,
+                  { n: 0 },
+                );
+                return typeof ids === 'string' ? 0 : ids.length;
+              })(),
+            }),
             description: description_variant.describe(world, world.character, detail),
             ...offered(actions(id)),
           },

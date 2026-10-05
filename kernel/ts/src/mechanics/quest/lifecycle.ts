@@ -19,6 +19,7 @@ import { bodyOf, refString } from '../../runtime/decision.ts';
 import { questOf } from '../lookups.ts';
 import type { Mint, QuestRow, Steps, World } from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
+import { ready } from '../dialogue/exchange.ts';
 import { cmp } from '../../foundation/validate.ts';
 
 /** The cartridge's definition of `quest` (the loader resolves every quest reference). */
@@ -39,6 +40,7 @@ export function activation(mint: Mint, actor: CharacterId, quest: DefinitionRef)
 }
 
 /** A bound dialogue acceptance schedules the quest's one authored absolute deadline. */
+// size: allow 45, exact retirement joins bound activation and optional deadline scheduling
 export function boundActivation(
   world: World,
   mint: Mint,
@@ -47,10 +49,24 @@ export function boundActivation(
   bindings: readonly RoleBinding[],
 ) {
   const activated = activation(mint, actor, quest);
+  const previous = questOf(world, actor, quest);
+  const retired =
+    previous && definition(world, quest).repeatable
+      ? [
+          {
+            op: 'quest.retire' as const,
+            writer_group: 0,
+            instance_id: previous[0],
+            quest,
+            scope: previous[1].scope,
+          },
+        ]
+      : [];
   const deadline = definition(world, quest).deadline;
   return {
     ...activated,
     ops: [
+      ...retired,
       { ...activated.ops[0], bindings },
       ...(deadline
         ? [
@@ -80,9 +96,18 @@ export function acceptRefused(
   quest: DefinitionRef,
   steps: Steps,
 ) {
-  const offer = definition(world, quest).offer;
-  if (questOf(world, actor, quest) || (offer && !holds(world, actor, offer.policy.root, { steps })))
+  const d = definition(world, quest);
+  const offer = d.offer;
+  const prior = questOf(world, actor, quest);
+  if (
+    (prior && !(d.repeatable && prior[1].state === 'resolved')) ||
+    (offer && !holds(world, actor, offer.policy.root, { steps }))
+  )
     return 'invalid_state' as const;
+  if (d.exchange) {
+    const result = ready(world, actor, quest, steps);
+    if (typeof result === 'string') return result;
+  }
 }
 
 /**
@@ -91,7 +116,9 @@ export function acceptRefused(
  * event meets (earned). Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
 export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef, steps: Steps) {
-  const o = definition(world, quest).objective;
+  const d = definition(world, quest);
+  if (d.exchange) return typeof ready(world, actor, quest, steps) !== 'string';
+  const o = d.objective;
   return o.evidence === 'current_state' && holds(world, actor, o.policy.root, { steps });
 }
 

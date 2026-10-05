@@ -12,6 +12,7 @@ export function target(op: DeltaOp): MutationTarget {
     case 'entity.transfer':
       return { kind: 'containment', entity_id: op.entity_id };
     case 'quest.activate':
+    case 'quest.retire':
     case 'quest.transition':
       return { kind: 'quest', instance_id: op.instance_id };
     case 'choice.open':

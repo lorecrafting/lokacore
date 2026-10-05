@@ -1,5 +1,5 @@
 {
-  "description": "Known answers for StateDelta composition (04 §5.1-§5.4), the commit boundary (04 §5.1, 03 §15) and the r3_pr5 invariant checks. Expected values are hand-written. States: facts and fact_defaults are row lists here; the test harness indexes them by canonical text (lib/loka/core/compose.ex). Three boundary cases are too long to list here; every host must build and run them (both kernels do: test/loka/core/compose_test.exs, kernel/ts/test/compose.test.ts). In them, id <pp>…<n> is \"<pp>000000-0000-4000-8000-\" followed by n zero-padded to 12 digits, every op has writer_group 0, and every job is lantern 0.1.0 schedule bram. (1) budget-before-first-op-fault: state base; job.schedule d1…0 due 30 (a job that already exists), then job.schedule f2…1 to f2…64 due 100; expected fault budget_exceeded, not precondition_failed. (2) pending-jobs-bound-is-the-final-queue: state clock 6 and jobs f0…1 to f0…1024, each pending with due_time 3; job.schedule f1…0 due 20, then job.complete f0…1; expected changes: job f0…1 completed with due_time 3, then job f1…0 pending with due_time 20. (3) changes-sorted-by-target-over-32-rows: state clock 0 and containers e0…1 to e0…40, all in 10000000-0000-4000-8000-000000000000; entity.transfer of each from there to 20000000-0000-4000-8000-000000000000, in the order e0…40 down to e0…1; expected 40 containment rows, e0…1 to e0…40 ascending, each with value 20000000-0000-4000-8000-000000000000.",
+  "description": "Known answers for StateDelta composition (04 \u00a75.1-\u00a75.4), the commit boundary (04 \u00a75.1, 03 \u00a715) and the r3_pr5 invariant checks. Expected values are hand-written. States: facts and fact_defaults are row lists here; the test harness indexes them by canonical text (lib/loka/core/compose.ex). Three boundary cases are too long to list here; every host must build and run them (both kernels do: test/loka/core/compose_test.exs, kernel/ts/test/compose.test.ts). In them, id <pp>\u2026<n> is \"<pp>000000-0000-4000-8000-\" followed by n zero-padded to 12 digits, every op has writer_group 0, and every job is lantern 0.1.0 schedule bram. (1) budget-before-first-op-fault: state base; job.schedule d1\u20260 due 30 (a job that already exists), then job.schedule f2\u20261 to f2\u202664 due 100; expected fault budget_exceeded, not precondition_failed. (2) pending-jobs-bound-is-the-final-queue: state clock 6 and jobs f0\u20261 to f0\u20261024, each pending with due_time 3; job.schedule f1\u20260 due 20, then job.complete f0\u20261; expected changes: job f0\u20261 completed with due_time 3, then job f1\u20260 pending with due_time 20. (3) changes-sorted-by-target-over-32-rows: state clock 0 and containers e0\u20261 to e0\u202640, all in 10000000-0000-4000-8000-000000000000; entity.transfer of each from there to 20000000-0000-4000-8000-000000000000, in the order e0\u202640 down to e0\u20261; expected 40 containment rows, e0\u20261 to e0\u202640 ascending, each with value 20000000-0000-4000-8000-000000000000.",
   "states": {
     "pools": {
       "clock": 7300,
@@ -348,6 +348,44 @@
           },
           "due_time": 3,
           "status": "completed"
+        }
+      }
+    },
+    "resolved_repeat": {
+      "clock": 6,
+      "quests": {
+        "b1000000-0000-4000-8000-000000000000": {
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "state": "resolved",
+          "outcome": "carry"
+        }
+      }
+    },
+    "active_repeat": {
+      "clock": 6,
+      "quests": {
+        "b1000000-0000-4000-8000-000000000000": {
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "state": "active",
+          "outcome": "carry"
         }
       }
     }
@@ -3647,6 +3685,219 @@
           "code": "precondition_failed",
           "target": {
             "kind": "clock"
+          }
+        }
+      }
+    },
+    {
+      "id": "repeat-retires-exact-terminal-row-and-creates-fresh-bound-occurrence",
+      "state": "resolved_repeat",
+      "ops": [
+        {
+          "op": "quest.retire",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          }
+        },
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "instance_id": "b2000000-0000-4000-8000-000000000000",
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "bindings": [
+            {
+              "role": "bram",
+              "entity_id": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b1000000-0000-4000-8000-000000000000"
+            },
+            "value": null
+          },
+          {
+            "target": {
+              "kind": "quest",
+              "instance_id": "b2000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "quest": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "quest",
+                "key": "find"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "state": "active",
+              "bindings": [
+                {
+                  "role": "bram",
+                  "entity_id": "30000000-0000-4000-8000-000000000000"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "repeat-cannot-retire-active-occurrence",
+      "state": "active_repeat",
+      "ops": [
+        {
+          "op": "quest.retire",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          }
+        },
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "instance_id": "b2000000-0000-4000-8000-000000000000",
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "bindings": [
+            {
+              "role": "bram",
+              "entity_id": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "repeat-cannot-retire-without-fresh-activation",
+      "state": "resolved_repeat",
+      "ops": [
+        {
+          "op": "quest.retire",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "repeat-cannot-retire-other-quest",
+      "state": "resolved_repeat",
+      "ops": [
+        {
+          "op": "quest.retire",
+          "writer_group": 0,
+          "instance_id": "b1000000-0000-4000-8000-000000000000",
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "other"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          }
+        },
+        {
+          "op": "quest.activate",
+          "writer_group": 0,
+          "instance_id": "b2000000-0000-4000-8000-000000000000",
+          "quest": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "other"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "bindings": [
+            {
+              "role": "bram",
+              "entity_id": "30000000-0000-4000-8000-000000000000"
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "quest",
+            "instance_id": "b1000000-0000-4000-8000-000000000000"
           }
         }
       }

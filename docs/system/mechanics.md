@@ -726,8 +726,8 @@ participating balances must reopen as valid current-build truth.
 
 ## S9 Infirmary Herbs (B5 selected contract)
 
-This planned consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
-It is not installed source or proof. Reuse containment, carrying, dialogue, quest,
+This consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
+It composes containment, carrying, dialogue, quest,
 bounded fact adjustment and receipts. [Cartridge stock](cartridge.md#b5-herb-and-bandage-stock)
 contains the exact quantities; no engine literal identifies Wick, fenwort or S9.
 

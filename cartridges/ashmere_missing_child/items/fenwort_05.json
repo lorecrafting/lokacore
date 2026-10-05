@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "fenwort",
+    "fenwort_05"
+  ],
+  "short": "item.fenwort.short",
+  "room_line": "item.fenwort.room",
+  "description": "item.fenwort.description",
+  "mass_grams": 20,
+  "location": {
+    "in": "room",
+    "room": "willow_shade"
+  }
+}

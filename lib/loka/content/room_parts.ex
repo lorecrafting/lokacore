@@ -75,12 +75,17 @@ defmodule Loka.Content.RoomParts do
     fields =
       [{["description"], detail["description"]}] ++
         for({field, value} <- Map.get(detail, "readable", %{}), do: {["readable", field], value}) ++
-        board_text(detail)
+        board_text(detail) ++
+        harvest_text(detail)
 
     for {steps, value} <- fields,
         not is_map_key(text, value),
         do: diag("UNRESOLVED_REFERENCE", at(rel, ["details", key] ++ steps), %{"target" => value})
   end
+
+  defp harvest_text(detail),
+    do:
+      for({k, v} <- Map.drop(Map.get(detail, "harvest", %{}), ["items"]), do: {["harvest", k], v})
 
   defp board_text(%{"notice_board" => board}) do
     [{["notice_board", "title"], board["title"]}] ++

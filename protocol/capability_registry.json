@@ -45,7 +45,8 @@
       "take",
       "drop",
       "give",
-      "put"
+      "put",
+      "harvest"
     ],
     "definitions": [
       "item",

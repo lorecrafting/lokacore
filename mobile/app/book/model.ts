@@ -280,7 +280,12 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...(v.notice_boards ?? []).flatMap((b) => b.notices),
   ].flatMap((n) =>
     (n.actions ?? [])
-      .filter((a) => a.available && !a.input.length && a.target.kind === 'none')
+      .filter(
+        (a) =>
+          a.available &&
+          !a.input.length &&
+          (a.target.kind === 'none' || a.action_key === 'harvest'),
+      )
       .map((a) => ({ ...button(a, ''), detail_id: n.id })),
   );
 

@@ -117,3 +117,5 @@ supply, nonrecoverable actual possessions, new creation/respawn machinery, an
 unplanned foundation/proposal contract, contradictory governing specs, or a
 review footprint exceeding a complete player outcome. PM settles policy; do not
 invent production pins, passing checks or an installed B3 creation seam.
+
+Implementation/check disposition: [local draft PR](b5-infirmary-herbs-local-pr-2026-10-05.md).

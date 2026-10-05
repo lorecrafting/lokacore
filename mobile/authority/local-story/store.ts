@@ -1,3 +1,4 @@
+import { exchangeSave } from './exchange-save.ts';
 // size: allow 304, shared save boundary retains quest reference checks before receipt recovery
 import { encountersValid } from '../../../kernel/ts/src/mechanics/combat/saved.ts';
 import { hydrate } from '../../../kernel/ts/src/runtime/created.ts';
@@ -147,9 +148,10 @@ export function load(db: Db, fresh: World, first: () => Meta) {
       if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))
         return undefined;
     const meta = { ...m, parent, seed, pin } as Meta;
+    const exchanges = exchangeSave(fresh, world, db, meta, h.revision);
     dialogueSave(world, db, meta);
     commerceSave(world, db, meta, h.revision);
-    deadlineSave(world, db, meta);
+    deadlineSave(world, db, meta, exchanges);
     finaleSave(world, db, meta, h.revision);
     return saved(world, h.revision, meta, db);
   } catch (e) {
@@ -291,7 +293,10 @@ export function commit(
       db.runSync(HEAD, r.revision, next.state.clock, encode(next.state.rng as Json));
       for (const op of decision.delta.ops) {
         const [section, key] = row(target(op)) ?? [];
-        if (section) db.runSync(UPSERT, section, key!, encode(next.state[section]![key!] as Json));
+        if (op.op === 'quest.retire')
+          db.runSync('DELETE FROM state_row WHERE section=? AND key=?', section!, key!);
+        else if (section)
+          db.runSync(UPSERT, section, key!, encode(next.state[section]![key!] as Json));
       }
     }
     db.runSync(

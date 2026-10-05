@@ -1,3 +1,4 @@
+# size: allow 320, typed terminal quest replacement joins portable composition
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
@@ -73,10 +74,19 @@ defmodule Loka.Core.Compose do
   end
 
   defp step_pair({op, next}, overlay, ctx) do
-    if op["op"] == "entity.create" and not Creation.initial_pair?(op, next),
-      do: {:halt, fault("precondition_failed", target(op))},
-      else: step(op, overlay, ctx)
+    if (op["op"] == "entity.create" and not Creation.initial_pair?(op, next)) or
+         not repeat_pair?(op, next),
+       do: {:halt, fault("precondition_failed", target(op))},
+       else: step(op, overlay, ctx)
   end
+
+  defp repeat_pair?(%{"op" => "quest.retire"} = op, %{"op" => "quest.activate"} = next),
+    do:
+      next["writer_group"] == op["writer_group"] and next["instance_id"] != op["instance_id"] and
+        next["quest"] == op["quest"] and next["scope"] == op["scope"]
+
+  defp repeat_pair?(%{"op" => "quest.retire"}, _), do: false
+  defp repeat_pair?(_, _), do: true
 
   defdelegate target(op), to: Loka.Core.ComposeTarget
 
@@ -156,13 +166,26 @@ defmodule Loka.Core.Compose do
     end
   end
 
-  defp apply_op(%{"op" => "quest.activate", "quest" => q, "scope" => s}, t, ctx) do
+  defp apply_op(%{"op" => "quest.retire", "quest" => q, "scope" => s}, t, ctx) do
+    row = read(t, ctx)
+
+    check(
+      row != nil and row["state"] == "resolved" and row["quest"] == q and row["scope"] == s,
+      nil
+    )
+  end
+
+  defp apply_op(%{"op" => "quest.activate", "quest" => q, "scope" => s} = op, t, ctx) do
     open? = fn {_, r} ->
       r["quest"] == q and r["scope"] == s and r["state"] in ~w(active objectives_complete)
     end
 
     taken = Enum.any?(rows("quest", "quests", "instance_id", ctx), open?)
-    check(read(t, ctx) == nil and not taken, %{"quest" => q, "scope" => s, "state" => "active"})
+
+    row =
+      Map.merge(%{"quest" => q, "scope" => s, "state" => "active"}, Map.take(op, ["bindings"]))
+
+    check(read(t, ctx) == nil and not taken, row)
   end
 
   defp apply_op(%{"op" => "quest.transition", "from" => from, "to" => to} = op, t, ctx) do
@@ -182,7 +205,7 @@ defmodule Loka.Core.Compose do
   end
 
   defp apply_op(%{"op" => "choice.open"} = op, t, ctx) do
-    row = Map.take(op, ~w(actor_id source beat roles choice_ids))
+    row = Map.take(op, ~w(actor_id source beat roles choice_ids quest_instance_id))
     check(read(t, ctx) == nil, Map.put(row, "status", "pending"))
   end
 

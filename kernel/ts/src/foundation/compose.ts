@@ -1,3 +1,4 @@
+// size: allow 320, typed terminal quest replacement joins portable composition
 import { transitionEscort } from './compose_escort.ts';
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
@@ -57,7 +58,8 @@ export function compose(state: State, delta: StateDelta): Result {
   const ctx: Ctx = { state, horizon, overlay: new Map() };
   for (const [index, op] of ops.entries()) {
     const t = target(op);
-    if (!initialPair(op, ops[index + 1])) return fault('precondition_failed', t);
+    if (!initialPair(op, ops[index + 1]) || !repeatPair(op, ops[index + 1]))
+      return fault('precondition_failed', t);
     const k = key(t);
     const prior = ctx.overlay.get(k);
     if (prior && prior.group !== op.writer_group) return fault('conflicting_write', t);
@@ -101,7 +103,7 @@ const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
 
-// size: allow 41, exhaustive dispatch over the closed delta-op contract
+// size: allow 42, exhaustive dispatch over the closed delta-op contract
 function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   const row = read(t, ctx);
   switch (op.op) {
@@ -117,6 +119,7 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'entity.transfer':
       return transferOp(op, row, ctx);
     case 'quest.activate':
+    case 'quest.retire':
     case 'quest.transition':
       return quest(op, row, ctx);
     case 'choice.open':
@@ -165,6 +168,7 @@ function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined)
     case 'choice.open': {
       const { actor_id, source, beat, roles, choice_ids } = op;
       const opened = { actor_id, source, beat, roles, choice_ids, status: 'pending' };
+      if (op.quest_instance_id) Object.assign(opened, { quest_instance_id: op.quest_instance_id });
       return check(row === undefined, opened as unknown as Json);
     }
     case 'choice.resolve': {
@@ -180,6 +184,13 @@ function choice(op: DeltaOp & { op: `choice.${string}` }, row: Json | undefined)
 }
 
 function quest(op: DeltaOp & { op: `quest.${string}` }, row: Json | undefined, ctx: Ctx): Outcome {
+  if (op.op === 'quest.retire')
+    return check(
+      get(row, 'state') === 'resolved' &&
+        same(get(row, 'quest'), op.quest) &&
+        same(get(row, 'scope'), op.scope),
+      null,
+    );
   if (op.op === 'quest.activate') {
     const taken = rows('quest', 'quests', 'instance_id', ctx).some(
       ([, r]) =>
@@ -288,5 +299,18 @@ function barrier(
   return check(
     now === op.from && Object.hasOwn(DOOR, op.from) && DOOR[op.from].includes(op.to),
     op.to,
+  );
+}
+
+function repeatPair(op: DeltaOp, next: DeltaOp | undefined): boolean {
+  return (
+    op.op !== 'quest.retire' ||
+    !!(
+      next?.op === 'quest.activate' &&
+      next.writer_group === op.writer_group &&
+      next.instance_id !== op.instance_id &&
+      same(next.quest, op.quest) &&
+      same(next.scope, op.scope)
+    )
   );
 }
