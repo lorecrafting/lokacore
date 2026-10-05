@@ -6,9 +6,8 @@ import { living } from '../death/shared.ts';
 
 /** Validate persisted combat authority before exposing a loaded/reconciled world. */
 export function encountersValid(world: World): boolean {
-  const rows = world.state.encounters ?? {};
   const occupied = new Set<string>();
-  for (const [id, row] of Object.entries(rows)) {
+  for (const [id, row] of Object.entries(world.state.encounters ?? {})) {
     if (
       validate('EncounterId', id).length ||
       validate('EncounterRow', row).length ||
