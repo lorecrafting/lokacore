@@ -22,7 +22,10 @@ normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass.
 
 Before handing off:
-1. Run the full local check line from AGENTS.md via `mise exec --` once; the pre-push hook is the
+1. In the [provisional local lane](../../docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md),
+   run touched-layer type/compile checks and focused behavior tests; the PM runs
+   the full active line on the accumulated publication head. For a hosted PR,
+   run the full local check line from AGENTS.md once; the pre-push hook is the
    final run, so do not run it again right before pushing. Every new check has a
    planted violation that fails.
 2. Self-review the diff: `/ponytail-review`, then `/code-review medium` on the branch
@@ -30,8 +33,10 @@ Before handing off:
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a
    disposition for each finding.
-3. Commit (attribution lines per the session), push the branch, open the PR citing the
-   governing `docs/system` sections and including the ponytail result. A slice that adds or changes a mechanic
+3. Commit (attribution lines per the session). In the provisional local lane,
+   hand the branch and exact head to the PM without pushing; otherwise push the
+   branch and open the PR citing the governing `docs/system` sections and
+   including the ponytail result. A slice that adds or changes a mechanic
    includes the composes-with statement
    ([emergence principles](../../docs/archive/decisions/owner-decision-emergence-2026-09-25.md)).
    Do not merge.
@@ -45,8 +50,7 @@ Never use `--no-verify` or force-push (including `--force-with-lease`) without t
 A developer spawned for a fix round on an existing PR skips the build, self-review and PR steps
 above and follows only the next paragraph.
 
-When review findings arrive: `git pull --rebase` (the review record is on the branch; never force-push), then fix each or dispute it with a concrete reason, rerun the
-checks once (the pre-push hook is the final run), push, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
+When review findings arrive on a hosted PR: `git pull --rebase` (the review record is on the branch; never force-push). In the provisional local lane, keep the original branch and have the PM attach the review-only record before fixes. Then fix each or dispute it with a concrete reason, rerun affected checks once, push only for a hosted PR, and reply with one line per finding (`fixed <sha>` / `disputed: why`), under 250 words.
 If the same issue survives two fix attempts within a round, stop: write down the assumption
 both attempts shared and test that, or escalate to the PM. A finding still open after fix
 round 2 goes to the owner, not a third round.

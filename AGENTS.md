@@ -138,9 +138,9 @@ A test exists to catch a specific break. Adapted from
 
 ## Checks
 
-CI runs the active checks, each with a planted case that must fail; see
-[docs/CHECKS.md](docs/CHECKS.md) and the [temporary mobile pause](docs/decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
-Run them locally: `bin/check_all.sh` (what pre-push runs).
+CI and full local checks: [CHECKS](docs/CHECKS.md), `bin/check_all.sh`.
+The [provisional lane](docs/decisions/owner-decision-local-provisional-integration-2026-10-05.md)
+uses focused checks first.
 
 ## Working rules
 
@@ -153,6 +153,7 @@ Run them locally: `bin/check_all.sh` (what pre-push runs).
   none of the work ([owner ruling](docs/system/owner-rules.md#process));
   who reviews what: [the workflow](docs/WORKFLOW.md).
 - Each fact lives in one place; other docs link to it rather than restate it.
-- Readiness probes that exit 1 by design are expected; don't "fix" them.
+- Track read path and revision; skip unchanged documents reached again through links.
+- Expected failing readiness probes need no fix.
 - The owner wants nothing paid (no EAS); headless work runs on GitHub Actions, iPhone
   and UI work on the owner's M1.

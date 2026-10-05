@@ -147,6 +147,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [Autonomous mechanics development](owner-decision-autonomous-mechanics-2026-10-03.md): owner delegates PM design/policy choices, continued slice planning and delivery, useful parallel agents and Astra.
 - [Codex model routing during local chapter work](pm-decision-codex-model-routing-2026-10-05.md): PM execution choice after the owner's model/role audit request; explicit lower-cost implementation tiers, stronger review at trust boundaries, Astra for highest-risk audits.
+- [Fast provisional local integration](owner-decision-local-provisional-integration-2026-10-05.md): owner prioritizes speed; complete source slices may merge into local `main` after checks and self-review while independent review runs in parallel, with remote publication still gated.
 
 - PM decision under delegated authority: [M1–M23 mechanics continuation and adopted clock/chapter policies](pm-decision-mechanics-continuation-plan-2026-10-03.md).
 
