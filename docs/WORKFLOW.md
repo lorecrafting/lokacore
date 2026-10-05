@@ -66,13 +66,13 @@ Report at the end of the slice, not at every step.
    (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
    docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
    both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
-   schema mutant sweep in the [contract lessons](lessons/contracts.md). Commit, push, open
-   the PR (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
+   schema mutant sweep in the [contract lessons](lessons/contracts.md). Commit, then publish
+   the PR or keep a [local draft PR](#local-draft-pr-cadence) (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
    branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
    dispositions, deviations from the brief, open questions.
 4. **Verify and review.** PM does not relay claims: it confirms CI is green on the pushed
    commit (or reruns the check line) before review. Then it spawns a *fresh* `reviewer`
-   with the PR number, the brief and the cited sections. The reviewer derives the
+   with the PR number (or local branch, base and exact head), the brief and the cited sections. The reviewer derives the
    requirements from them before reading the diff, checks the [composition record](system/architecture.md#building-mechanics-by-composition)
    against the actual consumer and diff, and tests the tests by breaking
    the logic temporarily. It writes `docs/reviews/<date>-<slice>-review.md`, links it from
@@ -87,8 +87,10 @@ Report at the end of the slice, not at every step.
    resolved by the PM in `../lokacore-pm` (merge, never rebase; the union driver covers the two lists) without waking the
    developer; a conflict in code goes to the developer. Every fix message restates the whole
    open finding list, not just the new ones (a resumed agent drops earlier directives). The
-   developer runs `git pull --rebase` first (the review record is on the branch), never
-   force-pushes, fixes or disputes each finding with a reason, reruns the checks once (the pre-push hook is the final run) and pushes.
+   developer runs `git pull --rebase` first when the branch is published (the review record is on the branch), never
+   force-pushes, fixes or disputes each finding with a reason, and reruns the checks once.
+   A published branch uses the pre-push hook as its final run and pushes; a local draft
+   keeps the fixed commits and review record until publication.
 6. **Re-review (same reviewer), scoped to the fixes.** PM sends the fix commits back to
    the same reviewer; if a second opinion was required, its scoped fix re-check starts at the same moment. The reviewer checks each disposition and the code the fix touched, plus that
    code's direct callers (a fix can break a neighbor), and nothing else; it appends the
@@ -96,7 +98,8 @@ Report at the end of the slice, not at every step.
    rewrote a core piece or the slice freezes a contract or closes a gate. At most two fix
    rounds; anything still open goes up the escalation ladder above, then to the owner.
 7. **Merge (PM).** Merge with a merge commit once the verdict is APPROVE or APPROVE WITH
-   NOTES with nothing open and every CI job started on the head has finished green
+   NOTES with nothing open, every required hosted CI check is present and green on the
+   published head, and every job started on that head has completed successfully
    ([owner decision](archive/decisions/owner-decisions-r3-lanes-2026-09-24.md),
    [which jobs run](archive/decisions/owner-decision-ci-mobile-builds-2026-09-25.md)).
    Merge with `gh pr merge <N> --merge --match-head-commit <sha>`, where `<sha>` is the head
@@ -113,6 +116,25 @@ Report at the end of the slice, not at every step.
    future decision and survives code drift; if a check could enforce it, write the check instead.
 
 ## Local edit loop
+
+### Local draft-PR cadence
+
+For new work after [PR #200 (Book keyboard exits)](https://github.com/lorecrafting/lokacore/pull/200)
+through [PR #204 (Green finale plan)](https://github.com/lorecrafting/lokacore/pull/204),
+the [owner's cadence](decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)
+uses steps 3–6 in a separate worktree and branch per new slice. Give an independent
+reviewer a different worktree. Treat the brief, base and exact head, local full-check
+result, fresh review record in `docs/reviews/`, and proposed PR description as the
+draft PR. Fix findings on that branch and retain its commits and record. Once the
+local check and review gates pass, merge it into the local integration clone's `main`
+with a merge commit; record that merge SHA in the next handoff. Periodically publish
+the accumulated local `main` history as a GitHub PR, rerun checks on its exact remote
+head, and merge to remote `main` only after required hosted CI is green. A later source
+edit needs the usual scoped re-review. Keep the owner's checkout and remote `main`
+untouched during local development. Local Git branches, merge commits and review
+records provide the trail without running another server. A local check is not
+hosted CI proof. Step 7's hosted-CI gate applies to the later remote merge, not
+to the reviewed local integration merge.
 
 The owner has [paused mobile development and verification](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md),
 including Debug and Release Simulator sessions. Browser preview work may provide a local test

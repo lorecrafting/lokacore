@@ -161,6 +161,8 @@ and not repeated here.
 
 ## Process
 
+- After PRs #200–#204, use local branches as draft PRs with exact-head local checks and independent review records, then merge approved units into local `main` with merge commits. Publish accumulated local history periodically; normal exact-head hosted CI gates later remote merges. The owner authorized a one-time hosted-CI exception only for those five reviewed PRs during GitHub's runner incident ([record](../decisions/owner-decision-local-draft-pr-cadence-2026-10-05.md)).
+
 - Reuse documents already loaded in each agent's context when following repeated links; reopen only when changed, truncated or missing a needed detail ([record](../decisions/owner-decision-read-once-docs-2026-10-05.md)).
 
 - The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Astra and assign useful parallel work without waiting for owner input; normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
