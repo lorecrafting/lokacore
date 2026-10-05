@@ -435,3 +435,13 @@ as `save_corrupt` without guessed repair. Unknown COMMIT stays fenced; receipt r
 cannot duplicate the ledger, payout or penalty. The deadline keeps running through
 death and reopen. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
 This is a selected next-release recovery rule, not a claim about current saves.
+
+## B3 shop recovery
+
+The selected [B3 exchange](mechanics.md#pegs-immediate-shop-b3-selected-contract)
+changes the exact item's containment row and both penny rows with one receipt.
+Failed or unknown COMMIT follows the existing fence and reconciliation path. Reopen
+validates the offered item identity, current custody and participating balances;
+it does not rebuild stock from an independent count or mint a missing shelf item.
+Receipt replay cannot pay or move the item again. Malformed or contradictory
+current-build truth is typed `save_corrupt` and leaves the save intact.

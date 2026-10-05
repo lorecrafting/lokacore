@@ -1,37 +1,81 @@
-# B3 — Peg's real immediate shop
+# B3 — Peg's immediate shop: adopted developer brief
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Branch:** `chapter-1/b3-pegs-shop` in a new isolated developer worktree.
+**Base:** local `main` `ec3ab73d`, B2 implementation/review merged; chapter
+`ashmere_missing_child@0.0.16`, API1.14. The independent B2 release pin is
+`protocol/fixtures/missing_child_v016_hash.json`. B3 release, hash, generated IDs,
+implementation head, PR and check results: null. Re-pin if the base advances.
+This is an assignment brief, not proof or permission to merge.
 
-Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B3. **Provisional until reviewed B2/Peg/currency merges and PM adopts a concrete catalog/stock policy.** Re-pin B2 and installed carrying/custody before GO; reading baseline main `0fbd2847` is not source authorization. New release/API/hash/IDs/head/PR and dependency heads: null. Suggested branch `chapter-1/b3-pegs-shop`, not created. Browser-first shared Book; no mobile Simulator/native/device/owner-save action. Keep Node/real SQLite/TypeScript headless sim.
+## Goal and contract
 
-## Goal, authority and actual consumer
+Deliver a playable Buy→carry/use→Sell exchange with Peg, conserving exact pennies,
+item identity and stock. The governing clauses are [B3 mechanics](../../system/mechanics.md#pegs-immediate-shop-b3-selected-contract),
+[shelf](../../system/cartridge.md#pegs-b3-shelf), [composition](../../system/protocol.md#b3-shop-composition),
+[recovery](../../system/save.md#b3-shop-recovery) and [Book](../../system/book-ui.md#b3-shop-detail),
+adopted by the [PM decision](../../decisions/pm-decision-b3-pegs-shop-2026-10-05.md).
+This is M18-A plus only the finite M18-B stock policy actually consumed. Follow
+[mechanic composition](../../system/architecture.md#building-mechanics-by-composition),
+the no-wait and world-parameter owner rules. B2's `resource.transfer` is installed;
+its S2 ledger, protected ancestor Give rule and 20p player start remain intact.
 
-Buy and sell useful real items with Peg, with exact conserved money, actual custody, stock and positive-load admission. This is M18-A and only its needed M18-B supply policy. Existing Wear/Remove/carrying make equipment immediately useful; B4 consumes torch/oil and B7 consumes waterskin in their own complete PRs. Never advertise unfinished Ignite/Drink actions in B3.
+Implement exactly the four authored Peg-held item definitions and explicit Peg
+balance in the shelf contract. The satchel's ordinary Put/Take is useful now.
+Torch, oil and waterskin are purchasable goods for B4/B7; no Ignite, Refuel,
+Fill, Drink, defense bonus or dynamic pricing control is selectable in B3.
+Stock is direct Peg custody of the four exact initial item IDs; buyback restores
+that same item. Do not add an issuance, restock or quantity subsystem. The shop
+may be revisited at every hour while Peg is present.
 
-Amend active mechanics containment/equipment/resource and any adopted B2 currency clause; protocol ActionSet/admission/Composition/GameView; cartridge source/compiler/loader/installed capabilities; save commit/reconcile/current-build recovery; Book NPC/items/detail/freshness. Future authority: `docs/NEXT-MECHANICS.md` M18-A/B; archived00a §§4–5 and archived00 §4.6/§11 chapter-one economy; primitive catalog21 §13. Owner world-parameters/no-wait and mechanics composition rules govern.
+## Implementation boundary
 
-## Selected candidate and exact scope
+Add the narrow commerce command/rule and authored offer source, compiler/loader
+validation, shared admission/projection, and Peg's Book interaction. Reuse B2's
+exact payment, containment transfer, carrying predicate, query budget, writer
+group, receipt and save reconciliation. Touch `protocol/` command/action,
+capability, cartridge and GameView contracts only for the actual new shape;
+derive fixtures and generated docs from the selected contract. Add current-build
+save validation for the shop's real rows, with no compatibility adapter.
+Likely files: chapter manifest, resources, Peg and four item JSON/text;
+`lib/loka/content/`, `kernel/ts/src/content/`, `mechanics/commerce/`,
+command/view/runtime seams, `mobile/authority/local-story/store.ts` and Book
+NPC detail. No native/phone work, Realm, barter, merchant AI, general pricing,
+unrelated scene work or obsolete-fixture preservation.
 
-Recommend a bound immediate Buy/Sell transaction: exact provider, item/offer and quoted current price are revalidated at execution. Peg remains all-hours; menus neither stop time nor privilege recovery. Payment debits one participant and credits the other through B2's exact currency transfer. Item acquisition and stock/till changes belong to that same writer group/head/receipt. Refuse insufficient funds, arithmetic overflow, unavailable stock, ineligible item, provider absence and full carrying load before mint/transfer/payment. View availability and command admission use one shared query with the existing budget.
+## Acceptance and verification
 
-The catalog is cartridge data, no dynamic haggle or faction pricing. Archived price candidates: torch3p, oil2p, waterskin4p, iron sword40p, wooden shield15p, bandage2p. PM adopts the actual shelf, masses, initial stock, till and sell prices before GO; unspecified values remain null. Include at least one presently useful piece of equipment and the specific later B4/B7 supply definitions. Never make the sword affordable by altering starting money or S2 reward silently.
+- Controlled initial state: actor20p, Peg20p, one Peg-held torch priced3p,
+  actor load11900g/max12000g. Buy yields actor17p/Peg23p, that same item directly
+  body-held, Peg stock0 and load12000g. Cold reopen and exact receipt retry retain
+  those values and one ID. A distinct second Buy refuses without any change.
+- At actor load11901g, balance2p, Peg absent, item sold out, or a changed quote,
+  Buy refuses before money, custody, RNG, narration or receipt effects. A valid
+  stale displayed offer is re-evaluated; the page and direct command agree.
+- Selling that exact torch at the declared 1p gives actor18p/Peg22p and returns
+  the same item to Peg. Total pennies stay40. Peg0p, a worn/nested/foreign ID,
+  an unrelated item and a satchel containing the active S2 ledger all refuse
+  without a partial transfer. A later Buy of the returned ID works once.
+- Each legal intermediate custody/balance state reopens. Malformed balance,
+  impossible shop item identity/custody or contradictory accepted receipt gives
+  typed `save_corrupt` with no silent repair. Real failed COMMIT, both unknown
+  COMMIT outcomes and lost acknowledgement retain all prior or all next rows.
+- Name distinct plausible breaks before adding tests. Apply each mutant to the
+  old focused suite first; add only missing behavior tests with independent
+  literal answers. Plant missing payer debit, wrong recipient, omitted carry
+  admission and duplicate item transfer, and observe a focused red test for
+  each; run the schema mutant sweep for changed schemas.
 
-Stock means real authored instances or deterministic declared stock issuance, chosen once in the source contract. Prefer concrete initial shelf item identities and conserved resale; if repeated consumable supply requires issuance, extend the existing created-item provenance only for that purchased definition/transaction, not an animal population engine. Do not silently transfer a blueprint or repeatedly sell the same EntityId. Distinct purchases of one definition mint distinct IDs only through the declared producer. Old receipt replay mints none. Inventory quantities, stock counts and origins must agree on load.
+Read [mechanics](../../lessons/mechanics.md), [contracts](../../lessons/contracts.md),
+[storage](../../lessons/storage.md), [mobile](../../lessons/mobile.md) and
+[evidence](../../lessons/evidence.md) lessons before touching those areas.
+Run focused compiler/loader, commerce, admission, carry, Book and real SQLite
+checks, then `mise exec -- bin/check_all.sh` once as the final hook-equivalent
+run. Keep the full-check status and failing lines, not bulk logs. Perform
+Ponytail Review and an actual-diff correctness pass. A fresh independent
+primary reviewer and a separate protocol/save opinion check the exact head;
+Astra applies if `runtime/proposal.ts` or portable foundation changes.
 
-Implement finite stock/restock only when this catalog actually uses it. If selected, state exact capacity, period and author-owned restock source in PM policy; no overwriting a sold-back unique instance or duplicate catch-up restock. Sold-out is truthful. Necessary light/water/recovery outcomes must remain immediately attainable from alternate usable supply or free recovery; a next-day stock wait cannot gate chapter completion. Selling transfers the exact directly held eligible item to Peg; protect active S2/Q2 items and their ancestor containers; equipped/nested items follow ordinary Remove/Take first. Sale acceptance/prices are explicit, no universal sell-anything fallback.
-
-## Independent literals, regressions and red controls
-
-- Controlled shelf: player20p, Peg10p, one torch priced3p, torch mass100g, player load11900g/max12000g. Buy gives player17p/Peg13p, the same shelf ID in body, stock0 and load12000g. Exact retry/cold reopen preserves that result, not a second torch/debit. This is controlled tuning, not an invented production mass/till.
-- With load11901g, funds2p or stock0, Buy changes no money/custody/stock/RNG. Synthetic and stale accepted-menu inputs recheck current price/provider/stock; changed offer cannot charge the older quote. A repeated distinct invocation after stock0 refuses.
-- Controlled sell price1p for that exact torch: body→Peg, player18p/Peg12p. Total30p and one item identity remain. Sale with Peg0p refuses entirely. Protected ledger/message, worn item, bag-owned item and substitute ID refuse unless their declared admission permits the exact custody path.
-- If concrete restock ships: reopen across one due boundary produces the declared quantity once, preserves sold-back IDs and never exceeds stock cap. Currency/item origin corruption is typed save_corrupt. Every legal intermediate state, including sold-out/buyback, loads before the next consumer.
-- Plant omitted payer debit, duplicate issuance, missing carry test, wrong recipient or stock decrement. Each distinct plausible break must make a focused behavior check red. No source-grep guards. Use real failed/unknown COMMIT and lost-ack receipt replay; expected totals/IDs are independently pinned.
-
-## Files, verification and review
-
-Chapter manifest/resources/catalog, Peg source and exact saleable item definitions; minimal `shops`/offer source only after contract selection. Compiler `lib/loka/content/checks.ex`/`resources.ex` and new small commerce source helper; TS `content/cartridge.ts` and matching loader helper, `mechanics/commerce/{rule,shared}.ts` as the named actual new capability, existing carrying/currency helpers, `runtime/{fresh,decision,created,apply}.ts` only as required. Command/action/capability/entity/state/delta/GameView contracts and generated docs only for actual new shape; reuse existing transfer/resource ops before adding an op. `mobile/authority/local-story/store.ts` for new-state validation; shared GameView/Book NPC options/item details/freshness and literal catalog labels. No native files, Realm, general pricing engine, barter, merchant AI, escrow, crafting or obsolete-fixture edits.
-
-Focused compiler/loader/buy/sell/admission/carry/Book/currency/SQLite checks; changed-schema sweep and red controls; full `mise exec -- bin/check_all.sh`; exact-head CI including headless `sim`. Authorized later browser path Buy→Wear/Remove→Sell and current-build refresh; browser evidence is distinct from SQLite durability. Read contract/storage/mobile/evidence lessons. Developer applies Ponytail Review and correctness pass; fresh primary plus protocol/save opinion, Astra if proposal/foundation changes.
-
-Stop if B2 supplies no sound exact currency path, finite supply strands a required outcome, general stack/stock spawning expands past the named shop, definition reuse would alter frozen fixtures, or the concrete contract grows beyond rescue footprint. Split at a complete buy/sell consumer or complete replenishment consumer, never leave a selectable unfinished transaction. PM freezes shelf/sell/restock numbers before GO; no fabricated pins or check claims.
+Stop and return to the PM for a required new creation/stock operation, a
+mandatory path that can be stranded by finite stock, a changed B2 payment
+contract, a frozen-fixture conflict, or a source footprint too large for a
+complete Buy/Sell outcome. Do not expose an unfinished exchange.

@@ -594,3 +594,27 @@ receive-plus-accept choice, bound original participants/item, absolute due time,
 resource ownership and exact participating balances. Source may use a narrow typed
 expiry declaration; it must not encode the job as a free-form Effect interpreter.
 This section describes the selected next release, not content already installed.
+
+## Peg's B3 shelf
+
+The [selected shop mechanic](mechanics.md#pegs-immediate-shop-b3-selected-contract)
+uses four separately authored, directly Peg-held items. Each item definition has one
+fresh-world instance; these are the whole initial stock. B3 adds no issuance or restock.
+The prices, masses and capacity below are chapter values, not engine defaults.
+
+| Item | Buy | Sell | Shell mass | Current use |
+|---|---:|---:|---:|---|
+| torch | 3p | 1p | 100g | Wear/Remove in the light slot; B4 adds fuel and light. |
+| lamp_oil | 2p | 1p | 200g | Held supply; B4 adds refill use. |
+| waterskin | 4p | 2p | 500g | Held vessel; B7 adds liquid use. |
+| satchel | 5p | 2p | 100g | Portable `container: true`, capacity four direct items. |
+
+Peg starts with an explicit 20-penny balance under B2's 0..1000 chapter resource
+bound. The player starts with B2's 20p and Aldric keeps his separate 10p funding.
+Shop source declares the four exact eligible item references and both prices; their
+fresh-world IDs are derived from the pinned release, not authored in source.
+Compiler and loader reject duplicate offers, absent/non-Peg starting items, invalid
+prices or missing participating balance declarations. The shop never treats Peg's
+S2 ledger or an item later given to her as an offer. B4/B7 may add use metadata to
+these definitions in their own releases without changing B3's item identities or
+shop rules. The satchel has no lid and its contents count toward the ordinary load.

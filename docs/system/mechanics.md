@@ -694,3 +694,32 @@ truth is `save_corrupt`, never repaired in place.
 The four deadline answers are literal: 151200 on_time, 151201 late, 237600 late,
 237601 never for an accepted still-active obligation. These use the B1 chapter calendar
 and existing due-before-input order; player Wait and clock skips remain unavailable.
+
+## Peg's immediate shop (B3 selected contract)
+
+At the chandler, the original living Peg offers the finite, authored
+[B3 shelf](cartridge.md#pegs-b3-shelf). Buy and Sell bind Peg, one exact item EntityId and
+the displayed price. The offer is rechecked against current co-location, direct custody,
+catalog eligibility, price, balances and carrying load when executed; a stale view or
+forged command has no authority. Reading the shop does not pause the clock. No hours gate
+or restock job applies.
+
+The shelf consists of the exact authored items initially held by Peg. An item is in
+stock precisely while Peg directly holds it; its identity survives purchase, sale,
+death and reopen. Only those authored IDs are saleable, and only while directly held
+in the actor's body; worn, nested, ground, corpse-held and other IDs require ordinary
+custody actions first or are ineligible. The S2 ledger and any active S2 ancestor remain
+protected by the existing Give restriction. There is no mint, stock-count row, abstract
+quantity, replacement or automatic restock. Peg's custody is the stock count.
+
+A successful Buy transfers the exact item Peg→actor and its exact price actor→Peg in
+one proposal. A successful Sell transfers that item actor→Peg and its declared sale
+price Peg→actor. Use B2's checked conserved penny transfer, not saturating resource
+adjustment. Reject absent/malformed/out-of-range balance, insufficient payer funds,
+recipient overflow, unavailable custody, ineligible item, changed quote, absent Peg,
+or positive-load carrying overflow before any effect or RNG consumption. A Buy that
+exactly reaches the ceiling succeeds; a neutral transfer keeps the ordinary carrying
+rules. The existing query budget covers the custody and carrying checks. Accepted
+changes, receipt and narration commit together before adoption or reply; exact retry
+returns the same receipt without another item or payment. Saved custody and both
+participating balances must reopen as valid current-build truth.

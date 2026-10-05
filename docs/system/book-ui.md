@@ -381,3 +381,14 @@ outcomes; a stale displayed choice can refuse safely after due work, without a
 false success entry. Neither the page nor reading suspends the clock or demands a
 Wait. See the [selected S2 mechanic](mechanics.md#s2-chandlers-debt-selected-contract-pending-implementation).
 These controls await B2 implementation.
+
+## B3 shop detail
+
+Peg's NPC detail presents the current [authored shelf](cartridge.md#pegs-b3-shelf)
+with exact prices and Buy/Sell controls only for eligible item identities. Sold-out,
+unaffordable and too-heavy offers state their current reason; no control promises
+an unavailable exchange. The ordinary live-action freshness token and command
+admission recheck the same offer when tapped. Only a confirmed receipt adds purchase
+or sale narration to Peg's history and refreshes pennies, custody and inventory.
+Stale/refused/fenced results never claim success. Leave retains the existing NPC
+detail behavior and the world clock continues while the page is open.

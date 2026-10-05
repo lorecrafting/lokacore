@@ -37,7 +37,7 @@ valid combinations become playable before the whole world's optional surfaces.
 |---|---|---:|
 | **B1 Calendar/status:** see truthful cartridge-owned day/time and changing sun/moon status. | elapsed clock and recovery | 0.7–0.9 |
 | **B2 S2 Chandler's Debt:** accept Peg's ledger and deliver it to Aldric on time, late or after honest expiry. | A1, B1 | 0.9–1.1 |
-| **B3 Peg's shop:** buy and sell useful goods with conserved money, stock and carrying load. | B2 | 0.8–1.0 |
+| **B3 Peg's shop:** buy and sell useful goods with conserved money, stock and carrying load ([adopted contract](decisions/pm-decision-b3-pegs-shop-2026-10-05.md)). | B2 | 0.8–1.0 |
 | **B4 Light:** use and refuel a light source in an optional dark well passage, with a safe possession-recovery route. | B1, B3 | 0.8–1.0 |
 | **B5 S9 Infirmary Herbs:** harvest real fenwort and exchange three for bandages and bounded faction gain. | B1, B2 | 0.8–1.0 |
 | **B6 S4 Wisp:** start an all-hours marsh riddle, retry promptly and learn its ward. | B4, B5, Q2 riddle | 0.6–0.8 |
