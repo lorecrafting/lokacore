@@ -118,10 +118,12 @@ and not repeated here.
   ([record](../archive/decisions/owner-decision-roadmap-2026-09-24.md), [ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
 - The due-job drain landed with the first real job; `real_elapsed` time is carried until a
   cartridge declares it ([record](../archive/decisions/owner-decision-s4-scope-2026-09-30.md)).
-- Saves: the app carries bundled releases newest first and reopens a save on its pin; a missing
-  pin or unknown format is a typed refusal; every future save format keeps `save.format` readable
-  by older apps; release deletion, migration staging and the recovery copy are carried
-  ([record](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md)).
+- Pre-production: backward API/release/save compatibility and older-development adapters or
+  migrations are not required; advance current releases and independently re-pin known answers.
+  Preserve frozen conformance fixtures and safe explicit mismatch refusal, never silent save
+  deletion ([superseding decision](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md)).
+- Saves reopen on an available exact pin; missing pins and unsupported formats are typed refusals
+  ([save contract](save.md#opening-a-story); [original scope](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md)).
 - The book UI's departures from 00 §4.10 (map joystick, full pages, status line) are documented
   departures, no spec amendment ([record](../archive/decisions/owner-decision-sm2-scope-2026-10-01.md)).
 - Narration binds its participants at commit; no `narration.emit`, no acknowledgement

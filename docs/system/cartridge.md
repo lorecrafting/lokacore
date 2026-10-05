@@ -204,8 +204,9 @@ wrong custody, and keys behind inaccessible rooms or lids retain the lockout dia
 Dialogue `receive` role references must name an item and NPC; it requires a resolving quest
 and excludes accept/hand_over. Dialogue `fact.adjust` must name a bounded integer fact, never
 a reserved engine fact. Both validators enforce references, types and ownership; source short
-fact references expand for this new spelling. This vocabulary (and authored Put actions)
-requires kernel API at least 1.7. Historical requirement minimums remain unchanged. An unknown dialogue sequence operation
+fact references expand for this new spelling. Current reward/storage content declares API1.7;
+there is no per-feature minimum-version detector for receive, fact.adjust or Put under the
+[pre-production policy](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md). Generic manifest range/schema validation remains. An unknown dialogue sequence operation
 now reports `unknown_variant` (the fact.assign/fact.adjust discriminator), rather than the old
 single-operation `const_mismatch`; valid legacy dialogue and hand_over semantics are unchanged.
 

@@ -158,3 +158,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - Owner direction (paraphrased): [PM-delegated in-game copy](owner-decision-copy-delegation-2026-10-04.md), superseding per-batch wording approval.
 - [One independent reviewer by default, 2026-10-04](owner-decision-one-reviewer-default-2026-10-04.md): mechanics PRs retain fresh review; a second opinion is reserved for save, contract, foundation and gate risks.
+
+- Owner direction: [pre-production compatibility](owner-decision-preproduction-compatibility-2026-10-04.md); prioritize the current release, preserve explicit mismatch refusal and frozen conformance fixtures.
