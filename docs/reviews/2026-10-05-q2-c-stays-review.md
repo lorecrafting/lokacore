@@ -41,3 +41,29 @@ The composes-with claim is accurate: generic authored properties and facts conne
 Nine reviewer logs/results are privately retained in the handoff execution bundle with SHA256SUMS and a separate successful verify output; private paths and identifiers were redacted. The PR has no committed C-stays evidence pack. Developer temporary logs and sweep reports were inspected, but absent developer checksums are not treated as authenticated retained evidence. The adopted contract requires the checks and red controls, not a new repository evidence pack; the critical claims above were reproduced independently.
 
 The full TypeScript/mobile suite and native appearance were not independently rerun; the source-head CI and focused behavior checks bound this verdict. No Metro, DeviceHub, Simulator, preview, native build or owner-save operation occurred. UI blur remains deferred. The rescue/escort path remains a separate future slice, with no unfinished selectable branch in this release.
+
+## Independent Sol protocol/save second opinion
+
+The PM ran a fresh read-only Codex Sol opinion on the exact source head. Its answer is reproduced verbatim.
+
+```text
+VERDICT: CHANGES REQUIRED
+PR #189, reviewed SHA abd54bf2d19220e1d88bb2ec8c128a76102f54a3.
+
+PS-1 | should-fix (P2) | mobile/authority/local-story/dialogue-save.ts:158
+Quest consistency is checked only when received=true. Reproduced: complete Q1 to activate Q2, then change only Q2’s saved row to state="resolved", outcome="stays", before selecting the message branch. Reopen succeeds instead of reporting save_corrupt. The journal claims delivery although branch remains unselected, status remains missing, and the original message remains with Vesper. Q2’s active-policy requirements then prevent completing the path. Validate terminal quest evidence even when no receive row exists; permit legitimate absent/active prebranch states.
+
+VERIFICATION:
+- Exact head confirmed; reviewed diff against origin/main, the source parent.
+- Required workflow, lessons, decision and governing specifications reviewed.
+- 47 focused kernel tests and 17 in-memory SQLite/Book tests passed.
+- Additional v011 journey passed Q1, riddle, message terminal, five actual rat kills, Maud reward and session reopen.
+- Python oracle reproduced v011 hash/IDs; current changed Elixir compiler modules produced the matching artifact. Historical v001–v010 fixtures remain unchanged.
+- API1.10 gates, original-item transfers, protected-container Give, direct-body terminal and absence of selectable escort checked.
+- Book detail recovery, exact replay, intact v010 pin refusal, genuine SQLite read-error propagation, failed COMMIT and lost acknowledgement verified.
+- In-memory removal of Give protection and Choose policy validation each caused existing tests to fail. Removing give_allowed’s schema const defeated its invalid fixture.
+- Ponytail review found no additional complexity finding.
+
+LIMITS:
+No files modified. No full check_all rerun, native/UI execution or owner-save access. Reopen probes used new sessions over in-memory SQLite, not file-backed close/reopen. Six source-head CI successes were supplied in the prompt.
+```
