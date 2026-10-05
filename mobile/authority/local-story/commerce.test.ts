@@ -268,3 +268,37 @@ test('satchel Put/Take is immediately useful but active S2 ancestor Sell is refu
   a.reopen();
   assert.equal(a.world().state.containers[ledger], fresh.body);
 });
+
+// Breaks: independently pinned IDs count non-spawned templates or omit worn-slot holders.
+test('v018 ID pin binds the spawned world, purchased torch and worn slot after cold reopen', () => {
+  const pinned = read('protocol/fixtures/missing_child_v018_ids.json');
+  const a = setup();
+  const actual = {
+    character: fresh.character,
+    body: fresh.body,
+    ...Object.fromEntries(
+      Object.entries(fresh.roomIds).map(([ref, id]) => [ref.split(':')[1], id]),
+    ),
+    ...Object.fromEntries(
+      Object.entries(fresh.entityIds).map(([ref, id]) => [ref.split(':')[1], id]),
+    ),
+    ...Object.fromEntries(
+      Object.entries(fresh.details).map(([id, detail]) => [
+        `detail/${fresh.rooms[detail.room].key}/${detail.key}`,
+        id,
+      ]),
+    ),
+    ...Object.fromEntries(
+      Object.entries(fresh.state.jobs ?? {}).map(([id, job]) => [`job/${job.job.key}`, id]),
+    ),
+    ...Object.fromEntries(Object.entries(fresh.slots).map(([slot, id]) => [`slot/${slot}`, id])),
+  };
+  assert.deepEqual(actual, pinned);
+  a.move('north', 'west');
+  a.invoke('buy', [pinned['npc/peg'], pinned['item/torch']], { quoted_price: 3 });
+  a.invoke('wear', [pinned['item/torch']]);
+  a.reopen();
+  assert.deepEqual(pennies(a), [17, 23, 10]);
+  assert.equal(a.world().state.containers[pinned['item/torch']], pinned['slot/light']);
+  assert.equal(a.world().state.containers[pinned['slot/light']], pinned.body);
+});
