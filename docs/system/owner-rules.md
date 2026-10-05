@@ -146,6 +146,9 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Presenter boundary: engine output is structured and presenters own the words; the renderer reaches the game only through `GameSession`/`Game` (the player's play session and the story being played) and uses only React Native building blocks ([record](../decisions/owner-decision-presenter-split-2026-10-02.md)).
 - A fresh agent of any vendor that authored none of the work is an independent reviewer
   ([record](../archive/decisions/owner-decision-reviewers-2026-09-24.md)).
+- Mechanics PRs use one fresh independent reviewer by default; a second opinion
+  is reserved for save/reconciliation, protocol/foundation, proposal and milestone-gate risks
+  ([record](../decisions/owner-decision-one-reviewer-default-2026-10-04.md)).
 - For c1-position PR #137 only, a fresh independent Codex agent replaces the primary Opus
   reviewer; all other review and merge requirements remain in force
   ([record](../decisions/owner-decision-c1-position-codex-review-2026-10-03.md)).
@@ -160,9 +163,9 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
   contract first reviews and every fix re-check; Fable only as codex's stand-in (and, by exception,
   the docs compaction); Opus drafts briefs; the PM keeps one persistent worktree
   ([record](../archive/decisions/owner-decision-review-rules-2026-10-01.md),
-  [compaction](../decisions/owner-decision-docs-compaction-2026-10-02.md)). Codex is an everyday
-  second opinion beside our own review, never instead of it
-  ([record](../archive/decisions/owner-decisions-review-flow-2026-09-30.md)).
+  [compaction](../decisions/owner-decision-docs-compaction-2026-10-02.md)). The older everyday
+  Codex second-opinion default is narrowed by the one-reviewer decision above;
+  a second opinion never replaces the independent reviewer.
 - Developers default to Sonnet; Opus for kernel and contract-freeze slices
   ([record](../archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)).
 - The TypeScript tests are type-checked (`kernel/ts` `npm run typecheck`, [CHECKS](../CHECKS.md))
