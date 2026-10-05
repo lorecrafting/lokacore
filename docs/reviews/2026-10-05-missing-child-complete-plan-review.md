@@ -14,3 +14,7 @@ The plan must preserve 57 genuinely reachable rooms (25 Ashmere, 22 Fen, ten pub
 ## Checked without findings
 
 The row count is 3 + 9 + 6 + 12 implementation/content candidates and three proof candidates. The disjoint additions sum to 41; 16 + 41 = 57. Q1/Q2/S1 plus Q3/S2/S9/S4/S10/S3/S27 = ten. The five pairs exclude lost/fox. The B/C/D rows provide named consumers for the remaining chapter-one release-scope families, subject to their later briefs. No row reintroduces Old Bram or makes a mandatory tide/night wait; D1 and D6 name recovery obligations. E3 distinguishes browser content proof from native/public release certification. These 33 rows are a plan, not 33 separately authored implementation briefs.
+
+## Scoped fix re-review — `bd315ae096dfe2828a19fb0df81f63c58d269e49`
+
+**APPROVE.** R192-1 is closed: PR #191 merged first; the plan now links the exact dated owner decision, and active owner rules plus workflow record the temporary mobile pause while retaining the Node engine simulator and later native obligations. R192-2 is closed: D1 offers Sedge's immediate swim lesson, D6 uses that earlier lesson for the two bottom rooms, and C6's possible later reward is free and idempotent. The related dependency rows remain acyclic. The scoped doc diff has no whitespace errors; exact-head CI checks are green or correctly skipped for this docs-only head. No code or native/device verification was requested for this recheck.
