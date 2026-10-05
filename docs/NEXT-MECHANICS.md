@@ -2,7 +2,11 @@
 
 **PM-adopted planned queue, not installed behavior.** Adopted under the owner’s [autonomous mechanics delegation](decisions/owner-decision-autonomous-mechanics-2026-10-03.md), with [policy decisions](decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md) informed by actual `gpt-6-astra` planning advice. The owner requested additional mechanics and continued autonomous delivery. Planning advice is not independent code review. Current C1 closure and carries are recorded in [ROADMAP](ROADMAP.md#c1-carry-checkpoints). UI blur stays deferred and owner simulator progress is preserved.
 
-The [no-wait opening decision](decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes planned chapter-one tide, night and returning-NPC gates. The current sampler still contains Bram's old schedule until its source release is replaced; this queue describes the intended next behavior, not the installed preview.
+The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
+sets the active source/save and retires temporary sampler work. Real Bram’s final role
+is unresolved; Q1 follows its clarification. The
+[no-wait opening decision](decisions/owner-decision-no-wait-opening-2026-10-05.md)
+continues to govern required chapter routes and availability.
 
 Planning inspected composed source `0e49963f893192d193fac65851aa882be0f597b8`; all four composed polish/layout PRs are now merged in main `395db3a05f261356913cf284ace0db6a27824502`. Re-pin latest merged main at each developer assignment. [Active specs](system/README.md), [protocol/fixtures](../protocol/README.md) and recorded owner rules govern installed behavior. [Future](system/future.md) reaches archived plans below; those describe intended consumers, not installed features. Installed capability subsets do not imply complete chapter mechanics. Conflicting clauses require explicit reviewed amendments. [PR #136](https://github.com/lorecrafting/lokacore/pull/136) is merged; its original formulas remain dated alternatives under the [current reconciliation](decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md).
 
@@ -21,7 +25,10 @@ These labels group work; they are not six guaranteed PRs. Lift is relative engin
 
 Clock, background/resume, reading safety and simplified sampler choices are governed by the [adopted policy](decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md), with implementation controls in the [M1-A brief](briefs/m1-a-clock.md). M1-B proves recurrence across midnight, the next morning and a subsequent evening using the existing sampler rooms. Controlled near-boundary starts are tests, not player skips. The frozen daily-schedule fixture remains a separate oracle, not sampler geography.
 
-**Next no-wait content change:** after the Book live-clock control fix, replace the bundled sampler release with Bram stationary at Ferry Landing; rederive its independent artifact/ID answers and keep M1 recurrence proof in a dedicated schedule fixture. Then author Q1 The Ferryman's Favor and the Q2 mire route against the no-wait rule. Existing 0.0.10 saves remain explicitly mismatched until the player chooses Start over; no silent reset.
+**Next chapter content change:** implement real Q1 after its character scope is resolved,
+with its actual node/consequence producer; then build the always-passable Q2 route.
+Finish M12 readable WIP against the active chapter source under normal review. No
+new sampler errand or sampler-only ferry graph is planned.
 
 ## Planned M7–M23: remaining chapter-one mechanics
 
@@ -53,7 +60,7 @@ This queues every chapter-one “not yet” capability plus the missing installe
 
 **Brief trigger for every planned letter:** PM selects its named beat and adopted rule, freezes minimal schema/oracle rows, supplies complete files/acceptance/mutations and an independent reviewer, then authorizes development under WORKFLOW. If reuse fails or another semantic surface becomes necessary, explicitly amend/split the brief. No placeholder API/scaffolding or blanket catalog implementation.
 
-**Content integration follows four playable phases:** village/useful actions (Bram always reachable) → search/return (always-passable mire route) → living village and player-initiated optional events → bell/all three endings. Night, tide and next-day windows cannot require idling in this chapter. Room batches retain prototype prose; PM approves scoped content batches under the delegation record. These are content integration blocks, not one gigantic Missing Child PR; required mechanics and conformance land before their consuming batch.
+**Content integration follows four playable phases:** village/useful actions (required NPCs always reachable) → search/return (always-passable mire route) → living village and player-initiated optional events → bell/all three endings. Night, tide and next-day windows cannot require idling in this chapter. Room batches retain prototype prose; PM approves scoped content batches under the delegation record. These are content integration blocks, not one gigantic Missing Child PR; required mechanics and conformance land before their consuming batch.
 
 ## Missing Child integration checklist
 
@@ -91,6 +98,6 @@ Mechanic briefs and reviews use [Building mechanics by composition](system/archi
 
 ## Execution order and parallel work
 
-Under the delegation the PM may adopt coherent policies, amend affected specs explicitly, brief developers and continue reviewed slices without waking the owner. This document itself implements nothing. Start with [M1-A](briefs/m1-a-clock.md), a separate M4 scratch contract and M12-A readable analysis. After the first fight, prioritize M12-A, M13-A, early M22-A and M20-A before dependent scenes; merge shared protocol/spec changes serially before their dependent code. Runtime pairs need complete disjoint file lists, not an assumption that different mechanics touch different files. Follow [WORKFLOW](WORKFLOW.md), independent reviews and [simulator-first validation](decisions/owner-decision-simulator-first-validation-2026-10-04.md); batch preview refreshes at playable checkpoints while retaining required per-PR checks; do not extrapolate C1-only exceptions. [World parameters](decisions/owner-decision-world-parameters-2026-10-02.md) keeps rates/settings in cartridges and safety budgets in the engine.
+Under the delegation the PM may adopt coherent policies, amend affected specs explicitly, brief developers and continue reviewed slices without waking the owner. This document itself implements nothing. Start with [M1-A](briefs/m1-a-clock.md), a separate M4 scratch contract and M12-A readable analysis. After the actual chapter cutover and Q1 character clarification, prioritize real Q1 (M13-A, early M22-A and M20-A) and finish M12-A before dependent scenes; merge shared protocol/spec changes serially before their dependent code. Runtime pairs need complete disjoint file lists, not an assumption that different mechanics touch different files. Follow [WORKFLOW](WORKFLOW.md), independent reviews and [simulator-first validation](decisions/owner-decision-simulator-first-validation-2026-10-04.md); batch preview refreshes at playable checkpoints while retaining required per-PR checks; do not extrapolate C1-only exceptions. [World parameters](decisions/owner-decision-world-parameters-2026-10-02.md) keeps rates/settings in cartridges and safety budgets in the engine.
 
 Ponytail design review: reuse current authority, changed-row saves, due jobs, facts and GameSession; no Effect, timer framework, dynamic cache, unused resolver, full story rewrite or broad audit. Stop each brief at one exercised consumer and its meaningful regression evidence.

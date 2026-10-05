@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "chest",
+    "storage_chest"
+  ],
+  "short": "item.storage_chest.short",
+  "room_line": "item.storage_chest.room",
+  "description": "item.storage_chest.description",
+  "mass_grams": 8000,
+  "capacity": 12,
+  "location": {
+    "in": "room",
+    "room": "inn_rooms"
+  },
+  "barrier": "storage_chest_lid"
+}

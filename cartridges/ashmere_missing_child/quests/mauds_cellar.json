@@ -1,0 +1,46 @@
+{
+  "title": "quest.mauds_cellar.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": [
+          {
+            "op": "fact_compare",
+            "fact": "rat_1_killed",
+            "equals": true
+          },
+          {
+            "op": "fact_compare",
+            "fact": "rat_2_killed",
+            "equals": true
+          },
+          {
+            "op": "fact_compare",
+            "fact": "rat_3_killed",
+            "equals": true
+          },
+          {
+            "op": "fact_compare",
+            "fact": "rat_4_killed",
+            "equals": true
+          },
+          {
+            "op": "fact_compare",
+            "fact": "rat_5_killed",
+            "equals": true
+          }
+        ]
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.mauds_cellar.active",
+    "objectives_met": "quest.mauds_cellar.ready",
+    "resolved": "quest.mauds_cellar.resolved",
+    "failed": "quest.mauds_cellar.failed",
+    "abandoned": "quest.mauds_cellar.abandoned"
+  }
+}

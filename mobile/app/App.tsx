@@ -11,7 +11,7 @@ import Storage from 'expo-sqlite/kv-store';
 import { KERNEL_ID, localSession } from '../authority/local-story/session';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import sampler from '../../protocol/fixtures/cartridge_sampler_hash.json';
+import chapter from '../../protocol/fixtures/missing_child_v001_hash.json';
 import { SaveError } from './SaveError';
 
 // The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.
@@ -26,9 +26,9 @@ const fonts = {
 // deletes the file (expo refuses to delete an open database).
 // deleteDatabaseSync removes the main file only; SQLite discards a -journal left beside the new,
 // empty file rather than replaying it, so nothing else needs deleting.
-// The sampler has its own save; the Lantern and items files stay on the phone untouched.
+// The chapter has its own save; earlier development story saves stay on the phone untouched.
 // ponytail: no story picker until the approved release needs one.
-const NAME = 'loka-ashmere-sampler.db';
+const NAME = 'loka-ashmere-missing-child.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
 const commit = process.env.EXPO_PUBLIC_KERNEL_COMMIT ?? `${'0'.repeat(40)}-dirty`;
@@ -45,7 +45,7 @@ const session = (g.loka_session ??= localSession(
     db = undefined;
     deleteDatabaseSync(NAME);
   },
-  sampler,
+  chapter,
   // Each NEW decision's kernel.decision_latency (11 §13), on the iPhone (Android descoped): select
   // the actual platform before Android evidence resumes.
   {

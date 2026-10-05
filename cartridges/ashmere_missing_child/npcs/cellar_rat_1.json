@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "rat",
+    "cellar_rat_1"
+  ],
+  "short": "npc.cellar_rat.short",
+  "room_line": "npc.cellar_rat_1.room",
+  "description": "npc.cellar_rat.description",
+  "room": "lantern_cellar",
+  "hp": {
+    "minimum": 0,
+    "maximum": 6,
+    "start": 6,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 50,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "room.drowned_lantern.title",
+  "description": "room.drowned_lantern.description",
+  "exits": {
+    "west": {
+      "to": "well_lane"
+    },
+    "up": {
+      "to": "inn_rooms"
+    },
+    "down": {
+      "to": "lantern_cellar"
+    }
+  }
+}

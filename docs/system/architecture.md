@@ -148,7 +148,11 @@ first seed once in the parent. It combines sequence counts, step-length buckets,
 and command/cartridge coverage before applying the existing assertions. A worker failure
 fails the run; invariant failures retain the simulator's reproducer and trace report.
 The [acceptance envelope §3](../archive/spec/r1-acceptance-envelope.md#3-corpus-command-mix-and-sampling)
-still governs the seed count, determinism and regression controls.
+still governs the seed count, determinism and regression controls. The default demo
+catalogue (`cartridge_*hash.json`) preserves its curated generator16 regression seeds.
+The active [chapter release](cartridge.md#source-layout) has a separate controlled
+corpus run through the same generator and per-step invariant checks; its versioned
+release pin does not silently retarget the historical demo regression corpus.
 
 ## Mobile import rules
 
@@ -164,7 +168,7 @@ The app shell imports the local authority's session controller
   scripted commands, prints the GameView, writes a transcript and the game trace; `--replay`
   re-decides the trace's Commands and requires a byte-identical transcript (`:2`, `:287`).
 - **The phone app** (`mobile/app/App.tsx`): opens the bundled story and its expo-sqlite
-  save under the current [sampler binding](cartridge.md#source-layout), plays through
+  save under the current [chapter binding](cartridge.md#source-layout), plays through
   `localSession`, supplies separate wall (`Date.now`) and monotonic (`performance.now`) clocks, and draws
   the book UI or the save-error screen. Elapsed accounting follows
   [durable elapsed sessions](save.md#durable-elapsed-sessions); latency remains separate.

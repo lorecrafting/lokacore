@@ -30,6 +30,10 @@ During [pre-production development](../decisions/owner-decision-preproduction-co
 compatibility is not required. A save opens only when its exact release pin is available;
 a mismatch is explicitly refused, never silently migrated, retargeted or deleted.
 
+The [active chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
+uses a distinct save file from the old sampler preview. It does not migrate or delete that
+preview; active-save mismatches still use the refusal and confirmed Start over above.
+
 ## Receipts
 
 Scope `story/<lineage_id>/<character>` (`save.ts:137`). A receipt (`store.ts:32`) stores
