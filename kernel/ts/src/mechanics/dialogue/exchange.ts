@@ -39,7 +39,10 @@ export function ready(
   const x = exchangeDefinition(world, quest);
   const body = bodyOf(world, actor);
   if (!x || !body) return 'invalid_state' as const;
-  const npc = world.entityIds[refString(x.npc)];
+  const bound = questOf(world, actor, quest)?.[1].bindings;
+  const npc =
+    bound?.find((r) => world.entities[r.entity_id]?.kind === 'npc')?.entity_id ??
+    world.entityIds[refString(x.npc)];
   if (!living(world, npc) || world.state.containers[npc] !== world.state.containers[body])
     return 'not_present' as const;
   const count = exact ? Math.max(x.outgoing.length, x.incoming.length) : x.quantity;
@@ -99,6 +102,8 @@ export function exchangeBlocked(world: World, row: ChoiceRow, quest: DefinitionR
   )
     return 'invalid_state' as const;
   const x = exchangeDefinition(world, quest)!;
+  const participants = row.roles.filter((r) => !/^(outgoing|incoming)_\d{2}$/.test(r.role));
+  if (!same(participants, prior[1].bindings)) return 'invalid_state' as const;
   const bound = (kind: 'outgoing' | 'incoming') =>
     row.roles.filter((r) => r.role.startsWith(`${kind}_`));
   const outgoing = bound('outgoing'),
@@ -165,9 +170,8 @@ export function exchangeTransfers(
   mint: Mint,
   row: ChoiceRow,
   body: EntityId,
-  quest: DefinitionRef,
 ) {
-  const npc = world.entityIds[refString(exchangeDefinition(world, quest)!.npc)];
+  const npc = row.roles.find((r) => world.entities[r.entity_id]?.kind === 'npc')!.entity_id;
   const items = row.roles.filter((r) => /^(outgoing|incoming)_\d{2}$/.test(r.role));
   const ops = items.map((r) => ({
     op: 'entity.transfer' as const,

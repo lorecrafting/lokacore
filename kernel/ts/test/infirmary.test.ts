@@ -168,3 +168,18 @@ test('global saturation spends no allowance and unrelated loss never refunds S9 
   capped.exchange();
   assert.deepEqual([capped.axis(), capped.contribution()], [1, 3]);
 });
+
+// Breaks: B5 re-resolves Wick from a changed definition map instead of preserving the accepted and continuation-bound participant.
+test('exchange retains original Wick bindings after definition mapping drift', () => {
+  const a = driver(standing(herbs.slice(0, 3)));
+  a.accept();
+  a.talk();
+  const w = a.world();
+  a.replace({
+    ...w,
+    entityIds: { ...w.entityIds, 'ashmere_missing_child@0.0.19:npc/wick': id('room', 'cloister') },
+  });
+  a.choose('exchange');
+  assert.equal(a.world().state.containers[herbs[0]], wick);
+  assert.equal(a.world().state.containers[bandages[0]], fresh.body);
+});
