@@ -253,3 +253,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Local Book web preview](2026-10-05-web-preview-review.md): PR #194 at `6a878fa2`, CHANGES REQUIRED; scoped fix `abef39cc`, APPROVE, R194-1/R194-2 closed; disposable browser corrupt-save recovery and worker red control pass.
 - [Read-once documentation rule](2026-10-05-read-once-docs-review.md): PR #195 at `fe73a47695aa17aa8868e521db626154bff6f7a1`, APPROVE; no findings.
 - [Builder's Guide reuse lessons](2026-10-05-builder-learning-review.md): PR #197 at `8971c7ed`, independent docs-only APPROVE; no findings.
+- [Forward development before release](2026-10-05-forward-development-review.md): PR #198 at `3efa96eb`, independent APPROVE; no findings, active contract wording and links checked.

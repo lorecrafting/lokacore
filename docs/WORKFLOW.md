@@ -55,8 +55,10 @@ Report at the end of the slice, not at every step.
    worktree). Spawn `developer` (pass `model: "opus"` for a kernel or contract-freeze slice) with a self-contained brief: goal,
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
-   decided, and a scope trigger (what makes the developer stop and ask, for example a frozen
-   fixture or protocol file that would need to change). Add a timebox only for open-ended work:
+   decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
+   protocol change with new behavior). Obsolete development fixtures may be updated under the
+   [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
+   Add a timebox only for open-ended work:
    at the limit the developer stops and returns partial findings.
    Mechanic briefs include the [composition record](system/architecture.md#building-mechanics-by-composition).
 3. **Build and self-review (developer).** Implement; run the full local check line from
