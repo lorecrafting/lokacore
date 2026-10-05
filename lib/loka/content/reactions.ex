@@ -46,12 +46,14 @@ defmodule Loka.Content.Reactions do
       r["on"]["event"] == "quest_resolved" or
         Enum.any?(r["apply"], &(&1["op"] == "quest.activate"))
 
+    terminal = Enum.any?(r["apply"], &(&1["op"] in ~w(quest.resolve quest.fail)))
+
     version =
       manifest["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if needed and version < [1, 8],
+    if (needed and version < [1, 8]) or (terminal and version < [1, 12]),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
@@ -65,6 +67,14 @@ defmodule Loka.Content.Reactions do
     restricted ++
       owned(path, "quest_activated", ctx.events) ++
       reference(rel, ["apply", i], "quest", s, ctx.m, ctx.defs)
+  end
+
+  defp consequence(rel, {%{"op" => op} = s, i}, on, ctx)
+       when op in ["quest.resolve", "quest.fail"] do
+    path = at(rel, ["apply", i, "op"])
+    restricted = if on["event"] == "fact_changed", do: [], else: [diag("OUTCOME_MISMATCH", path)]
+    event = if op == "quest.resolve", do: owned(path, "quest_resolved", ctx.events), else: []
+    restricted ++ event ++ reference(rel, ["apply", i], "quest", s, ctx.m, ctx.defs)
   end
 
   defp consequence(rel, {s, i}, _, ctx),

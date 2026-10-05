@@ -1,0 +1,35 @@
+{
+  "label": "actions.ring_bell",
+  "aliases": ["ring"],
+  "target": { "kind": "detail", "room": "belfry", "detail": "bell" },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": { "op": "all", "items": [
+      { "op": "quest_state", "quest": "bell_of_ashmere", "state": "active" },
+      { "op": "fact_compare", "fact": "chapel_bell_rung", "equals": false },
+      { "op": "any", "items": [
+        { "op": "all", "items": [
+          { "op": "quest_state", "quest": "missing_child", "state": "active" },
+          { "op": "fact_compare", "fact": "fen_tracks_found", "equals": true }
+        ] },
+        { "op": "all", "items": [
+          { "op": "quest_state", "quest": "missing_child", "state": "resolved" },
+          { "op": "any", "items": [
+            { "op": "fact_compare", "fact": "village_child_status", "equals": "rescued" },
+            { "op": "fact_compare", "fact": "village_child_status", "equals": "stays" }
+          ] }
+        ] }
+      ] }
+    ] }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        { "op": "fact.assign", "fact": "chapel_bell_rung", "value": true },
+        { "op": "fact.assign", "fact": "chapel_allegiance", "value": "prior" }
+      ],
+      "narration": { "actor": "narration.ring_bell" }
+    }
+  }
+}

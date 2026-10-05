@@ -7,6 +7,7 @@ import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { refString, type ChoiceRow, type World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
 import { escortSave } from './escort-save.ts';
+import { bellSave } from './bell-save.ts';
 import type { Db, Meta } from './store.ts';
 
 const invalid = () => {
@@ -36,11 +37,13 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
   for (const [id, row] of rows) checkRow(world, id, row);
   const actor = world.character;
   const scope = `story/${meta.lineage_id}/${actor}`;
+  const lost = bellSave(world, db, scope, rows);
   const rescued = escortSave(world, db, scope, rows);
   checkAssignments(
     world,
     rows,
     starts.map((s) => s.item),
+    lost,
   );
   for (const start of starts) {
     const resolved = rows.filter(
@@ -53,7 +56,7 @@ export function dialogueSave(world: World, db: Db, meta: Meta) {
     if (resolved.length > 1) invalid();
     const received = resolved.length === 1;
     if (received) committedDialogue(world, db, scope, resolved[0][0]);
-    const terminal = handoff(world, db, scope, rows, start.item, received, rescued);
+    const terminal = handoff(world, db, scope, rows, start.item, received, rescued, lost);
     const holder = world.state.containers[start.item];
     if (!received) {
       const original = bind(world, start.d).find(
@@ -96,7 +99,12 @@ function checkRow(world: World, id: string, row: ChoiceRow) {
     invalid();
 }
 
-function checkAssignments(world: World, rows: [string, ChoiceRow][], items: EntityId[]) {
+function checkAssignments(
+  world: World,
+  rows: [string, ChoiceRow][],
+  items: EntityId[],
+  lost: boolean,
+) {
   const expected = new Map<
     string,
     { fact: Parameters<typeof value>[2]; value: unknown; selected: boolean }
@@ -128,7 +136,11 @@ function checkAssignments(world: World, rows: [string, ChoiceRow][], items: Enti
     }
   }
   for (const e of expected.values())
-    if (!same(value(world, world.character, e.fact), e.value)) invalid();
+    if (
+      !(lost && e.fact.key === 'village_child_status') &&
+      !same(value(world, world.character, e.fact), e.value)
+    )
+      invalid();
 }
 
 // size: allow 46, terminal receipt, quest, status and original custody must agree at one load boundary
@@ -140,6 +152,7 @@ function handoff(
   item: EntityId,
   received: boolean,
   rescued: Set<string>,
+  lost: boolean,
 ) {
   let completed = false;
   for (const [key, d] of Object.entries(world.cartridge.dialogues ?? {})) {
@@ -171,6 +184,7 @@ function handoff(
         completed = true;
       } else if (
         !rescued.has(refString(d.quest)) &&
+        !lost &&
         ((q && q.state !== 'active') || (received && !q))
       )
         invalid();

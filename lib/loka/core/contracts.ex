@@ -102,6 +102,9 @@ defmodule Loka.Core.Contracts do
   defp keyword("maxProperties", n, v, path, _),
     do: check(map_size(v) <= n, path, :too_many_properties)
 
+  defp keyword("exactlyOneRequired", keys, v, path, _),
+    do: check(Enum.count(keys, &Map.has_key?(v, &1)) == 1, path, :exclusive_properties)
+
   # ponytail: recompiles the pattern on every call; precompile per contract if it shows up in profiles.
   defp keyword("pattern", p, v, path, _) do
     matched = :re.run(v, p, [:unicode, :dollar_endonly, capture: :none]) == :match
