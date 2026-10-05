@@ -452,3 +452,23 @@ After the same torch is lit directly held or worn, the authored masonry detail i
 visible; Douse, exhaustion or Put into the satchel removes it on the next confirmed
 view. Existing freshness handles a control selected before elapsed exhaustion.
 No required waiting, darkness modal, new native control or unfinished lantern UI.
+
+## C2 watch patrol details
+
+**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses ordinary Tobin NPC details, Talk/Choose, World movement and Journal. Tobin's
+page presents Start rounds, Continue rounds, Rejoin or Restart only from the typed
+current state; C1 lessons remain available at his actual location. The journal names
+the original leader's actual room, next route destination, unique checkpoint progress
+and together/awaiting/paused/failed/completed state. Awaiting explicitly says to walk
+the shown ordinary exit; it offers no second leader departure. Paused arrival says
+Rejoin is still required, while failure says return to Tobin and Restart now.
+
+Show unavailable reasons from shared kernel admission and maintain Close/Leave.
+Capture the exact attempt/cursor/status with each drawn control under existing live
+action freshness. Pending, refused, stale and faulted results claim no movement,
+credit or trust. Only committed narration appears, once, including after lost reply
+and reopen. No new watch page, immunity while reading, countdown, nighttime wait,
+optimistic follow or timer-driven movement is added. Browser proof must walk the
+real start→leader departure→player join→pause/rejoin→death/restart→success route;
+native verification remains paused under the owner decision.

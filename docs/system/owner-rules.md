@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- C2 offers an all-hours finite original-Tobin patrol; player death resets only the attempt, immediate Rejoin/Restart preserves reachable recovery, and completion grants trust alone ([PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)).
+
 - B4 uses the real refillable B3 torch and oil in an optional dark well, with gear-free egress and owned-corpse recovery ([PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md)).
 - C1 teaches swords/dodge immediately through conserved payment and typed acquired membership; current attribute qualification, real equipped weapons and shield defense affect the actual cellar fight ([PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)).
 
