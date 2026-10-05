@@ -13,7 +13,12 @@ call (`newId`), an optional account binding read once when a run starts, an opti
 for latency, and an optional random source shaped like `getRandomValues` (`:44`). It opens the
 save on the release its pin names, or saves a fresh world of the newest release at revision 0 as
 a new save: with a random source, under a world context and RNG seed drawn for the new lineage
-(below), else the release's own fresh world. Refusals, nothing written:
+(below), else the release's own fresh world.
+
+Saved quest rows require valid `DefinitionRef` quest and `StateScope` scope fields before
+receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped.
+
+Refusals, nothing written:
 
 | Reply | When | New game offered |
 |---|---|---|

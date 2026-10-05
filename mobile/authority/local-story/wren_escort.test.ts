@@ -33,38 +33,59 @@ const fresh = newWorld(
   [1, 2, 3, 4],
 );
 
-// Breaks: escort receipt validation dereferences an unrelated malformed quest before the
-// saved-world boundary can classify corruption and offer an explicit Start over.
+// Breaks: malformed Q1 rows crash receipt recovery or silently disappear from the journal
+// instead of offering typed corruption recovery with an explicit Start over.
 test('malformed Q1 after rescue selection or completion offers typed recovery without replacing progress', async (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-rescue-null-quest-'));
+  const dir = mkdtempSync(join(tmpdir(), 'loka-rescue-malformed-quest-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   for (const terminal of [false, true])
-    for (const malformed of [null, false, 0, [], {}])
-      await t.test(`${terminal ? 'completed' : 'following'}: ${JSON.stringify(malformed)}`, () => {
-        const a = setup(join(dir, `${terminal}-${JSON.stringify(malformed)}.db`));
-        try {
-          a.offer();
-          a.choose('rescue');
-          if (terminal) a.end();
-          assert.equal(openGame(a.db, bundle, a.host).view().view.journal.length, 2);
-          const q1 = a.rows('quests').find((q) => q.value.quest.key === 'first_lead')!;
-          a.put('quests', q1.key, malformed);
-          const before = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-          const session = localSession(() => a.db, assert.fail, bundle, a.host);
-          assert.equal(session.game(), undefined);
-          assert.equal(session.failed()?.kind, 'save_corrupt');
-          assert.equal(session.failed()?.startOver, true);
-          assert.deepEqual(
-            a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
-            before,
-          );
-          assert.equal(session.startOver(), undefined);
-          assert.equal(session.failed(), undefined);
-          assert.deepEqual(session.game()!.view().view.journal, []);
-        } finally {
-          a.sql.close();
-        }
-      });
+    for (const [field, malformed] of [
+      [null, null],
+      [null, false],
+      [null, 0],
+      [null, []],
+      [null, {}],
+      [null, { quest: {}, scope: {} }],
+      [null, { quest: true, scope: true }],
+      ['quest', {}],
+      ['scope', {}],
+    ] as const)
+      await t.test(
+        `${terminal ? 'completed' : 'following'} ${field ?? 'row'}: ${JSON.stringify(malformed)}`,
+        () => {
+          const a = setup(join(dir, `${terminal}-${field}-${JSON.stringify(malformed)}.db`));
+          try {
+            a.offer();
+            a.choose('rescue');
+            if (terminal) a.end();
+            a.sql.close();
+            a.sql.open();
+            assert.equal(openGame(a.db, bundle, a.host).view().view.journal.length, 2);
+            const q1 = a.rows('quests').find((q) => q.value.quest.key === 'first_lead')!;
+            a.put('quests', q1.key, field ? { ...q1.value, [field]: malformed } : malformed);
+            const before = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
+            a.sql.close();
+            a.sql.open();
+            assert.equal(
+              openStory(a.db, [{ content_hash: bundle.sha256, fresh }], a.host).kind,
+              'save_corrupt',
+            );
+            const session = localSession(() => a.db, assert.fail, bundle, a.host);
+            assert.equal(session.game(), undefined);
+            assert.equal(session.failed()?.kind, 'save_corrupt');
+            assert.equal(session.failed()?.startOver, true);
+            assert.deepEqual(
+              a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
+              before,
+            );
+            assert.equal(session.startOver(), undefined);
+            assert.equal(session.failed(), undefined);
+            assert.deepEqual(session.game()!.view().view.journal, []);
+          } finally {
+            a.sql.close();
+          }
+        },
+      );
 });
 
 function setup(path = ':memory:') {
