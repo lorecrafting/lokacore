@@ -168,6 +168,9 @@ The prior [Debug/Release Simulator procedure](decisions/owner-decision-local-edi
 remains historical guidance for when the owner resumes native work. Do not silently reset or
 re-pin a save when that happens.
 
+The [live Chapter 1 board](live-board.md) displays local Git facts and explicit
+last-reported phases, activities and check durations; it does not replace these gates.
+
 ## Token hygiene
 
 - Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
