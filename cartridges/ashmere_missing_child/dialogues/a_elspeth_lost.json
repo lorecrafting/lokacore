@@ -1,0 +1,13 @@
+{
+  "npc": "elspeth",
+  "policy": {
+    "policy_version": 1,
+    "root": { "op": "fact_compare", "fact": "village_child_status", "equals": "lost" }
+  },
+  "prompt": "dialogue.elspeth_lost.prompt",
+  "roles": { "elspeth": { "role": "npc", "npc": "elspeth" } },
+  "choices": {
+    "acknowledge": { "label": "dialogue.elspeth_lost.acknowledge", "narration": "narration.elspeth_lost" },
+    "directions": { "label": "dialogue.elspeth.directions", "narration": "narration.elspeth.directions" }
+  }
+}

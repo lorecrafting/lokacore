@@ -7,7 +7,12 @@ anything outside it fails compilation and generation. Nullable scalar unions and
 object-or-null union needed by escort's full prior-row precondition are supported
 for explicit absent custody and unknown death attribution (M5-B). Both kernels validate values against the
 flattened contracts with the same paths and error codes (`lib/loka/core/contracts.ex:69`,
-`kernel/ts/src/foundation/validate.ts:51`; codes in `protocol/error_registry.json`). Every contract's
+`kernel/ts/src/foundation/validate.ts:51`; codes in `protocol/error_registry.json`). The
+`exactlyOneRequired` object keyword names declared properties and requires exactly one to be
+present. The scene `on` contract uses it for `story_point` versus `quest`, retaining the
+existing story-point shape without a new discriminator. Failure reports `exclusive_properties`
+at the containing object path in both validators.
+Every contract's
 `examples` must validate and `protocol/fixtures/invalid.json` must fail with exactly the listed
 errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` generates
 `kernel/ts/src/contracts.gen.ts`, [contracts.gen.md](../contracts.gen.md) and
@@ -190,6 +195,10 @@ correlates everything to the player's command (`runtime/proposal.ts:183`). The m
 emits `scene_ended {scene}` on the final continue at position 2, leaving position 1
 for its line fact's fact_changed; start is the fact's 0→1 change, with no scene_started
 ([scene@1](mechanics.md#scene1-mechanicsscenerulets)).
+API1.12 permits that start to be caused by an evidenced actor-owned
+`quest_resolved {quest, outcome}`. A bell Ring emits no `story_point_reached`;
+its fact-change reactions emit Q3's typed resolution and, for the eligible
+bell-first case, a typed Q2 failure transition without a new event.
 
 ## ActionSet and admission
 

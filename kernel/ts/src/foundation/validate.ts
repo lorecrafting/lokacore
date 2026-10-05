@@ -77,6 +77,7 @@ const tests: Record<string, [(v: any, arg: any) => boolean, ErrorCode]> = {
   pattern: [(v, arg) => new RegExp(arg, 'u').test(v), 'pattern_mismatch'],
 };
 
+// size: allow 44, one closed-keyword dispatch includes the scene trigger exclusivity check
 function keyword(k: string, arg: any, v: any, path: string, defs: Defs): ContractError[] {
   if (Object.hasOwn(tests, k)) return check(tests[k][0](v, arg), path, tests[k][1]);
   switch (k) {
@@ -103,6 +104,12 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
     case 'required':
       return (arg as string[]).flatMap((key) =>
         Object.hasOwn(v, key) ? [] : err(child(path, key), 'missing_property'),
+      );
+    case 'exactlyOneRequired':
+      return check(
+        (arg as string[]).filter((key) => Object.hasOwn(v, key)).length === 1,
+        path,
+        'exclusive_properties',
       );
     // The subset gives each anyOf branch a different JSON type, so the type selects it.
     case 'anyOf': {

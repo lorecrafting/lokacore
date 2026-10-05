@@ -513,7 +513,7 @@ QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation p
 
 ReactionRule (21 §3.4, §11; 06 §14; 04 §5.2-§5.4), owned by reaction@1.
 
-- **ReactionRule**: A typed reaction owned by reaction@1 (21 §3.4, §11; 06 §14; 04 §5.2-§5.4), in rule-key UTF-8 order. Trigger on fact_changed of its fact, entity_entered_room into its room, or exact quest_resolved quest/outcome. Quest resolution verifies the source resolved player instance, outcome, actor and scope; its instance actor owns the delivery. Legacy triggers retain the command actor. Optional when is read on the proposal at the event time. Apply is an ordered sequence of fact.assign and, only on quest_resolved, quest.activate. Facts use their declared scope and expected values; activation skips every prior actor instance including terminal rows and emits quest-owned quest_activated. A delivery uses one writer group/causal allocator, is caused by its trigger and correlated with the root command; fact_changed remains actorless. All deliveries share the existing FIFO queue and delivery/depth/query/output budgets; faults commit nothing. New quest trigger/consequence forms require kernel API1.8.
+- **ReactionRule**: Typed reaction owned by reaction@1. Fact and room triggers retain the command actor; quest resolution verifies the source instance. Apply may assign facts or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.
 
 ## Relation and provenance contracts (`protocol/relation.schema.json`)
 

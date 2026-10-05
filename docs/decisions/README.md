@@ -1,5 +1,6 @@
 # Decisions after R0
 
+
 Accepted ADRs live in [document 16](../archive/spec/16-decision-register.md); ADR-070 to ADR-074
 entered it on 2026-09-24 and ADR-075 on 2026-09-25, and their files here hold the full
 text. This directory also holds the owner's decisions retained verbatim, or marked paraphrased.
@@ -174,7 +175,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - Owner direction (paraphrased): [PM-delegated in-game copy](owner-decision-copy-delegation-2026-10-04.md), superseding per-batch wording approval.
 - [One independent reviewer by default, 2026-10-04](owner-decision-one-reviewer-default-2026-10-04.md): mechanics PRs retain fresh review; a second opinion is reserved for save, contract, foundation and gate risks.
 
-- Owner direction: [pre-production compatibility](owner-decision-preproduction-compatibility-2026-10-04.md); prioritize the current release, preserve explicit mismatch refusal and frozen conformance fixtures.
+- Owner direction: [forward development before release](owner-decision-forward-development-2026-10-05.md); replace obsolete compatibility pins while retaining current-behavior and save-safety checks (supersedes the [earlier compatibility direction](owner-decision-preproduction-compatibility-2026-10-04.md)).
 - Owner direction (paraphrased): [no required waiting in the opening chapter](owner-decision-no-wait-opening-2026-10-05.md); keep Bram reachable and the rescue route open while retaining the clock for deadlines and world events.
 
 - [Fresh preproduction preview games, 2026-10-04](owner-decision-preproduction-preview-saves-2026-10-04.md): no save continuity across builds; current-build durability and explicit Start over remain required.
@@ -196,3 +197,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Q2-C rescue](pm-decision-q2-c-rescue-2026-10-05.md): bound Wren escort, death separation/Rejoin and Elspeth rescued terminal, preserving stays.
 
 - [Book keyboard navigation, 2026-10-05](owner-decision-book-keyboard-navigation-2026-10-05.md): arrows walk compass exits and Page Up/Page Down use vertical exits in the web Book.
+- [Q3-B bell-first prior and lost](pm-decision-q3-bell-prior-lost-2026-10-05.md): public Aldric, exact Belfry Ring, typed Q3/prior and bell-first Q2/lost.

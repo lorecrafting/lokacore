@@ -19,17 +19,12 @@
         "on": {
           "type": "object",
           "properties": {
-            "story_point": {
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "outcome": {
-              "$ref": "action.schema.json#/$defs/Key"
-            }
+            "story_point": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "outcome": { "$ref": "action.schema.json#/$defs/Key" }
           },
-          "required": [
-            "story_point",
-            "outcome"
-          ],
+          "required": ["outcome"],
+          "exactlyOneRequired": ["story_point", "quest"],
           "additionalProperties": false
         },
         "control": {

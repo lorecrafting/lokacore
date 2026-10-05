@@ -19,10 +19,10 @@ commit `997a7a8` (`docs/rewrite-v3/`, `r1-spike/`).
 
 ## Architecture decisions already made (do not reopen silently)
 
-- **Pre-production:** backward API/release/save compatibility and older-development adapters/migrations
-  are not required. Advance current bundled releases; independently re-pin their known answers.
-  Preserve frozen conformance fixtures, safe explicit mismatch refusal and no silent save deletion
-  ([owner decision](docs/decisions/owner-decision-preproduction-compatibility-2026-10-04.md)).
+- **Pre-production:** no backward API/release/save compatibility or older adapters. Replace obsolete
+  fixture and doc pins with independent current answers. Keep current-behavior checks, save integrity,
+  explicit pin refusal and no silent save deletion
+  ([owner decision](docs/decisions/owner-decision-forward-development-2026-10-05.md)).
 
 - **Candidate C (R1), TypeScript first:** the portable semantic foundation (canonical
   encoding and hash, numbers, RNG, IdSource, delta algebra, invariant registry) is built in
@@ -103,7 +103,7 @@ A test exists to catch a specific break. Adapted from
 - **Name the break.** Before the body, name the realistic bug that makes it fail. If the
   only thing that fails it is a deliberate decision (a constant, a message's wording, a
   registry's size), it is a change detector: test the behavior that depends on it instead.
-- **Expected values never come from the code under test.** Use the frozen conformance
+- **Expected values never come from the code under test.** Use current conformance
   fixtures, hand-checked literals, or table rows with literal answers. Never compute the
   answer with the implementation, its helpers, or the other kernel (where both kernels
   implement it, they are compared to the fixtures, then to each other, never only to each other).

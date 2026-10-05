@@ -1,0 +1,8 @@
+{
+  "title": "room.bell_tower.title",
+  "description": "room.bell_tower.description",
+  "exits": {
+    "down": { "to": "chapel_nave" },
+    "up": { "to": "belfry" }
+  }
+}

@@ -27,7 +27,7 @@ implemented where, with its contracts, fixtures, invariants and transcripts), th
 [residency matrix](../residency.gen.json).
 
 Executable contracts stay where they are and are not restated here: `protocol/`
-([map](../../protocol/README.md)), `docs/spec/conformance/` (frozen fixtures and the
+([map](../../protocol/README.md)), `docs/spec/conformance/` (current fixtures and the
 [numeric profile](../spec/conformance/numeric-profile.md)) and
 [release scope](../spec/release-scope.md).
 
