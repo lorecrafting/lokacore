@@ -16,7 +16,7 @@ design from Ashmere’s actual cast and retains the no-wait route rule.
 The [Missing Child completion plan](MISSING-CHILD-PLAN.md), merged in
 [#192](https://github.com/lorecrafting/lokacore/pull/192) after independent review,
 maps 33 proposed PRs through the remaining player outcomes, dependencies, relative
-lift and proof. Its rows are plans, not completed slices.
+lift and proof. Its rows are plans, not completed slices. The [33 provisional slice briefs](briefs/chapter-one/README.md) provide candidate assignment detail.
 
 The red-control existing-file carry is closed: plants preflight occupied paths and create exclusively;
 `test/loka/red_controls_test.exs` proves an occupied file is refused with its bytes preserved.

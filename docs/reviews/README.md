@@ -248,3 +248,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Q2-C-rescue — original Wren escort and rescued terminal](2026-10-05-q2-c-rescue-review.md): PR #190, scoped primary and separate Sol fix-round 2 **APPROVE** at `d014b7197b27c1572f54f8989a9faf86c3b797c3`, PS-1 closed. Null and truthy malformed quest/scope fields retain typed cold recovery, intact rows and explicit Start over; independent red mutations passed. Historical findings retained; no open items.
 - [Missing Child complete-chapter plan](2026-10-05-missing-child-complete-plan-review.md): PR #192 at `bc92912f`, CHANGES REQUIRED; scoped fix `bd315ae0`, APPROVE, R192-1 browser-first policy link and R192-2 pre-S27 swim access closed.
+- [Chapter 1 implementation and proof briefs](2026-10-05-chapter-one-briefs-review.md): PR #193 at `87b7bbca`, CHANGES REQUIRED; scoped fix `bdec64d8`, APPROVE, R193-1 D1/D6/C6 swim lesson handoff closed.
