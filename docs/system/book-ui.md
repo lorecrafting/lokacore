@@ -452,3 +452,65 @@ After the same torch is lit directly held or worn, the authored masonry detail i
 visible; Douse, exhaustion or Put into the satchel removes it on the next confirmed
 view. Existing freshness handles a control selected before elapsed exhaustion.
 No required waiting, darkness modal, new native control or unfinished lantern UI.
+
+## B7 water details
+
+**Selected, pending implementation.** Well Lane's actual well detail offers Fill
+with an exact currently eligible vessel destination. Inventory and reachable
+item details show confirmed liquid kind, quantity/capacity and authored unit
+label, and offer Drink or Pour to a distinct eligible owned vessel. Distinguish
+the original and spare waterskin with authored names; retain exact IDs through
+target selection rather than resolve an ambiguous keyword automatically.
+Ordinary empty/full/incompatible/carrying refusals use the shared projected
+availability and admission reason. No fake well room, text amount field or new
+management screen is required. Local Leave remains navigation only.
+
+Use the existing ActionInvocation/freshness boundary for the exact displayed
+source/receiver and view context. Revalidate after time/custody/quantity changes;
+a stale pair never silently substitutes another skin. Pending/unknown saves
+show no optimistic quantity or success log. Confirmed action narration reflects
+the receipt's actual transferred/consumed kind and amount; refresh/reopen uses
+saved state. Book owns neither liquid math nor a consumption effect producer.
+## C2 watch patrol details
+
+**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses ordinary Tobin NPC details, Talk/Choose, World movement and Journal. Tobin's
+page presents Start rounds, Continue rounds, Rejoin or Restart only from the typed
+current state; C1 lessons remain available at his actual location. The journal names
+the original leader's actual room, next route destination, unique checkpoint progress
+and together/awaiting/paused/failed/completed state. Awaiting explicitly says to walk
+the shown ordinary exit; it offers no second leader departure. Paused arrival says
+Rejoin is still required, while failure says return to Tobin and Restart now.
+
+Show unavailable reasons from shared kernel admission and maintain Close/Leave.
+Capture the exact attempt/cursor/status with each drawn control under existing live
+action freshness. Pending, refused, stale and faulted results claim no movement,
+credit or trust. Only committed narration appears, once, including after lost reply
+and reopen. No new watch page, immunity while reading, countdown, nighttime wait,
+optimistic follow or timer-driven movement is added. Browser proof must walk the
+real start→leader departure→player join→pause/rejoin→death/restart→success route;
+native verification remains paused under the owner decision.
+
+## B6 Seek, retry and ward details
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) uses the shared
+Book at every hour. Marsh Light shows truthful darkness, known return exits and
+its authored glow marker with Seek Wisp; reveal the actual wisp detail only after
+confirmed discovery. A lit carried source explains unavailable Seek/Talk/answer
+through the same confirmed admission result. Ordinary dark objects stay hidden.
+
+Wisp detail follows description → committed history → offered controls. Explicit
+Accept leads to the existing letter-bank controls with committed attempts/limit;
+wrong lines stay with the original speaker. At the third wrong line, discard the
+old tile buffer and show Ask Wisp again immediately, with an active quest journal.
+Fresh Talk resets the sitting, never the quest or learned facts. Close remains
+available through stale light, departure, death, scenes and save recovery under
+existing precedence; stale invocations retain their sent answer for exact retry.
+
+After confirmed success the journal names the ward discovery and the declared ward
+label appears once. At public Aldric, Ask about ward is absent before knowledge,
+then independently selectable beside eligible debt/bell conversations; opening it
+must target its authored dialogue rather than Talk's first eligible key. Its reply
+is informational and promises no spell. Cold reopen restores the exact committed
+wrong/success speaker line once, using that invocation's receipt; never borrow an
+unrelated latest receipt or treat selected tiles as a grant.

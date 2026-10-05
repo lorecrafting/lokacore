@@ -1,4 +1,5 @@
 import { membership } from '../skills.ts';
+import { exchangeBlocked } from './exchange.ts';
 import { refused as escortRefused } from '../escort/shared.ts';
 import { living } from '../death/shared.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
@@ -110,6 +111,7 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
   )
     return 'invalid_state' as const;
   const roles = roleBlocked(world, row, d, option, body!, allRolesNeeded);
+  if (option.exchange && d.quest) return roles ?? exchangeBlocked(world, row, d.quest, steps);
   if (roles) return roles;
   const escort = escortRefused(world, row, option);
   if (escort) return escort;
@@ -128,6 +130,7 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
   }
 }
 
+// size: allow 45, static participant identity and custody share one admission check
 function roleBlocked(
   world: World,
   row: ChoiceRow,
@@ -139,8 +142,15 @@ function roleBlocked(
   const bound = (role: string) => row.roles.find((r) => r.role === role)?.entity_id;
   for (const r of row.roles) {
     const expected = d.roles[r.role];
+    if (option.exchange && /^(outgoing|incoming)_\d{2}$/.test(r.role)) continue;
     const entity = world.entities[r.entity_id];
-    if (!expected || entity?.kind !== expected.role) return 'not_owned' as const;
+    if (
+      !expected ||
+      entity?.kind !== expected.role ||
+      r.entity_id !==
+        world.entityIds[refString(expected.role === 'npc' ? expected.npc : expected.item)]
+    )
+      return 'not_owned' as const;
     const needed =
       allRolesNeeded ||
       r.role ===

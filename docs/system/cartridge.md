@@ -731,3 +731,128 @@ matching fuel units and authored dark text on opted rooms. A supply cannot be li
 or illuminate. Missing fuel rows are not an implicit fresh charge. Metadata belongs
 to the exact item definitions; fuel state belongs to their real instances, never to
 the player, room or merchant. No generic stacking, destruction, stock or liquid API.
+
+## B7 water and vessels
+
+**Selected, pending implementation.** The [B7 mechanic](mechanics.md#b7-well-and-waterskin-selected-contract)
+authors `water` in integer quarter-litre units: **250 grams/unit**, Drink **1 unit**.
+Both waterskins have capacity **4 units**, shell mass **500 grams**, and initial
+`null/0` contents. A full skin therefore weighs **1500 grams**, with no rounded
+fractional quantity. Water has no declared resource benefit in B7.
+
+Keep B3's original `waterskin` offer and add one separately authored
+`spare_waterskin`, directly Peg-held, Buy **4p**, Sell **2p**, with the same vessel
+metadata. Its distinct name/keywords and exact identity support Book target
+selection; these are two finite real item offers, not a stack or restock mode.
+This explicitly extends the four-item B3 shelf for B7's real Pour consumer.
+All prior offers and starts stay governed by their existing declarations;
+release-derived IDs must be re-pinned, not copied from another release.
+Two skins cost **8p** from the authored **20p** player start, leaving **12p**;
+with Peg's **20p** start her balance becomes **28p**. Filled skins may be sold
+and bought back for the same authored prices with their contents intact.
+
+Add one actual `well` detail to Well Lane, accessible at all hours with no
+light, quest, bell, combat, tide or room descent requirement. It declares an
+inexhaustible source of the `water` reference; only Fill may introduce its units.
+The B4 well-shaft plan is independent; preserve its exits if already merged.
+No new room or route is counted for B7. The well cannot be carried or targeted
+as a Pour receiver, and cannot be drunk from directly in this slice.
+
+Source/compiler/loader validate positive integer opted vessel capacity, exact
+initial row, kind references, positive integer drink amount and grams/unit,
+source kind/room binding and safe maximum effective mass. Short DefinitionRefs expand through
+the existing compiler path. Reject initial contents over capacity, null with
+positive quantity, unknown kind, unsafe density product and source declarations
+on non-detail entities. Non-opted items and historical frozen artifacts retain
+their existing representation; B4's fuel rows are not liquid vessels.
+## C2 watch route and trust
+
+**Selected, pending implementation.** [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+adds four Ashmere rooms with reciprocal, all-hours exits: North Gate east ↔
+Watch Post west; Watch Post east ↔ Watch Cell west; Watch Post up ↔ Gate Tower
+down; Village Green east ↔ East Gate west. The cell is vacant with an open,
+unlocked door: no missing-key producer. Gate Tower uses existing adjacent sight;
+no far scan is promised. Watch Post's duty roster and East Gate's flooded-road
+sign use installed readable details. The sign explains that the King's Road is
+outside this chapter; no dangling exit or higher-chapter room is added.
+
+Move the same original C1 Tobin spawn from North Gate to Watch Post, retaining
+his pennies, lesson definitions and exact rusty sword identity. He is a passive
+noncombatant with no attack profile, daily schedule or other location writer.
+His C1 lessons remain available at his current reachable location, including
+between patrol legs; after completion he stays at the terminal checkpoint.
+No paid training, skill, trust, equipment, light or hour condition gates S3.
+
+| Chapter parameter | Selected value |
+|---|---|
+| Cyclic route cursor0..5, initial0 | Watch Post → North Gate → Village Green → East Gate → Village Green → North Gate → Watch Post |
+| Distinct checkpoints | North Gate, Village Green, East Gate, Watch Post |
+| Required new checkpoint entries per attempt | 4; starting co-presence earns0 |
+| Leader movement trigger | One explicit Continue rounds per edge |
+| Patrol duration, deadline, cooldown | 0, none, 0; authority elapsed settlement still applies |
+| S3 success outcome | `completed` |
+| `watch.gate_trusts_player` | Reserved player Boolean, initially false, true only on S3 success |
+| S3 other reward | None; C1 owns swords teaching and the rusty gift |
+
+The closing Watch Post is cursor0 again, not a seventh route occurrence. Route
+cursor denotes the leader's current occurrence, including the repeated Green/North
+Gate positions. On Restart it is retained, not reconstructed
+from room alone. Completing four unique post-start entries takes at most six edges
+from any cursor; repeated connecting rooms count once. Open all North Gate–chapel
+and village/fen/cellar/corpse routes at every hour, without a trust barrier. Watch
+Post, Cell and Tower are safe, equipment-free optional destinations, with usable
+return exits. No hound producer or survive timer is introduced.
+
+Compiler/loader validate the bounded finite adjacent route, unique nonempty declared
+checkpoint subset and achievable checkpoint count, original NPC/quest references,
+shared location-writer exclusion, reserved trust ownership and complete room/link/
+readable definitions. Reject malformed cursors, duplicate/unknown checkpoint credit,
+wrong row identities and ordinary writes to reserved state. World route/count values
+are cartridge data, never presenter/engine chapter literals; existing safety budgets
+bound all validation/traversal. Target C2 release/API/hash/IDs remain null until the
+reviewed C1/B5 integration is re-pinned and independently derived.
+
+## B6 marsh route and tuning
+
+The planned [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
+adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours
+public path on existing firm footing; preserve the already always-passable mire
+and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway
+east ↔ Tide Flats west are public reciprocal dry walking routes. Tide Flats is
+its public edge, with no swimming, low-tide charm, fare or water hazard in B6.
+The future Hound Run connection waits for C3; no dangling exit is emitted.
+Return to Aldric through Mire Crossing → Reed Bank → Reed Path → Ferry Landing
+→ Well Lane → Village Green → North Gate → Chapel Steps → Chapel Nave.
+His B2 public Chapel Nave role stays reachable regardless of S2/Q3 outcomes.
+
+Marsh Light opts into B4 darkness and authors ordinary/dark descriptions. Its
+self-luminous Seek marker and discovered wisp have explicit visibility metadata;
+other details have no exemption. Old Causeway's carved fox is flavor in B6 and
+must not silently grant ward before the riddle; D2/D5 own later discoveries.
+Bind one actual authored wisp, resident at every hour, not a timed population.
+
+| Chapter setting | Selected value |
+|---|---:|
+| Immutable attribute key/start | `per` / 5 |
+| Seek attribute difficulty | 5 |
+| Seek duration, costs and cooldown | 0 / none / none |
+| S4 answer / ordered bank | `tide` / `TIDE` |
+| Wrong answers per sitting | 3 |
+| Seek discovery fact | player Boolean `fen_wisp_discovered`, false |
+| Answered fact | player Boolean `fen_wisp_answered`, false |
+| Ward topic key / knowledge fact | `ward` / player Boolean `topic_ward_known`, false |
+
+Add `attributes@1`, `check@1`, `topics@1` and the actual light dependency to the
+chapter lock. The topic definition maps key, localized label and exact knowledge
+fact; no separate membership row or nineteen-topic catalog. Source `topic.grant`
+references that definition and lowers once through fact ownership. Chapter values
+never become engine or presenter defaults. All current fresh characters pass;
+D11 must preserve an immediate passing discovery path before changing attributes.
+
+Compiler and loader independently reject unresolved/wrong-kind attribute/topic/
+fact/role refs, non-Boolean or non-player topic facts, duplicate knowledge mappings,
+invalid threshold integers, nonpositive or non-safe-integer wrong limits, malformed
+bank or answer and an unresolved answer choice. Continuation/load validation rejects
+missing opted attempt fields.
+Short references expand in every new field. Existing bounded answer lengths apply;
+new schemas need their actual negative fixtures and planted guard controls.

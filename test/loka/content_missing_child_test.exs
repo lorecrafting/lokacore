@@ -1,7 +1,7 @@
 defmodule Loka.ContentMissingChildTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
-  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v018_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/missing_child_v019_hash.json"))
 
   # Breaks: active chapter geometry, retired definitions, reward/message custody, return guards or title drift.
   test "the chapter in progress compiles to its independent answer without warnings" do
@@ -40,6 +40,23 @@ defmodule Loka.ContentMissingChildTest do
           put_in(npc, ["shop", "offers"], npc["shop"]["offers"] ++ [hd(npc["shop"]["offers"])]),
           put_in(npc, ["shop", "offers", Access.at(0), "item"], "rusted_key"),
           Map.delete(npc, "resource_starts")
+        ] do
+      File.write!(path, JSON.encode!(changed))
+      assert {:error, _} = Loka.Content.compile(dir)
+    end
+  end
+
+  # Breaks: malformed funded families or contribution tuning compile despite the finite-exchange contract.
+  test "exchange source rejects duplicate stock, insufficient quantity and an oversized increment",
+       %{tmp_dir: dir} do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    path = Path.join(dir, "quests/infirmary_herbs.json")
+    q = path |> File.read!() |> JSON.decode!()
+
+    for changed <- [
+          put_in(q, ["exchange", "outgoing", Access.at(1)], hd(q["exchange"]["outgoing"])),
+          put_in(q, ["exchange", "quantity"], 13),
+          put_in(q, ["exchange", "increment"], 4)
         ] do
       File.write!(path, JSON.encode!(changed))
       assert {:error, _} = Loka.Content.compile(dir)

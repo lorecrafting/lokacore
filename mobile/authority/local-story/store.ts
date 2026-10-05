@@ -144,7 +144,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
       if (!validOverrideRow(world.state.resources?.[target], spec, world.state.clock))
         return undefined;
     const meta = { ...m, parent, seed, pin } as Meta;
-    receiptRecovery(world, db, meta, h.revision);
+    receiptRecovery(fresh, world, db, meta, h.revision);
     return saved(world, h.revision, meta, db);
   } catch (e) {
     if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;
@@ -285,7 +285,10 @@ export function commit(
       db.runSync(HEAD, r.revision, next.state.clock, encode(next.state.rng as Json));
       for (const op of decision.delta.ops) {
         const [section, key] = row(target(op)) ?? [];
-        if (section) db.runSync(UPSERT, section, key!, encode(next.state[section]![key!] as Json));
+        if (op.op === 'quest.retire')
+          db.runSync('DELETE FROM state_row WHERE section=? AND key=?', section!, key!);
+        else if (section)
+          db.runSync(UPSERT, section, key!, encode(next.state[section]![key!] as Json));
       }
     }
     db.runSync(

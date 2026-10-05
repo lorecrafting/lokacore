@@ -785,8 +785,8 @@ the authority remains the sole transaction/adoption owner.
 
 ## S9 Infirmary Herbs (B5 selected contract)
 
-This planned consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
-It is not installed source or proof. Reuse containment, carrying, dialogue, quest,
+This consumer is adopted in the [PM decision](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md).
+It composes containment, carrying, dialogue, quest,
 bounded fact adjustment and receipts. [Cartridge stock](cartridge.md#b5-herb-and-bandage-stock)
 contains the exact quantities; no engine literal identifies Wick, fenwort or S9.
 
@@ -886,7 +886,8 @@ sources do not illuminate, even when burning. The same bounded query governs
 GameView, Look/Scan, detail links, target resolution and direct-command admission;
 it charges the existing query budget. Without illumination expose the authored dark
 room text and ordinary known traversable exits, inventory, posture and escape controls.
-Hide other room details, items and NPC identities and adjacent sight descriptions;
+Hide other room details, items and NPC identities and adjacent sight descriptions
+unless opted into the later [B6 narrow glow exception](#s4-all-hours-wisp-b6-selected-contract);
 raw IDs or guessed keywords cannot bypass this gate. Existing combat restrictions
 still win. A visible Exit into a dark room remains traversable; a hidden object is
 not an equipment gate on movement.
@@ -898,3 +899,162 @@ from the shrine remains equipment-free. Well Shaft has no new enemy, water hazar
 barrier, required clue or deadline. Exhausted, sold, stored or lost light therefore
 cannot strand chapter progress, egress or possession recovery. No free replacement,
 shrine teleport or forced-overload recovery operation is added.
+
+## B7 well and waterskin selected contract
+
+**Selected, pending implementation.** B7 supplies the first `liquid@1` consumer:
+Fill at Well Lane's authored well detail, Pour between two real obtainable
+waterskins, and Drink water. [Tuning](cartridge.md#b7-water-and-vessels) supplies
+units, capacity, density and drink amount. [Composition](protocol.md#b7-liquid-composition),
+[recovery](save.md#b7-liquid-recovery) and [Book](book-ui.md#b7-water-details)
+govern their shared boundary. No hunger/thirst clock, HP/MV benefit, spill, oil
+conversion or finite environmental reservoir is selected. B8 must amend this
+contract before adding its actual consumption benefit or ale consumer.
+
+Each opted vessel has one exact-instance row `{kind, quantity}`. Empty is exactly
+`{kind: null, quantity: 0}`; positive integer quantity names one declared liquid
+kind and never exceeds authored capacity. Liquid capability does not imply an
+item receptacle: waterskins cannot accept Put of keys or other item entities.
+The empty shell persists after drinking; no item is deleted, minted or replaced.
+
+All three verbs require a living actor and usable vessels whose custody reaches
+that actor's body, including reachable open nested bags and their own worn
+holders. Use the existing bounded custody/lid checks with one query budget;
+reach alone also admits room items and therefore does not establish ownership.
+Ground, NPC, corpse-held and closed/locked-bag vessels are unavailable until
+ordinary Take/open/recovery puts them into eligible custody. Ordinary transfer,
+Wear/Remove, Drop, death and shop Buy/Sell preserve the same vessel row and liquid.
+No liquid verb transfers ownership, moves the actor or advances logical time.
+
+Fill binds the exact well detail in the actor's current room and one compatible
+vessel. It adds exactly its free capacity of the authored source kind. A full
+vessel or nonempty different kind refuses unchanged. This source is explicitly
+inexhaustible: an admitted Fill introduces water, and is not a closed-system
+conservation claim. There is no other liquid issuance path in B7.
+
+Pour binds distinct eligible source and receiver. Transfer exactly the lesser of
+source quantity and receiver free capacity, only into an empty or same-kind
+receiver. Source empty, receiver full, self-pour or different kinds refuse before
+any write. Debit and credit commit atomically; exhausting the source resets its
+kind to null. No arbitrary amount input or discard verb is added. Drink requires
+at least the liquid's authored positive integer drink amount, consumes exactly
+that amount and narrates the committed kind/amount. A smaller remainder refuses
+unchanged; there is no partial last serving. Emptying resets kind to null. B7
+water drinking changes no HP, MV, needs, faction, money, RNG or clock.
+
+Effective item mass is shell mass plus quantity times the liquid's grams/unit,
+in the existing carrying calculation, not a second stored load. Compiler/loader
+validate safe integer products and bound each maximum effective item mass by the
+existing item-mass limit; runtime checked arithmetic faults atomically on
+malformed relevant data. Fill is positive acquisition and requires resulting
+load at or below the authored ceiling; it never partially fills to evade that
+ceiling. Pour within actor custody is neutral even when overloaded, and Drink
+reduces load. Take, Buy and incoming transfer must include current liquid mass;
+Drop and recovery move the same contents without refilling them.
+## S3 finite watch patrol (C2 selected contract)
+
+**Selected, pending implementation.** [PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)
+selects an all-hours, player-started patrol led by the original noncombatant Tobin.
+The [cartridge route](cartridge.md#c2-watch-route-and-trust) supplies its finite
+walk and checkpoints. This is player-follow-leader behavior; it does not change
+[escort@1](#escort1)'s NPC-follow-player relation or occupy its actor-keyed row.
+
+The patrol owner retains one typed row per actor's S3 quest instance: original
+actor/body/leader, accepted activation choice, current attempt identity, route
+cursor, bounded unique checkpoint credit and status together/awaiting/paused/
+failed/completed. Start and Restart use their accepted command identity as the
+attempt identity; a restart never allocates another quest instance. Every mutation
+compares the complete prior row. The leader identity and activation binding never
+change; cursor/attempt/status/credit changes obey the transitions below. Authoring
+cannot assign patrol state or forge checkpoint credit through ordinary facts.
+
+Start requires standing living co-located participants and activates S3 once, status
+together, credit empty, at the authored initial route cursor. Continue rounds, from together, moves
+Tobin alone along exactly the next adjacent legal edge and changes to awaiting.
+It rechecks the original participants, current cursor, standing living actor and
+ordinary passage admission. It invokes shared movement queries, never another
+mechanic's player command. Tobin has no scheduled movement. Continue emits only
+Tobin's actual movement occurrence; it never transfers the player, skips time,
+spends RNG or fabricates a player entry.
+
+While awaiting, the actor's accepted Move/Flee over that exact pending edge joins
+Tobin, changes to together and credits the entered checkpoint at most once. Credit
+requires the same attempt, living original participants, expected source/destination
+and their co-location at the hydrated proposal prefix. Leader departure, starting
+co-presence, pre-activation visits, repeated checkpoints and foreign/replayed events
+earn nothing. Ordinary stance, passage, movement cost, combat and Flee remain
+owned by their existing mechanics. A refusal/fault changes neither movement nor credit.
+
+Any other accepted player departure while together/awaiting pauses the attempt,
+retaining its credit and Tobin's actual location/cursor. Walking while paused grants
+no credit, including arrival beside Tobin. Explicit standing, living co-located Rejoin changes paused
+to together without credit; the next legal leg proceeds from that actual cursor.
+An uncredited checkpoint is earned only by a later qualifying entry, at most one
+more circuit away. No player inactivity or reading duration fails an attempt.
+
+A real fatal event for the bound player body in together/awaiting/paused changes
+the attempt to failed and clears all credit in the same death writer group as corpse
+custody and shrine return. Tobin stays where he was. S3 remains active with a failed
+attempt, rather than terminally failing and reopening generic quests. Immediate
+standing, living co-located Restart replaces the attempt identity, clears credit and sets together
+at Tobin's current cursor; the cyclic walk needs at most one circuit for four new
+checkpoints. Old-attempt commands/events cannot resume or credit it. Failed-state
+walking/revival grants no credit. Existing Wren death separation composes independently.
+
+The fourth distinct qualifying checkpoint atomically marks completed, resolves S3
+as `completed` and assigns its reserved player trust fact true, with committed
+narration. Completed patrols never move Tobin again or offer restart/rewards.
+Trust is recognition only; it opens no required gate and grants no skill, sword,
+pennies or item. C1 remains the sole swords/gift lesson consumer. Both resolved
+trust and nonterminal attempt failure have retained causal evidence, not room-count
+inference. Scheduled hounds, arrest, NPC mortality/replacement and daily patrol AI
+are outside this selected consumer.
+
+## S4 all-hours wisp (B6 selected contract)
+
+Planned under the [B6 PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md),
+not installed behavior or proof. [Cartridge](cartridge.md#b6-marsh-route-and-tuning)
+owns the route, attribute, answer, limit and topic. S4 is optional and one-shot;
+no night, tide, purchase, fuel, herb, bell, faction or Q2-completion gate applies.
+
+At Marsh Light an authored self-luminous marker exposes **Seek Wisp**, even when
+ordinary room details are dark. This narrow perception metadata exposes only the
+marker and, after discovery, the original live co-located wisp; it illuminates
+neither other objects nor adjacent rooms. It uses B4's shared visibility/admission
+query, not a Book exception or a global bypass. Seek, Talk acceptance and answers
+require `light_off`: the actor has no effectively lit directly held or light-slot
+source. Nested, dropped, stored and corpse-held lights follow B4 unchanged.
+Known exits and the actor's actual corpse remain accessible under B4 recovery.
+
+Seek uses a deterministic `check@1` attribute-threshold arm. Read the commanded
+actor's declared immutable attribute through the existing attributes query, pass
+at equality, draw no RNG, and emit the owned `check_passed/check_failed` with the
+recipe reference. Its success sequence alone assigns the player discovery Boolean;
+failure leaves it false and offers immediate Seek again. Neither result grants S4
+or ward. This extends checks, not attributes, ancestry, skills or progression.
+After discovery a bound live/present wisp offers explicit S4 acceptance, followed
+by its riddle while that actor's occurrence remains active. These policies are
+rechecked at pending-option projection and Choose. Close always remains available.
+
+The riddle retains the installed ASCII case/bank/multiplicity rules. Only this
+opted dialogue declares a wrong limit. Its typed continuation count starts at zero;
+each bank-valid wrong answer atomically commits one count increment, bound wrong
+line and receipt. Below the limit the same continuation remains. At the limit,
+close that sitting in the same decision and offer **Ask Wisp again** through the
+ordinary bound Talk path, opening a fresh continuation with count zero. S4 stays
+active; no terminal failure, cooldown, spawn, departure, job or time advance occurs.
+Close/reopen Talk also starts a new sitting; the limit is a conversational pause,
+not an anti-cheating quota. No-limit dialogues, including Q2, keep unlimited retry.
+Malformed/impossible-bank input and exact invocation replay consume no attempt.
+
+Correct input resolves the original actor-owned S4, assigns `fen_wisp_answered`,
+grants the declared ward topic and resolves the choice in one atomic writer group.
+A previously known ward never prevents S4 completion or duplicates knowledge.
+Topics use a declared player-scoped Boolean mapping: typed `topic.grant` lowers to
+existing `fact.assign` only when false; the fact writer owns the mutation. Known
+labels derive in key order from those facts. The immediate ward consumer is the
+public original Aldric's **Ask about ward** dialogue; it remains independently
+selectable even when debt/bell dialogues are eligible. Its informational reply
+requires known ward and a live/present Aldric; it changes no spells, resources,
+faction, quest or chapter ending. This is one real topic consumer, not a full
+conversation graph or a promise of all historical topics.

@@ -39,6 +39,7 @@ function acyclic(final: Map<string, Json>): boolean {
 function link(op: Any): [Json | undefined, Json] {
   const fixed: Record<string, [Json | undefined, Json]> = {
     'quest.activate': [undefined, 'active'],
+    'quest.retire': ['resolved', null],
     'choice.open': [undefined, 'pending'],
     'choice.resolve': ['pending', 'resolved'],
     'choice.close': ['pending', 'closed'],
@@ -90,6 +91,10 @@ function transferValid(op: Any, containers: Map<string, string>, capacities: Any
 }
 
 function questValid(op: Any, quests: Map<string, Any>): boolean {
+  if (op.op === 'quest.retire') {
+    const q = quests.get(op.instance_id);
+    return q?.state === 'resolved' && same(q.quest, op.quest) && same(q.scope, op.scope);
+  }
   if (op.op === 'quest.activate')
     return ![...quests.values()].some(
       (q) =>
@@ -123,6 +128,7 @@ function extra(
   switch (op.op) {
     case 'entity.transfer':
       return transferValid(op, containers, s.capacities);
+    case 'quest.retire':
     case 'quest.activate':
     case 'quest.transition':
       return questValid(op, quests);
@@ -212,6 +218,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
       if (op.op === 'entity.transfer') containers.set(op.entity_id, op.destination_id);
       if (op.op === 'quest.activate')
         quests.set(op.instance_id, { quest: op.quest, scope: op.scope, state: 'active' });
+      if (op.op === 'quest.retire') quests.delete(op.instance_id);
       if (op.op === 'quest.transition')
         quests.set(op.instance_id, { ...quests.get(op.instance_id), state: op.to });
     }

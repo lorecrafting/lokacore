@@ -1,3 +1,4 @@
+import { decideHarvest } from './harvest.ts';
 import { living } from '../death/shared.ts';
 // containment@1 (capability_registry.json): take, drop and give (21 §8 Containment; 03 §23;
 // 04 §5.3 conserved transfer). An entity's one container is State.containers; an actor's
@@ -24,9 +25,11 @@ import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
 import { carrying, giveRefused, putRefused } from './shared.ts';
 
-// size: allow 50, one conserved-transfer decision for Take/Drop/Give/Put with shared pair admission
+// size: allow 52, finite Harvest joins the existing conserved-transfer decision
 export const decide: Rule<'containment'> = (world, command, mint, steps) => {
   const p = command.payload;
+  if (p.type === 'harvest')
+    return decideHarvest(world, { ...command, payload: p }, mint, steps ?? { n: 0 });
   const body = bodyOf(world, p.actor_id);
   if (!body || !has(world.entities, p.item_id)) return rejected('not_found');
   if (world.state.created?.[p.item_id] || world.entities[p.item_id].kind !== 'item')

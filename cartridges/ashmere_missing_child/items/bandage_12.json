@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "bandage",
+    "bandage_12"
+  ],
+  "short": "item.bandage.short",
+  "room_line": "item.bandage.room",
+  "description": "item.bandage.description",
+  "mass_grams": 10,
+  "location": {
+    "in": "npc",
+    "npc": "wick"
+  }
+}

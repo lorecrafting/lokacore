@@ -521,6 +521,10 @@ pennies. Lost acknowledgement, both uncertain COMMIT outcomes and reopen must
 produce all prior or all next truth. No migration, save reset, fresh replacement
 item or receipt-derived second ledger is introduced.
 
+For API1.17 explicit repeats, a committed `quest.retire` removes the prior
+resolved quest row in the same changed-row transaction as the new activation.
+Only that typed operation deletes a row; receipts retain prior occurrence proof.
+
 ## B4 fuel and dark recovery
 
 Planned [B4 fuel](protocol.md#b4-fuel-composition) rows initialize once from the
@@ -557,3 +561,106 @@ same roots/descendants through existing carrying and lid checks. Repeated death
 retains previous corpses and exact fuel custody. This is fixture-driven combat,
 not a new production Well Shaft danger or public death command. Keep the existing
 production cellar recovery proof green; darkness adds no dependency on lost gear.
+
+## B7 liquid recovery
+
+**Selected, pending implementation.** [B7](mechanics.md#b7-well-and-waterskin-selected-contract)
+uses the existing state_row transaction for exact vessel liquid rows, head and
+receipt. No liquid table, second ledger, save-format migration or automatic
+refill/reset is added. Initialize empty rows only when creating the pinned fresh
+world. Every opted authored instance requires its row even while ground, nested,
+Peg-held, sold back or corpse-held. Load rejects missing/extra/wrong-item rows,
+unknown kinds, noninteger/negative/over-capacity quantities and null/positive
+mismatch as typed `save_corrupt`, keeping the file intact.
+
+Bounded revision-ordered validation starts from authored initial rows and checks
+each accepted liquid-changing receipt's exact command ID, actor, source/vessel
+identities, historical custody and full prior/replacement quantities. Fill must
+prove the declared current-room source, compatible free capacity and resulting
+carrying admission at that commit; Pour must prove eligible custody and both
+equal debit/credit; Drink must prove the exact kind and serving debit. Reuse pure
+transition validation, not a second gameplay writer. Ordinary transfers preserve
+liquid and may lawfully change historical holders. The final validated quantities
+must agree with current saved rows; an unrelated latest receipt or merely
+bounded current quantity is not provenance. Preserve B3/S2 penny reconciliation
+and any merged B4/C1/B5 consumers without imposing today's custody on their old
+receipts. Do not invent receipt fields; extend the actual bounded verifier as
+needed to reconstruct relevant historical rows.
+
+Real failed COMMIT retains all prior liquid/custody/head/receipt state. Both
+uncertain-COMMIT branches fence input and elapsed work until reconciliation proves
+all prior or all next truth. No committed Fill/Pour/Drink is narrated before
+adoption. Lost acknowledgement and exact receipt replay return the original
+result without another Fill, debit, item allocation or benefit. Real SQLite
+reopen covers fresh, filled, partially poured, drunk-empty, nested, sold/bought
+back and death/recovered states; explicit release mismatch refusal and Start
+over authorization remain unchanged. Unknown successor pins stay unknown until
+the final integration release is compiled and independently re-pinned.
+## C2 patrol attempt recovery
+
+**Selected, pending implementation.** The [typed patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses existing changed-row state storage and receipts. Load/reconcile validate its
+original actor/body/Tobin, exact S3 instance/activation choice, attempt start or
+restart command identity, bounded route cursor/status/credit and revision-ordered
+transition evidence. Each credited checkpoint must trace to that attempt's accepted
+player movement, expected edge and co-present original leader; the leader's own
+entry alone is insufficient. Rejoin never retroactively supplies missing entry proof.
+
+Together requires co-location; awaiting permits leader at the cursor destination
+and player at the preceding source. Paused/failed permit lawful later player travel,
+including co-location before explicit recovery. Leader stays at the saved route
+cursor in all states. Completed requires all four proven distinct entries, S3's
+own resolved `completed` receipt and matching reserved trust. Historical final
+co-location must not reject later player travel, gear loss, lesson payments or death.
+No patrol row exists before activation; failed attempts keep S3 active and credit
+empty, with a same-body fatal event/return receipt. Restart has its own new attempt
+identity and cannot reuse historical credit. Completed trust and retained rows must
+agree in both directions; current co-location/trust is never terminal proof.
+
+Cold reopen each boundary: start, leader ahead/player behind, joined checkpoint,
+pause, arrival before Rejoin, failed death, player return, Restart and completion.
+Cross-check full definition refs/scopes, choice/command IDs, event cause/correlation,
+transfer source/destination and complete prior/result rows. Malformed/missing rows,
+unknown or duplicate credit, impossible cursor/location, swapped leader/actor/quest,
+forged terminal or old-attempt credit return typed `save_corrupt` without repair or
+file rewriting. Existing storage-error and pin-mismatch distinctions remain.
+
+Failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
+prove all-old/all-new movement/attempt/quest/trust/head/receipt. Exact receipt retry
+moves, credits, restarts and rewards nothing twice. Reconcile lawful intermediate
+states with the later consumer, including concurrent Wren following/separation;
+no new snapshot, periodic checkpoint, migration or receipt ledger is introduced.
+
+## B6 discovery, sitting and ward recovery
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) retains discovery,
+S4 state and topic knowledge in ordinary typed player facts/quest rows; only an
+opted riddle adds its typed continuation count. Persist changed rows and receipt
+atomically. Cold reopen at zero/one/two mistakes restores the exact continuation,
+opening revision, actor, original wisp, dialogue/choice/quest references and count;
+exact-selector Talk receipts must justify the selected dialogue source;
+a third mistake restores a closed sitting and immediate Ask again, never an active
+count-at-limit pending row. Unsent tiles are not saved. After correct answer,
+restore resolved S4, both narrative truth and known ward, and the original bound
+success line once; repeated receipt replay adds no grants or attempts.
+
+Validate each attempt at its historical revision against its source, answer-bank
+validity, exact prior count, actor, participants, causal command/receipt and closure
+or resolution, then reconcile with current rows. Close/death/current light changes
+cannot retroactively invalidate a lawful historical answer. Discovery requires
+successful owned Seek evidence; wrong/malformed answers justify no answered fact
+or ward grant. Reconcile topic truth with actual declared grants, including an
+already-known ward, rather than assume S4 is its only possible future source.
+Missing/null/corrupt bounded counts or bindings, forged wrong receipts, unjustified
+facts and pending-at-limit states refuse `save_corrupt` without repair/deletion.
+No defaulting a missing counter to zero on load.
+
+Light changes, location changes and death may make the pending answer unavailable;
+Close stays usable. Death preserves discovery, knowledge and active/resolved S4;
+after ordinary same-body recovery, Close if needed and Talk to the same reachable
+wisp immediately. This adds no item requirement or new danger. From the shrine,
+all new walking routes and the owned-corpse exception remain gear-free. Failed
+COMMIT, both uncertain-COMMIT outcomes and lost acknowledgement retain the existing
+fence/reconciliation rules; prove them with real SQLite at attempt, final wrong
+and correct transitions. Current-release mismatch remains explicit; no adapters,
+silent counter repair or save deletion is authorized.

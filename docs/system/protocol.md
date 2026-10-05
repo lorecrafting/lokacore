@@ -576,6 +576,13 @@ GameView projects remaining harvest availability, exchange readiness, journal
 state and authored refusal reasons from confirmed truth, without a stock ledger,
 created-item origin, expiry job, daily clock cut or unbounded history collection.
 
+API1.17 lowers explicit repeat to terminal-only `quest.retire` followed by a fresh
+`quest.activate` in one writer group. The retire operation names the exact prior
+instance, quest and scope; its null change removes only that quest row. An
+exchange continuation carries `quest_instance_id` and deterministic outgoing/
+incoming item role bindings. Quest-authored `exchange` tuning supplies the shared
+readiness and lowering; detail-authored `harvest` supplies conserved stock IDs.
+
 ## B4 fuel composition
 
 Planned [B4](mechanics.md#b4-light-and-darkness-selected-contract) adds `light@1`
@@ -603,3 +610,110 @@ fixtures and differential coverage; the light story rule remains TypeScript-only
 The next API/release pins and exact generated shape are assigned from the actual
 implementation base, not assumed by this planning contract. Existing error codes,
 writer groups, checked arithmetic and query budgets apply.
+
+## B7 liquid composition
+
+**Selected, pending implementation.** `liquid@1` owns only commands
+`fill {actor_id, source_id, vessel_id}`, `pour {actor_id, source_id, receiver_id}`
+and `drink {actor_id, vessel_id}`. Fill's source is a detail; Pour's source is an
+item. ActionInvocation targets retain that exact ordered pair (or Drink's one
+item), with no player-supplied amount, kind or resource benefit. Projection and
+admission share current custody, reach, compatibility, capacity and load checks.
+Use structured filled/poured/drank outcomes containing bound participant IDs,
+kind and actual quantity; no consumer reads success from narration.
+
+The missing primitive is a typed exact-instance liquid row and
+`liquid.set {item_id, from, to}` with whole-row equality precondition and one
+writer target per item. Quantity is a bounded nonnegative integer; null kind iff
+zero; positive kinds and capacity are validated against immutable per-vessel
+specifications and declared liquid references. No facts/resources encode an
+alternate quantity. Pour includes the two writes in one existing writer group;
+any conflict, precondition/invariant or budget failure rolls back both. Emptying
+a vessel preserves its item identity. Optional state sections remain absent in
+cartridges without the capability; fresh worlds initialize only actual opted
+vessels once. No generic create/destroy/mix liquid operation is introduced.
+
+Reuse the existing delta dispatch, target/precondition machinery, immutable
+observation validation and writer-group handling. B4's `fuel.set` has a timed
+`at/lit` history invariant; liquid kind/volume has no burn clock. Do not remodel
+one as the other or add a generic configurable row-operation registry merely
+to share these two shapes. Existing resource rows recover/adjust numeric pools,
+and containment rows move whole item identities; neither represents liquid
+kind plus capacity. Only the new typed variant is justified.
+
+The portable operation/precondition/invariant semantics require both checked
+foundation twins, independently hand-checked new fixtures and randomized
+comparison after fixture validation. Leave frozen fixtures unchanged. The
+player rule and source/custody/issuance semantics stay TypeScript-only until an
+actual server consumes them. Compose remains independent of RPG helpers.
+The generic row invariant checks shape/capacity, not global water conservation:
+Fill introduces water and Drink consumes it. Pour conservation and authorized
+issuance/consumption are mechanic and receipt-bound obligations.
+
+Extend GameView only for confirmed vessel kind/quantity/capacity, authored unit
+labels and exact legal Fill/Pour/Drink actions; existing details and target
+selection remain the UI boundary. No renderer arithmetic creates permission or
+adjusts liquid/mass. Shared aggregate query, delta, event and writer budgets stay
+in force; pair enumeration is bounded before work, not an unmetered all-item scan.
+## C2 patrol composition and admission
+
+**Selected, pending implementation.** [C2 patrol](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
+uses a typed patrol row and full-prior-row transition, keyed to the actor's exact
+quest instance, independently of the unchanged escort row. Register its minimal
+state/mutation target/transition and invariant under the patrol owner. Preserve
+foundation precondition/conflict semantics; any new delta/state composition branch
+must have Elixir and TypeScript literal conformance and differential proof. Patrol
+RPG admission and credit remain TypeScript story semantics, with no new server adapter.
+
+Start, Continue rounds, Rejoin and Restart are bound dialogue consequences using
+ordinary Talk/Choose and choice rows. Projection and direct Choose share current
+identity, presence, life, posture, quest, attempt/cursor/status admission. Structured
+input binds the quest instance, attempt and cursor/status drawn, as well as ordinary
+continuation/choice identity; a fresh invocation id cannot convert an old leg into
+the next leg. Normal combat/modal restrictions and Close/Leave remain in force.
+
+Movement owns legal edge transfer and typed entered-room occurrence; patrol owns
+leader progression/credit; quest owns S3 activation/resolution; death owns fatal
+invalidation before revival; fact owns lowering of reserved trust in the same group.
+No raw fact assignment or independently delivered entered-room event can mint credit.
+Use actual accepted causal command/event identity, scope, ordering and proposal-prefix
+presence. All reads share the command budget; bound the finite route before work.
+Continue's leader transfer, player join/progress, pause, fatal reset and final
+quest/trust consequence each commit or roll back as one root proposal. Concurrent
+Wren follow transfers Wren once and preserves both relations' original identities;
+neither relation adds a second player transfer or steals the other's mutation target.
+No due-job chain, new player verb, global objective interpreter or per-frame writer
+is needed. Declare new typed state/transition bounds and planted invalid fixtures;
+update generated contracts and current release pins in the implementation PR.
+
+## B6 bounded sitting and topic composition
+
+Planned [B6](mechanics.md#s4-all-hours-wisp-b6-selected-contract) extends only
+attribute-threshold checks, opted bounded riddle continuations and declared topic
+projection/grant. Use the existing Perform/Talk/Choose/Close invocations and actor
+ActionSet. Shared visibility/light/discovery/quest/participant policies govern
+both offered controls and raw-command admission. For the real Aldric consumer,
+Talk gains an optional exact dialogue DefinitionRef;
+when supplied it must belong to the target speaker and resolve through the actor's
+ActionSet with its own eligibility rechecked. Omission keeps first-eligible-key
+behavior. This is a bounded selector, not a conversation graph. GameView reveals
+bank and committed attempts/limit for an opted sitting, never the canonical answer.
+Known topics project as key-sorted `{topic: DefinitionRef, label: TextKey}` entries;
+the ward consumer reads the same declared Boolean membership as its admission.
+
+Dialogue owns a typed continuation attempt supplement and `choice.attempt` operation:
+bind continuation ID, actor, opening revision and exact prior count; increment by
+one only for a pending bounded sitting, within its pinned authored limit. Conflicts,
+wrong ownership and out-of-range rows fail closed. At the limit, increment and
+ordinary choice close share one writer group; no intervening count-at-limit pending
+world is adopted. This supplement is choice state, not a free-standing player fact,
+quest occurrence, general puzzle state machine or a second receipt ledger.
+Existing no-limit continuation semantics remain unchanged.
+
+The portable delta/precondition/invariant additions receive independently authored
+Elixir and TypeScript conformance answers and randomized differential proof, including
+increment-plus-close and writer conflicts. Check/perception/topic gameplay stays
+TypeScript-first. `topic.grant` is typed cartridge consequence lowering to the
+existing Boolean fact assignment, with no new portable topic operation or writer.
+Definition/participant/quest binding, causal ordering, query budgets and authority
+commit/adopt/response ordering retain their existing contracts.

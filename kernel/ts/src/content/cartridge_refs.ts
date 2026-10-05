@@ -1,5 +1,6 @@
 // size: allow 345, NPC explicit resource starts join the existing reference stage
 import { skills } from './cartridge_skills.ts';
+import { exchanges } from './cartridge_exchange.ts';
 import { commerce } from './cartridge_commerce.ts';
 import { noticeBoards } from './cartridge_boards.ts';
 import { combat } from './cartridge_combat.ts';
@@ -171,6 +172,7 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c));
   if (c.format !== 'loka-cartridge-v2') return out;
+  out.push(...exchanges(c, check));
   named(c.entry, 'room', '.cartridge.entry');
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;

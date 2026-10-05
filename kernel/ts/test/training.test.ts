@@ -135,7 +135,7 @@ test('only qualified learned wield custody selects the sword at the due opportun
   for (const [name, w, ratHp] of [
     ['unlearned', wield(trainingWorld()), 5],
     ['unqualified', wield(learned(trainingWorld(9), 'swords')), 5],
-    ['held', learned(trainingWorld(), 'swords'), 5],
+    ['held', carried(learned(trainingWorld(), 'swords')), 5],
     ['qualified wield', wield(learned(trainingWorld(), 'swords')), 3],
   ] as const) {
     const first = attack(w);
@@ -210,3 +210,8 @@ test('sleeping cannot defend and lethal armed hits close before retaliation', ()
       ['attack_result', 'entity_died', 'fact_changed'],
     );
 });
+
+function carried(w: World): World {
+  const item = w.entityIds[ref(w, 'item', 'sword')];
+  return { ...w, state: { ...w.state, containers: { ...w.state.containers, [item]: w.body } } };
+}

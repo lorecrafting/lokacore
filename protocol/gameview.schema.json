@@ -1681,6 +1681,11 @@
           "items": {
             "$ref": "#/$defs/AdvertisedAction"
           }
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 64
         }
       },
       "required": [

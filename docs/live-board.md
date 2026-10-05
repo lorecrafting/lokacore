@@ -46,6 +46,13 @@ start/end times, unreported check times and approval are unknown. Local completi
 and remote publication remain distinct. The cached `upstream/main` is the publication
 baseline when available; otherwise `origin/main` is used and a filesystem origin is
 explicitly labelled as a local mirror with publication unknown.
+Slice IDs group work by chapter area; they are not execution order. Dependencies
+decide when source work can start. `candidate` means planned but not locally
+complete, `no report` means no activity has been logged for that slice, and
+`unknown` means an exact pin, check duration or publication fact has not been
+reported. None of those labels means a slice was skipped. The pipeline reports
+show the latest phase for each unit, including plans approved while source work
+waits on a dependency.
 The board never fetches or changes refs. Update remote refs through the normal PM
 workflow before relying on their freshness.
 

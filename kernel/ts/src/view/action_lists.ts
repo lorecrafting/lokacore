@@ -1,3 +1,4 @@
+import { harvest } from '../mechanics/containment/harvest.ts';
 import { escapeDirections } from '../mechanics/combat/flee.ts';
 // The GameView lists of an actor's ActionSet (commands/actions.ts resolved; 04 §14, §19; 00 §4.10).
 import { LIMITS } from '../contracts.gen.ts';
@@ -76,8 +77,7 @@ export function lists(world: World, actor: CharacterId) {
   const readableRecipe = (a: Offered) =>
     !!a.recipe && !!world.details[detailOf(world, a.recipe.target)].readable;
   return {
-    notice: (id: string) =>
-      listed((a) => readableRecipe(a) && detailOf(world, a.recipe!.target) === id),
+    notice: (id: string) => listed((a) => noticeOffer(world, a, id), id, 'inspectable_details'),
     place: [
       ...listed(
         (a) =>
@@ -118,6 +118,7 @@ function entityOffered(
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
+// size: allow 50, exact detail harvest joins shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -128,15 +129,21 @@ function advertise(
   scope?: string,
 ): AdvertisedAction {
   const aimed = scope !== undefined && door(a);
+  const patch = id && a.command === 'harvest' && world.details[id]?.harvest;
   const shown = {
     action_key: a.key,
     label: a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
+    ...(patch && { label: patch.label, target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
   // Step's order: the action's policy, then the talk rule's not_found and talkRefused.
   const target = (a.recipe ? detailOf(world, a.recipe.target) : id) as EntityId | undefined;
+  const gathered =
+    a.command === 'harvest' && target !== undefined
+      ? harvest(world, actor, target, steps)
+      : undefined;
   const talk =
     a.command === 'talk' &&
     (speaks(world, target) ? talkRefused(world, actor, target) && 'invalid_state' : 'not_found');
@@ -147,6 +154,7 @@ function advertise(
         ? 'invalid_state'
         : undefined) ||
       (typeof admitted === 'string' ? admitted : undefined) ||
+      (typeof gathered === 'string' ? gathered : undefined) ||
       (a.command === 'take' && target !== undefined ? take(target) : undefined) ||
       (a.command === 'give' && target !== undefined
         ? giveRefused(world, target, steps)
@@ -259,4 +267,15 @@ function readActions(
     }
   }
   return result;
+}
+
+function noticeOffer(world: World, a: Offered, id: string) {
+  return (
+    (a.command === 'harvest' && !!world.details[id]?.harvest) ||
+    !!(
+      a.recipe &&
+      world.details[detailOf(world, a.recipe.target)]?.readable &&
+      detailOf(world, a.recipe.target) === id
+    )
+  );
 }

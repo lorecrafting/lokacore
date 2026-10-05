@@ -201,3 +201,30 @@ export function putRefused(
     if (count >= capacity) return 'invalid_state' as const;
   }
 }
+
+/** Carrying after one bounded conserved exchange; outgoing nested mass leaves with its item. */
+export function carryingExchange(
+  world: World,
+  body: EntityId,
+  outgoing: readonly EntityId[],
+  incoming: readonly EntityId[],
+  steps: Steps,
+) {
+  const setting = world.cartridge.world?.carry;
+  if (!setting) return;
+  const context: Context = { world, body, steps, totals: new Map(), owned: new Map() };
+  let net = 0;
+  for (const [items, sign] of [
+    [outgoing, -1],
+    [incoming, 1],
+  ] as const)
+    for (const item of items) {
+      const mass = total(context, item);
+      if (typeof mass === 'string') return mass;
+      net = add(net, sign * mass);
+    }
+  if (net <= 0) return;
+  const load = total(context, body);
+  if (typeof load === 'string') return load;
+  return add(load, net) > setting.max_grams ? ('too_heavy' as const) : undefined;
+}

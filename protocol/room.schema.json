@@ -130,6 +130,35 @@
             "notices"
           ],
           "additionalProperties": false
+        },
+        "harvest": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "label": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "narration": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "title": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "items",
+            "label",
+            "narration",
+            "title"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

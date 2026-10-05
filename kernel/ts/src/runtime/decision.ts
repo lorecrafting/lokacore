@@ -76,6 +76,7 @@ export type ChoiceRow = {
   readonly status: 'pending' | 'resolved' | 'closed';
   readonly opened_revision: number;
   readonly choice_id?: Key;
+  readonly quest_instance_id?: QuestInstanceId;
 };
 
 /** A scheduled job as composition stores it (foundation/compose.ts job.schedule; 03 §13; 04 §5.4). */

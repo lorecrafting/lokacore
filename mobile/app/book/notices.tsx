@@ -62,6 +62,14 @@ function NoticeLink(p: Props & { notice: Notice }) {
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
   const offer = noticeOffer(screen.view, notice.id);
+  if (notice.remaining !== undefined)
+    return (
+      <Tap label={title} onPress={() => p.open({ kind: 'notice', id: notice.id })}>
+        <Text style={{ ...prose, color: paper.accent }}>
+          {title} ({notice.remaining})
+        </Text>
+      </Tap>
+    );
   return b ? (
     <Tap
       label={title}
@@ -111,6 +119,7 @@ export function NoticePage(p: Props & { page: Extract<Page, { id: string }>; wor
   return (
     <Sheet title={p.screen.text(detail.title)}>
       <Text style={prose}>{plain(p.screen.text(detail.description))}</Text>
+      {'remaining' in detail && <Text style={note}>Remaining: {detail.remaining}</Text>}
       {p.screen.detail(detail.id).map((line, i) => (
         <Text key={i} style={prose}>
           {typeof line === 'string' ? line : line.text}
