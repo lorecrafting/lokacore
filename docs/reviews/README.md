@@ -303,3 +303,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D2 public Priory and held-book plan](2026-10-05-d2-priory-books-plan-review.md): exact planning head `7f750656`, independent APPROVE; reciprocal ten-room route, held/open-container Read, shared Ward/Bell authority, historical save evidence and nested Book recovery checked. No open findings; docs-only, source dependency re-pins and proof remain required.
 
 - [Chapter 1 documentation audit schedule](2026-10-05-chapter-one-docs-audit-schedule-review.md): exact local head `2536445c`, independent docs-only APPROVE; one-time post-A–D/pre-E3 audit, reviewed findings, link-safe archiving and preserved history checked; no findings.
+
+- [B5 Infirmary Herbs primary implementation](2026-10-05-b5-infirmary-herbs-primary-review.md): exact source head `802edd92`, initially CHANGES REQUIRED; scoped fix `cbb11fce` at integrated `2df52d32`, independent APPROVE, B5-P1/B5-P2 closed. Scoped 36/36 pass; trusted elapsed and pinned-role red controls fail, restored regressions 3/3 pass.
