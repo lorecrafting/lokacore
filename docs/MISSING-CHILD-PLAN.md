@@ -1,7 +1,7 @@
 # Missing Child Chapter 1 completion plan
 
 This is the current delivery plan, not a claim that the chapter is complete. The
-[roadmap](ROADMAP.md) records merged status; [the mechanics queue](NEXT-MECHANICS.md)
+[roadmap](ROADMAP.md) records merged status; the [33 provisional implementation and proof briefs](briefs/chapter-one/README.md) give candidate slice detail; [the mechanics queue](NEXT-MECHANICS.md)
 records the reusable capabilities. Each row below is one proposed player-visible PR
 after **Q2-C-rescue (Wren's escorted return to Elspeth)**. A row starts only after its
 dependencies are merged and its brief is re-pinned to the actual source head. The
