@@ -162,7 +162,7 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local `main` has completed **5 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3).
+Local `main` has completed **6 of the 33** proposed Chapter 1 completion slices (A1, B1, A2, B2, A3, B3).
 GitHub `main` has three (A1, B1, A2).
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
@@ -176,9 +176,14 @@ local `main` at chapter 0.0.16/API1.14. A3 Green finale is implemented at chapte
 findings were fixed ([primary review](reviews/2026-10-05-a3-green-primary-review.md),
 [save review](reviews/2026-10-05-a3-save-second-review.md)). Both await accumulated-head
 publication checks and a GitHub PR.
-B3 Peg's shop has an [adopted PM contract](decisions/pm-decision-b3-pegs-shop-2026-10-05.md)
-and a [re-pinned brief](briefs/chapter-one/b3-pegs-shop-brief-2026-10-05.md)
-on local B2 base `ec3ab73d`; source implementation and review remain ahead.
+B3 Peg's finite shop is implemented at chapter 0.0.18/API1.16 and independently
+approved after its ID-pin and schema-example findings were fixed
+([primary review](reviews/2026-10-05-b3-pegs-shop-primary-review.md),
+[save review](reviews/2026-10-05-b3-pegs-shop-save-second-review.md)). It awaits
+accumulated-head publication checks and a GitHub PR. B4 refillable light and
+safe dark-well recovery have an [adopted plan](decisions/pm-decision-b4-light-2026-10-05.md)
+and [independent plan approval](reviews/2026-10-05-b4-light-plan-review.md);
+implementation remains ahead.
 
 B5 Infirmary Herbs has an [adopted finite-stock contract](decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)
 and [re-pinned brief](briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
