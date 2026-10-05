@@ -34,7 +34,7 @@ The public plan owns the 33-row order and dependencies. These briefs add candida
 ## D. Connected world
 
 - **D1:** [D1 — Paid ferry, Mother Sedge and a usable isle return](d1-ferry-isle-brief-2026-10-05.md)
-- **D2:** [D2 — Public Priory rooms and books that grant their actual topics](d2-priory-books-brief-2026-10-05.md)
+- **D2 (adopted plan):** [D2 — Public Priory rooms and books that grant their actual topics](d2-priory-books-brief-2026-10-05.md)
 - **D3:** [D3 — Western Ashmere, the mill and Hob](d3-western-ashmere-brief-2026-10-05.md)
 - **D4:** [D4 — Homes, the smithy, orchard food and truthful child-state prose](d4-homes-orchard-brief-2026-10-05.md)
 - **D5:** [D5 — Oak canopy, pool edge, deep fox den and shallows](d5-deep-fen-brief-2026-10-05.md)

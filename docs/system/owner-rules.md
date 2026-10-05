@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- D2 completes ten public Priory rooms with safe reciprocal routes and explicit held-book Read granting exact Ward/Bell topics; reuse B6 knowledge and ordinary custody/recovery ([PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md)).
+
 - B6 offers an all-hours doused-light Seek, three-wrong sitting with immediate retry, and a once-known ward with a public Aldric consumer ([PM adoption](../decisions/pm-decision-b6-wisp-2026-10-05.md)).
 
 - C2 offers an all-hours finite original-Tobin patrol; player death resets only the attempt, immediate Rejoin/Restart preserves reachable recovery, and completion grants trust alone ([PM adoption](../decisions/pm-decision-c2-watchmans-rounds-2026-10-05.md)).

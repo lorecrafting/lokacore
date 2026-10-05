@@ -664,3 +664,32 @@ COMMIT, both uncertain-COMMIT outcomes and lost acknowledgement retain the exist
 fence/reconciliation rules; prove them with real SQLite at attempt, final wrong
 and correct transitions. Current-release mismatch remains explicit; no adapters,
 silent counter repair or save deletion is authorized.
+
+## D2 book knowledge and Read recovery
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) stores
+ordinary custody, schedule locations and B6 typed knowledge facts; it adds no book
+cursor, transcript, topic ledger or snapshot. Reconcile a grant with the exact
+historical Read command/receipt: actor/body, original item and pinned readable/topic
+metadata, lawful held/open-ancestor custody at that revision, causal assignment and
+prior knowledge. A lawful B6 grant also justifies ward; neither source requires the
+other. Already-known Read supplies narration without a new grant. Later Drop, Put,
+lid closure, travel, schedule movement or death cannot invalidate historical Read.
+Current fact truth must agree with the lawful grant history in both directions.
+
+Real SQLite reopen must accept every legal committed intermediate: ground books,
+directly held, open nested holding, closed nested holding, each learned topic,
+already-known reread and later stored/dropped/dead states. Reopen the novice overlap
+and departure, then exercise the next ordinary Read/Talk/move consumer. Missing or
+malformed topic mapping/fact, forged actor/book/source/cause, grant from unheld or
+closed custody, omitted required grant or unjustified knowledge returns typed
+`save_corrupt`, with existing in-place Start over and no silent repair/deletion.
+Operational read failures keep their existing storage-error handling.
+
+Failed COMMIT, both committed and absent uncertain-COMMIT outcomes, and lost
+acknowledgement preserve all-prior or all-next knowledge/receipt state. Exact retry
+replays the original response and grants nothing twice, including after later
+custody changes. Retained Read narration routes once to that exact book detail;
+restore its currently reachable parent chain only when projected, with normal
+scene/chapter precedence. An unavailable book yields no invented visible route or
+World/other-book narration fallback. Current-release pin refusal remains explicit.

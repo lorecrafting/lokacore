@@ -61,7 +61,7 @@ valid combinations become playable before the whole world's optional surfaces.
 | Slice and player outcome | Depends on | Lift |
 |---|---|---:|
 | **D1 Ferry and isle:** pay for passage, meet Sedge, take an immediately available swim lesson and return safely even after a loss. | B3, B4, B8 | 0.7–0.9 |
-| **D2 Priory books:** explore the public Priory and learn real topics from held books. | A1, B5, B6 | 0.4–0.6 |
+| **D2 Priory books:** explore the public Priory and learn real topics from held books ([adopted contract](decisions/pm-decision-d2-priory-books-2026-10-05.md)). | A1, B5, B6 | 0.4–0.6 |
 | **D3 Western Ashmere:** explore the mill and cottages and meet Hob through existing interactions. | B4, D1 | 0.3–0.5 |
 | **D4 Homes and orchard:** meet Gareth and Ada, visit Elspeth's home and forage useful food. | B5, B8 | 0.3–0.5 |
 | **D5 Deep Fen:** explore the oak canopy, black pool edge, fox den and fishing shallows. | B4, B6, Q2 returns | 0.3–0.5 |

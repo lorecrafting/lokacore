@@ -856,3 +856,49 @@ bank or answer and an unresolved answer choice. Continuation/load validation rej
 missing opted attempt fields.
 Short references expand in every new field. Existing bounded answer lengths apply;
 new schemas need their actual negative fixtures and planted guard controls.
+
+## D2 public Priory and book authoring
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
+`prior_study`, `spire`, `scriptorium`, `kitchen_garden` to the six existing public
+rooms. Every row below is reciprocal and ungated; preserve existing exits.
+
+| Room / outward direction | Neighbor / return direction | Delivery |
+|---|---|---|
+| North Gate / north | Chapel Steps / south | existing public approach |
+| Chapel Steps / north | Chapel Nave / south | existing |
+| Chapel Nave / up | Bell Tower / down | A1 |
+| Bell Tower / up | Belfry / down | A1 |
+| Chapel Nave / north | Cloister / south | B5 |
+| Cloister / east | Infirmary / west | B5 |
+| Chapel Nave / west | Prior Study / east | D2 |
+| Belfry / up | Spire / down | D2 |
+| Cloister / west | Scriptorium / east | D2 |
+| Scriptorium / west | Kitchen Garden / east | D2 |
+
+Spire's view and Kitchen Garden's herbs are descriptive; no far Scan, rue harvest,
+new quest or unfinished action is advertised. Study has no functional quest ledger
+or bell key. This implements archived 00a §§2/4/5/8 with current public/no-wait rules.
+The selected book instances start directly in Scriptorium with ordinary custody.
+
+| Book key | Title / single page | Declared topic / Boolean fact | Mass |
+|---|---|---|---:|
+| `ward_of_the_fen` | The Ward of the Fen / `readable.ward_of_the_fen` | `ward` / B6 `topic_ward_known` | 100g |
+| `bell_rites` | Bell Rites / `readable.bell_rites` | `bell` / `topic_bell_known`, initially false | 100g |
+
+Both facts are player-scoped; reuse B6's ward definition rather than duplicate its
+knowledge mapping. Author localized topic labels and book noun headings. Item
+readable metadata references catalog label/text and an optional topic DefinitionRef;
+compiler short-ref expansion and loader require a local declared topic mapped to a
+unique player Boolean. Reject unresolved/wrong-kind refs, non-Boolean or non-player
+facts, duplicate mappings, missing text/label, malformed metadata and missing opted-in
+mass. Update actual API/capability requirements with the consumed extension; do not
+invent successor version, hash or allocation answers in this plan.
+
+Ash and Hale are distinct original NPCs with distinct descriptions, noun headings,
+flavor Talk and shared `novice` keyword. Under [owner content decision 5](../decisions/owner-decision-chapter-one-content-2026-10-02.md), Ash is in
+Scriptorium 06:00–12:00 and 20:00–06:00, Cloister 12:00–20:00; Hale is in Kitchen
+Garden 06:00–18:00, Cloister 18:00–06:00. Intervals are start-inclusive/end-exclusive.
+At 19:00 both are in Cloister; neither waits for a player or grants topics. All
+scheduled destinations exist. Initial placement must agree with the selected launch
+clock; existing schedule machinery owns departures and saved locations.

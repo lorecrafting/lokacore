@@ -196,7 +196,9 @@ This composes existing detail identity/presence, ActionSet admission and authore
 with receipt replay and Book’s notice detail history; there is no gameplay writer or saved
 reading state.
 Projection offers each exact present readable target with its authored label and shares
-command eligibility. Held books, pagination and topic grants remain later M12 work.
+command eligibility. The selected [D2 held-book extension](#d2-held-books-and-public-priory-selected-contract)
+adds item Read and declared grants; pagination remains deferred. Ordinary room
+notices retain the eventless/no-topic contract above.
 The [PM adoption](../decisions/pm-decision-m12-a-readable-2026-10-05.md) records scope.
 
 ## target_resolution@1, policy@1, fact@1
@@ -1058,3 +1060,40 @@ selectable even when debt/bell dialogues are eligible. Its informational reply
 requires known ward and a live/present Aldric; it changes no spells, resources,
 faction, quest or chapter ending. This is one real topic consumer, not a full
 conversation graph or a promise of all historical topics.
+
+## D2 held books and public Priory (selected contract)
+
+Planned under [PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md),
+D2 completes the ten public Priory rooms through the reciprocal
+[authored route](cartridge.md#d2-public-priory-and-book-authoring). Movement retains
+its ordinary cost and position rules; no key, light, topic, bell/faction outcome,
+NPC schedule, fare, water skill or time window gates this extension. These are
+safe walking rooms, not a new hazard. Aldric remains public in Chapel Nave;
+S2/S4/Q3 and Wick's S9 stay independently usable. Study's ledger is descriptive,
+never a second Peg ledger. Future private gate/crypt and far Scan are excluded.
+
+A readable item declares one authored text and at most one declared topic. The
+existing actor-bound Read command accepts the exact original book only while
+it is directly held by that actor's body or reachable inside an open chain of
+held containers. Reuse the bounded custody walk and actor/body lookup, sharing
+one command query budget. A closed or locked ancestor, ground/room custody,
+foreign holding, worn-only custody or corpse custody does not qualify; a declared
+book outside this held reach refuses `not_present` before narration or grant.
+Unknown/non-readable targets remain `invalid_target`. Projection and raw admission
+use the same eligibility. Take, Look/Examine, opening details, text rendering and
+ordinary notice Read grant nothing. No keyword or same-key object substitutes
+for the original target identity and pinned definition.
+
+Accepted book Read narrates its one declared text and lowers the optional topic
+grant through [B6's declared Boolean mapping](#s4-all-hours-wisp-b6-selected-contract).
+Readable owns the text; topic lowering owns idempotence; facts owns the knowledge
+write. Already-known Read still narrates, but adds no second grant/write. RNG and
+logical duration remain unchanged; authority elapsed preflight and schedules keep
+running. Ward from either lawful source enables the same public Aldric ward
+conversation; Bell is a real known-topic entry, not Q3 activation, permission,
+resolution or spell acquisition. No quest, faction, resource or skill is awarded.
+
+Dropping/storing/giving a book moves its real identity and never unlearns a topic.
+Death preserves knowledge and puts the actual held books in ordinary owned-corpse
+custody; gear-free shrine routes permit recovery, then ordinary Take/Read. Optional
+books given away need no replacement or mint and cannot strand a required path.

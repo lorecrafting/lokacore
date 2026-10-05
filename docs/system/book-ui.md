@@ -514,3 +514,30 @@ must target its authored dialogue rather than Talk's first eligible key. Its rep
 is informational and promises no spell. Cold reopen restores the exact committed
 wrong/success speaker line once, using that invocation's receipt; never borrow an
 unrelated latest receipt or treat selected tiles as a grant.
+
+## D2 held book details
+
+Planned [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
+ordinary item detail order and custody projection. World → book detail → Take
+confirms the existing return to World. Contents → Equipment & Inventory → held
+book detail offers explicit Read; opening that item sends no Read. For an open
+held container, tapping its projected child pushes the child's full detail onto
+the existing stack. Back to the immediate container pops locally without a command;
+Leave/Back to World clears the stack. No new document/page-navigation system is added.
+Closed/locked ancestors expose no child Read or invented text.
+
+Read follows shared `buttonsOf`, `actionContext`, freshness, pending-save and exact
+retry handling. The confirmed one-page text appends to that exact item's history,
+then current options; the item page stays open. Pending/refused/stale/fault attempts
+show no learned topic or invented page text. Character shows the projected known
+topic labels; re-rendering or visiting Character never grants them. Intentional new
+Read can repeat text; replay of one invocation appends once. Authority clock and
+NPC schedules continue while a player browses these local pages.
+
+After chapter Continue on cold reopen, recover the latest committed Read to its
+original book history and currently reachable item route, including the projected
+open held-container parents. If custody no longer permits that route, retain exact
+history identity without opening an obsolete detail or copying text to World.
+Ordinary notice entry keeps its existing automatic Read behavior. Ash/Hale have
+separate touch cards at the declared overlap; a departed novice's pending context
+retains its original identity and follows normal refusal/Leave rules.
