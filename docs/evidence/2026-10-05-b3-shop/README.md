@@ -37,6 +37,11 @@ quantity row, pricing framework or dependency added. Actual-diff correctness rev
 also bound saved ordinary custody operations to their command and kept historical
 S2 balances independent of today's player balance.
 
+B3 merged provisional A3 correction `05e72a3c`; the combined focused commerce,
+scene/finale and Book run passes 18 tests in 1.5 s, and the compiler passes three
+in 0.8 s. Integration typechecking found an A3 nominal `CorrelationId`/`CommandId`
+comparison; the string comparison was corrected without changing runtime behavior.
+
 Full checks, broad schema mutant sweep, independent reviews and publication CI
 remain publication-head work under the [provisional lane](../../decisions/owner-decision-local-provisional-integration-2026-10-05.md).
 Full app TypeScript encounters unavailable `@e2e-dev/web` and `e2e`; its touched

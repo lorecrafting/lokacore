@@ -225,7 +225,7 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
         same(e.payload.scene, bellScene) &&
         e.actor_id === actor &&
         e.world_context_id === world.context &&
-        e.correlation_id === bellContinues[bellLines - 1]!.command.id,
+        e.correlation_id === (bellContinues[bellLines - 1]!.command.id as string),
     ).length !== 1
   )
     invalid();
