@@ -62,3 +62,35 @@ the B1 detectors and their focused compatibility tests are removed.
 The original finding and verdict above record the reviewed head and remain historical.
 **Broad contract re-review requested** against the revised policy/spec and implementation;
 this disposition is not reviewer approval.
+
+## Broad contract re-review — source head 3ab0d23799b1f707dbc018b0b0b86ed0a3c2c1ce
+
+Re-derived requirements before the implementation diff: the explicit owner decision removes
+B1's feature-specific API1.7 rejection requirement, including room-only authored Put. Current
+reward/storage content still declares API1.7. Generic manifest range/schema validation, semantic
+role/type/reserved-fact checks, frozen conformance fixtures and exact save-pin refusal remain.
+No save may be silently retargeted or deleted. The atomic reward, bounded adjustment, Put pair,
+query budget, Book freshness, changed-row transaction and recovery requirements above still hold.
+
+**APPROVE** at `3ab0d23799b1f707dbc018b0b0b86ed0a3c2c1ce`. No open findings.
+
+- **M20B1-R1 superseded:** the explicit owner decision and amended governing specification
+  remove its version-gating requirement. Accepting the former room-only case is now allowed.
+  This closes the finding by a legitimate contract change, not by claiming the original
+  detector was correct. The historical finding and initial verdict above remain intact.
+- Inspected the complete revision diff and direct validation callers. Only B1 feature-version
+  detection and its focused compatibility expectations were removed. Current semantic
+  references, role/type/bounds/reserved-write guards and generic manifest/schema validation
+  remain. Core reward/Put/Book/save implementation and protocol fixtures are byte-unchanged
+  from the initially reviewed source head; no save migration or retargeting fallback was added.
+- Re-ran compiler, current reward fixture and shared schema tests plus general content tests:
+  **27 passed**. Current reward/content/Put/Book/SQLite, generic cartridge validation and saved
+  release handling: **108 passed**, including five real preacceptance deaths, atomic reward,
+  failure/reconcile/reopen, concrete Put invocation and exact missing-pin refusal.
+- Two independent mutations failed existing tests: remove the bounded-fact semantic guard
+  (malformed reward content admitted); replace exact-pin lookup with newest-release selection
+  (missing-pin refusal and pinned-release preservation fail). Both were restored; the same
+  **108 tests passed** afterward. No mutation, fixture change or owner-save access retained.
+- Ponytail Review: deleting the superseded detector is the smallest compliant change;
+  no unnecessary replacement machinery and no new findings.
+

@@ -210,4 +210,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Verified mechanics lessons](2026-10-05-mechanics-lessons-review.md): PR #169 at `dd6d7da`, APPROVE; two verified incident lessons, accurate evidence/test pointers, no findings.
 - [One independent reviewer by default](2026-10-04-one-reviewer-default-review.md): PR #170 at `107564e`, APPROVE; fresh review and CI/merge gates retained, no findings.
 
-- [M20-B1 atomic reward and usable storage](2026-10-04-m20-b1-reward-storage-review.md): PR #171 at `6061cbc`, CHANGES REQUIRED; M20B1-R1: room-only authored Put bypasses the API1.7 gate in both validators.
+- [M20-B1 atomic reward and usable storage](2026-10-04-m20-b1-reward-storage-review.md): PR #171 at `6061cbc`, CHANGES REQUIRED; broad contract re-review at `3ab0d237`, APPROVE; M20B1-R1 superseded by the explicit pre-production policy, current validation/save safeguards verified.
