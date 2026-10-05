@@ -14,3 +14,9 @@ From [Book UI, Minimap, Map and presentation controls](../system/book-ui.md#mini
 - **R200-2 — blocker — `mobile/app/book/Book.tsx:213`:** The World eligibility gate has no effective test. Replacing `keyboardEnabled={!pending && !fault && !p.screen.catchingUp}` with `keyboardEnabled={true}` leaves the keyboard and Book polish tests green. In a pending-save World with a north exit, Arrow Up would invoke an action and interfere with the pending retry. Exercise a mounted Book footer in a pending-save state so this break fails.
 
 Production mapping, unavailable-exit refusal, no-exit handling and the current gate match the cited spec on inspection. A Page Up-to-north mutation failed the focused keyboard test as expected. The focused keyboard test passes on the restored head; the full app suite passes (386 passed, 1 skipped). The two mutants above stayed green and were restored without committing code changes. Ponytail Review: lean production diff; no simpler equivalent found.
+
+## Scoped fix review — `9ef3bf15031816db2385e19c470c72fa4ad05979`
+
+Verdict: **APPROVE**. R200-1 and R200-2 are closed.
+
+The revised target resolves the actual selector for input, textarea, select and dialog. Removing the editable tag selectors from `Footer.tsx` now fails the focused test at its no-movement assertion. The BookView-to-Bottom-to-Footer test covers the pending-save gate and adjacent catch-up, fault, scene, combat and detail states. Forcing `keyboardEnabled={true}` in `Book.tsx` now fails its inactive-state assertion. Both mutants were restored; the two focused tests pass on the fix head. Production and direct callers were unchanged. Ponytail Review: the test helper serves the two distinct regressions without new production machinery.
