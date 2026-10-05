@@ -41,3 +41,20 @@ Evidence:
 
 Ponytail: no unnecessary abstraction or dependency identified.
 ```
+
+## Separate save scoped recheck (verbatim)
+
+```text
+Verdict: APPROVE — scoped fix recheck at abef39cc11b0237d47d36fd85269e49b43f2064d.
+
+1. Previous P2 resolved — mobile/app/App.tsx:170 now reuses the primed handle and opens a fresh connection after removal clears db. Real SQLite NOTADB recovery produces a playable game and accepts a subsequent command.
+
+2. No new findings — mobile/app/patch-sqlite-web.cjs:17–18 preserves error messages through synchronous serialization and asynchronous delivery. Direct callers reconstruct Error instances, retaining corruption classification and operational-error handling.
+
+Independent validation:
+- 35 focused chapter/start_over/recovery/session tests passed on the exact source head.
+- Executed patched WorkerChannel: corruption, NOTADB, lock and I/O messages survive both delivery paths; a 300-byte response survives synchronous delivery.
+- Removing the length fix or synchronous error-message fix causes the corresponding assertion to fail.
+- Reapplying the patch is idempotent; unexpected source and version are rejected.
+- Disposable copy removed. Shared browser save and native saves were untouched.
+```
