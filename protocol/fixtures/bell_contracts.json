@@ -1,0 +1,476 @@
+[
+  {
+    "name": "valid resolve consequence",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "resolve_bell",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.resolve",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.13",
+            "kind": "quest",
+            "key": "bell_of_ashmere"
+          },
+          "outcome": "prior"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "valid fail consequence",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "fail_search",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.fail",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.13",
+            "kind": "quest",
+            "key": "missing_child"
+          },
+          "outcome": "lost"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "valid quest scene",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "quest",
+          "key": "bell_of_ashmere"
+        },
+        "outcome": "prior"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "resolve missing outcome",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "resolve_bell",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.resolve",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.13",
+            "kind": "quest",
+            "key": "bell_of_ashmere"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "fail missing quest",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "fail_search",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.fail",
+          "outcome": "lost"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "quest scene missing outcome",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "quest",
+          "key": "bell_of_ashmere"
+        }
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "resolve missing op",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "resolve_bell",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.13",
+            "kind": "quest",
+            "key": "bell_of_ashmere"
+          },
+          "outcome": "prior"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "resolve missing quest",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "resolve_bell",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.resolve",
+          "outcome": "prior"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "fail missing op",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "fail_search",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.13",
+            "kind": "quest",
+            "key": "missing_child"
+          },
+          "outcome": "lost"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "fail missing outcome",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "fail_search",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.fail",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.13",
+            "kind": "quest",
+            "key": "missing_child"
+          }
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "resolve malformed outcome",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "resolve_bell",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.resolve",
+          "quest": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.13",
+            "kind": "quest",
+            "key": "bell_of_ashmere"
+          },
+          "outcome": "bad outcome"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "fail malformed quest",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "fail_search",
+      "on": {
+        "event": "fact_changed",
+        "fact": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        }
+      },
+      "apply": [
+        {
+          "op": "quest.fail",
+          "quest": {
+            "kind": "quest",
+            "key": "missing_child"
+          },
+          "outcome": "lost"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "quest scene malformed quest",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "quest": {
+          "kind": "fact",
+          "key": "chapel_bell_rung"
+        },
+        "outcome": "prior"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "quest scene malformed outcome",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "quest": "bad outcome",
+        "outcome": "prior"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "valid story-point scene",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "scene missing both triggers",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "outcome": "prior"
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "scene has both triggers",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "quest": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.13",
+          "kind": "quest",
+          "key": "bell_of_ashmere"
+        },
+        "outcome": "prior",
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        }
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "valid": false
+  }
+]

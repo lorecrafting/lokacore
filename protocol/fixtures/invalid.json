@@ -15380,8 +15380,57 @@
     },
     "errors": [
       {
-        "path": "/on/story_point",
-        "code": "missing_property"
+        "path": "/on",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "scene_on_both_triggers",
+    "contract": "SceneDefinition",
+    "value": {
+      "key": "bell_rung",
+      "on": {
+        "story_point": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry",
+        "quest": {
+          "cartridge_id": "ashmere_scene",
+          "cartridge_version": "0.0.1",
+          "kind": "quest",
+          "key": "bell_of_ashmere"
+        }
+      },
+      "control": "modal",
+      "steps": [
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.bell"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fen"
+        },
+        {
+          "type": "narrate",
+          "text": "scene.bell_rung.fox"
+        },
+        {
+          "type": "await_ack"
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/on",
+        "code": "exclusive_properties"
       }
     ]
   },

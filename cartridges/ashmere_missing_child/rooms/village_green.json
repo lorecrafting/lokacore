@@ -13,6 +13,13 @@
     {
       "when": {
         "policy_version": 1,
+        "root": { "op": "fact_compare", "fact": "village_child_status", "equals": "lost" }
+      },
+      "description": "room.village_green.lost"
+    },
+    {
+      "when": {
+        "policy_version": 1,
         "root": {
           "op": "all",
           "items": [

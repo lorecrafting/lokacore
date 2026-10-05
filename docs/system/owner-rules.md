@@ -8,6 +8,9 @@ and not repeated here.
 
 ## Product and scope
 
+- Q3-B uses an exact bell-detail recipe, typed terminal reactions and an evidenced
+  quest-resolution scene start for the public prior/lost path ([PM adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md)).
+
 - Q2-C completes the Vesper message → Elspeth stays path before the complete Wren escort → Elspeth rescue path; no selectable unfinished branch ([stays adoption](../decisions/pm-decision-q2-c-stays-2026-10-05.md), [rescue adoption](../decisions/pm-decision-q2-c-rescue-2026-10-05.md)).
 
 - Only authored receptacles can hold items ([record](../decisions/owner-decision-container-eligibility-2026-10-05.md)).

@@ -1,0 +1,11 @@
+{
+  "on": { "quest": "bell_of_ashmere", "outcome": "prior" },
+  "control": "modal",
+  "steps": [
+    { "type": "narrate", "text": "scene.bell_rung.bell" },
+    { "type": "narrate", "text": "scene.bell_rung.fen" },
+    { "type": "narrate", "text": "scene.bell_rung.fox" },
+    { "type": "await_ack" },
+    { "type": "end" }
+  ]
+}

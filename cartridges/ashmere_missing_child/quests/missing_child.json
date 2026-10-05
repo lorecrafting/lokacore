@@ -111,7 +111,8 @@
     ],
     "outcomes": {
       "stays": "quest.missing_child.stays",
-      "rescued": "quest.missing_child.rescued"
+      "rescued": "quest.missing_child.rescued",
+      "lost": "quest.missing_child.lost"
     }
   }
 }

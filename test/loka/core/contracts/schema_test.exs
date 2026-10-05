@@ -35,6 +35,14 @@ defmodule Loka.Core.Contracts.SchemaTest do
             {"missing additionalProperties", object.(%{})},
             {"required but not declared",
              object.(%{"additionalProperties" => false, "required" => ["x"]})},
+            {"exclusive key not declared",
+             closed.(%{"exactlyOneRequired" => ["story_point", "quest"]})},
+            {"exclusive key repeated",
+             %{
+               "A" =>
+                 obj.(%{"story_point" => str, "quest" => str}, [])
+                 |> Map.put("exactlyOneRequired", ["story_point", "story_point"])
+             }},
             {"a nested bad keyword",
              %{"A" => %{"type" => "array", "items" => %{"type" => "null", "format" => "x"}}}},
             {"a dangling $ref", %{"A" => %{"$ref" => "#/$defs/B"}}},
