@@ -31,8 +31,13 @@ may be revisited at every hour while Peg is present.
 
 Add the narrow commerce command/rule and authored offer source, compiler/loader
 validation, shared admission/projection, and Peg's Book interaction. Reuse B2's
-exact payment, containment transfer, carrying predicate, query budget, writer
-group, receipt and save reconciliation. Touch `protocol/` command/action,
+exact payment, containment transfer, carrying predicate, query budget and writer
+group. Extend `mobile/authority/local-story/deadline-save.ts` and its load/receipt
+callers as required by [B3 recovery](../../system/save.md#b3-shop-recovery): B2's
+start/start-plus-reward comparisons reject legal commerce, and historical S2
+payment `from`/`to` values must be checked at their own commit. Reconcile the
+bounded accepted penny-transfer receipts in revision order; retain B2's forged
+receipt and contradictory outcome refusals. Touch `protocol/` command/action,
 capability, cartridge and GameView contracts only for the actual new shape;
 derive fixtures and generated docs from the selected contract. Add current-build
 save validation for the shop's real rows, with no compatibility adapter.
@@ -55,9 +60,17 @@ unrelated scene work or obsolete-fixture preservation.
   the same item to Peg. Total pennies stay40. Peg0p, a worn/nested/foreign ID,
   an unrelated item and a satchel containing the active S2 ledger all refuse
   without a partial transfer. A later Buy of the returned ID works once.
-- Each legal intermediate custody/balance state reopens. Malformed balance,
-  impossible shop item identity/custody or contradictory accepted receipt gives
-  typed `save_corrupt` with no silent repair. Real failed COMMIT, both unknown
+- With authored starts player20/Peg20/Aldric10, Buy torch before S2 acceptance
+  cold-reopens at 17/23/10 with the ledger still Peg-held. Buy then on-time S2
+  payout cold-reopens at 27/23/0 with the ledger at Aldric and S2 `on_time`;
+  its historical reward is player17→27, Aldric10→0. S2 payout then Buy also
+  cold-reopens at 27/23/0, but its historical reward is player20→30 before
+  the subsequent purchase. All three balances total50 in both orders.
+- Buy while S2 is active, or after late/expired S2 without payout, cold-reopens
+  at 17/23/10 with the exact ledger custody, quest state and deadline effect
+  preserved. A forged prior balance, omitted debit, wrong recipient, reordered
+  or contradictory transfer receipt remains `save_corrupt`; each legal
+  intermediate state opens without repair. Real failed COMMIT, both unknown
   COMMIT outcomes and lost acknowledgement retain all prior or all next rows.
 - Name distinct plausible breaks before adding tests. Apply each mutant to the
   old focused suite first; add only missing behavior tests with independent
