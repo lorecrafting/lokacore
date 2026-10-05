@@ -1,0 +1,35 @@
+✔ combat artifact requires executable API, owners, ordered damage and explicit NPC HP (65.017167ms)
+✔ death credit binds unique local attackable NPCs and false player Boolean facts (60.136959ms)
+✔ every combat narration role names existing cartridge text (26.515583ms)
+✖ combat requires executable death settings even without authored corpse templates (6.759417ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 260.505292
+
+✖ failing tests:
+
+test at kernel/ts/test/combat_content.test.ts:279:1
+✖ combat requires executable death settings even without authored corpse templates (6.759417ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!result.ok)
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat_content.test.ts:285:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

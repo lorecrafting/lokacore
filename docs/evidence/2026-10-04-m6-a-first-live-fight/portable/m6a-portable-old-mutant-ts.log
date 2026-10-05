@@ -1,0 +1,20 @@
+✔ composition known answers (9.275292ms)
+✔ invariant checks known answers, a holding and a violated case per invariant checked in both kernels (0.402875ms)
+✔ invalid successful deltas fail their independent precondition check (0.260333ms)
+✔ containment checks deep chains, untouched cycles and untouched capacity (13.252459ms)
+✔ limits are named in the composition profile order (0.45375ms)
+✔ composition-profile budgets: at the limit composes with the expected changes, one over faults (12.381417ms)
+✔ a malformed barrier state faults precondition_failed (0.222375ms)
+✔ opted recovery literal rows and independent metadata replay (2.399042ms)
+✔ independent recovery replay rejects an unauthored stored rate (0.275916ms)
+✔ recovery schema trust-boundary literals (1.111917ms)
+✔ entity-resource overrides match literals and independent preconditions reject false success (1.028875ms)
+✔ NPC HP schema trust-boundary literals (0.409958ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 152.656709

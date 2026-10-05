@@ -69,7 +69,9 @@ export function comings(was: GameView, now: GameView, text: Say): string[] {
   const gone = (a: GameView, b: GameView) =>
     a.entities.filter((e) => e.kind === 'npc' && !b.entities.some((f) => f.id === e.id));
   return [
-    ...gone(was, now).map((e) => `${text(e.name)} leaves.`),
+    ...gone(was, now)
+      .filter((e) => e.id !== was.combat?.opponent_id)
+      .map((e) => `${text(e.name)} leaves.`),
     ...gone(now, was).map((e) => `${text(e.name)} arrives.`),
   ];
 }

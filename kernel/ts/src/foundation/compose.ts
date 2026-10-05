@@ -1,16 +1,14 @@
+import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
-// StateDelta composition (04 §5.1-§5.4, 14 §R3A), twin of lib/loka/core/compose.ex, whose
-// moduledoc states the base-state shape and the semantics. The base is read, never copied:
-// writes go to an overlay keyed by canonical target text.
+// StateDelta composition, twin of lib/loka/core/compose.ex; writes use a target-keyed overlay.
 import { creationValid, initialPair, initialPlacement } from './creation.ts';
 import { encode, type Json } from './canonical.ts';
-import { validOverrideRow, adjusted, type Stored } from './resource.ts';
+import { composeAdjustment } from './resource.ts';
 import {
   LIMITS,
   type DeltaOp,
   type ErrorCode,
   type MutationTarget,
-  type ResourceSpec,
   type StateDelta,
 } from '../contracts.gen.ts';
 
@@ -31,7 +29,6 @@ const LEGAL: Record<string, string[]> = {
   abandoned: ['active'],
 };
 const OPEN = ['active', 'objectives_complete'];
-// A barrier's legal transitions (room.schema.json BarrierState): open, close, lock, unlock.
 const DOOR: Record<string, string[]> = {
   closed: ['open', 'locked'],
   open: ['closed'],
@@ -50,7 +47,6 @@ const containment = (e: string): MutationTarget =>
 
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
-
 export function compose(state: State, delta: StateDelta): Result {
   const { ops } = delta;
   if (typeof state.clock !== 'number') return fault('precondition_failed', { kind: 'clock' });
@@ -83,23 +79,17 @@ export function counts(state: State, ops: readonly DeltaOp[]) {
     operations: ops.length,
     created_jobs: created,
     due_jobs_per_advance: due,
-    pending_jobs: pending + created - due,
+    pending_jobs: pending + created - due - count('job.cancel'),
   };
 }
 
 export type Limit = keyof typeof LIMITS;
-// The composition profile's limits in 04 §5.4 order (LIMITS is sorted by key).
 export const LIMIT_ORDER = (
   'operations query_steps events deliveries reaction_depth selector_cardinality created_jobs ' +
   'pending_jobs due_jobs_per_advance scene_auto_advances output_bytes'
 ).split(' ') as Limit[];
 
-/**
- * The first limit, in 04 §5.4 order, a count passes (04 §5.4: one aggregate budget across the
- * root and all its descendants), or undefined: compose's operation and job counts, and the
- * events, output bytes, reaction deliveries, reaction depth and query steps runtime/proposal.ts counts
- * across a decision.
- */
+/** First exceeded aggregate budget in composition-profile order (04 §5.4). */
 export const over = (counts: Partial<Record<Limit, number>>): Limit | undefined =>
   LIMIT_ORDER.find((k) => counts[k]! > LIMITS[k]);
 
@@ -132,18 +122,17 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
     case 'choice.close':
       return choice(op, row);
     case 'job.schedule':
-      if (row !== undefined) return { code: 'precondition_failed' };
-      if (op.due_time <= ctx.horizon) return { code: 'nonfuture_job' };
-      return { value: { job: op.job, due_time: op.due_time, status: 'pending' } as Json };
-    case 'job.complete': {
-      const ok =
-        get(row, 'status') === 'pending' && (get(row, 'due_time') as number) <= ctx.horizon;
-      return check(ok, put(row, { status: 'completed' }));
-    }
+    case 'job.complete':
+    case 'job.cancel':
+      return composeJob(op, row, ctx.horizon);
+    case 'encounter.open':
+    case 'encounter.advance':
+    case 'encounter.close':
+      return encounter(op, row, ctx);
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
     case 'resource.adjust':
-      return adjustResource(op, row, ctx);
+      return composeAdjustment(op, row, ctx.state, ctx.horizon);
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
     case 'barrier.transition':
@@ -151,21 +140,19 @@ function apply(op: DeltaOp, t: MutationTarget, ctx: Ctx): Outcome {
   }
 }
 
-function adjustResource(
-  op: DeltaOp & { op: 'resource.adjust' },
+function encounter(
+  op: DeltaOp & { op: `encounter.${string}` },
   row: Json | undefined,
   ctx: Ctx,
 ): Outcome {
-  const override = get(section(ctx.state, 'entity_resource_specs'), key(target(op))) as
-    ResourceSpec | undefined;
-  if (override && !validOverrideRow(row, override, ctx.state.clock))
-    return { code: 'precondition_failed' };
-  return adjusted(
+  if (op.op !== 'encounter.open') return changeEncounter(op, row);
+  return openEncounter(
     op,
-    row as Stored | undefined,
-    override ??
-      (get(section(ctx.state, 'resource_specs'), key(op.resource)) as ResourceSpec | undefined),
-    ctx.state.clock,
+    row,
+    ctx.state,
+    read(containment(op.body_id), ctx),
+    read(containment(op.npc_id), ctx),
+    rows('encounter', 'encounters', 'encounter_id', ctx),
   );
 }
 
@@ -242,7 +229,6 @@ function inside(d: string, e: string, ctx: Ctx): boolean {
   return false;
 }
 
-// The overlay's value for a target, else the base's.
 function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   const w = ctx.overlay.get(key(t));
   if (w) return w.value;
@@ -260,6 +246,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'choices'), t.continuation_id);
     case 'job':
       return get(section(s, 'jobs'), t.job_id);
+    case 'encounter':
+      return get(section(s, 'encounters'), t.encounter_id);
     case 'clock':
       return s.clock;
     case 'resource':

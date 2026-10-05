@@ -1,3 +1,4 @@
+import { escapeDirections } from '../mechanics/combat/flee.ts';
 // The GameView lists of an actor's ActionSet (commands/actions.ts resolved; 04 §14, §19; 00 §4.10).
 import type {
   AdvertisedAction,
@@ -17,6 +18,7 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying } from '../mechanics/containment/shared.ts';
+import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 /**
@@ -59,6 +61,7 @@ export function lists(world: World, actor: CharacterId) {
     Object.values(set)
       .filter((a) => fits(a) && here(a) && !MODAL.includes(a.command))
       .filter((a) => movable(world, a, id))
+      .filter((a) => combatOffered(world, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .map((a) => advertise(world, actor, a, take, id, scope));
@@ -66,7 +69,6 @@ export function lists(world: World, actor: CharacterId) {
     place: listed(
       (a) => a.target.kind === 'none' && !door(a) && !equip(a) && a.command !== current,
     ),
-    // `nested`: an item inside a container (c1-locks) lists only the engine's take.
     of: (scope: string, id: string, nested = false) =>
       listed(
         (a) =>
@@ -111,8 +113,14 @@ function advertise(
   const code = !holds(world, actor, a.policy.root, { target, steps: { n: 0 } })
     ? 'invalid_state'
     : talk ||
+      (a.command === 'flee' && !escapeDirections(world, actor).length
+        ? 'invalid_state'
+        : undefined) ||
       (typeof admitted === 'string' ? admitted : undefined) ||
-      (a.command === 'take' && target !== undefined ? take(target) : undefined);
+      (a.command === 'take' && target !== undefined ? take(target) : undefined) ||
+      (a.command === 'attack' && target !== undefined
+        ? attackRefused(world, actor, target)
+        : undefined);
   return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
 }
 
@@ -152,4 +160,11 @@ function movable(world: World, a: Offered, id?: string): boolean {
     !world.state.created?.[id] ||
     !['take', 'drop', 'give', 'wear', 'remove'].includes(a.command)
   );
+}
+
+function combatOffered(world: World, body: EntityId | undefined, a: Offered, id?: string) {
+  if (a.command === 'move' && body && engaged(world, body)) return false;
+  if (a.command === 'flee') return !!body && !!engaged(world, body);
+  const entity = id && world.entities[id];
+  return a.command !== 'attack' || (entity && entity.kind === 'npc' && !!entity.attack);
 }

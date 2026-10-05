@@ -1,0 +1,47 @@
+Window: "M6 final proof", App: Device Hub.
+0 standard window M6 final proof – iOS 27.0, ID: com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, Secondary Actions: Raise
+	1 split group
+		2 split group com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, SidebarNavigationSplitView
+			3 container
+				4 container
+					5 button Description: Look, The Drowned Lantern, Secondary Actions: Cancel
+					6 text Secondary Actions: Cancel, Description: The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.
+					7 text Description: Hold the map and drag toward a path to walk; tap it to open the map., Secondary Actions: Cancel
+					8 button Description: Got it, Secondary Actions: Cancel
+					9 button Description: Map, Secondary Actions: Cancel, activate, Go down, Go up, Go west
+					10 button Description: Position, standing, Secondary Actions: Cancel
+					11 button Description: Contents, Character, hp 9 of 10, is slightly scratched, ma 7 of 100, mv 98 of 100, Secondary Actions: Cancel
+					12 text Description: Hour of the Rooster, five to seven, Secondary Actions: Cancel
+				13 button Description: Home, ID: app.grid.3x3
+				14 button Description: Screenshot, ID: camera.viewfinder
+				15 button Description: Record, ID: record.circle
+				16 button Rotate Left
+	17 toolbar
+		18 button Description: Show Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		19 toggle button Description: Capture Keyboard, Value: off
+		20 toggle button Description: Resize mode, Help: Enter resize mode, Value: off
+		21 Zoom
+			22 radio button Description: Zoom Out, Value: 0, ID: minus.magnifyingglass
+			23 radio button Description: arrowtriangles.up.right.down.left.magnifyingglass, Help: Zoom to Fit, Value: 1
+			24 radio button Description: Zoom To Actual Size, Help: Physical Size, Value: 0, ID: 1.magnifyingglass
+			25 radio button Description: Zoom In, Value: 0, ID: plus.magnifyingglass
+		26 button Description: Open in New Window, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		27 menu button More, Help: More Actions, ID: ellipsis
+		28 radio button Description: Edit, Help: Settings, Value: 0, ID: slider.horizontal.3
+		29 radio button Description: text.document, Help: Reports, Value: 0
+		30 radio button Description: Info, Value: 0, ID: info
+	31 close button
+	32 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	33 minimize button
+	34 text M6 final proof iOS 27.0
+35 menu bar
+	36 Device Hub
+	37 File
+	38 Edit
+	39 View
+	40 Device
+	41 Controls
+	42 Window
+	43 Help
+
+The focused UI element is 0 standard window M6 final proof – iOS 27.0, ID: com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, Secondary Actions: Raise

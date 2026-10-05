@@ -1,0 +1,7 @@
+The following is a diff from the previous accessibility tree for Window: "M6 isolated proof" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 50
+~					47 heading Description: Combat, Secondary Actions: Cancel
+~					48 text Description: a cellar rat, Secondary Actions: Cancel
+~					11 button Description: Flee, Secondary Actions: Cancel
+~					14 button (disabled) Description: Contents, Character, hp 1 of 10, is almost dead, ma 7 of 100, mv 100 of 100, Secondary Actions: Cancel
++					49 text Description: Position, standing, Secondary Actions: Cancel

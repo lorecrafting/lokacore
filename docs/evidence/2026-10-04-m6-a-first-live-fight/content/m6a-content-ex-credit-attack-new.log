@@ -1,0 +1,58 @@
+Compiling 42 files (.ex)
+    warning: the following conditional expression:
+
+        n["attack"] || true
+
+    will always evaluate to:
+
+        dynamic(not false and not nil)
+
+    where "n" was given the type:
+
+        # type: dynamic(
+          %{..., __struct__: atom()} or nil or empty_list() or non_empty_list(term(), term()) or
+            non_struct_map()
+        )
+        # from: lib/loka/content/combat.ex:81:15
+        n["attack"]
+
+    type warning found at:
+    │
+ 81 │           if(n["attack"] || true, do: [], else: [bad(at("cartridge.json", path ++ ["npc"]))]) ++
+    │           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/loka/content/combat.ex:81: Loka.Content.Combat.credit/5
+
+Generated loka app
+Running ExUnit with seed: 798589, max_cases: 16
+
+
+
+  1) test death credit is unique and bound to an attackable local NPC and player Boolean (Loka.ContentCombatTest)
+     test/loka/content_combat_test.exs:126
+     ** (MatchError) no match of right hand side value:
+
+         {:ok,
+          "{\"cartridge\":{\"actions\":{},\"entry\":{\"cartridge_id\":\"fight\",\"cartridge_version\":\"1.0.0\",\"key\":\"cellar\",\"kind\":\"room\"},\"facts\":{\"fight@1.0.0:fact/rat_dead\":{\"key\":\"rat_dead\",\"meaning\":\"Rat defeated\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"combat\":1,\"containment\":1,\"death\":1,\"fact\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"fight\",\"requires\":{\"capabilities\":{\"combat\":1,\"containment\":1,\"death\":1,\"fact\":1,\"movement\":1,\"resource\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.6\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Fight\",\"version\":\"1.0.0\"},\"npcs\":{\"fight@1.0.0:npc/rat\":{\"description\":\"t\",\"hp\":{\"gain\":0,\"maximum\":6,\"minimum\":0,\"start\":6},\"key\":\"rat\",\"keywords\":[\"rat\"],\"room\":{\"cartridge_id\":\"fight\",\"cartridge_version\":\"1.0.0\",\"key\":\"cellar\",\"kind\":\"room\"},\"room_line\":\"t\",\"short\":\"t\"}},\"policies\":{},\"resources\":{\"fight@1.0.0:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"fight@1.0.0:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"fight@1.0.0:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82}},\"rooms\":{\"fight@1.0.0:room/cellar\":{\"description\":\"t\",\"exits\":{},\"key\":\"cellar\",\"title\":\"t\"},\"fight@1.0.0:room/shrine\":{\"description\":\"t\",\"exits\":{},\"key\":\"shrine\",\"sanctuary\":true,\"title\":\"t\"}},\"text\":{\"t\":\"Test\"},\"world\":{\"combat\":{\"flee_multiplier\":3,\"interval\":2,\"player_attack\":{\"chance\":80,\"damage_max\":3,\"damage_min\":1},\"sleep_multiplier\":2},\"death_credit\":[{\"fact\":{\"cartridge_id\":\"fight\",\"cartridge_version\":\"1.0.0\",\"key\":\"rat_dead\",\"kind\":\"fact\"},\"npc\":{\"cartridge_id\":\"fight\",\"cartridge_version\":\"1.0.0\",\"key\":\"rat\",\"kind\":\"npc\"},\"room\":{\"cartridge_id\":\"fight\",\"cartridge_version\":\"1.0.0\",\"key\":\"cellar\",\"kind\":\"room\"}}]}},\"content_hash\":\"f80c9cc7bd632a062411380a12f20e90867a462ce16f4101b124dcdcf597fb67\"}",
+          [
+            %{
+              "code" => "TOUCH_LINK_MISSING",
+              "data" => %{"target" => "rat"},
+              "message_key" => "diagnostics.touch_link_missing",
+              "path" => "npcs/rat.room_line",
+              "severity" => "warning",
+              "suggested_capabilities" => []
+            }
+          ]}
+
+     code: for {manifest, npc, fact, code, path} <- cases do
+     stacktrace:
+       test/loka/content_combat_test.exs:157: anonymous fn/3 in Loka.ContentCombatTest."test death credit is unique and bound to an attackable local NPC and player Boolean"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/content_combat_test.exs:155: (test)
+
+..
+Finished in 0.1 seconds (0.1s async, 0.00s sync)
+
+Result: 2/3 passed
+Failed: 1 test

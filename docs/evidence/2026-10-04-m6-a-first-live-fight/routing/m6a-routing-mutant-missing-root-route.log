@@ -1,0 +1,96 @@
+✔ exit door actions keep their direction and remain separate from walking (1.276375ms)
+✔ worn items and reachable nested contents offer actions on their own ids (0.894791ms)
+✔ same-room actions retain projected item pages and remove pages hidden by a closed lid (0.204709ms)
+✔ chapter changes queue one title which survives scene lines and acknowledgement (0.111041ms)
+✔ band phrases and the hp accessibility label use the cartridge catalog (0.131666ms)
+✔ scene Continue and position verbs have dedicated groups (0.093709ms)
+✔ exits, the look title, place actions and a thing page come from the right buttons (0.99525ms)
+✔ position cycling skips absent offers and retains the offered freshness (0.110375ms)
+✔ a touch link is shown as its label (0.122083ms)
+✔ a choice's answers and Close are their own group, not place actions (0.749458ms)
+✔ the character label says the hp band and no other (0.141042ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.107917ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (0.130625ms)
+✔ the ending line shows once every quest is over (0.098208ms)
+✔ a closed exit's log line and a capitalised title (0.115792ms)
+✔ a move refused at 0 MV says the body is too exhausted (0.114417ms)
+✔ a hint survives a store that throws, for this session (0.113125ms)
+✔ the status line shows the double hour as its earthly branch (0.157208ms)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (4.447208ms)
+✔ journal cues belong only to changed NPC histories (0.376375ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.14775ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.207708ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.142917ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.140584ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.08025ms)
+✔ the log stops growing in one room, its last line the latest answer (1.16475ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.104584ms)
+✔ a corrupt report page: Start over gives a working save (46.681125ms)
+✔ a corrupt sqlite_autoindex_report_1 page: Start over gives a working save (25.183291ms)
+✔ a malformed report index record: Start over gives a working save (23.893791ms)
+✔ an intact report table survives Start over in place (13.541625ms)
+✔ the latest committed narration is read again on reopen, from the receipts (14.500709ms)
+✔ an older save reopens with its narration and keeps its report on Start over (18.393083ms)
+✔ a malformed receipt response: Start over keeps the pending report (15.399625ms)
+✔ a narration read that fails on a lock offers no Start over (11.72675ms)
+✔ a save with no body row: save_corrupt, Start over repairs it in place (12.897708ms)
+✔ a save with a null choice: save_corrupt, Start over repairs it in place (12.97625ms)
+✔ a save with an empty resource: save_corrupt, Start over repairs it in place (14.345333ms)
+✔ a receipt narration line that is null: save_corrupt at open, Start over repairs it (15.356708ms)
+✔ a receipt response that is not a decision replays as a conflict (6.390375ms)
+✔ elapsed NOTADB and page corruption recover only through explicit working Start over (17.600584ms)
+✔ unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (10.281333ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 427.104834
+✔ combat page lists offered controls vertically below history in one scroll (4.804333ms)
+✔ committed opponent death narrates once through the existing subscription (0.271625ms)
+✔ confirmed encounter foregrounds another page and closure or death restores the World (6.441834ms)
+✔ Attack opens its committed page; pending and refused Flee stay until committed escape (2.977042ms)
+✔ reopening an encounter restores the combat page and last committed narration (0.395458ms)
+✔ reopening after escape or either death never restores combat into the World log (1.26425ms)
+✔ combat receipt history is once-only when completion follows an already displayed state (0.192833ms)
+✖ committed combat line indices come from pinned keys and structured receipt events (5.436792ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 297.107542
+
+✖ failing tests:
+
+test at ../../../../private<mutation-tree>/mobile/authority/local-story/narration_routing.test.ts:10:1
+✖ committed combat line indices come from pinned keys and structured receipt events (5.436792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  -   combat_lines: [
+  -     0
+  -   ],
+      command_id: 'round',
+      lines: [
+        {
+          key: 'escape'
+        }
+  
+      at TestContext.<anonymous> (file:///private<mutation-tree>/mobile/authority/local-story/narration_routing.test.ts:67:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { command_id: 'round', lines: [ [Object] ] },
+    expected: { command_id: 'round', lines: [ [Object] ], combat_lines: [ 0 ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

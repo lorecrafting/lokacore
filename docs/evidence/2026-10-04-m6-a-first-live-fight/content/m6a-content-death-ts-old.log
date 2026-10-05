@@ -1,0 +1,11 @@
+✔ combat artifact requires executable API, owners, ordered damage and explicit NPC HP (90.211208ms)
+✔ death credit binds unique local attackable NPCs and false player Boolean facts (75.533917ms)
+✔ every combat narration role names existing cartridge text (29.280958ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 318.027

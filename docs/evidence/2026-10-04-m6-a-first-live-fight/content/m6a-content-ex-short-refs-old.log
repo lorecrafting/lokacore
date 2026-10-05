@@ -1,0 +1,22 @@
+Compiling 42 files (.ex)
+    warning: variable "m" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+  7 │   def expand(credit, m), do: Map.new(credit, fn {k, v} -> {k, v} end)
+    │                      ~
+    │
+    └─ lib/loka/content/combat.ex:7:22: Loka.Content.Combat.expand/2
+
+    warning: unused import Loka.Content.Source.ref/3
+    │
+  3 │   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
+    │   ~
+    │
+    └─ lib/loka/content/combat.ex:3:3
+
+Generated loka app
+Running ExUnit with seed: 735987, max_cases: 16
+
+...................................................
+Finished in 0.3 seconds (0.3s async, 0.00s sync)
+
+Result: 51 passed

@@ -1,3 +1,4 @@
+import { combat } from './cartridge_combat.ts';
 import { death } from './cartridge_death.ts';
 // size: allow 340, one reference stage preserves diagnostic ordering including carrying and NPC HP opt-ins
 // The loader's reference stage and the definition walks it shares with the lock stage
@@ -205,7 +206,7 @@ export function refStage(c: Obj): Diagnostic[] {
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
-  out.push(...pools(c, named), ...death(c, named));
+  out.push(...pools(c, named), ...death(c, named), ...combat(c, named));
   return out;
 }
 

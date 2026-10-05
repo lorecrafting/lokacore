@@ -61,10 +61,18 @@ export function recovered(op: Any, spec: Any, row: Any, now: number): Json | und
 export const effectiveSpec = (op: Any, s: Any) =>
   s.entity_resource_specs?.[key(target(op))] ?? s.resource_specs?.[key(op.resource)];
 
-export function legacyInitial(op: Any, s: Any): number | undefined {
+// Legacy rows also retain timestamps in the replay overlay: later ops cannot settle backwards.
+export function resourceAfter(op: Any, s: Any, row: Any, horizon: number): Json | undefined {
   const spec = effectiveSpec(op, s);
-  const row = s.resources?.[key(target(op))];
-  if (!spec || spec.regen) return undefined;
+  const now = op.at === undefined ? s.clock : op.at;
+  if (
+    !spec ||
+    !Number.isSafeInteger(now) ||
+    (op.at !== undefined && (now < s.clock || now > horizon)) ||
+    (row !== undefined && (!Number.isSafeInteger(row?.at) || row.at < 0 || row.at > now))
+  )
+    return undefined;
+  if (spec.regen) return recovered(op, spec, row, now);
   if (
     s.entity_resource_specs?.[key(target(op))] &&
     (!row ||
@@ -73,17 +81,22 @@ export function legacyInitial(op: Any, s: Any): number | undefined {
       Object.keys(row).length !== 2 ||
       !Number.isInteger(row.value) ||
       row.value < spec.minimum ||
-      row.value > spec.maximum ||
-      !Number.isSafeInteger(row.at) ||
-      row.at < 0 ||
-      row.at > s.clock)
+      row.value > spec.maximum)
   )
     return undefined;
   const before = row ?? { value: spec.start, at: 0 };
-  return Number.isInteger(before.value) && Number.isInteger(before.at)
-    ? Math.min(
-        spec.maximum,
-        before.value + spec.gain * (Math.floor(s.clock / 3600) - Math.floor(before.at / 3600)),
-      )
-    : undefined;
+  if (
+    !Number.isInteger(before.value) ||
+    !Number.isInteger(before.at) ||
+    op.next_rate !== undefined ||
+    !Number.isInteger(op.to) ||
+    op.to < spec.minimum ||
+    op.to > spec.maximum
+  )
+    return undefined;
+  const value = Math.min(
+    spec.maximum,
+    before.value + spec.gain * (Math.floor(now / 3600) - Math.floor(before.at / 3600)),
+  );
+  return value === op.from ? { value: op.to, at: now } : undefined;
 }

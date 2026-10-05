@@ -42,6 +42,16 @@ export const next = (state: RngState): [number, RngState] => step(checked(state)
  * discards the whole decision.
  */
 export function uniform(state: RngState, bound: number, maxDraws: number): [number, RngState] {
+  const [value, after] = uniformCounted(state, bound, maxDraws);
+  return [value, after];
+}
+
+/** Same sampler, with raw draw count for a round sharing one budget across attacks. */
+export function uniformCounted(
+  state: RngState,
+  bound: number,
+  maxDraws: number,
+): [number, RngState, number] {
   if (!Number.isInteger(bound) || bound < 1 || bound > TWO32)
     throw new KernelError('invalid_bound');
   if (!Number.isInteger(maxDraws) || maxDraws < 0) throw new KernelError('invalid_rng_budget');
@@ -50,7 +60,7 @@ export function uniform(state: RngState, bound: number, maxDraws: number): [numb
   for (let n = 0; n < maxDraws; n++) {
     const [raw, after] = step(s);
     s = after;
-    if (raw < limit) return [raw % bound, s];
+    if (raw < limit) return [raw % bound, s, n + 1];
   }
   throw new KernelError('rng_budget_exhausted');
 }

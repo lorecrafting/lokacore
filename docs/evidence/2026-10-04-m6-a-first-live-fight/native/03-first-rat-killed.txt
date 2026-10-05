@@ -1,0 +1,17 @@
+The following is a diff from the previous accessibility tree for Window: "M6 isolated proof" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 50-52
+~					53 button Description: Look, Lantern Cellar, Secondary Actions: Cancel
+~					54 text Secondary Actions: Cancel, Description: Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall.
++					55 button Description: a cellar rat, open, Secondary Actions: Cancel
++					56 button Description: a cellar rat, open, Secondary Actions: Cancel
++					57 button Description: a cellar rat, open, Secondary Actions: Cancel
++					58 button Description: a cellar rat, open, Secondary Actions: Cancel
++					59 button Description: a dead cellar rat, open, Secondary Actions: Cancel
++					60 text Secondary Actions: Cancel, Description: Your blow strikes the rat squarely. The rat sinks its teeth into you.
+The rat snaps at you, but finds only air. Your blow strikes the rat squarely.
+Your blow strikes the rat squarely. The rat gives one last shudder and lies still.
++					61 button Description: Map, Secondary Actions: Cancel, activate, Go up
++					62 button Description: Position, standing, Secondary Actions: Cancel
++					9 button Description: Contents, Character, hp 9 of 10, is slightly scratched, ma 100 of 100, mv 100 of 100, Secondary Actions: Cancel
++					63 text Description: Hour of the Dog, seven to nine, Secondary Actions: Cancel
+The focused UI element is 0 standard window M6 isolated proof – iOS 27.0, ID: com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, Secondary Actions: Raise

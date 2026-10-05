@@ -1,0 +1,7 @@
+before.log: OK
+focused.log: OK
+mutant-allow-dead-npc.log: OK
+mutant-allow-nonroom.log: OK
+mutant-restore-same-room.log: OK
+mutants.json: OK
+restored.log: OK

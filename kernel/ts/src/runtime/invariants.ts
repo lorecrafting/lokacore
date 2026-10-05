@@ -1,8 +1,9 @@
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
 // observation fields). check(id, observation) is true when the invariant holds. The checks
 // after STEP read one kernel step and are TypeScript only (rules are TypeScript, ADR-074).
+import { encountersHold } from './invariants_encounter.ts';
 import { creationsHold } from './invariants_creation.ts';
-import { recovered, legacyInitial, effectiveSpec } from './invariants_resource.ts';
+import { resourceAfter } from './invariants_resource.ts';
 import type { Json } from '../foundation/canonical.ts';
 import { key, same, target, type Result } from '../foundation/compose.ts';
 import { CAPABILITY_OWNERS, EVALUATION_FAULTS, type DeltaOp } from '../contracts.gen.ts';
@@ -40,8 +41,6 @@ function link(op: Any): [Json | undefined, Json] {
     'choice.open': [undefined, 'pending'],
     'choice.resolve': ['pending', 'resolved'],
     'choice.close': ['pending', 'closed'],
-    'job.schedule': [undefined, 'pending'],
-    'job.complete': ['pending', 'completed'],
   };
   if (fixed[op.op]) return fixed[op.op]!;
   if (op.op === 'fact.assign') return [op.expected, op.value];
@@ -58,11 +57,9 @@ function initial(op: Any, s: Any): Json | undefined {
   if (op.op === 'entity.transfer') return s.containers?.[op.entity_id];
   if (family === 'quest') return s.quests?.[op.instance_id]?.state;
   if (family === 'choice') return s.choices?.[op.continuation_id]?.status;
-  if (family === 'job') return s.jobs?.[op.job_id]?.status;
   if (family === 'cooldown') return s.cooldowns?.[key(target(op))];
   if (family === 'barrier')
     return s.barriers?.[key(target(op))] ?? s.barrier_initial?.[key(op.barrier)];
-  if (family === 'resource') return legacyInitial(op, s);
   return s.clock;
 }
 
@@ -119,7 +116,6 @@ function offeredChoice(op: Any, s: Any): boolean {
 function extra(
   op: Any,
   s: Any,
-  horizon: number,
   containers: Map<string, string>,
   quests: Map<string, Any>,
 ): boolean {
@@ -131,21 +127,8 @@ function extra(
       return questValid(op, quests);
     case 'choice.resolve':
       return offeredChoice(op, s);
-    case 'job.schedule':
-      return op.due_time > horizon;
-    case 'job.complete':
-      return s.jobs?.[op.job_id]?.due_time <= horizon;
     case 'time.advance':
       return op.to > op.from;
-    case 'resource.adjust': {
-      const spec = effectiveSpec(op, s);
-      return (
-        spec !== undefined &&
-        Number.isInteger(op.to) &&
-        op.to >= spec.minimum &&
-        op.to <= spec.maximum
-      );
-    }
     case 'cooldown.start':
       return op.at === s.clock;
     case 'barrier.transition':
@@ -199,6 +182,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     if (!Number.isInteger(state.clock) || !creationsHold(state, delta.ops, result)) return false;
+    if (!encountersHold(state, delta.ops, result)) return false;
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
     const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));
@@ -206,22 +190,19 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
+      if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
       const k = key(target(op));
       const [need, give] = link(op);
       if (op.op === 'resource.adjust') {
-        const spec = effectiveSpec(op, state);
-        if (spec?.regen) {
-          const before = resources.has(k) ? resources.get(k) : state.resources?.[k];
-          const after = recovered(op, spec, before, state.clock);
-          if (!after) return false;
-          resources.set(k, after);
-          continue;
-        }
-        if (op.next_rate !== undefined) return false;
+        const before = resources.has(k) ? resources.get(k) : state.resources?.[k];
+        const after = resourceAfter(op, state, before, horizon);
+        if (!after) return false;
+        resources.set(k, after);
+        continue;
       }
       if (
         !same(seen.has(k) ? seen.get(k) : initial(op, state), need) ||
-        !extra(op, state, horizon, containers, quests)
+        !extra(op, state, containers, quests)
       )
         return false;
       seen.set(k, give);

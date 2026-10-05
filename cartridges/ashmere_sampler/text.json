@@ -16,11 +16,8 @@
   "item.lantern.short": "a brass lantern",
   "item.lantern.room": "A [brass lantern] rests beside the well.",
   "item.lantern.description": "Dented brass with a horn window, oil sloshing inside.",
-  "item.cellar_key.short": "a cellar key",
-  "item.cellar_key.room": "A [cellar key] lies on the windowsill.",
-  "item.cellar_key.description": "An iron key, its bow worn smooth.",
   "item.brass_key.short": "a brass key",
-  "item.brass_key.room": "A [brass key] lies beside the cellar key.",
+  "item.brass_key.room": "A small [brass key] lies here, its narrow tooth glinting.",
   "item.brass_key.description": "A small brass key with a narrow tooth.",
   "item.wool_cloak.short": "a wool cloak",
   "item.wool_cloak.room": "A [wool cloak] hangs over the bedpost.",
@@ -32,7 +29,6 @@
   "item.tin_whistle.room": "A small [tin whistle] lies in the trunk.",
   "item.tin_whistle.description": "A small tin whistle, dulled by dust.",
   "barrier.trunk_lid.short": "the trunk's lid",
-  "barrier.cellar_door.short": "the cellar door",
   "npc.bram.short": "Old Bram",
   "npc.bram.room": "[Old Bram] the ferryman stands here, one boot on the ferry.",
   "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry.",
@@ -92,5 +88,11 @@
   "item.player_corpse.description": "Possessions remain with this body.",
   "item.rat_corpse.short": "a dead cellar rat",
   "item.rat_corpse.room": "A [rat corpse] lies here.",
-  "item.rat_corpse.description": "The cellar rat lies still."
+  "item.rat_corpse.description": "The cellar rat lies still.",
+  "combat.player_hit": "Your blow strikes the rat squarely.",
+  "combat.player_miss": "The rat darts clear of your blow.",
+  "combat.npc_hit": "The rat sinks its teeth into you.",
+  "combat.npc_miss": "The rat snaps at you, but finds only air.",
+  "combat.player_died": "You crumple to the floor. You awaken at the shrine.",
+  "combat.npc_died": "The rat gives one last shudder and lies still."
 }

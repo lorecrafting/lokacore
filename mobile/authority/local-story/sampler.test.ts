@@ -22,15 +22,14 @@ const fresh = newWorld(
   [1, 2, 3, 4],
 );
 // Independent Python IdSource oracle: character/body, ten sorted rooms, then Bram/five rats/items/scheduled job/slot.
-// Context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f; see M5 provenance for literal ordinals.
+// Context 0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f; see the independent sampler oracle for literal ordinals.
 const ids = {
   bram: '15349791-fa65-81f7-b378-bb8212b808d2',
   brass_key: 'f14e477f-cecc-897a-bee7-c573aa5c76c3',
-  cellar_key: '58ee172d-aa6f-8023-a3c1-a1d46af6d167',
-  lantern: '19785203-d373-8973-8e64-1a9d8e50be82',
-  tin_whistle: '05f6aca0-79cd-83fe-8096-bae95b0730e8',
-  trunk: 'd68b48e6-93a5-8899-81ec-808f7be333f8',
-  wool_cloak: '2603d738-5a68-83d2-93fe-8e50819f9741',
+  lantern: '58ee172d-aa6f-8023-a3c1-a1d46af6d167',
+  tin_whistle: '19785203-d373-8973-8e64-1a9d8e50be82',
+  trunk: '05f6aca0-79cd-83fe-8096-bae95b0730e8',
+  wool_cloak: 'd68b48e6-93a5-8899-81ec-808f7be333f8',
 };
 const adapt = (sql: DatabaseSync) => ({
   execSync: (s: string) => void sql.exec(s),
@@ -97,7 +96,7 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
   try {
     let p = open(sql);
     assert.equal(fresh.character, 'bd595711-ea5f-89a5-abb0-046cd349d2f9');
-    assert.equal(fresh.slots.cloak, 'b59d54de-ea10-84e1-964c-16d1c776e738');
+    assert.equal(fresh.slots.cloak, '86b28f4e-f743-87f8-8375-2ead5c2c295c');
     // Breaks: missing authored bands fall back to perfect_health, or the band label is absent.
     const hp = p.view().resources!.find((r) => r.resource.key === 'hp')!;
     assert.deepEqual([hp.band, hp.tone], ['ready', 'normal']);
@@ -128,11 +127,13 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
     p.journal('active', 'quest.lantern.find');
     p.invoke('take', {}, 'lantern');
     p.move('east', 'drowned_lantern');
-    p.move('down', 'drowned_lantern', 'exit_locked');
-    assert.equal(p.view().exits.find((e) => e.direction === 'down')!.door!.state, 'locked');
+    // The cellar is reachable before collecting any equipment or keys.
+    assert.equal(p.view().exits.find((e) => e.direction === 'down')!.door, undefined);
+    p.move('down', 'lantern_cellar');
+    assert.equal(p.view().exits[0].door, undefined);
+    p.move('up', 'drowned_lantern');
     p.move('up', 'inn_rooms');
-    for (const item of ['cellar_key', 'brass_key', 'wool_cloak'] as const)
-      p.invoke('take', {}, item);
+    for (const item of ['brass_key', 'wool_cloak'] as const) p.invoke('take', {}, item);
     p.invoke('wear', {}, 'wool_cloak');
     assert.equal(p.view().equipment![0].slot, 'cloak');
     assert.equal(p.view().equipment![0].item!.id, ids.wool_cloak);
@@ -157,15 +158,6 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
     p.invoke('take', {}, 'tin_whistle');
     p.move('down', 'inn_rooms');
     p.move('down', 'drowned_lantern');
-    p.invoke('unlock', { direction: 'down' });
-    assert.equal(p.view().exits.find((e) => e.direction === 'down')!.door!.state, 'closed');
-    p.invoke('open', { direction: 'down' });
-    p.move('down', 'lantern_cellar');
-    assert.equal(p.view().exits[0].door!.state, 'open');
-    p.invoke('close', { direction: 'up' });
-    assert.equal(p.view().exits[0].door!.state, 'closed');
-    p.invoke('open', { direction: 'up' });
-    p.move('up', 'drowned_lantern');
     p.move('west', 'well_lane');
     p.move('south', 'ferry_landing');
     p.invoke('bram', {}, 'bram');
@@ -216,14 +208,14 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
         .view()
         .inventory.map((i) => i.id)
         .sort(),
-      [ids.brass_key, ids.cellar_key, ids.lantern, ids.tin_whistle, ids.wool_cloak].sort(),
+      [ids.brass_key, ids.lantern, ids.tin_whistle, ids.wool_cloak].sort(),
     );
     const records = sql
       .prepare('SELECT record FROM trace ORDER BY rowid')
       .all()
       .map((r) => JSON.parse(r.record as string));
-    assert.equal(records.filter((r) => r.event === 'trace.command').length, 37);
-    assert.equal(sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 37);
+    assert.equal(records.filter((r) => r.event === 'trace.command').length, 31);
+    assert.equal(sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 31);
   } finally {
     sql.close();
     rmSync(dir, { recursive: true, force: true });

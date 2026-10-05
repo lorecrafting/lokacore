@@ -1,0 +1,7 @@
+The following is a diff from the previous accessibility tree for Window: "M6 isolated proof" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 47
+~					51 heading Description: Combat, Secondary Actions: Cancel
+~					52 text Description: a cellar rat, Secondary Actions: Cancel
+~					53 button Description: Flee up, Secondary Actions: Cancel
+~					9 button (disabled) Description: Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100, Secondary Actions: Cancel
+The focused UI element is 0 standard window M6 isolated proof – iOS 27.0, ID: com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, Secondary Actions: Raise

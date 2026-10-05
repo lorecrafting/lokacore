@@ -104,6 +104,15 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 A resource's `from` is its regenerated value ([resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets));
 unset means `start` at time 0 for legacy pools without an explicit entity override (`:87`). Opted recovery requires the row
 and metadata validation in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
+Optional `resource.adjust.at` is an authoritative due-job settlement time, never a
+cartridge recipe/player input. Require committed base clock <= at <= the explicit
+advance horizon, with equality at the base clock legal. When present, use that exact
+clock for resource precondition, regeneration, override-row validation and written
+row timestamp; when omitted all frozen base-clock behavior below remains unchanged.
+Same-writer overlays must not move a written row backward in time. M6 rounds stamp
+all their losses, wake settlement and death restoration at their actual due time.
+Independent composition and precondition twins enforce this additive supplement.
+
 Optional `resource.adjust.next_rate` is legal only for an opted pool and must be a
 nonnegative ResourceInt member of its authored position table, including zero. Settle the
 old rate against the committed **base clock**, check `from` and bounded `to`, then store
@@ -185,7 +194,8 @@ cartridge's actions, recipes, the offers of quests that have one and the actor h
 of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
 intersect; `:59`), then the answers to a pending choice (`choose`, `close_choice`), which no
-contribution removes. A recipe's admission adds `cooldown` and `insufficient_resource`
+ordinary contribution removes; the combat restriction below takes precedence. A recipe's
+admission adds `cooldown` and `insufficient_resource`
 ([action_recipe@1](mechanics.md#action_recipe1-mechanicsaction_reciperulets49)).
 The door verbs (`open`, `close`, `lock`, `unlock`) stay in the set and admission is unchanged;
 the GameView lists them only on the exits they act on and on the items with a barrier
@@ -207,6 +217,22 @@ replaced by its single `continue` action (none target, empty input), after every
 ordinary contribution. Both invocation resolution and direct Command admission
 therefore refuse other commands with existing `unsupported_capability`, before
 clock or state changes. Continue is never a general engine VERBS entry.
+
+An open encounter restricts the fully composed ActionSet to actions whose resolved Command
+is exactly `flee`, `stand`, `look` or `scan`. This final restriction follows engine, cartridge,
+room and pending-choice contributions; a key or alias cannot change the allowed command set.
+Recipes (`perform`), repeated Attack, Move, dialogue/choices, inventory/equipment/door actions,
+Wait and nonstanding position changes are unavailable. Projection, invocation resolution and
+direct Command admission use this same restricted set. Excluded invocation keys use the
+existing `unsupported_capability` result; a known direct Command excluded during combat
+refuses `invalid_state`, before RNG, time or state changes. Encounter closure immediately
+restores the ordinarily composed set, including on save reopen; no second persisted mode exists.
+
+Only the internal Flee candidate search reads the composed set before this restriction, to
+check ordinary authored movement policy without exposing a player Move bypass. Its existing
+movement gates, standing and fare checks still apply. Pending choice projection is suppressed
+while the encounter is open and is derived again when it closes. See the
+[focused combat action decision](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md).
 
 ## Policy
 
@@ -333,3 +359,40 @@ fixtures stay unchanged; the additive `corpse_creation.json` supplement pins thi
 Adoption and intermediate proposal reads hydrate created entities from their pinned
 templates. Only a changed derived entity map is copied; unrelated state changes
 retain it and the existing capacity map. Authored `entityIds` never gains template entries.
+
+## Encounter and round supplements (M6-A)
+
+Combat adds nominal EncounterId and optional State `encounters` keyed by that ID.
+EncounterRow is `{character_id, body_id, npc_id, room_id, status, round, job_id}`:
+status open/closed; round is a positive integer. `encounter.open` requires an absent ID
+and validated distinct participants in a real room, with no other open encounter for
+either participant. `encounter.advance` compares the open row's current job and round,
+then replaces both with the next occurrence; `encounter.close` compares the current job
+and closes the row. These share mutation target `{kind: encounter, encounter_id}`.
+
+A combat `job.schedule` retains the NPC DefinitionRef and adds `encounter_id`; legacy
+jobs omit it. `job.cancel {job_id, encounter_id}` requires a pending job bound to that
+encounter and makes its status cancelled, even before it is due. Existing job.complete
+remains due-only. Encounter rows and job binding are canonical changed rows; omitted
+sections retain historical hashes. Both portable composition/precondition twins validate
+the supplement against independent fixtures.
+
+The schedule rule dispatches bound combat jobs to a pure round sequence. Before each
+due delivery, the proposal re-reads pending status and the encounter's current binding;
+stale occurrences produce no ops/events/draws. One proposal-local RNG flows from the
+root through every due delivery, every prefix World and the final decision. Faults adopt
+none of it. Due-job narration joins the root narration in due/event order and is saved
+in the same receipt for the existing subscription/reopen narration path. Direct ownership is schedule→combat/death (and existing movement); the
+combat Flee command uses a shared movement sequence and declares combat→movement.
+
+`attack {actor_id, target_id}` and `flee {actor_id}` are complete engine verbs.
+`attack_result {encounter_id, attacker_id, target_id, hit, loss}` is instance-scoped and
+actor-free when caused by run_job. Loss is nonnegative actual clamped HP loss; miss
+requires zero. Event IDs use the existing due command allocator. The credit delivery
+uses the original fatal writer group and the proposal's hydrated intermediate World.
+
+### Directionless combat Flee
+
+`flee {actor_id}` accepts no direction field. Exit selection, proposal-local RNG and atomic
+movement follow [combat mechanics](mechanics.md#combat1--first-live-encounter-m6-a). The
+receipt pins the actual selected destination and final RNG; replay never chooses again.

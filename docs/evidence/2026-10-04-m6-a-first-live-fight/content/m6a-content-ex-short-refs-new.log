@@ -1,0 +1,156 @@
+Compiling 42 files (.ex)
+    warning: variable "m" is unused (if the variable is not meant to be used, prefix it with an underscore)
+    │
+  7 │   def expand(credit, m), do: Map.new(credit, fn {k, v} -> {k, v} end)
+    │                      ~
+    │
+    └─ lib/loka/content/combat.ex:7:22: Loka.Content.Combat.expand/2
+
+    warning: unused import Loka.Content.Source.ref/3
+    │
+  3 │   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
+    │   ~
+    │
+    └─ lib/loka/content/combat.ex:3:3
+
+Generated loka app
+Running ExUnit with seed: 102077, max_cases: 16
+
+
+
+  1) test death credit short references become local definition references (Loka.ContentCombatTest)
+     test/loka/content_combat_test.exs:70
+     ** (FunctionClauseError) no function clause matching in Access.get/3
+
+     The following arguments were given to Access.get/3:
+
+         # 1
+         "rat"
+
+         # 2
+         "cartridge_id"
+
+         # 3
+         nil
+
+     Attempted function clauses (showing 6 out of 6):
+
+         def get(-%module{} = container-, key, default)
+         def get(map, key, default) when -is_map(map)-
+         def get(list, key, default) when -is_list(list)- and -is_atom(key)-
+         def get(list, key, _default) when -is_list(list)- and -is_integer(key)-
+         def get(list, key, _default) when -is_list(list)-
+         def get(-nil-, _key, default)
+
+     code: assert {:ok, bytes, _} = Loka.Content.compile(dir)
+     stacktrace:
+       (elixir 1.20.4) lib/access.ex:324: Access.get/3
+       (loka 0.1.0) lib/loka/content/refs.ex:54: Loka.Content.Refs.reference/6
+       (loka 0.1.0) lib/loka/content/combat.ex:70: anonymous fn/6 in Loka.Content.Combat.credit/5
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (loka 0.1.0) lib/loka/content/combat.ex:69: Loka.Content.Combat.credit/5
+       (loka 0.1.0) lib/loka/content/combat.ex:63: anonymous fn/5 in Loka.Content.Combat.credits/3
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (loka 0.1.0) lib/loka/content/combat.ex:62: Loka.Content.Combat.credits/3
+       (loka 0.1.0) lib/loka/content/combat.ex:34: Loka.Content.Combat.check/3
+       (loka 0.1.0) lib/loka/content/compiler.ex:45: Loka.Content.Compiler.checks/5
+       (loka 0.1.0) lib/loka/content/compiler.ex:32: Loka.Content.Compiler.compile/3
+       (loka 0.1.0) lib/loka/content.ex:61: Loka.Content.compiled/3
+       (loka 0.1.0) lib/loka/content.ex:43: Loka.Content.compile/2
+       test/loka/content_combat_test.exs:72: (test)
+
+
+
+  2) test combat requirements and attack bounds are enforced (Loka.ContentCombatTest)
+     test/loka/content_combat_test.exs:100
+     ** (FunctionClauseError) no function clause matching in Access.get/3
+
+     The following arguments were given to Access.get/3:
+
+         # 1
+         "rat"
+
+         # 2
+         "cartridge_id"
+
+         # 3
+         nil
+
+     Attempted function clauses (showing 6 out of 6):
+
+         def get(-%module{} = container-, key, default)
+         def get(map, key, default) when -is_map(map)-
+         def get(list, key, default) when -is_list(list)- and -is_atom(key)-
+         def get(list, key, _default) when -is_list(list)- and -is_integer(key)-
+         def get(list, key, _default) when -is_list(list)-
+         def get(-nil-, _key, default)
+
+     code: for {manifest, npc, code, path} <- cases do
+     stacktrace:
+       (elixir 1.20.4) lib/access.ex:324: Access.get/3
+       (loka 0.1.0) lib/loka/content/refs.ex:54: Loka.Content.Refs.reference/6
+       (loka 0.1.0) lib/loka/content/combat.ex:70: anonymous fn/6 in Loka.Content.Combat.credit/5
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (loka 0.1.0) lib/loka/content/combat.ex:69: Loka.Content.Combat.credit/5
+       (loka 0.1.0) lib/loka/content/combat.ex:63: anonymous fn/5 in Loka.Content.Combat.credits/3
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (loka 0.1.0) lib/loka/content/combat.ex:62: Loka.Content.Combat.credits/3
+       (loka 0.1.0) lib/loka/content/combat.ex:34: Loka.Content.Combat.check/3
+       (loka 0.1.0) lib/loka/content/compiler.ex:45: Loka.Content.Compiler.checks/5
+       (loka 0.1.0) lib/loka/content/compiler.ex:32: Loka.Content.Compiler.compile/3
+       (loka 0.1.0) lib/loka/content.ex:61: Loka.Content.compiled/3
+       (loka 0.1.0) lib/loka/content.ex:43: Loka.Content.compile/2
+       test/loka/content_combat_test.exs:120: anonymous fn/3 in Loka.ContentCombatTest."test combat requirements and attack bounds are enforced"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/content_combat_test.exs:118: (test)
+
+
+
+  3) test death credit is unique and bound to an attackable local NPC and player Boolean (Loka.ContentCombatTest)
+     test/loka/content_combat_test.exs:126
+     ** (FunctionClauseError) no function clause matching in Access.get/3
+
+     The following arguments were given to Access.get/3:
+
+         # 1
+         "rat"
+
+         # 2
+         "cartridge_id"
+
+         # 3
+         nil
+
+     Attempted function clauses (showing 6 out of 6):
+
+         def get(-%module{} = container-, key, default)
+         def get(map, key, default) when -is_map(map)-
+         def get(list, key, default) when -is_list(list)- and -is_atom(key)-
+         def get(list, key, _default) when -is_list(list)- and -is_integer(key)-
+         def get(list, key, _default) when -is_list(list)-
+         def get(-nil-, _key, default)
+
+     code: for {manifest, npc, fact, code, path} <- cases do
+     stacktrace:
+       (elixir 1.20.4) lib/access.ex:324: Access.get/3
+       (loka 0.1.0) lib/loka/content/refs.ex:54: Loka.Content.Refs.reference/6
+       (loka 0.1.0) lib/loka/content/combat.ex:70: anonymous fn/6 in Loka.Content.Combat.credit/5
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (loka 0.1.0) lib/loka/content/combat.ex:69: Loka.Content.Combat.credit/5
+       (loka 0.1.0) lib/loka/content/combat.ex:63: anonymous fn/5 in Loka.Content.Combat.credits/3
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       (loka 0.1.0) lib/loka/content/combat.ex:62: Loka.Content.Combat.credits/3
+       (loka 0.1.0) lib/loka/content/combat.ex:34: Loka.Content.Combat.check/3
+       (loka 0.1.0) lib/loka/content/compiler.ex:45: Loka.Content.Compiler.checks/5
+       (loka 0.1.0) lib/loka/content/compiler.ex:32: Loka.Content.Compiler.compile/3
+       (loka 0.1.0) lib/loka/content.ex:61: Loka.Content.compiled/3
+       (loka 0.1.0) lib/loka/content.ex:43: Loka.Content.compile/2
+       test/loka/content_combat_test.exs:157: anonymous fn/3 in Loka.ContentCombatTest."test death credit is unique and bound to an attackable local NPC and player Boolean"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/content_combat_test.exs:155: (test)
+
+
+Finished in 0.07 seconds (0.07s async, 0.00s sync)
+
+Result: 0/3 passed
+Failed: 3 tests

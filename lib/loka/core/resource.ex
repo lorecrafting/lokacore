@@ -1,5 +1,7 @@
 defmodule Loka.Core.Resource do
   @moduledoc "Resource arithmetic for the portable delta algebra."
+  alias Loka.Core.{Canonical, ComposeTarget}
+
   @doc """
   A resource's current value at `now` (ResourceSpec regeneration): the stored value (`start` at
   time 0 when unset) plus `gain` for each hour boundary crossed since it was stored, stopping at
@@ -66,9 +68,25 @@ defmodule Loka.Core.Resource do
 
   defp safe?(n), do: is_integer(n) and n >= -9_007_199_254_740_991 and n <= 9_007_199_254_740_991
 
+  @spec compose_adjustment(map(), term(), map(), integer()) :: {:ok, map()} | {:error, String.t()}
+  def compose_adjustment(op, row, state, horizon) do
+    now = Map.get(op, "at", state["clock"])
+    {:ok, target} = Canonical.encode(ComposeTarget.target(op))
+    {:ok, definition} = Canonical.encode(op["resource"])
+    override = get_in(state, ["entity_resource_specs", target])
+    spec = override || get_in(state, ["resource_specs", definition])
+
+    valid =
+      safe?(now) and (not Map.has_key?(op, "at") or (now >= state["clock"] and now <= horizon)) and
+        (override == nil or valid_override_row?(row, override, now))
+
+    if valid, do: adjusted(op, row, spec, now), else: {:error, "precondition_failed"}
+  end
+
   def adjusted(%{"from" => from, "to" => to} = op, row, spec, now) do
     cond do
-      spec == nil or not value?(to, spec) ->
+      spec == nil or not value?(to, spec) or
+          (row != nil and not clock?(row["at"], now)) ->
         {:error, "precondition_failed"}
 
       spec["regen"] != nil ->

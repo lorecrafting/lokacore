@@ -1,7 +1,7 @@
 // The presenter over a hand-built Game: the replies' words need no engine, only the boundary.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { DecisionResult, Game, Reply } from '../../packages/game-view/session.ts';
+import type { DecisionResult, Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { presenter } from './presenter.ts';
 import { detail } from './words.ts';
 
@@ -275,4 +275,78 @@ test('the save-error line says a pending start over in words and shows any other
   const failed = { message: '', startOver: true };
   assert.equal(detail({ ...failed, code: 'start_over_pending' }), 'start over not confirmed');
   assert.equal(detail({ ...failed, message: 'disk I/O error' }), 'disk I/O error');
+});
+
+// Break: failed recovery of receipt routing falls back to showing combat prose in World.
+test('a narration recovery fault holds combat results while their line routing is unavailable', () => {
+  for (const result of [
+    { outcome: 'engaged', events: [] },
+    { outcome: 'fled', events: [] },
+    { outcome: 'waited', events: [{ payload: { type: 'attack_result' } }] },
+  ]) {
+    let committed = false;
+    const p = presenter({
+      ...game(() => accepted(result.outcome)),
+      invoke: () => {
+        committed = true;
+        return {
+          kind: 'saved',
+          decision: { kind: 'accepted', ...result, narration: [{ key: 'strike' }] },
+        } as Reply;
+      },
+      lastNarration: () => {
+        if (committed) throw new Error('receipt temporarily unavailable');
+        return undefined;
+      },
+    });
+    p.press(north);
+    assert.deepEqual(p.screen().log, []);
+    assert.deepEqual(p.screen().combatLog, []);
+    assert.match(p.screen().fault!, /narration recovery unavailable/);
+  }
+});
+
+// Break: state delivery followed by reservation completion erases onset history or doubles escape.
+test('combat receipt history is once-only when completion follows an already displayed state', () => {
+  const view = (extra = {}) => ({ ...(VIEW as object), ...extra }) as GameView;
+  let current = view(),
+    token = 'view:quiet';
+  let last: ReturnType<Game['lastNarration']>;
+  const p = presenter({
+    ...game(() => accepted('engaged')),
+    text: () => 'The marsh rat falls.',
+    view: () => ({ view: current, token }),
+    lastNarration: () => last,
+    pendingInvocation: () => 'reserved',
+    invoke: () => ({ kind: 'catching_up', invocation_id: 'reserved' }),
+  });
+  for (const [key, after] of [
+    [
+      'combat.result',
+      view({ combat: { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' } }),
+    ],
+    [
+      'combat.result',
+      view({ combat: undefined, place: { id: 'road', title: { key: 'road.title' } } }),
+    ],
+  ] as const) {
+    const before = { view: current, token };
+    p.press({ label: 'Act', action_key: 'flee', target_ids: [], input: {} });
+    current = after;
+    token += 'next';
+    last = { command_id: token, lines: [{ key }], combat_lines: [0] } as never;
+    p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
+    p.update({
+      kind: 'completion',
+      invocation_id: 'reserved',
+      intent: {} as never,
+      before,
+      reply: {
+        kind: 'saved',
+        decision: { kind: 'accepted', outcome: 'fled', narration: [{ key }] } as never,
+      },
+    });
+  }
+  assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.', 'The marsh rat falls.']);
+  assert.deepEqual(p.screen().log, []);
 });

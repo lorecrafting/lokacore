@@ -1,0 +1,98 @@
+✔ composition known answers (12.171ms)
+✔ invariant checks known answers, a holding and a violated case per invariant checked in both kernels (0.48275ms)
+✔ invalid successful deltas fail their independent precondition check (0.269625ms)
+✔ containment checks deep chains, untouched cycles and untouched capacity (15.208792ms)
+✔ limits are named in the composition profile order (0.553083ms)
+✔ composition-profile budgets: at the limit composes with the expected changes, one over faults (16.525417ms)
+✔ a malformed barrier state faults precondition_failed (0.262916ms)
+✔ opted recovery literal rows and independent metadata replay (2.629708ms)
+✔ independent recovery replay rejects an unauthored stored rate (0.424042ms)
+✔ recovery schema trust-boundary literals (1.245958ms)
+✔ entity-resource overrides match literals and independent preconditions reject false success (1.065667ms)
+✔ NPC HP schema trust-boundary literals (1.533ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 171.709083
+✔ encounter and bound job composition matches portable literal rows (6.068958ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.230875ms)
+✔ independent replay verifies every written lifecycle row (0.429709ms)
+✖ cancelling a future job frees one slot in a full queue (5.322167ms)
+✔ resource delivery times settle literal rows and reject counterfeit preconditions (2.53075ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 148.136584
+
+✖ failing tests:
+
+test at kernel/ts/test/encounter_composition.test.ts:64:1
+✖ cancelling a future job frees one slot in a full queue (5.322167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    {
+  +   fault: {
+  +     code: 'budget_exceeded',
+  +     kind: 'fault'
+  +   }
+  -   changes: [
+  -     {
+  -       target: {
+  -         job_id: '00000008-0000-4000-8000-000000000000',
+  -         kind: 'job'
+  -       },
+  -       value: {
+  -         due_time: 30,
+  -         encounter_id: '00000006-0000-4000-8000-000000000000',
+  -         job: {
+  -           cartridge_id: 'lantern',
+  -           cartridge_version: '0.1.0',
+  -           key: 'wolf',
+  -           kind: 'npc'
+  -         },
+  -         status: 'pending'
+  -       }
+  -     },
+  -     {
+  -       target: {
+  -         job_id: 'aaaaaaaa-0000-4000-8000-000000000001',
+  -         kind: 'job'
+  -       },
+  -       value: {
+  -         due_time: 20,
+  -         encounter_id: '00000006-0000-4000-8000-000000000000',
+  -         job: {
+  -           cartridge_id: 'lantern',
+  -           cartridge_version: '0.1.0',
+  -           key: 'wolf',
+  -           kind: 'npc'
+  -         },
+  -         status: 'cancelled'
+  -       }
+  -     }
+  -   ]
+    }
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/encounter_composition.test.ts:87:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { fault: { kind: 'fault', code: 'budget_exceeded' } },
+    expected: { changes: [ [Object], [Object] ] },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

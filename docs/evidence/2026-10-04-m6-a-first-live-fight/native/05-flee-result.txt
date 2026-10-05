@@ -1,0 +1,9 @@
+The following is a diff from the previous accessibility tree for Window: "M6 isolated proof" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 51-53
+~					54 button Description: Look, The Drowned Lantern, Secondary Actions: Cancel
+~					55 text Secondary Actions: Cancel, Description: The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.
++					56 button Description: Old Bram, open, Secondary Actions: Cancel
++					57 button Description: Map, Secondary Actions: Cancel, activate, Go down, Go up, Go west
++					58 button Description: Position, standing, Secondary Actions: Cancel
++					15 button Description: Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 98 of 100, Secondary Actions: Cancel
++					59 text Description: Hour of the Dog, seven to nine, Secondary Actions: Cancel

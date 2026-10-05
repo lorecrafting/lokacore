@@ -185,9 +185,10 @@ valid targets, with its own approved scope. The inspected unsupported-capability
 one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
 rather than hiding errors or clearing same-room history. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 
-## Planned combat interaction (M4/M6)
+## Combat interaction
 
-**Planned until M5/M6 implementation.** Under the [planned first-encounter decision](../decisions/pm-decision-first-encounter-2026-10-03.md), the actual combat consumer must project complete Attack/Stand/Flee invocations and persistent threat/escape controls. Ordinary obstructing details yield to danger while world time continues; mandatory modal reading remains in safe authored contexts before engagement. No combat control exists until its real GameView/admission contract lands. This functional interaction work is separate from deferred cosmetic polish.
+The installed first-fight interaction follows [Live combat response](#live-combat-response-m6-a).
+Functional combat pages remain separate from deferred cosmetic polish.
 
 ## Shared elapsed status/completion boundary
 
@@ -218,3 +219,31 @@ so caller mutation cannot change the retained attempt or its completion context.
 catching_up, a different identified intent returns conflict while the original attempt and
 status remain retained; a matching retry uses its original identity/context. Pending unknown
 save retries keep the existing original-attempt behavior for any subsequent press.
+
+## Live combat response (M6-A)
+
+An attackable present NPC offers deliberate Attack. An active encounter automatically opens
+and foregrounds its own full Book page, like dialogue, including when another ordinary page
+or menu was open and when reopening a saved encounter. The page names the opponent, shows
+committed combat narration, and renders only currently available Stand, directionless Flee
+and Look actions as complete typed invocations. The shared kernel ActionSet also permits Scan;
+its existing phone presentation deferral remains. The combat restriction is applied after all
+ordinary contributions, so no blocked action or alias is exposed by a hidden ordinary page.
+Attack initiates combat from the NPC page; it is not usable again during an open encounter
+and is not shown on the combat page.
+Flee lets the engine choose a random currently legal exit; success shows the actual resulting
+room. All offered combat actions appear as a vertical dialogue-style list below the log inside
+the same ScrollView, not a fixed strip. No unavailable or future skill actions are invented. World time continues
+while the combat page is open.
+
+Combat takes precedence over ordinary navigation until the encounter closes. Committed
+closure or opponent death returns to the World; successful Flee and player death show the
+resulting room through the existing room-change flow. A pending save keeps the confirmed
+encounter and existing retry behavior; a refusal remains visible on the combat page. The UI
+never presents an unconfirmed hit, death, escape or encounter end as committed. Results
+narrate once through the existing subscription and cartridge text. Combat narration belongs
+only to the combat page and its retained history, never the World room event log, including
+closure, death, Flee and reopening a save after any of them. Routing uses structured committed
+receipt metadata, never rendered prose; ordinary room events remain in the World log even
+when delivered in the same receipt as combat. This replaces the earlier
+persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).

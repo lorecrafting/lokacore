@@ -1,0 +1,1225 @@
+{
+  "description": "Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the preserved adopted catalog and eight approved prototype-derived room strings are copied from source. No compiler or kernel supplies expected values.",
+  "value": {
+    "format": "loka-cartridge-v2",
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "ashmere_sampler",
+      "version": "0.0.8",
+      "title": "Ashmere — Bram's Lantern",
+      "requires": {
+        "kernel_api": {
+          "at_least": "1.5",
+          "below": "2.0"
+        },
+        "content_schema": 1,
+        "rule_ir": 1,
+        "capabilities": {
+          "movement": 1,
+          "containment": 1,
+          "barrier": 1,
+          "equipment": 1,
+          "position": 1,
+          "policy": 1,
+          "fact": 1,
+          "quest": 1,
+          "dialogue": 1,
+          "scene": 1,
+          "resource": 1,
+          "schedule": 1,
+          "description_variant": 1,
+          "calendar": 1,
+          "behavior": 1,
+          "death": 1
+        },
+        "client_features": []
+      },
+      "supported_profiles": [
+        "offline_private"
+      ],
+      "time_policy": {
+        "profile": "real_elapsed",
+        "rate": 50
+      }
+    },
+    "lock": {
+      "format": "loka-capability-lock-v1",
+      "capabilities": {
+        "movement": 1,
+        "containment": 1,
+        "barrier": 1,
+        "equipment": 1,
+        "position": 1,
+        "policy": 1,
+        "fact": 1,
+        "quest": 1,
+        "dialogue": 1,
+        "scene": 1,
+        "resource": 1,
+        "schedule": 1,
+        "description_variant": 1,
+        "calendar": 1,
+        "behavior": 1,
+        "death": 1
+      }
+    },
+    "entry": {
+      "cartridge_id": "ashmere_sampler",
+      "cartridge_version": "0.0.8",
+      "kind": "room",
+      "key": "ferry_landing"
+    },
+    "chapters": [
+      {
+        "title": "chapter.lantern"
+      },
+      {
+        "title": "chapter.bank",
+        "story_point": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "story_point",
+          "key": "lantern_resolved"
+        },
+        "outcome": "carry"
+      }
+    ],
+    "calendar": {
+      "start": 64800
+    },
+    "facts": {
+      "ashmere_sampler@0.0.8:fact/search_plan": {
+        "key": "search_plan",
+        "version": 1,
+        "value_type": {
+          "type": "enum",
+          "values": [
+            "undecided",
+            "player_led",
+            "party_led"
+          ],
+          "default": "undecided"
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest)."
+      },
+      "ashmere_sampler@0.0.8:fact/position": {
+        "key": "position",
+        "version": 1,
+        "value_type": {
+          "type": "enum",
+          "values": [
+            "standing",
+            "sitting",
+            "resting",
+            "sleeping"
+          ],
+          "default": "standing"
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "The character's position (position@1): only its rule writes it."
+      },
+      "ashmere_sampler@0.0.8:fact/scene_lantern_kept": {
+        "key": "scene_lantern_kept",
+        "version": 1,
+        "value_type": {
+          "type": "int",
+          "minimum": -1,
+          "maximum": 3,
+          "default": 0
+        },
+        "scopes": [
+          "player"
+        ],
+        "meaning": "Scene lantern_kept's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it."
+      }
+    },
+    "policies": {},
+    "actions": {},
+    "rooms": {
+      "ashmere_sampler@0.0.8:room/ferry_landing": {
+        "key": "ferry_landing",
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "well_lane"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/well_lane": {
+        "key": "well_lane",
+        "title": "room.well_lane.title",
+        "description": "room.well_lane.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "ferry_landing"
+            }
+          },
+          "east": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "drowned_lantern"
+            }
+          },
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "village_green"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/village_green": {
+        "key": "village_green",
+        "title": "room.village_green.title",
+        "description": "room.village_green.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "north_gate"
+            }
+          },
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "well_lane"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/north_gate": {
+        "key": "north_gate",
+        "title": "room.north_gate.title",
+        "description": "room.north_gate.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "village_green"
+            }
+          },
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "chapel_steps"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/chapel_steps": {
+        "key": "chapel_steps",
+        "title": "room.chapel_steps.title",
+        "description": "room.chapel_steps.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "north_gate"
+            }
+          },
+          "north": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "chapel_nave"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/chapel_nave": {
+        "key": "chapel_nave",
+        "title": "room.chapel_nave.title",
+        "description": "room.chapel_nave.description",
+        "exits": {
+          "south": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "chapel_steps"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/drowned_lantern": {
+        "key": "drowned_lantern",
+        "title": "room.drowned_lantern.title",
+        "description": "room.drowned_lantern.description",
+        "exits": {
+          "west": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "well_lane"
+            }
+          },
+          "up": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "inn_rooms"
+            }
+          },
+          "down": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "lantern_cellar"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "barrier",
+              "key": "cellar_door"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/inn_rooms": {
+        "key": "inn_rooms",
+        "title": "room.inn_rooms.title",
+        "description": "room.inn_rooms.description",
+        "exits": {
+          "down": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "drowned_lantern"
+            }
+          },
+          "up": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "inn_attic"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/inn_attic": {
+        "key": "inn_attic",
+        "title": "room.inn_attic.title",
+        "description": "room.inn_attic.description",
+        "exits": {
+          "down": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "inn_rooms"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:room/lantern_cellar": {
+        "key": "lantern_cellar",
+        "title": "room.lantern_cellar.title",
+        "description": "room.lantern_cellar.description",
+        "exits": {
+          "up": {
+            "to": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "room",
+              "key": "drowned_lantern"
+            },
+            "barrier": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "barrier",
+              "key": "cellar_door"
+            }
+          }
+        }
+      }
+    },
+    "items": {
+      "ashmere_sampler@0.0.8:item/brass_key": {
+        "key": "brass_key",
+        "keywords": [
+          "key",
+          "brass_key"
+        ],
+        "short": "item.brass_key.short",
+        "room_line": "item.brass_key.room",
+        "description": "item.brass_key.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "room",
+            "key": "inn_rooms"
+          }
+        },
+        "mass_grams": 100
+      },
+      "ashmere_sampler@0.0.8:item/cellar_key": {
+        "key": "cellar_key",
+        "keywords": [
+          "key",
+          "cellar_key"
+        ],
+        "short": "item.cellar_key.short",
+        "room_line": "item.cellar_key.room",
+        "description": "item.cellar_key.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "room",
+            "key": "inn_rooms"
+          }
+        },
+        "mass_grams": 100
+      },
+      "ashmere_sampler@0.0.8:item/lantern": {
+        "key": "lantern",
+        "keywords": [
+          "lantern",
+          "brass_lantern"
+        ],
+        "short": "item.lantern.short",
+        "room_line": "item.lantern.room",
+        "description": "item.lantern.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "room",
+            "key": "well_lane"
+          }
+        },
+        "mass_grams": 2000
+      },
+      "ashmere_sampler@0.0.8:item/tin_whistle": {
+        "key": "tin_whistle",
+        "keywords": [
+          "whistle",
+          "tin_whistle"
+        ],
+        "short": "item.tin_whistle.short",
+        "room_line": "item.tin_whistle.room",
+        "description": "item.tin_whistle.description",
+        "location": {
+          "in": "item",
+          "item": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "item",
+            "key": "trunk"
+          }
+        },
+        "mass_grams": 200
+      },
+      "ashmere_sampler@0.0.8:item/trunk": {
+        "key": "trunk",
+        "keywords": [
+          "trunk"
+        ],
+        "short": "item.trunk.short",
+        "room_line": "item.trunk.room",
+        "description": "item.trunk.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "room",
+            "key": "inn_attic"
+          }
+        },
+        "mass_grams": 8000,
+        "barrier": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "barrier",
+          "key": "trunk_lid"
+        }
+      },
+      "ashmere_sampler@0.0.8:item/wool_cloak": {
+        "key": "wool_cloak",
+        "keywords": [
+          "cloak",
+          "wool_cloak"
+        ],
+        "short": "item.wool_cloak.short",
+        "room_line": "item.wool_cloak.room",
+        "description": "item.wool_cloak.description",
+        "location": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "room",
+            "key": "inn_rooms"
+          }
+        },
+        "mass_grams": 3000,
+        "slot": "cloak"
+      },
+      "ashmere_sampler@0.0.8:item/player_corpse": {
+        "key": "player_corpse",
+        "keywords": [
+          "corpse",
+          "player_corpse"
+        ],
+        "short": "item.player_corpse.short",
+        "room_line": "item.player_corpse.room",
+        "description": "item.player_corpse.description",
+        "location": {
+          "in": "template"
+        },
+        "mass_grams": 0
+      },
+      "ashmere_sampler@0.0.8:item/rat_corpse": {
+        "key": "rat_corpse",
+        "keywords": [
+          "corpse",
+          "rat_corpse"
+        ],
+        "short": "item.rat_corpse.short",
+        "room_line": "item.rat_corpse.room",
+        "description": "item.rat_corpse.description",
+        "location": {
+          "in": "template"
+        },
+        "mass_grams": 0
+      }
+    },
+    "npcs": {
+      "ashmere_sampler@0.0.8:npc/bram": {
+        "key": "bram",
+        "keywords": [
+          "bram",
+          "ferryman"
+        ],
+        "short": "npc.bram.short",
+        "room_line": "npc.bram.room",
+        "description": "npc.bram.description",
+        "room": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "room",
+          "key": "ferry_landing"
+        },
+        "daily_schedule": {
+          "6": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "room",
+            "key": "ferry_landing"
+          },
+          "19": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "room",
+            "key": "drowned_lantern"
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:npc/cellar_rat_1": {
+        "key": "cellar_rat_1",
+        "keywords": [
+          "rat",
+          "cellar_rat_1"
+        ],
+        "short": "npc.cellar_rat.short",
+        "room_line": "npc.cellar_rat_1.room",
+        "description": "npc.cellar_rat.description",
+        "room": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "room",
+          "key": "lantern_cellar"
+        },
+        "hp": {
+          "minimum": 0,
+          "maximum": 6,
+          "start": 6,
+          "gain": 0
+        }
+      },
+      "ashmere_sampler@0.0.8:npc/cellar_rat_2": {
+        "key": "cellar_rat_2",
+        "keywords": [
+          "rat",
+          "cellar_rat_2"
+        ],
+        "short": "npc.cellar_rat.short",
+        "room_line": "npc.cellar_rat_2.room",
+        "description": "npc.cellar_rat.description",
+        "room": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "room",
+          "key": "lantern_cellar"
+        },
+        "hp": {
+          "minimum": 0,
+          "maximum": 6,
+          "start": 6,
+          "gain": 0
+        }
+      },
+      "ashmere_sampler@0.0.8:npc/cellar_rat_3": {
+        "key": "cellar_rat_3",
+        "keywords": [
+          "rat",
+          "cellar_rat_3"
+        ],
+        "short": "npc.cellar_rat.short",
+        "room_line": "npc.cellar_rat_3.room",
+        "description": "npc.cellar_rat.description",
+        "room": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "room",
+          "key": "lantern_cellar"
+        },
+        "hp": {
+          "minimum": 0,
+          "maximum": 6,
+          "start": 6,
+          "gain": 0
+        }
+      },
+      "ashmere_sampler@0.0.8:npc/cellar_rat_4": {
+        "key": "cellar_rat_4",
+        "keywords": [
+          "rat",
+          "cellar_rat_4"
+        ],
+        "short": "npc.cellar_rat.short",
+        "room_line": "npc.cellar_rat_4.room",
+        "description": "npc.cellar_rat.description",
+        "room": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "room",
+          "key": "lantern_cellar"
+        },
+        "hp": {
+          "minimum": 0,
+          "maximum": 6,
+          "start": 6,
+          "gain": 0
+        }
+      },
+      "ashmere_sampler@0.0.8:npc/cellar_rat_5": {
+        "key": "cellar_rat_5",
+        "keywords": [
+          "rat",
+          "cellar_rat_5"
+        ],
+        "short": "npc.cellar_rat.short",
+        "room_line": "npc.cellar_rat_5.room",
+        "description": "npc.cellar_rat.description",
+        "room": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "room",
+          "key": "lantern_cellar"
+        },
+        "hp": {
+          "minimum": 0,
+          "maximum": 6,
+          "start": 6,
+          "gain": 0
+        }
+      }
+    },
+    "barriers": {
+      "ashmere_sampler@0.0.8:barrier/cellar_door": {
+        "key": "cellar_door",
+        "keywords": [
+          "door",
+          "cellar_door"
+        ],
+        "short": "barrier.cellar_door.short",
+        "initial": "locked",
+        "key_item": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "item",
+          "key": "cellar_key"
+        }
+      },
+      "ashmere_sampler@0.0.8:barrier/trunk_lid": {
+        "key": "trunk_lid",
+        "keywords": [
+          "lid",
+          "trunk_lid"
+        ],
+        "short": "barrier.trunk_lid.short",
+        "initial": "locked",
+        "key_item": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "item",
+          "key": "brass_key"
+        }
+      }
+    },
+    "resources": {
+      "ashmere_sampler@0.0.8:resource/hp": {
+        "key": "hp",
+        "minimum": 0,
+        "maximum": 10,
+        "start": 10,
+        "gain": 5
+      },
+      "ashmere_sampler@0.0.8:resource/ma": {
+        "key": "ma",
+        "minimum": 0,
+        "maximum": 100,
+        "start": 100,
+        "gain": 4
+      },
+      "ashmere_sampler@0.0.8:resource/mv": {
+        "key": "mv",
+        "minimum": 0,
+        "maximum": 100,
+        "start": 100,
+        "gain": 18,
+        "regen": {
+          "every": 3600,
+          "by_position": {
+            "standing": 18,
+            "sitting": 18,
+            "resting": 36,
+            "sleeping": 36
+          }
+        },
+        "bands": [
+          {
+            "at_percent": 100,
+            "key": "mv_ready",
+            "tone": "normal"
+          },
+          {
+            "at_percent": 75,
+            "key": "steady",
+            "tone": "normal"
+          },
+          {
+            "at_percent": 25,
+            "key": "tired",
+            "tone": "warning"
+          },
+          {
+            "at_percent": 0,
+            "key": "exhausted",
+            "tone": "danger"
+          }
+        ]
+      }
+    },
+    "quests": {
+      "ashmere_sampler@0.0.8:quest/lantern": {
+        "key": "lantern",
+        "title": "quest.lantern.title",
+        "objective": {
+          "evidence": "current_state",
+          "policy": {
+            "policy_version": 1,
+            "root": {
+              "op": "has_item",
+              "item": {
+                "cartridge_id": "ashmere_sampler",
+                "cartridge_version": "0.0.8",
+                "kind": "item",
+                "key": "lantern"
+              }
+            }
+          }
+        },
+        "journal": {
+          "active": "quest.lantern.find",
+          "objectives_met": "quest.lantern.return",
+          "resolved": "quest.lantern.done",
+          "failed": "quest.lantern.failed",
+          "abandoned": "quest.lantern.abandoned",
+          "outcomes": {
+            "take_it": "quest.lantern.carried"
+          }
+        }
+      }
+    },
+    "dialogues": {
+      "ashmere_sampler@0.0.8:dialogue/bram": {
+        "key": "bram",
+        "npc": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "npc",
+          "key": "bram"
+        },
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "quest_state",
+            "quest": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "quest",
+              "key": "lantern"
+            },
+            "state": "active"
+          }
+        },
+        "prompt": "dialogue.bram.prompt",
+        "roles": {
+          "bram": {
+            "role": "npc",
+            "npc": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "npc",
+              "key": "bram"
+            }
+          },
+          "lantern": {
+            "role": "item",
+            "item": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "item",
+              "key": "lantern"
+            }
+          }
+        },
+        "quest": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "quest",
+          "key": "lantern"
+        },
+        "choices": {
+          "take_it": {
+            "label": "dialogue.bram.carry",
+            "narration": "narration.bram.carry",
+            "sequence": [
+              {
+                "op": "fact.assign",
+                "fact": {
+                  "cartridge_id": "ashmere_sampler",
+                  "cartridge_version": "0.0.8",
+                  "kind": "fact",
+                  "key": "search_plan"
+                },
+                "value": "player_led"
+              }
+            ]
+          },
+          "leave_it": {
+            "label": "dialogue.bram.leave",
+            "narration": "narration.bram.leave",
+            "sequence": [
+              {
+                "op": "fact.assign",
+                "fact": {
+                  "cartridge_id": "ashmere_sampler",
+                  "cartridge_version": "0.0.8",
+                  "kind": "fact",
+                  "key": "search_plan"
+                },
+                "value": "party_led"
+              }
+            ],
+            "hand_over": {
+              "item": "lantern",
+              "to": "bram"
+            }
+          }
+        }
+      },
+      "ashmere_sampler@0.0.8:dialogue/bram_offer": {
+        "key": "bram_offer",
+        "npc": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "npc",
+          "key": "bram"
+        },
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "op": "not",
+            "item": {
+              "op": "any",
+              "items": [
+                {
+                  "op": "quest_state",
+                  "quest": {
+                    "cartridge_id": "ashmere_sampler",
+                    "cartridge_version": "0.0.8",
+                    "kind": "quest",
+                    "key": "lantern"
+                  },
+                  "state": "active"
+                },
+                {
+                  "op": "quest_state",
+                  "quest": {
+                    "cartridge_id": "ashmere_sampler",
+                    "cartridge_version": "0.0.8",
+                    "kind": "quest",
+                    "key": "lantern"
+                  },
+                  "state": "objectives_complete"
+                },
+                {
+                  "op": "quest_state",
+                  "quest": {
+                    "cartridge_id": "ashmere_sampler",
+                    "cartridge_version": "0.0.8",
+                    "kind": "quest",
+                    "key": "lantern"
+                  },
+                  "state": "resolved"
+                },
+                {
+                  "op": "quest_state",
+                  "quest": {
+                    "cartridge_id": "ashmere_sampler",
+                    "cartridge_version": "0.0.8",
+                    "kind": "quest",
+                    "key": "lantern"
+                  },
+                  "state": "failed"
+                },
+                {
+                  "op": "quest_state",
+                  "quest": {
+                    "cartridge_id": "ashmere_sampler",
+                    "cartridge_version": "0.0.8",
+                    "kind": "quest",
+                    "key": "lantern"
+                  },
+                  "state": "abandoned"
+                }
+              ]
+            }
+          }
+        },
+        "prompt": "dialogue.bram_offer.prompt",
+        "roles": {
+          "bram": {
+            "role": "npc",
+            "npc": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "npc",
+              "key": "bram"
+            }
+          }
+        },
+        "choices": {
+          "accept": {
+            "label": "quest.lantern.accept",
+            "narration": "narration.bram.accept",
+            "accept": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "quest",
+              "key": "lantern"
+            }
+          }
+        }
+      }
+    },
+    "story_points": {
+      "ashmere_sampler@0.0.8:story_point/lantern_resolved": {
+        "key": "lantern_resolved",
+        "outcomes": {
+          "carry": {
+            "dialogue": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "dialogue",
+              "key": "bram"
+            },
+            "choice": "take_it"
+          },
+          "leave": {
+            "dialogue": {
+              "cartridge_id": "ashmere_sampler",
+              "cartridge_version": "0.0.8",
+              "kind": "dialogue",
+              "key": "bram"
+            },
+            "choice": "leave_it"
+          }
+        }
+      }
+    },
+    "scenes": {
+      "ashmere_sampler@0.0.8:scene/lantern_kept": {
+        "key": "lantern_kept",
+        "on": {
+          "story_point": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "story_point",
+            "key": "lantern_resolved"
+          },
+          "outcome": "carry"
+        },
+        "control": "modal",
+        "steps": [
+          {
+            "type": "narrate",
+            "text": "scene.lantern_kept.bram"
+          },
+          {
+            "type": "narrate",
+            "text": "scene.lantern_kept.brass"
+          },
+          {
+            "type": "narrate",
+            "text": "scene.lantern_kept.river"
+          },
+          {
+            "type": "await_ack"
+          },
+          {
+            "type": "end"
+          }
+        ]
+      }
+    },
+    "world": {
+      "bands": [
+        {
+          "at_percent": 100,
+          "key": "ready",
+          "tone": "normal"
+        },
+        {
+          "at_percent": 90,
+          "key": "slightly_scratched",
+          "tone": "normal"
+        },
+        {
+          "at_percent": 80,
+          "key": "few_bruises",
+          "tone": "normal"
+        },
+        {
+          "at_percent": 70,
+          "key": "some_cuts",
+          "tone": "warning"
+        },
+        {
+          "at_percent": 60,
+          "key": "several_wounds",
+          "tone": "warning"
+        },
+        {
+          "at_percent": 50,
+          "key": "many_nasty_wounds",
+          "tone": "warning"
+        },
+        {
+          "at_percent": 40,
+          "key": "bleeding_freely",
+          "tone": "warning"
+        },
+        {
+          "at_percent": 30,
+          "key": "covered_in_blood",
+          "tone": "danger"
+        },
+        {
+          "at_percent": 20,
+          "key": "leaking_guts",
+          "tone": "danger"
+        },
+        {
+          "at_percent": 10,
+          "key": "almost_dead",
+          "tone": "danger"
+        },
+        {
+          "at_percent": 0,
+          "key": "dying",
+          "tone": "danger"
+        }
+      ],
+      "carry": {
+        "max_grams": 12000
+      },
+      "movement": {
+        "cost": {
+          "resource": {
+            "cartridge_id": "ashmere_sampler",
+            "cartridge_version": "0.0.8",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "amount": 1
+        }
+      },
+      "death": {
+        "player_corpse": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "item",
+          "key": "player_corpse"
+        },
+        "npc_corpse": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "item",
+          "key": "rat_corpse"
+        },
+        "shrine": {
+          "cartridge_id": "ashmere_sampler",
+          "cartridge_version": "0.0.8",
+          "kind": "room",
+          "key": "chapel_nave"
+        },
+        "restore": {
+          "hp": 10,
+          "mv": 100
+        }
+      }
+    },
+    "text": {
+      "room.drowned_lantern.title": "The Drowned Lantern",
+      "room.drowned_lantern.description": "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.",
+      "room.ferry_landing.title": "Ferry Landing",
+      "room.ferry_landing.description": "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.",
+      "room.inn_attic.title": "Inn Attic",
+      "room.inn_attic.description": "Dust lies thick as felt. A trunk with an iron hasp sits under the slope of the roof.",
+      "room.inn_rooms.title": "Inn Rooms",
+      "room.inn_rooms.description": "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage.",
+      "room.lantern_cellar.title": "Lantern Cellar",
+      "room.lantern_cellar.description": "Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall.",
+      "room.well_lane.title": "Well Lane",
+      "room.well_lane.description": "A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east.",
+      "chapter.lantern": "Bram's Lantern",
+      "chapter.bank": "The Lantern Found",
+      "item.lantern.short": "a brass lantern",
+      "item.lantern.room": "A [brass lantern] rests beside the well.",
+      "item.lantern.description": "Dented brass with a horn window, oil sloshing inside.",
+      "item.cellar_key.short": "a cellar key",
+      "item.cellar_key.room": "A [cellar key] lies on the windowsill.",
+      "item.cellar_key.description": "An iron key, its bow worn smooth.",
+      "item.brass_key.short": "a brass key",
+      "item.brass_key.room": "A [brass key] lies beside the cellar key.",
+      "item.brass_key.description": "A small brass key with a narrow tooth.",
+      "item.wool_cloak.short": "a wool cloak",
+      "item.wool_cloak.room": "A [wool cloak] hangs over the bedpost.",
+      "item.wool_cloak.description": "Heavy grey wool. Rain runs off it.",
+      "item.trunk.short": "an old trunk",
+      "item.trunk.room": "An old [trunk] sits under the slope of the roof.",
+      "item.trunk.description": "An old wooden trunk. Its iron hasp is dark with age.",
+      "item.tin_whistle.short": "a tin whistle",
+      "item.tin_whistle.room": "A small [tin whistle] lies in the trunk.",
+      "item.tin_whistle.description": "A small tin whistle, dulled by dust.",
+      "barrier.trunk_lid.short": "the trunk's lid",
+      "barrier.cellar_door.short": "the cellar door",
+      "npc.bram.short": "Old Bram",
+      "npc.bram.room": "[Old Bram] the ferryman stands here, one boot on the ferry.",
+      "npc.bram.description": "A ferryman with rope-scarred hands and a coat that has never been dry.",
+      "quest.lantern.title": "Bram's lantern",
+      "quest.lantern.accept": "Offer to fetch Bram's lantern",
+      "dialogue.bram.prompt": "Bram looks at the lantern, then at you. \"Will you keep it for now, or leave it with me?\"",
+      "dialogue.bram.carry": "Keep the lantern",
+      "dialogue.bram.leave": "Leave it with Bram",
+      "narration.bram.carry": "You keep the lantern. Bram nods once.",
+      "narration.bram.leave": "You hand Bram the lantern. He settles it beside his boot.",
+      "dialogue.bram_offer.prompt": "Bram keeps his eyes on the reeds. \"My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?\"",
+      "narration.bram.accept": "You say you'll fetch it. Bram nods toward the path north.",
+      "quest.lantern.find": "Find Bram's lantern.",
+      "quest.lantern.return": "Bring the lantern to Bram.",
+      "quest.lantern.done": "Bram's lantern is found.",
+      "quest.lantern.failed": "The lantern search failed.",
+      "quest.lantern.abandoned": "The lantern search was abandoned.",
+      "quest.lantern.carried": "You found the lantern and kept it.",
+      "scene.lantern_kept.bram": "Bram settles his boot against the ferry. The wet rope creaks around the mooring post.",
+      "scene.lantern_kept.brass": "You turn the brass lantern in your hand. Its dented side is cool against your palm.",
+      "scene.lantern_kept.river": "The reeds stir. The river keeps sliding past the landing, the color of strong tea.",
+      "action.talk": "Talk to",
+      "action.continue": "Continue",
+      "band.ready": "is in perfect health",
+      "band.slightly_scratched": "is slightly scratched",
+      "band.few_bruises": "has a few bruises",
+      "band.some_cuts": "has some cuts",
+      "band.several_wounds": "has several wounds",
+      "band.many_nasty_wounds": "has many nasty wounds",
+      "band.bleeding_freely": "is bleeding freely",
+      "band.covered_in_blood": "is covered in blood",
+      "band.leaking_guts": "is leaking guts",
+      "band.almost_dead": "is almost dead",
+      "band.dying": "is DYING",
+      "room.village_green.title": "Village Green",
+      "room.village_green.description": "An old elm shades a patch of trodden grass at the heart of Ashmere. The stocks stand empty, and a market cross of weathered stone marks the middle.",
+      "room.north_gate.title": "North Gate",
+      "room.north_gate.description": "The north gate is oak banded with iron, set in the village wall. North, a track climbs to the priory.",
+      "room.chapel_steps.title": "Chapel Steps",
+      "room.chapel_steps.description": "Wide stone steps, worn into dips, climb to the chapel door. An alms bowl sits on the top step.",
+      "room.chapel_nave.title": "Chapel Nave",
+      "room.chapel_nave.description": "The nave is cold and high. A fresco covers the east wall, and the altar is plain stone.",
+      "band.mv_ready": "is ready to travel",
+      "band.steady": "moves steadily",
+      "band.tired": "is tired",
+      "band.exhausted": "is exhausted",
+      "action.take": "Take",
+      "npc.cellar_rat.short": "a cellar rat",
+      "npc.cellar_rat.description": "A small grey rat watches from beside a barrel, its whiskers twitching.",
+      "npc.cellar_rat_1.room": "A [[cellar_rat_1|cellar rat]] noses among the dusty barrels.",
+      "npc.cellar_rat_2.room": "A [[cellar_rat_2|cellar rat]] noses among the dusty barrels.",
+      "npc.cellar_rat_3.room": "A [[cellar_rat_3|cellar rat]] noses among the dusty barrels.",
+      "npc.cellar_rat_4.room": "A [[cellar_rat_4|cellar rat]] noses among the dusty barrels.",
+      "npc.cellar_rat_5.room": "A [[cellar_rat_5|cellar rat]] noses among the dusty barrels.",
+      "item.player_corpse.short": "a fallen body",
+      "item.player_corpse.room": "A [player corpse] lies here.",
+      "item.player_corpse.description": "Possessions remain with this body.",
+      "item.rat_corpse.short": "a dead cellar rat",
+      "item.rat_corpse.room": "A [rat corpse] lies here.",
+      "item.rat_corpse.description": "The cellar rat lies still."
+    }
+  },
+  "canonical": "{\"actions\":{},\"barriers\":{\"ashmere_sampler@0.0.8:barrier/cellar_door\":{\"initial\":\"locked\",\"key\":\"cellar_door\",\"key_item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"cellar_key\",\"kind\":\"item\"},\"keywords\":[\"door\",\"cellar_door\"],\"short\":\"barrier.cellar_door.short\"},\"ashmere_sampler@0.0.8:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"calendar\":{\"start\":64800},\"chapters\":[{\"title\":\"chapter.lantern\"},{\"outcome\":\"carry\",\"story_point\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"},\"title\":\"chapter.bank\"}],\"dialogues\":{\"ashmere_sampler@0.0.8:dialogue/bram\":{\"choices\":{\"leave_it\":{\"hand_over\":{\"item\":\"lantern\",\"to\":\"bram\"},\"label\":\"dialogue.bram.leave\",\"narration\":\"narration.bram.leave\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"party_led\"}]},\"take_it\":{\"label\":\"dialogue.bram.carry\",\"narration\":\"narration.bram.carry\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"search_plan\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"player_led\"}]}},\"key\":\"bram\",\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"}},\"prompt\":\"dialogue.bram.prompt\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"},\"lantern\":{\"item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"item\"},\"role\":\"item\"}}},\"ashmere_sampler@0.0.8:dialogue/bram_offer\":{\"choices\":{\"accept\":{\"accept\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"label\":\"quest.lantern.accept\",\"narration\":\"narration.bram.accept\"}},\"key\":\"bram_offer\",\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"bram\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"items\":[{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"active\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"objectives_complete\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"resolved\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"failed\"},{\"op\":\"quest_state\",\"quest\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"quest\"},\"state\":\"abandoned\"}],\"op\":\"any\"},\"op\":\"not\"}},\"prompt\":\"dialogue.bram_offer.prompt\",\"roles\":{\"bram\":{\"npc\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"bram\",\"kind\":\"npc\"},\"role\":\"npc\"}}}},\"entry\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"facts\":{\"ashmere_sampler@0.0.8:fact/position\":{\"key\":\"position\",\"meaning\":\"The character's position (position@1): only its rule writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"standing\",\"type\":\"enum\",\"values\":[\"standing\",\"sitting\",\"resting\",\"sleeping\"]},\"version\":1},\"ashmere_sampler@0.0.8:fact/scene_lantern_kept\":{\"key\":\"scene_lantern_kept\",\"meaning\":\"Scene lantern_kept's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":0,\"maximum\":3,\"minimum\":-1,\"type\":\"int\"},\"version\":1},\"ashmere_sampler@0.0.8:fact/search_plan\":{\"key\":\"search_plan\",\"meaning\":\"Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest).\",\"scopes\":[\"player\"],\"value_type\":{\"default\":\"undecided\",\"type\":\"enum\",\"values\":[\"undecided\",\"player_led\",\"party_led\"]},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"items\":{\"ashmere_sampler@0.0.8:item/brass_key\":{\"description\":\"item.brass_key.description\",\"key\":\"brass_key\",\"keywords\":[\"key\",\"brass_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"mass_grams\":100,\"room_line\":\"item.brass_key.room\",\"short\":\"item.brass_key.short\"},\"ashmere_sampler@0.0.8:item/cellar_key\":{\"description\":\"item.cellar_key.description\",\"key\":\"cellar_key\",\"keywords\":[\"key\",\"cellar_key\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"mass_grams\":100,\"room_line\":\"item.cellar_key.room\",\"short\":\"item.cellar_key.short\"},\"ashmere_sampler@0.0.8:item/lantern\":{\"description\":\"item.lantern.description\",\"key\":\"lantern\",\"keywords\":[\"lantern\",\"brass_lantern\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"well_lane\",\"kind\":\"room\"}},\"mass_grams\":2000,\"room_line\":\"item.lantern.room\",\"short\":\"item.lantern.short\"},\"ashmere_sampler@0.0.8:item/player_corpse\":{\"description\":\"item.player_corpse.description\",\"key\":\"player_corpse\",\"keywords\":[\"corpse\",\"player_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"room_line\":\"item.player_corpse.room\",\"short\":\"item.player_corpse.short\"},\"ashmere_sampler@0.0.8:item/rat_corpse\":{\"description\":\"item.rat_corpse.description\",\"key\":\"rat_corpse\",\"keywords\":[\"corpse\",\"rat_corpse\"],\"location\":{\"in\":\"template\"},\"mass_grams\":0,\"room_line\":\"item.rat_corpse.room\",\"short\":\"item.rat_corpse.short\"},\"ashmere_sampler@0.0.8:item/tin_whistle\":{\"description\":\"item.tin_whistle.description\",\"key\":\"tin_whistle\",\"keywords\":[\"whistle\",\"tin_whistle\"],\"location\":{\"in\":\"item\",\"item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"trunk\",\"kind\":\"item\"}},\"mass_grams\":200,\"room_line\":\"item.tin_whistle.room\",\"short\":\"item.tin_whistle.short\"},\"ashmere_sampler@0.0.8:item/trunk\":{\"barrier\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"trunk_lid\",\"kind\":\"barrier\"},\"description\":\"item.trunk.description\",\"key\":\"trunk\",\"keywords\":[\"trunk\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"inn_attic\",\"kind\":\"room\"}},\"mass_grams\":8000,\"room_line\":\"item.trunk.room\",\"short\":\"item.trunk.short\"},\"ashmere_sampler@0.0.8:item/wool_cloak\":{\"description\":\"item.wool_cloak.description\",\"key\":\"wool_cloak\",\"keywords\":[\"cloak\",\"wool_cloak\"],\"location\":{\"in\":\"room\",\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"mass_grams\":3000,\"room_line\":\"item.wool_cloak.room\",\"short\":\"item.wool_cloak.short\",\"slot\":\"cloak\"}},\"lock\":{\"capabilities\":{\"barrier\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"position\":1,\"quest\":1,\"resource\":1,\"scene\":1,\"schedule\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"ashmere_sampler\",\"requires\":{\"capabilities\":{\"barrier\":1,\"behavior\":1,\"calendar\":1,\"containment\":1,\"death\":1,\"description_variant\":1,\"dialogue\":1,\"equipment\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"position\":1,\"quest\":1,\"resource\":1,\"scene\":1,\"schedule\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.5\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"time_policy\":{\"profile\":\"real_elapsed\",\"rate\":50},\"title\":\"Ashmere — Bram's Lantern\",\"version\":\"0.0.8\"},\"npcs\":{\"ashmere_sampler@0.0.8:npc/bram\":{\"daily_schedule\":{\"19\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"drowned_lantern\",\"kind\":\"room\"},\"6\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"ferry_landing\",\"kind\":\"room\"}},\"description\":\"npc.bram.description\",\"key\":\"bram\",\"keywords\":[\"bram\",\"ferryman\"],\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"ferry_landing\",\"kind\":\"room\"},\"room_line\":\"npc.bram.room\",\"short\":\"npc.bram.short\"},\"ashmere_sampler@0.0.8:npc/cellar_rat_1\":{\"description\":\"npc.cellar_rat.description\",\"hp\":{\"gain\":0,\"maximum\":6,\"minimum\":0,\"start\":6},\"key\":\"cellar_rat_1\",\"keywords\":[\"rat\",\"cellar_rat_1\"],\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_cellar\",\"kind\":\"room\"},\"room_line\":\"npc.cellar_rat_1.room\",\"short\":\"npc.cellar_rat.short\"},\"ashmere_sampler@0.0.8:npc/cellar_rat_2\":{\"description\":\"npc.cellar_rat.description\",\"hp\":{\"gain\":0,\"maximum\":6,\"minimum\":0,\"start\":6},\"key\":\"cellar_rat_2\",\"keywords\":[\"rat\",\"cellar_rat_2\"],\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_cellar\",\"kind\":\"room\"},\"room_line\":\"npc.cellar_rat_2.room\",\"short\":\"npc.cellar_rat.short\"},\"ashmere_sampler@0.0.8:npc/cellar_rat_3\":{\"description\":\"npc.cellar_rat.description\",\"hp\":{\"gain\":0,\"maximum\":6,\"minimum\":0,\"start\":6},\"key\":\"cellar_rat_3\",\"keywords\":[\"rat\",\"cellar_rat_3\"],\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_cellar\",\"kind\":\"room\"},\"room_line\":\"npc.cellar_rat_3.room\",\"short\":\"npc.cellar_rat.short\"},\"ashmere_sampler@0.0.8:npc/cellar_rat_4\":{\"description\":\"npc.cellar_rat.description\",\"hp\":{\"gain\":0,\"maximum\":6,\"minimum\":0,\"start\":6},\"key\":\"cellar_rat_4\",\"keywords\":[\"rat\",\"cellar_rat_4\"],\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_cellar\",\"kind\":\"room\"},\"room_line\":\"npc.cellar_rat_4.room\",\"short\":\"npc.cellar_rat.short\"},\"ashmere_sampler@0.0.8:npc/cellar_rat_5\":{\"description\":\"npc.cellar_rat.description\",\"hp\":{\"gain\":0,\"maximum\":6,\"minimum\":0,\"start\":6},\"key\":\"cellar_rat_5\",\"keywords\":[\"rat\",\"cellar_rat_5\"],\"room\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_cellar\",\"kind\":\"room\"},\"room_line\":\"npc.cellar_rat_5.room\",\"short\":\"npc.cellar_rat.short\"}},\"policies\":{},\"quests\":{\"ashmere_sampler@0.0.8:quest/lantern\":{\"journal\":{\"abandoned\":\"quest.lantern.abandoned\",\"active\":\"quest.lantern.find\",\"failed\":\"quest.lantern.failed\",\"objectives_met\":\"quest.lantern.return\",\"outcomes\":{\"take_it\":\"quest.lantern.carried\"},\"resolved\":\"quest.lantern.done\"},\"key\":\"lantern\",\"objective\":{\"evidence\":\"current_state\",\"policy\":{\"policy_version\":1,\"root\":{\"item\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern\",\"kind\":\"item\"},\"op\":\"has_item\"}}},\"title\":\"quest.lantern.title\"}},\"resources\":{\"ashmere_sampler@0.0.8:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":10,\"minimum\":0,\"start\":10},\"ashmere_sampler@0.0.8:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"ashmere_sampler@0.0.8:resource/mv\":{\"bands\":[{\"at_percent\":100,\"key\":\"mv_ready\",\"tone\":\"normal\"},{\"at_percent\":75,\"key\":\"steady\",\"tone\":\"normal\"},{\"at_percent\":25,\"key\":\"tired\",\"tone\":\"warning\"},{\"at_percent\":0,\"key\":\"exhausted\",\"tone\":\"danger\"}],\"gain\":18,\"key\":\"mv\",\"maximum\":100,\"minimum\":0,\"regen\":{\"by_position\":{\"resting\":36,\"sitting\":18,\"sleeping\":36,\"standing\":18},\"every\":3600},\"start\":100}},\"rooms\":{\"ashmere_sampler@0.0.8:room/chapel_nave\":{\"description\":\"room.chapel_nave.description\",\"exits\":{\"south\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"chapel_steps\",\"kind\":\"room\"}}},\"key\":\"chapel_nave\",\"title\":\"room.chapel_nave.title\"},\"ashmere_sampler@0.0.8:room/chapel_steps\":{\"description\":\"room.chapel_steps.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"chapel_nave\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"north_gate\",\"kind\":\"room\"}}},\"key\":\"chapel_steps\",\"title\":\"room.chapel_steps.title\"},\"ashmere_sampler@0.0.8:room/drowned_lantern\":{\"description\":\"room.drowned_lantern.description\",\"exits\":{\"down\":{\"barrier\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"cellar_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_cellar\",\"kind\":\"room\"}},\"up\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"inn_rooms\",\"kind\":\"room\"}},\"west\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"well_lane\",\"kind\":\"room\"}}},\"key\":\"drowned_lantern\",\"title\":\"room.drowned_lantern.title\"},\"ashmere_sampler@0.0.8:room/ferry_landing\":{\"description\":\"room.ferry_landing.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"well_lane\",\"kind\":\"room\"}}},\"key\":\"ferry_landing\",\"title\":\"room.ferry_landing.title\"},\"ashmere_sampler@0.0.8:room/inn_attic\":{\"description\":\"room.inn_attic.description\",\"exits\":{\"down\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"inn_rooms\",\"kind\":\"room\"}}},\"key\":\"inn_attic\",\"title\":\"room.inn_attic.title\"},\"ashmere_sampler@0.0.8:room/inn_rooms\":{\"description\":\"room.inn_rooms.description\",\"exits\":{\"down\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"drowned_lantern\",\"kind\":\"room\"}},\"up\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"inn_attic\",\"kind\":\"room\"}}},\"key\":\"inn_rooms\",\"title\":\"room.inn_rooms.title\"},\"ashmere_sampler@0.0.8:room/lantern_cellar\":{\"description\":\"room.lantern_cellar.description\",\"exits\":{\"up\":{\"barrier\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"cellar_door\",\"kind\":\"barrier\"},\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"drowned_lantern\",\"kind\":\"room\"}}},\"key\":\"lantern_cellar\",\"title\":\"room.lantern_cellar.title\"},\"ashmere_sampler@0.0.8:room/north_gate\":{\"description\":\"room.north_gate.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"chapel_steps\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"village_green\",\"kind\":\"room\"}}},\"key\":\"north_gate\",\"title\":\"room.north_gate.title\"},\"ashmere_sampler@0.0.8:room/village_green\":{\"description\":\"room.village_green.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"north_gate\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"well_lane\",\"kind\":\"room\"}}},\"key\":\"village_green\",\"title\":\"room.village_green.title\"},\"ashmere_sampler@0.0.8:room/well_lane\":{\"description\":\"room.well_lane.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"drowned_lantern\",\"kind\":\"room\"}},\"north\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"village_green\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"ferry_landing\",\"kind\":\"room\"}}},\"key\":\"well_lane\",\"title\":\"room.well_lane.title\"}},\"scenes\":{\"ashmere_sampler@0.0.8:scene/lantern_kept\":{\"control\":\"modal\",\"key\":\"lantern_kept\",\"on\":{\"outcome\":\"carry\",\"story_point\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"lantern_resolved\",\"kind\":\"story_point\"}},\"steps\":[{\"text\":\"scene.lantern_kept.bram\",\"type\":\"narrate\"},{\"text\":\"scene.lantern_kept.brass\",\"type\":\"narrate\"},{\"text\":\"scene.lantern_kept.river\",\"type\":\"narrate\"},{\"type\":\"await_ack\"},{\"type\":\"end\"}]}},\"story_points\":{\"ashmere_sampler@0.0.8:story_point/lantern_resolved\":{\"key\":\"lantern_resolved\",\"outcomes\":{\"carry\":{\"choice\":\"take_it\",\"dialogue\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"bram\",\"kind\":\"dialogue\"}},\"leave\":{\"choice\":\"leave_it\",\"dialogue\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"bram\",\"kind\":\"dialogue\"}}}}},\"text\":{\"action.continue\":\"Continue\",\"action.take\":\"Take\",\"action.talk\":\"Talk to\",\"band.almost_dead\":\"is almost dead\",\"band.bleeding_freely\":\"is bleeding freely\",\"band.covered_in_blood\":\"is covered in blood\",\"band.dying\":\"is DYING\",\"band.exhausted\":\"is exhausted\",\"band.few_bruises\":\"has a few bruises\",\"band.leaking_guts\":\"is leaking guts\",\"band.many_nasty_wounds\":\"has many nasty wounds\",\"band.mv_ready\":\"is ready to travel\",\"band.ready\":\"is in perfect health\",\"band.several_wounds\":\"has several wounds\",\"band.slightly_scratched\":\"is slightly scratched\",\"band.some_cuts\":\"has some cuts\",\"band.steady\":\"moves steadily\",\"band.tired\":\"is tired\",\"barrier.cellar_door.short\":\"the cellar door\",\"barrier.trunk_lid.short\":\"the trunk's lid\",\"chapter.bank\":\"The Lantern Found\",\"chapter.lantern\":\"Bram's Lantern\",\"dialogue.bram.carry\":\"Keep the lantern\",\"dialogue.bram.leave\":\"Leave it with Bram\",\"dialogue.bram.prompt\":\"Bram looks at the lantern, then at you. \\\"Will you keep it for now, or leave it with me?\\\"\",\"dialogue.bram_offer.prompt\":\"Bram keeps his eyes on the reeds. \\\"My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?\\\"\",\"item.brass_key.description\":\"A small brass key with a narrow tooth.\",\"item.brass_key.room\":\"A [brass key] lies beside the cellar key.\",\"item.brass_key.short\":\"a brass key\",\"item.cellar_key.description\":\"An iron key, its bow worn smooth.\",\"item.cellar_key.room\":\"A [cellar key] lies on the windowsill.\",\"item.cellar_key.short\":\"a cellar key\",\"item.lantern.description\":\"Dented brass with a horn window, oil sloshing inside.\",\"item.lantern.room\":\"A [brass lantern] rests beside the well.\",\"item.lantern.short\":\"a brass lantern\",\"item.player_corpse.description\":\"Possessions remain with this body.\",\"item.player_corpse.room\":\"A [player corpse] lies here.\",\"item.player_corpse.short\":\"a fallen body\",\"item.rat_corpse.description\":\"The cellar rat lies still.\",\"item.rat_corpse.room\":\"A [rat corpse] lies here.\",\"item.rat_corpse.short\":\"a dead cellar rat\",\"item.tin_whistle.description\":\"A small tin whistle, dulled by dust.\",\"item.tin_whistle.room\":\"A small [tin whistle] lies in the trunk.\",\"item.tin_whistle.short\":\"a tin whistle\",\"item.trunk.description\":\"An old wooden trunk. Its iron hasp is dark with age.\",\"item.trunk.room\":\"An old [trunk] sits under the slope of the roof.\",\"item.trunk.short\":\"an old trunk\",\"item.wool_cloak.description\":\"Heavy grey wool. Rain runs off it.\",\"item.wool_cloak.room\":\"A [wool cloak] hangs over the bedpost.\",\"item.wool_cloak.short\":\"a wool cloak\",\"narration.bram.accept\":\"You say you'll fetch it. Bram nods toward the path north.\",\"narration.bram.carry\":\"You keep the lantern. Bram nods once.\",\"narration.bram.leave\":\"You hand Bram the lantern. He settles it beside his boot.\",\"npc.bram.description\":\"A ferryman with rope-scarred hands and a coat that has never been dry.\",\"npc.bram.room\":\"[Old Bram] the ferryman stands here, one boot on the ferry.\",\"npc.bram.short\":\"Old Bram\",\"npc.cellar_rat.description\":\"A small grey rat watches from beside a barrel, its whiskers twitching.\",\"npc.cellar_rat.short\":\"a cellar rat\",\"npc.cellar_rat_1.room\":\"A [[cellar_rat_1|cellar rat]] noses among the dusty barrels.\",\"npc.cellar_rat_2.room\":\"A [[cellar_rat_2|cellar rat]] noses among the dusty barrels.\",\"npc.cellar_rat_3.room\":\"A [[cellar_rat_3|cellar rat]] noses among the dusty barrels.\",\"npc.cellar_rat_4.room\":\"A [[cellar_rat_4|cellar rat]] noses among the dusty barrels.\",\"npc.cellar_rat_5.room\":\"A [[cellar_rat_5|cellar rat]] noses among the dusty barrels.\",\"quest.lantern.abandoned\":\"The lantern search was abandoned.\",\"quest.lantern.accept\":\"Offer to fetch Bram's lantern\",\"quest.lantern.carried\":\"You found the lantern and kept it.\",\"quest.lantern.done\":\"Bram's lantern is found.\",\"quest.lantern.failed\":\"The lantern search failed.\",\"quest.lantern.find\":\"Find Bram's lantern.\",\"quest.lantern.return\":\"Bring the lantern to Bram.\",\"quest.lantern.title\":\"Bram's lantern\",\"room.chapel_nave.description\":\"The nave is cold and high. A fresco covers the east wall, and the altar is plain stone.\",\"room.chapel_nave.title\":\"Chapel Nave\",\"room.chapel_steps.description\":\"Wide stone steps, worn into dips, climb to the chapel door. An alms bowl sits on the top step.\",\"room.chapel_steps.title\":\"Chapel Steps\",\"room.drowned_lantern.description\":\"The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.\",\"room.drowned_lantern.title\":\"The Drowned Lantern\",\"room.ferry_landing.description\":\"Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.\",\"room.ferry_landing.title\":\"Ferry Landing\",\"room.inn_attic.description\":\"Dust lies thick as felt. A trunk with an iron hasp sits under the slope of the roof.\",\"room.inn_attic.title\":\"Inn Attic\",\"room.inn_rooms.description\":\"A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage.\",\"room.inn_rooms.title\":\"Inn Rooms\",\"room.lantern_cellar.description\":\"Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall.\",\"room.lantern_cellar.title\":\"Lantern Cellar\",\"room.north_gate.description\":\"The north gate is oak banded with iron, set in the village wall. North, a track climbs to the priory.\",\"room.north_gate.title\":\"North Gate\",\"room.village_green.description\":\"An old elm shades a patch of trodden grass at the heart of Ashmere. The stocks stand empty, and a market cross of weathered stone marks the middle.\",\"room.village_green.title\":\"Village Green\",\"room.well_lane.description\":\"A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east.\",\"room.well_lane.title\":\"Well Lane\",\"scene.lantern_kept.bram\":\"Bram settles his boot against the ferry. The wet rope creaks around the mooring post.\",\"scene.lantern_kept.brass\":\"You turn the brass lantern in your hand. Its dented side is cool against your palm.\",\"scene.lantern_kept.river\":\"The reeds stir. The river keeps sliding past the landing, the color of strong tea.\"},\"world\":{\"bands\":[{\"at_percent\":100,\"key\":\"ready\",\"tone\":\"normal\"},{\"at_percent\":90,\"key\":\"slightly_scratched\",\"tone\":\"normal\"},{\"at_percent\":80,\"key\":\"few_bruises\",\"tone\":\"normal\"},{\"at_percent\":70,\"key\":\"some_cuts\",\"tone\":\"warning\"},{\"at_percent\":60,\"key\":\"several_wounds\",\"tone\":\"warning\"},{\"at_percent\":50,\"key\":\"many_nasty_wounds\",\"tone\":\"warning\"},{\"at_percent\":40,\"key\":\"bleeding_freely\",\"tone\":\"warning\"},{\"at_percent\":30,\"key\":\"covered_in_blood\",\"tone\":\"danger\"},{\"at_percent\":20,\"key\":\"leaking_guts\",\"tone\":\"danger\"},{\"at_percent\":10,\"key\":\"almost_dead\",\"tone\":\"danger\"},{\"at_percent\":0,\"key\":\"dying\",\"tone\":\"danger\"}],\"carry\":{\"max_grams\":12000},\"death\":{\"npc_corpse\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"rat_corpse\",\"kind\":\"item\"},\"player_corpse\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"player_corpse\",\"kind\":\"item\"},\"restore\":{\"hp\":10,\"mv\":100},\"shrine\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"chapel_nave\",\"kind\":\"room\"}},\"movement\":{\"cost\":{\"amount\":1,\"resource\":{\"cartridge_id\":\"ashmere_sampler\",\"cartridge_version\":\"0.0.8\",\"key\":\"mv\",\"kind\":\"resource\"}}}}}",
+  "sha256": "ff248562a7900160ccadf774dad441a6ac060c3c8ff2fe872a9dded31183a23a"
+}

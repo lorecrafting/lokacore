@@ -1,5 +1,7 @@
 id: mobile-renderer-imports
 valid:
+  - "import { Combat } from './Combat.tsx';"
+  - "import { restoredLogs } from './logs.ts';"
   - "import { useState } from 'react';"
   - "import { Pressable, Text } from 'react-native';"
   - "import { P } from './book/paper.ts';"

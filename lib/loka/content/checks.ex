@@ -24,14 +24,7 @@ defmodule Loka.Content.Checks do
   @enclosing 3
 
   @doc """
-  `v` with each short reference expanded (owner decision 2026-09-25): a Key where a policy
-  node's reference (fact, item, quest, barrier), in any policy tree (a variant's condition
-  included), a recipe's fact.assign fact, its target's room or the resource of its cost,
-  threshold check or resource.adjust step (or of cartridge.json's world.movement.cost), a narration participant's or dialogue role's npc or item, a dialogue's npc and
-  quest, a dialogue choice's fact.assign fact and accept, a story point trigger's dialogue, an exit's `to` and `barrier`, a barrier's
-  `key_item`, a quest objective's `item_acquired`, a reaction trigger's fact or room, an item's location (its room,
-  npc or item, as `in` selects) and barrier, an NPC's room or a room of its daily schedule goes becomes the DefinitionRef of cartridge
-  `m`'s definition of that key, of the kind the field takes (`Source.ref/3`).
+  Expands short source references to local DefinitionRefs (owner decision 2026-09-25).
   """
   @spec expand(term(), map()) :: term()
   def expand(%{"op" => op} = n, m) when is_map_key(@ref_fields, op),
@@ -111,6 +104,13 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)
+
+  def expand(%{"death_credit" => credits} = world, m) when is_list(credits),
+    do:
+      world
+      |> Map.delete("death_credit")
+      |> expand(m)
+      |> Map.put("death_credit", Enum.map(credits, &Loka.Content.Combat.expand(&1, m)))
 
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))

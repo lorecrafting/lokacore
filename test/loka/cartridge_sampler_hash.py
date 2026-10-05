@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_sampler'
-VERSION = '0.0.8'
+VERSION = '0.0.9'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -17,8 +17,8 @@ def quest_state(state):
     return dict(op='quest_state', quest=ref('quest', 'lantern'), state=state)
 def definition(name, **parts):
     return dict(key=name, **parts)
-caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior', 'death'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.5', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
+caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'scene', 'resource', 'schedule', 'description_variant', 'calendar', 'behavior', 'death', 'combat'], 1)
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title="Ashmere — Bram's Lantern", requires=dict(kernel_api=dict(at_least='1.6', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.lantern'), dict(title='chapter.bank', story_point=ref('story_point', 'lantern_resolved'), outcome='carry')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
 v['calendar'] = dict(start=64800)
 v['facts'] = {
@@ -35,25 +35,26 @@ geometry = {
     'north_gate': [('south', 'village_green', None), ('north', 'chapel_steps', None)],
     'chapel_steps': [('south', 'north_gate', None), ('north', 'chapel_nave', None)],
     'chapel_nave': [('south', 'chapel_steps', None)],
-    'drowned_lantern': [('west', 'well_lane', None), ('up', 'inn_rooms', None), ('down', 'lantern_cellar', 'cellar_door')],
+    'drowned_lantern': [('west', 'well_lane', None), ('up', 'inn_rooms', None), ('down', 'lantern_cellar', None)],
     'inn_rooms': [('down', 'drowned_lantern', None), ('up', 'inn_attic', None)],
     'inn_attic': [('down', 'inn_rooms', None)],
-    'lantern_cellar': [('up', 'drowned_lantern', 'cellar_door')]}
+    'lantern_cellar': [('up', 'drowned_lantern', None)]}
 v['rooms'] = {key('room', name): definition(name, title=f'room.{name}.title', description=f'room.{name}.description', exits={direction: dict(to=ref('room', dest), **(dict(barrier=ref('barrier', barrier)) if barrier else {})) for direction, dest, barrier in exits}) for name, exits in geometry.items()}
-items = [('brass_key', ['key', 'brass_key'], 'room', 'inn_rooms'), ('cellar_key', ['key', 'cellar_key'], 'room', 'inn_rooms'), ('lantern', ['lantern', 'brass_lantern'], 'room', 'well_lane'), ('tin_whistle', ['whistle', 'tin_whistle'], 'item', 'trunk'), ('trunk', ['trunk'], 'room', 'inn_attic'), ('wool_cloak', ['cloak', 'wool_cloak'], 'room', 'inn_rooms')]
+items = [('brass_key', ['key', 'brass_key'], 'room', 'inn_rooms'), ('lantern', ['lantern', 'brass_lantern'], 'room', 'well_lane'), ('tin_whistle', ['whistle', 'tin_whistle'], 'item', 'trunk'), ('trunk', ['trunk'], 'room', 'inn_attic'), ('wool_cloak', ['cloak', 'wool_cloak'], 'room', 'inn_rooms')]
+v['rooms'][key('room', 'chapel_nave')]['sanctuary'] = True
 v['items'] = {key('item', name): definition(name, keywords=words, short=f'item.{name}.short', room_line=f'item.{name}.room', description=f'item.{name}.description', location={'in': kind, kind: ref(kind, place)}) for name, words, kind, place in items}
 # M3 independently declared shell masses; nested/worn custody does not change them.
-for name, grams in [('lantern', 2000), ('wool_cloak', 3000), ('brass_key', 100), ('cellar_key', 100), ('tin_whistle', 200), ('trunk', 8000)]:
+for name, grams in [('lantern', 2000), ('wool_cloak', 3000), ('brass_key', 100), ('tin_whistle', 200), ('trunk', 8000)]:
     v['items'][key('item', name)]['mass_grams'] = grams
 v['items'][key('item', 'trunk')]['barrier'] = ref('barrier', 'trunk_lid')
 v['items'][key('item', 'wool_cloak')]['slot'] = 'cloak'
 for name in ['player_corpse', 'rat_corpse']:
     v['items'][key('item', name)] = definition(name, keywords=['corpse', name], short=f'item.{name}.short', room_line=f'item.{name}.room', description=f'item.{name}.description', location=dict(**{'in': 'template'}), mass_grams=0)
 v['npcs'] = {key('npc', 'bram'): definition('bram', keywords=['bram', 'ferryman'], short='npc.bram.short', room_line='npc.bram.room', description='npc.bram.description', room=ref('room', 'ferry_landing'), daily_schedule={'6': ref('room', 'ferry_landing'), '19': ref('room', 'drowned_lantern')})}
-# Five authored finite passive rats; numeric values are literal PM-approved inputs.
+# Five authored finite attackable rats; numeric values are literal PM-approved inputs.
 for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5']:
-    v['npcs'][key('npc', name)] = definition(name, keywords=['rat', name], short='npc.cellar_rat.short', room_line=f'npc.{name}.room', description='npc.cellar_rat.description', room=ref('room', 'lantern_cellar'), hp=dict(minimum=0, maximum=6, start=6, gain=0))
-v['barriers'] = {key('barrier', name): definition(name, keywords=words, short=f'barrier.{name}.short', initial='locked', key_item=ref('item', item)) for name, words, item in [('cellar_door', ['door', 'cellar_door'], 'cellar_key'), ('trunk_lid', ['lid', 'trunk_lid'], 'brass_key')]}
+    v['npcs'][key('npc', name)] = definition(name, keywords=['rat', name], short='npc.cellar_rat.short', room_line=f'npc.{name}.room', description='npc.cellar_rat.description', room=ref('room', 'lantern_cellar'), hp=dict(minimum=0, maximum=6, start=6, gain=0), attack=dict(chance=50, damage_min=1, damage_max=1))
+v['barriers'] = {key('barrier', name): definition(name, keywords=words, short=f'barrier.{name}.short', initial='locked', key_item=ref('item', item)) for name, words, item in [('trunk_lid', ['lid', 'trunk_lid'], 'brass_key')]}
 v['resources'] = {key('resource', name): definition(name, minimum=0, maximum=maximum, start=maximum, gain=gain) for name, maximum, gain in [('hp', 10, 5), ('ma', 100, 4), ('mv', 100, 18)]}
 # M5-A independently declared HP10/MV100; M2 rates/fractions and MA unchanged.
 v['resources'][key('resource', 'mv')].update(
@@ -88,13 +89,18 @@ v['world'] = {'bands': [
 v['world']['carry'] = dict(max_grams=12000)
 v['world']['movement'] = dict(cost=dict(resource=ref('resource', 'mv'), amount=1))
 v['world']['death'] = dict(player_corpse=ref('item', 'player_corpse'), npc_corpse=ref('item', 'rat_corpse'), shrine=ref('room', 'chapel_nave'), restore=dict(hp=10, mv=100))
+v['world']['combat'] = dict(player_attack=dict(chance=75, damage_min=1, damage_max=2), interval=150, sleep_multiplier=2, flee_multiplier=2)
+v['world']['combat']['narration'] = {name: f'combat.{name}' for name in ['player_hit', 'player_miss', 'npc_hit', 'npc_miss', 'player_died', 'npc_died']}
+v['world']['death_credit'] = [dict(npc=ref('npc', f'cellar_rat_{i}'), room=ref('room', 'lantern_cellar'), fact=ref('fact', f'rat_{i}_killed')) for i in range(1, 6)]
+for i in range(1, 6):
+    v['facts'][key('fact', f'rat_{i}_killed')] = definition(f'rat_{i}_killed', version=1, value_type=dict(type='bool', default=False), scopes=['player'], meaning=f'The player defeated the authored cellar rat {i} in the lantern cellar.')
 v['text'] = json.loads(Path('cartridges/ashmere_sampler/text.json').read_text())
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved sampler semantics and compiler-owned defaults; only the preserved adopted catalog and eight approved prototype-derived room strings are copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
 Path('protocol/fixtures/cartridge_sampler_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram, six items, the next scheduled Bram job, cloak holder.
+# Reviewed numeric-profile allocation order: character, body, ten rooms, Bram/five rats, five items, the next scheduled Bram job, cloak holder.
 names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['npc/'+name for name in ['bram', 'cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5']] + ['item/'+row[0] for row in items] + ['job/bram'] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):

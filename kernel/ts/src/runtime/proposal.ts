@@ -12,6 +12,7 @@ import {
   type DomainEvent,
   type JobId,
   type QuestInstanceId,
+  type Text,
 } from '../contracts.gen.ts';
 import { allocator, COMPOSES, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, typedFact, type Base } from '../mechanics/fact.ts';
@@ -21,6 +22,8 @@ import { sequence, triggered } from '../mechanics/reaction.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { utf8 } from '../foundation/sha256.ts';
 import { cmp } from '../foundation/validate.ts';
+import { currentRound } from '../mechanics/combat/round.ts';
+import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 
 // limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
@@ -29,16 +32,9 @@ export type Actor = Parameters<typeof event>[1];
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 type Corr = DomainEvent['correlation_id'];
 
-/**
- * Proposes an admitted decision whole (propose) and composes its delta over the state, the fact
- * defaults and the declared capacities, adopting its containment, fact and clock changes; only
- * admit() makes an Admitted. A fact.assign whose fact, scope kind or value its FactSpec does not
- * allow faults precondition_failed (03 §7; 04 §5.1). A result over compose's, the events or the
- * output_bytes limit faults budget_exceeded (04 §5.4); every budget fault names its limit in
- * `limit`, which no other result has. `steps` is the decision's query_steps count so far. A fault
- * discards the whole proposal. Each continuation a choice.open of it creates is stamped with
- * `revision`, the one its commit will take (04 §5.3: the expected revision a choice.resolve must
- * match), in the state whose rows the host commits.
+/** Compose one admitted proposal atomically. Validate typed facts, whole-proposal budgets,
+ * recovery metadata and choice revision stamps before adopting state and hydrated maps.
+ * A fault discards every change, including the proposal-local RNG.
  */
 export function adopt(
   world: World,
@@ -90,6 +86,8 @@ type P = {
   steps: Steps;
   at: World;
   applied: number;
+  rng: World['state']['rng'];
+  narration: Text[];
   limit?: Limit | undefined; // set only just before a budget fault returns
 };
 const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
@@ -99,44 +97,9 @@ const faulted = (decision: DecisionResult, world: World, limit?: Limit): Stepped
   ...(limit && { limit }),
 });
 
-/**
- * The whole proposal of an admitted root decision (04 §5.2 steps 4-6, §5.4), each explicit
- * sequence joining in turn: its ops, then its events, with the fact_changed of each assign that
- * changes its fact (mechanics/fact.ts factChanged) at its causal position, numbered after the events before
- * them and correlated to the command; each event then queued FIFO for the reactions it triggers
- * (mechanics/reaction.ts). The root sequence (writer group 0) and its deliveries to quiescence; then, when its delta has a time.advance (a wait, or a recipe's
- * duration), each due job and its reactions to quiescence before the next. One counter numbers
- * every later writer group: each job, quest delivery and reaction delivery takes the next.
- *
- * The due jobs: the pending jobs due at or before the advance's target, snapshotted from the
- * committed state and run in (due_time, job_id) order (job ids compared as UTF-8 bytes, never in
- * row order), each as its run_job (mechanics/schedule/rule.ts) with the job's CommandId (id_source.ts
- * jobCommandId) and IdSource against the proposal so far, its events caused by that run_job.
- * adopt() composes the whole advance once, so final invariants, the strictly-later-than-target
- * rule for new jobs (nonfuture_job), the job budgets (budget_exceeded) and conflicts between
- * groups apply to it as one proposal, and a fault discards all of it, time included. A run_job
- * that is not accepted is the advance's result. Admission never meets an already-due job: every
- * advance drains its own, and each new job is later than the advance's target, so 04 §5.2 step 2
- * has nothing to drain.
- *
- * The deliveries of each queued event, at its FIFO position (04 §5.2 steps 5-6): first each quest
- * instance it earned when placed (join; mechanics/quest/lifecycle.ts earned), counted toward the deliveries budget,
- * then, when still active in the proposal so far, one quest.transition to objectives_complete as
- * its own writer group; then each rule it triggers, in rule-key order, at
- * one more than its cause's reaction depth (a root's or job's events are at 0). Each counts
- * toward the deliveries budget and its `when`'s policy leaves toward query_steps, read on the
- * proposal so far at the event's logical time; only one whose `when` holds runs, as its own
- * writer group, its fact_changed caused by that event at its logical time, its ids from the
- * IdSource of the root or job that began the chain. A delivery past the deliveries,
- * reaction_depth or query_steps limit (foundation/compose.ts over) faults budget_exceeded: a cycle ends
- * there, never truncated (adopt checks the events limit on the whole proposal). `steps` already
- * counts the root's admission and rule policy leaves (runtime/world.ts decideWith checks them). A budget
- * fault returns its limit beside the decision.
- * ponytail: the 04 §5.4 re-read of an entry before it runs is run_job's own status check
- * (mechanics/schedule/rule.ts), and a stale entry it refuses rejects the whole advance instead of being
- * skipped as ineligible. Nothing in schedule@1 or reaction@1 cancels, reschedules or completes
- * another job, so no entry goes stale yet; the first operation that can turns that refusal into a
- * skip and adds the generation to the comparison.
+/** Root, due jobs and their FIFO deliveries compose atomically (docs/system/protocol.md).
+ * Each sequence gets one writer group; event positions are global, allocators causal.
+ * now() lazily applies the prefix and retains hydration/RNG for real later consumers.
  */
 export function propose(
   world: World,
@@ -158,11 +121,21 @@ export function propose(
     steps,
     at: world,
     applied: 0,
+    rng: root.rng,
+    narration: [...(root.narration ?? [])],
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   const failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
-  return { decision: { ...root, delta: { ops: p.ops }, events: p.events } };
+  return {
+    decision: {
+      ...root,
+      delta: { ops: p.ops },
+      events: p.events,
+      rng: p.rng,
+      ...(p.narration.length && { narration: p.narration }),
+    },
+  };
 }
 
 // The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
@@ -176,6 +149,7 @@ function now(p: P): World | Admitted {
     }
     [p.at, p.applied] = [r.world, p.ops.length];
   }
+  p.at = { ...p.at, state: { ...p.at.state, rng: p.rng } };
   return p.at;
 }
 
@@ -220,9 +194,27 @@ const cause = (p: P, logical_time: number, id: string) => ({
   correlation_id: p.command.id as string as Corr,
 });
 
+function creditDelivery(p: P, next: Queued): Admitted | undefined {
+  if (next.cause.payload.type !== 'entity_died') return;
+  const at = now(p);
+  if (!('cartridge' in at)) return at;
+  const credit = deathCredit(at, next.cause, p.ops, p.events);
+  if (credit.length)
+    return join(
+      p,
+      credit,
+      [],
+      cause(p, next.cause.logical_time, next.cause.id),
+      next.depth,
+      next.mint,
+    );
+}
+
 // The queue's deliveries to quiescence, or the fault that ends them.
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
+    const credited = creditDelivery(p, next);
+    if (credited) return credited;
     for (const instance_id of next.earns) {
       if ((p.limit = over({ deliveries: ++p.deliveries }))) return BUDGET;
       const at = now(p);
@@ -262,6 +254,13 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
+    const current = at.state.jobs?.[job_id];
+    if (
+      !current ||
+      current.status !== 'pending' ||
+      (current.encounter_id && !currentRound(at, job_id as JobId, current))
+    )
+      continue;
     const run = {
       id: jobCommandId(job_id, due_time) as CommandId,
       world_context_id: p.world.context,
@@ -270,6 +269,8 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const m = allocator(at, run);
     const ran = admit('schedule', schedule.decide(at, run, m));
     if (ran.kind !== 'accepted') return ran;
+    p.rng = ran.rng;
+    p.narration.push(...(ran.narration ?? []));
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: p.group + 1 }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);

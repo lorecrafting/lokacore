@@ -9,8 +9,7 @@
       "to": "inn_rooms"
     },
     "down": {
-      "to": "lantern_cellar",
-      "barrier": "cellar_door"
+      "to": "lantern_cellar"
     }
   }
 }

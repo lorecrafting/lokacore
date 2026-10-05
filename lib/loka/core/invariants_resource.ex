@@ -62,35 +62,49 @@ defmodule Loka.Core.InvariantsResource do
 
   defp safe?(n), do: is_integer(n) and n >= -9_007_199_254_740_991 and n <= 9_007_199_254_740_991
 
-  def initial(%{"op" => "resource.adjust"} = op, s) do
+  @spec resource_after(map(), map(), term(), integer()) :: map() | nil
+  def resource_after(op, s, row, horizon) do
     spec = spec(op, s)
-    row = get_in(s, ["resources", Compose.key(Compose.target(op))])
+    now = Map.get(op, "at", s["clock"])
 
-    required = get_in(s, ["entity_resource_specs", Compose.key(Compose.target(op))])
+    valid =
+      spec != nil and valid_time?(op, now, s["clock"], horizon) and row_time?(row, now)
 
-    if spec != nil and spec["regen"] == nil and
-         (required == nil or override_row?(row, spec, s["clock"])) do
-      legacy_current(row, spec, s["clock"])
+    if valid do
+      if spec["regen"] != nil,
+        do: recovered(op, spec, row, now),
+        else:
+          legacy(
+            op,
+            spec,
+            row,
+            now,
+            get_in(s, ["entity_resource_specs", Compose.key(Compose.target(op))])
+          )
     end
   end
 
-  defp legacy_current(row, spec, clock) do
-    row = row || %{"value" => spec["start"], "at" => 0}
+  defp valid_time?(op, now, clock, horizon),
+    do: safe?(now) and (not Map.has_key?(op, "at") or (now >= clock and now <= horizon))
 
-    if is_integer(row["value"]) and is_integer(row["at"]) do
-      ticks = Integer.floor_div(clock, 3600) - Integer.floor_div(row["at"], 3600)
-      min(spec["maximum"], row["value"] + spec["gain"] * ticks)
+  defp row_time?(row, now),
+    do: row == nil or (safe?(row["at"]) and row["at"] >= 0 and row["at"] <= now)
+
+  defp legacy(op, spec, row, now, required) do
+    valid =
+      (required == nil or override_row?(row, spec, now)) and
+        not Map.has_key?(op, "next_rate") and bounded?(op["to"], spec)
+
+    before = row || %{"value" => spec["start"], "at" => 0}
+
+    if valid and is_integer(before["value"]) and is_integer(before["at"]) do
+      ticks = Integer.floor_div(now, 3600) - Integer.floor_div(before["at"], 3600)
+      value = min(spec["maximum"], before["value"] + spec["gain"] * ticks)
+      if value == op["from"], do: %{"value" => op["to"], "at" => now}
     end
   end
 
-  def legacy_valid?(op, s) do
-    spec = spec(op, s)
-
-    spec != nil and not Map.has_key?(op, "next_rate") and is_integer(op["to"]) and
-      op["to"] >= spec["minimum"] and op["to"] <= spec["maximum"]
-  end
-
-  def spec(op, s),
+  defp spec(op, s),
     do:
       get_in(s, ["entity_resource_specs", Compose.key(Compose.target(op))]) ||
         get_in(s, ["resource_specs", Compose.key(op["resource"])])

@@ -15,6 +15,61 @@
         "player"
       ],
       "meaning": "Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest)."
+    },
+    "rat_1_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 1 in the lantern cellar."
+    },
+    "rat_2_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 2 in the lantern cellar."
+    },
+    "rat_3_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 3 in the lantern cellar."
+    },
+    "rat_4_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 4 in the lantern cellar."
+    },
+    "rat_5_killed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player defeated the authored cellar rat 5 in the lantern cellar."
     }
   }
 }

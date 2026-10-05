@@ -1,0 +1,1 @@
+mobile/app/book/Combat.tsx(20,44): error TS2339: Property 'key' does not exist on type 'TextKey'.

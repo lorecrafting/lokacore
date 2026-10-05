@@ -1,0 +1,47 @@
+✔ frozen M4 A runs through real Attack and two trusted elapsed proposals (5.89475ms)
+✔ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (3.053958ms)
+✔ frozen M4 C dies sleeping on the rat-first round and returns the same body (3.350333ms)
+✖ Flee and directional move share one multiplied payment and future cancellation (1.844375ms)
+✔ a surviving sleeper wakes before its remaining opportunity, other positions skip (6.306791ms)
+✔ accuracy20 misses on roll20; endpoint chances still draw accuracy (3.44125ms)
+✔ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.335834ms)
+✔ admission refuses absent, dead, sanctuary, nonstanding and already engaged participants (2.61425ms)
+✔ eight raw draws including damage rejections exhaust the whole round atomically (1.017708ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (40.916667ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (9.824417ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (17.967875ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (24.459791ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (18.969542ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 13
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 276.547875
+
+✖ failing tests:
+
+test at kernel/ts/test/combat.test.ts:73:1
+✖ Flee and directional move share one multiplied payment and future cancellation (1.844375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'pending'
+  - 'cancelled'
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:85:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'pending',
+    expected: 'cancelled',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

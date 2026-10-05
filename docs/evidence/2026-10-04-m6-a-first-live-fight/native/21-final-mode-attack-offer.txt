@@ -1,0 +1,44 @@
+Window: "M6 isolated proof", App: Device Hub.
+0 standard window M6 isolated proof – iOS 27.0, ID: com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, Secondary Actions: Raise
+	1 split group
+		2 split group com.apple.dt.DeviceKit.DeviceManagementWindow-AppWindow-1, SidebarNavigationSplitView
+			3 container
+				4 container
+					5 heading Description: A cellar rat, Secondary Actions: Cancel
+					6 text Description: A small grey rat watches from beside a barrel, its whiskers twitching., Secondary Actions: Cancel
+					7 button Description: Attack a cellar rat, Secondary Actions: Cancel
+					8 button Description: Leave, Secondary Actions: Cancel
+					9 button Description: Contents, Character, hp 1 of 10, is almost dead, ma 7 of 100, mv 100 of 100, Secondary Actions: Cancel
+					10 text Description: Hour of the Rooster, five to seven, Secondary Actions: Cancel
+					11 text Description: Position, standing, Secondary Actions: Cancel
+				12 button Description: Home, ID: app.grid.3x3
+				13 button Description: Screenshot, ID: camera.viewfinder
+				14 button Description: Record, ID: record.circle
+				15 button Rotate Left
+	16 toolbar
+		17 button Description: Show Sidebar, Secondary Actions: Increment, Decrement, Delete, Cancel
+		18 toggle button Description: Capture Keyboard, Value: off
+		19 toggle button Description: Resize mode, Help: Enter resize mode, Value: off
+		20 Zoom
+			21 radio button Description: Zoom Out, Value: 0, ID: minus.magnifyingglass
+			22 radio button Description: arrowtriangles.up.right.down.left.magnifyingglass, Help: Zoom to Fit, Value: 1
+			23 radio button Description: Zoom To Actual Size, Help: Physical Size, Value: 0, ID: 1.magnifyingglass
+			24 radio button Description: Zoom In, Value: 0, ID: plus.magnifyingglass
+		25 button Description: Open in New Window, Secondary Actions: Increment, Decrement, Delete, Cancel, Move previous, Move next, Remove from toolbar
+		26 menu button More, Help: More Actions, ID: ellipsis
+		27 radio button Description: Edit, Help: Settings, Value: 0, ID: slider.horizontal.3
+		28 radio button Description: text.document, Help: Reports, Value: 0
+		29 radio button Description: Info, Value: 0, ID: info
+	30 close button
+	31 full screen button Help: this button also has an action to zoom the window, Secondary Actions: zoom the window
+	32 minimize button
+	33 text M6 isolated proof iOS 27.0
+34 menu bar
+	35 Device Hub
+	36 File
+	37 Edit
+	38 View
+	39 Device
+	40 Controls
+	41 Window
+	42 Help

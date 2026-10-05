@@ -1,7 +1,7 @@
 defmodule Loka.Core.Compose do
   @moduledoc """
   StateDelta composition (04 §5.1-§5.4, 14 §R3A). `kernel/ts/src/foundation/compose.ts` is the
-  TypeScript twin; both run the composition and corpse creation fixtures.
+  TypeScript twin; both run the portable composition fixtures.
 
   Takes a committed base state and a contract-valid StateDelta. Ops apply in their semantic
   order to a proposal overlay; each op's precondition reads the overlay over the base. An op
@@ -18,7 +18,8 @@ defmodule Loka.Core.Compose do
   - `"quests"`: QuestInstanceId => `quest`, `scope`, `state`, optional `outcome`;
   - `"choices"`: ContinuationId => the `choice.open` fields plus `status` and the
     host-assigned `opened_revision`;
-  - `"jobs"`: JobId => `job`, `due_time`, `status`;
+  - `"jobs"`: JobId => `job`, `due_time`, `status`, optional `encounter_id`;
+  - `"encounters"`: EncounterId => EncounterRow (participants, room, status, round and job);
   - `"resource_specs"`: canonical DefinitionRef text => ResourceSpec (`minimum`, `maximum`,
     `start`, `gain`, optional `regen`); `"resources"`: canonical resource MutationTarget text =>
     `value`, `at`, with required `rate`, `remainder` for opted recovery; a resource's current
@@ -37,12 +38,10 @@ defmodule Loka.Core.Compose do
   visited time for `job.complete` and the bound `job.schedule` must exceed (04 §5.4).
   """
   alias Loka.Core.{Canonical, Creation}
-
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
-  @limits JSON.decode!(@profile)["limits"]
-
+  @limits @profile |> JSON.decode!() |> Map.fetch!("limits")
   @legal %{
     "active" => ~w(objectives_complete failed abandoned),
     "objectives_complete" => ~w(resolved failed abandoned),
@@ -98,7 +97,8 @@ defmodule Loka.Core.Compose do
     due = count.("job.complete")
 
     length(ops) > @limits["operations"] or created > @limits["created_jobs"] or
-      due > @limits["due_jobs_per_advance"] or pending + created - due > @limits["pending_jobs"]
+      due > @limits["due_jobs_per_advance"] or
+      pending + created - due - count.("job.cancel") > @limits["pending_jobs"]
   end
 
   defp advance_target(%{"op" => "time.advance", "to" => to}, _), do: to
@@ -201,36 +201,28 @@ defmodule Loka.Core.Compose do
     check(row["status"] == "pending", Map.put(row || %{}, "status", "closed"))
   end
 
-  defp apply_op(%{"op" => "job.schedule", "due_time" => due} = op, t, {_, horizon, _} = ctx) do
-    cond do
-      read(t, ctx) != nil -> {:error, "precondition_failed"}
-      due <= horizon -> {:error, "nonfuture_job"}
-      true -> {:ok, %{"job" => op["job"], "due_time" => due, "status" => "pending"}}
-    end
-  end
+  defp apply_op(%{"op" => "job." <> _} = op, t, {_, horizon, _} = ctx),
+    do: Loka.Core.ComposeEncounter.job(op, read(t, ctx), horizon)
 
-  defp apply_op(%{"op" => "job.complete"}, t, {_, horizon, _} = ctx) do
-    row = read(t, ctx)
+  defp apply_op(%{"op" => "encounter.open"} = op, t, {state, _, _} = ctx),
+    do:
+      Loka.Core.ComposeEncounter.open(
+        op,
+        read(t, ctx),
+        state,
+        read(containment(op["body_id"]), ctx),
+        read(containment(op["npc_id"]), ctx),
+        rows("encounter", "encounters", "encounter_id", ctx)
+      )
 
-    check(
-      row["status"] == "pending" and row["due_time"] <= horizon,
-      Map.put(row || %{}, "status", "completed")
-    )
-  end
+  defp apply_op(%{"op" => "encounter." <> _} = op, t, ctx),
+    do: Loka.Core.ComposeEncounter.change(op, read(t, ctx))
 
   defp apply_op(%{"op" => "time.advance", "from" => from, "to" => to}, t, ctx),
     do: check(read(t, ctx) == from and to > from, to)
 
-  defp apply_op(%{"op" => "resource.adjust"} = op, t, ctx) do
-    override = section(elem(ctx, 0), "entity_resource_specs")[key(t)]
-    spec = override || section(elem(ctx, 0), "resource_specs")[key(op["resource"])]
-    row = read(t, ctx)
-    now = elem(ctx, 0)["clock"]
-
-    if override && !Loka.Core.Resource.valid_override_row?(row, override, now),
-      do: {:error, "precondition_failed"},
-      else: Loka.Core.Resource.adjusted(op, row, spec, now)
-  end
+  defp apply_op(%{"op" => "resource.adjust"} = op, t, {state, horizon, _} = ctx),
+    do: Loka.Core.Resource.compose_adjustment(op, read(t, ctx), state, horizon)
 
   defp apply_op(%{"op" => "cooldown.start", "at" => at} = op, t, {state, _, _} = ctx),
     do: check(read(t, ctx) == op["from"] and at == state["clock"], at)
@@ -259,6 +251,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "quest", "instance_id" => i}, s), do: section(s, "quests")[i]
   defp base(%{"kind" => "choice", "continuation_id" => c}, s), do: section(s, "choices")[c]
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
+  defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "clock"}, s), do: s["clock"]
   defp base(%{"kind" => "resource"} = t, s), do: section(s, "resources")[key(t)]
   defp base(%{"kind" => "cooldown"} = t, s), do: section(s, "cooldowns")[key(t)]

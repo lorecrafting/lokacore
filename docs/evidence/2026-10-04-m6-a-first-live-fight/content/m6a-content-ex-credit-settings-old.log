@@ -1,0 +1,27 @@
+Compiling 42 files (.ex)
+    warning: the following clause cannot match because the previous clauses already matched all possible values:
+
+        _ ->
+
+    it attempts to match on the result of:
+
+        credit && !combat && false
+
+    which has the already matched type:
+
+        dynamic(false or nil)
+
+    type warning found at:
+    │
+ 33 │       if(credit && !combat && false, do: [bad("cartridge.world.death_credit")], else: []) ++
+    │       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    │
+    └─ lib/loka/content/combat.ex:33: Loka.Content.Combat.check/3
+
+Generated loka app
+Running ExUnit with seed: 882897, max_cases: 16
+
+...................................................
+Finished in 0.4 seconds (0.4s async, 0.00s sync)
+
+Result: 51 passed

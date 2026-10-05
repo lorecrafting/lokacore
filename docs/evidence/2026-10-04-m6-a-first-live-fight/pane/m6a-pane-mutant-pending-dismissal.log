@@ -1,0 +1,73 @@
+✔ exit door actions keep their direction and remain separate from walking (3.311458ms)
+✔ worn items and reachable nested contents offer actions on their own ids (8.814333ms)
+✔ same-room actions retain projected item pages and remove pages hidden by a closed lid (27.622625ms)
+✔ chapter changes queue one title which survives scene lines and acknowledgement (17.815209ms)
+✔ band phrases and the hp accessibility label use the cartridge catalog (1.054917ms)
+✔ scene Continue and position verbs have dedicated groups (1.175917ms)
+✔ combat page replaces ordinary pages and retains complete Stand/Flee controls (41.221667ms)
+✔ committed opponent death narrates once through the existing subscription (4.582125ms)
+✔ exits, the look title, place actions and a thing page come from the right buttons (8.163375ms)
+✔ position cycling skips absent offers and retains the offered freshness (1.196167ms)
+✔ a touch link is shown as its label (0.2825ms)
+✔ a choice's answers and Close are their own group, not place actions (0.227584ms)
+✔ the character label says the hp band and no other (0.189917ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.341958ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (31.1905ms)
+✔ the ending line shows once every quest is over (0.750209ms)
+✔ a closed exit's log line and a capitalised title (0.366625ms)
+✔ a move refused at 0 MV says the body is too exhausted (0.625ms)
+✔ a hint survives a store that throws, for this session (2.035333ms)
+✔ the status line shows the double hour as its earthly branch (0.432042ms)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (15.759584ms)
+✔ journal cues belong only to changed NPC histories (0.861708ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.592209ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.487041ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.210875ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.788125ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.947584ms)
+✔ the log stops growing in one room, its last line the latest answer (12.115125ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.1975ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1339.245
+✔ combat page replaces ordinary pages and retains complete Stand/Flee controls (6.848292ms)
+✔ committed opponent death narrates once through the existing subscription (0.745416ms)
+✔ confirmed encounter foregrounds another page and closure or death restores the World (18.74225ms)
+✖ Attack opens its committed page; pending and refused Flee stay until committed escape (11.796375ms)
+✔ reopening an encounter restores the combat page and last committed narration (0.745959ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1060.9125
+
+✖ failing tests:
+
+test at ../../../../private<mutation-tree>/book/combat.test.ts:305:1
+✖ Attack opens its committed page; pending and refused Flee stay until committed escape (11.796375ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(h.texts().includes('Combat'))
+  
+      at TestContext.<anonymous> (file:///private<mutation-tree>/book/combat.test.ts:331:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

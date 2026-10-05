@@ -290,3 +290,28 @@ Both compiler and loader validate these constraints and reference kinds.
 The sampler's 0.0.8 release binds chapel_nave, HP10/MV100 and two corpse templates.
 This is a foundation release: the first live lethal producer remains M6. Older kernels
 refuse API1.5 content; older bundled release lists refuse its unknown content pin.
+
+## First encounter authoring (M6-A)
+
+`world.combat` requires combat@1, schedule@1, death@1, valid `world.death`
+corpse/shrine settings and kernel API1.6. It owns
+`player_attack {chance, damage_min, damage_max}`, positive `interval`,
+`sleep_multiplier` and `flee_multiplier`, and `narration` text keys for player_hit,
+player_miss, npc_hit, npc_miss, player_died and npc_died. All six resolve in the
+cartridge catalog. An NPC's optional `attack` profile explicitly
+makes it attackable and supplies its own chance/damage bounds; it requires explicit HP.
+Chances are integers 0..100, damage bounds positive and ordered, multipliers positive.
+Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
+
+Optional `world.death_credit` is a list of `{npc, room, fact}` DefinitionRefs, expanded
+from normal short references. Each NPC/fact appears once; NPC is an authored attackable
+NPC, room its authored room, fact a player Boolean with false default. Runtime binds the
+NPC definition to its exact fresh instance; this is finite authored credit, not spawn or
+multiplayer accounting. The [combat consumer](mechanics.md#combat1--first-live-encounter-m6-a)
+validates the actual fatal occurrence and hydrated corpse before assigning the fact.
+
+The sampler release after0.0.8 adds five distinct rat credit facts and these profiles,
+preserving the five finite rats. It removes cellar_door from both reciprocal exits and
+removes the obsolete barrier/key/text. Cellar access is an ordinary free passage, so
+shrine recovery requires no equipment/key. Other barriers and owner prose remain.
+The previous0.0.8 pin is retained; changed content gets new version and independent KAT.

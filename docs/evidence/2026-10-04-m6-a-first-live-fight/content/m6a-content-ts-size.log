@@ -1,0 +1,16 @@
+kernel/ts/src/content/cartridge_combat.ts:7: function combat, 56 lines, limit 40
+kernel/ts/play/main.ts:2: info: size: allow 315, one terminal session: its loop, each command's dispatch and the replay
+kernel/ts/src/content/cartridge_refs.ts:3: info: size: allow 340, one reference stage preserves diagnostic ordering including carrying and NPC HP opt-ins
+kernel/ts/src/content/cartridge_refs.ts:153: info: size: allow 60, reference checks retain the existing ordered stage plus carrying opt-in checks
+kernel/ts/src/mechanics/schedule/rule.ts:20: function decide, 41 lines, limit 40
+kernel/ts/src/runtime/proposal.ts:1: file, 316 lines, limit 300
+kernel/ts/src/view/action_lists.ts:37: info: size: allow 50, existing action lists share one lazy carrying context across their item offers
+kernel/ts/src/view/action_lists.ts:38: function lists, 52 lines, limit 50
+kernel/ts/test/containment.test.ts:1: info: size: allow 555, containment and carrying behavior share the same minimal custody fixture
+kernel/ts/test/dialogue.test.ts:1: info: size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
+mobile/app/book/Book.tsx:1: file, 302 lines, limit 300
+mobile/app/book/pages.tsx:1: info: size: allow 315, established book pages with the current carrying refusal note
+mobile/app/book/polish.test.ts:2: info: size: allow 750, Book routes, elapsed completion and carrying note regressions share one real-session adapter
+mobile/authority/local-story/local_story.test.ts:1: info: size: allow 650, every local authority case (restart, receipts, COMMIT faults, kill, trace, jobs, reactions, narration, choices) shares this harness
+mobile/authority/local-story/saves.test.ts:1: info: size: allow 560, every save-open outcome shares this file's one-process harness
+mobile/authority/local-story/store.ts:99: info: size: allow 45, one save-load boundary checks elapsed and required pinned resource rows

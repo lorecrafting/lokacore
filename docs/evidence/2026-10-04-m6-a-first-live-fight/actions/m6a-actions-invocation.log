@@ -1,0 +1,12 @@
+✔ the adapter matches the invocation known answers (5.855459ms)
+✔ the intent digest matches its pinned known answers (0.877375ms)
+✔ a mismatch reports the step, both results and the state as canonical bytes (0.41875ms)
+✔ fault, rejection and failed attempt stay distinct; only the attempt changes the world (3.461625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 153.818833

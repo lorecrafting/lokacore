@@ -1,0 +1,287 @@
+✖ frozen M4 A runs through real Attack and two trusted elapsed proposals (5.808416ms)
+✖ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (2.787084ms)
+✖ frozen M4 C dies sleeping on the rat-first round and returns the same body (3.230459ms)
+✔ Flee and directional move share one multiplied payment and future cancellation (2.907709ms)
+✖ a surviving sleeper wakes before its remaining opportunity, other positions skip (2.426792ms)
+✖ accuracy20 misses on roll20; endpoint chances still draw accuracy (1.208458ms)
+✖ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.49075ms)
+✔ admission refuses absent, dead, sanctuary, nonstanding and already engaged participants (2.874417ms)
+✔ eight raw draws including damage rejections exhaust the whole round atomically (1.1175ms)
+✖ real SQLite reopens Attack and both M4 A rounds with original receipt replay (31.424ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.141958ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (18.893875ms)
+✖ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (23.959208ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (18.765167ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 6
+ℹ fail 8
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 270.564125
+
+✖ failing tests:
+
+test at kernel/ts/test/combat.test.ts:17:1
+✖ frozen M4 A runs through real Attack and two trusted elapsed proposals (5.808416ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      9,
+      5,
+      [
+  +     1,
+  +     2,
+  +     3,
+  +     4
+  -     25179138,
+  -     12295,
+  -     540162,
+  -     2107404
+      ]
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:23:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 9, 5, [ 1, 2, 3, 4 ] ],
+    expected: [ 9, 5, [ 25179138, 12295, 540162, 2107404 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/combat.test.ts:33:1
+✖ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (2.787084ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   1,
+  +   2,
+  +   3,
+  +   4
+  -   12295,
+  -   1029,
+  -   1029,
+  -   25165824
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:39:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 1, 2, 3, 4 ],
+    expected: [ 12295, 1029, 1029, 25165824 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/combat.test.ts:54:1
+✖ frozen M4 C dies sleeping on the rat-first round and returns the same body (3.230459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      10,
+      6,
+      [
+  -     25179138,
+        12295,
+  +     1029,
+  +     1029,
+  +     25165824
+  -     540162,
+  -     2107404
+      ]
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:65:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 10, 6, [ 12295, 1029, 1029, 25165824 ] ],
+    expected: [ 10, 6, [ 25179138, 12295, 540162, 2107404 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/combat.test.ts:94:1
+✖ a surviving sleeper wakes before its remaining opportunity, other positions skip (2.426792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      2,
+      4,
+      [
+  +     12295,
+  +     1029,
+  +     1029,
+  +     25165824
+  -     15224335,
+  -     29364750,
+  -     272377353,
+  -     1125134346
+      ]
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:109:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 2, 4, [ 12295, 1029, 1029, 25165824 ] ],
+    expected: [ 2, 4, [ 15224335, 29364750, 272377353, 1125134346 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/combat.test.ts:123:1
+✖ accuracy20 misses on roll20; endpoint chances still draw accuracy (1.208458ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      9,
+      6,
+      [
+  +     1,
+  +     2,
+  +     3,
+  +     4
+  -     12295,
+  -     1029,
+  -     1029,
+  -     25165824
+      ]
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:139:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 9, 6, [ 1, 2, 3, 4 ] ],
+    expected: [ 9, 6, [ 12295, 1029, 1029, 25165824 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/combat.test.ts:144:1
+✖ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.49075ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      8,
+      5,
+      [
+  +     1,
+  +     2,
+  +     3,
+  +     4
+  -     25179138,
+  -     12295,
+  -     540162,
+  -     2107404
+      ]
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:159:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 8, 5, [ 1, 2, 3, 4 ] ],
+    expected: [ 8, 5, [ 25179138, 12295, 540162, 2107404 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/combat.test.ts:55:1
+✖ real SQLite reopens Attack and both M4 A rounds with original receipt replay (31.424ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   1,
+  +   2,
+  +   3,
+  +   4
+  -   25179138,
+  -   12295,
+  -   540162,
+  -   2107404
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/mobile/authority/local-story/combat.test.ts:69:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 1, 2, 3, 4 ],
+    expected: [ 25179138, 12295, 540162, 2107404 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/combat.test.ts:182:1
+✖ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (23.959208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   1,
+  +   2,
+  +   3,
+  +   4
+  -   12295,
+  -   1029,
+  -   1029,
+  -   25165824
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/mobile/authority/local-story/combat.test.ts:224:18)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 1, 2, 3, 4 ],
+    expected: [ 12295, 1029, 1029, 25165824 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

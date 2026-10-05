@@ -1,0 +1,17 @@
+(node:47442) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/combat.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ combat page replaces ordinary pages and retains complete Stand/Flee controls (10.102833ms)
+✔ committed opponent death narrates once through the existing subscription (0.33675ms)
+✔ confirmed encounter foregrounds another page and closure or death restores the World (6.395209ms)
+✔ Attack opens its committed page; pending and refused Flee stay until committed escape (3.422708ms)
+✔ reopening an encounter restores the combat page and last committed narration (0.596292ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 440.807125

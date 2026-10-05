@@ -184,7 +184,14 @@
     "key": "combat",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "attack",
+      "flee"
+    ],
+    "events": [
+      "attack_result"
+    ]
   },
   {
     "key": "death",

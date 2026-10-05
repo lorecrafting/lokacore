@@ -18,6 +18,10 @@ defmodule Loka.Core.ComposeTarget do
     do: %{"kind" => "choice", "continuation_id" => c}
 
   def target(%{"op" => "job." <> _, "job_id" => j}), do: %{"kind" => "job", "job_id" => j}
+
+  def target(%{"op" => "encounter." <> _, "encounter_id" => e}),
+    do: %{"kind" => "encounter", "encounter_id" => e}
+
   def target(%{"op" => "time.advance"}), do: %{"kind" => "clock"}
 
   def target(%{"op" => "resource.adjust"} = op),

@@ -1,0 +1,2289 @@
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (40.143417ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.647209ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (18.52925ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (25.289625ms)
+✖ saved encounter corruption refuses before exposing play without repairing rows (50.000792ms)
+✔ input at the due deadline settles lethal combat before attempting Flee (9.509875ms)
+✔ random Flee destination and RNG reopen and replay one SQLite receipt (7.716292ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 317.59525
+
+✖ failing tests:
+
+test at mobile/authority/local-story/combat.test.ts:266:1
+✖ saved encounter corruption refuses before exposing play without repairing rows (50.000792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   elapsed: {
+  +     remainder: 0,
+  +     run_id: 'aaaaaaaa-0000-4000-8000-000000000002',
+  +     target: 64800,
+  +     wall_ms: 10000
+  +   },
+  +   meta: {
+  +     binding: null,
+  +     format: 'loka-save-v2',
+  +     lineage_id: 'aaaaaaaa-0000-4000-8000-000000000001',
+  +     one: 1,
+  +     parent: null,
+  +     pin: {
+  +       capability_lock: {
+  +         capabilities: {
+  +           barrier: 1,
+  +           behavior: 1,
+  +           calendar: 1,
+  +           combat: 1,
+  +           containment: 1,
+  +           death: 1,
+  +           description_variant: 1,
+  +           dialogue: 1,
+  +           equipment: 1,
+  +           fact: 1,
+  +           movement: 1,
+  +           policy: 1,
+  +           position: 1,
+  +           quest: 1,
+  +           resource: 1,
+  +           scene: 1,
+  +           schedule: 1
+  +         },
+  +         format: 'loka-capability-lock-v1'
+  +       },
+  +       cartridge_id: 'ashmere_sampler',
+  +       cartridge_version: '0.0.9',
+  +       content_hash: 'ee1a72f0b8d681d8521b64be5bb2b35cd1ba9e8699cbff21ddad2ecf92d98867',
+  +       numeric_profile: null,
+  +       rng_profile: null,
+  +       rule_ir: 1,
+  +       world_context_id: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
+  +     },
+  +     run_id: 'aaaaaaaa-0000-4000-8000-000000000002',
+  +     seed: [
+  +       1,
+  +       2,
+  +       3,
+  +       4
+  +     ]
+  +   },
+  +   revision: 1,
+  +   world: {
+  +     attributes: {},
+  +     barrierInitial: {
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"trunk_lid","kind":"barrier"}': 'locked'
+  +     },
+  +     body: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +     capacities: {
+  +       '86b28f4e-f743-87f8-8375-2ead5c2c295c': 1
+  +     },
+  +     cartridge: [Object: null prototype] {
+  +       actions: [Object: null prototype] {},
+  +       barriers: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:barrier/trunk_lid': [Object: null prototype] {
+  +           initial: 'locked',
+  +           key: 'trunk_lid',
+  +           key_item: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'brass_key',
+  +             kind: 'item'
+  +           },
+  +           keywords: [
+  +             'lid',
+  +             'trunk_lid'
+  +           ],
+  +           short: 'barrier.trunk_lid.short'
+  +         }
+  +       },
+  +       calendar: [Object: null prototype] {
+  +         start: 64800
+  +       },
+  +       chapters: [
+  +         [Object: null prototype] {
+  +           title: 'chapter.lantern'
+  +         },
+  +         [Object: null prototype] {
+  +           outcome: 'carry',
+  +           story_point: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'lantern_resolved',
+  +             kind: 'story_point'
+  +           },
+  +           title: 'chapter.bank'
+  +         }
+  +       ],
+  +       dialogues: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:dialogue/bram': [Object: null prototype] {
+  +           choices: [Object: null prototype] {
+  +             leave_it: [Object: null prototype] {
+  +               hand_over: [Object: null prototype] {
+  +                 item: 'lantern',
+  +                 to: 'bram'
+  +               },
+  +               label: 'dialogue.bram.leave',
+  +               narration: 'narration.bram.leave',
+  +               sequence: [
+  +                 [Object: null prototype] {
+  +                   fact: [Object: null prototype] {
+  +                     cartridge_id: 'ashmere_sampler',
+  +                     cartridge_version: '0.0.9',
+  +                     key: 'search_plan',
+  +                     kind: 'fact'
+  +                   },
+  +                   op: 'fact.assign',
+  +                   value: 'party_led'
+  +                 }
+  +               ]
+  +             },
+  +             take_it: [Object: null prototype] {
+  +               label: 'dialogue.bram.carry',
+  +               narration: 'narration.bram.carry',
+  +               sequence: [
+  +                 [Object: null prototype] {
+  +                   fact: [Object: null prototype] {
+  +                     cartridge_id: 'ashmere_sampler',
+  +                     cartridge_version: '0.0.9',
+  +                     key: 'search_plan',
+  +                     kind: 'fact'
+  +                   },
+  +                   op: 'fact.assign',
+  +                   value: 'player_led'
+  +                 }
+  +               ]
+  +             }
+  +           },
+  +           key: 'bram',
+  +           npc: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'bram',
+  +             kind: 'npc'
+  +           },
+  +           policy: [Object: null prototype] {
+  +             policy_version: 1,
+  +             root: [Object: null prototype] {
+  +               op: 'quest_state',
+  +               quest: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'lantern',
+  +                 kind: 'quest'
+  +               },
+  +               state: 'active'
+  +             }
+  +           },
+  +           prompt: 'dialogue.bram.prompt',
+  +           quest: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'lantern',
+  +             kind: 'quest'
+  +           },
+  +           roles: [Object: null prototype] {
+  +             bram: [Object: null prototype] {
+  +               npc: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'bram',
+  +                 kind: 'npc'
+  +               },
+  +               role: 'npc'
+  +             },
+  +             lantern: [Object: null prototype] {
+  +               item: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'lantern',
+  +                 kind: 'item'
+  +               },
+  +               role: 'item'
+  +             }
+  +           }
+  +         },
+  +         'ashmere_sampler@0.0.9:dialogue/bram_offer': [Object: null prototype] {
+  +           choices: [Object: null prototype] {
+  +             accept: [Object: null prototype] {
+  +               accept: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'lantern',
+  +                 kind: 'quest'
+  +               },
+  +               label: 'quest.lantern.accept',
+  +               narration: 'narration.bram.accept'
+  +             }
+  +           },
+  +           key: 'bram_offer',
+  +           npc: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'bram',
+  +             kind: 'npc'
+  +           },
+  +           policy: [Object: null prototype] {
+  +             policy_version: 1,
+  +             root: [Object: null prototype] {
+  +               item: [Object: null prototype] {
+  +                 items: [
+  +                   [Object: null prototype] {
+  +                     op: 'quest_state',
+  +                     quest: [Object: null prototype] {
+  +                       cartridge_id: 'ashmere_sampler',
+  +                       cartridge_version: '0.0.9',
+  +                       key: 'lantern',
+  +                       kind: 'quest'
+  +                     },
+  +                     state: 'active'
+  +                   },
+  +                   [Object: null prototype] {
+  +                     op: 'quest_state',
+  +                     quest: [Object: null prototype] {
+  +                       cartridge_id: 'ashmere_sampler',
+  +                       cartridge_version: '0.0.9',
+  +                       key: 'lantern',
+  +                       kind: 'quest'
+  +                     },
+  +                     state: 'objectives_complete'
+  +                   },
+  +                   [Object: null prototype] {
+  +                     op: 'quest_state',
+  +                     quest: [Object: null prototype] {
+  +                       cartridge_id: 'ashmere_sampler',
+  +                       cartridge_version: '0.0.9',
+  +                       key: 'lantern',
+  +                       kind: 'quest'
+  +                     },
+  +                     state: 'resolved'
+  +                   },
+  +                   [Object: null prototype] {
+  +                     op: 'quest_state',
+  +                     quest: [Object: null prototype] {
+  +                       cartridge_id: 'ashmere_sampler',
+  +                       cartridge_version: '0.0.9',
+  +                       key: 'lantern',
+  +                       kind: 'quest'
+  +                     },
+  +                     state: 'failed'
+  +                   },
+  +                   [Object: null prototype] {
+  +                     op: 'quest_state',
+  +                     quest: [Object: null prototype] {
+  +                       cartridge_id: 'ashmere_sampler',
+  +                       cartridge_version: '0.0.9',
+  +                       key: 'lantern',
+  +                       kind: 'quest'
+  +                     },
+  +                     state: 'abandoned'
+  +                   }
+  +                 ],
+  +                 op: 'any'
+  +               },
+  +               op: 'not'
+  +             }
+  +           },
+  +           prompt: 'dialogue.bram_offer.prompt',
+  +           roles: [Object: null prototype] {
+  +             bram: [Object: null prototype] {
+  +               npc: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'bram',
+  +                 kind: 'npc'
+  +               },
+  +               role: 'npc'
+  +             }
+  +           }
+  +         }
+  +       },
+  +       entry: [Object: null prototype] {
+  +         cartridge_id: 'ashmere_sampler',
+  +         cartridge_version: '0.0.9',
+  +         key: 'ferry_landing',
+  +         kind: 'room'
+  +       },
+  +       facts: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:fact/position': [Object: null prototype] {
+  +           key: 'position',
+  +           meaning: "The character's position (position@1): only its rule writes it.",
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: 'standing',
+  +             type: 'enum',
+  +             values: [
+  +               'standing',
+  +               'sitting',
+  +               'resting',
+  +               'sleeping'
+  +             ]
+  +           },
+  +           version: 1
+  +         },
+  +         'ashmere_sampler@0.0.9:fact/rat_1_killed': [Object: null prototype] {
+  +           key: 'rat_1_killed',
+  +           meaning: 'The player defeated the authored cellar rat 1 in the lantern cellar.',
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: false,
+  +             type: 'bool'
+  +           },
+  +           version: 1
+  +         },
+  +         'ashmere_sampler@0.0.9:fact/rat_2_killed': [Object: null prototype] {
+  +           key: 'rat_2_killed',
+  +           meaning: 'The player defeated the authored cellar rat 2 in the lantern cellar.',
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: false,
+  +             type: 'bool'
+  +           },
+  +           version: 1
+  +         },
+  +         'ashmere_sampler@0.0.9:fact/rat_3_killed': [Object: null prototype] {
+  +           key: 'rat_3_killed',
+  +           meaning: 'The player defeated the authored cellar rat 3 in the lantern cellar.',
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: false,
+  +             type: 'bool'
+  +           },
+  +           version: 1
+  +         },
+  +         'ashmere_sampler@0.0.9:fact/rat_4_killed': [Object: null prototype] {
+  +           key: 'rat_4_killed',
+  +           meaning: 'The player defeated the authored cellar rat 4 in the lantern cellar.',
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: false,
+  +             type: 'bool'
+  +           },
+  +           version: 1
+  +         },
+  +         'ashmere_sampler@0.0.9:fact/rat_5_killed': [Object: null prototype] {
+  +           key: 'rat_5_killed',
+  +           meaning: 'The player defeated the authored cellar rat 5 in the lantern cellar.',
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: false,
+  +             type: 'bool'
+  +           },
+  +           version: 1
+  +         },
+  +         'ashmere_sampler@0.0.9:fact/scene_lantern_kept': [Object: null prototype] {
+  +           key: 'scene_lantern_kept',
+  +           meaning: "Scene lantern_kept's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.",
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: 0,
+  +             maximum: 3,
+  +             minimum: -1,
+  +             type: 'int'
+  +           },
+  +           version: 1
+  +         },
+  +         'ashmere_sampler@0.0.9:fact/search_plan': [Object: null prototype] {
+  +           key: 'search_plan',
+  +           meaning: "Whether the player keeps Bram's lantern or leaves it with Bram (sampler lantern microquest).",
+  +           scopes: [
+  +             'player'
+  +           ],
+  +           value_type: [Object: null prototype] {
+  +             default: 'undecided',
+  +             type: 'enum',
+  +             values: [
+  +               'undecided',
+  +               'player_led',
+  +               'party_led'
+  +             ]
+  +           },
+  +           version: 1
+  +         }
+  +       },
+  +       format: 'loka-cartridge-v2',
+  +       items: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:item/brass_key': [Object: null prototype] {
+  +           description: 'item.brass_key.description',
+  +           key: 'brass_key',
+  +           keywords: [
+  +             'key',
+  +             'brass_key'
+  +           ],
+  +           location: [Object: null prototype] {
+  +             in: 'room',
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'inn_rooms',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           mass_grams: 100,
+  +           room_line: 'item.brass_key.room',
+  +           short: 'item.brass_key.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:item/lantern': [Object: null prototype] {
+  +           description: 'item.lantern.description',
+  +           key: 'lantern',
+  +           keywords: [
+  +             'lantern',
+  +             'brass_lantern'
+  +           ],
+  +           location: [Object: null prototype] {
+  +             in: 'room',
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'well_lane',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           mass_grams: 2000,
+  +           room_line: 'item.lantern.room',
+  +           short: 'item.lantern.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:item/player_corpse': [Object: null prototype] {
+  +           description: 'item.player_corpse.description',
+  +           key: 'player_corpse',
+  +           keywords: [
+  +             'corpse',
+  +             'player_corpse'
+  +           ],
+  +           location: [Object: null prototype] {
+  +             in: 'template'
+  +           },
+  +           mass_grams: 0,
+  +           room_line: 'item.player_corpse.room',
+  +           short: 'item.player_corpse.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:item/rat_corpse': [Object: null prototype] {
+  +           description: 'item.rat_corpse.description',
+  +           key: 'rat_corpse',
+  +           keywords: [
+  +             'corpse',
+  +             'rat_corpse'
+  +           ],
+  +           location: [Object: null prototype] {
+  +             in: 'template'
+  +           },
+  +           mass_grams: 0,
+  +           room_line: 'item.rat_corpse.room',
+  +           short: 'item.rat_corpse.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:item/tin_whistle': [Object: null prototype] {
+  +           description: 'item.tin_whistle.description',
+  +           key: 'tin_whistle',
+  +           keywords: [
+  +             'whistle',
+  +             'tin_whistle'
+  +           ],
+  +           location: [Object: null prototype] {
+  +             in: 'item',
+  +             item: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'trunk',
+  +               kind: 'item'
+  +             }
+  +           },
+  +           mass_grams: 200,
+  +           room_line: 'item.tin_whistle.room',
+  +           short: 'item.tin_whistle.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:item/trunk': [Object: null prototype] {
+  +           barrier: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'trunk_lid',
+  +             kind: 'barrier'
+  +           },
+  +           description: 'item.trunk.description',
+  +           key: 'trunk',
+  +           keywords: [
+  +             'trunk'
+  +           ],
+  +           location: [Object: null prototype] {
+  +             in: 'room',
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'inn_attic',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           mass_grams: 8000,
+  +           room_line: 'item.trunk.room',
+  +           short: 'item.trunk.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:item/wool_cloak': [Object: null prototype] {
+  +           description: 'item.wool_cloak.description',
+  +           key: 'wool_cloak',
+  +           keywords: [
+  +             'cloak',
+  +             'wool_cloak'
+  +           ],
+  +           location: [Object: null prototype] {
+  +             in: 'room',
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'inn_rooms',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           mass_grams: 3000,
+  +           room_line: 'item.wool_cloak.room',
+  +           short: 'item.wool_cloak.short',
+  +           slot: 'cloak'
+  +         }
+  +       },
+  +       lock: [Object: null prototype] {
+  +         capabilities: [Object: null prototype] {
+  +           barrier: 1,
+  +           behavior: 1,
+  +           calendar: 1,
+  +           combat: 1,
+  +           containment: 1,
+  +           death: 1,
+  +           description_variant: 1,
+  +           dialogue: 1,
+  +           equipment: 1,
+  +           fact: 1,
+  +           movement: 1,
+  +           policy: 1,
+  +           position: 1,
+  +           quest: 1,
+  +           resource: 1,
+  +           scene: 1,
+  +           schedule: 1
+  +         },
+  +         format: 'loka-capability-lock-v1'
+  +       },
+  +       manifest: [Object: null prototype] {
+  +         api_version: 'loka/v3',
+  +         id: 'ashmere_sampler',
+  +         requires: [Object: null prototype] {
+  +           capabilities: [Object: null prototype] {
+  +             barrier: 1,
+  +             behavior: 1,
+  +             calendar: 1,
+  +             combat: 1,
+  +             containment: 1,
+  +             death: 1,
+  +             description_variant: 1,
+  +             dialogue: 1,
+  +             equipment: 1,
+  +             fact: 1,
+  +             movement: 1,
+  +             policy: 1,
+  +             position: 1,
+  +             quest: 1,
+  +             resource: 1,
+  +             scene: 1,
+  +             schedule: 1
+  +           },
+  +           client_features: [],
+  +           content_schema: 1,
+  +           kernel_api: [Object: null prototype] {
+  +             at_least: '1.6',
+  +             below: '2.0'
+  +           },
+  +           rule_ir: 1
+  +         },
+  +         supported_profiles: [
+  +           'offline_private'
+  +         ],
+  +         time_policy: [Object: null prototype] {
+  +           profile: 'real_elapsed',
+  +           rate: 50
+  +         },
+  +         title: "Ashmere — Bram's Lantern",
+  +         version: '0.0.9'
+  +       },
+  +       npcs: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:npc/bram': [Object: null prototype] {
+  +           daily_schedule: [Object: null prototype] {
+  +             '19': [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'drowned_lantern',
+  +               kind: 'room'
+  +             },
+  +             '6': [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'ferry_landing',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           description: 'npc.bram.description',
+  +           key: 'bram',
+  +           keywords: [
+  +             'bram',
+  +             'ferryman'
+  +           ],
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'ferry_landing',
+  +             kind: 'room'
+  +           },
+  +           room_line: 'npc.bram.room',
+  +           short: 'npc.bram.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:npc/cellar_rat_1': [Object: null prototype] {
+  +           attack: [Object: null prototype] {
+  +             chance: 50,
+  +             damage_max: 1,
+  +             damage_min: 1
+  +           },
+  +           description: 'npc.cellar_rat.description',
+  +           hp: [Object: null prototype] {
+  +             gain: 0,
+  +             maximum: 6,
+  +             minimum: 0,
+  +             start: 6
+  +           },
+  +           key: 'cellar_rat_1',
+  +           keywords: [
+  +             'rat',
+  +             'cellar_rat_1'
+  +           ],
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'lantern_cellar',
+  +             kind: 'room'
+  +           },
+  +           room_line: 'npc.cellar_rat_1.room',
+  +           short: 'npc.cellar_rat.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:npc/cellar_rat_2': [Object: null prototype] {
+  +           attack: [Object: null prototype] {
+  +             chance: 50,
+  +             damage_max: 1,
+  +             damage_min: 1
+  +           },
+  +           description: 'npc.cellar_rat.description',
+  +           hp: [Object: null prototype] {
+  +             gain: 0,
+  +             maximum: 6,
+  +             minimum: 0,
+  +             start: 6
+  +           },
+  +           key: 'cellar_rat_2',
+  +           keywords: [
+  +             'rat',
+  +             'cellar_rat_2'
+  +           ],
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'lantern_cellar',
+  +             kind: 'room'
+  +           },
+  +           room_line: 'npc.cellar_rat_2.room',
+  +           short: 'npc.cellar_rat.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:npc/cellar_rat_3': [Object: null prototype] {
+  +           attack: [Object: null prototype] {
+  +             chance: 50,
+  +             damage_max: 1,
+  +             damage_min: 1
+  +           },
+  +           description: 'npc.cellar_rat.description',
+  +           hp: [Object: null prototype] {
+  +             gain: 0,
+  +             maximum: 6,
+  +             minimum: 0,
+  +             start: 6
+  +           },
+  +           key: 'cellar_rat_3',
+  +           keywords: [
+  +             'rat',
+  +             'cellar_rat_3'
+  +           ],
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'lantern_cellar',
+  +             kind: 'room'
+  +           },
+  +           room_line: 'npc.cellar_rat_3.room',
+  +           short: 'npc.cellar_rat.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:npc/cellar_rat_4': [Object: null prototype] {
+  +           attack: [Object: null prototype] {
+  +             chance: 50,
+  +             damage_max: 1,
+  +             damage_min: 1
+  +           },
+  +           description: 'npc.cellar_rat.description',
+  +           hp: [Object: null prototype] {
+  +             gain: 0,
+  +             maximum: 6,
+  +             minimum: 0,
+  +             start: 6
+  +           },
+  +           key: 'cellar_rat_4',
+  +           keywords: [
+  +             'rat',
+  +             'cellar_rat_4'
+  +           ],
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'lantern_cellar',
+  +             kind: 'room'
+  +           },
+  +           room_line: 'npc.cellar_rat_4.room',
+  +           short: 'npc.cellar_rat.short'
+  +         },
+  +         'ashmere_sampler@0.0.9:npc/cellar_rat_5': [Object: null prototype] {
+  +           attack: [Object: null prototype] {
+  +             chance: 50,
+  +             damage_max: 1,
+  +             damage_min: 1
+  +           },
+  +           description: 'npc.cellar_rat.description',
+  +           hp: [Object: null prototype] {
+  +             gain: 0,
+  +             maximum: 6,
+  +             minimum: 0,
+  +             start: 6
+  +           },
+  +           key: 'cellar_rat_5',
+  +           keywords: [
+  +             'rat',
+  +             'cellar_rat_5'
+  +           ],
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'lantern_cellar',
+  +             kind: 'room'
+  +           },
+  +           room_line: 'npc.cellar_rat_5.room',
+  +           short: 'npc.cellar_rat.short'
+  +         }
+  +       },
+  +       policies: [Object: null prototype] {},
+  +       quests: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:quest/lantern': [Object: null prototype] {
+  +           journal: [Object: null prototype] {
+  +             abandoned: 'quest.lantern.abandoned',
+  +             active: 'quest.lantern.find',
+  +             failed: 'quest.lantern.failed',
+  +             objectives_met: 'quest.lantern.return',
+  +             outcomes: [Object: null prototype] {
+  +               take_it: 'quest.lantern.carried'
+  +             },
+  +             resolved: 'quest.lantern.done'
+  +           },
+  +           key: 'lantern',
+  +           objective: [Object: null prototype] {
+  +             evidence: 'current_state',
+  +             policy: [Object: null prototype] {
+  +               policy_version: 1,
+  +               root: [Object: null prototype] {
+  +                 item: [Object: null prototype] {
+  +                   cartridge_id: 'ashmere_sampler',
+  +                   cartridge_version: '0.0.9',
+  +                   key: 'lantern',
+  +                   kind: 'item'
+  +                 },
+  +                 op: 'has_item'
+  +               }
+  +             }
+  +           },
+  +           title: 'quest.lantern.title'
+  +         }
+  +       },
+  +       resources: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:resource/hp': [Object: null prototype] {
+  +           gain: 5,
+  +           key: 'hp',
+  +           maximum: 10,
+  +           minimum: 0,
+  +           start: 10
+  +         },
+  +         'ashmere_sampler@0.0.9:resource/ma': [Object: null prototype] {
+  +           gain: 4,
+  +           key: 'ma',
+  +           maximum: 100,
+  +           minimum: 0,
+  +           start: 100
+  +         },
+  +         'ashmere_sampler@0.0.9:resource/mv': [Object: null prototype] {
+  +           bands: [
+  +             [Object: null prototype] {
+  +               at_percent: 100,
+  +               key: 'mv_ready',
+  +               tone: 'normal'
+  +             },
+  +             [Object: null prototype] {
+  +               at_percent: 75,
+  +               key: 'steady',
+  +               tone: 'normal'
+  +             },
+  +             [Object: null prototype] {
+  +               at_percent: 25,
+  +               key: 'tired',
+  +               tone: 'warning'
+  +             },
+  +             [Object: null prototype] {
+  +               at_percent: 0,
+  +               key: 'exhausted',
+  +               tone: 'danger'
+  +             }
+  +           ],
+  +           gain: 18,
+  +           key: 'mv',
+  +           maximum: 100,
+  +           minimum: 0,
+  +           regen: [Object: null prototype] {
+  +             by_position: [Object: null prototype] {
+  +               resting: 36,
+  +               sitting: 18,
+  +               sleeping: 36,
+  +               standing: 18
+  +             },
+  +             every: 3600
+  +           },
+  +           start: 100
+  +         }
+  +       },
+  +       rooms: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:room/chapel_nave': [Object: null prototype] {
+  +           description: 'room.chapel_nave.description',
+  +           exits: [Object: null prototype] {
+  +             south: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'chapel_steps',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'chapel_nave',
+  +           sanctuary: true,
+  +           title: 'room.chapel_nave.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/chapel_steps': [Object: null prototype] {
+  +           description: 'room.chapel_steps.description',
+  +           exits: [Object: null prototype] {
+  +             north: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'chapel_nave',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             south: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'north_gate',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'chapel_steps',
+  +           title: 'room.chapel_steps.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/drowned_lantern': [Object: null prototype] {
+  +           description: 'room.drowned_lantern.description',
+  +           exits: [Object: null prototype] {
+  +             down: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'lantern_cellar',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             up: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'inn_rooms',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             west: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'well_lane',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'drowned_lantern',
+  +           title: 'room.drowned_lantern.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/ferry_landing': [Object: null prototype] {
+  +           description: 'room.ferry_landing.description',
+  +           exits: [Object: null prototype] {
+  +             north: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'well_lane',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'ferry_landing',
+  +           title: 'room.ferry_landing.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/inn_attic': [Object: null prototype] {
+  +           description: 'room.inn_attic.description',
+  +           exits: [Object: null prototype] {
+  +             down: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'inn_rooms',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'inn_attic',
+  +           title: 'room.inn_attic.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/inn_rooms': [Object: null prototype] {
+  +           description: 'room.inn_rooms.description',
+  +           exits: [Object: null prototype] {
+  +             down: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'drowned_lantern',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             up: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'inn_attic',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'inn_rooms',
+  +           title: 'room.inn_rooms.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/lantern_cellar': [Object: null prototype] {
+  +           description: 'room.lantern_cellar.description',
+  +           exits: [Object: null prototype] {
+  +             up: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'drowned_lantern',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'lantern_cellar',
+  +           title: 'room.lantern_cellar.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/north_gate': [Object: null prototype] {
+  +           description: 'room.north_gate.description',
+  +           exits: [Object: null prototype] {
+  +             north: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'chapel_steps',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             south: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'village_green',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'north_gate',
+  +           title: 'room.north_gate.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/village_green': [Object: null prototype] {
+  +           description: 'room.village_green.description',
+  +           exits: [Object: null prototype] {
+  +             north: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'north_gate',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             south: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'well_lane',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'village_green',
+  +           title: 'room.village_green.title'
+  +         },
+  +         'ashmere_sampler@0.0.9:room/well_lane': [Object: null prototype] {
+  +           description: 'room.well_lane.description',
+  +           exits: [Object: null prototype] {
+  +             east: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'drowned_lantern',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             north: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'village_green',
+  +                 kind: 'room'
+  +               }
+  +             },
+  +             south: [Object: null prototype] {
+  +               to: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'ferry_landing',
+  +                 kind: 'room'
+  +               }
+  +             }
+  +           },
+  +           key: 'well_lane',
+  +           title: 'room.well_lane.title'
+  +         }
+  +       },
+  +       scenes: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:scene/lantern_kept': [Object: null prototype] {
+  +           control: 'modal',
+  +           key: 'lantern_kept',
+  +           on: [Object: null prototype] {
+  +             outcome: 'carry',
+  +             story_point: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'lantern_resolved',
+  +               kind: 'story_point'
+  +             }
+  +           },
+  +           steps: [
+  +             [Object: null prototype] {
+  +               text: 'scene.lantern_kept.bram',
+  +               type: 'narrate'
+  +             },
+  +             [Object: null prototype] {
+  +               text: 'scene.lantern_kept.brass',
+  +               type: 'narrate'
+  +             },
+  +             [Object: null prototype] {
+  +               text: 'scene.lantern_kept.river',
+  +               type: 'narrate'
+  +             },
+  +             [Object: null prototype] {
+  +               type: 'await_ack'
+  +             },
+  +             [Object: null prototype] {
+  +               type: 'end'
+  +             }
+  +           ]
+  +         }
+  +       },
+  +       story_points: [Object: null prototype] {
+  +         'ashmere_sampler@0.0.9:story_point/lantern_resolved': [Object: null prototype] {
+  +           key: 'lantern_resolved',
+  +           outcomes: [Object: null prototype] {
+  +             carry: [Object: null prototype] {
+  +               choice: 'take_it',
+  +               dialogue: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'bram',
+  +                 kind: 'dialogue'
+  +               }
+  +             },
+  +             leave: [Object: null prototype] {
+  +               choice: 'leave_it',
+  +               dialogue: [Object: null prototype] {
+  +                 cartridge_id: 'ashmere_sampler',
+  +                 cartridge_version: '0.0.9',
+  +                 key: 'bram',
+  +                 kind: 'dialogue'
+  +               }
+  +             }
+  +           }
+  +         }
+  +       },
+  +       text: [Object: null prototype] {
+  +         'action.continue': 'Continue',
+  +         'action.take': 'Take',
+  +         'action.talk': 'Talk to',
+  +         'band.almost_dead': 'is almost dead',
+  +         'band.bleeding_freely': 'is bleeding freely',
+  +         'band.covered_in_blood': 'is covered in blood',
+  +         'band.dying': 'is DYING',
+  +         'band.exhausted': 'is exhausted',
+  +         'band.few_bruises': 'has a few bruises',
+  +         'band.leaking_guts': 'is leaking guts',
+  +         'band.many_nasty_wounds': 'has many nasty wounds',
+  +         'band.mv_ready': 'is ready to travel',
+  +         'band.ready': 'is in perfect health',
+  +         'band.several_wounds': 'has several wounds',
+  +         'band.slightly_scratched': 'is slightly scratched',
+  +         'band.some_cuts': 'has some cuts',
+  +         'band.steady': 'moves steadily',
+  +         'band.tired': 'is tired',
+  +         'barrier.trunk_lid.short': "the trunk's lid",
+  +         'chapter.bank': 'The Lantern Found',
+  +         'chapter.lantern': "Bram's Lantern",
+  +         'combat.npc_died': 'The rat gives one last shudder and lies still.',
+  +         'combat.npc_hit': 'The rat sinks its teeth into you.',
+  +         'combat.npc_miss': 'The rat snaps at you, but finds only air.',
+  +         'combat.player_died': 'You crumple to the floor. You awaken at the shrine.',
+  +         'combat.player_hit': 'Your blow strikes the rat squarely.',
+  +         'combat.player_miss': 'The rat darts clear of your blow.',
+  +         'dialogue.bram.carry': 'Keep the lantern',
+  +         'dialogue.bram.leave': 'Leave it with Bram',
+  +         'dialogue.bram.prompt': 'Bram looks at the lantern, then at you. "Will you keep it for now, or leave it with me?"',
+  +         'dialogue.bram_offer.prompt': 'Bram keeps his eyes on the reeds. "My lantern’s beside the well, and I can’t leave the ferry. Would you fetch it?"',
+  +         'item.brass_key.description': 'A small brass key with a narrow tooth.',
+  +         'item.brass_key.room': 'A small [brass key] lies here, its narrow tooth glinting.',
+  +         'item.brass_key.short': 'a brass key',
+  +         'item.lantern.description': 'Dented brass with a horn window, oil sloshing inside.',
+  +         'item.lantern.room': 'A [brass lantern] rests beside the well.',
+  +         'item.lantern.short': 'a brass lantern',
+  +         'item.player_corpse.description': 'Possessions remain with this body.',
+  +         'item.player_corpse.room': 'A [player corpse] lies here.',
+  +         'item.player_corpse.short': 'a fallen body',
+  +         'item.rat_corpse.description': 'The cellar rat lies still.',
+  +         'item.rat_corpse.room': 'A [rat corpse] lies here.',
+  +         'item.rat_corpse.short': 'a dead cellar rat',
+  +         'item.tin_whistle.description': 'A small tin whistle, dulled by dust.',
+  +         'item.tin_whistle.room': 'A small [tin whistle] lies in the trunk.',
+  +         'item.tin_whistle.short': 'a tin whistle',
+  +         'item.trunk.description': 'An old wooden trunk. Its iron hasp is dark with age.',
+  +         'item.trunk.room': 'An old [trunk] sits under the slope of the roof.',
+  +         'item.trunk.short': 'an old trunk',
+  +         'item.wool_cloak.description': 'Heavy grey wool. Rain runs off it.',
+  +         'item.wool_cloak.room': 'A [wool cloak] hangs over the bedpost.',
+  +         'item.wool_cloak.short': 'a wool cloak',
+  +         'narration.bram.accept': "You say you'll fetch it. Bram nods toward the path north.",
+  +         'narration.bram.carry': 'You keep the lantern. Bram nods once.',
+  +         'narration.bram.leave': 'You hand Bram the lantern. He settles it beside his boot.',
+  +         'npc.bram.description': 'A ferryman with rope-scarred hands and a coat that has never been dry.',
+  +         'npc.bram.room': '[Old Bram] the ferryman stands here, one boot on the ferry.',
+  +         'npc.bram.short': 'Old Bram',
+  +         'npc.cellar_rat.description': 'A small grey rat watches from beside a barrel, its whiskers twitching.',
+  +         'npc.cellar_rat.short': 'a cellar rat',
+  +         'npc.cellar_rat_1.room': 'A [[cellar_rat_1|cellar rat]] noses among the dusty barrels.',
+  +         'npc.cellar_rat_2.room': 'A [[cellar_rat_2|cellar rat]] noses among the dusty barrels.',
+  +         'npc.cellar_rat_3.room': 'A [[cellar_rat_3|cellar rat]] noses among the dusty barrels.',
+  +         'npc.cellar_rat_4.room': 'A [[cellar_rat_4|cellar rat]] noses among the dusty barrels.',
+  +         'npc.cellar_rat_5.room': 'A [[cellar_rat_5|cellar rat]] noses among the dusty barrels.',
+  +         'quest.lantern.abandoned': 'The lantern search was abandoned.',
+  +         'quest.lantern.accept': "Offer to fetch Bram's lantern",
+  +         'quest.lantern.carried': 'You found the lantern and kept it.',
+  +         'quest.lantern.done': "Bram's lantern is found.",
+  +         'quest.lantern.failed': 'The lantern search failed.',
+  +         'quest.lantern.find': "Find Bram's lantern.",
+  +         'quest.lantern.return': 'Bring the lantern to Bram.',
+  +         'quest.lantern.title': "Bram's lantern",
+  +         'room.chapel_nave.description': 'The nave is cold and high. A fresco covers the east wall, and the altar is plain stone.',
+  +         'room.chapel_nave.title': 'Chapel Nave',
+  +         'room.chapel_steps.description': 'Wide stone steps, worn into dips, climb to the chapel door. An alms bowl sits on the top step.',
+  +         'room.chapel_steps.title': 'Chapel Steps',
+  +         'room.drowned_lantern.description': 'The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall.',
+  +         'room.drowned_lantern.title': 'The Drowned Lantern',
+  +         'room.ferry_landing.description': 'Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings.',
+  +         'room.ferry_landing.title': 'Ferry Landing',
+  +         'room.inn_attic.description': 'Dust lies thick as felt. A trunk with an iron hasp sits under the slope of the roof.',
+  +         'room.inn_attic.title': 'Inn Attic',
+  +         'room.inn_rooms.description': 'A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage.',
+  +         'room.inn_rooms.title': 'Inn Rooms',
+  +         'room.lantern_cellar.description': 'Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall.',
+  +         'room.lantern_cellar.title': 'Lantern Cellar',
+  +         'room.north_gate.description': 'The north gate is oak banded with iron, set in the village wall. North, a track climbs to the priory.',
+  +         'room.north_gate.title': 'North Gate',
+  +         'room.village_green.description': 'An old elm shades a patch of trodden grass at the heart of Ashmere. The stocks stand empty, and a market cross of weathered stone marks the middle.',
+  +         'room.village_green.title': 'Village Green',
+  +         'room.well_lane.description': 'A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east.',
+  +         'room.well_lane.title': 'Well Lane',
+  +         'scene.lantern_kept.bram': 'Bram settles his boot against the ferry. The wet rope creaks around the mooring post.',
+  +         'scene.lantern_kept.brass': 'You turn the brass lantern in your hand. Its dented side is cool against your palm.',
+  +         'scene.lantern_kept.river': 'The reeds stir. The river keeps sliding past the landing, the color of strong tea.'
+  +       },
+  +       world: [Object: null prototype] {
+  +         bands: [
+  +           [Object: null prototype] {
+  +             at_percent: 100,
+  +             key: 'ready',
+  +             tone: 'normal'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 90,
+  +             key: 'slightly_scratched',
+  +             tone: 'normal'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 80,
+  +             key: 'few_bruises',
+  +             tone: 'normal'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 70,
+  +             key: 'some_cuts',
+  +             tone: 'warning'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 60,
+  +             key: 'several_wounds',
+  +             tone: 'warning'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 50,
+  +             key: 'many_nasty_wounds',
+  +             tone: 'warning'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 40,
+  +             key: 'bleeding_freely',
+  +             tone: 'warning'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 30,
+  +             key: 'covered_in_blood',
+  +             tone: 'danger'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 20,
+  +             key: 'leaking_guts',
+  +             tone: 'danger'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 10,
+  +             key: 'almost_dead',
+  +             tone: 'danger'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 0,
+  +             key: 'dying',
+  +             tone: 'danger'
+  +           }
+  +         ],
+  +         carry: [Object: null prototype] {
+  +           max_grams: 12000
+  +         },
+  +         combat: [Object: null prototype] {
+  +           flee_multiplier: 2,
+  +           interval: 150,
+  +           narration: [Object: null prototype] {
+  +             npc_died: 'combat.npc_died',
+  +             npc_hit: 'combat.npc_hit',
+  +             npc_miss: 'combat.npc_miss',
+  +             player_died: 'combat.player_died',
+  +             player_hit: 'combat.player_hit',
+  +             player_miss: 'combat.player_miss'
+  +           },
+  +           player_attack: [Object: null prototype] {
+  +             chance: 75,
+  +             damage_max: 2,
+  +             damage_min: 1
+  +           },
+  +           sleep_multiplier: 2
+  +         },
+  +         death: [Object: null prototype] {
+  +           npc_corpse: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'rat_corpse',
+  +             kind: 'item'
+  +           },
+  +           player_corpse: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'player_corpse',
+  +             kind: 'item'
+  +           },
+  +           restore: [Object: null prototype] {
+  +             hp: 10,
+  +             mv: 100
+  +           },
+  +           shrine: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'chapel_nave',
+  +             kind: 'room'
+  +           }
+  +         },
+  +         death_credit: [
+  +           [Object: null prototype] {
+  +             fact: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'rat_1_killed',
+  +               kind: 'fact'
+  +             },
+  +             npc: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'cellar_rat_1',
+  +               kind: 'npc'
+  +             },
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'lantern_cellar',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           [Object: null prototype] {
+  +             fact: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'rat_2_killed',
+  +               kind: 'fact'
+  +             },
+  +             npc: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'cellar_rat_2',
+  +               kind: 'npc'
+  +             },
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'lantern_cellar',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           [Object: null prototype] {
+  +             fact: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'rat_3_killed',
+  +               kind: 'fact'
+  +             },
+  +             npc: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'cellar_rat_3',
+  +               kind: 'npc'
+  +             },
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'lantern_cellar',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           [Object: null prototype] {
+  +             fact: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'rat_4_killed',
+  +               kind: 'fact'
+  +             },
+  +             npc: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'cellar_rat_4',
+  +               kind: 'npc'
+  +             },
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'lantern_cellar',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           [Object: null prototype] {
+  +             fact: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'rat_5_killed',
+  +               kind: 'fact'
+  +             },
+  +             npc: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'cellar_rat_5',
+  +               kind: 'npc'
+  +             },
+  +             room: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'lantern_cellar',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         ],
+  +         movement: [Object: null prototype] {
+  +           cost: [Object: null prototype] {
+  +             amount: 1,
+  +             resource: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'mv',
+  +               kind: 'resource'
+  +             }
+  +           }
+  +         }
+  +       }
+  +     },
+  +     character: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
+  +     context: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f',
+  +     corpseTemplates: {
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"player_corpse","kind":"item"}': 'player',
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"rat_corpse","kind":"item"}': 'npc'
+  +     },
+  +     details: {},
+  +     entities: {
+  +       '05f6aca0-79cd-83fe-8096-bae95b0730e8': {
+  +         barrier: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_sampler',
+  +           cartridge_version: '0.0.9',
+  +           key: 'trunk_lid',
+  +           kind: 'barrier'
+  +         },
+  +         description: 'item.trunk.description',
+  +         key: 'trunk',
+  +         keywords: [
+  +           'trunk'
+  +         ],
+  +         kind: 'item',
+  +         location: [Object: null prototype] {
+  +           in: 'room',
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'inn_attic',
+  +             kind: 'room'
+  +           }
+  +         },
+  +         mass_grams: 8000,
+  +         room_line: 'item.trunk.room',
+  +         short: 'item.trunk.short'
+  +       },
+  +       '15349791-fa65-81f7-b378-bb8212b808d2': {
+  +         daily_schedule: [Object: null prototype] {
+  +           '19': [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'drowned_lantern',
+  +             kind: 'room'
+  +           },
+  +           '6': [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'ferry_landing',
+  +             kind: 'room'
+  +           }
+  +         },
+  +         description: 'npc.bram.description',
+  +         key: 'bram',
+  +         keywords: [
+  +           'bram',
+  +           'ferryman'
+  +         ],
+  +         kind: 'npc',
+  +         room: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_sampler',
+  +           cartridge_version: '0.0.9',
+  +           key: 'ferry_landing',
+  +           kind: 'room'
+  +         },
+  +         room_line: 'npc.bram.room',
+  +         short: 'npc.bram.short'
+  +       },
+  +       '19785203-d373-8973-8e64-1a9d8e50be82': {
+  +         description: 'item.tin_whistle.description',
+  +         key: 'tin_whistle',
+  +         keywords: [
+  +           'whistle',
+  +           'tin_whistle'
+  +         ],
+  +         kind: 'item',
+  +         location: [Object: null prototype] {
+  +           in: 'item',
+  +           item: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'trunk',
+  +             kind: 'item'
+  +           }
+  +         },
+  +         mass_grams: 200,
+  +         room_line: 'item.tin_whistle.room',
+  +         short: 'item.tin_whistle.short'
+  +       },
+  +       '251e7a71-b5ad-8d22-858b-533e52cc5415': {
+  +         attack: [Object: null prototype] {
+  +           chance: 50,
+  +           damage_max: 1,
+  +           damage_min: 1
+  +         },
+  +         description: 'npc.cellar_rat.description',
+  +         hp: [Object: null prototype] {
+  +           gain: 0,
+  +           maximum: 6,
+  +           minimum: 0,
+  +           start: 6
+  +         },
+  +         key: 'cellar_rat_3',
+  +         keywords: [
+  +           'rat',
+  +           'cellar_rat_3'
+  +         ],
+  +         kind: 'npc',
+  +         room: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_sampler',
+  +           cartridge_version: '0.0.9',
+  +           key: 'lantern_cellar',
+  +           kind: 'room'
+  +         },
+  +         room_line: 'npc.cellar_rat_3.room',
+  +         short: 'npc.cellar_rat.short'
+  +       },
+  +       '58cfbca8-0448-8e2e-af98-49d0a71d1a04': {
+  +         attack: [Object: null prototype] {
+  +           chance: 50,
+  +           damage_max: 1,
+  +           damage_min: 1
+  +         },
+  +         description: 'npc.cellar_rat.description',
+  +         hp: [Object: null prototype] {
+  +           gain: 0,
+  +           maximum: 6,
+  +           minimum: 0,
+  +           start: 6
+  +         },
+  +         key: 'cellar_rat_5',
+  +         keywords: [
+  +           'rat',
+  +           'cellar_rat_5'
+  +         ],
+  +         kind: 'npc',
+  +         room: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_sampler',
+  +           cartridge_version: '0.0.9',
+  +           key: 'lantern_cellar',
+  +           kind: 'room'
+  +         },
+  +         room_line: 'npc.cellar_rat_5.room',
+  +         short: 'npc.cellar_rat.short'
+  +       },
+  +       '58ee172d-aa6f-8023-a3c1-a1d46af6d167': {
+  +         description: 'item.lantern.description',
+  +         key: 'lantern',
+  +         keywords: [
+  +           'lantern',
+  +           'brass_lantern'
+  +         ],
+  +         kind: 'item',
+  +         location: [Object: null prototype] {
+  +           in: 'room',
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'well_lane',
+  +             kind: 'room'
+  +           }
+  +         },
+  +         mass_grams: 2000,
+  +         room_line: 'item.lantern.room',
+  +         short: 'item.lantern.short'
+  +       },
+  +       'b0711280-2a6c-8b4e-844c-3e902e0c2184': {
+  +         attack: [Object: null prototype] {
+  +           chance: 50,
+  +           damage_max: 1,
+  +           damage_min: 1
+  +         },
+  +         description: 'npc.cellar_rat.description',
+  +         hp: [Object: null prototype] {
+  +           gain: 0,
+  +           maximum: 6,
+  +           minimum: 0,
+  +           start: 6
+  +         },
+  +         key: 'cellar_rat_4',
+  +         keywords: [
+  +           'rat',
+  +           'cellar_rat_4'
+  +         ],
+  +         kind: 'npc',
+  +         room: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_sampler',
+  +           cartridge_version: '0.0.9',
+  +           key: 'lantern_cellar',
+  +           kind: 'room'
+  +         },
+  +         room_line: 'npc.cellar_rat_4.room',
+  +         short: 'npc.cellar_rat.short'
+  +       },
+  +       'd68b48e6-93a5-8899-81ec-808f7be333f8': {
+  +         description: 'item.wool_cloak.description',
+  +         key: 'wool_cloak',
+  +         keywords: [
+  +           'cloak',
+  +           'wool_cloak'
+  +         ],
+  +         kind: 'item',
+  +         location: [Object: null prototype] {
+  +           in: 'room',
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'inn_rooms',
+  +             kind: 'room'
+  +           }
+  +         },
+  +         mass_grams: 3000,
+  +         room_line: 'item.wool_cloak.room',
+  +         short: 'item.wool_cloak.short',
+  +         slot: 'cloak'
+  +       },
+  +       'd7e286c7-c344-8eef-8aa6-94a781d448bd': {
+  +         attack: [Object: null prototype] {
+  +           chance: 50,
+  +           damage_max: 1,
+  +           damage_min: 1
+  +         },
+  +         description: 'npc.cellar_rat.description',
+  +         hp: [Object: null prototype] {
+  +           gain: 0,
+  +           maximum: 6,
+  +           minimum: 0,
+  +           start: 6
+  +         },
+  +         key: 'cellar_rat_2',
+  +         keywords: [
+  +           'rat',
+  +           'cellar_rat_2'
+  +         ],
+  +         kind: 'npc',
+  +         room: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_sampler',
+  +           cartridge_version: '0.0.9',
+  +           key: 'lantern_cellar',
+  +           kind: 'room'
+  +         },
+  +         room_line: 'npc.cellar_rat_2.room',
+  +         short: 'npc.cellar_rat.short'
+  +       },
+  +       'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2': {
+  +         attack: [Object: null prototype] {
+  +           chance: 50,
+  +           damage_max: 1,
+  +           damage_min: 1
+  +         },
+  +         description: 'npc.cellar_rat.description',
+  +         hp: [Object: null prototype] {
+  +           gain: 0,
+  +           maximum: 6,
+  +           minimum: 0,
+  +           start: 6
+  +         },
+  +         key: 'cellar_rat_1',
+  +         keywords: [
+  +           'rat',
+  +           'cellar_rat_1'
+  +         ],
+  +         kind: 'npc',
+  +         room: [Object: null prototype] {
+  +           cartridge_id: 'ashmere_sampler',
+  +           cartridge_version: '0.0.9',
+  +           key: 'lantern_cellar',
+  +           kind: 'room'
+  +         },
+  +         room_line: 'npc.cellar_rat_1.room',
+  +         short: 'npc.cellar_rat.short'
+  +       },
+  +       'f14e477f-cecc-897a-bee7-c573aa5c76c3': {
+  +         description: 'item.brass_key.description',
+  +         key: 'brass_key',
+  +         keywords: [
+  +           'key',
+  +           'brass_key'
+  +         ],
+  +         kind: 'item',
+  +         location: [Object: null prototype] {
+  +           in: 'room',
+  +           room: [Object: null prototype] {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'inn_rooms',
+  +             kind: 'room'
+  +           }
+  +         },
+  +         mass_grams: 100,
+  +         room_line: 'item.brass_key.room',
+  +         short: 'item.brass_key.short'
+  +       }
+  +     },
+  +     entityIds: {
+  +       'ashmere_sampler@0.0.9:item/brass_key': 'f14e477f-cecc-897a-bee7-c573aa5c76c3',
+  +       'ashmere_sampler@0.0.9:item/lantern': '58ee172d-aa6f-8023-a3c1-a1d46af6d167',
+  +       'ashmere_sampler@0.0.9:item/tin_whistle': '19785203-d373-8973-8e64-1a9d8e50be82',
+  +       'ashmere_sampler@0.0.9:item/trunk': '05f6aca0-79cd-83fe-8096-bae95b0730e8',
+  +       'ashmere_sampler@0.0.9:item/wool_cloak': 'd68b48e6-93a5-8899-81ec-808f7be333f8',
+  +       'ashmere_sampler@0.0.9:npc/bram': '15349791-fa65-81f7-b378-bb8212b808d2',
+  +       'ashmere_sampler@0.0.9:npc/cellar_rat_1': 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2',
+  +       'ashmere_sampler@0.0.9:npc/cellar_rat_2': 'd7e286c7-c344-8eef-8aa6-94a781d448bd',
+  +       'ashmere_sampler@0.0.9:npc/cellar_rat_3': '251e7a71-b5ad-8d22-858b-533e52cc5415',
+  +       'ashmere_sampler@0.0.9:npc/cellar_rat_4': 'b0711280-2a6c-8b4e-844c-3e902e0c2184',
+  +       'ashmere_sampler@0.0.9:npc/cellar_rat_5': '58cfbca8-0448-8e2e-af98-49d0a71d1a04'
+  +     },
+  +     entityResourceSpecs: {
+  +       '{"entity_id":"251e7a71-b5ad-8d22-858b-533e52cc5415","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +         gain: 0,
+  +         key: 'hp',
+  +         maximum: 6,
+  +         minimum: 0,
+  +         start: 6
+  +       },
+  +       '{"entity_id":"58cfbca8-0448-8e2e-af98-49d0a71d1a04","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +         gain: 0,
+  +         key: 'hp',
+  +         maximum: 6,
+  +         minimum: 0,
+  +         start: 6
+  +       },
+  +       '{"entity_id":"b0711280-2a6c-8b4e-844c-3e902e0c2184","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +         gain: 0,
+  +         key: 'hp',
+  +         maximum: 6,
+  +         minimum: 0,
+  +         start: 6
+  +       },
+  +       '{"entity_id":"d7e286c7-c344-8eef-8aa6-94a781d448bd","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +         gain: 0,
+  +         key: 'hp',
+  +         maximum: 6,
+  +         minimum: 0,
+  +         start: 6
+  +       },
+  +       '{"entity_id":"e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +         gain: 0,
+  +         key: 'hp',
+  +         maximum: 6,
+  +         minimum: 0,
+  +         start: 6
+  +       }
+  +     },
+  +     factDefaults: {
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"position","kind":"fact"}': 'standing',
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"rat_1_killed","kind":"fact"}': false,
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"rat_2_killed","kind":"fact"}': false,
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"rat_3_killed","kind":"fact"}': false,
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"rat_4_killed","kind":"fact"}': false,
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"rat_5_killed","kind":"fact"}': false,
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"scene_lantern_kept","kind":"fact"}': 0,
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"search_plan","kind":"fact"}': 'undecided'
+  +     },
+  +     knownEntities: {
+  +       '05f6aca0-79cd-83fe-8096-bae95b0730e8': {
+  +         kind: 'item'
+  +       },
+  +       '0f5f2329-bcff-82f4-948a-3d22a75fb068': {
+  +         kind: 'room'
+  +       },
+  +       '15349791-fa65-81f7-b378-bb8212b808d2': {
+  +         kind: 'npc'
+  +       },
+  +       '19785203-d373-8973-8e64-1a9d8e50be82': {
+  +         kind: 'item'
+  +       },
+  +       '1a7c3699-2844-8a55-b29f-eac079c7bf50': {
+  +         kind: 'room'
+  +       },
+  +       '251e7a71-b5ad-8d22-858b-533e52cc5415': {
+  +         kind: 'npc'
+  +       },
+  +       '2ef35eee-f837-8b28-bea7-9748a332940a': {
+  +         kind: 'room'
+  +       },
+  +       '3d4829ad-9e43-81ef-bc10-66b1b267e157': {
+  +         kind: 'body',
+  +         owner_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9'
+  +       },
+  +       '470b4175-5b92-89c1-bdac-645a128dc72f': {
+  +         kind: 'room'
+  +       },
+  +       '58cfbca8-0448-8e2e-af98-49d0a71d1a04': {
+  +         kind: 'npc'
+  +       },
+  +       '58ee172d-aa6f-8023-a3c1-a1d46af6d167': {
+  +         kind: 'item'
+  +       },
+  +       '6a70d262-b6ea-8b64-9809-ec7f79d1521e': {
+  +         kind: 'room'
+  +       },
+  +       '86b28f4e-f743-87f8-8375-2ead5c2c295c': {
+  +         kind: 'slot'
+  +       },
+  +       '91fde0fc-dd14-846f-826e-245e45d16ec7': {
+  +         kind: 'room'
+  +       },
+  +       '953a909b-3a29-8c5c-9e3f-4105b9a47c4b': {
+  +         kind: 'room'
+  +       },
+  +       'b0711280-2a6c-8b4e-844c-3e902e0c2184': {
+  +         kind: 'npc'
+  +       },
+  +       'd530207e-b845-8be5-9d53-b44b2cf5d8a1': {
+  +         kind: 'room'
+  +       },
+  +       'd68b48e6-93a5-8899-81ec-808f7be333f8': {
+  +         kind: 'item'
+  +       },
+  +       'd7e286c7-c344-8eef-8aa6-94a781d448bd': {
+  +         kind: 'npc'
+  +       },
+  +       'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2': {
+  +         kind: 'npc'
+  +       },
+  +       'f14e477f-cecc-897a-bee7-c573aa5c76c3': {
+  +         kind: 'item'
+  +       },
+  +       'f34698e2-c92c-841a-b0bd-da6883e9c111': {
+  +         kind: 'room'
+  +       },
+  +       'ff864ad5-cd56-80c8-9392-dc88bdc28fd2': {
+  +         kind: 'room'
+  +       }
+  +     },
+  +     resourceSpecs: {
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}': [Object: null prototype] {
+  +         gain: 5,
+  +         key: 'hp',
+  +         maximum: 10,
+  +         minimum: 0,
+  +         start: 10
+  +       },
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"ma","kind":"resource"}': [Object: null prototype] {
+  +         gain: 4,
+  +         key: 'ma',
+  +         maximum: 100,
+  +         minimum: 0,
+  +         start: 100
+  +       },
+  +       '{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"mv","kind":"resource"}': [Object: null prototype] {
+  +         bands: [
+  +           [Object: null prototype] {
+  +             at_percent: 100,
+  +             key: 'mv_ready',
+  +             tone: 'normal'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 75,
+  +             key: 'steady',
+  +             tone: 'normal'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 25,
+  +             key: 'tired',
+  +             tone: 'warning'
+  +           },
+  +           [Object: null prototype] {
+  +             at_percent: 0,
+  +             key: 'exhausted',
+  +             tone: 'danger'
+  +           }
+  +         ],
+  +         gain: 18,
+  +         key: 'mv',
+  +         maximum: 100,
+  +         minimum: 0,
+  +         regen: [Object: null prototype] {
+  +           by_position: [Object: null prototype] {
+  +             resting: 36,
+  +             sitting: 18,
+  +             sleeping: 36,
+  +             standing: 18
+  +           },
+  +           every: 3600
+  +         },
+  +         start: 100
+  +       }
+  +     },
+  +     roomIds: {
+  +       'ashmere_sampler@0.0.9:room/chapel_nave': '1a7c3699-2844-8a55-b29f-eac079c7bf50',
+  +       'ashmere_sampler@0.0.9:room/chapel_steps': '91fde0fc-dd14-846f-826e-245e45d16ec7',
+  +       'ashmere_sampler@0.0.9:room/drowned_lantern': '953a909b-3a29-8c5c-9e3f-4105b9a47c4b',
+  +       'ashmere_sampler@0.0.9:room/ferry_landing': 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2',
+  +       'ashmere_sampler@0.0.9:room/inn_attic': '6a70d262-b6ea-8b64-9809-ec7f79d1521e',
+  +       'ashmere_sampler@0.0.9:room/inn_rooms': '0f5f2329-bcff-82f4-948a-3d22a75fb068',
+  +       'ashmere_sampler@0.0.9:room/lantern_cellar': 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +       'ashmere_sampler@0.0.9:room/north_gate': '2ef35eee-f837-8b28-bea7-9748a332940a',
+  +       'ashmere_sampler@0.0.9:room/village_green': '470b4175-5b92-89c1-bdac-645a128dc72f',
+  +       'ashmere_sampler@0.0.9:room/well_lane': 'f34698e2-c92c-841a-b0bd-da6883e9c111'
+  +     },
+  +     rooms: {
+  +       '0f5f2329-bcff-82f4-948a-3d22a75fb068': [Object: null prototype] {
+  +         description: 'room.inn_rooms.description',
+  +         exits: [Object: null prototype] {
+  +           down: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'drowned_lantern',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           up: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'inn_attic',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'inn_rooms',
+  +         title: 'room.inn_rooms.title'
+  +       },
+  +       '1a7c3699-2844-8a55-b29f-eac079c7bf50': [Object: null prototype] {
+  +         description: 'room.chapel_nave.description',
+  +         exits: [Object: null prototype] {
+  +           south: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'chapel_steps',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'chapel_nave',
+  +         sanctuary: true,
+  +         title: 'room.chapel_nave.title'
+  +       },
+  +       '2ef35eee-f837-8b28-bea7-9748a332940a': [Object: null prototype] {
+  +         description: 'room.north_gate.description',
+  +         exits: [Object: null prototype] {
+  +           north: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'chapel_steps',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           south: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'village_green',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'north_gate',
+  +         title: 'room.north_gate.title'
+  +       },
+  +       '470b4175-5b92-89c1-bdac-645a128dc72f': [Object: null prototype] {
+  +         description: 'room.village_green.description',
+  +         exits: [Object: null prototype] {
+  +           north: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'north_gate',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           south: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'well_lane',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'village_green',
+  +         title: 'room.village_green.title'
+  +       },
+  +       '6a70d262-b6ea-8b64-9809-ec7f79d1521e': [Object: null prototype] {
+  +         description: 'room.inn_attic.description',
+  +         exits: [Object: null prototype] {
+  +           down: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'inn_rooms',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'inn_attic',
+  +         title: 'room.inn_attic.title'
+  +       },
+  +       '91fde0fc-dd14-846f-826e-245e45d16ec7': [Object: null prototype] {
+  +         description: 'room.chapel_steps.description',
+  +         exits: [Object: null prototype] {
+  +           north: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'chapel_nave',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           south: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'north_gate',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'chapel_steps',
+  +         title: 'room.chapel_steps.title'
+  +       },
+  +       '953a909b-3a29-8c5c-9e3f-4105b9a47c4b': [Object: null prototype] {
+  +         description: 'room.drowned_lantern.description',
+  +         exits: [Object: null prototype] {
+  +           down: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'lantern_cellar',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           up: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'inn_rooms',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           west: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'well_lane',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'drowned_lantern',
+  +         title: 'room.drowned_lantern.title'
+  +       },
+  +       'd530207e-b845-8be5-9d53-b44b2cf5d8a1': [Object: null prototype] {
+  +         description: 'room.lantern_cellar.description',
+  +         exits: [Object: null prototype] {
+  +           up: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'drowned_lantern',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'lantern_cellar',
+  +         title: 'room.lantern_cellar.title'
+  +       },
+  +       'f34698e2-c92c-841a-b0bd-da6883e9c111': [Object: null prototype] {
+  +         description: 'room.well_lane.description',
+  +         exits: [Object: null prototype] {
+  +           east: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'drowned_lantern',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           north: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'village_green',
+  +               kind: 'room'
+  +             }
+  +           },
+  +           south: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'ferry_landing',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'well_lane',
+  +         title: 'room.well_lane.title'
+  +       },
+  +       'ff864ad5-cd56-80c8-9392-dc88bdc28fd2': [Object: null prototype] {
+  +         description: 'room.ferry_landing.description',
+  +         exits: [Object: null prototype] {
+  +           north: [Object: null prototype] {
+  +             to: [Object: null prototype] {
+  +               cartridge_id: 'ashmere_sampler',
+  +               cartridge_version: '0.0.9',
+  +               key: 'well_lane',
+  +               kind: 'room'
+  +             }
+  +           }
+  +         },
+  +         key: 'ferry_landing',
+  +         title: 'room.ferry_landing.title'
+  +       }
+  +     },
+  +     slots: {
+  +       cloak: '86b28f4e-f743-87f8-8375-2ead5c2c295c'
+  +     },
+  +     state: {
+  +       clock: 64800,
+  +       containers: {
+  +         '05f6aca0-79cd-83fe-8096-bae95b0730e8': '6a70d262-b6ea-8b64-9809-ec7f79d1521e',
+  +         '15349791-fa65-81f7-b378-bb8212b808d2': 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2',
+  +         '19785203-d373-8973-8e64-1a9d8e50be82': '05f6aca0-79cd-83fe-8096-bae95b0730e8',
+  +         '251e7a71-b5ad-8d22-858b-533e52cc5415': 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +         '3d4829ad-9e43-81ef-bc10-66b1b267e157': 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +         '58cfbca8-0448-8e2e-af98-49d0a71d1a04': 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +         '58ee172d-aa6f-8023-a3c1-a1d46af6d167': 'f34698e2-c92c-841a-b0bd-da6883e9c111',
+  +         '86b28f4e-f743-87f8-8375-2ead5c2c295c': '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +         'b0711280-2a6c-8b4e-844c-3e902e0c2184': 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +         'd68b48e6-93a5-8899-81ec-808f7be333f8': '0f5f2329-bcff-82f4-948a-3d22a75fb068',
+  +         'd7e286c7-c344-8eef-8aa6-94a781d448bd': 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +         'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2': 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +         'f14e477f-cecc-897a-bee7-c573aa5c76c3': '0f5f2329-bcff-82f4-948a-3d22a75fb068'
+  +       },
+  +       encounters: {
+  +         '5a23b0b2-b165-8b36-9476-3b46d43d3dfb': {
+  +           body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +           character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
+  +           job_id: 'd173f5a9-2a9c-8901-bc0b-c520648fc8de',
+  +           npc_id: 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2',
+  +           room_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +           round: 1,
+  +           status: 'open'
+  +         }
+  +       },
+  +       jobs: {
+  +         '2603d738-5a68-83d2-93fe-8e50819f9741': {
+  +           due_time: 68400,
+  +           job: {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'bram',
+  +             kind: 'npc'
+  +           },
+  +           status: 'pending'
+  +         },
+  +         'd173f5a9-2a9c-8901-bc0b-c520648fc8de': {
+  +           due_time: 64950,
+  +           encounter_id: '5a23b0b2-b165-8b36-9476-3b46d43d3dfb',
+  +           job: {
+  +             cartridge_id: 'ashmere_sampler',
+  +             cartridge_version: '0.0.9',
+  +             key: 'cellar_rat_1',
+  +             kind: 'npc'
+  +           },
+  +           status: 'pending'
+  +         }
+  +       },
+  +       resources: {
+  +         '{"entity_id":"251e7a71-b5ad-8d22-858b-533e52cc5415","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +           at: 64800,
+  +           value: 6
+  +         },
+  +         '{"entity_id":"3d4829ad-9e43-81ef-bc10-66b1b267e157","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +           at: 64800,
+  +           value: 10
+  +         },
+  +         '{"entity_id":"3d4829ad-9e43-81ef-bc10-66b1b267e157","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"ma","kind":"resource"}}': {
+  +           at: 64800,
+  +           value: 100
+  +         },
+  +         '{"entity_id":"3d4829ad-9e43-81ef-bc10-66b1b267e157","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"mv","kind":"resource"}}': {
+  +           at: 64800,
+  +           rate: 18,
+  +           remainder: 0,
+  +           value: 100
+  +         },
+  +         '{"entity_id":"58cfbca8-0448-8e2e-af98-49d0a71d1a04","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +           at: 64800,
+  +           value: 6
+  +         },
+  +         '{"entity_id":"b0711280-2a6c-8b4e-844c-3e902e0c2184","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +           at: 64800,
+  +           value: 6
+  +         },
+  +         '{"entity_id":"d7e286c7-c344-8eef-8aa6-94a781d448bd","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +           at: 64800,
+  +           value: 6
+  +         },
+  +         '{"entity_id":"e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2","kind":"resource","resource":{"cartridge_id":"ashmere_sampler","cartridge_version":"0.0.9","key":"hp","kind":"resource"}}': {
+  +           at: 64800,
+  +           value: 0
+  +         }
+  +       },
+  +       rng: [
+  +         1,
+  +         2,
+  +         3,
+  +         4
+  +       ]
+  +     }
+  +   }
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file://<repo>/mobile/authority/local-story/combat.test.ts:285:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { world: { cartridge: [Object], context: '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f', character: 'bd595711-ea5f-89a5-abb0-046cd349d2f9', body: '3d4829ad-9e43-81ef-bc10-66b1b267e157', rooms: [Object], roomIds: [Object], details: {}, entities: [Object], entityIds: [Object], capacities: [Object], knownEntities: [Object], corpseTemplates: [Object], slots: [Object], factDefaults: [Object], resourceSpecs: [Object], entityResourceSpecs: [Object], barrierInitial: [Object], attributes: {}, state: [Object] }, revision: 1, meta: { one: 1, format: 'loka-save-v2', lineage_id: 'aaaaaaaa-0000-4000-8000-000000000001', run_id: 'aaaaaaaa-0000-4000-8000-000000000002', parent: null, seed: [Array], pin: [Object], binding: null }, elapsed: { run_id: 'aaaaaaaa-0000-4000-8000-000000000002', wall_ms: 10000, remainder: 0, target: 64800 } },
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

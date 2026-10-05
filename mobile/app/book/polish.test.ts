@@ -714,7 +714,6 @@ test('actual trunk detail explains refused Take and restores its button after Re
   go('east');
   go('up');
   take('a brass key');
-  take('a cellar key');
   take('a wool cloak');
   const carrying = () => {
     h.tap(h.labels().find((s) => s.startsWith('Contents,'))!);

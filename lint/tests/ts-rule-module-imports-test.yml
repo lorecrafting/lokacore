@@ -8,6 +8,10 @@ valid:
   - "import { earned } from '../quest/lifecycle.ts';"
   - "import { pay } from '../resource.ts';"
   - "import { entered } from './behavior.ts';"
+  # Break: named pure helpers are rejected along with rule-module imports.
+  - "import { moveSequence } from './sequence.ts';"
+  - "import { roundSequence } from '../combat/round.ts';"
+  - "import { flee } from './flee.ts';"
 invalid:
   - "import { readFileSync } from 'node:fs';"
   - "import { decide } from '../movement/rule.ts';"

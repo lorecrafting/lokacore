@@ -55,3 +55,12 @@ The chapel route reaches chapel_nave, configured as the return room. The M6 actu
 Attack → round → lethal NPC/player loss → shrine → recovery proof, including encounter
 closure before revival and frozen RNG outcomes, remains required. No live death or native
 consumer proof is claimed by foundation conformance.
+
+## Escape supersession, 2026-10-04
+
+The [owner random-Flee decision](../../decisions/owner-decision-m6-a-random-flee-2026-10-04.md)
+supersedes directional Move/alias escape above: Flee is directionless and randomly selects
+among currently legal exits; engaged directional movement is refused. Frozen A/B/C attack
+and death vectors remain unchanged. Random-exit acceptance uses additive literal cases.
+
+Implementation evidence: [M6-A first live cellar fight](../../evidence/2026-10-04-m6-a-first-live-fight/README.md).

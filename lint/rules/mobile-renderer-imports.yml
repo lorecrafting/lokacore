@@ -16,7 +16,7 @@ rule:
       inside: { matches: module-specifier }
       any:
         - not:
-            regex: '^(react|react-native|\./(book/)?(Book|Footer|MapDrawing|Menu|Turn|SaveError|joystick|model|pages|paper|presenter|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
+            regex: '^(react|react-native|\./(book/)?(Book|Combat|Footer|MapDrawing|Menu|Turn|SaveError|joystick|logs|model|pages|paper|presenter|words)(\.tsx?)?|(\.\./)+packages/game-view/[\w-]+(\.ts)?)$'
         # react-native: only `import { A, B } from`, every name plain and on the list. A namespace, default,
         # `{ default as X }`, aliased or string-named import, a re-export, require() or import() is flagged.
         - regex: '^react-native$'

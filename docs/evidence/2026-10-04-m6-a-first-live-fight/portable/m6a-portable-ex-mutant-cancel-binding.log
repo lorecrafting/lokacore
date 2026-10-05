@@ -1,0 +1,28 @@
+Compiling 42 files (.ex)
+Generated loka app
+Running ExUnit with seed: 902400, max_cases: 16
+
+............
+Finished in 3.3 seconds (3.3s async, 0.00s sync)
+
+Result: 12 passed
+Compiling 42 files (.ex)
+Generated loka app
+Running ExUnit with seed: 271432, max_cases: 16
+
+...
+
+  1) test encounter and bound job composition matches portable literal rows (Loka.Core.EncounterCompositionTest)
+     test/loka/core/encounter_composition_test.exs:7
+     cancel-wrong-encounter
+     code: for c <- @fixture["cases"] do
+     stacktrace:
+       test/loka/core/encounter_composition_test.exs:11: anonymous fn/2 in Loka.Core.EncounterCompositionTest."test encounter and bound job composition matches portable literal rows"/1
+       (elixir 1.20.4) lib/enum.ex:2622: Enum."-reduce/3-lists^foldl/2-0-"/3
+       test/loka/core/encounter_composition_test.exs:8: (test)
+
+
+Finished in 0.07 seconds (0.07s async, 0.00s sync)
+
+Result: 3/4 passed
+Failed: 1 test

@@ -1,5 +1,7 @@
 // Resource arithmetic for the portable delta algebra; invariant replay stays independent.
-import type { Json } from './canonical.ts';
+import { encode, type Json } from './canonical.ts';
+import type { State } from './compose.ts';
+import { target } from './compose_target.ts';
 import type { DeltaOp, ResourceSpec, ErrorCode } from '../contracts.gen.ts';
 type Outcome = { value: Json } | { code: ErrorCode };
 
@@ -63,6 +65,31 @@ export function current(row: Stored | undefined, spec: ResourceSpec, now: number
   return Math.min(spec.maximum, value + spec.gain * ticks);
 }
 
+// Omitted at retains the base clock; explicit delivery times stay inside this advance.
+export function composeAdjustment(
+  op: DeltaOp & { op: 'resource.adjust' },
+  row: Json | undefined,
+  state: State,
+  horizon: number,
+): Outcome {
+  const now = op.at === undefined ? state.clock : op.at;
+  const overrides = (state.entity_resource_specs ?? {}) as unknown as Record<string, ResourceSpec>;
+  const specs = (state.resource_specs ?? {}) as unknown as Record<string, ResourceSpec>;
+  const override = overrides[encode(target(op) as Json)];
+  if (
+    !Number.isSafeInteger(now) ||
+    (op.at !== undefined && (now < state.clock || now > horizon)) ||
+    (override && !validOverrideRow(row, override, now))
+  )
+    return { code: 'precondition_failed' };
+  return adjusted(
+    op,
+    row as Stored | undefined,
+    override ?? specs[encode(op.resource as Json)],
+    now,
+  );
+}
+
 // `from` is the resource's current (regenerated) value and `to` within its spec's bounds.
 export function adjusted(
   op: DeltaOp & { op: 'resource.adjust' },
@@ -70,7 +97,13 @@ export function adjusted(
   spec: ResourceSpec | undefined,
   now: number,
 ): Outcome {
-  if (!spec || !Number.isInteger(op.to) || op.to < spec.minimum || op.to > spec.maximum)
+  if (
+    !spec ||
+    !Number.isInteger(op.to) ||
+    op.to < spec.minimum ||
+    op.to > spec.maximum ||
+    (row !== undefined && (!Number.isSafeInteger(row?.at) || row.at < 0 || row.at > now))
+  )
     return { code: 'precondition_failed' };
   if (spec.regen) {
     const before = settled(row, spec, now);

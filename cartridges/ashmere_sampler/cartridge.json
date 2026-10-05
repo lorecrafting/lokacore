@@ -1,11 +1,11 @@
 {
   "api_version": "loka/v3",
   "id": "ashmere_sampler",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "title": "Ashmere — Bram's Lantern",
   "requires": {
     "kernel_api": {
-      "at_least": "1.5",
+      "at_least": "1.6",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -25,7 +25,8 @@
       "calendar": 1,
       "behavior": 1,
       "schedule": 1,
-      "death": 1
+      "death": 1,
+      "combat": 1
     },
     "client_features": []
   },
@@ -125,6 +126,51 @@
         "hp": 10,
         "mv": 100
       }
-    }
+    },
+    "combat": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      }
+    },
+    "death_credit": [
+      {
+        "npc": "cellar_rat_1",
+        "room": "lantern_cellar",
+        "fact": "rat_1_killed"
+      },
+      {
+        "npc": "cellar_rat_2",
+        "room": "lantern_cellar",
+        "fact": "rat_2_killed"
+      },
+      {
+        "npc": "cellar_rat_3",
+        "room": "lantern_cellar",
+        "fact": "rat_3_killed"
+      },
+      {
+        "npc": "cellar_rat_4",
+        "room": "lantern_cellar",
+        "fact": "rat_4_killed"
+      },
+      {
+        "npc": "cellar_rat_5",
+        "room": "lantern_cellar",
+        "fact": "rat_5_killed"
+      }
+    ]
   }
 }

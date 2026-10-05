@@ -1,0 +1,60 @@
+{
+  "source": "actual final Release Simulator SQLite after lethal Attack and reopen",
+  "corpse_count": 1,
+  "corpse": {
+    "definition": {
+      "cartridge_id": "ashmere_sampler",
+      "cartridge_version": "0.0.9",
+      "key": "player_corpse",
+      "kind": "item"
+    },
+    "id": "143dc96d-3e96-856b-903b-0a1d6a79273d",
+    "origin": {
+      "event_id": "63e3cb96-9da3-8029-94e8-c2e4570f85b5",
+      "kind": "death",
+      "owner_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+      "victim_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157"
+    }
+  },
+  "corpse_room": "d530207e-b845-8be5-9d53-b44b2cf5d8a1",
+  "returned_body": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+  "returned_room": "1a7c3699-2844-8a55-b29f-eac079c7bf50",
+  "corpse_roots": [
+    "05f6aca0-79cd-83fe-8096-bae95b0730e8",
+    "d68b48e6-93a5-8899-81ec-808f7be333f8"
+  ],
+  "nested_custody": [
+    [
+      "19785203-d373-8973-8e64-1a9d8e50be82",
+      "05f6aca0-79cd-83fe-8096-bae95b0730e8"
+    ],
+    [
+      "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+      "05f6aca0-79cd-83fe-8096-bae95b0730e8"
+    ]
+  ],
+  "encounters": {
+    "29951759-b12b-8e58-8c87-0ef0ba49ec00": {
+      "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+      "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+      "job_id": "2432ff61-0321-86be-99c6-3fbd2f8ada8e",
+      "npc_id": "e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2",
+      "room_id": "d530207e-b845-8be5-9d53-b44b2cf5d8a1",
+      "round": 1,
+      "status": "closed"
+    }
+  },
+  "bound_jobs": {
+    "2432ff61-0321-86be-99c6-3fbd2f8ada8e": {
+      "due_time": 65256,
+      "encounter_id": "29951759-b12b-8e58-8c87-0ef0ba49ec00",
+      "job": {
+        "cartridge_id": "ashmere_sampler",
+        "cartridge_version": "0.0.9",
+        "key": "cellar_rat_1",
+        "kind": "npc"
+      },
+      "status": "completed"
+    }
+  }
+}

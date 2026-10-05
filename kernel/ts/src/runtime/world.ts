@@ -25,6 +25,7 @@ import * as containment from '../mechanics/containment/rule.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 import * as dialogue from '../mechanics/dialogue/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
+import * as combat from '../mechanics/combat/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import * as position from '../mechanics/position/rule.ts';
 import * as quest from '../mechanics/quest/rule.ts';
@@ -36,6 +37,7 @@ import { newWorld, NIL } from './fresh.ts';
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
   movement: movement.decide,
+  combat: combat.decide,
   description_variant: description_variant.decide,
   containment: containment.decide,
   action_recipe: action_recipe.decide,
@@ -68,7 +70,7 @@ const RULELESS = [
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.5',
+  kernel_api: '1.6',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,

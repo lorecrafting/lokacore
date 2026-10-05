@@ -1,0 +1,45 @@
+✔ two-exit Flee selects canonical north/west using independent seeded answers (7.56575ms)
+✖ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (1.7045ms)
+✔ active combat exposes one directionless Flee and refuses directional movement (2.129625ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (41.563792ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.029042ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (18.521208ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (25.308792ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (19.885625ms)
+✔ input at the due deadline settles lethal combat before attempting Flee (8.161208ms)
+✔ random Flee destination and RNG reopen and replay one SQLite receipt (7.672625ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 307.862958
+
+✖ failing tests:
+
+test at kernel/ts/test/combat_flee.test.ts:61:1
+✖ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (1.7045ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'north',
+      'west'
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat_flee.test.ts:84:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'north', 'west' ],
+    expected: [ 'west' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

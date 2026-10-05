@@ -39,3 +39,9 @@ Before M6 live lethality, add the actual four-room chapel route from existing we
 PR #136's accuracy/defense/critical/mitigation/death equations remain unadopted. This decision deliberately chooses unarmed fixed-profile damage, alternating initiative, immediate deterministic escape and existing recovery instead of its larger resolver and queued escape/suppression proposals. It is a small Loka continuing-melee contract, not a claim that the selected three-second cadence or formulas match the live Legend engine.
 
 Schema/event fields, entity creation/placement operation syntax, final ownership and save layout freeze in their M1/M2/M5/M6 implementation PRs after the actual merged shape is read. M4-A freezes the semantics and independent literal oracles only; no combat capability lock or unused resolver is installed.
+
+## Owner escape supersession, 2026-10-04
+
+The [directionless random-Flee decision](owner-decision-m6-a-random-flee-2026-10-04.md)
+supersedes deterministic directional escape and engaged Move/alias escape in this decision.
+A/B/C combat oracles, ordinary noncombat movement and the authored flee multiplier remain.

@@ -423,10 +423,6 @@ logical time is one second, an hour 3600, a day 86400, time 0 midnight (`mechani
   Policies/reactions may read scene facts. The one direct coupling, reaction → scene,
   is limited to event start delivery until a second capability needs this hook.
 
-## Planned first combat contract (M4-A)
-
-**Planned until M5/M6 implementation.** The [M4-A first-encounter contract](../spec/conformance/first-encounter.md), under its [PM adoption](../decisions/pm-decision-first-encounter-2026-10-03.md), governs later M5/M6 work. It specifies one real cellar rat, conditional RNG, alternating opportunities, immediate deterministic flee and death-before-revival closure. This is planned, not an installed capability. Exact schemas/ownership and executable rules follow the consuming implementation PRs. The [current reconciliation](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md#current-mechanics-policy) preserves the untrained/unarmed A/B/C profile; its [future acceptance](../decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md#future-acceptance-references) adds production recovery and reachable-corpse controls without changing those oracles.
-
 ## M1-A elapsed authority time
 
 [Contract decision](../decisions/pm-decision-m1-a-elapsed-contract-2026-10-04.md). `manifest.time_policy.profile = real_elapsed` disables player Wait and recipe time skips; omitted policy retains legacy behavior. `stepElapsed(world, command, revision)` admits only schedule-owned `elapsed {actor_id, run_id, from, until}`. It validates schema and derived CommandId, rejects nil ID (`permission_denied`), wrong world/actor (`not_found`), and refuses wrong derived ID (`permission_denied`), wrong profile or interval (`invalid_state`). A valid interval has `from == world.state.clock`, `until > from`. Accepted outcome `elapsed` contains one root `time.advance`, no own narration/event/RNG; the existing proposal supplies due jobs, reactions, owned events and all budgets. Faults adopt nothing. Normal `step` refuses elapsed (`permission_denied`) even if supplied a forged ActionSet action. Scenes retain Continue-only player admission while this trusted path advances time.
@@ -447,7 +443,7 @@ room, killer and credited character where known, and corpse. The producer alloca
 attack-result EventId before death EventId before corpse EntityId, with no death RNG.
 The actual M6 producer owns lethal loss and encounter/job closure in the same writer
 group before this sequence; no public death/damage command or test-only engine verb
-exists. Live Attack/round/death/escape integration remains required in M6.
+exists. The installed combat producer below provides live Attack/round/death/escape integration.
 
 A player returns as the same body and character directly to `world.death.shrine`, with
 no fare, gate traversal, clock jump or lineage/story reset. Position recovery settles
@@ -460,3 +456,57 @@ contents are public. The shared custody walk and projection enforce the same bou
 including nested locked bags and ordinary positive-load Take admission. NPCs with
 explicit HP0 retain identity and resource provenance but disappear from living room,
 scan, targeting, dialogue and Give paths; malformed explicit HP remains corruption.
+
+## combat@1 — first live encounter (M6-A)
+
+Attack admits a living standing character/body and one living explicitly attackable NPC
+in the same nonsanctuary room, with no modal scene or open encounter for either participant.
+It creates an encounter and its first round job at now + the authored interval; it does
+not attack immediately, advance time or draw RNG. The encounter pins character, body,
+NPC, room, round and current job. While the encounter is open, the final shared
+[ActionSet](protocol.md#actionset-and-admission) allows only Flee, Stand, Look and Scan by
+resolved command, after all ordinary contributions. This blocks repeated Attack, directional
+Move, dialogue/choices, inventory/equipment/doors, Wait, recipes and Sit/Rest/Sleep, including
+aliases and raw commands. Closure restores ordinary actions from state; reopening derives the
+same restriction. This focused mode leaves actor-free scheduled rounds and their existing
+nonstanding/wake semantics intact.
+
+Rounds follow the frozen [first-encounter oracles](../spec/conformance/first-encounter.md).
+Odd rounds give the player the first opportunity; even rounds give the NPC the first.
+Revalidate life, room, current occurrence and position before each opportunity. A
+nonstanding player skips without a draw. Every eligible attack draws uniform(100), with
+strict roll < chance; only a hit with variable damage draws for its inclusive interval.
+Fixed damage draws nothing further. Positive damage to a sleeping player is multiplied
+and wakes a survivor through ordinary position/recovery settlement. Resting/sitting do
+not wake. Checked arithmetic and an eight-raw-draw round budget fault atomically.
+Recovery remains active. Successors use the prior due time plus the content interval.
+
+An attack_result names encounter, attacker, target, hit and actual clamped HP loss.
+Allocate its event before a fatal entity_died and corpse. The fatal sequence's one writer
+group loses HP, closes encounter/completes its current job, then invokes the installed
+[death sequence](#death1--corpse-custody-and-same-body-return-m5-b-foundation) exactly once.
+The revived body has no remaining opportunity in the closed round. Actor-free run_job
+uses the encounter's validated character/body and NPC for owner, killer and credit.
+
+Flee is one directionless action. After prerequisite due work settles, enumerate exits in
+canonical direction-key order and retain only those admitted by composed ordinary movement
+policy, standing, destination, gate and the authored flee-multiplied fare. Zero candidates
+refuses invalid_state without RNG, payment or change; one is deterministic without RNG.
+Two or more use one logical uniform selection with the existing rejection sampler and an
+eight-raw-draw safety budget. Revalidate the chosen move at that same state. Success pays
+once, transfers once, closes once and cancels the pending round, without retaliation; RNG
+and destination commit/replay together. Failure discards all changes. During an encounter,
+raw directional Move refuses invalid_state; excluded invocation keys and aliases use the
+ActionSet boundary refusal and are unavailable in projection,
+so they cannot choose an escape direction. Ordinary movement outside combat is unchanged.
+Stand retains ordinary piecewise recovery. This supersedes the earlier directional escape
+clause under the [owner random-Flee decision](../decisions/owner-decision-m6-a-random-flee-2026-10-04.md).
+
+The content death-credit mapper consumes entity_died at its hydrated proposal prefix,
+before adoption, in the fatal writer group. It matches exact authored NPC instance and
+definition, required death room, and encounter-validated credited character/body. It
+requires that this proposal lost positive HP to zero and created the event's corpse with
+matching event/victim/owner origin, configured NPC corpse definition and room custody.
+Only then does it assign that player's mapped Boolean fact. Order is attack_result,
+entity_died, fact_changed. Corpse Take, forged events, duplicate instances and replay do
+not earn credit. Quest acceptance/rewards are later consumers of these facts.

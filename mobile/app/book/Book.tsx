@@ -1,9 +1,8 @@
-// The book: the room page, the pages opened from it, the status line and the footer, over the
-// presenter (presenter.ts) over a Game. Real data only: it draws what GameView projects and nothing
-// else. It uses React Native and the Game only; the shell (App.tsx) injects the rest.
+// The Book draws GameView through its presenter; App injects the shell.
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, SafeAreaView, Text, View } from 'react-native';
 import type { Game } from '../../packages/game-view/session.ts';
+import { Combat } from './Combat.tsx';
 import { Footer, Status } from './Footer.tsx';
 import {
   group,
@@ -65,7 +64,7 @@ function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       const terminal = pr.update(update);
       const after = pr.screen();
       let next = pagesAfter(before.stack, before.view, after.view);
-      if (terminal && after.returnWorld) next = [];
+      if (terminal && after.returnWorld && !after.view.combat) next = [];
       current.current = { stack: next, view: after.view };
       setStack(next);
       if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
@@ -87,7 +86,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   const after = pr.screen(),
     before = s.current.current;
   let next = pagesAfter(before.stack, before.view, after.view);
-  if (after.returnWorld) next = [];
+  if (after.returnWorld && !after.view.combat) next = [];
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);
@@ -112,7 +111,9 @@ export default function Book(p: BookProps) {
   const state = { current, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
-    current.current = { stack: next, view: pr.screen().view };
+    const view = pr.screen().view;
+    next = pagesAfter(next, view, view);
+    current.current = { stack: next, view };
     setStack(next);
     setFlip((f) => ({ turn: f.turn + 1, dir }));
   };
@@ -144,7 +145,6 @@ type ViewProps = {
   shell: Shell;
 };
 
-// The drawing and route callbacks stay separate from the shell's React state and animation.
 export function BookView(p: ViewProps) {
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
@@ -154,7 +154,11 @@ export function BookView(p: ViewProps) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
       <Turn turn={p.flip.turn} dir={p.flip.dir}>
-        <Body {...ctx} page={page} chapterDone={() => p.go([], 1)} />
+        {p.screen.view.combat ? (
+          <Combat screen={p.screen} g={g} press={p.press} />
+        ) : (
+          <Body {...ctx} page={page} chapterDone={() => p.go([], 1)} />
+        )}
       </Turn>
       <Bottom {...ctx} page={page} />
     </SafeAreaView>
@@ -181,6 +185,7 @@ function Bottom(p: BottomProps) {
   return (
     <View style={{ padding: 8 }}>
       {!view.scene &&
+        !view.combat &&
         (p.page ? (
           p.page.kind === 'thing' || p.page.kind === 'dialogue' ? null : (
             <Back onPress={p.world} />
@@ -200,7 +205,7 @@ function Bottom(p: BottomProps) {
         resources={view.resources}
         position={view.position}
         text={text}
-        locked={!!view.scene}
+        locked={!!view.scene || !!view.combat}
         openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
         pending={pending}
         open={() => p.open({ kind: 'contents' })}

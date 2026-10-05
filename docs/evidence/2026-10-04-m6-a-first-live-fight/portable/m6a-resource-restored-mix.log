@@ -1,0 +1,8 @@
+Compiling 42 files (.ex)
+Generated loka app
+Running ExUnit with seed: 187967, max_cases: 16
+
+.................
+Finished in 3.5 seconds (3.5s async, 0.00s sync)
+
+Result: 17 passed

@@ -1,0 +1,18 @@
+✔ two-exit Flee selects canonical north/west using independent seeded answers (7.115583ms)
+✔ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (3.79975ms)
+✔ active combat exposes one directionless Flee and refuses directional movement (1.264209ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (40.288708ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (11.087542ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (19.390833ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (25.207958ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (19.047125ms)
+✔ input at the due deadline settles lethal combat before attempting Flee (7.904208ms)
+✔ random Flee destination and RNG reopen and replay one SQLite receipt (8.173833ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 323.7995

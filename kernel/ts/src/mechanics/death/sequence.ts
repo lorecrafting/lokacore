@@ -8,6 +8,9 @@ import { fact, positionOf } from '../position/shared.ts';
 import { wornIn } from '../equipment/rule.ts';
 import { cmp } from '../../foundation/validate.ts';
 
+type DeathEvent = DomainEvent & {
+  payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
+};
 type Loss = Extract<DeltaOp, { op: 'resource.adjust' }>;
 export type Fatal = {
   loss: Loss;
@@ -161,7 +164,7 @@ function deathEvent(
   id: DomainEvent['id'],
   corpse_id: EntityId,
   player: boolean,
-): DomainEvent {
+): DeathEvent {
   const { killer_id, credited_character_id } = fatal;
   const victim_id = fatal.loss.entity_id;
   const room_id = world.state.containers[victim_id];
@@ -174,7 +177,7 @@ function deathEvent(
         kind: 'npc' as const,
         key: npc.key,
       };
-  const died: DomainEvent = {
+  const died: DeathEvent = {
     id,
     world_context_id: world.context,
     scope: { kind: 'instance', world_context_id: world.context },
