@@ -148,7 +148,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const meta = { ...m, parent, seed, pin } as Meta;
     dialogueSave(world, db, meta);
     deadlineSave(world, db, meta);
-    finaleSave(world, db, meta);
+    finaleSave(world, db, meta, h.revision);
     return saved(world, h.revision, meta, db);
   } catch (e) {
     if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;

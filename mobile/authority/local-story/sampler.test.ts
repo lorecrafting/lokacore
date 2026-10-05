@@ -197,10 +197,10 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
     );
     assert.equal(sql.prepare('SELECT revision FROM head').get()!.revision, revision);
     assert.equal(sql.prepare('SELECT count(*) AS n FROM report').get()!.n, reports);
-    p.invoke('continue');
+    p.invoke('continue', { scene: p.view().scene!.scene, line: p.view().scene!.index });
     assert.equal(p.view().scene!.index, 3);
     assert.equal(p.view().scene!.line, 'scene.lantern_kept.river');
-    p.invoke('continue');
+    p.invoke('continue', { scene: p.view().scene!.scene, line: p.view().scene!.index });
     assert.equal(p.view().scene, undefined);
     assert.deepEqual(p.view().chapter, { index: 1, title: 'chapter.bank' });
     assert.deepEqual(
