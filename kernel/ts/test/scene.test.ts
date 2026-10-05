@@ -52,7 +52,11 @@ const identifyAction = (w: World, action_key: string, target?: string, input = {
   return i;
 };
 function invoke(w: World, action_key: string, target?: string, input = {}) {
-  const c = resolve(w, identifyAction(w, action_key, target, input)) as Command;
+  const bound =
+    action_key === 'continue'
+      ? { scene: gameView(w).scene!.scene, line: gameView(w).scene!.index }
+      : input;
+  const c = resolve(w, identifyAction(w, action_key, target, bound)) as Command;
   assert.ok('payload' in c, JSON.stringify(c));
   const s = step(w, c, n, action_key as Key);
   const resolves = Object.fromEntries(

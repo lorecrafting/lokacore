@@ -13,7 +13,11 @@
     {
       "when": {
         "policy_version": 1,
-        "root": { "op": "fact_compare", "fact": "village_child_status", "equals": "lost" }
+        "root": {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "lost"
+        }
       },
       "description": "room.village_green.lost"
     },
@@ -49,5 +53,14 @@
       },
       "description": "room.village_green.stays"
     }
-  ]
+  ],
+  "details": {
+    "market_cross": {
+      "aliases": [
+        "market_cross",
+        "cross"
+      ],
+      "description": "detail.market_cross.description"
+    }
+  }
 }

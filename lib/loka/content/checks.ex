@@ -1,4 +1,4 @@
-# size: allow 321, bound deadline fact refs join the existing checked expansion boundary
+# size: allow 340, scene-end fact refs join the existing checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;
@@ -99,6 +99,12 @@ defmodule Loka.Content.Checks do
   def expand(%{"dialogue" => d, "choice" => c} = t, m) when is_binary(c),
     do: Map.put(t, "dialogue", ref(d, "dialogue", m))
 
+  def expand(%{"scene" => s} = t, m) when is_binary(s),
+    do: Map.put(t, "scene", ref(s, "scene", m))
+
+  def expand(%{"fact" => f, "value" => _} = t, m) when is_binary(f),
+    do: Map.put(t, "fact", ref(f, "fact", m))
+
   def expand(%{"accept" => k, "narration" => _} = o, m) when is_binary(k),
     do: o |> Map.delete("accept") |> expand(m) |> Map.put("accept", ref(k, "quest", m))
 
@@ -117,10 +123,17 @@ defmodule Loka.Content.Checks do
 
   # Scene trigger: outcome remains a key.
   def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
-    do: Map.put(trigger, "story_point", ref(p, "story_point", m))
+    do:
+      trigger
+      |> Map.delete("story_point")
+      |> expand(m)
+      |> Map.put("story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
     do: Map.put(trigger, "quest", ref(q, "quest", m))
+
+  def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
+    do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)

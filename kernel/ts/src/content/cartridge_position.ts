@@ -3,7 +3,7 @@
 // scene@1 also reserves each scene_<key> fact. The artifact must carry exactly these FactSpecs,
 // and no recipe outcome, reaction apply or
 // dialogue choice may fact.assign it. Reading it (fact_compare, on.fact) is allowed.
-import { spec } from './cartridge_scenes.ts';
+import { markerSpec, spec } from './cartridge_scenes.ts';
 import { encode } from '../foundation/canonical.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
@@ -30,6 +30,9 @@ export function reserved(c: Obj): Diagnostic[] {
         s.key,
         s.steps.filter((x: Obj) => x.type === 'narrate').length,
       );
+  for (const p of Object.values((c.story_points ?? {}) as Obj))
+    if (Object.values(p.outcomes as Obj).some((t: Obj) => !!t.scene))
+      expected[`story_point_${p.key}`] = markerSpec(p.key, Object.keys(p.outcomes));
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const out: Diagnostic[] = [];
   refs.forEach((ref, i) => {

@@ -215,6 +215,55 @@
         "instance"
       ],
       "meaning": "The outcome of the original bound tithe ledger obligation."
+    },
+    "memory.village_ending": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unreached",
+          "rescued",
+          "stays",
+          "lost"
+        ],
+        "default": "unreached"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The acknowledged Green epilogue continuity value for memory.village_ending."
+    },
+    "memory.fox_fate": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unreached",
+          "stilled",
+          "free"
+        ],
+        "default": "unreached"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The acknowledged Green epilogue continuity value for memory.fox_fate."
+    },
+    "memory.chapter_1_guild_tilt": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unreached",
+          "prior",
+          "fox"
+        ],
+        "default": "unreached"
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The acknowledged Green epilogue continuity value for memory.chapter_1_guild_tilt."
     }
   }
 }

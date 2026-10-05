@@ -24,6 +24,7 @@ import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { row } from '../../../kernel/ts/src/runtime/world.ts';
 import { dialogueSave } from './dialogue-save.ts';
 import { deadlineSave } from './deadline-save.ts';
+import { finaleSave } from './finale-save.ts';
 import { recoveryFault } from '../../../kernel/ts/src/mechanics/resource.ts';
 
 /** expo-sqlite's synchronous database methods, the only ones used; one handle per process. */
@@ -147,6 +148,7 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const meta = { ...m, parent, seed, pin } as Meta;
     dialogueSave(world, db, meta);
     deadlineSave(world, db, meta);
+    finaleSave(world, db, meta);
     return saved(world, h.revision, meta, db);
   } catch (e) {
     if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;

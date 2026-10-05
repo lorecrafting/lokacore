@@ -33,6 +33,13 @@
         "answer": {
           "type": "string",
           "pattern": "^[a-zA-Z]{1,32}$"
+        },
+        "scene": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
         }
       },
       "required": [],
@@ -270,7 +277,9 @@
         "choice_id",
         "continuation_id",
         "until",
-        "answer"
+        "answer",
+        "scene",
+        "line"
       ],
       "examples": [
         "until"

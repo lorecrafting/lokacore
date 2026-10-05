@@ -270,6 +270,11 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...button(a, ''),
     ...(a.target.kind === 'entity' && { place: true as const }),
   }));
+  if (v.scene) {
+    const next = v.actions.find((a) => a.action_key === 'continue' && a.available);
+    if (next)
+      placed.push({ ...button(next, ''), input: { scene: v.scene.scene, line: v.scene.index } });
+  }
   const notices = [
     ...(v.notices ?? []),
     ...(v.notice_boards ?? []).flatMap((b) => b.notices),

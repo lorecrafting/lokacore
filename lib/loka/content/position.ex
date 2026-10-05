@@ -51,6 +51,16 @@ defmodule Loka.Content.Position do
   def check(_, _), do: []
 
   defp reserved_refs(m, defs) do
+    for key <- reserved_names(m, defs),
+        do: %{
+          "cartridge_id" => m["id"],
+          "cartridge_version" => m["version"],
+          "kind" => "fact",
+          "key" => key
+        }
+  end
+
+  defp reserved_names(m, defs) do
     keys = if required?(m), do: ["position"], else: []
 
     scenes =
@@ -58,13 +68,12 @@ defmodule Loka.Content.Position do
         do: Enum.map(Map.keys(defs["scene"]), &("scene_" <> &1)),
         else: []
 
-    for key <- keys ++ scenes,
-        do: %{
-          "cartridge_id" => m["id"],
-          "cartridge_version" => m["version"],
-          "kind" => "fact",
-          "key" => key
-        }
+    markers =
+      for {key, {_, _, %{"outcomes" => outcomes}}} <- defs["story_point"],
+          Enum.any?(outcomes, fn {_, t} -> is_map_key(t, "scene") end),
+          do: "story_point_" <> key
+
+    keys ++ scenes ++ markers
   end
 
   @doc "The manifest with fact@1 required under position@1, else unchanged."

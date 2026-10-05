@@ -28,6 +28,7 @@ import * as movement from '../mechanics/movement/rule.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { holds } from '../mechanics/policy.ts';
+import { value } from '../mechanics/fact.ts';
 import { holdsNow } from '../mechanics/quest/lifecycle.ts';
 import { cmp } from '../foundation/validate.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
@@ -202,9 +203,19 @@ function chapter(world: World): ChapterView | undefined {
   for (let i = 1; i < chapters.length; i++) {
     const c = chapters[i]!;
     const outcomes = world.cartridge.story_points![refString(c.story_point!)].outcomes;
-    const counted = c.outcome ? [outcomes[c.outcome]!] : Object.values(outcomes);
+    const counted = c.outcome
+      ? [[c.outcome, outcomes[c.outcome]!] as const]
+      : Object.entries(outcomes);
     if (
-      counted.some((t) => {
+      counted.some(([outcome, t]) => {
+        if ('scene' in t) {
+          const marker = {
+            ...c.story_point!,
+            kind: 'fact' as const,
+            key: `story_point_${c.story_point!.key}` as Key,
+          };
+          return value(world, world.character, marker) === outcome;
+        }
         const d = definition(world, t.dialogue);
         const q = questOf(world, world.character, d.quest!)?.[1];
         return q?.state === 'resolved' && q.outcome === t.choice;

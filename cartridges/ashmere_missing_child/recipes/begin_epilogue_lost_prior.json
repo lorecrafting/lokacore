@@ -1,0 +1,68 @@
+{
+  "label": "actions.begin_epilogue",
+  "target": {
+    "kind": "detail",
+    "room": "village_green",
+    "detail": "market_cross"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "missing_child",
+          "state": "failed"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "village_child_status",
+          "equals": "lost"
+        },
+        {
+          "op": "quest_state",
+          "quest": "bell_of_ashmere",
+          "state": "resolved"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "chapel_allegiance",
+          "equals": "prior"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "chapel_bell_rung",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "scene_bell_rung",
+          "equals": -1
+        },
+        {
+          "op": "fact_compare",
+          "fact": "scene_epilogue_lost_prior",
+          "equals": 0
+        },
+        {
+          "op": "fact_compare",
+          "fact": "story_point_prologue_completed",
+          "equals": "unreached"
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [{ "op": "event.emit", "event": "epilogue_begun" }],
+      "narration": {
+        "actor": "narration.begin_epilogue"
+      }
+    }
+  },
+  "aliases": [
+    "begin_epilogue_lost_prior"
+  ]
+}
