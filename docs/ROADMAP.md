@@ -73,6 +73,11 @@ M12-B — nested notice-board and notice detail pages — merged in
 navigation-label and malformed-save findings were fixed; primary and protocol/save
 rechecks approved, with six green source-head checks and green review-only head checks.
 
+OPEN-ELSPETH — real opening-room NPC directs newcomers toward Well Lane, the Green
+and the inn — merged in [#183](https://github.com/lorecrafting/lokacore/pull/183)
+after independent primary and pin/save approvals, six green source-head checks and
+green review-only head checks. Chapter release 0.0.5 does not yet offer Q1.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
