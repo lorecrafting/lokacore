@@ -843,8 +843,9 @@ Hound/pelt definitions are bundle templates, not additional authored birth spawn
 The plan binds its exact NPC, item and NPC corpse definitions, home and ordered
 allowed rooms, eligible slot targets, time window and periods. Require resolved
 correct-kind short references, distinct allowed rooms connected by legal reciprocal
-edges, positive safe calendar products/periods, targets <= cap, and the exact bounded
-bundle shape. Hound HP/attack obey existing profile validation; pelt has ordinary
+edges, positive safe calendar products/periods, wander interval <= replacement
+delay, targets <= cap, and the exact bounded bundle shape. Hound HP/attack obey
+existing profile validation; pelt has ordinary
 item metadata and no lid, slot, children or capacity; corpse obeys M5 room-container
 validation. Unknown fields and malformed origin/job/state declarations refuse at
 compile/load; inspect actual slot bounds before traversal or allocation.

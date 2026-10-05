@@ -630,16 +630,23 @@ no new snapshot, periodic checkpoint, migration or receipt ledger is introduced.
 ## C3 living population recovery
 
 **Selected, pending implementation.** [C3 composition](protocol.md#c3-spawned-bundles-and-population-composition)
-saves immutable spawned identities, containment, HP, typed plan slots/current job,
-RNG, encounter/death changes, head and receipt through the existing changed-row
+saves immutable spawned identities, containment, HP, separately keyed slot rows
+and plan control/current job, RNG, encounter/death changes, head and receipt through
+the existing changed-row
 transaction. Genesis binds the same checked initialization to revision0; later
 origins bind their exact accepted creation command/job occurrence. No loader
 reconciliation spawns an animal, heals HP, replaces an identity or repairs a slot.
 
 Validate full pinned plan/bundle/template refs, slot/generation/member/role and
 creation occurrence, paired initial parent, actual HP rows and current job/due
-binding. Later ordinary pelt custody may be its hound, public corpse, room, player,
-bag or other legal owner; validate revision-ordered transfer/death evidence rather
+binding. Require exactly the declared ordinal slot keys; control stores no duplicate
+membership index. A fatal receipt changes only its bound slot, while a plan-job
+receipt advances control and actual birth/replacement slots. Equal-time combined
+receipts keep their canonical job-ID order and distinct writer groups; cold reopen
+and uncertain-COMMIT reconciliation accept both legal orders with the same conserved
+fatal slot/corpse/pelt and one current plan successor. No-op rewrites of other slots
+are not valid transition evidence. Later ordinary pelt custody may be its hound,
+public corpse, room, player, bag or other legal owner; validate revision-ordered transfer/death evidence rather
 than requiring its original parent forever. Old HP0 hound identities remain valid
 corpse victims after their slot advances. A due time must trace to that member's
 positive-to-zero fatal event at fatal clock + declared delay. Fresh/never-used,

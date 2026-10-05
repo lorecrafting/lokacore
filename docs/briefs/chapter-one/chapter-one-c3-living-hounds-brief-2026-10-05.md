@@ -61,8 +61,9 @@ Follow [composition](../../system/architecture.md#building-mechanics-by-composit
 **Consumer:** one living population, per-instance fight and real pelt custody.
 **Reads:** declared plan/bundle, calendar, bounded current slots/job, exact member
 origins/HP/rooms, encounter, legal edges and shared custody. **Writes:** checked
-identities/placements/HP, typed slot generation/death eligibility/current job,
-ordinary movement and existing encounter/HP/death/corpse/loot consequences.
+identities/placements/HP, separately keyed slot generation/death eligibility and
+plan control/current job, ordinary movement and existing encounter/HP/death/corpse/
+loot consequences.
 **Owners:** population owns bounded membership and replacement; creation owns
 immutable identity/bundle proof; movement owns edges; schedule owns dispatch;
 combat/resource/death own lethal consequences; authority alone owns receipts,
@@ -76,7 +77,13 @@ hydrates only room-fixed corpse items, and authored `entityIds` is one-to-one:
 repair those actual seams rather than treating generic `spawned` schema as support.
 Initialize new worlds through the checked bundle sequence after the existing
 birth allocations; independently re-pin current known answers. All six slots use
-one job; no member scheduler or generalized behavior tree is needed. Runtime
+one job; no member scheduler or generalized behavior tree is needed. Fatal combat
+writes only its victim slot; population dispatch writes separate control and only
+actual birth/replacement slots, never no-op slot transitions. The fixed declared
+ordinal range is the only slot index; control stores no member/count mirror. Require
+wander <= replacement delay so the existing job is early enough without a death
+control write. Preserve canonical job-ID order and distinct groups at equal times;
+same-slot cross-group writes remain conflicting_write. Runtime
 reads current slots without scanning historical corpses. Derived maps copy only
 when creation changes them; ordinary actions retain existing structural sharing.
 
@@ -142,7 +149,34 @@ rat R; production IDs remain null until allocation is independently checked.
    mismatch refuses without file deletion. Exercise lawful post-Take pelt custody
    and an old dead victim after its slot advances; original-parent validation
    must not reject them. Break atomic slot/bundle/receipt binding as red controls.
-7. **Bounds or Book path silently fail:** run 30 controlled world days with
+7. **Equal-time fatal and population deliveries conflict:** use the six-live
+   controlled setup at200, HP6/player10, zero recovery, accuracy100, fixed player3/
+   NPC1, no defenses, combat interval5. Attack H1 at200; round205 leaves player9/
+   H1=3/H2–H6=6, S2. At210 round2 and population wander are both due. Use two
+   frozen controlled lineage/command inputs whose actual allocated job IDs put
+   combat first and population first respectively; do not forge IDs or provenance.
+   In both runs require accepted elapsed210, player8/H1=0/H2–H6=6, S4, one closed
+   encounter, one home-room corpse holding the same L1, slot1 generation1/memberH1/
+   replacement due450, live count5, H2–H6 at nest with their original pelts and
+   one pending plan successor due220/next wander220. No H7/L7 is created at210.
+   Control names only that successor, with no duplicate membership index; exact
+   slot keys1–6 stay present and all other slot generations/members stay unchanged.
+   Committed event/operation order follows actual job IDs; require the same stated
+   conserved result, not identical receipts across the two lineages. Cold reopen
+   and exact receipt retry preserve it without another corpse/slot write. Include
+   this boundary in real failed/unknown COMMIT controls.
+   Red control: make population emit a no-op transition for slot1 while advancing
+   control; each ID order must fail instead of accepting the combined elapsed.
+   Independently compose two otherwise valid transitions of the same slot from
+   different groups, using the first transition's resulting row as the second's
+   expected prior row: require literal fault code `conflicting_write` and target
+   `{kind: population_slot, plan: A, slot: 1}`, with no adopted changes. Do not make
+   different-group writes legal to pass the equality test. Distinct control/slot
+   targets must compose to their independent literal rows in both foundations.
+   Compile and load the otherwise valid controlled plan with wander241/delay240:
+   both must refuse; wander240/delay240 is admitted. Remove only this period guard
+   and observe the invalid-plan test fail, protecting the untouched-control proof.
+8. **Bounds or Book path silently fail:** run 30 controlled world days with
    scripted deliberate fights and autonomous elapsed/wander between them; sample
    every committed boundary, cap <=6 and exactly one current pending plan job.
    Retain command/seed/fault identity and literal expected generation/loot rows for
@@ -178,4 +212,7 @@ no separate inventory/population balance ledger or speculative behavior framewor
 Ponytail Review: lean; one owned job and fixed slots reuse existing time/death/
 custody/receipts. Correctness review checked surplus, extra-slot eligibility,
 post-death identities, stale invocation and honest delayed optional replenishment.
+C3-P1 (the sole open finding, review record commit `3c0a81632934e0f5297757fefc4115d5e4447388`)
+is addressed by separate slot/control targets, preserved equal-time ordering and
+the literal collision controls above; same-reviewer scoped recheck remains pending.
 This is author review; independent plan/source approval remains ahead.

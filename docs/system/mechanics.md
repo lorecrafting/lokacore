@@ -1017,8 +1017,9 @@ owns its bounds, periods, area and profiles. C3 hounds engage only on deliberate
 Attack using C1's single-opponent resolver. C4 owns aggression, pack assistance and
 enemy flight; C5 owns actual bleeding. No hound is a required quest objective.
 
-One instance-scoped plan owns a fixed ordered set of slots. A slot retains its
-generation, exact current hound identity and optional death-to-replacement due time.
+One instance-scoped plan owns a fixed ordered set of separately targeted slot rows,
+numbered1 through its declared cap. A slot retains its generation, exact current
+hound identity and optional death-to-replacement due time.
 Never-used slots have generation0, null member and null due time. Occupied slots
 start at generation1; a living member has null replacement due. A proven fatal HP
 transition retains the dead member identity and sets due = fatal clock + declared
@@ -1040,10 +1041,20 @@ replacement, under the existing genesis allocator. One current plan-owned job
 handles all slots, in slot order. Its successor is due at the earliest next wander
 boundary, day/night target boundary or eligible replacement time, strictly after
 this occurrence. Ignore past due times for night-only slots while ineligible;
-the next night boundary reconsideration prevents a zero-time loop. Fatal changes
-recompute the earliest job only if needed, atomically cancelling/replacing its old
-binding. Existing due ordering, segmentation and shared command budgets apply;
-plan work cannot scan historical created rows to find its six current members.
+the next night boundary reconsideration prevents a zero-time loop. Require wander
+interval <= replacement delay. The current plan job is no later than the next
+wander boundary, hence no later than a newly fatal member's replacement due. Death
+writes only that slot's eligibility; it never reschedules or writes plan control.
+Existing due ordering, segmentation and shared command budgets apply; plan work
+cannot scan historical created rows to find its six current members.
+
+Equal-time combat and population jobs retain canonical `(due_time, job_id)` order
+and distinct writer groups. Population dispatch changes only actual birth/replacement
+slots, never unchanged living or not-yet-eligible dead slots. Thus population-first
+skips the engaged hound before fatal combat; combat-first leaves a dead slot whose
+new due is strictly later, which population skips. Both advance the separate plan
+control once and conserve the same fatal slot/corpse/pelt. No whole-plan slot rewrite
+or cross-writer exception is permitted; see [targets](protocol.md#c3-spawned-bundles-and-population-composition).
 
 At a wander boundary each living, unengaged member alternates between the two
 adjacent declared rooms through ordinary legal movement. A blocked edge leaves it

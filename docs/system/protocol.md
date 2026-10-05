@@ -683,11 +683,17 @@ update generated contracts and current release pins in the implementation PR.
 
 **Selected, pending implementation.** [C3](mechanics.md#c3-bounded-living-hounds-selected-contract)
 requires a checked extension to death-only creation, not permission to trust the
-currently schema-only `spawned` origin. Register the minimum typed population row,
-full-prior-row transition/mutation target, plan-owned job binding and invariants.
-One plan row contains fixed ordered slots plus current job ID and next wander due;
-each slot contains generation, member ID and replacement due. State cannot be
-forged through ordinary fact assignment or a player-accessible population verb.
+currently schema-only `spawned` origin. Register separately keyed full-prior-row
+transitions: target `{kind: population_plan, plan}` contains only current job ID
+and next wander due; target `{kind: population_slot, plan, slot}` contains generation,
+member ID and replacement due. `plan` is the full pinned DefinitionRef; `slot` is
+one ordinal1..declared cap. Genesis creates every slot, including never-used rows.
+Plan control duplicates no member list, count, generation or mutable slot index.
+The declared fixed ordinal range is the only membership index: projection, dispatch
+and load read those exact slot keys and reject absent, extra or foreign keys. Each
+transition compares its own complete prior row; no transition rewrites the plan
+plus all slots. State cannot be forged through ordinary fact assignment or a
+player-accessible population verb.
 Story admission remains TypeScript; added state/delta/precondition semantics and
 creation validation retain both-kernel literal conformance then differential proof.
 
@@ -718,7 +724,21 @@ ordinary player/default authored NPC corpse contracts. S1 cannot credit a hound.
 Population owns membership/eligibility/bounded creation; movement owns legal
 transfer; combat/resource/death own loss, closure, corpse and loot transfer;
 schedule dispatches the exact saved plan/job occurrence under existing causation
-and due ordering. Only that current pending binding may run; replayed, cancelled
+and canonical `(due_time, job_id)` ordering. Each due job keeps its existing distinct
+writer group. A fatal combat group writes only its victim's slot, with the ordinary
+HP/encounter/corpse/loot ops; it never writes plan control. The plan-job group advances
+control and only newly filled/replaced slots. No-op transitions of other slots are
+forbidden. If population is first at an equal deadline, the still-engaged victim is
+not moved or rewritten; if combat is first, that newly dead slot's future eligibility
+prevents a replacement or rewrite. Other eligible slots use different mutation
+targets. Control still binds one current pending successor; the plan's declared
+ordinal range and all unchanged slot identities agree in either order. Wander <= replacement
+delay ensures fatal eligibility cannot require an earlier plan-control write.
+
+Ordinary same-target cross-group writes still fault `conflicting_write`, including
+two attempted transitions of one population slot; there is no population exemption,
+writer-group coalescing, job-priority change or last-writer-wins overlay. Only the
+exact current pending binding may run; replayed, cancelled
 or stale occurrences create/move/draw nothing. All writes use existing root
 proposal, conflicts, shared work counters and changed-row transaction. No public
 spawn action, per-hound job, global ecology service or unbounded history scan is
