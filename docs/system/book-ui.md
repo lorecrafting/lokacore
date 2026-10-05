@@ -144,6 +144,11 @@ Put appears as a concrete pair button using projected source/destination names a
 Each button captures its projection freshness and follows the normal GameSession invocation
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
+Quest completion updates its journal and confirmed narration. A terminal side quest
+never implies that the whole story has ended. World shows no whole-story completion
+hint until an explicit main-story terminal signal has an authored consumer (M20-A/finale);
+storage, travel and other quest actions remain available under their normal rules.
+
 ## Chapters, scenes and recovery
 
 A declared chapter opens a title page on launch and on index change, once per presenter session.

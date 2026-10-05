@@ -122,14 +122,6 @@ export const absent = (v: GameView) =>
       ? 'They are not here to answer. Find them, or close this.'
       : 'No one is here to answer.';
 
-// Under the log once every quest in the journal is over (the Lantern's ending). ponytail: a
-// chapter's real end comes from the story, not from its quests (an OWNER item: an ending page).
-const OVER = ['resolved', 'failed', 'abandoned'];
-export const ended = (v: GameView) =>
-  v.journal.length > 0 && v.journal.every((q) => OVER.includes(q.state))
-    ? 'The story ends here. Start over is in Settings.'
-    : '';
-
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // The status line's character label: each resource's amount, the hp band's name after hp only (the
