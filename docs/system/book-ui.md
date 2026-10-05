@@ -4,6 +4,9 @@ Canonical presentation behavior for rebuilding the phone book. The host boundary
 [architecture](architecture.md#book-presenter); action admission, freshness and state come
 from [GameView](protocol.md#gameview). This specification changes presentation, not rules,
 authority, content, receipts or save formats.
+The [Book component guide](../BOOK-UI-COMPONENTS.md) maps these rules to the current
+shared client; the [delivery workflow](../WORKFLOW.md#book-interaction-delivery) requires
+interaction-rule updates in the mechanic slice that needs them.
 
 Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-2026-10-03.md),
 [room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md),

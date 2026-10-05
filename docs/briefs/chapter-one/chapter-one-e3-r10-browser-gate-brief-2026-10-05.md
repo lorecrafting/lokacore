@@ -67,6 +67,12 @@ Run `mise exec -- bin/check_all.sh`, focused full-chapter compiler/kernel/Book/l
 
 Gate review follows the slim workflow: one Astra audit of the stage's actual riskiest code and one fresh checklist reviewer verifying every applicable proof link, every carry's owner/trigger, and docs tidy over changed live milestone docs. The separate [one-time Chapter 1 Astra documentation audit](../../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md) runs after A–D source/reviews settle and before this gate closes; its current-guidance, handoff and archive-candidate findings are fixed in independently reviewed docs work units. No separate narrative docs-only double review. Tidy removes duplicated facts/stale lessons/catch-all drift; leave archived/review/decision history intact. Owner browser play, when actually done, is identified as browser play. Merge with merge commit only after findings close and all started head jobs finish green.
 
+The browser walk also compares the [Book component patterns](../../BOOK-UI-COMPONENTS.md)
+across complete journeys: detail order, spacing, labels, touch/keyboard access,
+local logs, action placement and nested return. Fix consistency findings in the
+reviewed chapter-polish branch. An earlier mechanic slice still owns any obvious
+broken navigation or UI correctness defect it introduces.
+
 ## Deferred native/prelaunch checkpoint and stop triggers
 
 The gate record must visibly distinguish **browser content complete** from native/full-R10/public readiness. Deferred checkpoint includes actual iOS/Android builds and host fixtures as applicable, Hermes replay/DET-02/08, offline app kill/background/resume/save-error UI, native SQLite integration, input/accessibility/touch/performance, UI-FUZZ-01/UI-PHONE-01 and remaining fresh-tester/device carries. Browser/Node proof cannot mark R10's physical developer-harness smoke passed. Public free release still needs applicable R12/R12A ACCOUNT/RUN, installation/signing/store/human gates. No native step runs until explicitly resumed.
