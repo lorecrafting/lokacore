@@ -216,3 +216,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [M20-A0 no-wait opening plan](2026-10-05-m20-a0-no-wait-opening-review.md): PR #174 at `8ed6615`, CHANGES REQUIRED (M20A0-R1: active release applicability still requires chapter-one tide); scoped fix `d2469f5d`, APPROVE, M20A0-R1 closed.
 - [M1-B3 still-offered Book controls across live-clock redraws](2026-10-04-m1-b3-live-clock-actions-review.md): PR #173 at `0c0e44e401bcf37cbed6db72e817c5a834724542`, APPROVE; no findings, four independent mutations red, 287 mobile tests pass plus one existing skip, post-Maud west movement and presenter placement verified.
+- [NW-01 always-available sampler Bram](2026-10-05-nw-01-sampler-bram-review.md): PR #175 at `9e7e2a0`, APPROVE; no findings, independent custody mutant red/restored green, full checks and old-pin refusal/explicit Start over verified.
