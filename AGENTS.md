@@ -47,8 +47,9 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
 
 ## Hard-won lessons
 
-New lessons go in the file for their area; a lesson enters AGENTS.md only if it applies to all work.
+Keep lessons in area files; link here only when relevant to all work.
 - Before touching `mobile/` or running on a phone, read [mobile lessons](docs/lessons/mobile.md).
+- For engine mechanics, read [mechanics lessons](docs/lessons/mechanics.md).
 - Before touching SQLite or persistence, read [storage lessons](docs/lessons/storage.md).
 - Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
 - Before touching `protocol/`, its fixtures or canonical encoding, read [contract lessons](docs/lessons/contracts.md).
