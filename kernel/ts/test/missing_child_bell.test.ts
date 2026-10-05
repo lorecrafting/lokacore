@@ -11,11 +11,12 @@ import {
 } from '../src/index.ts';
 import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { key } from '../src/foundation/compose.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { read } from './read.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v014_hash.json');
-const ids = read('protocol/fixtures/missing_child_v014_ids.json');
+const bundle = read('protocol/fixtures/missing_child_v015_hash.json');
+const ids = read('protocol/fixtures/missing_child_v015_ids.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -27,7 +28,7 @@ const cartridge = loaded.cartridge as Cartridge;
 const ref = (kind: string, name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.14',
+    cartridge_version: '0.0.15',
     kind,
     key: name,
   }) as DefinitionRef;
@@ -125,6 +126,25 @@ test('Ring admission still requires Q2 eligibility even if Q3 state is active', 
   assert.deepEqual([a.flag('chapel_bell_rung'), a.flag('chapel_allegiance')], [false, 'unknown']);
 });
 
+// Breaks: Ring reassigns a retained fox allegiance while Q3 is still active.
+test('Ring rechecks unknown allegiance at execution', () => {
+  const a = setup();
+  a.search();
+  a.chapel();
+  const w = a.world();
+  const at = key({
+    kind: 'fact',
+    fact: ref('fact', 'chapel_allegiance'),
+    scope: { kind: 'player', character_id: w.character },
+  });
+  a.set({
+    ...w,
+    state: { ...w.state, facts: { ...w.state.facts, [at]: 'fox' } },
+  } as unknown as World);
+  a.run({ type: 'perform', action: 'ring_bell' }, 'invalid_state');
+  assert.deepEqual([a.flag('chapel_bell_rung'), a.flag('chapel_allegiance')], [false, 'fox']);
+});
+
 // Breaks: an early Ring can resolve Q3 while leaving Q2 active, or can write lost without an accepted action.
 test('bell-first Ring resolves Q3, fails Q2 and starts exactly one retained scene', () => {
   const a = setup();
@@ -154,6 +174,7 @@ test('bell-first Ring resolves Q3, fails Q2 and starts exactly one retained scen
   a.run({ type: 'continue' });
   assert.equal(gameView(a.world()).scene, undefined);
   a.run({ type: 'perform', action: 'ring_bell' }, 'invalid_state');
+  a.run({ type: 'perform', action: 'silence_bell' }, 'invalid_state');
 });
 
 // Breaks: ringing after the accepted Wren meeting closes either ordinary Q2 return.
@@ -263,5 +284,70 @@ test('Ring after either completed return preserves the completed outcome', () =>
         'resolved',
       ],
     );
+  }
+});
+
+// Breaks: Silence admits an active or lost Q2, or one terminal choice can overwrite the other.
+test('Silence requires a completed return and permanently wins the bell choice', () => {
+  for (const branch of ['stays', 'rescue']) {
+    const a = setup();
+    a.search();
+    a.move('south', 'south');
+    a.talk('vesper');
+    a.choose('meet_wren');
+    a.move('north', 'north');
+    a.chapel();
+    a.run({ type: 'perform', action: 'silence_bell' }, 'invalid_state');
+    a.move(
+      'down',
+      'down',
+      'south',
+      'south',
+      'south',
+      'south',
+      'south',
+      'south',
+      'south',
+      'south',
+      'south',
+    );
+    a.talk('vesper');
+    a.run({
+      type: 'choose',
+      continuation_id: gameView(a.world()).choice!.continuation_id,
+      choice_id: 'answer',
+      answer: 'LANTERN',
+    });
+    if (branch === 'stays') {
+      a.talk('vesper');
+      a.choose('carry_message');
+    } else {
+      a.talk('wren');
+      a.choose('rescue');
+    }
+    a.move('north', 'north', 'north', 'north');
+    a.talk('elspeth');
+    a.choose(branch === 'stays' ? 'stays' : 'rescued');
+    a.move('north', 'north', 'north', 'north', 'north', 'up', 'up');
+    const result = a.run({ type: 'perform', action: 'silence_bell' });
+    assert.equal(result.kind, 'accepted');
+    assert.deepEqual(
+      [
+        a.quest('missing_child')?.outcome,
+        a.quest('bell_of_ashmere')?.outcome,
+        a.flag('chapel_bell_rung'),
+        a.flag('chapel_allegiance'),
+        gameView(a.world()).scene?.index,
+      ],
+      [branch === 'stays' ? 'stays' : 'rescued', 'fox', false, 'fox', 1],
+    );
+    a.run({ type: 'perform', action: 'ring_bell' }, 'unsupported_capability');
+    a.run({ type: 'perform', action: 'silence_bell' }, 'unsupported_capability');
+    a.run({ type: 'continue' });
+    assert.equal(gameView(a.world()).scene?.index, 2);
+    a.run({ type: 'continue' });
+    assert.equal(gameView(a.world()).scene, undefined);
+    assert.equal(a.flag('scene_bell_silenced'), -1);
+    assert.equal(a.flag('scene_bell_rung'), 0);
   }
 });

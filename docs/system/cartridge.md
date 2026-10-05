@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.14`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.15`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
@@ -69,8 +69,8 @@ Its Q2 activation consumer is [the staged first search lead below](#source-layou
 The release declares API1.13 for the authored calendar and confirmed status projection, including API1.12's typed bell reaction and scene composition. It retains real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source. Its
-independent answer is `protocol/fixtures/missing_child_v014_hash.json`, derived
-by `test/loka/cartridge_missing_child_v014_hash.py`. Historical sampler/proof sources,
+independent answer is `protocol/fixtures/missing_child_v015_hash.json`, derived
+by `test/loka/cartridge_missing_child_v015_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
 The app opens only the chapter file and offers no story picker. Missing pins follow
@@ -521,4 +521,21 @@ guarded reaction fails still-active Q2/lost and writes instance child status los
 when the accepted Wren meeting is absent. Ring after that meeting preserves active Q2
 and either return. Rescued and stays remain terminal. The Q3 resolution starts one
 three-line bell scene; Ring emits no story point. Lost has honest journal, Elspeth and
-Green text. No Silence control or finale is present yet.
+Green text. The fox choice is specified separately below; no finale is present yet.
+
+## Q3-F fox and silent bell
+
+[Q3-F adoption](../decisions/pm-decision-q3-fox-silence-2026-10-05.md) governs
+the bundled chapter. It adds **Leave the
+bell silent** on the same Belfry bell detail. It is offered only to the actor with
+active Q3, resolved Q2/rescued or Q2/stays, an unrung bell and unknown allegiance.
+The recipe rechecks those conditions when performed. It assigns only the player-scope
+allegiance from unknown to fox; it does not ring the bell, change Q2 or write a
+story point. Q3's current-state objective accepts prior or fox, while the existing
+Ring and the new Silence recipes retain their distinct admission policies. A
+fact-change reaction on the fox allegiance resolves Q3/fox once; the resolved
+quest event starts one two-line `bell_silenced` modal scene through scene@1.
+The final Continue acknowledges and ends it. The scene carries Aldric's cold
+response as narration; he remains present and the chapel route remains open.
+The first accepted Q3 terminal choice closes both recipes. No lost/fox outcome,
+later allegiance switch, dawn scene or export is part of Q3-F.

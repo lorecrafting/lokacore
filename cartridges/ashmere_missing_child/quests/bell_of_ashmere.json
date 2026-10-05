@@ -4,7 +4,10 @@
     "evidence": "current_state",
     "policy": {
       "policy_version": 1,
-      "root": { "op": "fact_compare", "fact": "chapel_allegiance", "equals": "prior" }
+      "root": { "op": "any", "items": [
+        { "op": "fact_compare", "fact": "chapel_allegiance", "equals": "prior" },
+        { "op": "fact_compare", "fact": "chapel_allegiance", "equals": "fox" }
+      ] }
     }
   },
   "journal": {
@@ -13,6 +16,6 @@
     "resolved": "quest.bell.resolved",
     "failed": "quest.bell.failed",
     "abandoned": "quest.bell.abandoned",
-    "outcomes": { "prior": "quest.bell.prior" }
+    "outcomes": { "prior": "quest.bell.prior", "fox": "quest.bell.fox" }
   }
 }

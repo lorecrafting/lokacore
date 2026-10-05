@@ -200,3 +200,4 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 - [Book keyboard navigation, 2026-10-05](owner-decision-book-keyboard-navigation-2026-10-05.md): arrows walk compass exits and Page Up/Page Down use vertical exits in the web Book.
 - [Q3-B bell-first prior and lost](pm-decision-q3-bell-prior-lost-2026-10-05.md): public Aldric, exact Belfry Ring, typed Q3/prior and bell-first Q2/lost.
+- [Q3-F fox through a silent bell](pm-decision-q3-fox-silence-2026-10-05.md): after either complete Q2 return, exact Belfry Silence resolves Q3/fox with its own evidenced scene.
