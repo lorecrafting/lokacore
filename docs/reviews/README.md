@@ -233,3 +233,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Opening Elspeth second opinion](2026-10-04-opening-elspeth-second-review.md): PR #183 at `1614da51`, APPROVE; no findings, v005 pin/IDs and explicit Start over checked.
 
 - [FEN-01 first south search route](2026-10-05-fen01-south-search-review.md): PR #184 at `c1764bdd`, initial CHANGES REQUIRED; scoped fix `673ec70c`, independent APPROVE, FEN01-R1 closed; heading red control detected, restored focused Book/App/compiler checks and exact-head CI green.
+
+- [Q1-A — Elspeth’s first lead](2026-10-05-q1-a-first-lead-review.md): PR #185 at `de66051fd61a359d2f1927e1390bce351384169d`, independent APPROVE; explicit acceptance, current-possession clue and once-only report; no findings, two mutation classes detected, restored focused checks pass.
