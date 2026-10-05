@@ -34,3 +34,10 @@ test:e2e`. The tester.army e2e runner starts and stops its own preview on ports 
 19107, uses a fresh browser profile, and checks a saved move after reload. It does not
 touch the usual preview at 19006 or its save. Install its browser once with `mise exec --
 npx e2e-web install chromium`. The test uses no model or API key, and telemetry is disabled.
+
+The default `e2e run` is headless. To watch the configured browser live and save a video,
+run `mise exec -- npm run test:e2e -- tests/book.e2e.ts --headed --video`.
+The runner also accepts `--video retain-on-failure` to keep recordings only for failed tests
+([official e2e documentation](https://e2e.tester.army/docs), [Expo's e2e guide](https://docs.expo.dev/guides/using-e2e/)). The deterministic suite needs no model. Exploratory tests that use agent actions require a configured model provider and may consume a subscription or API usage. The official e2e overview describes the distinction between exact steps and model-driven agent steps.
+
+The current suite contains one deterministic saved-move-after-reload check. It is setup proof for the browser runner, not chapter route/UI coverage. Chapter closure requires the route walk, exploratory pass, and owner-visible headed run or video described in the [workflow](WORKFLOW.md#local-edit-loop).

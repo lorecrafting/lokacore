@@ -38,6 +38,8 @@ and not repeated here.
 
 - The opening chapter has no required idle waits for tides, night, next day or a returning NPC; any required opening NPC stays reachable, the mire has an always-passable non-swim route, and time may still drive deadlines and ambience ([record](../decisions/owner-decision-no-wait-opening-2026-10-05.md)).
 
+- After each chapter, close the deterministic browser route/UI walk, exploratory E2E pass, visible headed run or video, isolated polish fixes and reruns, and exact-head independent review before calling that chapter closed ([record](../decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md)).
+
 - Later Ashmere conflicts follow the [PM-selected future policy](../decisions/pm-decision-later-story-reconciliation-2026-10-04.md); implementation and publication review remain pending, with no active M15/schema change.
 
 - One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
