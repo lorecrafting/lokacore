@@ -219,3 +219,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [NW-01 always-available sampler Bram](2026-10-05-nw-01-sampler-bram-review.md): PR #175 at `9e7e2a0`, APPROVE; no findings, independent custody mutant red/restored green, full checks and old-pin refusal/explicit Start over verified.
 
 - [CHAPTER-01 actual chapter cutover](2026-10-05-chapter-01-review.md): PR #176 at `06f67ba`, APPROVE.
+
+- [M12-A first readable details](2026-10-05-m12-a-readable-review.md): PR #177 at `fe0f79ae`, CHANGES REQUIRED (M12A-R1: Book drops a valid projected Read alias); three independent mutants red, restored focused tests and schema sweep pass.
