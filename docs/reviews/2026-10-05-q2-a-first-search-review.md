@@ -49,3 +49,16 @@ Two plausible production mutations were planted separately in this disposable de
 2. Keep the receipt query's parameter shape but ignore exact `command_id` selection (`local-story/save.ts`). The twelve-test authority chapter suite fails the older Study replay after newer unrelated Read: original Tracks history is empty instead of the literal Study line (exit 1; 11/12 passed).
 
 Both mutations and the additional malformed-evidence probe were fully restored. The tracked production/test diff was empty before committing only this record and its index. Normal commit/push hooks are retained. No Metro, Simulator, DeviceHub, preview or owner-save operation was run; no native rendering/touch proof is claimed.
+
+## Independent Astra second opinion
+
+The PM ran a fresh read-only Codex Astra opinion on the exact source head. Its answer is reproduced verbatim.
+
+```text
+VERDICT: CHANGES REQUIRED
+
+Q2A-01 | blocker | mobile/authority/local-story/save.ts:142
+A committed Study receipt with missing/null events, or an event lacking payload, throws TypeError before receiptDetail validates its evidence. Reproduced with real in-memory SQLite: localSession returns no game, no save_corrupt classification, and startOver:false, stranding the save. Guard the event structure before scanning and route malformed readable-recipe evidence through save_corrupt recovery. Add these cases to the corruption tests.
+
+Verification/limits: 12 focused tests passed; independently reproduced 3/21 behavior red controls and all 15 schema controls. Checked validator parity, compiled chapter/hash/allocation pins, and previous-save refusal. No files changed; no device or file-backed reopen rerun.
+```
