@@ -68,3 +68,20 @@ Independent evidence:
 - All six exact fix-source CI checks are green. No additional complexity finding: the shared-boundary placement is appropriate and avoids catch-all conversion of storage faults; the remaining issue is incomplete input validation. No temporary test or mutant is committed. Normal hooks apply to the review-record push.
 
 No source edits, merge, roadmap completion, preview, device operation, Android/iOS build or native verification was performed.
+
+
+## Scoped fix-round 2 recheck — source `d014b719`
+
+**APPROVE. PS-1 closed.** Reviewed `d014b7197b27c1572f54f8989a9faf86c3b797c3` against the prior reviewed source, limited to the saved-quest boundary, its direct open/adoption/session callers, the changed regression test and governing save clause. No remaining findings.
+
+`mobile/authority/local-story/store.ts:135` now applies the existing DefinitionRef and StateScope validators before receipt recovery. Null and truthy malformed fields both produce the existing typed corruption result; no row is skipped or repaired. `openStory` retains explicit replacement recovery, `adopt` retains its typed corruption fence, and genuine SQLite errors still propagate without a Start over offer. Ponytail review: reuse of the existing validators is the smallest complete fix. The local 52-line boundary and 304-line file allowances retain cohesive validation; the size checker passes. No new abstraction, dependency or broad error catch was added.
+
+Independent validation:
+
+- Existing focused kernel/SQLite suites (`escort`, `wren_escort`, `vesper_message`, `saves`): **76 passed**, exit0.
+- Additional disposable file-backed probes recreated Q1 corruption after both escort start and terminal: null row, `{"quest":{},"scope":{}}`, `{"quest":true,"scope":true}`, and independently malformed quest or scope with the other original field retained. Each closed the original connection and opened a new SQLite connection. All ten cases return save_corrupt at `openStory` and `localSession`, offer Start over, leave saved rows identical until explicit replacement and successfully start fresh afterward.
+- A valid completed rescue cold-opens with both `first_lead` and `missing_child` journal entries. A real second-connection `BEGIN EXCLUSIVE` read lock yields a storage failure, no corruption classification and no Start over; unlocking preserves and reopens the same saved rows. Combined independent probe suite: **12 passed**, exit0.
+- Independently removed only DefinitionRef validation: the two isolated malformed-quest cases fail. Restored, then removed only StateScope validation: the two isolated malformed-scope cases fail. Both runs exit1 (16 passed / 3 failed including the parent test). Both guards restored.
+- Restored existing suites plus independent probes: **88 passed**, exit0. TypeScript size check: exit0. All five currently scheduled source-head CI checks are green: changes, lint, elixir, typescript and headless sim. No native check was started. Temporary probes and mutants were removed; only this record and its index are committed with normal hooks.
+
+Earlier findings and failed experiments above remain historical evidence. No native build, simulator/device/preview operation, source edit, merge or roadmap completion occurred.
