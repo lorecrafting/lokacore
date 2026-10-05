@@ -399,6 +399,30 @@ requires the fatal transition's death event and player-body transfer. Unrelated 
 receipts and current room never prove success. Existing rollback,
 unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchanged.
 
+## Green finale recovery (planned A3)
+
+The five [Green outcomes](cartridge.md#a3-green-finale-planned) extend the same
+receipt-backed return proof. A begun epilogue requires its own committed Begin
+receipt with the selected recipe, actor at Green and exact `market_cross` event
+subject; an unrelated action cannot evidence its scene start. Load admits every
+lawful intermediate: terminal Q2/Q3,
+acknowledged bell, eligible Green, begun epilogue at each shown line, acknowledged
+end with one pending or later delivered report. It rejects lost/fox, mismatched
+bell/allegiance or scene pair, two active epilogues, unacknowledged bell with begun
+epilogue, and any early or inconsistent completion memory, marker or report. A final
+marker must agree with the ended scene, three memories, exact pair and outcome;
+the original Q2/Q3 evidence remains required. Contradictions use typed
+`save_corrupt` and Start over, never silent repair.
+
+Only an accepted bound final Continue produces the three player memory assignments,
+reserved story-point marker and `story_point_reached` event. Changed rows, scene end,
+marker, report and receipt commit in one transaction before memory adoption and UI
+confirmation. Exact replay keeps its original receipt and cannot allocate a second
+report. Failed or uncertain COMMIT follows the existing fence and reconciliation;
+uncommitted effects never present as completion. Offline delivery leaves the one
+report pending and does not undo completion. Reopen observes saved state and never
+starts the epilogue by itself.
+
 ## Selected S2 recovery (pending implementation)
 
 The B2 S2 occurrence, bound actor/Peg/Aldric/ledger, expiry job and any explicit

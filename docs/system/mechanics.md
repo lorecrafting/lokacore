@@ -396,6 +396,12 @@ trigger is rejected if another dialogue resolves the same quest with the same ch
 `OUTCOME_MISMATCH` code. This narrow check is the PM's continuing-workflow choice,
 not an explicit owner response to the chapter brief's Q4.
 
+**A3 planned extension:** a story point reached by acknowledgement of an exact
+`scene_ended` outcome uses its engine-owned player fact marker, including the selected
+outcome, for chapter projection. It does not infer completion from a pending or delivered
+report. Dialogue-triggered points keep the quest derivation above. Only the matching
+final Continue may reach this point; a running scene, screen render and reopen cannot.
+
 ## narration@1
 
 Ruleless: a committed narration line binds its participants' EntityIds at commit (recipe
@@ -452,6 +458,17 @@ start-once half are covered by the [scene review](../reviews/2026-10-03-c1-scene
 A stale fresh-id Continue can still advance an unseen line at the command boundary;
 the [ROADMAP carry](../ROADMAP.md#c1-carry-checkpoints) distinguishes presenter input
 review from the future line-bearing contract.
+
+**A3 planned extension:** Continue binds the scene identity and the line actually shown
+when the control was drawn. Admission and the scene rule require both to equal the current
+durable scene and line, including for a fresh invocation id or direct Command. An exact
+accepted id replays its original receipt before current-state admission. A scene may start
+from one exact accepted `action_completed` recipe at the Village Green, with a validated
+actor, `market_cross` detail subject and pair-specific once-only condition. Its
+acknowledged final end may make
+only declared player fact assignments and one typed story-point reach within the same
+proposal and shared budgets. No display callback, movement, elapsed settlement or reopen
+starts a scene or writes its consequences.
 
 ## reaction@1 (`kernel/ts/src/mechanics/reaction.ts`)
 

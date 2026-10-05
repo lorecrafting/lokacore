@@ -74,6 +74,12 @@ exit, departed target, altered choice or other changed interaction context keeps
 the authority refuses the stale invocation, the Book redraws and nothing acts. No substituted
 target, extra movement or optimistic success is permitted. The clock and schedules keep running.
 
+For the planned A3 finale, Continue carries the scene identity and line shown when
+drawn. A changed line or scene remains stale even if the presenter obtains a fresh
+invocation id; the Book redraws the actual saved line. An exact accepted retry retains
+its receipt and presentation context. The Green's Begin epilogue appears as one
+ordinary action only when eligible; rendering, arrival and reopening do not press it.
+
 A pending retry keeps its original invocation, token, receipt and presentation context; this
 rule never refreshes an already-sent invocation or weakens authority freshness/admission.
 
