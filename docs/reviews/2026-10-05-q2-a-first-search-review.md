@@ -4,7 +4,7 @@ PR [#187](https://github.com/lorecrafting/lokacore/pull/187).
 
 - Source head reviewed: `85742097dd90193a97ea75963c99e8a25fc9b040`.
 - Reviewer: fresh independent Codex agent; authored none of the implementation.
-- Verdict: **CHANGES REQUIRED**. One blocker, Q2A-R1, remains open.
+- Initial verdict: **CHANGES REQUIRED**; blocker Q2A-R1 raised. Scoped closure is recorded below.
 
 ## Acceptance derived before reading the diff
 
@@ -62,3 +62,22 @@ A committed Study receipt with missing/null events, or an event lacking payload,
 
 Verification/limits: 12 focused tests passed; independently reproduced 3/21 behavior red controls and all 15 schema controls. Checked validator parity, compiled chapter/hash/allocation pins, and previous-save refusal. No files changed; no device or file-backed reopen rerun.
 ```
+
+## Scoped fix round 1 — primary review
+
+- Fix source head reviewed: `c8186f663cfb293e2a3de0b180ad62428f56c062`.
+- Current primary verdict: **APPROVE**. Q2A-R1 closed; no open findings.
+- Scope: the two-file fix, `narration()` and its direct authority/session/Book consumers. Unaffected implementation was not reopened.
+
+**Q2A-R1 closed — `mobile/authority/local-story/save.ts:137`.** The array/payload check runs before the combat scan and receipt-detail scan. Malformed event evidence now throws the existing `malformed JSON` error, which `checked()` classifies as `save_corrupt` with the in-place new-game recovery. SQLite read errors still propagate through the existing storage handling. The updated ten-case regression keeps the prior identity/root/subject/duplicate evidence cases, adds the three reported structural forms, and asserts typed refusal, explicit Start over and an empty fresh journal with literal expected results. Ponytail Review: the two-line guard uses native checks and the existing trust boundary; no unnecessary machinery.
+
+| Scoped reviewer validation | Result |
+| --- | --- |
+| Authority `missing_child`, `start_over`, `lineage`, `faults`; Book `notice_board`, `presenter` | Exit 0; 79/79 pass, including the real exclusive-lock narration read, receipt identity/replay and confirmed detail recovery |
+| Independent file-backed cold-reopen probe after actual Q1 report and Study | All three forms (missing events, null events, missing payload) return no game, `save_corrupt`, and Start over available. Refusal preserves state rows and lineage/run identity. Explicit Start over keeps the file, clears the failure, opens Ferry Landing on 0.0.9 with an empty journal and a new run. SQLite journal mode is `delete`. |
+| Independent removal of the array check | Exit 1; regression fails with absent corruption kind, expected literal `save_corrupt` |
+| Independent removal of the payload-shape check | Exit 1; regression fails on missing payload with absent corruption kind, expected literal `save_corrupt` |
+| Restored ten-case corruption regression | Exit 0; all cases pass and tracked source/test diff is empty |
+| Exact fix-source CI | All six jobs successful at `c8186f66` |
+
+The temporary probe and both production mutations were restored before the record-only commit. Normal commit/push hooks remain enabled; the disposable detached worktree is removed after pushing. No preview, Metro, Simulator, device or owner-save operations were used.
