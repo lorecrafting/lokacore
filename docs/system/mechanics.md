@@ -898,3 +898,55 @@ from the shrine remains equipment-free. Well Shaft has no new enemy, water hazar
 barrier, required clue or deadline. Exhausted, sold, stored or lost light therefore
 cannot strand chapter progress, egress or possession recovery. No free replacement,
 shrine teleport or forced-overload recovery operation is added.
+
+## B7 well and waterskin selected contract
+
+**Selected, pending implementation.** B7 supplies the first `liquid@1` consumer:
+Fill at Well Lane's authored well detail, Pour between two real obtainable
+waterskins, and Drink water. [Tuning](cartridge.md#b7-water-and-vessels) supplies
+units, capacity, density and drink amount. [Composition](protocol.md#b7-liquid-composition),
+[recovery](save.md#b7-liquid-recovery) and [Book](book-ui.md#b7-water-details)
+govern their shared boundary. No hunger/thirst clock, HP/MV benefit, spill, oil
+conversion or finite environmental reservoir is selected. B8 must amend this
+contract before adding its actual consumption benefit or ale consumer.
+
+Each opted vessel has one exact-instance row `{kind, quantity}`. Empty is exactly
+`{kind: null, quantity: 0}`; positive integer quantity names one declared liquid
+kind and never exceeds authored capacity. Liquid capability does not imply an
+item receptacle: waterskins cannot accept Put of keys or other item entities.
+The empty shell persists after drinking; no item is deleted, minted or replaced.
+
+All three verbs require a living actor and usable vessels whose custody reaches
+that actor's body, including reachable open nested bags and their own worn
+holders. Use the existing bounded custody/lid checks with one query budget;
+reach alone also admits room items and therefore does not establish ownership.
+Ground, NPC, corpse-held and closed/locked-bag vessels are unavailable until
+ordinary Take/open/recovery puts them into eligible custody. Ordinary transfer,
+Wear/Remove, Drop, death and shop Buy/Sell preserve the same vessel row and liquid.
+No liquid verb transfers ownership, moves the actor or advances logical time.
+
+Fill binds the exact well detail in the actor's current room and one compatible
+vessel. It adds exactly its free capacity of the authored source kind. A full
+vessel or nonempty different kind refuses unchanged. This source is explicitly
+inexhaustible: an admitted Fill introduces water, and is not a closed-system
+conservation claim. There is no other liquid issuance path in B7.
+
+Pour binds distinct eligible source and receiver. Transfer exactly the lesser of
+source quantity and receiver free capacity, only into an empty or same-kind
+receiver. Source empty, receiver full, self-pour or different kinds refuse before
+any write. Debit and credit commit atomically; exhausting the source resets its
+kind to null. No arbitrary amount input or discard verb is added. Drink requires
+at least the liquid's authored positive integer drink amount, consumes exactly
+that amount and narrates the committed kind/amount. A smaller remainder refuses
+unchanged; there is no partial last serving. Emptying resets kind to null. B7
+water drinking changes no HP, MV, needs, faction, money, RNG or clock.
+
+Effective item mass is shell mass plus quantity times the liquid's grams/unit,
+in the existing carrying calculation, not a second stored load. Compiler/loader
+validate safe integer products and bound each maximum effective item mass by the
+existing item-mass limit; runtime checked arithmetic faults atomically on
+malformed relevant data. Fill is positive acquisition and requires resulting
+load at or below the authored ceiling; it never partially fills to evade that
+ceiling. Pour within actor custody is neutral even when overloaded, and Drink
+reduces load. Take, Buy and incoming transfer must include current liquid mass;
+Drop and recovery move the same contents without refilling them.

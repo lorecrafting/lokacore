@@ -452,3 +452,22 @@ After the same torch is lit directly held or worn, the authored masonry detail i
 visible; Douse, exhaustion or Put into the satchel removes it on the next confirmed
 view. Existing freshness handles a control selected before elapsed exhaustion.
 No required waiting, darkness modal, new native control or unfinished lantern UI.
+
+## B7 water details
+
+**Selected, pending implementation.** Well Lane's actual well detail offers Fill
+with an exact currently eligible vessel destination. Inventory and reachable
+item details show confirmed liquid kind, quantity/capacity and authored unit
+label, and offer Drink or Pour to a distinct eligible owned vessel. Distinguish
+the original and spare waterskin with authored names; retain exact IDs through
+target selection rather than resolve an ambiguous keyword automatically.
+Ordinary empty/full/incompatible/carrying refusals use the shared projected
+availability and admission reason. No fake well room, text amount field or new
+management screen is required. Local Leave remains navigation only.
+
+Use the existing ActionInvocation/freshness boundary for the exact displayed
+source/receiver and view context. Revalidate after time/custody/quantity changes;
+a stale pair never silently substitutes another skin. Pending/unknown saves
+show no optimistic quantity or success log. Confirmed action narration reflects
+the receipt's actual transferred/consumed kind and amount; refresh/reopen uses
+saved state. Book owns neither liquid math nor a consumption effect producer.

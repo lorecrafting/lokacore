@@ -9,6 +9,7 @@ and not repeated here.
 ## Product and scope
 
 - B4 uses the real refillable B3 torch and oil in an optional dark well, with gear-free egress and owned-corpse recovery ([PM adoption](../decisions/pm-decision-b4-light-2026-10-05.md)).
+- B7 uses the public well and two finite Peg waterskins for mass-accounted Fill/Pour/Drink, without a passive need or resource benefit ([PM adoption](../decisions/pm-decision-b7-well-waterskin-2026-10-05.md)).
 - C1 teaches swords/dodge immediately through conserved payment and typed acquired membership; current attribute qualification, real equipped weapons and shield defense affect the actual cellar fight ([PM adoption](../decisions/pm-decision-c1-tobin-training-2026-10-05.md)).
 
 - A3 requires an explicit Green Begin after a lawful terminal pair and acknowledged
@@ -26,7 +27,7 @@ and not repeated here.
   chapter 0.0.16 ([PM adoption](../decisions/pm-decision-b2-chandlers-debt-2026-10-05.md)).
 - B5 S9 uses finite real herb/bandage stock, immediate optional explicit repeats and a separate capped Priory contribution ([PM adoption](../decisions/pm-decision-b5-infirmary-herbs-2026-10-05.md)).
 
-- B3 Peg's shop uses a finite four-item authored shelf, exact conserved penny exchange,
+- B3 Peg's shop starts with a finite four-item authored shelf, exact conserved penny exchange,
   same-ID buyback and no restock ([PM adoption](../decisions/pm-decision-b3-pegs-shop-2026-10-05.md)).
 - Q3-B uses an exact bell-detail recipe, typed terminal reactions and an evidenced
   quest-resolution scene start for the public prior/lost path ([PM adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md)).

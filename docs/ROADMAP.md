@@ -189,6 +189,11 @@ B5 Infirmary Herbs has an [adopted finite-stock contract](decisions/pm-decision-
 and [re-pinned brief](briefs/chapter-one/b5-infirmary-herbs-brief-2026-10-05.md)
 on local base `d41ec0d2`; source implementation and proof remain ahead.
 
+B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
+and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
+against local B3 integration at `4bfe252e`. Source implementation, successor
+release pins, independent plan review and proof remain ahead.
+
 C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md)
 against corrected provisional B3 integration `9c7e5379`; re-pin its scoped review
