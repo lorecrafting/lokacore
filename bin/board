@@ -9,12 +9,14 @@ import pathlib
 import re
 import subprocess
 import time
+import tempfile
 
 PHASES = ('plan', 'build', 'checks', 'provisional', 'reviews', 'fixes', 'local complete', 'publication')
 
 
 def redact(value):
     value = re.sub(r'(?:/Users/|/home/|/private/|/tmp/|/var/|[A-Za-z]:\\)[^\s<>"\']+', '[local path]', str(value))
+    value = re.sub(r'(?<![\w/])(?:~/|(?:\.\.?/)*tmp/)[^\s<>"\']+', '[local path]', value)
     value = re.sub(r'\b[0-9A-Fa-f]{8}-(?:[0-9A-Fa-f]{4}-){3}[0-9A-Fa-f]{12}\b', '[identifier]', value)
     return re.sub(r'(?i)\b(?:udid|ecid|serial|team.?id|certificate|provisioning|device.?name)\s*[:=]\s*[^\n,;]+', '[device/signing identifier]', value)
 
@@ -38,9 +40,11 @@ def document(repo, path):
 def plan_rows(text):
     rows = []
     for line in text.splitlines():
-        match = re.match(r'\| \*\*([A-E]\d+)\s+(.*?)\*\*\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|', line)
+        match = re.match(r'\| \*\*([A-E]\d+)\s+(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|', line)
         if match:
-            rows.append(dict(zip(('slice', 'outcome', 'depends', 'lift'), match.groups())))
+            row = dict(zip(('slice', 'outcome', 'depends', 'lift'), match.groups()))
+            row['outcome'] = row['outcome'].replace('**', '')
+            rows.append(row)
     return rows
 
 
@@ -80,12 +84,16 @@ def snapshot(repo, notes_path, github=False):
     prs = run(repo, 'gh', 'pr', 'list', '--state', 'all', '--limit', '40', '--json',
               'number,title,state,url,headRefOid,headRefName,statusCheckRollup') if github else None
     local = git(repo, 'rev-parse', 'main')
-    remote = git(repo, 'rev-parse', 'origin/main')
-    ahead = git(repo, 'rev-list', '--left-right', '--count', 'origin/main...main') if remote and local else None
-    commits = git(repo, 'log', '--format=%h %s', 'origin/main..main') if ahead else None
+    remote_ref = 'upstream/main' if git(repo, 'rev-parse', '--verify', 'upstream/main') else 'origin/main'
+    remote = git(repo, 'rev-parse', '--verify', remote_ref)
+    origin_url = git(repo, 'remote', 'get-url', 'origin') or ''
+    mirror = remote_ref == 'origin/main' and not re.match(r'(?:https?://|ssh://|git://|[^/]+@[^:]+:)', origin_url)
+    remote_label = f'Cached {remote_ref}' + (' (local mirror; publication unknown)' if mirror else ' (publication baseline)')
+    ahead = git(repo, 'rev-list', '--left-right', '--count', f'{remote_ref}...main') if remote and local else None
+    commits = git(repo, 'log', '--format=%h %s', f'{remote_ref}..main') if ahead else None
     return {'at': dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds'), 'rows': rows,
             'notes': notes, 'note_errors': errors, 'worktrees': worktrees, 'local': local,
-            'remote': remote, 'divergence': ahead, 'commits': commits,
+            'remote': remote, 'remote_label': remote_label, 'divergence': ahead, 'commits': commits,
             'prs': json.loads(prs) if prs else None, 'github_requested': github}
 
 
@@ -130,12 +138,22 @@ def render(data, watch=False):
 <h1>Chapter 1 delivery board</h1><p>Generated UTC {esc(data['at'])}. {'Refreshes every 5s while the watch command runs.' if watch else 'Snapshot; rerun bin/board to refresh.'}
 Agent activity is last reported, never OS liveness. Changed files do not imply a running agent.
 Reports are operational claims, not independent approval; review and check evidence must match the exact head.
-Local checks are not hosted CI. GitHub: {github_label}. origin/main is cached; this command never fetches.</p>
-<h2>Local integration and publication</h2><p>Local main: {esc(data['local'] or 'unknown')}<br>Cached origin/main: {esc(data['remote'] or 'unknown')}<br>
+Local checks are not hosted CI. GitHub: {github_label}. Remote refs are cached; this command never fetches.</p>
+<h2>Local integration and publication</h2><p>Local main: {esc(data['local'] or 'unknown')}<br>{esc(data.get('remote_label', 'Cached remote main'))}: {esc(data['remote'] or 'unknown')}<br>
 Remote-only / local-only commits: {esc(data['divergence'] or 'unknown')}</p><pre>{esc(data['commits'] or 'No known local-only commits')}</pre>
 <h2>Pipeline — last reports</h2>{phases}<h2>Activities and measured checks</h2><p>Malformed report lines ignored: {data['note_errors']}. Unreported phase start/end times and check durations remain unknown.</p>{notes}
 <h2>All {len(data['rows'])} Chapter 1 candidates</h2><p>Source: local main completion plan and roadmap. Plan dependency/lift values are recommendations, not implementation proof.</p>{rows}
 <h2>Work units</h2>{trees}<h2>Recent GitHub PRs</h2>{prs}</html>'''
+
+
+def write_output(output, content):
+    with tempfile.NamedTemporaryFile(mode="w", dir=output.parent, prefix=".chapter-board-", delete=False) as stream:
+        temporary = pathlib.Path(stream.name)
+        stream.write(content)
+    try:
+        temporary.replace(output)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def main():
@@ -171,8 +189,7 @@ def main():
     output.parent.mkdir(parents=True, exist_ok=True)
     try:
         while True:
-            output.with_suffix('.new').write_text(render(snapshot(repo, notes, args.github), args.watch))
-            output.with_suffix('.new').replace(output)
+            write_output(output, render(snapshot(repo, notes, args.github), args.watch))
             print('Chapter board refreshed.', flush=True)
             if not args.watch:
                 break

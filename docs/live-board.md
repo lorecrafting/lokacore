@@ -41,7 +41,9 @@ The board shows **last reported activity**, never whether an agent process is
 running. Changed files and commit subjects are Git facts, not approval. Explicit
 phase reports can be stale; inspect their UTC timestamp and exact head. Phase
 start/end times, unreported check times and approval are unknown. Local completion
-and remote publication remain distinct; `origin/main` is the cached Git ref.
+and remote publication remain distinct. The cached `upstream/main` is the publication
+baseline when available; otherwise `origin/main` is used and a filesystem origin is
+explicitly labelled as a local mirror with publication unknown.
 The board never fetches or changes refs. Update remote refs through the normal PM
 workflow before relying on their freshness.
 
