@@ -308,5 +308,21 @@
   "scene.epilogue_stays_fox.3": "You leave the cross knowing Wren chose his own place.",
   "scene.epilogue_lost_prior.1": "Wren did not return. His absence sits with the village even here.",
   "scene.epilogue_lost_prior.2": "The bell you rang still seems to echo from the priory hill. The fox calls have quieted.",
-  "scene.epilogue_lost_prior.3": "You leave the cross carrying the truth of Wren’s loss."
+  "scene.epilogue_lost_prior.3": "You leave the cross carrying the truth of Wren’s loss.",
+  "item.torch.short": "a torch",
+  "item.torch.room": "[A torch](torch) lies here.",
+  "item.torch.description": "A pitch torch fitted for the light slot.",
+  "item.lamp_oil.short": "a flask of lamp oil",
+  "item.lamp_oil.room": "[A flask of lamp oil](lamp_oil) lies here.",
+  "item.lamp_oil.description": "A sealed flask of lamp oil.",
+  "item.waterskin.short": "a waterskin",
+  "item.waterskin.room": "[A waterskin](waterskin) lies here.",
+  "item.waterskin.description": "A sturdy leather waterskin.",
+  "item.satchel.short": "a small satchel",
+  "item.satchel.room": "[A small satchel](satchel) lies here.",
+  "item.satchel.description": "A small satchel with room for four items.",
+  "shop.bought": "Peg takes your pennies and hands you the purchase.",
+  "shop.sold": "Peg takes the item and counts your pennies into your hand.",
+  "action.buy": "Buy",
+  "action.sell": "Sell"
 }

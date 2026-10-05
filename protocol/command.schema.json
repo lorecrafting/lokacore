@@ -678,6 +678,66 @@
             "target_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "buy"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "provider_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "quoted_price": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "provider_id",
+            "item_id",
+            "quoted_price"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "sell"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "provider_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "item_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "quoted_price": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "type",
+            "actor_id",
+            "provider_id",
+            "item_id",
+            "quoted_price"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

@@ -212,6 +212,7 @@ export const COMPOSES = {
   schedule: ['movement', 'combat', 'death'],
   combat: ['movement'],
   dialogue: ['quest', 'containment'],
+  commerce: ['containment'],
   scene: ['dialogue'],
   reaction: ['quest'],
 } as const;

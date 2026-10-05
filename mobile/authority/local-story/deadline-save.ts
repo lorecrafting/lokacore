@@ -87,6 +87,9 @@ export function deadlineSave(world: World, db: Db, meta: Meta) {
       !validOverrideRow(npcBalance, spec, world.state.clock)
     )
       invalid();
+    const commerce = Object.values(world.cartridge.npcs ?? {}).some(
+      (n) => n.shop && same(n.shop.resource, resource),
+    );
     const [instance, q] = instances[0] ?? [];
     if (!q) {
       if (
@@ -94,7 +97,7 @@ export function deadlineSave(world: World, db: Db, meta: Meta) {
         jobs.length ||
         fact !== world.factDefaults[key(deadline.fact)] ||
         trust !== world.factDefaults[key(deadline.trust_fact)] ||
-        actorBalance!.value !== spec.start ||
+        (!commerce && actorBalance!.value !== spec.start) ||
         npcBalance!.value !== start
       )
         invalid();
@@ -161,7 +164,7 @@ export function deadlineSave(world: World, db: Db, meta: Meta) {
       const selected = terminal.choices[outcome!]!;
       const axis = selected.sequence?.filter((s) => s.op === 'fact.adjust') ?? [];
       if (axis.length !== 1 || !terminalAxis(world, terminalReceipt, axis[0])) invalid();
-      if (paid) {
+      if (paid && !commerce) {
         const transfers = terminalReceipt.delta.ops.filter((o) => o.op === 'resource.adjust');
         if (
           transfers.length !== 2 ||
@@ -192,7 +195,7 @@ export function deadlineSave(world: World, db: Db, meta: Meta) {
     )
       invalid();
     if (
-      actorBalance!.value !== spec.start + (paid ? funding.amount : 0) ||
+      (!commerce && actorBalance!.value !== spec.start + (paid ? funding.amount : 0)) ||
       npcBalance!.value !== start! - (paid ? funding.amount : 0)
     )
       invalid();

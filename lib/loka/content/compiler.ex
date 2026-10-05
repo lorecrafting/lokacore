@@ -42,6 +42,7 @@ defmodule Loka.Content.Compiler do
     Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs) ++
       Resources.check(manifest, defs, v2, located, registry) ++
       Entities.carry(manifest, defs, located) ++
+      Loka.Content.Commerce.check(manifest, defs) ++
       Loka.Content.Death.check(manifest, defs, located) ++
       Loka.Content.Combat.check(manifest, defs, located, v2) ++
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry) ++

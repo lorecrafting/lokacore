@@ -430,6 +430,12 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "shop": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/ShopItemView"
+          }
         }
       },
       "required": [
@@ -845,15 +851,42 @@
       "description": "Confirmed cartridge calendar projection. Phase fields appear only when authored.",
       "type": "object",
       "properties": {
-        "day": { "type": "integer", "minimum": 1 },
-        "hour": { "type": "integer", "minimum": 0 },
-        "subdivision": { "type": "integer", "minimum": 0 },
-        "solar": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-        "lunar": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+        "day": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hour": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "subdivision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "solar": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "lunar": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        }
       },
-      "required": ["day", "hour", "subdivision"],
+      "required": [
+        "day",
+        "hour",
+        "subdivision"
+      ],
       "additionalProperties": false,
-      "examples": [{"day": 1, "hour": 18, "subdivision": 0, "solar": "dusk", "lunar": "new"}]
+      "examples": [
+        {
+          "day": 1,
+          "hour": 18,
+          "subdivision": 0,
+          "solar": "dusk",
+          "lunar": "new"
+        }
+      ]
     },
     "GameView": {
       "description": "One actor's semantic view (04 \u00a714, \u00a715): the current logical time (to build wait until, P5), the place, its exits, place-level actions, visible entities with their actions, the actor's inventory, quest journal, the body's resources (resource@1; absent when the cartridge has none, an optional field: the snapshot format stays), and the pending choice when one is open. The fields the R6P touch path needs (00 \u00a74.10; P5); the worn equipment, one entry per slot holder (equipment@1; absent when the world has none, an optional field); the actor's position (position@1; absent without it). Map, shop and other surfaces join with their capabilities.",
@@ -917,7 +950,9 @@
         "time": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
         },
-        "calendar_status": { "$ref": "#/$defs/CalendarStatus" },
+        "calendar_status": {
+          "$ref": "#/$defs/CalendarStatus"
+        },
         "chapter": {
           "description": "Present exactly when the cartridge declares chapters.",
           "$ref": "#/$defs/ChapterView"
@@ -1676,6 +1711,53 @@
           ]
         }
       ]
+    },
+    "ShopAction": {
+      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).",
+      "type": "object",
+      "properties": {
+        "price": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "available": {
+          "type": "boolean"
+        },
+        "reason": {
+          "$ref": "error.schema.json#/$defs/ErrorCode"
+        }
+      },
+      "required": [
+        "price",
+        "available"
+      ],
+      "additionalProperties": false
+    },
+    "ShopItemView": {
+      "description": "An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).",
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "$ref": "identity.schema.json#/$defs/EntityId"
+        },
+        "name": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "buy": {
+          "$ref": "gameview.schema.json#/$defs/ShopAction"
+        },
+        "sell": {
+          "$ref": "gameview.schema.json#/$defs/ShopAction"
+        }
+      },
+      "required": [
+        "item_id",
+        "name",
+        "buy",
+        "sell"
+      ],
+      "additionalProperties": false
     }
   }
 }

@@ -311,7 +311,14 @@
     "key": "commerce",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "buy",
+      "sell"
+    ],
+    "definitions": [
+      "shop"
+    ]
   },
   {
     "key": "service",

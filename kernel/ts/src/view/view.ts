@@ -31,6 +31,7 @@ import { holds } from '../mechanics/policy.ts';
 import { value } from '../mechanics/fact.ts';
 import { holdsNow } from '../mechanics/quest/lifecycle.ts';
 import { cmp } from '../foundation/validate.ts';
+import { shelf } from '../mechanics/commerce/shared.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
 
 /**
@@ -152,6 +153,7 @@ const viewOf = (world: World, id: string, e: Entity, actions: AdvertisedAction[]
   kind: e.kind as Key,
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
+  ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
 });
 
 type Lists = ReturnType<typeof lists>;
