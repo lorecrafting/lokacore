@@ -1,0 +1,50 @@
+(node:68523) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/combat.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ combat page lists offered controls vertically below history in one scroll (5.5555ms)
+✔ committed opponent death narrates once through the existing subscription (0.317583ms)
+✔ confirmed encounter foregrounds another page and closure or death restores the World (6.843542ms)
+✔ Attack opens its committed page; pending and refused Flee stay until committed escape (3.306625ms)
+✔ reopening an encounter restores the combat page and last committed narration (0.473791ms)
+✔ reopening after escape or either death never restores combat into the World log (1.324375ms)
+✔ combat receipt history is once-only when completion follows an already displayed state (0.245667ms)
+(node:68524) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/polish.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room is focused while Map retains directions and every detail returns to the world (57.666ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (22.377583ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (40.253083ms)
+✔ only World position taps directly cycle the offered states with captured freshness (20.710875ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (13.850875ms)
+✔ only confirmed pickup returns World, including a retry from another page (19.659333ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (14.094334ms)
+✔ inventory Drop returns World with one named event only after confirmation (18.910375ms)
+✔ other item actions retain their detail and World consequences (9.740875ms)
+✔ elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips (17.591458ms)
+✔ delayed Take returns once with its original item name after a conflicting tap (24.90875ms)
+✔ delayed actual quest completion adds one authored result and Journal updated in original history (22.467125ms)
+✔ actual trunk detail explains refused Take and restores its button after Remove then Drop (39.491375ms)
+(node:68525) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (2.240625ms)
+✔ journal cues belong only to changed NPC histories (0.297875ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.128834ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.196292ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.134083ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.137333ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.079083ms)
+✔ the log stops growing in one room, its last line the latest answer (3.522459ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.137334ms)
+✔ a narration recovery fault holds combat results while their line routing is unavailable (0.369042ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 690.605958

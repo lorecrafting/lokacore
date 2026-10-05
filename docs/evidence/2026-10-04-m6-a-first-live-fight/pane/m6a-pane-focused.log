@@ -1,0 +1,56 @@
+(node:48334) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/c1.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exit door actions keep their direction and remain separate from walking (23.113ms)
+✔ worn items and reachable nested contents offer actions on their own ids (1.334375ms)
+✔ same-room actions retain projected item pages and remove pages hidden by a closed lid (1.538416ms)
+✔ chapter changes queue one title which survives scene lines and acknowledgement (1.701333ms)
+✔ band phrases and the hp accessibility label use the cartridge catalog (0.910291ms)
+✔ scene Continue and position verbs have dedicated groups (0.390791ms)
+(node:48335) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/combat.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ combat page replaces ordinary pages and retains complete Stand/Flee controls (6.809791ms)
+✔ committed opponent death narrates once through the existing subscription (0.362208ms)
+✔ confirmed encounter foregrounds another page and closure or death restores the World (11.301542ms)
+✔ Attack opens its committed page; pending and refused Flee stay until committed escape (93.937792ms)
+✔ reopening an encounter restores the combat page and last committed narration (52.628791ms)
+(node:48336) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exits, the look title, place actions and a thing page come from the right buttons (4.192583ms)
+✔ position cycling skips absent offers and retains the offered freshness (0.210875ms)
+✔ a touch link is shown as its label (0.178417ms)
+✔ a choice's answers and Close are their own group, not place actions (0.13525ms)
+✔ the character label says the hp band and no other (0.191208ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.137042ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (3.307375ms)
+✔ the ending line shows once every quest is over (1.392209ms)
+✔ a closed exit's log line and a capitalised title (12.973458ms)
+✔ a move refused at 0 MV says the body is too exhausted (1.156833ms)
+✔ a hint survives a store that throws, for this session (0.392209ms)
+✔ the status line shows the double hour as its earthly branch (0.451709ms)
+(node:48337) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (2.542291ms)
+✔ journal cues belong only to changed NPC histories (0.334042ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.146625ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.209667ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.150667ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.161625ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.088166ms)
+✔ the log stops growing in one room, its last line the latest answer (3.49575ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.597209ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2632.788208

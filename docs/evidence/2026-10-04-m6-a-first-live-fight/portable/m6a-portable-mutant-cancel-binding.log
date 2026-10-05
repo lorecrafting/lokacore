@@ -1,0 +1,80 @@
+✔ composition known answers (9.531625ms)
+✔ invariant checks known answers, a holding and a violated case per invariant checked in both kernels (0.449125ms)
+✔ invalid successful deltas fail their independent precondition check (0.2685ms)
+✔ containment checks deep chains, untouched cycles and untouched capacity (13.605916ms)
+✔ limits are named in the composition profile order (0.542667ms)
+✔ composition-profile budgets: at the limit composes with the expected changes, one over faults (12.941125ms)
+✔ a malformed barrier state faults precondition_failed (0.217ms)
+✔ opted recovery literal rows and independent metadata replay (2.763167ms)
+✔ independent recovery replay rejects an unauthored stored rate (0.400417ms)
+✔ recovery schema trust-boundary literals (1.246584ms)
+✔ entity-resource overrides match literals and independent preconditions reject false success (1.037917ms)
+✔ NPC HP schema trust-boundary literals (0.431083ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.529458
+✖ encounter and bound job composition matches portable literal rows (5.393291ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.237542ms)
+✔ independent replay verifies every written lifecycle row (0.378084ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 118.879667
+
+✖ failing tests:
+
+test at kernel/ts/test/encounter_composition.test.ts:15:1
+✖ encounter and bound job composition matches portable literal rows (5.393291ms)
+  AssertionError [ERR_ASSERTION]: cancel-wrong-encounter
+  + actual - expected
+  
+    {
+  +   changes: [
+  +     {
+  +       target: {
+  +         job_id: '00000007-0000-4000-8000-000000000000',
+  +         kind: 'job'
+  +       },
+  +       value: {
+  +         due_time: 20,
+  +         encounter_id: '00000006-0000-4000-8000-000000000000',
+  +         job: {
+  +           cartridge_id: 'lantern',
+  +           cartridge_version: '0.1.0',
+  +           key: 'wolf',
+  +           kind: 'npc'
+  +         },
+  +         status: 'cancelled'
+  +       }
+  -   fault: {
+  -     code: 'precondition_failed',
+  -     kind: 'fault',
+  -     target: {
+  -       job_id: '00000007-0000-4000-8000-000000000000',
+  -       kind: 'job'
+        }
+  +   ]
+  -   }
+    }
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/encounter_composition.test.ts:19:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: { changes: [ [Object] ] },
+    expected: { fault: { kind: 'fault', code: 'precondition_failed', target: [Object] } },
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

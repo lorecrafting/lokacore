@@ -1,0 +1,54 @@
+✔ frozen M4 A runs through real Attack and two trusted elapsed proposals (5.871291ms)
+✔ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (2.92125ms)
+✔ frozen M4 C dies sleeping on the rat-first round and returns the same body (3.116917ms)
+✔ Flee and directional move share one multiplied payment and future cancellation (2.660667ms)
+✔ a surviving sleeper wakes before its remaining opportunity, other positions skip (5.318458ms)
+✖ accuracy20 misses on roll20; endpoint chances still draw accuracy (3.040917ms)
+✔ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.353959ms)
+✔ admission refuses absent, dead, sanctuary, nonstanding and already engaged participants (2.589542ms)
+✔ eight raw draws including damage rejections exhaust the whole round atomically (0.98625ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (42.269916ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.6585ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (17.88925ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (24.645125ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (19.054541ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 13
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 281.289916
+
+✖ failing tests:
+
+test at kernel/ts/test/combat.test.ts:123:1
+✖ accuracy20 misses on roll20; endpoint chances still draw accuracy (3.040917ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      9,
+  +   5,
+  -   6,
+      [
+        12295,
+        1029,
+        1029,
+        25165824
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:139:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 9, 5, [ 12295, 1029, 1029, 25165824 ] ],
+    expected: [ 9, 6, [ 12295, 1029, 1029, 25165824 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

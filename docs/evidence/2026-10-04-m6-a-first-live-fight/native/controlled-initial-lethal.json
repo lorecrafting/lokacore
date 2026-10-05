@@ -1,0 +1,19 @@
+{
+  "fixture": "normal save initialized by actual local authority then controlled initial rows; active mode uses actual Attack plus declared seeded sleeping state, not an admitted Sleep command",
+  "content_hash": "ee1a72f0b8d681d8521b64be5bb2b35cd1ba9e8699cbff21ddad2ecf92d98867",
+  "clock": 64800,
+  "rng": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "hp": 1,
+  "ma": 7,
+  "position": "standing",
+  "room": "lantern_cellar",
+  "held": "trunk",
+  "worn": "wool_cloak",
+  "nested": "lantern inside trunk",
+  "recovery": "unchanged production rates"
+}

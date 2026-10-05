@@ -1,0 +1,27 @@
+[
+  {
+    "mutation": "biased-first-exit",
+    "old": 0,
+    "new": 1
+  },
+  {
+    "mutation": "drop-selection-rng",
+    "old": 0,
+    "new": 1
+  },
+  {
+    "mutation": "skip-composed-policy",
+    "old": 0,
+    "new": 1
+  },
+  {
+    "mutation": "ignore-locked-exit",
+    "old": 0,
+    "new": 1
+  },
+  {
+    "mutation": "allow-chosen-move",
+    "old": 0,
+    "new": 1
+  }
+]

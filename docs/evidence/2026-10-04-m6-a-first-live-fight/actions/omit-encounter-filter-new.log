@@ -1,0 +1,82 @@
+✖ encounter ActionSet filters ordinary raw verbs and aliases while retaining harmless inspection (4.288083ms)
+✖ pending choices disappear during combat and ordinary actions return after Flee or death (7.131833ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 167.675
+
+✖ failing tests:
+
+test at kernel/ts/test/combat_actions.test.ts:40:1
+✖ encounter ActionSet filters ordinary raw verbs and aliases while retaining harmless inspection (4.288083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'attack',
+  +   'choose',
+  +   'close',
+  +   'drop',
+      'flee',
+  +   'give',
+  +   'lock',
+      'look',
+  +   'move',
+  +   'open',
+  +   'remove',
+  +   'rest',
+      'scan',
+  +   'sit',
+  +   'sleep',
+      'stand',
+  +   'take',
+  +   'talk',
+  +   'unlock',
+  +   'wear'
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat_actions.test.ts:43:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [
+      'attack', 'choose', 'close',
+      'drop',   'flee',   'give',
+      'lock',   'look',   'move',
+      'open',   'remove', 'rest',
+      'scan',   'sit',    'sleep',
+      'stand',  'take',   'talk',
+      'unlock', 'wear'
+    ],
+    expected: [ 'flee', 'look', 'scan', 'stand' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/combat_actions.test.ts:96:1
+✖ pending choices disappear during combat and ordinary actions return after Flee or death (7.131833ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat_actions.test.ts:109:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

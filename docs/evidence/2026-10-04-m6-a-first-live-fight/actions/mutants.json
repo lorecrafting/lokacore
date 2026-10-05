@@ -1,0 +1,12 @@
+[
+  {
+    "mutation": "omit-encounter-filter",
+    "old": 0,
+    "new": 1
+  },
+  {
+    "mutation": "leak-pending-choice",
+    "old": 0,
+    "new": 1
+  }
+]

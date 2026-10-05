@@ -1,0 +1,29 @@
+✔ frozen M4 A runs through real Attack and two trusted elapsed proposals (10.049458ms)
+✔ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (7.964584ms)
+✔ frozen M4 C dies sleeping on the rat-first round and returns the same body (4.778167ms)
+✔ one-exit Flee pays once and cancels its future round without drawing (2.661084ms)
+✔ a surviving sleeper wakes before its remaining opportunity, other positions skip (7.850709ms)
+✔ accuracy20 misses on roll20; endpoint chances still draw accuracy (4.755209ms)
+✔ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.60025ms)
+✔ admission refuses absent, dead, sanctuary, nonstanding and already engaged participants (2.877417ms)
+✔ eight raw draws including damage rejections exhaust the whole round atomically (1.098167ms)
+✔ credit delivery rejects counterfeit attribution and missing fatal/corpse provenance (10.171042ms)
+✔ five distinct preacceptance lethal occurrences set exactly five facts without quest rewards (11.914292ms)
+✔ two-exit Flee selects canonical north/west using independent seeded answers (10.918958ms)
+✔ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (6.167166ms)
+✔ active combat exposes one directionless Flee and refuses directional movement (1.404667ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (46.225916ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.8485ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (18.191833ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (24.8835ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (19.413458ms)
+✔ input at the due deadline settles lethal combat before attempting Flee (8.140875ms)
+✔ random Flee destination and RNG reopen and replay one SQLite receipt (7.74025ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 401.698459

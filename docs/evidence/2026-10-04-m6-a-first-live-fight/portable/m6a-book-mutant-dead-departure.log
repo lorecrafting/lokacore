@@ -1,0 +1,89 @@
+(node:42542) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/c1.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exit door actions keep their direction and remain separate from walking (1.284916ms)
+✔ worn items and reachable nested contents offer actions on their own ids (0.245791ms)
+✔ same-room actions retain projected item pages and remove pages hidden by a closed lid (0.175708ms)
+✔ chapter changes queue one title which survives scene lines and acknowledgement (0.102083ms)
+✔ band phrases and the hp accessibility label use the cartridge catalog (0.126916ms)
+✔ scene Continue and position verbs have dedicated groups (0.080708ms)
+(node:42543) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/model.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ exits, the look title, place actions and a thing page come from the right buttons (0.942834ms)
+✔ position cycling skips absent offers and retains the offered freshness (0.111375ms)
+✔ a touch link is shown as its label (0.121708ms)
+✔ a choice's answers and Close are their own group, not place actions (0.100709ms)
+✔ the character label says the hp band and no other (0.124375ms)
+✔ the absent-speaker line shows only when the speaker is not here (0.107625ms)
+✔ a restored choice opens its actual speaker detail or retained conversation (0.125167ms)
+✔ the ending line shows once every quest is over (0.111834ms)
+✔ a closed exit's log line and a capitalised title (0.113833ms)
+✔ a move refused at 0 MV says the body is too exhausted (0.110084ms)
+✔ a hint survives a store that throws, for this session (0.117166ms)
+✔ the status line shows the double hour as its earthly branch (0.15725ms)
+(node:42544) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (1.56025ms)
+✔ journal cues belong only to changed NPC histories (0.246666ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.114583ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.163375ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.125583ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.121958ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.067209ms)
+✔ the log stops growing in one room, its last line the latest answer (0.982625ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.085833ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110.068417
+(node:42546) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/combat.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ threat and complete Stand/Flee controls remain usable on every ordinary page (4.440208ms)
+✖ committed opponent death narrates once through the existing subscription (0.78875ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 269.209125
+
+✖ failing tests:
+
+test at mobile/app/book/combat.test.ts:146:1
+✖ committed opponent death narrates once through the existing subscription (0.78875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+  +   'a marsh rat leaves.',
+      'The marsh rat falls.'
+    ]
+  
+      at TestContext.<anonymous> (file://<worktree>/mobile/app/book/combat.test.ts:159:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'a marsh rat leaves.', 'The marsh rat falls.' ],
+    expected: [ 'The marsh rat falls.' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

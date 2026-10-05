@@ -1,0 +1,56 @@
+✔ composition known answers (9.629667ms)
+✔ invariant checks known answers, a holding and a violated case per invariant checked in both kernels (0.4355ms)
+✔ invalid successful deltas fail their independent precondition check (0.261666ms)
+✔ containment checks deep chains, untouched cycles and untouched capacity (13.497417ms)
+✔ limits are named in the composition profile order (0.500958ms)
+✔ composition-profile budgets: at the limit composes with the expected changes, one over faults (12.905958ms)
+✔ a malformed barrier state faults precondition_failed (0.245292ms)
+✔ opted recovery literal rows and independent metadata replay (2.334083ms)
+✔ independent recovery replay rejects an unauthored stored rate (0.3495ms)
+✔ recovery schema trust-boundary literals (1.178625ms)
+✔ entity-resource overrides match literals and independent preconditions reject false success (0.8445ms)
+✔ NPC HP schema trust-boundary literals (0.390709ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 154.845125
+✔ encounter and bound job composition matches portable literal rows (4.00075ms)
+✔ independent encounter preconditions reject matching counterfeit success (0.203125ms)
+✔ independent replay verifies every written lifecycle row (0.38325ms)
+✔ cancelling a future job frees one slot in a full queue (3.734084ms)
+✖ resource delivery times settle literal rows and reject counterfeit preconditions (1.574958ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 110.718208
+
+✖ failing tests:
+
+test at kernel/ts/test/encounter_composition.test.ts:102:1
+✖ resource delivery times settle literal rows and reject counterfeit preconditions (1.574958ms)
+  AssertionError [ERR_ASSERTION]: before-base
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file://<worktree>/kernel/ts/test/encounter_composition.test.ts:119:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,21 @@
+✔ encounter ActionSet filters ordinary raw verbs and aliases while retaining harmless inspection (9.230458ms)
+✔ pending choices disappear during combat and ordinary actions return after Flee or death (6.905417ms)
+✔ two-exit Flee selects canonical north/west using independent seeded answers (7.406917ms)
+✔ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (3.767208ms)
+✔ active combat exposes one directionless Flee and refuses directional movement (1.306958ms)
+✔ random Flee candidate policies share the command query budget and fault atomically (4.744209ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (44.61575ms)
+✔ a real rat kill commits corpse and preacceptance credit together and reopens exactly (11.759333ms)
+✔ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (20.591292ms)
+✔ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (29.092625ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (23.714958ms)
+✔ input at the due deadline settles lethal combat before attempting Flee (8.487042ms)
+✔ random Flee destination and RNG reopen and replay one SQLite receipt (8.165084ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 359.962667

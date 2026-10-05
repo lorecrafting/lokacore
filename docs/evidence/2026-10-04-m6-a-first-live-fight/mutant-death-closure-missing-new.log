@@ -1,0 +1,176 @@
+✔ frozen M4 A runs through real Attack and two trusted elapsed proposals (6.144ms)
+✖ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (3.407459ms)
+✖ frozen M4 C dies sleeping on the rat-first round and returns the same body (3.454333ms)
+✔ Flee and directional move share one multiplied payment and future cancellation (3.149ms)
+✔ a surviving sleeper wakes before its remaining opportunity, other positions skip (5.802375ms)
+✔ accuracy20 misses on roll20; endpoint chances still draw accuracy (3.121708ms)
+✔ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.150208ms)
+✔ admission refuses absent, dead, sanctuary, nonstanding and already engaged participants (2.551834ms)
+✔ eight raw draws including damage rejections exhaust the whole round atomically (1.047833ms)
+✔ real SQLite reopens Attack and both M4 A rounds with original receipt replay (43.396458ms)
+✖ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.071666ms)
+✖ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (9.1815ms)
+✖ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (25.898416ms)
+✔ saved encounter corruption refuses before exposing play without repairing rows (19.416209ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 9
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 277.612167
+
+✖ failing tests:
+
+test at kernel/ts/test/combat.test.ts:33:1
+✖ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (3.407459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   id: 'af0fb296-b16c-8d98-b3d3-e010266cfaf3',
+  +   row: {
+  +     body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +     character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
+  +     job_id: 'd22433c6-4ade-84e5-8287-2a52f883c8f3',
+  +     npc_id: '251e7a71-b5ad-8d22-858b-533e52cc5415',
+  +     room_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +     round: 2,
+  +     status: 'open'
+  +   }
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:41:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { id: 'af0fb296-b16c-8d98-b3d3-e010266cfaf3', row: { character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9', body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157', npc_id: '251e7a71-b5ad-8d22-858b-533e52cc5415', room_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1', job_id: 'd22433c6-4ade-84e5-8287-2a52f883c8f3', status: 'open', round: 2 } },
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/combat.test.ts:54:1
+✖ frozen M4 C dies sleeping on the rat-first round and returns the same body (3.454333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   id: 'af0fb296-b16c-8d98-b3d3-e010266cfaf3',
+  +   row: {
+  +     body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +     character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
+  +     job_id: 'c3aa07af-7dd1-8bbb-897c-e2fc36b3710d',
+  +     npc_id: 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2',
+  +     room_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +     round: 3,
+  +     status: 'open'
+  +   }
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file://<repo>/kernel/ts/test/combat.test.ts:69:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { id: 'af0fb296-b16c-8d98-b3d3-e010266cfaf3', row: { character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9', body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157', npc_id: 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2', room_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1', job_id: 'c3aa07af-7dd1-8bbb-897c-e2fc36b3710d', status: 'open', round: 3 } },
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/combat.test.ts:91:1
+✖ a real rat kill commits corpse and preacceptance credit together and reopens exactly (10.071666ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      false,
+      false,
+  -   true,
+      false,
+      false,
+  +   false
+    ]
+  
+      at TestContext.<anonymous> (file://<repo>/mobile/authority/local-story/combat.test.ts:98:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ false, false, false, false, false ],
+    expected: [ false, false, true, false, false ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/combat.test.ts:120:1
+✖ actual lethal combat returns empty-handed and ordinary six-exit journey recovers corpse roots (9.1815ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + {
+  +   id: '5a23b0b2-b165-8b36-9476-3b46d43d3dfb',
+  +   row: {
+  +     body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  +     character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
+  +     job_id: '28524a4a-d895-863e-bd26-4b8b45dbd2f3',
+  +     npc_id: 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2',
+  +     room_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1',
+  +     round: 2,
+  +     status: 'open'
+  +   }
+  + }
+  - undefined
+  
+      at TestContext.<anonymous> (file://<repo>/mobile/authority/local-story/combat.test.ts:147:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: { id: '5a23b0b2-b165-8b36-9476-3b46d43d3dfb', row: { character_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9', body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157', npc_id: 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2', room_id: 'd530207e-b845-8be5-9d53-b44b2cf5d8a1', job_id: '28524a4a-d895-863e-bd26-4b8b45dbd2f3', status: 'open', round: 2 } },
+    expected: undefined,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at mobile/authority/local-story/combat.test.ts:182:1
+✖ genuine FULL and both unknown-COMMIT outcomes fence a real fatal round (25.898416ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(durable)
+  
+      at TestContext.<anonymous> (file://<repo>/mobile/authority/local-story/combat.test.ts:211:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

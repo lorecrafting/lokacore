@@ -1,0 +1,75 @@
+✔ room is focused while Map retains directions and every detail returns to the world (57.547584ms)
+✔ a postcommit narration read fault preserves the saved result and clears retry context (22.075625ms)
+✔ NPC history has distinct journal events and one confirmed Leave after the scrolling log (39.332625ms)
+✔ only World position taps directly cycle the offered states with captured freshness (20.37925ms)
+✔ an NPC choice retried from the world keeps its result in the original detail (13.582833ms)
+✔ only confirmed pickup returns World, including a retry from another page (19.878125ms)
+✔ touch omits incomplete Give but the complete item and recipient command remains valid (14.433667ms)
+✔ inventory Drop returns World with one named event only after confirmation (18.472333ms)
+✔ other item actions retain their detail and World consequences (8.526458ms)
+✔ elapsed confirmed boundaries retain Conversation and chapter acknowledgment without page flips (18.250875ms)
+✔ delayed Take returns once with its original item name after a conflicting tap (24.576375ms)
+✔ delayed actual quest completion adds one authored result and Journal updated in original history (23.191834ms)
+✔ actual trunk detail explains refused Take and restores its button after Remove then Drop (40.859042ms)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (2.672833ms)
+✔ journal cues belong only to changed NPC histories (0.296375ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.134416ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.202875ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.136875ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.161375ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.084208ms)
+✔ the log stops growing in one room, its last line the latest answer (1.175875ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.106ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 657.190458
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (1.597583ms)
+✔ journal cues belong only to changed NPC histories (0.258042ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.120083ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.184791ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.128917ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.127542ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.070166ms)
+✔ the log stops growing in one room, its last line the latest answer (1.049083ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.139959ms)
+✖ a narration recovery fault holds combat results while their line routing is unavailable (0.875625ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 83.032541
+
+✖ failing tests:
+
+test at ../../../../private<mutation-tree>/mobile/app/book/presenter.test.ts:281:1
+✖ a narration recovery fault holds combat results while their line routing is unavailable (0.875625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'strike'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///private<mutation-tree>/mobile/app/book/presenter.test.ts:303:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'strike' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

@@ -1,0 +1,33 @@
+(node:54313) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/combat.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ combat page lists offered controls vertically below history in one scroll (5.019542ms)
+✔ committed opponent death narrates once through the existing subscription (0.252416ms)
+✔ confirmed encounter foregrounds another page and closure or death restores the World (6.487458ms)
+✔ Attack opens its committed page; pending and refused Flee stay until committed escape (2.950625ms)
+✔ reopening an encounter restores the combat page and last committed narration (0.389959ms)
+✔ reopening after escape or either death never restores combat into the World log (1.268208ms)
+✔ combat receipt history is once-only when completion follows an already displayed state (0.190542ms)
+(node:54314) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<worktree>/mobile/app/book/presenter.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <worktree>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (1.768541ms)
+✔ journal cues belong only to changed NPC histories (0.267833ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.126584ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.193334ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.130208ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.128458ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.073333ms)
+✔ the log stops growing in one room, its last line the latest answer (1.359708ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.374708ms)
+✔ a narration recovery fault holds the committed lines until their routing can be read (0.348958ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 299.286542

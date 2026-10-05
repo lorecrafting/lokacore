@@ -1,0 +1,147 @@
+✔ the loader rejects an enum fact default outside its values (10.356875ms)
+✔ the loader rejects a bounded integer fact default outside its bounds (11.070083ms)
+✔ the loader rejects an invalid v2 fact default (27.805875ms)
+✔ the known-answer cartridge loads and its hash is the fixture literal (1.747334ms)
+✔ corpus not_decodable: yields exactly its hand-written diagnostic (0.545625ms)
+✔ corpus duplicate_key: yields exactly its hand-written diagnostic (0.256833ms)
+✔ corpus unknown_format: yields exactly its hand-written diagnostic (0.295583ms)
+✔ corpus no_cartridge: yields exactly its hand-written diagnostic (0.065375ms)
+✔ corpus unknown_field: yields exactly its hand-written diagnostic (0.731083ms)
+✔ corpus schema_violation: yields exactly its hand-written diagnostic (0.766083ms)
+✔ corpus schema_violation_index: yields exactly its hand-written diagnostic (0.874417ms)
+✔ corpus kind_mismatch: yields exactly its hand-written diagnostic (1.899209ms)
+✔ corpus hash_mismatch: yields exactly its hand-written diagnostic (0.503833ms)
+✔ corpus key_cartridge_id: yields exactly its hand-written diagnostic (0.609042ms)
+✔ corpus key_cartridge_version: yields exactly its hand-written diagnostic (1.352208ms)
+✔ corpus key_key: yields exactly its hand-written diagnostic (0.796833ms)
+✔ corpus lock_missing_required: yields exactly its hand-written diagnostic (0.720083ms)
+✔ corpus lock_extra: yields exactly its hand-written diagnostic (1.480958ms)
+✔ corpus command_owner_absent: yields exactly its hand-written diagnostic (1.463917ms)
+✔ corpus unknown_command: yields exactly its hand-written diagnostic (0.694708ms)
+✔ corpus policy_op_owner_absent: yields exactly its hand-written diagnostic (0.857666ms)
+✔ corpus stage_list_order: yields exactly its hand-written diagnostic (0.728167ms)
+✔ corpus capability_not_installed: yields exactly its hand-written diagnostic (0.658167ms)
+✔ corpus capability_version_not_installed: yields exactly its hand-written diagnostic (0.434709ms)
+✔ corpus kernel_api_at_below: yields exactly its hand-written diagnostic (0.460917ms)
+✔ corpus kernel_api_under: yields exactly its hand-written diagnostic (0.518333ms)
+✔ corpus kernel_api_numeric: yields exactly its hand-written diagnostic (0.463917ms)
+✔ corpus rule_ir_unsupported: yields exactly its hand-written diagnostic (0.440958ms)
+✔ corpus content_schema_unsupported: yields exactly its hand-written diagnostic (2.5855ms)
+✔ corpus client_feature_missing: yields exactly its hand-written diagnostic (0.486459ms)
+✔ corpus two_faults_schema_hash: yields exactly its hand-written diagnostic (0.380709ms)
+✔ corpus two_faults_hash_keys: yields exactly its hand-written diagnostic (0.307709ms)
+✔ corpus two_faults_lock_installed: yields exactly its hand-written diagnostic (1.254458ms)
+✔ corpus band_table_unsorted: yields exactly its hand-written diagnostic (1.888833ms)
+✔ corpus band_table_gap: yields exactly its hand-written diagnostic (0.685458ms)
+✔ corpus band_table_duplicate_cut: yields exactly its hand-written diagnostic (0.622042ms)
+✔ corpus band_table_duplicate_key: yields exactly its hand-written diagnostic (0.869666ms)
+✔ corpus band_text_missing: yields exactly its hand-written diagnostic (0.635375ms)
+✔ corpus move_cost_unknown_pool: yields exactly its hand-written diagnostic (1.05825ms)
+✔ corpus move_cost_zero: yields exactly its hand-written diagnostic (0.831208ms)
+✔ corpus band_cut_over_100: yields exactly its hand-written diagnostic (0.526583ms)
+✔ corpus band_tone_unknown: yields exactly its hand-written diagnostic (0.475625ms)
+✔ corpus band_table_empty: yields exactly its hand-written diagnostic (0.672292ms)
+✔ corpus attribute_unlocked: yields exactly its hand-written diagnostic (1.312917ms)
+✔ corpus stat_compare_unlocked: yields exactly its hand-written diagnostic (0.9275ms)
+✔ corpus resource_compare_unlocked: yields exactly its hand-written diagnostic (1.600833ms)
+✔ corpus stat_compare_unresolved: yields exactly its hand-written diagnostic (1.608625ms)
+✔ corpus resource_compare_unresolved: yields exactly its hand-written diagnostic (0.914084ms)
+✔ corpus attribute_key_mismatch: yields exactly its hand-written diagnostic (0.749625ms)
+✔ corpus slot_unlocked: yields exactly its hand-written diagnostic (1.012792ms)
+✔ corpus slot_finger: yields exactly its hand-written diagnostic (0.800042ms)
+✔ corpus journal_missing_stage_text: yields exactly its hand-written diagnostic (2.402834ms)
+✔ corpus journal_missing_outcome_text: yields exactly its hand-written diagnostic (1.58675ms)
+✔ corpus journal_missing_failed: yields exactly its hand-written diagnostic (1.268291ms)
+✔ corpus chapters_missing_text: yields exactly its hand-written diagnostic (1.7655ms)
+✔ corpus chapters_missing_point: yields exactly its hand-written diagnostic (1.408458ms)
+✔ corpus chapters_missing_outcome: yields exactly its hand-written diagnostic (1.644292ms)
+✔ corpus chapters_opening_point: yields exactly its hand-written diagnostic (1.4795ms)
+✔ corpus chapters_opening_outcome: yields exactly its hand-written diagnostic (1.438583ms)
+✔ corpus chapters_later_missing_point: yields exactly its hand-written diagnostic (1.571083ms)
+✔ corpus chapters_ambiguous: yields exactly its hand-written diagnostic (1.568083ms)
+✔ corpus scene_unknown_step: yields exactly its hand-written diagnostic (1.4525ms)
+✔ corpus scene_missing_ack: yields exactly its hand-written diagnostic (1.717584ms)
+✔ corpus scene_restricted_control: yields exactly its hand-written diagnostic (1.3245ms)
+✔ corpus scene_unknown_story_point: yields exactly its hand-written diagnostic (1.382959ms)
+✔ corpus scene_unknown_outcome: yields exactly its hand-written diagnostic (1.448042ms)
+✔ corpus scene_missing_text: yields exactly its hand-written diagnostic (1.372875ms)
+✔ corpus scene_duplicate_trigger: yields exactly its hand-written diagnostic (1.559625ms)
+✔ corpus scene_undeclared: yields exactly its hand-written diagnostic (1.310125ms)
+✔ corpus scene_definition_key: yields exactly its hand-written diagnostic (1.253ms)
+✔ corpus scene_fact_changed: yields exactly its hand-written diagnostic (1.686125ms)
+✔ corpus scene_fact_missing: yields exactly its hand-written diagnostic (1.465333ms)
+✔ corpus scene_recipe_write: yields exactly its hand-written diagnostic (1.48125ms)
+✔ corpus scene_reaction_write: yields exactly its hand-written diagnostic (1.602084ms)
+✔ corpus scene_dialogue_write: yields exactly its hand-written diagnostic (1.401084ms)
+✔ the byte cap applies to the raw length before decoding (0.771583ms)
+✔ artifact bytes that are not strict UTF-8 are INVALID_JSON (0.203375ms)
+node:internal/modules/esm/resolve:272
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '<repo>/kernel/ts/src/mechanics/movement/sequence.ts' imported from <repo>/kernel/ts/src/mechanics/combat/rule.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:272:11)
+    at moduleResolve (node:internal/modules/esm/resolve:879:10)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:381:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file://<repo>/kernel/ts/src/mechanics/movement/sequence.ts'
+}
+
+Node.js v24.21.0
+✖ kernel/ts/test/cartridge_items.test.ts (198.642708ms)
+✔ the v2 known answer loads with its fixture hash (6.211875ms)
+✔ an exit or entry naming no room of this cartridge is UNRESOLVED_REFERENCE (4.843208ms)
+✔ a room text key missing from the catalog is UNRESOLVED_REFERENCE (0.981792ms)
+✔ rooms without movement in the lock are UNDECLARED_CAPABILITY (1.344166ms)
+✔ a room map key that disagrees with the room's key is ARTIFACT_DEFINITION_KEY_MISMATCH (1.198792ms)
+✔ a v1 artifact carrying rooms is UNKNOWN_FIELD (0.935292ms)
+✔ an action text key missing from the catalog is UNRESOLVED_REFERENCE (1.13875ms)
+✔ the details known answer loads with its fixture hash (2.448292ms)
+✔ a detail's text key missing from the catalog is UNRESOLVED_REFERENCE (1.136792ms)
+✔ a detail whose first alias is shared or untypable is UNREACHABLE_DETAIL (3.311166ms)
+node:internal/modules/esm/resolve:272
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '<repo>/kernel/ts/src/mechanics/movement/sequence.ts' imported from <repo>/kernel/ts/src/mechanics/combat/rule.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:272:11)
+    at moduleResolve (node:internal/modules/esm/resolve:879:10)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:705:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:725:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:763:56)
+    at #resolve (node:internal/modules/esm/loader:687:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:607:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:276:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:381:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file://<repo>/kernel/ts/src/mechanics/movement/sequence.ts'
+}
+
+Node.js v24.21.0
+✖ kernel/ts/test/death_content.test.ts (166.638791ms)
+ℹ tests 89
+ℹ suites 0
+ℹ pass 87
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 292.775083
+
+✖ failing tests:
+
+test at kernel/ts/test/cartridge_items.test.ts:1:1
+✖ kernel/ts/test/cartridge_items.test.ts (198.642708ms)
+  'test failed'
+
+test at kernel/ts/test/death_content.test.ts:1:1
+✖ kernel/ts/test/death_content.test.ts (166.638791ms)
+  'test failed'

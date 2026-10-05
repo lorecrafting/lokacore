@@ -1,0 +1,62 @@
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (1.626542ms)
+✔ journal cues belong only to changed NPC histories (0.255291ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.117667ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.186792ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.123958ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.121958ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.068125ms)
+✔ the log stops growing in one room, its last line the latest answer (1.042292ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.093917ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 85.601792
+✔ pending and refused Take/Drop/Leave retain detail routing and unchanged custody (1.645125ms)
+✔ journal cues belong only to changed NPC histories (0.244375ms)
+✔ recovery removes the current heading but retains an unclassified consequence (0.119958ms)
+✔ confirmed room change clears old history before adding new authored consequences (0.178166ms)
+✔ World omits the routine Close fallback while retaining authored consequences (0.135375ms)
+✔ a restored committed narration is not duplicated by its pending receipt retry (0.121125ms)
+✔ a move rejected for want of MV says the body is too exhausted (0.0675ms)
+✔ the log stops growing in one room, its last line the latest answer (1.048833ms)
+✔ the save-error line says a pending start over in words and shows any other message (0.088334ms)
+✖ a narration recovery fault holds the committed lines until their routing can be read (0.798166ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 85.397041
+
+✖ failing tests:
+
+test at ../../../../private<mutation-tree>/book/presenter.test.ts:281:1
+✖ a narration recovery fault holds the committed lines until their routing can be read (0.798166ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'strike'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///private<mutation-tree>/book/presenter.test.ts:298:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'strike' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

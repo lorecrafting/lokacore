@@ -1,0 +1,20 @@
+✔ frozen M4 A runs through real Attack and two trusted elapsed proposals (7.269542ms)
+✔ frozen M4 B closes before retaliation and credits the exact third rat at proposal.now (3.65225ms)
+✔ frozen M4 C dies sleeping on the rat-first round and returns the same body (5.365459ms)
+✔ one-exit Flee pays once and cancels its future round without drawing (2.076875ms)
+✔ a surviving sleeper wakes before its remaining opportunity, other positions skip (6.952625ms)
+✔ accuracy20 misses on roll20; endpoint chances still draw accuracy (4.967791ms)
+✔ production hour-boundary recovery precedes damage and Flee preserves the remainder (2.635333ms)
+✔ admission refuses absent, dead, sanctuary, nonstanding and already engaged participants (3.047708ms)
+✔ eight raw draws including damage rejections exhaust the whole round atomically (1.159084ms)
+✔ two-exit Flee selects canonical north/west using independent seeded answers (9.172459ms)
+✔ blocked exits are excluded; zero exits or insufficient fare refuse without a draw (6.715833ms)
+✔ active combat exposes one directionless Flee and refuses directional movement (1.352875ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 235.8035
