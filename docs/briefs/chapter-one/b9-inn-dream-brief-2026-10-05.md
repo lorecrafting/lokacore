@@ -1,40 +1,161 @@
-# B9 — S10 actual inn Rest and acknowledged dream
+# B9 — S10 Lantern Rest, resumable dream and acknowledged memory
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted planning brief; source pending.** Row B9 of the
+[public plan](../../MISSING-CHILD-PLAN.md), lift0.8–1.0. Planning branch
+`planning/b9-lantern-dream`, local base
+`10b023e827cba4f056aa82870764afb07236938c`. A3 is locally integrated and independently
+approved at chapter0.0.17/API1.15; the inspected current chapter is0.0.18/API1.16
+after B3. B8's [approved plan](../../reviews/2026-10-05-b8-maud-services-plan-review.md)
+is not source implementation. Actual B8 source/review head, B9 release/API/hash/IDs,
+implementation head/PR and review verdicts: null. Re-pin integrated A3/B8 source,
+reviews and known answers before assignment. Implementation branch
+`chapter-1/b9-inn-dream` is not created. Docs only; no merge/push/play/save claim.
 
-Provisional PM brief, 2026-10-05, for [public plan](../../MISSING-CHILD-PLAN.md) row B9. **Provisional until B8 room policy and A3 acknowledged-consequence/scene identity merge, PM adopts Rest/overlay/export contracts, and actual heads re-pin.** Reading main `0fbd2847` contains only modal current_world scenes, not this overlay. New release/API/hash/IDs/head/PR/dependency heads: null. Suggested branch `chapter-1/b9-inn-dream`, not created. Browser-first existing Book; real SQLite/shared engine/headless sim retained, native proof deferred. No preview/device/owner-save work here.
+## Consumer and governing clauses
 
-## Goal and governing clauses
+B9: actual paid Inn Rooms Rest opens a resumable dream and final acknowledgement
+commits its once-only local memory. Original Maud's B8 Room purchase grants
+`lantern_bed_paid`; the real bed detail consumes entitlement. A3 supplies strict
+shown-line acknowledgement, final consequence and receipt-backed save patterns.
+No S1, Q2/Q3 ending, clock boundary or waiting prerequisite is added. S10 is
+optional for the player's Green finale, while E3 must prove all ten quest paths.
 
-A real first qualifying Rest in Inn Rooms arms S10 and a resumable dream. Follow the fox or wake through a bounded presentation choice; final acknowledgement grants `player.dream_seen`/declared memory exactly once. No body/map/inventory copy or spatial dream instance. S10 remains optional for chapter completion.
+The [PM adoption](../../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
+selects [mechanics](../../system/mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract),
+[declarations](../../system/cartridge.md#b9-lantern-dream-declarations),
+[composition](../../system/protocol.md#b9-rest-occurrence-and-dream-composition),
+[save](../../system/save.md#b9-dream-recovery) and
+[Book](../../system/book-ui.md#b9-bed-and-resumable-dream-details).
+Also govern position@1, scene@1, quest@1, reaction@1, ActionSet/admission,
+Commit/fence/reconcile, live freshness and
+[composition](../../system/architecture.md#building-mechanics-by-composition).
+Archived00a §§7/9 and primitive21 §19 supply consumer direction, not an installed
+overlay/choice engine. Reading-time/no-wait, world-parameters, forward-development
+and free corpse-recovery rulings remain. Read AGENTS/WORKFLOW and lessons for
+mechanics/contracts/storage/mobile/evidence before relevant work.
 
-Amend active mechanics position@1/scene@1/quest@1/reaction and Chapters producer contract actually changed by A3; protocol event ownership/causal composition/ActionSet/GameView; cartridge source/compiler/loader; save scene/quest/export/reconcile/report semantics; Book Chapters/scenes/recovery/freshness. Intended sources: `docs/NEXT-MECHANICS.md` M20/M21-B, archived00a §§7(S10)/9 dream_of_the_fen, primitive21 §§19(SceneSpace)/20 and reconciliation Selected chapter amendments/Reachable death recovery and reading. Fixed-time/world-time-during-reading/no-wait/world-parameters and B8 explicit qualifying-bed policy govern.
+## Minimal composition record and scope
 
-## Selected candidate and exact scope
+- **Real consumer:** first accepted paid Rest in actual Inn Rooms; exact bed,
+  one S10 occurrence, one finite dream and memory-only acknowledged end.
+- **Shared reads:** command actor→bodyOf, life/prior position/current room,
+  paid entitlement, first-Rest fact, own S10, exact scene cursor/choice,
+  ordinary pending choice/modal/encounter and safe anchor. One command budget
+  spans event delivery, admission, choice and consequences before allocation.
+- **Writes/owners:** position owns recovery settlement/position and typed
+  `rested {body_id, room_id}` occurrence; reaction owns guarded first-Rest fact
+  and S10 activation; scene owns cursor/start/bounded choice/final memory and
+  typed S10 resolution; proposal owns ordering/conflicts/atomic rollback;
+  authority owns transaction/history/reconcile; presenter writes no game state.
+- **Missing consumed invariants:** causal paid Rest proof, anchored resumability,
+  scene-owned choice identity/branch persistence, no modal/ordinary-choice hijack,
+  no early memory and one final quest/memory commit. Use existing cursor facts,
+  choice rows and typed ops. A3 currently requires a story point for on_end;
+  extend it only for memory/quest consequences without inventing a report.
+- **Reuse and exceptions:** A3 bound Continue/end, ordinary B8 targetless Rest,
+  fact/quest/choice ownership, receipt replay and changed-row storage hold.
+  Presentation-only checkpoints are excluded from modal selection; scene choices
+  are excluded from ordinary dialogue-choice selection. They preserve independent
+  World/quest actions while dormant, rather than a general scheduler. Room/detail,
+  facts, exact quest, branches and text are cartridge declarations, never kernel
+  Lantern switches. Resume/Close are local routes, not gameplay commands.
 
-Use the actual accepted Rest producer. Installed `rested` is an outcome label, not a registered DomainEvent; do not trigger on screen/menu wording. Recommend position-owned `rested {room}` emitted at the actual accepted transition to resting, with command actor/body, actual room and causal occurrence, after prior-rate settlement/position assignment. Compiler/loader/event registry/producer ownership and root-to-event validation must agree. A3's generic event/consequence seam may instead already supply an equally explicit validated producer; re-pin it and avoid duplicating a mutation path.
+First qualifying Rest atomically sets `slept_at_lantern=true`, S10active and
+scene beat1, even if presentation must wait for the other interaction to close. It does not set
+`dream_seen`. The adopted beat/branch oracle is in the declaration clause:
+1→2→3→choice4→selected final5→ended. Follow/wake both yield `dream_seen=true`
+and S10resolved/acknowledged only at accepted final Continue. Close, legal travel,
+modal/combat interruption and same-body death/return preserve cursor/branch.
+Return legally to the bed and Resume; ordinary deadlines/jobs/resources continue.
 
-Only actor-owned accepted Rest at actual Inn Rooms with B8 entitlement and slept=false credits the first occurrence. Menu opening, rental purchase, Sleep elsewhere, Look/elapsed, forged event, another actor or an already-resting refused Rest gives no credit. In that same proposal activate this S10 occurrence, set slept_at_lantern=true and arm dream availability; **do not write dream_seen or export yet**. No retrospective credit for an ordinary unpaid Rest. A pending bell/finale cannot be silently replaced by the dream; a bounded armed flag allows later explicit Begin dream, not a general scene queue. PM adopts this producer/deferral policy before GO.
+Allowed source owners: chapter manifest/facts/quest/scenes/text/actual B8 bed;
+consumed command/action/event/scene/choice/cartridge/gameview/capability schemas
+and generated artifacts; source compiler short-ref expansion and loader links;
+position event, scene/reaction shared admission and typed consequence lowering;
+commands/invocation, scene/choice projection and actual view invariant;
+local-story history/save verifier and narration recovery; shared Book detail
+routing/freshness. Re-pin actual files after B8 source. No new foundation delta,
+state table, dependency, source room, item/resource/body/container writer, generic
+scene grammar, spatial overlay, ambience system, reward, story-point report,
+Realm/export transport, native build or owner-save work.
 
-SceneSpace is a presentation-only scoped overlay anchored at actual Inn Rooms. Reuse A3's durable beat identity, selected scene occurrence and acknowledged end/consequence guard. Three authored narrates, finite follow-fox/wake choice, authored branch presentation, final await_ack/end. A branch choice persists its identity but awards no memory; either branch reaches one same final dream-seen consequence unless PM explicitly changes the authored reward. New choice encoding must be bounded and used here, not a universal scene interpreter.
+## Independent literal acceptance and red controls
 
-World time/jobs/resources continue through all beats. Overlay changes no room, body, containers, item/resource balances, population, faction or quest other than the declared S10 consequence. Follow fox is presentation, never a world move. Close/suspend dream is immediately usable; visiting real World/delivery is possible during S2's timed window. Moving away or losing the required safe/room context suspends presentation rather than teleporting/fabricating an Inn Rooms backdrop; return legally and Resume at the saved beat. Harm/death closes active presentation and preserves the resumable checkpoint under an adopted policy; no immunity, re-running first Rest or premature export.
+Each new test names a distinct realistic break and uses independent literals.
+Apply its mutant to the old focused tests in that layer first; if an existing
+focused test detects it, reuse that proof instead of adding overlap. No source
+text matching, implementation-helper expected values or coverage-only cases.
+For controlled transition cases freeze elapsed input at0, with MV50/max100,
+standing and zero remainder; ordinary Rest settles without immediate MV gain.
 
-At final accepted acknowledgement, require current scene/occurrence/beat/actor/context, commit ended state, S10 resolved, dream_seen=true and the exact declared continuity export once using A3's acknowledged end seam. This is a memory consequence, **not an invented prologue_completed report**. Report only a separately declared story point. Replay/new stale Continue cannot advance an unseen beat or duplicate end; UI rendering/restore never writes. A different active scene cannot consume this dream acknowledgement.
+| Controlled input | Independent expected answer | Break/red control |
+|---|---|---|
+| Paid living actor at Inn Rooms, standing; slept/seen false | resting/MV50/clock0, slepttrue, S10active, beat1, seenfalse, no report | Rental/menu trigger or early memory |
+| Unpaid Rest, then pay while already resting | first Rest leaves slept/seenfalse and no S10; payment remains so; refused Rest remains so; Stand→Rest gives first row | Retrospective credit or same-position credit |
+| Paid Rest elsewhere; Sleep at Inn Rooms; another actor Rest | original actor slept/seenfalse, no S10/start | Wrong room/verb/actor producer |
+| Paid Rest with ordinary pending choice | slepttrue/S10active/beat1; original choice untouched; later safe Resume shows beat1 once | Choice overwritten or credit lost |
+| Continue beats1,2,3 | beat2,3,choice4; seenfalse, S10active | Opening narrations skipped/exported |
+| Choose follow_fox; separate controlled wake run | each exact branch persists, final5 shown, seenfalse/S10active | Choice grants memory or swaps branch |
+| Exact final5 acknowledgement on either branch | ended, seentrue, S10resolved/acknowledged, same branch; zero new reports | Missing/early/duplicate end consequence |
+| Fresh-id old beat2 Continue or old choice occurrence at final5 | refusal; final5/branch unchanged, seenfalse | Identity guard removed |
+| Exact final invocation replay, then new stale acknowledgement | replay same receipt; stale refuses; one terminal/memory | Duplicate end or replay redecides |
 
-## Literal behavioral proof and red controls
+Before/after every beat compare literal room/body and exact held/worn/nested IDs;
+no dream custody, position, pennies, HP/MV or clock edits beyond actual normal
+elapsed work. Observe atomically unchanged state/head/RNG on malformed refs,
+foreign anchor/actor/body, wrong branch/beat, budget/conflict and combat/modal
+admission. Plant body transfer and require the controlled invariance test red.
+Production safe-context checks use existing real encounters, not invented mocks.
 
-- Controlled actor at actual Inn Rooms, entitled, standing, slept=false/seen=false: actual Rest settles old recovery and sets positionresting/slept=true/S10active/dreamarmed, seen=false/export absent. Purchase/menu/Look/elapsed and Rest outside Inn Rooms leave both dream flags false. Already-resting Rest refuses and cannot create another occurrence.
-- Begin→line1→Continue→line2; cold reopen shows the same occurrence/line2 and no export. Choose follow-fox or wake persists exactly that branch and no authoritative movement/custody/resource changes attributable to overlay. Both fresh paths reach final awaiting acknowledgement with seen=false.
-- Final exact acknowledgement gives sceneended/S10resolved/seen=true and one memory. Retry/reopen stays one; a fresh-id stale line2 Continue while final line is visible refuses rather than ending it. Another scene/actor/context refuses without credit.
-- Close at line2, legally leave for public Aldric while S2 is deliverable, complete delivery, return and Resume line2. Controlled elapsed clock/recovery/jobs advance as in World. A real production combat/death journey after closing/suspending cannot change dream branch or duplicate first-Rest credit.
-- Compare literal room/body and exact held/worn/nested item IDs before/after each dream beat: no overlay-specific edit. Load every legal state—armed, shown beat, branch selected, suspended, returned, ended—and invoke its next actual consumer. Null scene/quest row, invalid branch/beat/anchor, missing end evidence or forged export yields typed save_corrupt, never skipped consequence/repair.
-- Plant rental-as-Rest, wrong room/actor, overlay body transfer, early seen/export, missing scene identity guard or second end reward; require focused red controls. Use actual failed and both unknown-COMMIT outcomes plus lost acknowledgement/receipt replay on first Rest, branch and final end. No OS-kill/native claim from browser refresh.
+Close at beat2, Stand and legally reach public Aldric while S2 remains deliverable,
+complete its real handoff, return and Resume beat2. Advance controlled1800 seconds
+while resting MV50/rate36/3600: MV68/clock1800; the dream stays at its prior beat.
+After closing, run actual lethal cellar combat→same-body chapel return→real
+possessions recovery→legal Inn Rooms return; entitlement, credit, branch/checkpoint
+survive. Use established production damage/recovery literals after dependency re-pin,
+not predicted results. Restore each mutated source and rerun focused checks.
 
-## Files, checks, review and stop
+Real SQLite reopen unpaid, paid-before-Rest, started/deferred, beats1/2/3,
+pendingchoice4, each final5 branch, away/ordinary choice/modal/encounter/returned,
+and ended; invoke each next real consumer. Alter one bounded saved truth or linked
+receipt at a time: entitlement/payment order, Rest root/type/actor/body/room,
+full refs/scopes/cause/correlation, S10 instance/state/outcome, cursor, ChoiceRow
+source/beat/anchor/continuation/branch, exact final event or early/missing memory.
+Require `save_corrupt` without rewriting. Later valid travel/death/elapsed/modal
+receipts remain lawful and cannot be compared to today's anchor as historical proof.
 
-Content manifest/catalog/facts/S10 quest/Inn Rooms bed and `scenes/dream_of_the_fen.json`; exact memory declaration once A3's merged contract is known. Position rule/shared helper, reaction/event consumer, scene rule/shared/overlay helper, quest lifecycle, view scene/actions/invariants, runtime state/apply/proposal only as required. Compiler `lib/loka/content` scene/quest/check helpers and TS `content/cartridge_scenes.ts`/quest loader. Protocol scene/event/command/choice/state/action/capability/GameView contracts actually needed; generated maps/fixtures. Host `store.ts`, scene/quest/continuity validation and Book scene/dream/recovery/freshness through GameSession. Out: spatial InstancePlan, copied actors/inventories, dreams as combat/map spaces, arbitrary interpreter/queue, player clock skips, native/Realm or frozen-fixture edits.
+Qualifying Rest, choice and final end each use real failed COMMIT,
+both unknown-COMMIT outcomes, lost acknowledgement and exact replay. Uncommitted
+reopens all old; committed reopens all new; input and elapsed stay fenced while
+unknown. Plant adoption-before-COMMIT and observe a focused red control. Reuse
+unchanged transaction proofs; add only missing integration regressions. Changed
+schema required/bound sweep and compiler/loader negative refs/capabilities must
+fail their planted omissions. Capture actual commands and failing assertions.
 
-Read contract/storage/mobile/evidence lessons. Focused Rest producer/compiler/loader/overlay/choice/ack/Book/S2 access/real SQLite tests, schema sweep, full `mise exec -- bin/check_all.sh`, exact-head CI with TypeScript headless sim. Later authorized browser Rest→dream→suspend/resume→both branch acknowledgements/refresh is interaction proof. Developer Ponytail Review/actual-diff correctness pass; fresh primary plus protocol/save opinion; Astra required for proposal changes. Re-derive current release pins independently.
+## Checks, reviews and stop triggers
 
-Stop for missing A3 stale-scene/end seam, a rental/Rest policy conflict, inaccessible S2 actions during dream, required world mutation/second body/spatial instance, native-dependent persistence, unsupported memory/report encoding, unsafe death checkpoint or frozen-fixture conflict. PM selects exact event/overlay/export encoding before GO; no invented commit, completion, review or native evidence.
+Run focused event/position/scene/quest/admission, compiler/loader and schema mutants,
+real SQLite history/fault/reopen, Book nesting/freshness and TS shared simulation
+checks. Use `mise exec --` and normal hooks; `bin/check_all.sh` once for publication
+under WORKFLOW. Native/emulator/phone/Hermes work stays deferred. A later authorized
+browser run uses disposable Maud rental→upstairs bed→actual Rest→choice→close→
+World→return/Resume→final acknowledge→refresh; browser refresh is not native
+SQLite/background/kill proof. This planning task runs docs checks only.
+
+Apply Ponytail Review and actual-diff correctness self-review. Fresh primary plus
+separate save/protocol opinion are required for source; proposal.ts/foundation
+changes need amended scope and Astra audit. Return actual head, checks, mutants,
+new independent pins, deviations and unresolved dependencies. Independent plan
+review and all B8 source/review re-pins precede assignment.
+
+Stop for missing B8 source/review, unprovable Rest root/causal order, a scene choice
+that blocks World/delivery or corrupts ordinary choices, unavailable free corpse
+recovery, legal intermediate hydration failure, unplanned report/foundation op,
+spatial scene/generic interpreter requirement, governing conflict or excessive
+slice footprint. Do not weaken validation or ship a choice without acknowledged
+end/save recovery. Unknown future pins stay null.
+
+Planning self-review: reuse existing state/receipt owners and two bounded scene
+extensions; no queue, second armed flag or duplicate memory. Correctness pass
+checked payment-before-Rest, deferred interaction, branch persistence, exact final
+acknowledgement, no time/custody effects and all real-save intermediate obligations.
