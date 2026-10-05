@@ -33,37 +33,38 @@ const fresh = newWorld(
   [1, 2, 3, 4],
 );
 
-// Breaks: escort receipt validation dereferences an unrelated null quest before the
+// Breaks: escort receipt validation dereferences an unrelated malformed quest before the
 // saved-world boundary can classify corruption and offer an explicit Start over.
-test('null Q1 after rescue selection or completion offers typed recovery without replacing progress', async (t) => {
+test('malformed Q1 after rescue selection or completion offers typed recovery without replacing progress', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-rescue-null-quest-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   for (const terminal of [false, true])
-    await t.test(terminal ? 'completed' : 'following', () => {
-      const a = setup(join(dir, `${terminal}.db`));
-      try {
-        a.offer();
-        a.choose('rescue');
-        if (terminal) a.end();
-        assert.equal(openGame(a.db, bundle, a.host).view().view.journal.length, 2);
-        const q1 = a.rows('quests').find((q) => q.value.quest.key === 'first_lead')!;
-        a.put('quests', q1.key, null);
-        const before = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-        const session = localSession(() => a.db, assert.fail, bundle, a.host);
-        assert.equal(session.game(), undefined);
-        assert.equal(session.failed()?.kind, 'save_corrupt');
-        assert.equal(session.failed()?.startOver, true);
-        assert.deepEqual(
-          a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
-          before,
-        );
-        assert.equal(session.startOver(), undefined);
-        assert.equal(session.failed(), undefined);
-        assert.deepEqual(session.game()!.view().view.journal, []);
-      } finally {
-        a.sql.close();
-      }
-    });
+    for (const malformed of [null, false, 0, [], {}])
+      await t.test(`${terminal ? 'completed' : 'following'}: ${JSON.stringify(malformed)}`, () => {
+        const a = setup(join(dir, `${terminal}-${JSON.stringify(malformed)}.db`));
+        try {
+          a.offer();
+          a.choose('rescue');
+          if (terminal) a.end();
+          assert.equal(openGame(a.db, bundle, a.host).view().view.journal.length, 2);
+          const q1 = a.rows('quests').find((q) => q.value.quest.key === 'first_lead')!;
+          a.put('quests', q1.key, malformed);
+          const before = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
+          const session = localSession(() => a.db, assert.fail, bundle, a.host);
+          assert.equal(session.game(), undefined);
+          assert.equal(session.failed()?.kind, 'save_corrupt');
+          assert.equal(session.failed()?.startOver, true);
+          assert.deepEqual(
+            a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(),
+            before,
+          );
+          assert.equal(session.startOver(), undefined);
+          assert.equal(session.failed(), undefined);
+          assert.deepEqual(session.game()!.view().view.journal, []);
+        } finally {
+          a.sql.close();
+        }
+      });
 });
 
 function setup(path = ':memory:') {
