@@ -34,3 +34,9 @@ SceneDefinition now accepts both an outcome-only trigger and simultaneous quest/
 Evidence: Focused bell, return, escort, scene and readable-routing tests pass. Real delete-journal SQLite controls passed Ring replay, lost acknowledgement and genuinely failed COMMIT reconciliation. Three additional corruption assertions fail with open instead of save_corrupt. Removing the receipt guard makes the existing corruption test fail. Independent v013 pins reproduce; API1.11 refuses v013. Disposable checkout removed.
 
 Ponytail: No over-engineering finding; tighten existing validation predicates.
+
+## Primary scoped fix round 1 — 2026-10-05
+
+Source head `45332c26293ca31d2ff21adf6c85ee2f8346776d`. **APPROVE** for the primary review; R196-1 is closed. This verdict covers the scene-trigger contract and its direct callers. The separate save/protocol opinion owns S1–S3 and its final disposition.
+
+`SceneDefinition.on` now requires exactly one declared trigger. The closed-subset schema compiler validates the keyword's declared, unique keys; Elixir and TypeScript validators return `exclusive_properties` at `/on`; the generated TypeScript type has exclusive quest/story-point branches. Both lawful branches validate, zero and dual triggers fail, and the source compiler/loader scene checks retain lawful behavior. Focused Elixir schema/bell/scene tests: 75 passed; kernel bell tests: 5 passed; scene/cartridge tests: 81 passed; kernel typecheck passed. A controlled removal of `exactlyOneRequired` followed by contract regeneration made both Elixir and TypeScript fixture tests fail on the missing-trigger case. The mutant was restored; no source edits remain. No new contract finding or simplicity finding.

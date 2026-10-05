@@ -250,7 +250,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Missing Child complete-chapter plan](2026-10-05-missing-child-complete-plan-review.md): PR #192 at `bc92912f`, CHANGES REQUIRED; scoped fix `bd315ae0`, APPROVE, R192-1 browser-first policy link and R192-2 pre-S27 swim access closed.
 - [Local Book web preview](2026-10-05-web-preview-review.md): PR #194 at `6a878fa2`, CHANGES REQUIRED (R194-1 App host tests fail; R194-2 repeated install rejects its own worker patch).
 - [Chapter 1 implementation and proof briefs](2026-10-05-chapter-one-briefs-review.md): PR #193 at `87b7bbca`, CHANGES REQUIRED; scoped fix `bdec64d8`, APPROVE, R193-1 D1/D6/C6 swim lesson handoff closed.
-- [Q3-B bell-first prior/lost](2026-10-05-q3-bell-lost-review.md): PR #196 at `a7810adb7a2da2db56eb0bb51f393d196b4b9103`, primary CHANGES REQUIRED; R196-1 scene trigger contract open.
+- [Q3-B bell-first prior/lost](2026-10-05-q3-bell-lost-review.md): PR #196 at `a7810adb7a2da2db56eb0bb51f393d196b4b9103`, primary scoped fix `45332c26` APPROVE, R196-1 closed; separate save findings S1–S3 pending their reviewer.
 - [Local Book web preview](2026-10-05-web-preview-review.md): PR #194 at `6a878fa2`, CHANGES REQUIRED; scoped fix `abef39cc`, APPROVE, R194-1/R194-2 closed; disposable browser corrupt-save recovery and worker red control pass.
 - [Read-once documentation rule](2026-10-05-read-once-docs-review.md): PR #195 at `fe73a47695aa17aa8868e521db626154bff6f7a1`, APPROVE; no findings.
 - [Builder's Guide reuse lessons](2026-10-05-builder-learning-review.md): PR #197 at `8971c7ed`, independent docs-only APPROVE; no findings.
