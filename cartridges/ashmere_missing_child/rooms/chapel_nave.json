@@ -2,6 +2,9 @@
   "title": "room.chapel_nave.title",
   "description": "room.chapel_nave.description",
   "exits": {
+    "up": {
+      "to": "bell_tower"
+    },
     "south": {
       "to": "chapel_steps"
     }

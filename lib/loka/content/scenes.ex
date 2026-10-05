@@ -66,8 +66,20 @@ defmodule Loka.Content.Scenes do
 
   defp scene({rel, steps, s}, ctx) do
     owned(at(rel, steps), "scene", ctx.required) ++
+      api(s, ctx.m) ++
       order(rel, steps, s) ++
       refs(rel, steps, s, ctx.m, ctx.defs) ++ texts(rel, steps, s, ctx.text)
+  end
+
+  defp api(s, m) do
+    version =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    if is_map_key(s["on"], "quest") and version < [1, 12],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
   end
 
   defp order(rel, steps, s) do
@@ -89,8 +101,19 @@ defmodule Loka.Content.Scenes do
   end
 
   defp refs(rel, steps, s, m, defs) do
-    reference(rel, steps ++ ["on"], "story_point", s["on"], m, defs) ++
-      case resolve(s["on"]["story_point"], "story_point", m, defs) do
+    kind = if is_map_key(s["on"], "quest"), do: "quest", else: "story_point"
+
+    shape =
+      if is_map_key(s["on"], "quest") == is_map_key(s["on"], "story_point"),
+        do: [diag("SCHEMA_VIOLATION", at(rel, steps ++ ["on"]))],
+        else: []
+
+    shape ++
+      if(shape == [], do: reference(rel, steps ++ ["on"], kind, s["on"], m, defs), else: []) ++
+      case if(kind == "story_point",
+             do: resolve(s["on"]["story_point"], "story_point", m, defs),
+             else: nil
+           ) do
         {_, _, p} ->
           if is_map_key(p["outcomes"], s["on"]["outcome"]),
             do: [],

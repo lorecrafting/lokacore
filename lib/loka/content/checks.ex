@@ -20,6 +20,8 @@ defmodule Loka.Content.Checks do
     "fact.assign" => "fact",
     "fact.adjust" => "fact",
     "quest.activate" => "quest",
+    "quest.resolve" => "quest",
+    "quest.fail" => "quest",
     "barrier_state" => "barrier",
     "stat_compare" => "attribute",
     "resource_compare" => "resource"
@@ -110,6 +112,9 @@ defmodule Loka.Content.Checks do
   # Scene trigger: outcome remains a key.
   def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
     do: Map.put(trigger, "story_point", ref(p, "story_point", m))
+
+  def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
+    do: Map.put(trigger, "quest", ref(q, "quest", m))
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)

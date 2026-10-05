@@ -354,6 +354,20 @@ separated permits player departure or later co-location before explicit Rejoin. 
 requires the proven rescued terminal and NPC beside the terminal speaker. Every committed
 intermediate state must reopen and reconcile under the same boundary.
 
+## Bell-first return recovery
+
+In the Q3-B release, load checks the retained bell, allegiance, Q3 terminal and
+scene line together. Resolved Q3/prior requires a committed Ring receipt that
+assigned the bell and allegiance, resolved that actor's Q3 instance and started
+the bell scene. A failed Q2/lost additionally requires the same Ring receipt to
+fail that Q2 instance and assign lost child status; Wren's accepted meeting,
+return selection and escort must be absent. A completed stays/rescued Q2 or an
+active Q2 after the accepted Wren meeting remains legal after Ring. Missing or
+contradictory quest rows, facts, scene state or receipt are `save_corrupt`, with
+the existing Start over path and no silent repair. The saved Ring receipt and
+every scene continuation use the existing changed-row transaction and unknown
+COMMIT fence.
+
 Bound return validation admits mutually exclusive alternatives: no branch keeps the message
 with its original source; stays requires its original receive and optional stays handoff;
 rescue keeps the message with the original source and requires its original escort path.

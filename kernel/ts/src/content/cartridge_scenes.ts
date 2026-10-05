@@ -18,8 +18,21 @@ export function scenes(c: Obj): Diagnostic[] {
   const triggers: Record<string, string[]> = {};
   for (const [k, s] of Object.entries((c.scenes ?? {}) as Obj)) {
     const at = `.cartridge.scenes${step(k)}`;
-    named(s.on.story_point, 'story_point', `${at}.on.story_point`);
-    const point = c.story_points?.[refString(s.on.story_point)];
+    const quest = !!s.on.quest;
+    if (quest === !!s.on.story_point) out.push(diag('SCHEMA_VIOLATION', `${at}.on`));
+    if (quest || s.on.story_point)
+      named(
+        s.on[quest ? 'quest' : 'story_point'],
+        quest ? 'quest' : 'story_point',
+        `${at}.on.${quest ? 'quest' : 'story_point'}`,
+      );
+    const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
+    if (quest && (major < 1 || (major === 1 && minor < 12)))
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
+    const point =
+      quest || !s.on.story_point ? undefined : c.story_points?.[refString(s.on.story_point)];
     if (point && !Object.hasOwn(point.outcomes, s.on.outcome))
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.on.outcome`, { target: s.on.outcome }));
     s.steps.forEach((s: Obj, i: number) => text(s, ['text'], `${at}.steps[${i}]`));
@@ -33,7 +46,7 @@ export function scenes(c: Obj): Diagnostic[] {
           error: 'not_in_enum',
         }),
       );
-    const trigger = `${refString(s.on.story_point)}/${s.on.outcome}`;
+    const trigger = `${quest ? 'quest' : 'story_point'}/${s.on[quest ? 'quest' : 'story_point'] ? refString(s.on[quest ? 'quest' : 'story_point']) : ''}/${s.on.outcome}`;
     (triggers[trigger] ??= []).push(`${at}.on`);
   }
   for (const paths of Object.values(triggers))

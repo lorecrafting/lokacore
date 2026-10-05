@@ -301,10 +301,12 @@ and an undeclared quest are refused before the rule. Accepted: `quest.activate` 
 stored) or `post_activation_event` (met by an `item_acquired` of the named item into the
 instance's actor's body, placed after activation; `earned`, `kernel/ts/src/mechanics/quest/lifecycle.ts:75`), which the proposal
 completes to `objectives_complete` as its own writer group. Resolution (`:111`) happens in the
-rule that resolves it (a dialogue choice): no open instance `invalid_state`; `active` with an
+rule that resolves it (a dialogue choice or typed reaction): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
-`quest_resolved`. Policy leaf `quest_state`; the GameView journal lists the player's instances.
+`quest_resolved`. A typed reaction may instead fail an actor-owned active or
+objectives_complete instance with a declared outcome. Failure never reopens a terminal
+instance and emits no event. Policy leaf `quest_state`; the GameView journal lists the player's instances.
 A quest may declare `journal` texts: `active`, `objectives_met`, `resolved`, `failed`,
 `abandoned`, and optional `outcomes` keyed by outcome. The view selects one TextKey without
 persisting it: `active` shows `objectives_met` while `holdsNow` holds, else `active`;
@@ -422,7 +424,7 @@ For scene key k, the compiler adds `<id>@<ver>:fact/scene_<k>` exactly as follow
 
 The fact is absent until changed: 0 means not started, 1..n the line shown, −1 ended.
 Content may read it but cannot author or assign it ([compiler](cartridge.md#compiler)).
-At `story_point_reached` matching `on`, the proposal's reaction delivery appends a
+At `story_point_reached` or an evidenced actor-owned `quest_resolved` matching `on`, the proposal's reaction delivery appends a
 scene start after authored reactions, in scene-key order: `when` fact equals 0,
 `apply` fact := 1. This reuses the existing delivery budgets, FIFO and writer groups;
 scene starts require scene@1 alone, never reaction@1. There is no `scene_started`.
@@ -458,8 +460,12 @@ For quest resolution, the source instance must exist at player scope, be resolve
 event's quest/outcome, and agree with its actor and scope; inconsistent evidence faults
 `precondition_failed`. The instance's actor owns the delivery. Legacy fact/room triggers retain
 the command actor. Its `when` is read on the proposal so far at the event's logical time.
-`apply` assigns facts at that actor's scope or activates a declared quest through
-`quest.activate {quest}`. Activation is legal only on a quest-resolution trigger; any prior
+`apply` assigns facts at that actor's scope, activates a declared quest through
+`quest.activate {quest}`, or requests typed `quest.resolve {quest, outcome}` and
+`quest.fail {quest, outcome}` transitions. Resolve and fail are legal only on a
+`fact_changed` trigger, for the trigger's actor; resolve checks the quest objective,
+and fail requires an active or objectives_complete actor instance. Neither changes a
+terminal instance. Activation is legal only on a quest-resolution trigger; any prior
 instance for that actor, including terminal instances, skips activation. The delivery uses
 one writer group and causal allocator; its quest-owned `quest_activated` is admitted through
 reaction's quest composition, caused by the source event and correlated with the root command.

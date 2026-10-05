@@ -1,0 +1,42 @@
+{
+  "npc": "aldric",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "any",
+          "items": [
+            { "op": "all", "items": [
+              { "op": "quest_state", "quest": "missing_child", "state": "active" },
+              { "op": "fact_compare", "fact": "fen_tracks_found", "equals": true }
+            ] },
+            { "op": "all", "items": [
+              { "op": "quest_state", "quest": "missing_child", "state": "resolved" },
+              { "op": "any", "items": [
+                { "op": "fact_compare", "fact": "village_child_status", "equals": "rescued" },
+                { "op": "fact_compare", "fact": "village_child_status", "equals": "stays" }
+              ] }
+            ] }
+          ]
+        },
+        { "op": "not", "item": { "op": "any", "items": [
+          { "op": "quest_state", "quest": "bell_of_ashmere", "state": "active" },
+          { "op": "quest_state", "quest": "bell_of_ashmere", "state": "objectives_complete" },
+          { "op": "quest_state", "quest": "bell_of_ashmere", "state": "resolved" },
+          { "op": "quest_state", "quest": "bell_of_ashmere", "state": "failed" }
+        ] } }
+      ]
+    }
+  },
+  "prompt": "dialogue.aldric.offer.prompt",
+  "roles": { "aldric": { "role": "npc", "npc": "aldric" } },
+  "choices": {
+    "accept": {
+      "label": "dialogue.aldric.offer.accept",
+      "narration": "narration.aldric.accept",
+      "accept": "bell_of_ashmere"
+    }
+  }
+}

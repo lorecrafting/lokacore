@@ -22,7 +22,7 @@ import {
 import { scopeOf, value } from './fact.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
-import { activation } from './quest/lifecycle.ts';
+import { activation, resolution } from './quest/lifecycle.ts';
 import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 
@@ -66,7 +66,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-): Decision<'quest_activated'> | undefined {
+): Decision<EventPayload['type']> | undefined {
   const source = resolvedActor(world, cause, actor);
   if (!source) return { kind: 'fault', code: 'precondition_failed' };
   actor = source;
@@ -75,7 +75,7 @@ export function sequence(
   const set: Record<string, FactValue> = {};
   const activated = new Set<string>();
   const ops: DeltaOp[] = [];
-  const events: ReturnType<typeof event<Payload<'quest_activated'>>>[] = [];
+  const events: DomainEvent[] = [];
   let position = 0;
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
@@ -93,6 +93,34 @@ export function sequence(
           started.payload,
         ),
       );
+    } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
+      if (rule.on.event !== 'fact_changed') return { kind: 'fault', code: 'precondition_failed' };
+      const q = questOf(world, actor, step.quest);
+      if (!q || (q[1].state !== 'active' && q[1].state !== 'objectives_complete'))
+        return { kind: 'fault', code: 'precondition_failed' };
+      if (step.op === 'quest.resolve') {
+        const resolved = resolution(world, actor, step.quest, step.outcome, group, steps);
+        if (typeof resolved === 'string') return { kind: 'fault', code: 'precondition_failed' };
+        ops.push(...resolved.ops);
+        events.push(
+          event(
+            then,
+            { id: cause.id as string as CommandId, payload: { actor_id: actor } },
+            mint,
+            ++position,
+            resolved.payload,
+          ),
+        );
+      } else {
+        ops.push({
+          op: 'quest.transition',
+          writer_group: group,
+          instance_id: q[0],
+          from: q[1].state,
+          to: 'failed',
+          outcome: step.outcome,
+        });
+      }
     } else {
       const scope = scopeOf(world, actor, step.fact);
       const at = key({ kind: 'fact', fact: step.fact, scope });

@@ -158,7 +158,7 @@ test('the 0.0.9 chapter save is refused intact until explicit Start over', (t) =
   );
   const current = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v012_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/missing_child_v013_hash.json', import.meta.url),
       'utf8',
     ),
   );
@@ -203,7 +203,7 @@ test('the 0.0.9 chapter save is refused intact until explicit Start over', (t) =
 function appHost() {
   const chapter = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v012_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/missing_child_v013_hash.json', import.meta.url),
       'utf8',
     ),
   );

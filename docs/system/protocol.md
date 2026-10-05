@@ -190,6 +190,10 @@ correlates everything to the player's command (`runtime/proposal.ts:183`). The m
 emits `scene_ended {scene}` on the final continue at position 2, leaving position 1
 for its line fact's fact_changed; start is the fact's 0→1 change, with no scene_started
 ([scene@1](mechanics.md#scene1-mechanicsscenerulets)).
+API1.12 permits that start to be caused by an evidenced actor-owned
+`quest_resolved {quest, outcome}`. A bell Ring emits no `story_point_reached`;
+its fact-change reactions emit Q3's typed resolution and, for the eligible
+bell-first case, a typed Q2 failure transition without a new event.
 
 ## ActionSet and admission
 

@@ -1,0 +1,7 @@
+{
+  "keywords": ["aldric", "prior"],
+  "short": "npc.aldric.short",
+  "room_line": "npc.aldric.room",
+  "description": "npc.aldric.description",
+  "room": "chapel_nave"
+}

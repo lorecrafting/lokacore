@@ -38,12 +38,20 @@ export function running(world: World, actor: CharacterId): SceneView | undefined
 
 /** Reaction-shaped deliveries: on is unused here; sequence consumes when and apply. */
 export function starts(world: World, e: DomainEvent): ReactionRule[] {
-  if (!has(world.cartridge.lock.capabilities, 'scene') || e.payload.type !== 'story_point_reached')
+  if (
+    !has(world.cartridge.lock.capabilities, 'scene') ||
+    (e.payload.type !== 'story_point_reached' && e.payload.type !== 'quest_resolved')
+  )
     return [];
   const p = e.payload;
   return values(world.cartridge.scenes ?? {})
     .filter(
-      (s) => refString(s.on.story_point) === refString(p.story_point) && s.on.outcome === p.outcome,
+      (s) =>
+        ('story_point' in s.on && p.type === 'story_point_reached'
+          ? refString(s.on.story_point!) === refString(p.story_point)
+          : 'quest' in s.on &&
+            p.type === 'quest_resolved' &&
+            refString(s.on.quest!) === refString(p.quest)) && s.on.outcome === p.outcome,
     )
     .map((s) => ({
       key: s.key as Key,

@@ -128,6 +128,18 @@
       ],
       "meaning": "The player’s chosen return: Vesper’s message while Wren stays, or escorting Wren to Elspeth."
     },
+    "chapel.bell_rung": {
+      "version": 1,
+      "value_type": { "type": "bool", "default": false },
+      "scopes": ["player"],
+      "meaning": "The player rang the Belfry bell for the priory in the accepted Q3 action."
+    },
+    "chapel.allegiance": {
+      "version": 1,
+      "value_type": { "type": "enum", "values": ["unknown", "prior", "fox"], "default": "unknown" },
+      "scopes": ["player"],
+      "meaning": "The player's committed chapel allegiance; first set by Ring."
+    },
     "village.child_status": {
       "version": 1,
       "value_type": {

@@ -1,5 +1,6 @@
 # Decisions after R0
 
+
 Accepted ADRs live in [document 16](../archive/spec/16-decision-register.md); ADR-070 to ADR-074
 entered it on 2026-09-24 and ADR-075 on 2026-09-25, and their files here hold the full
 text. This directory also holds the owner's decisions retained verbatim, or marked paraphrased.
@@ -190,3 +191,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Q2-C stays return](pm-decision-q2-c-stays-2026-10-05.md): complete message custody and Elspeth terminal before a separate complete rescue path.
 
 - [Q2-C rescue](pm-decision-q2-c-rescue-2026-10-05.md): bound Wren escort, death separation/Rejoin and Elspeth rescued terminal, preserving stays.
+
+- [Q3-B bell-first prior and lost](pm-decision-q3-bell-prior-lost-2026-10-05.md): public Aldric, exact Belfry Ring, typed Q3/prior and bell-first Q2/lost.

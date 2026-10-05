@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.12`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.13`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
@@ -66,11 +66,11 @@ S1 offer and turn-in remain independently usable in every Q1 state. No hour or w
 apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
 Its Q2 activation consumer is [the staged first search lead below](#source-layout).
 
-The release declares API1.11 for the typed escort choice and relation, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
+The release declares API1.12 for the typed bell reaction and scene composition, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source. Its
-independent answer is `protocol/fixtures/missing_child_v012_hash.json`, derived
-by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
+independent answer is `protocol/fixtures/missing_child_v013_hash.json`, derived
+by `test/loka/cartridge_missing_child_v013_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
 The app opens only the chapter file and offers no story picker. Missing pins follow
@@ -109,6 +109,11 @@ Reaction authoring accepts exact `on: quest_resolved {quest, outcome}` and
 source short keys, resolve to local quest definitions, and require the quest event owner in
 the capability lock. These trigger/consequence forms require kernel API at least 1.8.
 Existing fact/room triggers retain their semantics.
+From API1.12, fact_changed reactions may apply typed `quest.resolve {quest, outcome}`
+and `quest.fail {quest, outcome}`. Both require a local quest reference and quest capability;
+resolve emits the quest-owned `quest_resolved` event. A scene may start on exact
+`quest_resolved {quest, outcome}` instead of a story point, with the same actor/instance
+evidence check as reaction delivery. The compiler expands these short quest references.
 
 ## Carrying settings and item mass
 
@@ -498,4 +503,17 @@ the relation, resolves Q2 as rescued and assigns status rescued in one proposal.
 remains physically beside Elspeth after later player movement. Arrival alone cannot finish.
 The journal distinguishes following/separated/completed; Green and Elspeth read committed
 rescued/stays truth. Both terminal guides retain directions; Q1 and Maud remain independent.
-No lost, bell, finale, schedule, party or NPC AI is introduced.
+Bell-first loss and the prior allegiance are specified by the Q3 adoption below.
+
+## Q3-B bell-first prior and lost
+
+[Q3-B adoption](../decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md) adds public
+Aldric and the all-hours Chapel Nave → Bell Tower → Belfry path. Aldric offers the
+actor-owned bell quest after active Q2 with studied tracks, or either completed Q2
+return. Only Ring on the Belfry bell detail with active Q3 and an eligible Q2 writes
+the bell and prior allegiance. Its fact-change reaction resolves Q3/prior; another
+guarded reaction fails still-active Q2/lost and writes instance child status lost only
+when the accepted Wren meeting is absent. Ring after that meeting preserves active Q2
+and either return. Rescued and stays remain terminal. The Q3 resolution starts one
+three-line bell scene; Ring emits no story point. Lost has honest journal, Elspeth and
+Green text. No Silence control or finale is present yet.
