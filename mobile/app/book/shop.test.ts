@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 const pin = JSON.parse(
   readFileSync(
-    new URL('../../../../protocol/fixtures/missing_child_v018_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v018_hash.json', import.meta.url),
     'utf8',
   ),
 );
