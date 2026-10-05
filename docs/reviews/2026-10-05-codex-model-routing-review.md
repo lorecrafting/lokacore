@@ -26,3 +26,7 @@ The routing keeps Claude policy explicit and uses the [workflow](../WORKFLOW.md)
 - Normal pre-commit hook: passed.
 - Ponytail Review: lean already; no machinery or redundant policy to remove.
 - Docs-only review: no runtime tests or mutation testing required. No push, merge or hosted-CI claim.
+
+## Scoped paragraph recheck
+
+**APPROVE** at source head `dbfe3a22`. The changed Models paragraph explicitly scopes highest-Opus review to Claude-led slices and links Codex-led slices to the adopted routing, retaining the same independent-review requirements. The adjacent review-count paragraph still requires separate second opinions at the named risk boundaries. This clarification matches the approved policy; no findings. Scoped diff and whitespace checks, indexed docs check and normal pre-commit hook passed. No push or merge.
