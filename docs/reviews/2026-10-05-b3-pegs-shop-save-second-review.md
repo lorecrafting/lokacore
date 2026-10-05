@@ -49,3 +49,26 @@ ledger protection, failed COMMIT and both unknown outcomes pass. No save-behavio
 finding reproduced. Broad schema mutation sweep and full publication checks remain
 deferred under the provisional lane; no native/browser proof claimed.
 Ponytail Review: **Lean already. Ship.** The two contract-proof blockers remain open.
+
+## Scoped fix recheck — 2026-10-05
+
+Reviewed exact integrated head `9c7e537942e13455a1f64b5afdb90b60faae27dd`,
+fix source `bd3d8c05518a890d7b6b282970092ce6b9b50cde`.
+Verdict: **APPROVE**; B3-S1 and B3-S2 closed, no open findings.
+Scope was the fixes, their tests and direct callers.
+
+- B3-S1: the Python SHA-256 enumerator excludes corpse templates and includes
+  scheduled jobs and slot holders in the declared allocation order. It reproduces
+  the committed 58-ID fixture without a change. The focused test checks every
+  fresh identity against that independent fixture, then buys and wears its exact
+  torch and cold-reopens at player17/Peg23/Aldric10 with the pinned light holder.
+  Independently restoring the original ID fixture makes only this new test fail;
+  the prior six commerce tests still pass. Restored fixture: seven tests pass.
+- B3-S2: all four new definitions have valid minimal examples; generated contracts
+  match. Independently removing those examples reproduces the existing contract
+  example failure (8/9 pass). Restored schemas: all nine tests pass.
+
+Focused Node commerce/schema checks: eight pass. Elixir contract/chapter compiler
+checks: twelve pass. Contract generator check: exit 0. Mutation checkout restored
+and removed. No runtime behavior or chapter artifact/hash changed.
+Ponytail Review: **Lean already. Ship.** Publication checks retain their existing gate.
