@@ -43,8 +43,13 @@ CHAPTER-01 — actual chapter cutover — merged in [#176](https://github.com/lo
 after independent approval, a separate save/bundle opinion and six green source-head checks:
 distinct Missing Child cartridge/save, retained playable Maud S1, retired temporary
 Lantern/Bram content. This is an incremental chapter release, not full chapter completion.
-Real Q1 follows owner clarification of Bram’s role; M12 readable WIP targets the new source. See the
+Real Q1 follows owner clarification of Bram’s role. See the
 [cutover record](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
+
+M12-A — read the Missing Child landing notice and inn rumor board — merged in
+[#177](https://github.com/lorecrafting/lokacore/pull/177) after the authored-alias
+Book finding was fixed, independently rechecked and approved; a separate protocol
+opinion and six green source-head checks cover chapter release 0.0.2.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
