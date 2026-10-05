@@ -59,3 +59,22 @@ Validation:
 - Inspected compiler/loader ownership/reference mutation evidence; compiler tests were not independently rerun. Optional App-shell test lacked TypeScript in the isolated checkout.
 - Ponytail review: no unnecessary machinery identified. Isolated checkout removed.
 ```
+
+## Scoped fix review — round 1
+
+Source reviewed: `372d06e9bc667c7bad912f0d85e8f1a4c05036cc`.
+
+**APPROVE. M12A-R1 closed. No open findings.**
+
+Scope was the three-file fix after the initial record, plus its direct Book and invocation callers. The local `Button.place` marker is assigned only to concrete target-bearing actions projected in `GameView.actions`; `group` uses that membership instead of the literal `read` key. `BookView` passes the resulting group through `Body` to `RoomPage`, which renders the preserved alias. Entity and inventory actions remain unmarked and do not appear in World. `intentOf` selects only the existing action key, targets, input and freshness token, excluding the presentation marker. Presenter button copies retain membership while freshness still compares the exact interaction and current offered action; retry and authority admission are unchanged.
+
+The new real-authority regression uses an authored `peruse → read` alias, subtracts engine `read`, and adds a takeable item in the same room. It asserts the literal World control and target, keeps Take on the item, carries a held alias through an elapsed redraw, receives the exact notice narration, and checks the wire intent without the marker.
+
+Independent validation:
+
+- Confirmed all six source-head CI checks completed green at this exact SHA.
+- Ran alias, readable, model, touch and live-action suites: 33 passing tests, exit 0.
+- In the detached review worktree, restored the original literal-key exception: the new alias regression failed (exit 1). Separately let all aimed actions into the World group: the same regression failed on entity-action leakage (exit 1). Restored the original source exactly; the same 33 tests passed again, and tracked source was clean before the record edit.
+- Correctness and Ponytail review: the single optional local membership flag is sufficient; no new abstraction, wire contract, persistent state or dependency. No further finding in the fix or direct callers.
+
+This verdict covers the approved current Read contract. Any separately proposed nested board/notice navigation is outside this scoped review. No Simulator or native preview was run.
