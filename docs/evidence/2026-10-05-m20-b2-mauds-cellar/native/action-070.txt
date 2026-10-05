@@ -1,0 +1,19 @@
+Phase: final Book fix
+Action: press label="Map" --settle
+Exit: 0
+Tapped label="Map" (201, 760)
+settled after 1840ms: +7 -7 (~3 unchanged)
+- @e2 [other] "Look, Ferry Landing"
+- @e3 [button] "Look, Ferry Landing"
+- @e4 [scroll-area] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
+- @e5 [other] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
+- @e6 [text] "Old Bram leaves."
+- @e7 [button] "Map"
+- @e8 [button] "Position, standing"
++ @e2~s891987 [scroll-area] "Map"
++ @e3~s891987 [other] "Map"
++ @e4~s891987 [text] "Ferry Landing"
++ @e5~s891987 [button] "Go north"
++ @e6~s891987 [text] "Beyond north: Well Lane — a brass lantern."
++ @e7~s891987 [button] "Back to World"
++ @e10~s891987 [text] "Position, standing"

@@ -1,0 +1,23 @@
+Action: press label="Leave" --settle
+Exit: 0
+Tapped label="Leave" (201, 495)
+settled after 1771ms: +7 -12 (~4 unchanged)
++ @e2~s528216 [button] "Look, The Drowned Lantern"
+- @e3 [text] "Widow Maud"
+- @e4 [text] "Broad, floury, sharp-eyed. She has been widowed by the river and has not forgiven it."
+- @e5 [text] "“Clear the five rats out of my cellar and I’ll give you the key to the storage chest upstairs.”"
+- @e6 [text] "You agree to clear Maud’s cellar."
+- @e7 [text] "Journal updated"
+- @e8 [text] "“Well? Have you dealt with those rats?”"
+- @e9 [text] "The page had changed; here it is again."
+- @e10 [text] "The page had changed; here it is again."
+- @e11 [text] "Maud sets an iron key in your palm. “For the storage chest upstairs. You’ve earned it.”"
+- @e12 [text] "Journal updated"
+- @e13 [button] "Leave"
++ @e4~s528216 [text] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
++ @e5~s528216 [button] "Old Bram, open"
++ @e6~s528216 [button] "Widow Maud, open"
++ @e7~s528216 [text] "The story ends here. Start over is in Settings."
++ @e8~s528216 [button] "Map"
++ @e9~s528216 [button] "Position, standing"
+- @e16 [text] "Position, standing"

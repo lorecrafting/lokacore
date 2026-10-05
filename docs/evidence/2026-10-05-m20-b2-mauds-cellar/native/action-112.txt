@@ -1,0 +1,20 @@
+Phase: final Book fix
+Action: snapshot -i
+Exit: 0
+Page: com.lorecrafting.loka
+App: com.lorecrafting.loka
+Snapshot: 12 visible nodes
+Simulator AX snapshot unavailable (circuit-disabled); used XCTest for this app generation.
+@e1 [application] "Loka"
+@e2 [scroll-area] "Contents" [scrollable]
+  [content below scroll-area hidden]
+@e3 [other] "Contents"
+@e4 [button] "Character"
+@e5 [button] "Equipment & Inventory"
+@e6 [button] "Map"
+@e7 [button] "Journal"
+@e8 [button] "Settings"
+@e9 [button] "Back to World"
+@e10 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
+@e11 [text] "Hour of the Ox, one to three"
+@e12 [text] "Position, standing"

@@ -1,0 +1,16 @@
+Action: press label="Attack a cellar rat" --settle
+Exit: 0
+Tapped label="Attack a cellar rat" (201, 215)
+settled after 1742ms: +6 -6 (~3 unchanged)
+- @e2 [scroll-area] "A cellar rat"
+- @e3 [other] "A cellar rat"
+- @e4 [text] "A small grey rat watches from beside a barrel, its whiskers twitching."
+- @e5 [button] "Attack a cellar rat"
+- @e6 [button] "Leave"
+- @e7 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
++ @e2~s527918 [scroll-area] "Combat"
++ @e3~s527918 [other] "Combat"
++ @e4~s527918 [text] "a cellar rat"
++ @e5~s527918 [button] "Look"
++ @e6~s527918 [button] "Flee"
++ @e7~s527918 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100" [disabled]

@@ -1,0 +1,16 @@
+Action: press label="Got it" --settle
+Exit: 0
+Tapped label="Got it" (362, 710)
+settled after 855ms: +0 -2 (~10 unchanged)
+- @e2 [other] "Hold the map and drag toward a path to walk; tap it to open the map."
+- @e8 [button] "Got it"
+unchanged interactive (9):
+= @e2~s527621 [other] "Look, Ferry Landing"
+= @e3~s527621 [button] "Look, Ferry Landing"
+= @e4~s527621 [scroll-area] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
+= @e5~s527621 [other] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
+= @e6~s527621 [button] "Old Bram, open"
+= @e7~s527621 [button] "Map"
+= @e8~s527621 [button] "Position, standing"
+= @e9~s527621 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
+= @e10~s527621 [text] "Hour of the Rooster, five to seven"

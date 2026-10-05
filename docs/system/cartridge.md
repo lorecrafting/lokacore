@@ -362,3 +362,5 @@ known answer is retained as history, not added to the bundled release list: an u
 pin follows the established [missing-pin refusal](save.md#opening-a-story). Pre-production
 releases have no compatibility adapter or migration. Native evidence must identify the
 exact release; older fight captures do not prove this reward/storage consumer.
+The [M20-B2 evidence](../evidence/2026-10-05-m20-b2-mauds-cellar/README.md) records the
+current Release quest/storage walk, independent pin and behavior red controls.

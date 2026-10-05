@@ -1,0 +1,14 @@
+Action: press label="Journal" --settle
+Exit: 0
+Tapped label="Journal" (201, 323)
+settled after 1178ms: +4 -6 (~6 unchanged)
+- @e3 [text] "Contents"
+- @e4 [button] "Character"
+- @e5 [button] "Equipment & Inventory"
+- @e6 [button] "Map"
+- @e7 [button] "Journal"
+- @e8 [button] "Settings"
++ @e3~s528171 [text] "Journal"
++ @e4~s528171 [text] "Maud’s Cellar"
++ @e5~s528171 [text] "active"
++ @e6~s528171 [text] "The five cellar rats are dead. Return to Maud at the Drowned Lantern."

@@ -1,0 +1,18 @@
+Action: press label="Continue" --settle
+Exit: 0
+Tapped label="Continue" (201, 167)
+settled after 2177ms: +9 -5 (~3 unchanged)
+- @e2 [scroll-area] "Bram's Lantern"
+- @e3 [cell] "Bram's Lantern"
+- @e4 [button] "Continue"
+- @e5 [button] "Back to World"
++ @e2~s527617 [other] "Hold the map and drag toward a path to walk; tap it to open the map."
++ @e3~s527617 [other] "Look, Ferry Landing"
++ @e4~s527617 [button] "Look, Ferry Landing"
++ @e5~s527617 [scroll-area] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
++ @e6~s527617 [other] "Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A mooring post leans into the current with a notice nailed to it. Tide marks stripe the pilings."
++ @e7~s527617 [button] "Old Bram, open"
++ @e8~s527617 [button] "Got it"
++ @e9~s527617 [button] "Map"
++ @e10~s527617 [button] "Position, standing"
+- @e8 [text] "Position, standing"

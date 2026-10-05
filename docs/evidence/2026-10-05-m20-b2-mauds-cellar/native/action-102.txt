@@ -1,0 +1,22 @@
+Phase: final Book fix
+Action: press label="Go up" --settle
+Exit: 0
+Tapped label="Go up" (201, 215)
+settled after 1765ms: +9 -8 (~2 unchanged)
+- @e2 [scroll-area] "Map"
+- @e3 [other] "Map"
+- @e4 [text] "Lantern Cellar"
+- @e5 [button] "Go up"
+- @e6 [text] "Beyond up: The Drowned Lantern — Old Bram, Widow Maud."
+- @e7 [button] "Back to World"
+- @e8 [button] "Contents, Character, hp 8 of 10, has a few bruises, ma 100 of 100, mv 100 of 100"
++ @e2~s892375 [other] "Look, The Drowned Lantern"
++ @e3~s892375 [button] "Look, The Drowned Lantern"
++ @e4~s892375 [scroll-area] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
++ @e5~s892375 [other] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
++ @e6~s892375 [button] "Old Bram, open"
++ @e7~s892375 [button] "Widow Maud, open"
++ @e8~s892375 [button] "Map"
++ @e9~s892375 [button] "Position, standing"
++ @e10~s892375 [button] "Contents, Character, hp 8 of 10, has a few bruises, ma 100 of 100, mv 99 of 100"
+- @e10 [text] "Position, standing"

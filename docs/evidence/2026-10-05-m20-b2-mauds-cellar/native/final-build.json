@@ -1,0 +1,12 @@
+{
+  "configuration": "Release",
+  "sdk": "iphonesimulator",
+  "code_signing_allowed": false,
+  "build_exit": 0,
+  "source_sha": "8260f14108f8d759ad9fdf458bd92b268bc89b79",
+  "content_hash": "285f75c2786b96e2e1c92cc8fb859ff30bf59a6b76b51d131481cef1c1564f8c",
+  "artifact_sha256": {
+    "Loka": "44e5e714dccfbc578cc320cba8b5aaf536f6531376b7564be30f0e322c19bd16",
+    "main.jsbundle": "fdcfb68e3a978e14842b01ec93af56e254cada5713812c6ba7c7cf73bae17bb0"
+  }
+}

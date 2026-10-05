@@ -1,0 +1,14 @@
+Action: snapshot -i
+Exit: 0
+Page: com.lorecrafting.loka
+App: com.lorecrafting.loka
+Snapshot: 8 visible nodes
+@e1 [application] "Loka"
+@e2 [scroll-area] [scrollable]
+  [content below scroll-area hidden]
+@e3 [text] "Bram's Lantern"
+@e4 [button] "Continue"
+@e5 [button] "Back to World"
+@e6 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
+@e7 [text] "Hour of the Rat, eleven to one"
+@e8 [text] "Position, standing"

@@ -1,0 +1,25 @@
+Phase: final Book fix
+Action: press label="Map" --settle
+Exit: 0
+Tapped label="Map" (201, 760)
+settled after 3317ms: +12 -8 (~2 unchanged)
+- @e2 [other] "Look, Well Lane"
+- @e3 [button] "Look, Well Lane"
+- @e4 [scroll-area] "A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east."
+- @e5 [other] "A cobbled lane climbs from the landing toward the green. In the middle stands the well, with a bucket on a chain. The Drowned Lantern’s sign creaks to the east."
+- @e6 [button] "a brass lantern, open"
+- @e7 [button] "Map"
+- @e8 [button] "Position, standing"
+- @e9 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100"
++ @e2~s892002 [scroll-area] "Map"
++ @e3~s892002 [other] "Map"
++ @e4~s892002 [text] "Well Lane"
++ @e5~s892002 [button] "Go east"
++ @e6~s892002 [text] "Beyond east: The Drowned Lantern — Old Bram, Widow Maud."
++ @e7~s892002 [button] "Go north"
++ @e8~s892002 [text] "Beyond north: Village Green."
++ @e9~s892002 [button] "Go south"
++ @e10~s892002 [text] "Beyond south: Ferry Landing."
++ @e11~s892002 [button] "Back to World"
++ @e12~s892002 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
++ @e14~s892002 [text] "Position, standing"

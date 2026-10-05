@@ -1,0 +1,19 @@
+Phase: final Book fix
+Action: press label="Widow Maud, open" --settle
+Exit: 0
+Tapped label="Widow Maud, open" (201, 332)
+settled after 1705ms: +6 -8 (~3 unchanged)
+- @e2 [other] "Look, The Drowned Lantern"
+- @e3 [button] "Look, The Drowned Lantern"
+- @e4 [scroll-area] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e5 [other] "The inn is low and warm and smells of peat smoke and spilled ale. The hearth is big enough to stand in. The rumor board is thick with pinned notes, and Maud’s bar runs along the back wall."
+- @e6 [button] "Old Bram, open"
+- @e7 [button] "Widow Maud, open"
+- @e8 [button] "Map"
+- @e9 [button] "Position, standing"
++ @e2~s892382 [scroll-area] "Widow Maud"
++ @e3~s892382 [other] "Widow Maud"
++ @e4~s892382 [text] "Broad, floury, sharp-eyed. She has been widowed by the river and has not forgiven it."
++ @e5~s892382 [button] "Talk to Widow Maud"
++ @e6~s892382 [button] "Leave"
++ @e9~s892382 [text] "Position, standing"

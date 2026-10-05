@@ -1,0 +1,3 @@
+Action: screenshot docs/evidence/2026-10-05-m20-b2-mauds-cellar/native/five-corpses.png
+Exit: 0
+<local-path> (402x874 @1x)

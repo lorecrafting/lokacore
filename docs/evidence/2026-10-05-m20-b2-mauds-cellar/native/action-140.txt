@@ -1,0 +1,26 @@
+Phase: final Book fix
+Action: press label="a storage chest, open" --settle
+Exit: 0
+Tapped label="a storage chest, open" (201, 332)
+settled after 3256ms: +10 -11 (~1 unchanged)
+- @e2 [other] "Look, Inn Rooms"
+- @e3 [button] "Look, Inn Rooms"
+- @e4 [scroll-area] "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage."
+- @e5 [other] "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage."
+- @e6 [button] "a brass key, open"
+- @e7 [button] "a storage chest, open"
+- @e8 [button] "a wool cloak, open"
+- @e9 [button] "Map"
+- @e10 [button] "Position, standing"
+- @e11 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100"
+- @e12 [text] "Hour of the Ox, one to three"
++ @e2~s892496 [scroll-area] "A storage chest"
++ @e3~s892496 [other] "A storage chest"
++ @e4~s892496 [text] "A wooden chest with an iron lock."
++ @e5~s892496 [text] "Locked"
++ @e6~s892496 [button] "Take a storage chest"
++ @e7~s892496 [button] "Unlock a storage chest"
++ @e8~s892496 [button] "Leave"
++ @e9~s892496 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
++ @e10~s892496 [text] "Hour of the Tiger, three to five"
++ @e11~s892496 [text] "Position, standing"

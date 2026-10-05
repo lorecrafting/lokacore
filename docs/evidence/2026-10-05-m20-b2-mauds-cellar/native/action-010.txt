@@ -1,0 +1,28 @@
+Action: press label="Go down" --settle
+Exit: 0
+Tapped label="Go down" (201, 215)
+settled after 2017ms: +12 -12 (~2 unchanged)
+- @e2 [scroll-area] "Map"
+- @e3 [other] "Map"
+- @e4 [text] "The Drowned Lantern"
+- @e5 [button] "Go down"
+- @e6 [text] "Beyond down: Lantern Cellar — a cellar rat, a cellar rat, a cellar rat, a cellar rat, a cellar rat."
+- @e7 [button] "Go up"
+- @e8 [text] "Beyond up: Inn Rooms — a brass key, a storage chest, a wool cloak."
+- @e9 [button] "Go west"
+- @e10 [text] "Beyond west: Well Lane — a brass lantern."
+- @e11 [button] "Back to World"
+- @e12 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
++ @e2~s527657 [other] "Look, Lantern Cellar"
++ @e3~s527657 [button] "Look, Lantern Cellar"
++ @e4~s527657 [scroll-area] "Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall."
++ @e5~s527657 [other] "Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall."
++ @e6~s527657 [button] "a cellar rat, open"
++ @e7~s527657 [button] "a cellar rat, open"
++ @e8~s527657 [button] "a cellar rat, open"
++ @e9~s527657 [button] "a cellar rat, open"
++ @e10~s527657 [button] "a cellar rat, open"
++ @e11~s527657 [button] "Map"
++ @e12~s527657 [button] "Position, standing"
++ @e13~s527657 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 99 of 100"
+- @e14 [text] "Position, standing"

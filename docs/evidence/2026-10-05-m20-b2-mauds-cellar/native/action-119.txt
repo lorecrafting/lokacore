@@ -1,0 +1,8 @@
+Phase: final Book fix
+Action: press @e9 --settle
+Exit: 0
+Tapped @e9 (201, 367)
+settled after 752ms: +2 -1 (~12 unchanged)
+- @e9 [button] "“Your cellar is clear.”"
++ @e9~s892427 [text] "Maud sets an iron key in your palm. “For the storage chest upstairs. You’ve earned it.”"
++ @e10~s892427 [text] "Journal updated"

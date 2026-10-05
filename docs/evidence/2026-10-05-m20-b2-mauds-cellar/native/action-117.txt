@@ -1,0 +1,8 @@
+Phase: final Book fix
+Action: press label="Talk to Widow Maud" --settle
+Exit: 0
+Tapped label="Talk to Widow Maud" (201, 327)
+settled after 749ms: +2 -1 (~11 unchanged)
+- @e8 [button] "Talk to Widow Maud"
++ @e8~s892423 [text] "“Well? Have you dealt with those rats?”"
++ @e9~s892423 [button] "“Your cellar is clear.”"

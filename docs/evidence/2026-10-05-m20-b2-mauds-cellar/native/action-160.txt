@@ -1,0 +1,16 @@
+Phase: final Book fix
+Action: press label="Continue" --settle
+Exit: 0
+Tapped label="Continue" (201, 167)
+settled after 2174ms: +7 -4 (~4 unchanged)
++ @e2~s892553 [button] "Look, Inn Rooms"
+- @e3 [text] "Bram's Lantern"
+- @e4 [button] "Continue"
+- @e5 [button] "Back to World"
++ @e4~s892553 [text] "A narrow passage of doors under the eaves. One stands open on a bed made up tight, and a window over the green. The ceiling sags a little at the end of the passage."
++ @e5~s892553 [button] "a storage chest, open"
++ @e6~s892553 [button] "a wool cloak, open"
++ @e7~s892553 [text] "Maud sets an iron key in your palm. “For the storage chest upstairs. You’ve earned it.”"
++ @e8~s892553 [button] "Map"
++ @e9~s892553 [button] "Position, standing"
+- @e8 [text] "Position, standing"

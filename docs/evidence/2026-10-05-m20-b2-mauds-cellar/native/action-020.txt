@@ -1,0 +1,23 @@
+Action: press @e6 --settle
+Exit: 0
+Tapped @e6 (201, 260)
+settled after 1911ms: +7 -12 (~2 unchanged)
+- @e2 [other] "Look, Lantern Cellar"
+- @e3 [button] "Look, Lantern Cellar"
+- @e4 [scroll-area] "Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall."
+- @e5 [other] "Ale casks lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. Rat holes gnaw the base of every wall."
+- @e6 [button] "a cellar rat, open"
+- @e7 [button] "a cellar rat, open"
+- @e8 [button] "a cellar rat, open"
+- @e9 [button] "a dead cellar rat, open"
+- @e10 [button] "a dead cellar rat, open"
+- @e11 [button] "Map"
+- @e12 [button] "Position, standing"
+- @e13 [button] "Contents, Character, hp 9 of 10, is slightly scratched, ma 100 of 100, mv 100 of 100"
++ @e2~s527912 [scroll-area] "A cellar rat"
++ @e3~s527912 [other] "A cellar rat"
++ @e4~s527912 [text] "A small grey rat watches from beside a barrel, its whiskers twitching."
++ @e5~s527912 [button] "Attack a cellar rat"
++ @e6~s527912 [button] "Leave"
++ @e7~s527912 [button] "Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100"
++ @e9~s527912 [text] "Position, standing"

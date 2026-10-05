@@ -1,0 +1,18 @@
+Phase: final Book fix
+Action: press label="Equipment & Inventory" --settle
+Exit: 0
+Tapped label="Equipment & Inventory" (201, 219)
+settled after 1773ms: +7 -6 (~6 unchanged)
+- @e3 [text] "Contents"
+- @e4 [button] "Character"
+- @e5 [button] "Equipment & Inventory"
+- @e6 [button] "Map"
+- @e7 [button] "Journal"
+- @e8 [button] "Settings"
++ @e3~s892596 [text] "Equipment & Inventory"
++ @e4~s892596 [text] "Held"
++ @e5~s892596 [button] "a brass key, open"
++ @e6~s892596 [button] "a storage key, open"
++ @e7~s892596 [text] "Worn"
++ @e8~s892596 [text] "Cloak"
++ @e9~s892596 [text] "Empty"

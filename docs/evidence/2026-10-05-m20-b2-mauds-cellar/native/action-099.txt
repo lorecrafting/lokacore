@@ -1,0 +1,15 @@
+Phase: final Book fix
+Action: press label="Go up" --settle
+Exit: 0
+Tapped label="Go up" (201, 215)
+settled after 720ms: +0 -0 (~10 unchanged)
+unchanged interactive (9):
+= @e2~s892366 [scroll-area] "Map"
+= @e3~s892366 [other] "Map"
+= @e4~s892366 [text] "Lantern Cellar"
+= @e5~s892366 [button] "Go up"
+= @e6~s892366 [text] "Beyond up: The Drowned Lantern — Old Bram, Widow Maud."
+= @e7~s892366 [button] "Back to World"
+= @e8~s892366 [button] "Contents, Character, hp 8 of 10, has a few bruises, ma 100 of 100, mv 100 of 100"
+= @e9~s892366 [text] "Hour of the Rat, eleven to one"
+= @e10~s892366 [text] "Position, standing"

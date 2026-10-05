@@ -1,0 +1,18 @@
+Action: press label="Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100" --settle
+Exit: 0
+Tapped label="Contents, Character, hp 10 of 10, is in perfect health, ma 100 of 100, mv 100 of 100" (254, 810)
+settled after 1779ms: +7 -7 (~5 unchanged)
+- @e3 [text] "Widow Maud"
+- @e4 [text] "Broad, floury, sharp-eyed. She has been widowed by the river and has not forgiven it."
+- @e5 [text] "“Clear the five rats out of my cellar and I’ll give you the key to the storage chest upstairs.”"
+- @e6 [text] "You agree to clear Maud’s cellar."
+- @e7 [text] "Journal updated"
+- @e8 [button] "Talk to Widow Maud"
+- @e9 [button] "Leave"
++ @e3~s528165 [text] "Contents"
++ @e4~s528165 [button] "Character"
++ @e5~s528165 [button] "Equipment & Inventory"
++ @e6~s528165 [button] "Map"
++ @e7~s528165 [button] "Journal"
++ @e8~s528165 [button] "Settings"
++ @e9~s528165 [button] "Back to World"
