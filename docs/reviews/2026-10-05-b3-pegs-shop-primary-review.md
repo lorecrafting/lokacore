@@ -52,3 +52,28 @@ restock framework, dependency or speculative abstraction.
 Full checks, broad schema mutation sweep, hosted CI and native verification are
 not claimed; see the [source check note](../evidence/2026-10-05-b3-shop/README.md)
 and [provisional workflow](../WORKFLOW.md#local-draft-pr-cadence).
+
+## Scoped fix recheck
+
+**APPROVE at integrated `9c7e537942e13455a1f64b5afdb90b60faae27dd`**, source
+fix `bd3d8c05518a890d7b6b282970092ce6b9b50cde`. No new findings; the earlier
+primary approval is retained. Scope is corrected independent ID answers, their
+Buy→Wear→reopen regression, four schema examples and generated contracts.
+No gameplay rule, chapter artifact/hash or save format changed.
+
+- Checked initial enumeration, equipment custody and compiler/validator consumers
+  against [initial/slot ordering](../spec/conformance/numeric-profile.md).
+  The independent Python script reproduces all 58 fixture identities byte for
+  byte, excludes corpse templates and includes both slot holders.
+- The exact new ID-pin/Buy→Wear→cold-reopen test passes (one test, 0.27 s).
+  Restoring the original bad fixture in a throwaway worktree makes it fail.
+- The existing all-contract examples check passes via
+  `mix test --force test/loka/core/contracts_test.exs:17` (one test, 0.5 s).
+  Removing ShopAction's example makes that check fail. Restored controls pass;
+  the throwaway worktree is removed and reviewed source remains unchanged.
+- The four generated shop contract definitions are identical after removing
+  their added examples; no validation constraints changed.
+
+Ponytail Review: no extra runtime machinery or duplicate example checker. Only
+the two affected tests were rerun; publication and second-opinion gates remain
+separate.
