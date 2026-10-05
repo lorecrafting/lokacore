@@ -63,9 +63,13 @@ status=0
 out=$(node bin/check_ts_size.mjs $(find "$L" "$T" -type f)) || status=$?
 got=$(printf '%s\n' "$out" | LC_ALL=C sort)
 want=$(printf '%s\n' "$expected" | LC_ALL=C sort)
-# The no-argument scan (what CI runs) must find a planted file too.
+# The production scan selection must find a planted file too.
 scan_status=0
-scan=$(node bin/check_ts_size.mjs) || scan_status=$?
+if [ "${1-}" = --core-only ]; then
+  scan=$(git ls-files -z -co --exclude-standard '*.ts' '*.tsx' '*.mjs' ':(exclude)mobile/**' | xargs -0 node bin/check_ts_size.mjs) || scan_status=$?
+else
+  scan=$(node bin/check_ts_size.mjs) || scan_status=$?
+fi
 if [ "$status" -ne 0 ] && [ "$got" = "$want" ] && [ "$scan_status" -ne 0 ] &&
   printf '%s\n' "$scan" | grep -qxF "$L/big.ts:1: file, 301 lines, limit 300"; then
   echo "ok   ts size: limits and allow markers"

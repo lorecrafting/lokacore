@@ -70,6 +70,13 @@ LOCAL-FAST-LOOP — owner testing on Debug/Metro with playable-checkpoint source
 and coherent PR batching — merged in [#181](https://github.com/lorecrafting/lokacore/pull/181)
 after independent approval and green docs-head checks.
 
+WEB-FIRST-PAUSE — mobile-specific CI checks, native builds and device Simulator
+verification paused while headless engine simulation stays active — merged in
+[#191](https://github.com/lorecrafting/lokacore/pull/191) after two workflow-review
+findings were fixed and independently rechecked. Five source-head CI checks and
+final review-head checks passed. The [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md)
+sets the temporary routing; browser preview implementation remains separate.
+
 M12-B — nested notice-board and notice detail pages — merged in
 [#182](https://github.com/lorecrafting/lokacore/pull/182) after the cold-reopen,
 navigation-label and malformed-save findings were fixed; primary and protocol/save
