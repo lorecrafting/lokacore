@@ -109,3 +109,5 @@ and new review carries; their linked records retain the governing details.
 | First touch recipient selector | Touch Give: supply a projected valid recipient; meanwhile suppress incomplete item-only Give and preserve complete invocations ([Book UI](system/book-ui.md)). |
 | First typed worn/nested-item consumer / targetless item alias | Equipment: typed targets omit worn items; locks: typed examine omits nested items. Revisit when a typed client needs them. A targetless take/drop/give alias is listed but never accepted; revisit before first such authored alias. |
 | Next necessary dialogue boundary change / retained older Lantern release with journal text | c1-journal: inline continuationId when a typed replacement satisfies rule purity; journal keys for a retained pinned Lantern require its own release handling. Current development sampler replacement follows its own ruling. |
+
+M20-B1 — atomic Maud reward and usable storage with a controlled S1 consumer — in development under [PM adoption](decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md); production S1 remains B2.

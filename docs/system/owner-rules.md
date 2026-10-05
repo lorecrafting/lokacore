@@ -25,7 +25,7 @@ and not repeated here.
 - NPC dialogue/actions use a stable scrolling history with bottom-anchored offered controls; NPC/items use Leave and confirmed Take returns to World with named pickup narration; the status entry opens Contents with the five existing sections ([record](../decisions/owner-decision-c1-dialogue-contents-polish-2026-10-03.md)).
 - C1 room output stays focused; NPCs open full details, section detail returns say Back to World, and position changes open only from the room status label ([record](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md)).
 
-- The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); substantive story prose remains subject to batch approval.
+- The sampler reuses existing UI labels and default band settings for its approved content-owned phrase/tone acceptance ([PM repair](../decisions/pm-decision-sampler-bands-2026-10-03.md)); descriptions, action text and other in-game copy are now PM-delegated without per-batch owner approval ([superseding decision](../decisions/owner-decision-copy-delegation-2026-10-04.md)).
 - Sampler identity and complete prose follow the [owner delegation and PM selections](../decisions/owner-decision-sampler-batch-2026-10-03.md).
 
 - World time continues during dialogue, menus and cutscenes; reading-speed fairness needs intentional timed choices and protection or an escape option while controls are restricted ([record](../decisions/owner-decision-reading-time-2026-10-03.md)).
@@ -118,10 +118,12 @@ and not repeated here.
   ([record](../archive/decisions/owner-decision-roadmap-2026-09-24.md), [ROADMAP](../archive/ROADMAP.md#verification-harness-adopted-2026-09-24)).
 - The due-job drain landed with the first real job; `real_elapsed` time is carried until a
   cartridge declares it ([record](../archive/decisions/owner-decision-s4-scope-2026-09-30.md)).
-- Saves: the app carries bundled releases newest first and reopens a save on its pin; a missing
-  pin or unknown format is a typed refusal; every future save format keeps `save.format` readable
-  by older apps; release deletion, migration staging and the recovery copy are carried
-  ([record](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md)).
+- Pre-production: backward API/release/save compatibility and older-development adapters or
+  migrations are not required; advance current releases and independently re-pin known answers.
+  Preserve frozen conformance fixtures and safe explicit mismatch refusal, never silent save
+  deletion ([superseding decision](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md)).
+- Saves reopen on an available exact pin; missing pins and unsupported formats are typed refusals
+  ([save contract](save.md#opening-a-story); [original scope](../archive/decisions/owner-decision-s3b-scope-2026-09-30.md)).
 - The book UI's departures from 00 §4.10 (map joystick, full pages, status line) are documented
   departures, no spec amendment ([record](../archive/decisions/owner-decision-sm2-scope-2026-10-01.md)).
 - Narration binds its participants at commit; no `narration.emit`, no acknowledgement
@@ -204,3 +206,5 @@ The workflow itself is [WORKFLOW.md](../WORKFLOW.md); these records are its sour
 - Flee takes no player direction and chooses a legal exit through the [owner-approved random-Flee rule](../decisions/owner-decision-m6-a-random-flee-2026-10-04.md).
 
 - Open encounters apply the [owner-approved focused combat ActionSet](../decisions/owner-decision-m6-a-combat-actions-2026-10-04.md) after ordinary contributions, with shared admission/projection and normal restoration on close.
+
+- M20-B1 mechanical scope: [PM adoption](../decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md); controlled consumer only, production S1 copy/publication stays B2.

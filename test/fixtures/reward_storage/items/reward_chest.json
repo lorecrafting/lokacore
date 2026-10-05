@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "reward_chest"
+  ],
+  "short": "fixture.reward_chest",
+  "room_line": "fixture.reward_chest.room",
+  "description": "fixture.reward_chest",
+  "mass_grams": 8000,
+  "capacity": 12,
+  "location": {
+    "in": "room",
+    "room": "inn_rooms"
+  },
+  "barrier": "reward_lid"
+}

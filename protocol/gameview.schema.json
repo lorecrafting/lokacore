@@ -27,6 +27,12 @@
               "items": {
                 "$ref": "action.schema.json#/$defs/ActionInputParameter"
               }
+            },
+            "target_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
+              }
             }
           },
           "required": [
@@ -61,6 +67,12 @@
               "type": "array",
               "items": {
                 "$ref": "action.schema.json#/$defs/ActionInputParameter"
+              }
+            },
+            "target_ids": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/EntityId"
               }
             }
           },

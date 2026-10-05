@@ -22,8 +22,9 @@ import {
 } from '../../runtime/decision.ts';
 import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
-import { carrying } from './shared.ts';
+import { carrying, putRefused } from './shared.ts';
 
+// size: allow 50, one conserved-transfer decision for Take/Drop/Give/Put with shared pair admission
 export const decide: Rule<'containment'> = (world, command, mint, steps) => {
   const p = command.payload;
   const body = bodyOf(world, p.actor_id);
@@ -52,6 +53,14 @@ export const decide: Rule<'containment'> = (world, command, mint, steps) => {
     const code = carrying(world, body, steps)(p.item_id);
     if (code) return code === 'too_heavy' ? rejected(code) : { kind: 'fault', code };
     return accepted(world, 'taken', move(body), acquired(body));
+  }
+  if (p.type === 'put') {
+    const code = putRefused(world, body, p.item_id, p.container_id, steps ?? { n: 0 });
+    if (code)
+      return code === 'budget_exceeded' || code === 'containment_cycle'
+        ? { kind: 'fault', code }
+        : rejected(code);
+    return accepted(world, 'put', move(p.container_id), acquired(p.container_id));
   }
   if (at !== body) return rejected('not_owned');
   if (p.type === 'drop') {

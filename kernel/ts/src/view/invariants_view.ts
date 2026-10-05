@@ -79,6 +79,7 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
     'insufficient_resource',
   ],
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
+  put: ['not_present', 'not_owned', 'invalid_state', 'exit_closed', 'exit_locked'],
   take: ['not_present', 'too_heavy'], // reach and voluntary carrying admission
 };
 
@@ -105,10 +106,15 @@ function advertised(
     return view.actions.find((a) => a.action_key === key);
   }
   return entityView(view, id)?.actions.find((a) =>
-    p.type === 'take'
+    p.type === 'put'
       ? (action_key === undefined || a.action_key === action_key) &&
-        (commandOf(a) ?? a.action_key) === 'take'
-      : a.action_key === p.type,
+        (commandOf(a) ?? a.action_key) === 'put' &&
+        a.target_ids?.[0] === p.item_id &&
+        a.target_ids?.[1] === p.container_id
+      : p.type === 'take'
+        ? (action_key === undefined || a.action_key === action_key) &&
+          (commandOf(a) ?? a.action_key) === 'take'
+        : a.action_key === p.type,
   );
 }
 

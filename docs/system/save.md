@@ -26,6 +26,10 @@ The session controller adds two `save_corrupt` causes, both with the new game in
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 
+During [pre-production development](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md), old release/save
+compatibility is not required. A save opens only when its exact release pin is available;
+a mismatch is explicitly refused, never silently migrated, retargeted or deleted.
+
 ## Receipts
 
 Scope `story/<lineage_id>/<character>` (`save.ts:137`). A receipt (`store.ts:32`) stores
@@ -62,6 +66,9 @@ reads the receipt (committed: memory adopts the saved head; not there: the attem
 Memory never serves a state the store did not confirm. Tests: `faults.test.ts` (every fault
 leaves the prior or next revision), `saves.test.ts` ("a new game whose COMMIT is unknown is
 fenced; settling it moves play to the new run").
+
+The [M20-B1 reward and Put](mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts)
+use these same changed containers/facts/quests/choices/head/receipt rows, with no new table or format.
 
 ## The save file (`loka-save-v1`)
 
@@ -277,8 +284,8 @@ owner, ID collisions, room custody and reachable acyclic custody before hydratin
 entities. Invalid rows are `save_corrupt`, without repairs or skipped possessions.
 Forced death custody does not apply a voluntary carrying ceiling. Unknown COMMIT
 continues fencing input and elapsed work until the existing reconciliation confirms
-all prior or all next rows. The API1.5 content requirement and exact release pin are the
-compatibility gates; this addition uses existing save-v2 rows without a format bump.
+all prior or all next rows. The exact release pin refuses a missing or mismatched release;
+this addition uses existing save-v2 rows without a format bump or old-save migration.
 
 ## Live encounter persistence (M6-A)
 
@@ -293,4 +300,5 @@ The due round revalidates presence and closes the encounter without attacks or R
 the NPC remains absent. Closed/cancelled occurrences cannot attack after reopen. Unknown COMMIT
 fences both input and elapsed work until complete prior/next state is reconciled;
 replay allocates and credits nothing. This uses save-v2 without a table/format migration;
-API1.6 and the exact release pin protect compatibility and existing owner saves.
+exact release-pin refusal prevents opening a mismatched save, without promising old development
+save compatibility.

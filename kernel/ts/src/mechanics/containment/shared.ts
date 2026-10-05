@@ -2,6 +2,7 @@
 // only for this decision/list projection; custody and pinned item definitions remain authoritative.
 import { LIMITS, type EntityId } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
+import { opened, reach, barrierState } from '../lookups.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
 
 type Failure = 'too_heavy' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
@@ -119,4 +120,52 @@ function total(c: Context, root: string): number | Failure {
     for (const child of c.children!.get(node.id) ?? []) stack.push({ id: child });
   }
   return totals.get(root)!;
+}
+
+/** Put admission and projection share direct source custody, lid, cycle and capacity checks. */
+// size: allow 50, one bounded pair query keeps source, reach, lid, ancestry and capacity admission together
+export function putRefused(
+  world: World,
+  body: EntityId,
+  item: EntityId,
+  destination: EntityId,
+  steps: Steps,
+) {
+  if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+  if (!Object.hasOwn(world.entities, item) || !Object.hasOwn(world.entities, destination))
+    return 'not_found' as const;
+  if (
+    world.entities[item].kind !== 'item' ||
+    world.entities[destination].kind !== 'item' ||
+    world.state.created?.[item]
+  )
+    return 'invalid_target' as const;
+  if (world.state.containers[item] !== body) return 'not_owned' as const;
+  const seen = new Set<string>();
+  let at: string = destination;
+  while (at !== undefined && !Object.hasOwn(world.rooms, at)) {
+    if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+    if (at === item || seen.has(at)) return 'containment_cycle' as const;
+    seen.add(at);
+    at = world.state.containers[at];
+  }
+  const reached = reach(world, body, destination, steps);
+  if (typeof reached === 'string') return reached;
+  if (!reached) return 'not_present' as const;
+  const lid = world.entities[destination].barrier;
+  if (lid && barrierState(world, lid) !== 'open')
+    return barrierState(world, lid) === 'locked'
+      ? ('exit_locked' as const)
+      : ('exit_closed' as const);
+  if (!opened(world, destination, body)) return 'not_present' as const;
+  const capacity = world.capacities[destination];
+  if (capacity !== undefined) {
+    let count = 0;
+    for (const child in world.state.containers) {
+      if (!Object.hasOwn(world.state.containers, child)) continue;
+      if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+      if (world.state.containers[child] === destination) count++;
+    }
+    if (count >= capacity) return 'invalid_state' as const;
+  }
 }

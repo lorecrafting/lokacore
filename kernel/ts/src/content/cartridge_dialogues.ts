@@ -39,13 +39,14 @@ export const uses = (c: Obj) =>
   [
     ...each(c).flatMap(([d, at]) => [
       ['definition', 'dialogue', at],
-      ...Object.entries(d.choices as Obj).flatMap(([id, o]) =>
-        (o.sequence ?? []).map((_: Obj, i: number) => [
+      ...Object.entries(d.choices as Obj).flatMap(([id, o]) => [
+        ...(o.receive ? [['event', 'item_acquired', `${at}.choices${step(id)}.receive`]] : []),
+        ...(o.sequence ?? []).map((_: Obj, i: number) => [
           'event',
           'fact_changed',
           `${at}.choices${step(id)}.sequence[${i}].op`,
         ]),
-      ),
+      ]),
     ]),
     ...Object.keys((c.story_points ?? {}) as Obj).map((ref) => [
       'event',
@@ -78,7 +79,7 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     if (!Object.keys(d.choices).length)
       out.push(diag('SCHEMA_VIOLATION', `${at}.choices`, { error: 'too_few_items' }));
     for (const [id, o] of Object.entries(d.choices as Obj))
-      out.push(...choice(o, `${at}.choices${step(id)}`, d, checks));
+      out.push(...choice(o, `${at}.choices${step(id)}`, d, checks, c));
   }
   return [...out, ...storyPoints(c, named), ...chapters(c, checks)];
 }
@@ -152,7 +153,7 @@ function ambiguous(c: Obj, t: Obj): boolean {
 
 // One option's texts, fact.assign steps, accept (a quest of this cartridge, in a dialogue that
 // resolves none, with no hand_over: OUTCOME_MISMATCH) and hand_over (an item role to an npc role).
-function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Checks) {
+function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Checks, c: Obj) {
   const roles = d.roles as Obj;
   const out: Diagnostic[] = [];
   text(o, ['label', 'narration'], path);
@@ -163,8 +164,23 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
   }
   (o.sequence ?? []).forEach((s: Obj, i: number) => {
     named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
-    typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
+    if (s.op === 'fact.adjust') {
+      const t = c.facts[refString(s.fact)]?.value_type;
+      if (t && (t.type !== 'int' || t.minimum === undefined || t.maximum === undefined))
+        out.push(diag('FACT_TYPE_MISMATCH', `${path}.sequence[${i}].fact`));
+    } else typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
   });
+  if (o.receive) {
+    if (!d.quest || o.accept || o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
+    for (const [field, role] of [
+      ['item', 'item'],
+      ['from', 'npc'],
+    ])
+      if (!Object.hasOwn(roles, o.receive[field]) || roles[o.receive[field]].role !== role)
+        out.push(
+          diag('UNRESOLVED_REFERENCE', `${path}.receive.${field}`, { target: o.receive[field] }),
+        );
+  }
   const h = o.hand_over;
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);

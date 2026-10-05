@@ -153,4 +153,10 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Random Flee, 2026-10-04](owner-decision-m6-a-random-flee-2026-10-04.md): owner selects directionless Flee with an engine-chosen legal exit.
 
 - [Focused combat actions, 2026-10-04](owner-decision-m6-a-combat-actions-2026-10-04.md): owner restricts the composed action set to Flee, Stand, Look and Scan during an open encounter.
+
+- PM adoption: [M20-B1 atomic reward and usable storage](pm-decision-m20-b1-reward-storage-2026-10-04.md).
+
+- Owner direction (paraphrased): [PM-delegated in-game copy](owner-decision-copy-delegation-2026-10-04.md), superseding per-batch wording approval.
 - [One independent reviewer by default, 2026-10-04](owner-decision-one-reviewer-default-2026-10-04.md): mechanics PRs retain fresh review; a second opinion is reserved for save, contract, foundation and gate risks.
+
+- Owner direction: [pre-production compatibility](owner-decision-preproduction-compatibility-2026-10-04.md); prioritize the current release, preserve explicit mismatch refusal and frozen conformance fixtures.

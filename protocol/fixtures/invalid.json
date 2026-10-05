@@ -13072,7 +13072,7 @@
       },
       {
         "path": "/choices/d/sequence/0/op",
-        "code": "const_mismatch"
+        "code": "unknown_variant"
       },
       {
         "path": "/choices/d/sequence/1/fact",

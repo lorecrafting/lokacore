@@ -92,7 +92,12 @@ const transfer = (entity_id: string, source_id: string, destination_id: string) 
   { op: 'entity.transfer', writer_group: 0, entity_id, source_id, destination_id },
 ];
 const keys = (v: GameView['inventory']) =>
-  Object.fromEntries(v.map((e) => [e.id, e.actions.map((a) => a.action_key)]));
+  Object.fromEntries(
+    v.map((e) => [
+      e.id,
+      e.actions.filter((a) => ['wear', 'remove'].includes(a.action_key)).map((a) => a.action_key),
+    ]),
+  );
 
 // Breaks: holders minted before the jobs or the items, in ref or 00 §4.4 order instead of
 // slot-key order, outside the body, without capacity 1, or as targetable, listed entities.
@@ -204,18 +209,18 @@ test('the GameView lists the slots in order and wear and remove only where step 
   );
   for (const item of [CAP, HAT, KEY, LANTERN]) w = accepted(w, 'take', item).world;
   assert.deepEqual(keys(gameView(w).inventory), {
-    [KEY]: ['drop', 'give'],
-    [LANTERN]: ['drop', 'give', 'wear'],
-    [CAP]: ['drop', 'give', 'wear'],
-    [HAT]: ['drop', 'give', 'wear'],
+    [KEY]: [],
+    [LANTERN]: ['wear'],
+    [CAP]: ['wear'],
+    [HAT]: ['wear'],
   });
   assert.equal(gameView(w).inventory.find((e) => e.id === CAP)!.description, 'catalog.cap_body');
   w = accepted(w, 'wear', CAP).world;
   const view = gameView(w);
   assert.deepEqual(keys(view.inventory), {
-    [KEY]: ['drop', 'give'],
-    [LANTERN]: ['drop', 'give', 'wear'],
-    [HAT]: ['drop', 'give'],
+    [KEY]: [],
+    [LANTERN]: ['wear'],
+    [HAT]: [],
   });
   const remove = {
     available: true,

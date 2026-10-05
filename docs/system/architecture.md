@@ -125,6 +125,12 @@ actual subset; existing writer conflicts, budgets and ordering remain governed b
 and [primitive graduation rules](../archive/spec/21-composable-world-primitives.md#24-primitive-graduation-rule)
 supply the historical direction, without making the whole catalog an implementation queue.
 
+The controlled M20-B1 consumer composes five typed rat-death credits with a current-state
+quest, a live/present bound NPC, incoming item custody, carrying capacity and bounded trust.
+Dialogue owns incoming transfer and adjustment lowering; containment owns Put; proposal owns
+acquisition quests/reactions; authority owns atomic save/receipt/adoption. No named Maud or
+chest rule belongs in the kernel. See [PM adoption](../decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md).
+
 ## Two kernels, one semantic contract
 
 The foundation (encoding, hash, integers, RNG, ids, composition, validation, the

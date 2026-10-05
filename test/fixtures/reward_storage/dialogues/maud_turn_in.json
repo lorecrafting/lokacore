@@ -1,0 +1,45 @@
+{
+  "npc": "maud",
+  "quest": "mauds_cellar",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "mauds_cellar",
+      "state": "active"
+    }
+  },
+  "prompt": "fixture.turn_in",
+  "roles": {
+    "maud": {
+      "role": "npc",
+      "npc": "maud"
+    },
+    "key": {
+      "role": "item",
+      "item": "reward_key"
+    }
+  },
+  "choices": {
+    "done": {
+      "label": "fixture.done",
+      "narration": "fixture.completed",
+      "receive": {
+        "item": "key",
+        "from": "maud"
+      },
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "maud_trust",
+          "amount": 5
+        },
+        {
+          "op": "fact.assign",
+          "fact": "inn_cellar_cleared",
+          "value": true
+        }
+      ]
+    }
+  }
+}

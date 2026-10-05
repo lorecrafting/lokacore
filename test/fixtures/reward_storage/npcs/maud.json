@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "maud"
+  ],
+  "short": "fixture.maud",
+  "room_line": "fixture.maud.room",
+  "description": "fixture.maud",
+  "room": "drowned_lantern"
+}

@@ -37,7 +37,7 @@ export function reserved(c: Obj): Diagnostic[] {
       out.push(diag('RESERVED_FACT', `.cartridge.facts${step(ref)}`));
   });
   const write = (s: Obj, at: string) => {
-    if (s.op === 'fact.assign' && refs.includes(refString(s.fact)))
+    if ((s.op === 'fact.assign' || s.op === 'fact.adjust') && refs.includes(refString(s.fact)))
       out.push(diag('RESERVED_FACT', `${at}.fact`));
   };
   const each = (map: string) => Object.entries((c[map] ?? {}) as Obj);

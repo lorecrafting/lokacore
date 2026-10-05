@@ -31,7 +31,7 @@ import { read } from './read.ts';
  * Bump when a seed would generate a different sequence, a new demo cartridge known answer
  * included (begin picks among them by seed); sim_seeds.json records it.
  */
-export const GENERATOR = 15;
+export const GENERATOR = 16;
 /** Each registered invariant, by how a step checks it (runtime/world.ts holds on the world after it, */
 /** runtime/invariants.ts check on its observation), or why no step does. */
 export const CHECKED = {
@@ -335,7 +335,13 @@ function offered(world: World, g: Gen): Payload {
       options.push(...[...view.inventory, ...worn].map((e) => aimed(o.command, e.id, STALE)));
   for (const e of [...view.entities, ...view.inventory, ...worn, ...inside])
     for (const a of e.actions)
-      options.push(aimed(set[a.action_key]!.command, e.id, g.pick([...npcs, STALE])));
+      options.push(
+        aimed(
+          set[a.action_key]!.command,
+          a.target_ids?.[0] ?? e.id,
+          a.target_ids?.[1] ?? g.pick([...npcs, STALE]),
+        ),
+      );
   for (const [d, detail] of Object.entries(world.details))
     if (detail.room === here) options.push({ type: 'look', target_id: d });
   return options.length ? g.pick(options) : { type: 'look' };
@@ -345,7 +351,12 @@ function offered(world: World, g: Gen): Payload {
 const aimed = (type: string, id: string, to: string): Payload =>
   type === 'look' || type === 'talk' || Object.hasOwn(MOVES, type)
     ? { type, target_id: id }
-    : { type, item_id: id, ...(type === 'give' && { recipient_id: to }) };
+    : {
+        type,
+        item_id: id,
+        ...(type === 'give' && { recipient_id: to }),
+        ...(type === 'put' && { container_id: to }),
+      };
 
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 const DIRECTIONS = ['north', 'south', 'east', 'west', 'up', 'down', 'sideways', 'constructor'];

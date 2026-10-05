@@ -85,7 +85,7 @@ export function RoomPage(p: {
           </Tap>
         )}
         {p.g.place.map((b) => (
-          <Act key={b.label} b={b} press={p.press} />
+          <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
         ))}
         {p.log.length > 0 && <Text style={{ ...prose, marginTop: 12 }}>{p.log.join('\n')}</Text>}
         {ended(p.view) !== '' && <Text style={{ ...note, marginTop: 12 }}>{ended(p.view)}</Text>}
@@ -143,7 +143,7 @@ export function ThingPage(p: {
         <Text style={note}>Nothing to do here.</Text>
       )}
       {p.actions.map((b) => (
-        <Act key={b.label} b={b} press={p.press} />
+        <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
       <Leave leave={p.leave} />
       {p.contents.length > 0 && <Text style={titleStyle}>Inside</Text>}
@@ -267,7 +267,7 @@ export function MapPage(p: { view: GameView; text: Say; g: Grouped; press: (b: B
       {p.view.exits.length === 0 && <Text style={note}>No way out is known.</Text>}
       <Ways {...p} />
       {p.g.place.map((b) => (
-        <Act key={b.label} b={b} press={p.press} />
+        <Act key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />
       ))}
     </Sheet>
   );

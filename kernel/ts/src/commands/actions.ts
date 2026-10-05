@@ -73,8 +73,7 @@ const entity = (scope: 'room_contents' | 'inventory'): TargetSpec => ({
 });
 // ponytail: every engine verb has priority 0, so they list in key order; give them priorities
 // when a host's presentation needs one first. ponytail: this table names other capabilities'
-// verbs (schedule's wait joined in R5 S6, barrier's open, close, lock and unlock in S7,
-// movement's scan in S8, per the briefs); each verb's target and input move onto its command's
+// verbs; each verb's target and input move onto its command's
 // registry entry when a second capability contributes a verb outside VERBS (dialogue's talk,
 // choose and close_choice come from mechanics/dialogue/shared.ts).
 const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
@@ -86,6 +85,7 @@ const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]>> = {
   take: [entity('room_contents'), []],
   drop: [entity('inventory'), []],
   give: [entity('inventory'), []],
+  put: [entity('inventory'), []],
   wait: [{ kind: 'none' }, ['until']],
   open: [{ kind: 'none' }, ['direction']],
   close: [{ kind: 'none' }, ['direction']],

@@ -1,14 +1,10 @@
 # AGENTS.md — Loka v3
 
-Instructions for every coding agent and LLM working here (Codex, Claude Code, others).
-`CLAUDE.md` only points to this file; it is not separate policy.
+Instructions for every coding agent and LLM. `CLAUDE.md` points here; no separate policy.
 
-Loka v3 is an offline-first story/MUD engine: an Elixir/OTP server and a TypeScript
-kernel running on Hermes in a React Native (Expo) phone app. This repository starts at
-R2 (fresh repository foundation). The history, the R1 spike and all R1 evidence live
-in the archived repository
-[lorecrafting/lokacore-v2-legacy](https://github.com/lorecrafting/lokacore-v2-legacy)
-at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
+Loka v3: offline-first story/MUD engine, Elixir/OTP server and TypeScript kernel on
+Hermes/React Native (Expo). R2 foundation; R1 history/spec/evidence: [archive](https://github.com/lorecrafting/lokacore-v2-legacy),
+commit `997a7a8` (`docs/rewrite-v3/`, `r1-spike/`).
 
 ## Specification (source of truth)
 
@@ -22,6 +18,11 @@ at commit `997a7a8` (spec under `docs/rewrite-v3/`, spike under `r1-spike/`).
   History, read only when a task needs it.
 
 ## Architecture decisions already made (do not reopen silently)
+
+- **Pre-production:** backward API/release/save compatibility and older-development adapters/migrations
+  are not required. Advance current bundled releases; independently re-pin their known answers.
+  Preserve frozen conformance fixtures, safe explicit mismatch refusal and no silent save deletion
+  ([owner decision](docs/decisions/owner-decision-preproduction-compatibility-2026-10-04.md)).
 
 - **Candidate C (R1), TypeScript first:** the portable semantic foundation (canonical
   encoding and hash, numbers, RNG, IdSource, delta algebra, invariant registry) is built in
