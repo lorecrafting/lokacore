@@ -104,6 +104,13 @@ The primary and separate save opinions approved, six source-head checks passed,
 and the final review-only head checks passed. Chapter release 0.0.9 keeps Q2 active;
 Wren has not yet been found.
 
+Q2-B — meet Wren and Vesper at Fox Hollow and solve the durable letter-bank
+riddle — merged in [#188](https://github.com/lorecrafting/lokacore/pull/188)
+after the malformed dialogue-source recovery finding was fixed. Primary and
+separate protocol/save rechecks approved, six fix-source checks passed, and the
+final review-only head checks passed. Chapter release 0.0.10 keeps Q2 active;
+the escort or message return remains to be built.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
