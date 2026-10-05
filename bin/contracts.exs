@@ -82,15 +82,6 @@ defmodule Gen do
     end)
   end
 
-  defp exclusive_field(k, sub, keys, required, chosen) do
-    cond do
-      k == chosen -> "readonly #{lit(k)}: #{type(sub)}"
-      k in keys -> "readonly #{lit(k)}?: never"
-      k in required -> "readonly #{lit(k)}: #{type(sub)}"
-      true -> "readonly #{lit(k)}?: #{type(sub)}"
-    end
-  end
-
   defp type(%{"type" => "object", "properties" => ps} = s) do
     required = Map.get(s, "required", [])
 
@@ -103,6 +94,15 @@ defmodule Gen do
   end
 
   defp type(%{"type" => t}), do: %{"string" => "string", "integer" => "number"}[t] || t
+
+  defp exclusive_field(k, sub, keys, required, chosen) do
+    cond do
+      k == chosen -> "readonly #{lit(k)}: #{type(sub)}"
+      k in keys -> "readonly #{lit(k)}?: never"
+      k in required -> "readonly #{lit(k)}: #{type(sub)}"
+      true -> "readonly #{lit(k)}?: #{type(sub)}"
+    end
+  end
 end
 
 # ---- Inputs ----
