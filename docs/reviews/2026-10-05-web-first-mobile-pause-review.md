@@ -18,3 +18,7 @@ Findings:
 - **F2, should-fix — `bin/check_all.sh:34`:** The old no-argument size check included tracked and untracked nonignored files. The new explicit `git ls-files` selection includes tracked files only. A new untracked `kernel/ts/src` file over 300 lines passes the local size check before staging, weakening the active non-mobile gate. Include untracked nonignored files in the non-mobile selection, as line 36 already does for Prettier. Keep CI's tracked-only selection if desired.
 
 `git diff --check origin/main...HEAD` passed. The exact-head CI run completed successfully (`changes`, `elixir`, `lint`, `sim`, `typescript`). No code mutation test is needed for this config/docs slice.
+
+## Fix round 1 — `3040ee3ea94a46517206f86d7f294586fb9748bb`
+
+Verdict: **APPROVE**. F1 is closed: `AGENTS.md` now explicitly names the active checks and links the temporary mobile pause for agents taking over. F2 is closed: `bin/check_all.sh` uses `git ls-files -co --exclude-standard` with the mobile exclusion, matching its Prettier selection. The directly related `bin/ts_size_red_controls.sh --core-only` now exercises that same production selection using its untracked oversized kernel file; it passed and left the worktree clean. CI's tracked-only source selection remains appropriate for its checkout. `git diff --check b428a6d8..3040ee3e` passed. The new head's CI was still running at review time; the PM retains the exact-head green gate before merge. No open findings.
