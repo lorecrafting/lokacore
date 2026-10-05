@@ -97,6 +97,13 @@ detail pages — merged in [#186](https://github.com/lorecrafting/lokacore/pull/
 after primary and pin/save approvals, six green source-head checks and green
 review-only head checks. Chapter release 0.0.8 remains pre-Q2 discovery and rescue.
 
+Q2-A — automatic Missing Child search activation after Q1 and Study of Reed Bank
+tracks — merged in [#187](https://github.com/lorecrafting/lokacore/pull/187)
+after the malformed-receipt recovery finding was fixed and independently rechecked.
+The primary and separate save opinions approved, six source-head checks passed,
+and the final review-only head checks passed. Chapter release 0.0.9 keeps Q2 active;
+Wren has not yet been found.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
