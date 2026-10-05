@@ -13,3 +13,24 @@ From [architecture](../system/architecture.md#building-mechanics-by-composition)
 ## Verification and simplicity
 
 Focused kernel bell tests: 5 passed; real rollback-journal SQLite bell tests: 4 passed; focused Elixir content/contract tests: 8 passed. Kernel and mobile TypeScript checks and headless Node sim passed. Removing reaction Q3 resolution made three bell-path tests fail; bypassing Ring receipt verification made the `ring_receipt_missing` cold-open case fail. Both mutants were restored. Native checks remain paused by the owner decision. The diff reuses recipe, quest lifecycle, reaction delivery and scene facts; no distinct over-engineering finding. No PR code was edited.
+
+## Separate save/protocol opinion
+
+Verdict: REQUEST CHANGES
+Reviewed SHA: a7810adb7a2da2db56eb0bb51f393d196b4b9103
+
+S1 — blocker — mobile/authority/local-story/bell-save.ts:92
+Ring evidence matches fact keys and terminal IDs without checking full references/scopes, event quest/actor, or retained command identity. After lawful Ring, changing its quest_resolved event to name missing_child, changing actor, or assigning the bell at another actor’s scope still returns open. Contradictory evidence must yield save_corrupt under “Bell-first return recovery.”
+
+S2 — blocker — mobile/authority/local-story/bell-save.ts:39
+The scene check rejects only zero. Saved scene_bell_rung values 4, -2, "bad", and 1.5 all reopen. The first three suppress the unfinished modal scene; 1.5 makes gameView throw TypeError. Validate the persisted scene value against its generated integer bounds before exposing play.
+
+S3 — blocker — mobile/authority/local-story/bell-save.ts:43
+After legitimate Q3 acceptance, deleting Q2’s quest row still returns open because the unrung branch never requires Q2. Q1 is already resolved, leaving accepted Q3 stranded and Ring permanently refused instead of offering typed corruption recovery.
+
+S4 — should-fix — protocol/scene.schema.json:26
+SceneDefinition now accepts both an outcome-only trigger and simultaneous quest/story_point triggers. The PR removes frozen scene_on_missing_story_point coverage. Compiler/loader checks remain safe, but generated contract validation accepts invalid trigger shapes. Restore contract-level rejection and the conformance control.
+
+Evidence: Focused bell, return, escort, scene and readable-routing tests pass. Real delete-journal SQLite controls passed Ring replay, lost acknowledgement and genuinely failed COMMIT reconciliation. Three additional corruption assertions fail with open instead of save_corrupt. Removing the receipt guard makes the existing corruption test fail. Independent v013 pins reproduce; API1.11 refuses v013. Disposable checkout removed.
+
+Ponytail: No over-engineering finding; tighten existing validation predicates.

@@ -7,7 +7,12 @@ anything outside it fails compilation and generation. Nullable scalar unions and
 object-or-null union needed by escort's full prior-row precondition are supported
 for explicit absent custody and unknown death attribution (M5-B). Both kernels validate values against the
 flattened contracts with the same paths and error codes (`lib/loka/core/contracts.ex:69`,
-`kernel/ts/src/foundation/validate.ts:51`; codes in `protocol/error_registry.json`). Every contract's
+`kernel/ts/src/foundation/validate.ts:51`; codes in `protocol/error_registry.json`). The
+`exactlyOneRequired` object keyword names declared properties and requires exactly one to be
+present. The scene `on` contract uses it for `story_point` versus `quest`, retaining the
+existing story-point shape without a new discriminator. Failure reports `exclusive_properties`
+at the containing object path in both validators.
+Every contract's
 `examples` must validate and `protocol/fixtures/invalid.json` must fail with exactly the listed
 errors (`test/loka/core/contracts_test.exs:17`, `:26`). `bin/contracts.exs` generates
 `kernel/ts/src/contracts.gen.ts`, [contracts.gen.md](../contracts.gen.md) and

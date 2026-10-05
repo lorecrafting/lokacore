@@ -9,7 +9,8 @@ defmodule Loka.Core.Contracts.Schema do
   The subset: annotations `$schema`, `$id`, `title`, `description`, `examples` (`$defs` only
   at document level); a schema has one `type` or else exactly one of `$ref`, `enum`,
   `const`, `oneOf`, `anyOf`. Per type: object either `properties`, `required`,
-  `additionalProperties` (always `false`), or, as a map, no `properties` and
+  `additionalProperties` (always `false`), optional `exactlyOneRequired` naming
+  two or more declared properties, or, as a map, no `properties` and
   `additionalProperties` as the schema of every value, with optional `propertyNames`
   (exactly `{"pattern": ...}`) and `maxProperties`; array `items` (required), `minItems`,
   `maxItems`; string `pattern`, `minLength`, `maxLength`; integer `minimum`, `maximum`;
@@ -32,7 +33,8 @@ defmodule Loka.Core.Contracts.Schema do
 
   @annotations ~w($schema $id title description examples)
   @by_type %{
-    "object" => ~w(type properties required additionalProperties propertyNames maxProperties),
+    "object" =>
+      ~w(type properties required exactlyOneRequired additionalProperties propertyNames maxProperties),
     "array" => ~w(type items minItems maxItems),
     "string" => ~w(type enum const pattern minLength maxLength),
     "integer" => ~w(type enum const minimum maximum),
@@ -114,6 +116,15 @@ defmodule Loka.Core.Contracts.Schema do
   end
 
   defp keyword("required", r, _, at, _), do: ok(is_list(r) and Enum.all?(r, &is_binary/1), at)
+
+  defp keyword("exactlyOneRequired", keys, %{"properties" => ps}, at, _) when is_map(ps) do
+    ok(
+      is_list(keys) and length(keys) >= 2 and keys == Enum.uniq(keys) and
+        Enum.all?(keys, &(is_binary(&1) and is_map_key(ps, &1))),
+      at
+    )
+  end
+
   defp keyword("additionalProperties", a, _, at, ctx) when is_map(a), do: check(a, at, ctx)
   defp keyword("additionalProperties", a, _, at, _), do: ok(a === false, at)
 
@@ -155,8 +166,9 @@ defmodule Loka.Core.Contracts.Schema do
   defp keyword(k, n, _, at, _) when k in @counts, do: ok(is_integer(n) and n >= 0, at)
   defp keyword(k, n, _, at, _) when k in ~w(minimum maximum), do: ok(is_integer(n), at)
 
-  defp keyword(k, _, _, at, _) when k in ~w(properties oneOf propertyNames anyOf),
-    do: ["#{at}: invalid"]
+  defp keyword(k, _, _, at, _)
+       when k in ~w(properties oneOf propertyNames anyOf exactlyOneRequired),
+       do: ["#{at}: invalid"]
 
   defp keyword(_, _, _, _, _), do: []
 

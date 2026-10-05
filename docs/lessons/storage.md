@@ -10,3 +10,7 @@ Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward 
 - expo-sqlite on iOS sets no journal mode: the phone's save runs SQLite's default rollback
   journal (`delete`), not WAL. Headless tests run in that mode too, so a test never relies on
   WAL-only behaviour (a reader beside an open write) the phone lacks.
+- A receipt used to justify a derived quest or scene row must bind the stored command ID,
+  full definition references, scopes and event cause/correlation, not just matching keys.
+  Mutate each linked field in a real saved SQLite row and require typed corruption recovery
+  without rewriting the file; include intermediate scene values and an uncertain COMMIT.

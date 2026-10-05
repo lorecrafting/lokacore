@@ -39,6 +39,7 @@
         "not_in_enum",
         "const_mismatch",
         "unknown_variant",
+        "exclusive_properties",
         "below_minimum",
         "above_maximum",
         "pattern_mismatch",

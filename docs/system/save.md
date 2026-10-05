@@ -357,9 +357,12 @@ intermediate state must reopen and reconcile under the same boundary.
 ## Bell-first return recovery
 
 In the Q3-B release, load checks the retained bell, allegiance, Q3 terminal and
-scene line together. Resolved Q3/prior requires a committed Ring receipt that
-assigned the bell and allegiance, resolved that actor's Q3 instance and started
-the bell scene. A failed Q2/lost additionally requires the same Ring receipt to
+scene line together. An accepted Q3 requires its eligible Q2 row, even before Ring.
+The scene line must be an integer in the compiler-generated scene fact bounds.
+Resolved Q3/prior requires a committed Ring receipt whose stored command identity,
+full fact references and scopes, Q3 transition, and resolved event quest/actor/cause
+match that actor's save. The receipt must assign the bell and allegiance, resolve
+that actor's Q3 instance and start the bell scene. A failed Q2/lost additionally requires the same Ring receipt to
 fail that Q2 instance and assign lost child status; Wren's accepted meeting,
 return selection and escort must be absent. A completed stays/rescued Q2 or an
 active Q2 after the accepted Wren meeting remains legal after Ring. Missing or

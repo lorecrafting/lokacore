@@ -24,6 +24,7 @@
             "outcome": { "$ref": "action.schema.json#/$defs/Key" }
           },
           "required": ["outcome"],
+          "exactlyOneRequired": ["story_point", "quest"],
           "additionalProperties": false
         },
         "control": {

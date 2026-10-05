@@ -69,6 +69,28 @@ defmodule Gen do
 
   defp type(%{"type" => "object", "properties" => ps}) when ps == %{}, do: "Record<string, never>"
 
+  defp type(%{"type" => "object", "properties" => ps, "exactlyOneRequired" => keys} = s) do
+    required = Map.get(s, "required", [])
+
+    Enum.map_join(keys, " | ", fn chosen ->
+      fields =
+        Enum.map_join(Enum.sort(ps), "; ", fn {k, sub} ->
+          exclusive_field(k, sub, keys, required, chosen)
+        end)
+
+      "{ #{fields} }"
+    end)
+  end
+
+  defp exclusive_field(k, sub, keys, required, chosen) do
+    cond do
+      k == chosen -> "readonly #{lit(k)}: #{type(sub)}"
+      k in keys -> "readonly #{lit(k)}?: never"
+      k in required -> "readonly #{lit(k)}: #{type(sub)}"
+      true -> "readonly #{lit(k)}?: #{type(sub)}"
+    end
+  end
+
   defp type(%{"type" => "object", "properties" => ps} = s) do
     required = Map.get(s, "required", [])
 
