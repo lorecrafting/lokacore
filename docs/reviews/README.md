@@ -266,3 +266,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [A3/B2 integration](2026-10-05-a3-b2-integration-review.md): independent APPROVE of merge `b67d290d`; both append-only spec resolutions, decision/review indexes, roadmap and docs links checked; no findings.
 - [B2 Chandler's Debt primary implementation](2026-10-05-b2-chandlers-primary-review.md): local draft PR at integrated `8da75b87`, CHANGES REQUIRED; scoped fix `ce56f24c` APPROVE, B2-P1/P2 closed.
+- [B2 Chandler's Debt save/protocol second opinion](2026-10-05-b2-chandlers-save-second-review.md): integrated local head `8da75b87`, CHANGES REQUIRED (B2-S1 forged payment prior balances and B2-S2 cross-scope expiry fact receipt survive real-SQLite cold reopen); two red controls observed, focused 13 tests pass.
