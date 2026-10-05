@@ -138,8 +138,8 @@ test('projection and direct exchange refuse too-heavy, poor, absent and changed-
     'too_heavy',
   );
 });
-// Breaks: Sell accepts nested/worn/unrelated goods or gives away a container with the active ledger.
-test('sell requires direct eligible custody and funded Peg and preserves protected ancestors', () => {
+// Breaks: Sell accepts nested/worn/unrelated goods or spends unfunded Peg pennies.
+test('sell requires direct eligible custody and funded Peg', () => {
   const bought = run(world(0)).world;
   const slot = Object.values(bought.slots)[0];
   for (const holder of [slot, ledger]) {
