@@ -1,7 +1,12 @@
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { acquisition } from '../../../kernel/ts/src/mechanics/skills.ts';
 import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
-import type { DefinitionRef, DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
+import type {
+  DefinitionRef,
+  DecisionResult,
+  Command,
+} from '../../../kernel/ts/src/contracts.gen.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
 import { checkRow } from './dialogue-save.ts';
 import type { Db, Meta } from './store.ts';
@@ -31,8 +36,8 @@ function reservedReceipts(world: World, db: Db, scope: string, grants: Map<strin
   const invalid = () => {
     throw new SyntaxError('malformed JSON: inconsistent skill receipt');
   };
-  for (const r of db.getAllSync<{ response: string }>(
-    "SELECT response FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted'",
+  for (const r of db.getAllSync<{ command_id: string; command: string; response: string }>(
+    "SELECT command_id,command,response FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted'",
     scope,
   )) {
     const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
@@ -42,6 +47,8 @@ function reservedReceipts(world: World, db: Db, scope: string, grants: Map<strin
         (s) => `skill_${s.key}` === op.fact.key,
       );
       if (!skill) continue;
+      const ids = grants.get(refString({ ...op.fact, kind: 'skill', key: skill.key })) ?? [];
+      if (!receiptBound(world, r, d, ids)) invalid();
       if (
         op.expected !== false ||
         op.value !== true ||
@@ -82,4 +89,24 @@ function memberships(world: World, grants: Map<string, string[]>) {
     const count = grants.get(ref)?.length ?? 0;
     if (typeof acquired !== 'boolean' || count > 1 || acquired !== (count === 1)) invalid();
   }
+}
+
+function receiptBound(
+  world: World,
+  r: { command_id: string; command: string },
+  d: DecisionResult,
+  ids: string[],
+) {
+  const command = JSON.parse(r.command) as Command;
+  if (validate('Command', command).length || validate('DecisionResult', d).length) return false;
+  const payload = command.payload;
+  return (
+    command.id === r.command_id &&
+    command.world_context_id === world.context &&
+    payload.type === 'choose' &&
+    payload.actor_id === world.character &&
+    d.kind === 'accepted' &&
+    d.outcome === payload.choice_id &&
+    ids.includes(payload.continuation_id)
+  );
 }

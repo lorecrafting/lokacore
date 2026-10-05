@@ -51,6 +51,14 @@ test('unqualified learning persists distinct acquisition and one-time exact paym
   assert.equal(one.decision.kind, 'accepted', JSON.stringify(one.decision));
   w = one.world;
   assert.deepEqual(penny(w), [6, 4]);
+  const view = gameView(w);
+  const skill = view.skills!.find((s) => s.skill.key === 'swords')!;
+  assert.deepEqual([skill.acquired, skill.qualified, skill.usable], [true, false, false]);
+  assert.equal(view.attributes!.find((a) => a.attribute.key === 'str')!.value, 9);
+  const sword = view.inventory.find((e) => e.id === w.entityIds[ref(w, 'item', 'sword')])!;
+  assert.equal(sword.weapon!.attack.damage_min, 3);
+  assert.equal(sword.slot, 'wield');
+  assert.equal(sword.skill_requirement, 'training.test');
   assert.equal(w.state.containers[w.entityIds[ref(w, 'item', 'sword')]], w.body);
   assert.deepEqual(status(w, w.character, trainingRef(w, 'skill', 'swords' as never), { n: 0 }), {
     acquired: true,
@@ -66,6 +74,11 @@ test('unqualified learning persists distinct acquisition and one-time exact paym
     qualified: false,
     usable: false,
   });
+  const item = w.entityIds[ref(w, 'item', 'sword')];
+  const worn = step(w, command(w, { type: 'wear', actor_id: w.character, item_id: item }, 7), 7);
+  assert.equal(worn.decision.kind, 'accepted');
+  const fought = elapsed(attack(worn.world).world, 150);
+  assert.deepEqual(pools(fought.world), [9, 5, [12295, 1029, 1029, 25165824]]);
   const repeated = talk(w, 5);
   const refused = choose(repeated, 6);
   assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'invalid_state' } });

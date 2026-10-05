@@ -169,18 +169,17 @@ export function ThingPage(p: {
   );
 }
 
-export function CharacterPage(p: {
-  resources?: readonly Pool[];
-  position?: GameView['position'];
-  view?: GameView;
-  text: Say;
-}) {
+export function CharacterPage(
+  p: { view?: GameView; text: Say } & Pick<GameView, 'resources' | 'position'>,
+) {
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
   const resources = p.resources ?? p.view?.resources ?? [];
   const position = p.position ?? p.view?.position;
+  const known =
+    resources.length || p.view?.attributes?.length || p.view?.skills?.some((s) => s.acquired);
   return (
     <Sheet title="Character">
-      {resources.length === 0 && <Text style={note}>Nothing is known about you yet.</Text>}
+      {!known && <Text style={note}>Nothing is known about you yet.</Text>}
       {position && <Text style={prose}>{cap(position)}</Text>}
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (

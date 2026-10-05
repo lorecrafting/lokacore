@@ -2,8 +2,7 @@ import { status } from '../mechanics/skills.ts';
 import type { World } from '../runtime/decision.ts';
 import type { DefinitionRef } from '../contracts.gen.ts';
 
-export function skillViews(world: World) {
-  const steps = { n: 0 };
+export function skillViews(world: World, steps = { n: 0 }) {
   const ref = (kind: string, key: DefinitionRef['key']): DefinitionRef => ({
     cartridge_id: world.cartridge.manifest.id,
     cartridge_version: world.cartridge.manifest.version,

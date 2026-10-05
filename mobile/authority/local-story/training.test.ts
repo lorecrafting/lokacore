@@ -146,6 +146,7 @@ test('forged lesson receipts and contradictory acquired rows reopen as save_corr
     'skill',
     'actor',
     'correlation',
+    'wrong-command',
   ]) {
     const a = setup();
     a.learn();
@@ -171,6 +172,21 @@ test('forged lesson receipts and contradictory acquired rows reopen as save_corr
     if (mutant === 'correlation')
       d.events.find((e: any) => e.payload.type === 'fact_changed').correlation_id =
         'aaaaaaaa-0000-4000-8000-000000000099';
+    if (mutant === 'wrong-command') {
+      a.invoke('look');
+      const fake = {
+        ...d,
+        delta: {
+          ...d.delta,
+          ops: d.delta.ops.filter((o: any) => ['fact.assign', 'choice.resolve'].includes(o.op)),
+        },
+      };
+      a.sql
+        .prepare(
+          "UPDATE receipt SET response=? WHERE json_extract(command,'$.payload.type')='look'",
+        )
+        .run(JSON.stringify(fake));
+    }
     if (mutant !== 'membership')
       a.sql
         .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')

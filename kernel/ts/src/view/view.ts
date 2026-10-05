@@ -60,7 +60,8 @@ import { status as calendarStatus } from '../mechanics/calendar.ts';
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
-  const actions = lists(world, world.character);
+  const steps = { n: 0 };
+  const actions = lists(world, world.character, steps);
   const equipment = Object.entries(world.slots).map(([slot, holder]) => {
     const [item] = within(world, actions, holder, actions.worn);
     return { slot: slot as SlotKey, ...(item && { item }) };
@@ -68,7 +69,7 @@ export function gameView(world: World): GameView {
   const room = world.rooms[here];
   const text = (key: TextKey) => ({ key });
   const description = text(description_variant.describe(world, world.character, room));
-  const choice = fight ? undefined : choiceView(world, world.character);
+  const choice = fight ? undefined : choiceView(world, world.character, steps);
   const pools = resources(world);
   const current = chapter(world);
   const showing = scene.running(world, world.character);
@@ -76,7 +77,7 @@ export function gameView(world: World): GameView {
   const calendar_status = calendarStatus(world.cartridge, world.state.clock);
   return {
     actor_id: world.character,
-    ...skillViews(world),
+    ...skillViews(world, steps),
     ...(fight && {
       combat: {
         encounter_id: fight.id,
