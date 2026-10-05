@@ -43,3 +43,35 @@ Two plausible mutation classes were planted independently in a throwaway detache
 After restoration, all eight production chapter authority tests and the compiler answer passed (both exit 0). The tracked mutation diff was empty and the throwaway worktree was removed.
 
 Native touch/layout validation remains deferred under the owner’s overnight stop. No Metro, Simulator, DeviceHub, preview or owner-save operation was run.
+
+## Independent chapter-pin/save second opinion
+
+The separate reviewer authored none of the source or primary review. Its result is reproduced verbatim.
+
+```text
+VERDICT: APPROVE
+PR #185; source head de66051fd61a359d2f1927e1390bce351384169d.
+Scoped independent pin/save second opinion; authored none.
+
+Findings: none.
+
+Verified:
+- test/loka/cartridge_missing_child_hash.py:124 independently reproduces v007 canonical artifact, hash and allocation IDs:
+  ab94a17f8b881b15a9b1ac29d111de7aad32bb14232a2d2f47ce1e53f20dbae3.
+- Historical v006 hash/ID fixtures remain byte-identical.
+- mobile/app/App.tsx:14 selects v007; executing the actual App shell saves that exact pin.
+- mobile/app/chapter.test.ts:149: real SQLite v006 save is refused as pinned_release_missing with unchanged file bytes, then replaced only through explicit Start over. App.tsx:169 routes the refusal recovery through confirmation.
+- mobile/authority/local-story/missing_child.test.ts:201: current possession gates readiness, report resolves once, and reopen/retry preserves the result.
+- Additional independent real-SQLite scenario verified drawing custody after both cold reopens, resolved Q1, replay=true, unchanged revision/receipt count and exact v007 pin.
+
+Commands:
+- mise exec -- mix test test/loka/content_missing_child_test.exs: 1 passed.
+- mise exec -- node --test --test-reporter=spec mobile/app/chapter.test.ts mobile/authority/local-story/missing_child.test.ts: 13 passed.
+- mise exec -- node --test --test-reporter=spec kernel/ts/test/missing_child.test.ts: 1 passed.
+- Python independent oracle reproduction; disposable independent SQLite script.
+
+Red controls: stale App bundle, unsafe newest-release fallback, omitted container persistence and omitted quest persistence each failed. Restored controls passed.
+
+Ponytail Review: lean already; existing mechanisms suffice.
+No owner data or native UI touched. No source/record changes or pushes retained; disposable worktree removed.
+```
