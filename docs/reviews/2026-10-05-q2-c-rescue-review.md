@@ -50,3 +50,21 @@ CHANGES REQUIRED
 
 1. PS-1 | blocker | mobile/authority/local-story/dialogue-receipt.ts:174 — After accepting rescue (or completing it), set the saved Q1 quest row’s value to JSON null and reopen. escortEvidence calls questOf, which dereferences the null row and throws an uncaught TypeError. Recovery loses the required save_corrupt classification and Start over offer. Reproduced in in-memory SQLite; identical corruption before rescue selection receives typed recovery.
 ```
+
+## Scoped fix recheck — source `e5cca99f`
+
+Reviewed only fix commits `45234317981d352dbbfe31a6e559491ac28f2c3d` and `e5cca99f2348824003c22adc995d8b91ab0b528f`, the changed load boundary and its direct receipt/session consumers. Earlier review and validation above remain historical evidence.
+
+**CHANGES REQUIRED. PS-1 remains open (blocker).** The null-row crash is fixed, but the new guard checks truthiness rather than usable quest/scope references.
+
+- **PS-1 — `mobile/authority/local-story/store.ts:134` at `e5cca99f2348824003c22adc995d8b91ab0b528f`:** After the actual Q1/riddle/rescue journey, replace the existing Q1 (`first_lead`) `state_row` value with JSON `{"quest":{},"scope":{}}` or `{"quest":true,"scope":true}`. Close SQLite, open a fresh connection, and call `localSession`. Both values pass the new guard. The session opens successfully, gives no typed save_corrupt/Start over recovery, and its journal contains only `missing_child`: the damaged Q1 has silently disappeared. Reproduced separately after escort start and after the rescued terminal. Reject unusable quest/scope references at this same boundary before receipt recovery; retain the storage-error distinction.
+
+Independent evidence:
+
+- Existing focused suites (`wren_escort`, `vesper_message`, `saves`, kernel `escort`): **68 passed**, exit0 before mutation and again after restoration. Legitimate rescue, death/Rejoin, terminal, stays, replay and transaction behavior remain green.
+- Additional file-backed cold-reopen probes independently wrote nine malformed Q1 values at both stages, closed the original connection and reopened through `localSession`. Null, false, zero, empty array/object, null quest and null scope all return typed save_corrupt, offer explicit Start over, preserve rows before consent and successfully start fresh afterward: **14 corruption cases pass**. The two truthy malformed-field forms above open normally at both stages: **four corruption cases fail**. The parent test also fails, so the temporary probe run reports **15 passes / 5 failures out of 20**, including the separate storage control below.
+- A legitimate completed rescue reopens on a fresh connection. A second real SQLite connection holding `BEGIN EXCLUSIVE` causes the normal connection's read to fail as locked, without classifying corruption or offering Start over. Releasing the lock restores readable progress and the saved rows are unchanged: **pass**.
+- Independently removed the new two-line load guard: the developer's malformed-Q1 regression test goes **exit1**, all ten corruption subcases fail. Restored the guard. The remaining truthy-field cases fail on the unmodified fix source, not on a mutant.
+- All six exact fix-source CI checks are green. No additional complexity finding: the shared-boundary placement is appropriate and avoids catch-all conversion of storage faults; the remaining issue is incomplete input validation. No temporary test or mutant is committed. Normal hooks apply to the review-record push.
+
+No source edits, merge, roadmap completion, preview, device operation, Android/iOS build or native verification was performed.
