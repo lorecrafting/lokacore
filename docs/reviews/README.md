@@ -228,6 +228,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Real chapter cast](2026-10-05-real-chapter-cast-review.md): PR #180 at `6954a41b`, APPROVE; no findings.
 - [Local fast edit loop](2026-10-04-local-fast-loop-review.md): PR #181 at `d32b3620`, independent docs-only APPROVE; no findings, Debug/Release separation and PR gates retained.
 - [M12-B nested notice board](2026-10-04-m12-b-notice-board-review.md): PR #182 at `0b8cb02`, CHANGES REQUIRED; scoped fix `1a9967c`, APPROVE (R1–R3 closed; two independent fix mutants red).
-- [M12-B nested notice board](2026-10-04-m12-b-notice-board-review.md): PR #182 at `0b8cb02`, CHANGES REQUIRED (R1 cold-reopen message hidden; R2 child Back label; R3 stale bundled-fixture pointer).
-
 - [M12-B protocol/save second opinion](2026-10-04-m12-b-protocol-save-second-review.md): PR #182 at `0b8cb02`, CHANGES REQUIRED (R182-S1 invalid stored Read JSON loses typed corruption recovery); scoped fix `1a9967cb`, APPROVE, R182-S1 closed.
