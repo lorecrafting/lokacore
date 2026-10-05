@@ -17,7 +17,7 @@ defmodule Loka.Core.Contracts.Schema do
   `oneOf` branches are inline objects, each with exactly one `const` property, the same
   required property in every branch with distinct values (the discriminator). `anyOf` has two
   or more branches, each a `type` or `$ref` resolving to a different one of string, integer
-  boolean and null, so a value's JSON type selects its branch. A `$ref` may
+  boolean and null, or exactly object and null, so a value's JSON type selects its branch. A `$ref` may
   name its own or an enclosing contract; recursion is bounded by the value, and decoded
   values by the canonical depth limit.
 
@@ -127,7 +127,9 @@ defmodule Loka.Core.Contracts.Schema do
     types = Enum.map(bs, &json_type(&1, ctx, []))
     distinct = length(bs) >= 2 and nil not in types and types == Enum.uniq(types)
 
-    ok(distinct, at) ++
+    allowed = "object" not in types or Enum.sort(types) == ["null", "object"]
+
+    ok(distinct and allowed, at) ++
       Enum.flat_map(Enum.with_index(bs), fn {b, i} -> check(b, "#{at}/#{i}", ctx) end)
   end
 
@@ -176,8 +178,8 @@ defmodule Loka.Core.Contracts.Schema do
 
   defp target(_, _), do: nil
 
-  # The scalar JSON type an anyOf branch accepts, following $refs (seen stops a cycle); else nil.
-  defp json_type(%{"type" => t}, _, _) when t in @scalar_types, do: t
+  # The JSON type an anyOf branch accepts, following $refs (seen stops a cycle); else nil.
+  defp json_type(%{"type" => t}, _, _) when t in ["object" | @scalar_types], do: t
 
   defp json_type(%{"$ref" => ref}, {_, names} = ctx, seen) do
     case target(ref, ctx) do

@@ -584,5 +584,26 @@
       "gameview_agrees_with_admission"
     ],
     "implemented_in": "M12-A fixed current-room written details; authored narration, no gameplay writes"
+  },
+  "escort": {
+    "spec": "docs/system/mechanics.md escort@1; docs/system/protocol.md Typed escort relation",
+    "contracts": [
+      "EscortRelation",
+      "EscortStatus",
+      "DeltaOp",
+      "MutationTarget",
+      "DialogueChoice",
+      "Policy"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/escort/shared.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/escort.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold"
+    ],
+    "implemented_in": "Q2-C rescue (TypeScript)"
   }
 }

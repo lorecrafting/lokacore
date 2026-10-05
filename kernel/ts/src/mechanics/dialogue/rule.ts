@@ -28,6 +28,7 @@ import type {
   EntityId,
   Key,
 } from '../../contracts.gen.ts';
+import { transition as escortTransition } from '../escort/shared.ts';
 import { same } from '../../foundation/compose.ts';
 import {
   accepted,
@@ -133,13 +134,13 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   }
   const given = handOver(world, command, mint, row, option, body);
   const quests = q ? [event(world, command, mint, run.position + 1, q.payload)] : [];
-  const expected_revision = row.opened_revision;
+  const escort = escortTransition(world, row, option, continuation_id, choice_id);
   const op = {
     op: 'choice.resolve',
     writer_group: 0,
     continuation_id,
     choice_id,
-    expected_revision,
+    expected_revision: row.opened_revision,
   } as const;
   const chosen = { type: 'choice_resolved', continuation_id, choice_id } as const;
   const at = run.position + quests.length + 1;
@@ -149,7 +150,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   return accepted(
     world,
     choice_id,
-    [...given.ops, ...run.ops, ...(q ? q.ops : []), op],
+    [...given.ops, ...run.ops, ...escort, ...(q ? q.ops : []), op],
     [...given.events, ...quests, resolvedChoice, ...reached],
     [{ key: option.narration, participants }],
   );

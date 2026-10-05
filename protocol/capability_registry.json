@@ -387,5 +387,17 @@
     "version": 1,
     "portability": "portable",
     "residency": "portable_capability"
+  },
+  {
+    "key": "escort",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "policies": [
+      "escort_state"
+    ],
+    "definitions": [
+      "escort"
+    ]
   }
 ]

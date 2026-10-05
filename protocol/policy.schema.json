@@ -262,6 +262,27 @@
             "at_least"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "escort_state"
+            },
+            "quest": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "state": {
+              "$ref": "relation.schema.json#/$defs/EscortStatus"
+            }
+          },
+          "required": [
+            "op",
+            "quest",
+            "state"
+          ],
+          "additionalProperties": false,
+          "description": "API1.11 escort@1: this actor’s typed escort for the named quest instance has this status."
         }
       ],
       "examples": [
@@ -352,6 +373,16 @@
             },
             "at_least": 2
           }
+        },
+        {
+          "op": "escort_state",
+          "quest": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "quest",
+            "key": "rescue"
+          },
+          "state": "following"
         }
       ]
     }

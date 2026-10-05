@@ -15,8 +15,8 @@ import { key } from '../src/foundation/compose.ts';
 import { read } from './read.ts';
 import { elapsed, hp } from './combat_fixture.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v011_hash.json');
-const ids = read('protocol/fixtures/missing_child_v011_ids.json');
+const bundle = read('protocol/fixtures/missing_child_v012_hash.json');
+const ids = read('protocol/fixtures/missing_child_v012_ids.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -28,7 +28,7 @@ const cartridge = loaded.cartridge as Cartridge;
 const ref = (kind: string, name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.11',
+    cartridge_version: '0.0.12',
     kind,
     key: name,
   }) as DefinitionRef;
@@ -137,7 +137,7 @@ test('the original message is received once, cannot be given away, and resolves 
   const a = setup();
   assert.equal(message, 'b03b53e3-456d-8c7a-b056-ff22f4adf06d');
   assert.equal(a.world().character, 'bd595711-ea5f-89a5-abb0-046cd349d2f9');
-  assert.equal(a.world().entityIds['ashmere_missing_child@0.0.11:item/vesper_message'], message);
+  assert.equal(a.world().entityIds['ashmere_missing_child@0.0.12:item/vesper_message'], message);
   a.move('south', 'south', 'south', 'south');
   a.run({ type: 'take', item_id: message }, 'not_present');
   assert.equal(

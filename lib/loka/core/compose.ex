@@ -218,6 +218,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "encounter." <> _} = op, t, ctx),
     do: Loka.Core.ComposeEncounter.change(op, read(t, ctx))
 
+  defp apply_op(%{"op" => "escort.transition"} = op, t, ctx),
+    do: Loka.Core.ComposeEscort.transition(op, read(t, ctx))
+
   defp apply_op(%{"op" => "time.advance", "from" => from, "to" => to}, t, ctx),
     do: check(read(t, ctx) == from and to > from, to)
 
@@ -252,6 +255,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "choice", "continuation_id" => c}, s), do: section(s, "choices")[c]
   defp base(%{"kind" => "job", "job_id" => j}, s), do: section(s, "jobs")[j]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
+  defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]
   defp base(%{"kind" => "clock"}, s), do: s["clock"]
   defp base(%{"kind" => "resource"} = t, s), do: section(s, "resources")[key(t)]
   defp base(%{"kind" => "cooldown"} = t, s), do: section(s, "cooldowns")[key(t)]

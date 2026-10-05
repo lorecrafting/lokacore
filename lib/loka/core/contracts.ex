@@ -115,7 +115,7 @@ defmodule Loka.Core.Contracts do
   defp keyword("additionalProperties", sub, v, path, defs) when is_map(sub),
     do: Enum.flat_map(v, fn {k, x} -> errors(sub, x, child(path, k), defs) end)
 
-  # The subset gives each anyOf branch a different scalar JSON type, so the type selects it.
+  # The subset gives each anyOf branch a different JSON type, so the type selects it.
   defp keyword("anyOf", bs, v, path, defs) do
     case Enum.find(bs, &type?(json_type(&1, defs), v)) do
       nil -> [%{path: path, code: :invalid_type}]

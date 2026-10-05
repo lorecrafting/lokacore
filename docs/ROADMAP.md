@@ -119,9 +119,13 @@ after the forged-terminal-save finding was fixed. Primary and separate save
 rechecks approved, six fix-source checks passed, and the final review-only head
 checks passed. Chapter release 0.0.11 offers one complete return path.
 
-Next, [Q2-C return plan](decisions/pm-decision-q2-c-stays-2026-10-05.md):
-C-rescue completes bound Wren escort → Elspeth alongside the already complete
-message return.
+Q2-C-rescue — escort the original Wren, recover after death separation, and return
+him to Elspeth for the `rescued` path — merged in
+[#190](https://github.com/lorecrafting/lokacore/pull/190) after malformed saved Q1
+references were fixed. Primary and separate Sol save rechecks approved, five
+scheduled source-head checks (including headless `sim`) passed, and the final
+review-record head passed its checks. Chapter release 0.0.12 offers both complete
+return paths; the `lost` outcome and Q3 bell/finale are still ahead.
 
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
