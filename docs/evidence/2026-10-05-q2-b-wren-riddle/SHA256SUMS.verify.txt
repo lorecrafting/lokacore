@@ -15,6 +15,8 @@ initial-routing-failure.log: OK
 journal-stage.log: OK
 local-check-all.log: OK
 meeting-policy.log: OK
+r1-focused-green.log: OK
+r1-source-guard-red.log: OK
 receipt-evidence.log: OK
 receipt-role.log: OK
 restored-compatibility.log: OK

@@ -221,7 +221,38 @@ test('stored riddle command, binding and root evidence mismatches become typed s
 function elapsedReopen(a: ReturnType<typeof setup>) {
   return openGame(a.db, bundle, a.host);
 }
-import { openGame } from './session.ts';
+import { localSession, openGame } from './session.ts';
+
+// Breaks: a null/missing saved source throws before typed corruption offers explicit Start over.
+test('malformed retained riddle source offers typed recovery and explicit Start over', async (t) => {
+  for (const source of [null, undefined]) {
+    await t.test(source === null ? 'null source' : 'missing source', () => {
+      const a = setup();
+      try {
+        a.riddle();
+        const continuation = a.view().choice!.continuation_id;
+        a.submit('LANTERN');
+        const saved = a.sql
+          .prepare("SELECT value FROM state_row WHERE section='choices' AND key=?")
+          .get(continuation)!;
+        const resolved = JSON.parse(saved.value as string);
+        assert.equal(resolved.status, 'resolved');
+        resolved.source = source;
+        a.sql
+          .prepare("UPDATE state_row SET value=? WHERE section='choices' AND key=?")
+          .run(JSON.stringify(resolved), continuation);
+        const session = localSession(() => a.db, assert.fail, bundle, a.host);
+        assert.equal(session.game(), undefined);
+        assert.equal(session.failed()?.kind, 'save_corrupt');
+        assert.equal(session.failed()?.startOver, true);
+        assert.equal(session.startOver(), undefined);
+        assert.deepEqual(session.game()!.view().view.journal, []);
+      } finally {
+        a.sql.close();
+      }
+    });
+  }
+});
 
 // Breaks: live redraw strands unchanged answer controls or freshness ignores changed continuation/bank.
 test('answer input refreshes only across unchanged offered riddle context and reads its own eventless receipt', (t) => {

@@ -26,6 +26,7 @@ export function dialogueDetail(
     return invalid();
   const p = command.payload;
   const row = s.world.state.choices?.[p.continuation_id];
+  if (row && validate('DefinitionRef', row.source).length) return invalid();
   const source = row && s.world.cartridge.dialogues?.[refString(row.source)];
   if (!source?.riddle && p.answer === undefined && d.outcome !== 'riddle_wrong') return;
   const option = source?.choices[p.choice_id];

@@ -44,3 +44,18 @@ the real transaction failure paths. No remaining self-review finding.
 All captures use a `redact()` that removes local worktree, home and scratch paths. No native
 tooling, Simulator, Metro, development preview or owner-save operation was used. Primary and
 separate protocol/save reviews and remote exact-head CI remain the PM's merge gates.
+
+## PR188 fix round 1 — R1 saved source identity
+
+A retained resolved choice with null/missing `source` previously threw an untyped error
+before the riddle receipt boundary could classify corruption. The boundary now applies the
+existing `DefinitionRef` validator before dereferencing the source; no SQLite error catch
+or ordinary dialogue routing rule changed.
+
+Real SQLite controls exercise both null and omitted source through `localSession`, expect
+literal `save_corrupt` and Start over availability, then explicitly start over and observe
+a fresh empty journal. Removing the one-line guard makes both controls fail with an absent
+error kind ([red control](r1-source-guard-red.log), exit1). Restoring the guard passes the
+40 riddle/session/Start over/presenter controls ([green run](r1-focused-green.log), exit0).
+Ponytail and correctness self-review: reuse the existing boundary validator; no open findings.
+The normal pre-push full gate validates the committed fix; no review record was edited.
