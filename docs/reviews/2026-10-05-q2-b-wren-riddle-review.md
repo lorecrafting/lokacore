@@ -42,3 +42,31 @@ The adoption's composition statement matches the actual consumers: ordered polic
 ## Limits
 
 Headless React controls establish behavior and ordering, not native appearance. Native/UI blur verification remains deferred per the task boundary. No Metro, DeviceHub, Simulator, preview/native tooling or owner-save access occurred. Q2-C remains the adopted rescue/return consumer; it is not an open Q2-B defect.
+
+## Independent Sol protocol/save second opinion
+
+The PM ran a fresh read-only Codex Sol opinion on the exact source head. Its answer is reproduced verbatim.
+
+```text
+VERDICT: CHANGES REQUIRED
+HEAD: e4a802997ee9cda671fed8742b1094df1cf83070
+
+R1 — should-fix (P2)
+mobile/authority/local-story/dialogue-receipt.ts:29
+Failure scenario: after a correct answer resolves the riddle, its retained ChoiceRow has source=null or a missing source in otherwise valid saved JSON. dialogueDetail calls refString(row.source) before validating it, throwing an untyped TypeError. On reopen, localSession reports no save_corrupt kind and startOver=false, leaving the player without the required recovery control.
+Reproduced using real in-memory SQLite and the actual localSession path. Restoring the original row restores successful reopen.
+Validate the stored source before dereferencing it and route malformed identity through typed save_corrupt handling, preserving genuine SQLite errors.
+
+VERIFICATION
+- Exact source head confirmed; reviewed against origin/main.
+- Ten focused tests passed: loader/API gates, answer validation, participant identity/availability, receipt corruption, UI controls, freshness and failed/lost COMMIT reconciliation.
+- All 68 literal schema controls passed in both kernels.
+- Independent Python hash/allocation pins matched; current Elixir compiler matched the chapter artifact.
+- Persisted-row reopen passed before answering, after wrong and after correct; exact wrong-answer replay succeeded and changed-answer replay conflicted.
+- Old 0.0.9 release was refused without changing authority rows; genuine SQLite read errors remained storage errors.
+- In-memory red control disabling wrong-answer comparison failed with actual=answer, expected=riddle_wrong.
+
+LIMITS
+- File-backed/process-restart tests and full CI were not rerun; six green source-head jobs were supplied by the requester.
+- No files modified, native/preview/device tooling run, or owner saves accessed.
+```
