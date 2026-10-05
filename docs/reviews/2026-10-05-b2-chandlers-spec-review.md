@@ -19,3 +19,9 @@ Docs-only review: no mutation test or full check line was needed. `git show --ch
 ## Scoped fix recheck — 2026-10-05
 
 **APPROVE** at source head `7d3b7d468b4302c3228a0ed531d93a798538eacf`. B2-N1 is closed: the brief now links the current forward-development owner decision, which expressly supersedes the older frozen-fixture clause. The fix changes only that relative link, and its target exists. No other finding is open. The developer reported a passing docs check; this scoped review did not rerun it.
+
+## A2 integration recheck — 2026-10-05
+
+PR #203 (draft), stacked on A2 PR #202. **APPROVE** at merge head `5be784fac38ff6e8787b37f5a0dd6f891f0ab3af` against A2 baseline `602164c8f67b515b45b803792213b5a8144a1b7b`. The merge retained A2's Q3-F fox/silent-bell clause and B2's S2 authoring clause in `cartridge.md`, and kept the Q3-F, B1 and B2 owner rules. The B2 selected sections in mechanics, cartridge, protocol, save and Book are byte-identical to approved B2 head `f5b8fd7e`; the Q3-F cartridge section is byte-identical to the A2 baseline. Both decision and review indices retain their distinct B1, A2 and B2 records once each. A2's Aldric remains public after Silence, consistent with B2's delivery rule. No integrated release pin is claimed for future B2 source.
+
+This is a scoped docs integration review; no source, mutation or browser proof was run. The merge diff passed `git diff --check`. No new finding or Ponytail simplification.
