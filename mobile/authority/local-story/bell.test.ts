@@ -13,8 +13,8 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v013_hash.json');
-const ids = read('protocol/fixtures/missing_child_v013_ids.json');
+const bundle = read('protocol/fixtures/missing_child_v014_hash.json');
+const ids = read('protocol/fixtures/missing_child_v014_ids.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),

@@ -39,7 +39,8 @@ defmodule Loka.Content.Compiler do
   defp split(lists), do: lists |> Enum.concat() |> Enum.split_with(&(&1["severity"] == "warning"))
 
   defp checks(manifest, defs, v2, located, registry) do
-    Resources.check(manifest, defs, v2, located, registry) ++
+    Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs) ++
+      Resources.check(manifest, defs, v2, located, registry) ++
       Entities.carry(manifest, defs, located) ++
       Loka.Content.Death.check(manifest, defs, located) ++
       Loka.Content.Combat.check(manifest, defs, located, v2) ++
@@ -50,8 +51,11 @@ defmodule Loka.Content.Compiler do
       Reactions.check(manifest, defs, v2, registry) ++
       Dialogues.check(manifest, defs, v2, located, registry) ++
       Links.check(defs, v2) ++
-      Position.check(manifest, defs) ++ Scenes.check(manifest, defs, v2, registry)
+      final_checks(manifest, defs, v2, registry)
   end
+
+  defp final_checks(manifest, defs, v2, registry),
+    do: Position.check(manifest, defs) ++ Scenes.check(manifest, defs, v2, registry)
 
   # v2 exactly when the source has rooms, items, NPCs, recipes, barriers, quests, reactions, dialogues, story points, an
   # entry, a calendar or world, a text catalog, resources.json or attributes.json (CompiledCartridge).
@@ -66,7 +70,7 @@ defmodule Loka.Content.Compiler do
        do: {entry, text || %{}}
   end
 
-  # cartridge.json's calendar (cartridge.schema.json Calendar) needs calendar@1, its owner.
+  # cartridge.json calendar is owned by calendar@1.
   defp calendar(m, cal, registry) when cal != nil do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
     owned(at("cartridge.json", ["calendar"]), "calendar", required)

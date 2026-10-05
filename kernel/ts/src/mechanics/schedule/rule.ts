@@ -14,7 +14,7 @@
 import { roundSequence } from '../combat/round.ts';
 import { accepted, rejected, refString, type Rule } from '../../runtime/decision.ts';
 import type { DeltaOp } from '../../contracts.gen.ts';
-import { entered, hourOf, jobId, next, scheduleOf } from './behavior.ts';
+import { entered, hourOf, jobId, nextHour, scheduleOf } from './behavior.ts';
 
 export const decide: Rule<'schedule'> = (world, command, mint) => {
   const { payload } = command;
@@ -24,12 +24,12 @@ export const decide: Rule<'schedule'> = (world, command, mint) => {
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint);
     const schedule = scheduleOf(world, row.job);
     const npc = world.entityIds[refString(row.job)];
-    const room = world.roomIds[refString(schedule[hourOf(row.due_time)])];
+    const room = world.roomIds[refString(schedule[hourOf(world.cartridge, row.due_time)])];
     const from = world.state.containers[npc];
     const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
     const move: DeltaOp[] =
       from === room ? [] : [{ ...transfer, source_id: from, destination_id: room }];
-    const due_time = next(schedule, row.due_time);
+    const due_time = nextHour(world.cartridge, schedule, row.due_time);
     return accepted(
       world,
       'job_ran',

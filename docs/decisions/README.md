@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [B1 chapter calendar and Book status PM decision](pm-decision-b1-calendar-status-2026-10-05.md): authored hour/day, solar/lunar cycle and confirmed status consumer.
+
 - [Reuse documents already read](owner-decision-read-once-docs-2026-10-05.md): avoid redundant reads when links loop through the same governing files.
 
 - [Pause mobile development and verification](owner-decision-web-first-mobile-pause-2026-10-05.md): keep the Node engine simulator while mobile checks, builds and sessions wait for resumption.

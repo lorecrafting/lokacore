@@ -19,7 +19,8 @@ defmodule Loka.Core.Resource do
   def current(nil, spec, now), do: current(%{"value" => spec["start"], "at" => 0}, spec, now)
 
   def current(%{"value" => v, "at" => at}, spec, now) when is_integer(v) and is_integer(at) do
-    ticks = Integer.floor_div(now, 3600) - Integer.floor_div(at, 3600)
+    every = Map.get(spec, "gain_every", 3600)
+    ticks = Integer.floor_div(now, every) - Integer.floor_div(at, every)
     min(spec["maximum"], v + spec["gain"] * ticks)
   end
 

@@ -178,6 +178,7 @@ function readerActions(
 // ruled departure) and opens Contents, the index of the existing book sections.
 type StatusProps = {
   time: number;
+  calendar?: GameView['calendar_status'];
   resources?: readonly Pool[];
   position?: GameView['position'];
   text: (key: string) => string;
@@ -188,6 +189,16 @@ type StatusProps = {
 };
 
 export function Status(p: StatusProps) {
+  const calendar = p.calendar;
+  const time =
+    calendar &&
+    [
+      `day ${calendar.day}, ${String(calendar.hour).padStart(2, '0')}:${String(calendar.subdivision).padStart(2, '0')}`,
+      calendar.solar?.replaceAll('_', ' '),
+      calendar.lunar && `${calendar.lunar.replaceAll('_', ' ')} moon`,
+    ]
+      .filter(Boolean)
+      .join(' · ');
   return (
     <View
       style={{
@@ -198,8 +209,11 @@ export function Status(p: StatusProps) {
         columnGap: 14,
       }}
     >
-      <Text style={{ ...small, color: paper.dim }} accessibilityLabel={branch(p.time).label}>
-        {branch(p.time).glyph}
+      <Text
+        style={{ ...small, color: paper.dim }}
+        accessibilityLabel={time ? time.replaceAll(' · ', ', ') : branch(p.time).label}
+      >
+        {time ?? branch(p.time).glyph}
       </Text>
       {p.position && <Position value={p.position} open={p.openPosition} />}
       <Pressable

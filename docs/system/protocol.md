@@ -258,7 +258,7 @@ and independently validates both targets.
 `holds` (`kernel/ts/src/mechanics/policy.ts:18`) evaluates `all`, `any`, `not` and the leaves
 `fact_compare` (the fact's value at the actor's scope equals), `has_item` (inside the actor's
 body, directly or nested), `barrier_state`, `quest_state` (false while the actor has no
-instance), `time_window` (hour of day from `clock / 3600 % 24`, wrapping windows allowed, `:42`),
+instance), `time_window` (hour of day from the validated cartridge calendar, wrapping windows allowed),
 `target_present` (the action's target is in reach, `:47`), and `stat_compare` and
 `resource_compare` (`:60`, [attributes@1](mechanics.md#attributes1)). An op outside this list throws:
 the loader closes the set (`content/cartridge.ts:160`).

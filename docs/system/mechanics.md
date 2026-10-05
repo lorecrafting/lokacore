@@ -228,7 +228,8 @@ never falling back to start. A zero-gain NPC stays wounded or at zero as time ad
 zero HP alone has no death behavior. No NPC rows are initialized for other pools.
 
 Ruleless. A body's current value is derived from the stored row and the clock: `gain` per
-hour boundary crossed, capped at `maximum` (`foundation/resource.ts:59`), for legacy pools.
+authored `gain_every` boundary crossed, capped at `maximum` (`foundation/resource.ts:59`),
+for legacy pools; historical pools without that field retain their installed hour boundary.
 An optional `regen {every, by_position}` instead uses a required stored
 `{value, at, rate, remainder}` row. At `now`, settle the **old stored rate** over `now-at`:
 conceptually divide `remainder + (now-at)*rate` by `every`, adding the quotient and retaining
@@ -484,9 +485,14 @@ runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pend
 `invalid_state` (`:23`); the NPC moves to the room listed for the job's hour unless already
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
 scheduled at the schedule's next listed hour, strictly later (`mechanics/schedule/behavior.ts:24`). One unit of
-logical time is one second, an hour 3600, a day 86400, time 0 midnight (`mechanics/schedule/behavior.ts:18`;
-`mechanics/policy.ts:42`). `calendar@1` is the cartridge's start time only. Policy leaf `time_window
-{from, to}` in hours, wrapping past midnight. Invariant `job_complete_owned_by_run`.
+logical time is defined by the cartridge calendar: positive exact units per hour, hours per day
+and displayed subdivisions per hour. Time 0 begins day 1 at midnight. Daily schedules and
+policy leaf `time_window {from, to}` use calendar hours, including half-open windows that wrap
+midnight; jobs schedule strictly after the current time. The compiler and loader reject hours
+outside the authored day, unsafe day products and malformed periods. Optional ordered solar and
+lunar phase cuts classify confirmed time; absent sky data produces no sky claim. Legacy
+cartridges without the expanded calendar retain their installed fixed-hour meaning.
+Invariant `job_complete_owned_by_run`.
 
 ## Engine-wide behaviours
 

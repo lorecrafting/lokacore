@@ -315,9 +315,8 @@ const unlock = (c: any, cap: string) => {
 // Breaks: the loader admitting what the compiler rejects (test/loka/content_ferry_test.exs): a
 // schedule naming a room the cartridge lacks (run_job would move Bram nowhere), a schedule or
 // calendar whose owner (behavior@1, calendar@1) is not locked, or a schedule without schedule@1
-// (the drain would run its jobs under a capability the cartridge never declared), a calendar
-// start past day 1 (its first job's due time could leave the safe integers and the first save
-// throw), or an action built on run_job (authority-internal, 04 §1: a dead action).
+// (the drain would run its jobs under a capability the cartridge never declared), or an action
+// built on run_job (authority-internal, 04 §1: a dead action).
 test('the loader checks schedule rooms and the schedule and calendar owners', () => {
   const bram = `.cartridge.npcs["${F}:npc/bram"]`;
   fails(
@@ -340,9 +339,6 @@ test('the loader checks schedule rooms and the schedule and calendar owners', ()
     { capability: 'schedule' },
     ['schedule@1'],
   );
-  fails((c) => (c.calendar.start = 86400), 'SCHEMA_VIOLATION', '.cartridge.calendar.start', {
-    error: 'above_maximum',
-  });
   fails(
     (c) =>
       (c.actions[`${F}:action/hurry`] = {

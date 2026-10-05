@@ -40,7 +40,11 @@
     "hp": {
       "minimum": 0,
       "maximum": 10,
-      "start": 10
+      "start": 10,
+      "gain_every": 3600
+    },
+    "ma": {
+      "gain_every": 3600
     }
   }
 }

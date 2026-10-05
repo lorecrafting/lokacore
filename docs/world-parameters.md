@@ -12,7 +12,7 @@ W6) and removed P2's wait list. When a row moves to content, mark it DONE with t
 The original inventory and counts remain a dated audit, not a current completion claim.
 [Current reconciliation](decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md#current-mechanics-policy)
 supersedes W3/W4/W16 duration/wait recommendations for opted-in elapsed profiles; legacy
-play-time contracts stay frozen. W5/W6/W8/W19/W20 follow-on remains open with M1-C/M2.
+play-time contracts stay frozen. W5/W6/W8/W19/W20 are implemented by B1; the dated audit table below records their original findings.
 
 Scope read: `kernel/ts/src/**` (all rules, view, actions, dialogue, quest, reaction, policy, behavior, resource, compose, fresh), `lib/loka/**` (compiler + core twins), `mobile/app`, `mobile/authority`, plus the numeric bounds in `protocol/*.schema.json` that fix world values.
 Method: ast-grep `kind: number` sweep (plus a 0/1 pass over every rule and ActionSet file) over kernel + mobile (ts and tsx), numeric grep over lib/loka, jq sweep of schema `minimum/maximum/maxItems`, then a read of every rule for implicit values (a missing `time.advance` = a hard-coded zero cost).
@@ -28,10 +28,10 @@ Priority: **C1** before chapter one; **TM** with the time-model slice; **L** lat
 | W2 | DONE [#131](https://github.com/lorecrafting/lokacore/pull/131) | kernel/ts/src/mechanics/movement/rule.ts:75 | which pool pays a move | DEF: engine default `mv`, cartridge override `world.movement.cost = {resource, amount}` | none | — |
 | W3 | no `time.advance` (0 s) | kernel/ts/src/mechanics/movement/rule.ts:54 | game time a move takes | HC (zero) | Historical recommendation `world.movement.duration`; superseded for elapsed profiles: no action-time jump | TM |
 | W4 | 0 s for look, scan, examine, take, drop, give, open, close, lock, unlock, talk, choose, close_choice, accept_quest | kernel/ts/src/mechanics/description_variant/rule.ts:12, :19; mechanics/movement/rule.ts:31; mechanics/containment/rule.ts:45, :50, :57; mechanics/barrier/rule.ts:41; mechanics/dialogue/rule.ts:63, :84, :117; mechanics/quest/rule.ts:10 | time cost of each engine verb | HC (zero) | Historical duration knobs superseded for elapsed profiles; nonzero recipe durations rejected. Costs remain separate (W15) | TM |
-| W5 | `3600` (s per hour) | kernel/ts/src/mechanics/schedule/behavior.ts:18, :28; mechanics/policy.ts:43; foundation/compose.ts:89; lib/loka/core/compose.ex:110; protocol/command.schema.json LogicalTime (PM ruling "until calendar@1 R8") | length of a game hour | HC | `cartridge.json calendar.units_per_hour` (calendar@1 already exists, has only `start`) | TM |
-| W6 | `24` / `86400` (hours/day) | mechanics/schedule/behavior.ts:18, :25, :29; mechanics/policy.ts:43; schemas: policy.schema time_window from/to max 23, entity.schema daily_schedule keys 0-23, cartridge.schema Calendar.start max 86399 | length of a day; day wrap of schedules and windows | HC (engine + schema) | `calendar.hours_per_day`; schema bounds become loader checks against the calendar | TM |
-| W7 | `start ?? 0` (midnight day 1) | kernel/ts/src/runtime/fresh.ts:39 | world start time | CT (`calendar.start`, Lantern/ferry/green use 21600); engine default 0; schema caps it to day 1 | keep; lift the 86399 cap with W6; add `calendar.start_day` if multi-day needed | L |
-| W8 | regen tick = every hour boundary (`/3600`) | foundation/compose.ts:89; lib/loka/core/compose.ex:110 | how often `gain` is applied | HC | `resources.json <pool>.gain_every` (units), default one calendar hour | TM |
+| W5 | B1 | calendar@1 `units_per_hour` | length of a game hour | CT in current chapter | authored in `cartridge.json calendar` | — |
+| W6 | B1 | calendar@1 `hours_per_day` | day wrap of schedules and windows | CT in current chapter | compiler and loader check authored-hour bounds | — |
+| W7 | B1 | `calendar.start` | world start time | CT in current chapter | multi-day starts are allowed; historical cartridges may omit calendar | — |
+| W8 | B1 | `resources.json <pool>.gain_every` | legacy gain interval | CT in current chapter | opted fractional `regen.every` remains separate | — |
 | W9 | gain hp 5, ma 4, mv 18 | lib/loka/content/resources.ex:16-18 | regen per tick | DEF (resources.json) | keep as overridable default; document in cartridge guide | — |
 | W10 | hp 0..20 start 20; ma 0..100 start 100; mv 0..82 start 82 | lib/loka/content/resources.ex:16-18 | pool bounds and start values | DEF (resources.json; ashmere_road overrides hp/mv) | keep as overridable default | — |
 | W11 | hp/ma/mv always added; resource@1 + schedule@1 always required | lib/loka/content/resources.ex:141-152 (`def requires`, `specs`) | whether a world has these pools at all | HC (cannot opt out, only re-tune) | allow `resources.json "<pool>": null` (or `world.pools`) to drop a default pool | L |
@@ -42,8 +42,8 @@ Priority: **C1** before chapter one; **TM** with the time-model slice; **L** lat
 | W16 | wait: no max, no min step, no extra regen | kernel/ts/src/mechanics/schedule/rule.ts:44-47 | how far one wait may jump; rest effect | HC (unbounded) | Historical `world.wait.max` superseded for elapsed profiles: no player Wait route/alias; position recovery belongs to M2 | TM |
 | W17 | player body has no capacity, no weight | kernel/ts/src/runtime/fresh.ts:28, :37 (body never gets a `capacities` row); kernel/ts/src/mechanics/containment/rule.ts:44-47 (take never checks) | inventory limit / carry weight | HC (unlimited) | `cartridge.json world.body.capacity`; later `weight` on items + `world.body.carry` (spec 00 §4 "Encumbrance", STR cap) | L |
 | W18 | NPC/item capacity default `Infinity` | kernel/ts/src/mechanics/containment/rule.ts:58 | how many items an NPC accepts when undeclared | DEF (per-entity `capacity` is CT) | keep | — |
-| W19 | NPC schedule granularity = whole hour | mechanics/schedule/behavior.ts:24-31; entity.schema daily_schedule keys 0-23 | when NPCs move | HC | keys in calendar time (`"06:30"` or units) once W5/W6 land | TM |
-| W20 | `time_window` granularity = whole hour | mechanics/policy.ts:43-44; policy.schema time_window 0-23 | dusk/dawn style conditions | HC | windows in calendar units, or named periods `calendar.periods.{dusk:[18,6]}` | TM |
+| W19 | B1 | `daily_schedule` hour keys | when NPCs move | CT in current chapter | bounds use the authored day | — |
+| W20 | B1 | `time_window` hour endpoints | dusk/dawn conditions | CT in current chapter | bounds use the authored day | — |
 | W21 | engine verb, talk and quest-offer priority `0` | kernel/ts/src/commands/actions.ts:111, :142; mechanics/dialogue/shared.ts:135, :156 | presentation order of engine verbs | HC | `world.verbs.<verb>.priority` (same block as W4) | L |
 | W22 | lock/unlock need `key_item` | kernel/ts/src/mechanics/barrier/rule.ts:81-84 | key rule | CT (key_item per barrier); the rule itself is mechanism | none | — |
 
@@ -52,8 +52,8 @@ At that audit, the only `time.advance` producers: mechanics/action_recipe/rule.t
 
 ### Spec-pinned rows (need a spec/schema amendment before code)
 - W1/W2: 00 §4 amendment 2026-09-25 ("1 MV per move from R5, terrain R8") and resource.schema ResourceSpec description; amended 2026-10-02 (#131).
-- W5/W6/W19/W20: PM ruling R5 S6 in command.schema LogicalTime ("until calendar@1 R8 the kernel fixes them"), plus schema bounds time_window 0-23, daily_schedule keys 0-23, Calendar.start <= 86399.
-- W8: resource.schema ResourceSpec and delta.schema resource.adjust ("each hour boundary, floor(time / 3600)").
+- W5/W6/W19/W20: B1 amended calendar@1 and the schedule/window schemas; compiler and loader validate bounds against the authored calendar.
+- W8: B1 added `ResourceSpec.gain_every`; the current chapter authors its gain interval.
 - W13: 04 §15 bands amendment 2026-10-01; amended 2026-10-02 (#131).
 Correction to the brief: regeneration timing does exist (fixed hourly tick, foundation/compose.ts:89 and compose.ex:110); only rest/position multipliers are missing.
 

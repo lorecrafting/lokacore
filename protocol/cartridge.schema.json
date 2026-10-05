@@ -791,24 +791,67 @@
       ]
     },
     "Calendar": {
-      "description": "calendar@1 (21 \u00a74 Time; capability_registry.json definitions): start, the logical time a fresh world begins at, on day 1 (command.schema.json LogicalTime units; 21600 is 06:00), so its first jobs' due times stay safe integers. Absent, a world begins at 0. An optional map of loka-cartridge-v2 (Early R7/R8 S): the tag stays. In source it is cartridge.json's calendar, beside entry.",
+      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; compiler and loader check order, cycle bounds and schedule/window hours.",
       "type": "object",
       "properties": {
-        "start": {
+        "start": {"type": "integer", "minimum": 0},
+        "units_per_hour": {
           "type": "integer",
-          "minimum": 0,
-          "maximum": 86399
+          "minimum": 1
+        },
+        "hours_per_day": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "subdivisions_per_hour": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "solar": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/CalendarCut"
+          }
+        },
+        "lunar": {
+          "type": "object",
+          "properties": {
+            "period": { "type": "integer", "minimum": 1 },
+            "origin": { "type": "integer", "minimum": 0 },
+            "phases": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "#/$defs/CalendarCut" }
+            }
+          },
+          "required": ["period", "origin", "phases"],
+          "additionalProperties": false
         }
       },
-      "required": [
-        "start"
-      ],
+      "required": ["start"],
       "additionalProperties": false,
       "examples": [
         {
-          "start": 21600
+          "start": 3000,
+          "units_per_hour": 100,
+          "hours_per_day": 30,
+          "subdivisions_per_hour": 10,
+          "solar": [{"at": 0, "phase": "night"}, {"at": 700, "phase": "day"}],
+          "lunar": {"period": 80, "origin": 0, "phases": [{"at": 0, "phase": "new"}, {"at": 40, "phase": "full"}]}
         }
       ]
+    },
+    "CalendarCut": {
+      "description": "An inclusive phase start within one authored solar day or lunar period.",
+      "type": "object",
+      "properties": {
+        "at": { "type": "integer", "minimum": 0 },
+        "phase": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+      },
+      "required": ["at", "phase"],
+      "additionalProperties": false,
+      "examples": [{"at": 0, "phase": "new"}]
     },
     "ArtifactSize": {
       "description": "The byte length of a cartridge artifact file, checked before decoding: at most 4 MiB (owner decision, docs/archive/decisions/owner-decisions-r4-2026-09-25.md, item 2). bin/contracts.exs emits the maximum into kernel/ts/src/contracts.gen.ts as ARTIFACT_MAX_BYTES; Elixir reads it here.",

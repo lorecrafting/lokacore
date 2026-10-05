@@ -61,7 +61,8 @@ function settled(row: Stored | undefined, spec: ResourceSpec, now: number): Reco
 export function current(row: Stored | undefined, spec: ResourceSpec, now: number): number {
   if (spec.regen) return settled(row, spec, now)?.value ?? NaN;
   const { value, at } = row ?? { value: spec.start, at: 0 };
-  const ticks = Math.floor(now / 3600) - Math.floor(at / 3600);
+  const every = spec.gain_every ?? 3600; // frozen legacy cartridges predate authored intervals
+  const ticks = Math.floor(now / every) - Math.floor(at / every);
   return Math.min(spec.maximum, value + spec.gain * ticks);
 }
 

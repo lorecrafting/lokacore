@@ -257,3 +257,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Book keyboard navigation](2026-10-05-book-keyboard-navigation-review.md): PR #200 at `f80ac75d`, CHANGES REQUIRED; scoped fix `9ef3bf15`, APPROVE, R200-1/R200-2 closed.
 - [Forward development before release](2026-10-05-forward-development-review.md): PR #198 at `3efa96eb`, independent APPROVE; no findings, active contract wording and links checked.
 - [Book browser save/reopen E2E](2026-10-05-tester-army-book-e2e-review.md): PR #199 at `810c7a41`, APPROVE; browser red control failed as intended; no findings.
+- [B1 cartridge calendar and truthful Book status](2026-10-05-b1-calendar-status-review.md): at `8efa48bc`, independent APPROVE WITH NOTES; no correctness findings, one nonblocking Ponytail nit, focused suites green and phase-boundary mutant red. PR pending.

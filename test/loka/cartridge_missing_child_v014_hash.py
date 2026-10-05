@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_missing_child'
-VERSION = '0.0.13'
+VERSION = '0.0.14'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -17,9 +17,11 @@ def policy(root):
 def definition(name, **parts):
     return dict(key=name, **parts)
 caps = dict.fromkeys(['movement', 'containment', 'barrier', 'equipment', 'position', 'policy', 'fact', 'quest', 'dialogue', 'resource', 'schedule', 'description_variant', 'calendar', 'death', 'combat', 'inspectable_detail', 'readable', 'reaction', 'action_recipe', 'escort', 'scene'], 1)
-v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Ashmere — The Missing Child', requires=dict(kernel_api=dict(at_least='1.12', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.missing_child')])
+v = dict(format='loka-cartridge-v2', manifest=dict(api_version='loka/v3', id=ID, version=VERSION, title='Ashmere — The Missing Child', requires=dict(kernel_api=dict(at_least='1.13', below='2.0'), content_schema=1, rule_ir=1, capabilities=caps, client_features=[]), supported_profiles=['offline_private']), lock=dict(format='loka-capability-lock-v1', capabilities=caps), entry=ref('room', 'ferry_landing'), chapters=[dict(title='chapter.missing_child')])
 v['manifest']['time_policy'] = dict(profile='real_elapsed', rate=50)
-v['calendar'] = dict(start=64800)
+v['calendar'] = dict(start=64800, units_per_hour=3600, hours_per_day=24, subdivisions_per_hour=60,
+    solar=[dict(at=at, phase=phase) for at, phase in [(18000, 'dawn'), (25200, 'day'), (64800, 'dusk'), (72000, 'night')]],
+    lunar=dict(period=2419200, origin=0, phases=[dict(at=i*302400, phase=phase) for i, phase in enumerate(['new', 'waxing_crescent', 'first_quarter', 'waxing_gibbous', 'full', 'waning_gibbous', 'last_quarter', 'waning_crescent'])]))
 v['facts'] = {key('fact', 'position'): definition('position', version=1, value_type=dict(type='enum', values=['standing', 'sitting', 'resting', 'sleeping'], default='standing'), scopes=['player'], meaning="The character's position (position@1): only its rule writes it.")}
 v['policies'] = {}
 v['actions'] = {}
@@ -70,6 +72,8 @@ for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'ce
     v['npcs'][key('npc', name)] = definition(name, keywords=['rat', name], short='npc.cellar_rat.short', room_line=f'npc.{name}.room', description='npc.cellar_rat.description', room=ref('room', 'lantern_cellar'), hp=dict(minimum=0, maximum=6, start=6, gain=0), attack=dict(chance=50, damage_min=1, damage_max=1))
 v['barriers'] = {key('barrier', name): definition(name, keywords=words, short=f'barrier.{name}.short', initial='locked', key_item=ref('item', item)) for name, words, item in [('trunk_lid', ['lid', 'trunk_lid'], 'brass_key')]}
 v['resources'] = {key('resource', name): definition(name, minimum=0, maximum=maximum, start=maximum, gain=gain) for name, maximum, gain in [('hp', 10, 5), ('ma', 100, 4), ('mv', 100, 18)]}
+for name in ['hp', 'ma']:
+    v['resources'][key('resource', name)]['gain_every'] = 3600
 # M5-A independently declared HP10/MV100; M2 rates/fractions and MA unchanged.
 v['resources'][key('resource', 'mv')].update(
     regen=dict(every=3600, by_position=dict(standing=18, sitting=18, resting=36, sleeping=36)),
@@ -190,7 +194,7 @@ v['text'] = json.loads(Path('cartridges/ashmere_missing_child/text.json').read_t
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved chapter semantics and compiler-owned defaults; only the chapter text catalog is copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
-Path('protocol/fixtures/missing_child_v013_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
+Path('protocol/fixtures/missing_child_v014_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
 # Reviewed allocation order: character, body, eighteen rooms, nine details, ten NPCs, eight items, cloak holder.
 names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/bell', 'detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice', 'detail/hollow', 'detail/plank', 'detail/tracks', 'detail/fox_prints'] + ['npc/'+name for name in ['aldric', 'cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud', 'vesper', 'wren']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'fox_drawing', 'storage_chest', 'tin_whistle', 'trunk', 'vesper_message', 'wool_cloak']] + ['slot/cloak']
@@ -201,4 +205,4 @@ for ordinal, name in enumerate(names):
     b[8] = (b[8] & 63) | 128
     s = b.hex()
     ids[name] = '-'.join([s[:8], s[8:12], s[12:16], s[16:20], s[20:]])
-Path('protocol/fixtures/missing_child_v013_ids.json').write_text(json.dumps(ids, indent=2)+'\n')
+Path('protocol/fixtures/missing_child_v014_ids.json').write_text(json.dumps(ids, indent=2)+'\n')

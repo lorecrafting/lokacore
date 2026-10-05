@@ -134,7 +134,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
     assert.equal(
       pin().content_hash,
-      '2e05620c7bd1319352aad6b4f0bc7f8479da3a324601b320fb2f9a9b79441a7b',
+      'ed81f319bc98e0658bcd24986ede82eec01b86f605ad73dcdf1faa915d82e3af',
     );
     assert.equal(globals.loka_session!.startOver(), undefined);
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
@@ -158,7 +158,7 @@ test('the 0.0.9 chapter save is refused intact until explicit Start over', (t) =
   );
   const current = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v013_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/missing_child_v014_hash.json', import.meta.url),
       'utf8',
     ),
   );
@@ -203,7 +203,7 @@ test('the 0.0.9 chapter save is refused intact until explicit Start over', (t) =
 function appHost() {
   const chapter = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v013_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/missing_child_v014_hash.json', import.meta.url),
       'utf8',
     ),
   );

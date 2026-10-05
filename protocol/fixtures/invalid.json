@@ -11751,10 +11751,6 @@
       {
         "path": "/from",
         "code": "below_minimum"
-      },
-      {
-        "path": "/to",
-        "code": "above_maximum"
       }
     ]
   },
@@ -11857,10 +11853,6 @@
       "to": -1
     },
     "errors": [
-      {
-        "path": "/from",
-        "code": "above_maximum"
-      },
       {
         "path": "/to",
         "code": "below_minimum"
@@ -12468,12 +12460,6 @@
         "key": "r"
       },
       "daily_schedule": {
-        "24": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "r"
-        },
         "06": {
           "cartridge_id": "c",
           "cartridge_version": "1.0.0",
@@ -12486,10 +12472,6 @@
     "errors": [
       {
         "path": "/daily_schedule/06",
-        "code": "pattern_mismatch"
-      },
-      {
-        "path": "/daily_schedule/24",
         "code": "pattern_mismatch"
       },
       {
@@ -12528,15 +12510,13 @@
   },
   {
     "contract": "Calendar",
-    "value": {
-      "start": 86400
-    },
-    "errors": [
-      {
-        "path": "/start",
-        "code": "above_maximum"
-      }
-    ]
+    "value": {"start": 3000, "units_per_hour": 0, "hours_per_day": 30, "subdivisions_per_hour": 10},
+    "errors": [{"path": "/units_per_hour", "code": "below_minimum"}]
+  },
+  {
+    "contract": "CalendarCut",
+    "value": {"at": -1, "phase": "new"},
+    "errors": [{"path": "/at", "code": "below_minimum"}]
   },
   {
     "contract": "ReactionRule",

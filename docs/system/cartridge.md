@@ -20,7 +20,7 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.13`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.14`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
@@ -66,11 +66,11 @@ S1 offer and turn-in remain independently usable in every Q1 state. No hour or w
 apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
 Its Q2 activation consumer is [the staged first search lead below](#source-layout).
 
-The release declares API1.12 for the typed bell reaction and scene composition, retaining real_elapsed rate50/start64800, HP10, MV100, carrying
+The release declares API1.13 for the authored calendar and confirmed status projection, including API1.12's typed bell reaction and scene composition. It retains real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source. Its
-independent answer is `protocol/fixtures/missing_child_v013_hash.json`, derived
-by `test/loka/cartridge_missing_child_v013_hash.py`. Historical sampler/proof sources,
+independent answer is `protocol/fixtures/missing_child_v014_hash.json`, derived
+by `test/loka/cartridge_missing_child_v014_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
 The app opens only the chapter file and offers no story picker. Missing pins follow
@@ -221,6 +221,11 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   dialogue without a `quest`, on a choice without a `hand_over` (`OUTCOME_MISMATCH`); a recipe has a `failure` outcome exactly when it has a
   check (`content_dusk_test.exs`); `time_window` needs `schedule@1` and a non-empty window
   (`EMPTY_TIME_WINDOW`); a schedule needs `behavior@1` and a calendar `calendar@1`;
+- `calendar` may author a nonnegative multi-day `start`, positive `units_per_hour` and
+  `hours_per_day`, a positive `subdivisions_per_hour` dividing the hour, and ordered solar
+  and lunar cuts. The compiler and loader check safe day arithmetic, cut order and bounds,
+  schedule keys and time-window endpoints against the authored day. Solar and lunar phases
+  are labels, not engine values; the current chapter authors the complete cycle;
 - attributes (`attributes.json`, the artifact's `attributes`) need `attributes@1` in the lock, as
   do the policy leaves `stat_compare` and `resource_compare`, whose `attribute` or `resource`
   names an attribute or a pool of this cartridge (the compiler and the loader);

@@ -223,6 +223,7 @@ function Bottom(p: BottomProps) {
         ))}
       <Status
         time={view.time}
+        calendar={view.calendar_status}
         resources={view.resources}
         position={view.position}
         text={text}

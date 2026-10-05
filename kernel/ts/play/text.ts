@@ -1,16 +1,14 @@
-// The terminal's words (00 §4.10 text drawer; 06 §20 "the same action supports touch and
-// terminal adapters"): a table from words to Commands, and the room as text. Action
-// definitions carry no aliases yet (action.schema.json), so the aliases live here.
-import type { Cartridge, World } from '../src/index.ts';
+// Terminal words and room text (00 §4.10, 06 §20); action aliases live here until authored.
+import { gameView, type Cartridge, type World } from '../src/index.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { COMPASS, refString } from '../src/runtime/decision.ts';
 import { exitOf } from '../src/mechanics/lookups.ts';
-import { gameView } from '../src/index.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { normalize } from '../src/commands/target.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { status as calendarStatus } from '../src/mechanics/calendar.ts';
 
 /**
  * A Command's payload without its actor, a lookup (the player's words after the verb, which
@@ -226,7 +224,10 @@ export const which = (cartridge: Cartridge, world: World, ids: readonly EntityId
 };
 
 /** A LogicalTime as the player reads it: one unit a second, time 0 midnight of day 1. */
-export const clock = (t: number): string => {
+export const clock = (t: number, cartridge?: Cartridge): string => {
+  const projected = cartridge && calendarStatus(cartridge, t);
+  if (projected)
+    return `day ${projected.day}, ${String(projected.hour).padStart(2, '0')}:${String(projected.subdivision).padStart(2, '0')}`;
   const [day, hh, mm] = [
     Math.floor(t / 86400) + 1,
     Math.floor(t / 3600) % 24,
@@ -246,7 +247,14 @@ export function status(world: World): string {
     const now = level(world, world.body, r);
     return now === undefined ? [] : [`${k} ${now}/${world.resourceSpecs[key(r)].maximum}`];
   });
-  return pools.length ? `${[...pools, clock(world.state.clock)].join('  ')}\n` : '';
+  const sky = calendarStatus(world.cartridge, world.state.clock);
+  const phases = [
+    sky?.solar?.replaceAll('_', ' '),
+    sky?.lunar && `${sky.lunar.replaceAll('_', ' ')} moon`,
+  ].filter(Boolean);
+  return pools.length
+    ? `${[...pools, clock(world.state.clock, world.cartridge), ...phases].join('  ')}\n`
+    : '';
 }
 
 // The player's words for a rejection of a command of `type`, else the kind and code.

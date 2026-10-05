@@ -47,8 +47,11 @@ Settings retains Start over and its confirmation/error handling. Section returns
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
-palette without presenter thresholds. Status shows the hp band phrase only on hp, colors every
-projected resource, and shows the game clock as its earthly branch under the
+palette without presenter thresholds. Status shows the hp band phrase only on hp and colors every
+projected resource. With a cartridge calendar, status shows the confirmed day and displayed time,
+plus structured solar and lunar phase labels when authored. It updates from confirmed GameView
+time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
+cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
 
 Only World's current-position label is a distinct position tap target. Each tap directly invokes
