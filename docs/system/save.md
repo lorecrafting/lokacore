@@ -22,7 +22,14 @@ a new save: with a random source, under a world context and RNG seed drawn for t
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:157`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry | yes, on the newest release |
 
-The session controller adds two `save_corrupt` causes, both with the new game in place, after a story opens: a world whose first screen cannot be built (`mobile/authority/local-story/session.ts:60`), or a receipt response in the story's scope that is not valid JSON or has a narration line without a key (`:71`). Any other valid-JSON response of the wrong shape still opens; its replay is a `conflict` ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
+The session controller adds `save_corrupt` causes with the new game in place after a story
+opens: a world whose first screen cannot be built
+(`mobile/authority/local-story/session.ts:60`), or a receipt response in the story's scope
+that is not valid JSON or has a narration line without a key (`:71`). A stored Read command
+that is invalid JSON or has no valid target also follows this corruption path. SQLite
+read failures such as locks and I/O errors retain their storage-error handling. Any other
+valid-JSON response of the wrong shape still opens; its replay is a `conflict`
+([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
 `recovery.test.ts`, `start_over.test.ts`.
 

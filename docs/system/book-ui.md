@@ -126,14 +126,16 @@ description precede the confirmed message and any nonempty detail-local history,
 options. Entry shows the message immediately when Read confirms; no second Read option is
 shown. A pending entry can be retried by returning and opening it again. Body text comes only
 from confirmed Read narration; pending, refused, stale and replayed attempts never invent or
-duplicate it. Back pops to the board, then Back to World clears the board. Opening a board or
-returning/backing creates no command or receipt; entering a notice invokes its one existing
+duplicate it. Back to board pops to the board, then Back to World clears the board. Opening
+a board or returning/backing creates no command or receipt; entering a notice invokes its one existing
 Read. Room changes prune these routes; elapsed-only redraws retain them. Scene/combat
 precedence and live action freshness apply unchanged. These local pages add no pause,
 deadline extension or persisted transcript. On cold reopen, the resolved Read target from
 the existing committed receipt restores its message once to that notice’s detail history
-without a command or receipt. Ordinary unclassified narration continues to follow the
-existing World recovery rule.
+and its visible detail route after the chapter Continue. A board child restores its parent
+board beneath it. This creates no command or receipt. A missing current-room target restores
+no notice route; scene/combat precedence still applies. Ordinary unclassified narration
+continues to follow the existing World recovery rule.
 
 ## NPC dialogue and action details
 

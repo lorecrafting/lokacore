@@ -4,6 +4,7 @@ import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { localSession } from '../../authority/local-story/session.ts';
 import { group, intentOf } from './model.ts';
 import { presenter } from './presenter.ts';
 
@@ -19,8 +20,8 @@ const board = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2';
 const noticeBody = 'Keep the landing clear. Tie boats to the mooring post.';
 const boardBody = 'Lost a tin whistle? Ask at the Drowned Lantern.';
 
-function preview(path = ':memory:') {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+function preview(path = ':memory:', bundled = bundle) {
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundled);
   const book = presenter(a.game);
   a.game.subscribe(book.update);
   const button = (label: string) =>
@@ -201,6 +202,46 @@ test('cold reopen refuses a committed Read whose stored target is malformed', (t
     assert.throws(
       () => preview(path),
       (error: any) => error.cause?.kind === 'save_corrupt',
+    );
+  }
+});
+
+// Break: invalid stored command JSON escapes typed corruption/Start over, or handling it
+// silently replaces an unavailable older pin instead of preserving it until explicit reset.
+test('invalid Read JSON offers in-place Start over and leaves older pins explicitly refused', (t) => {
+  const older = JSON.parse(
+    readFileSync(
+      new URL('../../../protocol/fixtures/missing_child_v003_hash.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  for (const [bundled, refusal] of [
+    [bundle, 'save_corrupt'],
+    [older, 'pinned_release_missing'],
+  ]) {
+    const a = preview(':memory:', bundled);
+    t.after(() => a.sql.close());
+    a.tap('Read the notice');
+    a.sql.prepare('UPDATE receipt SET command = ?').run('{broken');
+    a.sql.exec("CREATE TABLE retained(marker TEXT); INSERT INTO retained VALUES ('keep')");
+    const pin = a.sql.prepare('SELECT pin FROM save').get()!.pin;
+    const session = localSession(
+      () => a.db,
+      () => assert.fail('an intact database must be repaired in place'),
+      bundle,
+      a.host,
+    );
+    assert.equal(session.failed()?.kind, refusal);
+    assert.equal(session.failed()?.startOver, true);
+    assert.equal(session.game(), undefined);
+    assert.equal(a.sql.prepare('SELECT pin FROM save').get()!.pin, pin);
+    assert.equal(session.startOver(), undefined);
+    assert.equal(session.failed(), undefined);
+    assert.ok(session.game());
+    assert.equal(a.sql.prepare('SELECT marker FROM retained').get()!.marker, 'keep');
+    assert.equal(
+      JSON.parse(a.sql.prepare('SELECT pin FROM save').get()!.pin as string).content_hash,
+      'e8ea74aa3fc1cf9f26ae2349c4a4d2a99d54d69a636c24745f03670ddf2eb43f',
     );
   }
 });
