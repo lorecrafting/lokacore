@@ -45,7 +45,7 @@ export type Ui<P> = {
 /**
  * The footer map's drag as PanResponder callbacks. Distances are in map units (drag px / ZOOM); a
  * drag under 2.5 units is still a tap. A release walks on the props the drag began on, so a redraw
- * meanwhile answers stale_view (04 §16) instead of pressing the new screen's button.
+ * keeps the captured action/context; the presenter refreshes only an unchanged offered action.
  */
 export function gesture<P extends { exits: readonly { direction: string }[] }>(u: Ui<P>) {
   const reset = () => (u.setLit(null), u.knob(0, 0), u.zoom(0));

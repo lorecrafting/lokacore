@@ -254,6 +254,30 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
   return [...place.map((a) => button(a, '')), ...travel(v), ...doors, ...held, ...asked(v, label)];
 }
 
+// Capture only the interaction, not clock/resources or the whole GameView.
+export function actionContext(
+  view: GameView,
+  b: Pick<Button, 'action_key' | 'target_ids' | 'input'>,
+  generation: number,
+) {
+  const exit = view.exits.find(
+    (e) => e.direction === (b.input as { direction?: string }).direction,
+  );
+  return JSON.stringify([
+    generation,
+    b.action_key,
+    b.target_ids,
+    Object.entries(b.input).sort(([a], [z]) => a.localeCompare(z)),
+    view.actor_id,
+    view.place.id,
+    view.choice,
+    view.scene,
+    view.combat,
+    ['stand', 'sit', 'rest', 'sleep'].includes(b.action_key) ? view.position : null,
+    exit ? [exit.sight?.room, exit.door?.state] : null,
+  ]);
+}
+
 // The button's plain strings are the wire's branded ones: a button is built from the view's own keys.
 export const intentOf = ({ action_key, target_ids, input, token }: Button): Intent => ({
   action_key: action_key as Key,

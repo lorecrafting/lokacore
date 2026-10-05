@@ -22,7 +22,7 @@ const small = { fontFamily: body, fontVariant: ['small-caps' as const], fontSize
 const rule = { flex: 1, height: 1, backgroundColor: paper.line };
 
 // ponytail: react-native-web's announceForAccessibility is a no-op; a web build needs a live region.
-// A walk goes by the props it was offered on (`at`: a drag's start), never newer ones (04 §16).
+// A walk keeps the action/context from `at` (drag start); the presenter revalidates its token.
 export function Footer(p: Props) {
   const [lit, setLit] = useState<string | null>(null);
   const [note, setNote] = useState(''); // a closed exit's reason, kept after release until the next press
