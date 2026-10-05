@@ -91,3 +91,34 @@ Ponytail Review: lean already; no additional dependency, persistence table, spec
 combat framework or actionable simplification found. Existing movement, resource, death,
 ActionSet and receipt mechanisms are reused. Correctness review traced their real consumers
 and found M6A-R1. No numerical oracle was rewritten and no unrelated feature is requested.
+
+## Round 1 scoped fix review — APPROVE
+
+Reviewed exact pushed head `f023eff2957eab64a31d93b2224bb8b9d485f895`, including
+`e30dcc9e`, `a4d3cc68`, `ddc4e27b` and the final single-use binding cleanup in `f023eff`.
+**M6A-R1 is closed. No findings remain open; final verdict APPROVE.**
+
+Scope was the finding's disposition, changed save contract/validator/tests, and direct
+load/reconciliation and due-round consumers. The validator now accepts a living NPC in
+another valid room while retaining the player's encounter-room presence, schema/identity,
+authored attack profile, unique participation and current pending future job checks.
+The unchanged round revalidates presence and closes without attacking an absent NPC.
+This admits the lawful intermediate state without permitting dead or non-room NPC custody.
+
+Independently ran 23 focused kernel combat/Flee/ActionSet and real SQLite combat/scheduled-
+departure tests: all passed. The new controlled artifact passes the actual loader, schedules
+departure at3600 after Attack at3550, recovers a lost COMMIT acknowledgement, cold reopens
+before3700 with exact saved state, and completes the due job with unchanged RNG/HP,
+no events/resource adjustments, a closed encounter and completed job.
+
+Two actual reviewer mutations in the detached worktree tested the boundaries: restoring
+same-room NPC validation fails the departure/reconciliation regression; removing the
+valid-NPC-room guard fails the save-corruption regression. Both exit1, sources restored,
+and all23 focused tests pass again. Inspected the author's additional dead-NPC red control
+and verified the additive fix evidence checksum manifest. Existing player presence and
+job/identity checks remain in the actual diff; no broad save-validation bypass was added.
+
+Ponytail Review: lean already; this uses the existing validator and due presence check,
+with no extra producer hook or framework. No unrelated scope was reopened. The PM confirmed
+six green CI jobs on the exact reviewed source head. This fix's proof is SQLite authority
+behavior; no fresh native run is claimed. Only this record and its index are committed.
