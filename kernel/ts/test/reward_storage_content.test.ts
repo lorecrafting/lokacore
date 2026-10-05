@@ -69,3 +69,38 @@ test('static reward-key potential retains wrong-custody and inaccessible-speaker
     assert.equal(result.diagnostic.code, 'BARRIER_UNREACHABLE_KEY');
   }
 });
+
+// Breaks: either transfer feature bypasses API1.10 or legacy terminal receive stops loading.
+test('each transfer feature requires API1.10 without changing terminal receive', () => {
+  assert.ok(load(() => {}).ok);
+  for (const feature of ['receive', 'give_allowed']) {
+    const change = (c: any) => {
+      if (feature === 'receive') delete c.dialogues[`${prefix}:dialogue/maud_turn_in`].quest;
+      else c.items[`${prefix}:item/reward_key`].give_allowed = false;
+    };
+    const current = load((c) => {
+      c.manifest.requires.kernel_api.at_least = '1.10';
+      change(c);
+    });
+    assert.ok(current.ok, JSON.stringify(current));
+    const old = load((c) => {
+      c.manifest.requires.kernel_api.at_least = '1.9';
+      change(c);
+    });
+    assert.ok(!old.ok);
+    assert.equal(old.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
+  }
+});
+
+// Breaks: relaxing the receive quest requirement also permits activating a quest in that choice.
+test('nonterminal receive still excludes accept', () => {
+  const result = load((c) => {
+    c.manifest.requires.kernel_api.at_least = '1.10';
+    const d = c.dialogues[`${prefix}:dialogue/maud_turn_in`];
+    delete d.quest;
+    d.choices.done.accept = ref('quest', 'mauds_cellar');
+  });
+  assert.ok(!result.ok);
+  assert.equal(result.diagnostic.code, 'OUTCOME_MISMATCH');
+  assert.ok(result.diagnostic.path.endsWith('.receive'));
+});

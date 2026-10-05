@@ -260,7 +260,7 @@ defmodule Loka.Content.Dialogues do
 
     owned(at(rel, steps), "item_acquired", ctx.events) ++
       transfer_roles(rel, steps, h, d["roles"], "from") ++
-      if not is_map_key(d, "quest") or is_map_key(o, "accept") or is_map_key(o, "hand_over"),
+      if is_map_key(o, "accept") or is_map_key(o, "hand_over"),
         do: [diag("OUTCOME_MISMATCH", at(rel, steps))],
         else: []
   end

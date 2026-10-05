@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "message",
+    "vesper_message"
+  ],
+  "short": "item.vesper_message.short",
+  "room_line": "item.vesper_message.room",
+  "description": "item.vesper_message.description",
+  "mass_grams": 20,
+  "location": {
+    "in": "npc",
+    "npc": "vesper"
+  },
+  "give_allowed": false
+}

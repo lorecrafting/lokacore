@@ -443,3 +443,13 @@ optionally projects `riddle {choice_id, bank}` with the ordered 1–32 uppercase
 never the canonical answer. The ordinary prompt supplies the clue. Projection/admission
 share the saved continuation, choice and bound participant availability; malformed input
 still fails the command/invocation boundary. Ordinary non-riddle choices retain their shape.
+
+
+## Authored item Give restriction
+
+API1.10 permits optional item `give_allowed: false` (absence means allowed).
+Give projection and direct command admission share the same restriction for the item
+and any container that holds it transitively; dialogue
+hand_over remains an independently guarded transfer. PendingChoice availability and
+Choose both re-evaluate the pinned dialogue policy against current actor state, alongside
+bound-role and direct-custody checks. No GameView shape, command or event is added.

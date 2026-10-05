@@ -325,3 +325,16 @@ fences both input and elapsed work until complete prior/next state is reconciled
 replay allocates and credits nothing. This uses save-v2 without a table/format migration;
 exact release-pin refusal prevents opening a mismatched save, without promising old development
 save compatibility.
+
+
+## Bound message return recovery
+
+Non-riddle receive and hand_over narration recovers its original speaker from the
+committed Choose command and retained bound row, with matching choice/outcome, original
+item transfer, fact consequences and quest resolution when declared. Unrelated latest
+receipts cannot supply authority. Load validates retained role identities and the branch
+and terminal evidence against authored definitions: malformed rows, impossible custody,
+or terminal status without the original message directly with the terminal NPC are
+`save_corrupt`. Legal ground, held-container and corpse custody before turn-in remain
+valid. No repair, transcript or save table is added; rollback and either unknown-COMMIT
+outcome retain the existing confirmed-disk adoption fence.

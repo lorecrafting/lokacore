@@ -1,5 +1,27 @@
 [
   {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "letter",
+      "keywords": [
+        "letter"
+      ],
+      "short": "item.letter.short",
+      "room_line": "item.letter.room",
+      "description": "item.letter.description",
+      "location": {
+        "in": "template"
+      },
+      "give_allowed": true
+    },
+    "errors": [
+      {
+        "path": "/give_allowed",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
     "contract": "DeltaOp",
     "value": {
       "op": "resource.adjust",

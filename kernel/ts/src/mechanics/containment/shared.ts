@@ -15,7 +15,21 @@ type Context = {
   totals: Map<string, number>;
   owned: Map<string, boolean>;
 };
-const charge = (c: Context) => ++c.steps.n <= LIMITS.query_steps;
+const charge = (c: { steps: Steps }) => ++c.steps.n <= LIMITS.query_steps;
+
+/** Giving a container must not strand any protected item inside it with an NPC. */
+export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 }) {
+  const context = { world, body: item, steps, owned: new Map<string, boolean>() };
+  for (const id in world.entities) {
+    if (!Object.hasOwn(world.entities, id)) continue;
+    if (!charge(context)) return 'budget_exceeded' as const;
+    const entity = world.entities[id];
+    if (entity.kind !== 'item' || entity.give_allowed !== false) continue;
+    const contained = underBody(context, id);
+    if (typeof contained === 'string') return contained;
+    if (contained) return 'invalid_state' as const;
+  }
+}
 
 /** One shared predicate for voluntary Take, called after existing target/reach admission. */
 export function carrying(world: World, body: EntityId, steps: Steps = { n: 0 }) {
@@ -37,7 +51,10 @@ export function carrying(world: World, body: EntityId, steps: Steps = { n: 0 }) 
   };
 }
 
-function underBody(c: Context, id: string): boolean | Failure {
+function underBody(
+  c: Pick<Context, 'world' | 'body' | 'steps' | 'owned'>,
+  id: string,
+): boolean | Failure {
   const { world, body, owned } = c;
   const path = new Set<string>();
   let at = id;

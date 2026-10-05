@@ -8,7 +8,7 @@ and not repeated here.
 
 ## Product and scope
 
-- Q2-B ends at the bound Wren meeting and accepted riddle with Q2 active; real escort/message return belongs to Q2-C ([PM adoption](../decisions/pm-decision-q2-b-wren-riddle-2026-10-05.md)).
+- Q2-C completes the Vesper message → Elspeth stays path before a separate complete Wren escort → Elspeth rescue path; no selectable unfinished branch ([PM adoption](../decisions/pm-decision-q2-c-stays-2026-10-05.md)).
 
 - Only authored receptacles can hold items ([record](../decisions/owner-decision-container-eligibility-2026-10-05.md)).
 

@@ -335,3 +335,13 @@ Request committed narration by the sent invocation's command ID even when it has
 never borrow the latest unrelated receipt. Cold reopen restores the committed detail line
 once, including after a successful answer removes the pending choice. Scene/combat precedence
 and typed save-corrupt handling remain in force.
+
+
+## Message return details
+
+Confirmed Vesper and Elspeth return lines appear once in their original NPC detail
+history, after description and before options, including cold reopen. Pending, refused
+and stale replies never print success. Existing live freshness preserves an unchanged
+choice across elapsed-only redraws; changed custody, continuation, room or speaker
+refuses stale and redraws truthfully. The journal and Green description use committed
+quest/status truth, without a new UI mode.

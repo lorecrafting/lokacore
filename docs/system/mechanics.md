@@ -75,7 +75,9 @@ or with an open one; an NPC, a slot holder or a closed or locked lid on the way 
 container without a barrier is open: its contents are in reach (a sack can be emptied).
 Custody leaves `has_item` and target resolution's `target_present` unchanged. `drop`: not
 held `not_owned` (`:49`); accepted `dropped`, `item_dropped`. `give {item_id, recipient_id}`:
-not held `not_owned`; recipient missing `not_found`, not an NPC `invalid_target`, not here
+not held `not_owned`; authored item `give_allowed: false` refuses `invalid_state`
+through the shared projection/admission predicate, including Give of any container
+with a protected descendant (absence means allowed for items without protected contents); recipient missing `not_found`, not an NPC `invalid_target`, not here
 `not_present`, at its declared capacity `invalid_state` (`:58`, undeclared is unlimited);
 accepted `given`, `item_acquired` with the NPC as holder. Composition re-checks custody, cycles
 and capacity. Policy leaf `has_item`; invariants `one_container_per_item`,
@@ -320,7 +322,9 @@ actor already having a pending choice, `invalid_state`. Accepted
 `choice_opened`: one `choice.open` of a new continuation (ordinal 0 of this command), the
 dialogue's roles bound to EntityIds in role-name order, the choice ids in key order, and
 `choice_opened`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
-actor's or not offering the choice `invalid_state`; a bound NPC not in the room `not_present`;
+actor's or not offering the choice `invalid_state`; the pinned dialogue policy is
+re-evaluated for that actor at Choose and pending-option projection, refusing
+`invalid_state` when no longer true; a bound NPC not in the room `not_present`;
 a bound item not held `not_owned` (`kernel/ts/src/mechanics/dialogue/shared.ts:66`; the GameView shows the same); then the
 dialogue's quest resolves (above), or the choice's `accept` activates its quest as
 `accept_quest` does, `invalid_state` when `accept_quest` would be: the actor already has an
@@ -354,7 +358,7 @@ the ordinary atomic choice path, including its authored fact consequences and re
 No duration, cooldown or new continuation is created for an answer. Close stays available
 when a participant leaves or dies. The invocation digest includes the answer.
 
-A quest-resolving choice may declare `receive {item, from}` with bound item/NPC role names,
+A choice may declare `receive {item, from}` (without a resolving quest from API1.10) with bound item/NPC role names,
 excluding `accept` and `hand_over`. Only that choice's incoming item role substitutes direct
 custody by its named NPC for actor-held custody. Every other item role retains its contract.
 Choose and its projected availability recheck the same bound live/present NPC, direct reward

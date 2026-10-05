@@ -184,4 +184,47 @@ defmodule Loka.ContentRewardStorageTest do
       File.write!(bram, original_bram)
     end
   end
+
+  # Breaks: API1.9 admits either new transfer feature, or API1.10 drops the authored restriction.
+  test "each API1.10 transfer feature requires its own minimum", %{tmp_dir: dir} do
+    for feature <- ["receive", "give_allowed"] do
+      sub = source(Path.join(dir, feature))
+      update(sub, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.10"))
+
+      if feature == "receive",
+        do: update(sub, "dialogues/maud_turn_in.json", &Map.delete(&1, "quest")),
+        else: update(sub, "items/reward_key.json", &Map.put(&1, "give_allowed", false))
+
+      assert {:ok, bytes, []} = Loka.Content.compile(sub)
+      c = JSON.decode!(bytes)["cartridge"]
+
+      if feature == "receive",
+        do:
+          refute(
+            Map.has_key?(c["dialogues"]["reward_storage@0.0.1:dialogue/maud_turn_in"], "quest")
+          ),
+        else: assert(c["items"]["reward_storage@0.0.1:item/reward_key"]["give_allowed"] == false)
+
+      update(sub, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.9"))
+      assert {:error, diagnostics} = Loka.Content.compile(sub)
+      assert Enum.any?(diagnostics, &(&1["code"] == "KERNEL_API_RANGE_INVALID"))
+    end
+  end
+
+  # Breaks: removing the receive quest requirement accidentally allows simultaneous activation.
+  test "nonterminal receive still excludes accept", %{tmp_dir: dir} do
+    source(dir)
+    update(dir, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.10"))
+
+    update(dir, "dialogues/maud_turn_in.json", fn d ->
+      d |> Map.delete("quest") |> put_in(["choices", "done", "accept"], "mauds_cellar")
+    end)
+
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.any?(
+             diagnostics,
+             &(&1["code"] == "OUTCOME_MISMATCH" and String.ends_with?(&1["path"], ".receive"))
+           )
+  end
 end

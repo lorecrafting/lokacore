@@ -111,6 +111,10 @@ separate protocol/save rechecks approved, six fix-source checks passed, and the
 final review-only head checks passed. Chapter release 0.0.10 keeps Q2 active;
 the escort or message return remains to be built.
 
+Next, [Q2-C return plan](decisions/pm-decision-q2-c-stays-2026-10-05.md): C-stays completes
+Vesper’s message → Elspeth; C-rescue then completes bound Wren escort → Elspeth.
+Each adds a complete selectable path.
+
 60 planned slices after R3 (3 R4 + 1 observability + 11 R5 + 9 R6 including P1 and SM + 3 SM2 + 7 early R7/R8 + 11 R6P + 1 docs compaction + 1 presenter split + 1 quest from dialogue + 12 chapter one). Estimates and re-estimates are in [the archive](archive/ROADMAP.md).
 
 Legend reconciliation: [#136](https://github.com/lorecrafting/lokacore/pull/136) retains the
