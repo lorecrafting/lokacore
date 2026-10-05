@@ -110,23 +110,26 @@ defmodule Loka.Content.Scenes do
 
     shape ++
       if(shape == [], do: reference(rel, steps ++ ["on"], kind, s["on"], m, defs), else: []) ++
-      case if(kind == "story_point",
-             do: resolve(s["on"]["story_point"], "story_point", m, defs),
-             else: nil
-           ) do
-        {_, _, p} ->
-          if is_map_key(p["outcomes"], s["on"]["outcome"]),
-            do: [],
-            else: [
-              diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["on", "outcome"]), %{
-                "target" => s["on"]["outcome"]
-              })
-            ]
-
-        _ ->
-          []
-      end
+      outcome(rel, steps, s, kind, m, defs)
   end
+
+  defp outcome(rel, steps, s, "story_point", m, defs) do
+    case resolve(s["on"]["story_point"], "story_point", m, defs) do
+      {_, _, p} ->
+        if is_map_key(p["outcomes"], s["on"]["outcome"]),
+          do: [],
+          else: [
+            diag("UNRESOLVED_REFERENCE", at(rel, steps ++ ["on", "outcome"]), %{
+              "target" => s["on"]["outcome"]
+            })
+          ]
+
+      _ ->
+        []
+    end
+  end
+
+  defp outcome(_, _, _, _, _, _), do: []
 
   defp texts(_, _, _, :unknown), do: []
 

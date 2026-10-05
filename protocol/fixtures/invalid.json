@@ -15349,43 +15349,6 @@
     ]
   },
   {
-    "name": "scene_on_missing_story_point",
-    "contract": "SceneDefinition",
-    "value": {
-      "key": "bell_rung",
-      "on": {
-        "outcome": "carry"
-      },
-      "control": "modal",
-      "steps": [
-        {
-          "type": "narrate",
-          "text": "scene.bell_rung.bell"
-        },
-        {
-          "type": "narrate",
-          "text": "scene.bell_rung.fen"
-        },
-        {
-          "type": "narrate",
-          "text": "scene.bell_rung.fox"
-        },
-        {
-          "type": "await_ack"
-        },
-        {
-          "type": "end"
-        }
-      ]
-    },
-    "errors": [
-      {
-        "path": "/on/story_point",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
     "name": "scene_on_missing_outcome",
     "contract": "SceneDefinition",
     "value": {

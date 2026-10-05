@@ -79,11 +79,9 @@ test('bell-first loss survives real rollback-journal SQLite reopen after every s
   a.sql.close();
   a = setup(path);
   assert.equal(a.view().journal.find((q) => q.quest.key === 'bell_of_ashmere')?.state, 'active');
+  const bellNotice = a.view().notices?.find((n) => n.id === ids['detail/bell']);
   assert.deepEqual(
-    a
-      .view()
-      .notices!.find((n) => n.id === ids['detail/bell'])
-      ?.actions.map((x) => [x.action_key, x.available]),
+    bellNotice?.actions?.map((x) => [x.action_key, x.available]),
     [['ring_bell', true]],
   );
   const wrong = a.game.invoke({
@@ -208,6 +206,7 @@ test('bell save contradictions offer typed recovery without changing saved rows'
     'q3_scope',
     'prior_without_bell',
     'scene_without_resolution',
+    'ring_receipt_missing',
   ]) {
     const path = join(dir, `${damage}.db`);
     const a = setup(path);
@@ -235,6 +234,10 @@ test('bell save contradictions offer typed recovery without changing saved rows'
     if (damage === 'prior_without_bell') change('facts', fact('chapel_bell_rung').key, false);
     if (damage === 'scene_without_resolution')
       change('quests', q3.key, { ...q3.value, state: 'active', outcome: undefined });
+    if (damage === 'ring_receipt_missing')
+      a.sql
+        .prepare("DELETE FROM receipt WHERE json_extract(command,'$.payload.action')='ring_bell'")
+        .run();
     const before = a.sql
       .prepare('SELECT section,key,value FROM state_row ORDER BY section,key')
       .all();

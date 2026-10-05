@@ -1,4 +1,4 @@
-# size: allow 310, new short quest references join the existing checked expansion boundary
+# size: allow 315, new short quest references join the existing checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc """
   Capability ownership, references and fact types (05 §4, §6;

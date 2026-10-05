@@ -90,6 +90,7 @@ defmodule Loka.ContentScenesTest do
            ]), ".steps[1].type", "SCHEMA_VIOLATION", %{"error" => "not_in_enum"}},
           {Map.put(s, "control", "restricted"), ".control", "SCHEMA_VIOLATION",
            %{"error" => "const_mismatch"}},
+          {update_in(s, ["on"], &Map.delete(&1, "story_point")), ".on", "SCHEMA_VIOLATION", %{}},
           {put_in(s, ["on", "story_point"], "nope"), ".on.story_point", "UNRESOLVED_REFERENCE",
            %{"target" => "ashmere_scene@0.0.1:story_point/nope"}},
           {put_in(s, ["on", "outcome"], "stay"), ".on.outcome", "UNRESOLVED_REFERENCE",

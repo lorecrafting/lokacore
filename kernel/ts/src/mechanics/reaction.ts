@@ -57,7 +57,7 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  * for `actor`, expecting the value the proposal and the steps before it leave. Each policy leaf
  * the `when` evaluates adds one to `steps.n`.
  */
-// size: allow 55, one ordered delivery lowers fact assignments and consumed quest activations
+// size: allow 58, one ordered delivery lowers fact assignments and quest effects
 export function sequence(
   world: World,
   actor: CharacterId,
@@ -95,49 +95,74 @@ export function sequence(
       );
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
       if (rule.on.event !== 'fact_changed') return { kind: 'fault', code: 'precondition_failed' };
-      const q = questOf(world, actor, step.quest);
-      if (!q || (q[1].state !== 'active' && q[1].state !== 'objectives_complete'))
-        return { kind: 'fault', code: 'precondition_failed' };
-      if (step.op === 'quest.resolve') {
-        const resolved = resolution(world, actor, step.quest, step.outcome, group, steps);
-        if (typeof resolved === 'string') return { kind: 'fault', code: 'precondition_failed' };
-        ops.push(...resolved.ops);
+      const result = terminal(world, actor, step, group, steps);
+      if (!result) return { kind: 'fault', code: 'precondition_failed' };
+      ops.push(...result.ops);
+      if ('payload' in result)
         events.push(
           event(
             then,
             { id: cause.id as string as CommandId, payload: { actor_id: actor } },
             mint,
             ++position,
-            resolved.payload,
+            result.payload,
           ),
         );
-      } else {
-        ops.push({
-          op: 'quest.transition',
-          writer_group: group,
-          instance_id: q[0],
-          from: q[1].state,
-          to: 'failed',
-          outcome: step.outcome,
-        });
-      }
     } else {
-      const scope = scopeOf(world, actor, step.fact);
-      const at = key({ kind: 'fact', fact: step.fact, scope });
-      const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact);
-      set[at] = step.value;
-      ops.push({
-        op: 'fact.assign',
-        writer_group: group,
-        fact: step.fact,
-        scope,
-        expected,
-        value: step.value,
-      });
-      if (expected !== step.value) position++;
+      const assigned = assignment(world, actor, step, group, set);
+      ops.push(assigned);
+      if (assigned.expected !== step.value) position++;
     }
   }
   return accepted(world, 'reacted', ops, events);
+}
+
+function assignment(
+  world: World,
+  actor: CharacterId,
+  step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' }>,
+  group: number,
+  set: Record<string, FactValue>,
+) {
+  const scope = scopeOf(world, actor, step.fact);
+  const at = key({ kind: 'fact', fact: step.fact, scope });
+  const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact);
+  set[at] = step.value;
+  return {
+    op: 'fact.assign' as const,
+    writer_group: group,
+    fact: step.fact,
+    scope,
+    expected,
+    value: step.value,
+  };
+}
+
+function terminal(
+  world: World,
+  actor: CharacterId,
+  step: Extract<ReactionRule['apply'][number], { op: 'quest.resolve' | 'quest.fail' }>,
+  group: number,
+  steps: { n: number },
+) {
+  const q = questOf(world, actor, step.quest);
+  if (!q || (q[1].state !== 'active' && q[1].state !== 'objectives_complete')) return;
+  if (step.op === 'quest.resolve') {
+    const result = resolution(world, actor, step.quest, step.outcome, group, steps);
+    return typeof result === 'string' ? undefined : result;
+  }
+  return {
+    ops: [
+      {
+        op: 'quest.transition' as const,
+        writer_group: group,
+        instance_id: q[0],
+        from: q[1].state,
+        to: 'failed' as const,
+        outcome: step.outcome,
+      },
+    ],
+  };
 }
 
 // A quest event's evidenced player instance owns the delivery; legacy triggers keep the root actor.

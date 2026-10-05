@@ -12,6 +12,7 @@ export const spec = (key: string, n: number) => ({
   meaning: `Scene ${key}'s line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it.`,
 });
 
+// size: allow 41, one scene pass validates trigger and ordered lines together
 export function scenes(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const { named, text } = checkers(c, out);
