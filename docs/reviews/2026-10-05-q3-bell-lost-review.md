@@ -35,9 +35,19 @@ Evidence: Focused bell, return, escort, scene and readable-routing tests pass. R
 
 Ponytail: No over-engineering finding; tighten existing validation predicates.
 
+## Primary scoped fix round 1 — 2026-10-05
+
+Source head `45332c26293ca31d2ff21adf6c85ee2f8346776d`. **APPROVE** for the primary review; R196-1 is closed. This verdict covers the scene-trigger contract and its direct callers. The separate save/protocol opinion owns S1–S3 and its final disposition.
+
+`SceneDefinition.on` now requires exactly one declared trigger. The closed-subset schema compiler validates the keyword's declared, unique keys; Elixir and TypeScript validators return `exclusive_properties` at `/on`; the generated TypeScript type has exclusive quest/story-point branches. Both lawful branches validate, zero and dual triggers fail, and the source compiler/loader scene checks retain lawful behavior. Focused Elixir schema/bell/scene tests: 75 passed; kernel bell tests: 5 passed; scene/cartridge tests: 81 passed; kernel typecheck passed. A controlled removal of `exactlyOneRequired` followed by contract regeneration made both Elixir and TypeScript fixture tests fail on the missing-trigger case. The mutant was restored; no source edits remain. No new contract finding or simplicity finding.
+
 ## Developer response — cross-row save follow-up
 
 On the fix-round head `45332c26293ca31d2ff21adf6c85ee2f8346776d`, the save reviewer found that a genuine bell-first loss receipt still permitted current Q2 to be changed back to active when the child and meeting facts were also changed. The controlled real SQLite case returned `open` before this follow-up fix. Ring receipt recovery now always binds Q2's instance ID and requires the receipt's Q2 transition and child-status assignment to agree with the current lost branch in both directions. The same case returns `save_corrupt` without changing saved rows; lawful late Ring and lost states still reopen. The separate reviewer will recheck this response independently.
+
+## Primary scoped regression check — 2026-10-05
+
+Source head `bb56a9b073a2091aa5b78847ab7227e007d310ba`. **APPROVE** for the previously reviewed scene contract and its save receipt integration; R196-1 remains closed. The new bidirectional Ring evidence agrees with the save amendment. The existing direct `dialogueSave` caller still routes through `bellSave`; six focused real SQLite bell tests and mobile TypeScript checking passed. Removing both new receipt comparisons made the resurrected-Q2 control fail (`open` versus `save_corrupt`); both mutations were restored. Removing only the Q2 comparison left the current suite green. That comparison has a distinct late-Ring corruption case (a retained response with an extra Q2 transition but no child assignment), which I sent to the separate save reviewer for its S1–S3 disposition. No new primary-scope finding.
 
 The primary recheck requested a distinct red control for that Q2 predicate. A lawful late Ring after Wren's meeting, with current Q2 active and child missing, was given a forged Q2/lost transition in its retained receipt and no child-status assignment. The new SQLite test returns `save_corrupt` with unchanged rows. Removing only the Q2 receipt predicate made that test fail with `open`; restoring the predicate made it pass.
 
@@ -50,3 +60,7 @@ The primary recheck requested a distinct red control for that Q2 predicate. A la
 Verification: all 12 focused kernel/SQLite bell tests passed, including intermediate scene reopen, both late returns, linked-field forgeries, receipt replay, genuinely failed COMMIT and lost acknowledgement. Removing the bidirectional comparisons made the retained resurrection control fail. The added late-Ring receipt-only Q2 loss control also passes; changing only `q2Changed === lost` to `true` makes it fail with `open` instead of `save_corrupt`, proving that comparison catches a distinct contradiction. Both mutants were restored. I traced the unchanged dialogue/save load and reconciliation callers. Native and shared browser checks were not run.
 
 Ponytail: the fix adds two comparisons at the existing receipt boundary; no over-engineering finding.
+
+## Primary exact-head recheck — 2026-10-05
+
+**APPROVE** at source head `93b3531219685795e47a26577ae948101db0059d`; R196-1 remains closed. The only new executable change is the retained late-Ring receipt forgery test. It starts from an accepted Wren meeting, confirms Q2 remains active, inserts a Q2/lost transition only into the Ring receipt, and requires `save_corrupt` with unchanged rows. Seven focused real SQLite bell tests and mobile TypeScript checking passed. The separate reviewer independently confirmed its Q2-only mutant goes red. No new primary-scope finding.
