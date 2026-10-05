@@ -15,32 +15,34 @@ defmodule Loka.Content.Commerce do
     resource = Refs.resolve(s["resource"], "resource", m, defs)
     ids = Enum.map(s["offers"], & &1["item"])
 
-    version =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
-    api = if version < [1, 16], do: [diag("KERNEL_API_RANGE_INVALID", path)], else: []
+    api = api_check(m, path)
 
     duplicate =
       if length(Enum.uniq(ids)) != length(ids), do: [diag("DUPLICATE_DEFINITION", path)], else: []
 
-    funded =
-      case resource do
-        {_, _, r} ->
-          r["gain"] == 0 and r["regen"] == nil and npc["resource_starts"][r["key"]] != nil
-
-        _ ->
-          false
-      end
-
-    funds = if funded, do: [], else: [diag("RESOURCE_SPEC_INVALID", path)]
+    funds = if funded?(resource, npc), do: [], else: [diag("RESOURCE_SPEC_INVALID", path)]
 
     items =
       for ref <- ids, not stocked?(ref, npc, m, defs), do: diag("UNRESOLVED_REFERENCE", path)
 
     api ++ duplicate ++ funds ++ items
   end
+
+  defp api_check(manifest, path) do
+    version =
+      manifest["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    if version < [1, 16], do: [diag("KERNEL_API_RANGE_INVALID", path)], else: []
+  end
+
+  defp funded?({_, _, resource}, npc) do
+    resource["gain"] == 0 and resource["regen"] == nil and
+      npc["resource_starts"][resource["key"]] != nil
+  end
+
+  defp funded?(_, _), do: false
 
   defp stocked?(ref, npc, m, defs) do
     case Refs.resolve(ref, "item", m, defs) do
