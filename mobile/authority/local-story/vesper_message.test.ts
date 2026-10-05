@@ -1,4 +1,4 @@
-// size: allow 550, message receipt, custody, corruption and COMMIT recovery share one real SQLite journey
+// size: allow 590, message receipt, custody, corruption and COMMIT recovery share one real SQLite journey
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -537,4 +537,39 @@ test('v011 refuses the frozen v010 SQLite save and offers explicit Start over wi
   assert.equal(session.failed()?.kind, 'pinned_release_missing');
   assert.equal(session.failed()?.startOver, true);
   assert.deepEqual(snapshot(), before);
+});
+
+// Breaks: a forged terminal Q2 row before receiving the message bypasses handoff validation,
+// showing delivery while leaving the branch, status and original custody untouched.
+test('terminal quest without a message branch refuses reopen and requires explicit Start over', (t) => {
+  const a = setup();
+  t.after(() => a.sql.close());
+  assert.deepEqual(openGame(a.db, bundle, a.host).view().view.journal, []);
+  a.ok('elspeth', [ids['npc/elspeth']]);
+  a.choose('accept');
+  a.move('north', 'north');
+  a.ok('take', [ids['item/fox_drawing']]);
+  a.move('south', 'south');
+  a.ok('a_elspeth_report', [ids['npc/elspeth']]);
+  a.choose('report');
+  assert.equal(
+    openGame(a.db, bundle, a.host)
+      .view()
+      .view.journal.find((q) => q.quest.key === 'missing_child')!.state,
+    'active',
+  );
+  const q = a.rows('quests').find((r) => r.value.quest.key === 'missing_child')!;
+  const forged = { ...q.value, state: 'resolved', outcome: 'stays' };
+  a.put('quests', q.key, forged);
+  const session = localSession(() => a.db, assert.fail, bundle, a.host);
+  assert.equal(session.game(), undefined);
+  assert.equal(session.failed()?.kind, 'save_corrupt');
+  assert.equal(session.failed()?.startOver, true);
+  assert.deepEqual(a.row('quests', q.key), forged);
+  assert.equal(a.row('containers', message), ids['npc/vesper']);
+  assert.equal(a.fact('fen_return_branch'), undefined);
+  assert.equal(a.fact('village_child_status'), undefined);
+  assert.equal(session.startOver(), undefined);
+  assert.equal(session.failed(), undefined);
+  assert.deepEqual(session.game()!.view().view.journal, []);
 });

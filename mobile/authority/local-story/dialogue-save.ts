@@ -155,7 +155,7 @@ function handoff(
           invalid();
         committed(world, db, scope, matches[0][0]);
         completed = true;
-      } else if (received && q?.state !== 'active') invalid();
+      } else if ((q && q.state !== 'active') || (received && !q)) invalid();
     }
   }
   return completed;
