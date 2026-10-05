@@ -145,6 +145,8 @@ and not repeated here.
 
 ## Process
 
+- Reuse documents already loaded in each agent's context when following repeated links; reopen only when changed, truncated or missing a needed detail ([record](../decisions/owner-decision-read-once-docs-2026-10-05.md)).
+
 - The PM may decide mechanics design/policy, adopt and extend slices beyond the M list, use Astra and assign useful parallel work without waiting for owner input; normal review, checks, merge, privacy and no-paid-service requirements remain ([delegation](../decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
 
 - PM selects fresh independent Codex primary plus separate Sol review for the resumed C1 touch slice under the owner's delegated workflow while Opus quota is unavailable; required Simulator interaction evidence remains

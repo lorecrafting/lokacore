@@ -56,6 +56,7 @@ Keep lessons in area files; link here only when relevant to all work.
 - Before touching `protocol/`, its fixtures or canonical encoding, read [contract lessons](docs/lessons/contracts.md).
 
 **All work**
+- Read documents once per agent; [exceptions](docs/decisions/owner-decision-read-once-docs-2026-10-05.md).
 - Never print or commit adb serials, iPhone UDID/ECID/serial/device name, team ID,
   certificate or provisioning identifiers, home/scratch/worktree paths or
   app-container UUIDs. Every capture script has a `redact()` covering them.
