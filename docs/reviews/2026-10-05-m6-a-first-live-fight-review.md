@@ -122,3 +122,40 @@ Ponytail Review: lean already; this uses the existing validator and due presence
 with no extra producer hook or framework. No unrelated scope was reopened. The PM confirmed
 six green CI jobs on the exact reviewed source head. This fix's proof is SQLite authority
 behavior; no fresh native run is claimed. Only this record and its index are committed.
+
+## Separate read-only second opinion — source head
+
+The independent Sol review returned the following answer verbatim for source head
+`53f1d4c7d4d3d054c5024bca43bddd1d6121e679`. Its approval did not override
+M6A-R1; the primary review's blocker was fixed afterward.
+
+```text
+Verdict: APPROVE — exact head 53f1d4c7d4d3d054c5024bca43bddd1d6121e679.
+
+Findings: None. No concrete failure found in encounter/cancellation composition, proposal RNG/hydration, fatal attribution and rat credit, SQLite reopen/replay/unknown-COMMIT fencing, command-wide Flee query accounting, or combat ActionSet and narration routing.
+
+Verification: 52 focused TypeScript, SQLite and Book tests plus 12 Elixir composition/content/contract tests passed. Frozen A/B/C answers, directionless escape, both uncertain-COMMIT outcomes and lethal recovery are exercised. The seven approved catalog lines match exactly.
+
+Ponytail audit: Lean already. Existing movement, RNG, changed-row persistence and receipt machinery are reused; no speculative framework or dependency finding.
+
+Open questions: None. Native isolation and untouched owner simulator/save are documented in evidence; I did not independently operate a simulator. Review was read-only; no edits, record commit or merge.
+```
+
+## Separate read-only second opinion — scoped fix recheck
+
+The same Sol reviewer returned this answer verbatim for fix head
+`f023eff2957eab64a31d93b2224bb8b9d485f895`:
+
+```text
+Verdict: APPROVE — scoped fix recheck at f023eff2957eab64a31d93b2224bb8b9d485f895.
+
+M6A-R1 is resolved. Saved validation accepts a living opponent’s departure into another valid room while retaining body location, life, participant ownership and job-binding checks. The pending round revalidates presence and closes harmlessly.
+
+Findings: None.
+
+Verification: All eight real SQLite combat tests pass, including lost-COMMIT reconciliation, physical close/reopen after scheduled departure, and subsequent closure with unchanged RNG/HP and no attack events. New corruption cases reject a nonroom NPC location and dead NPC without repairing saved rows. Recorded red controls fail when restoring same-room validation or removing either new corruption guard; restored controls pass. save.md matches the behavior.
+
+Ponytail audit: Minimal validator adjustment using existing scheduling and round closure; no additional machinery.
+
+Open questions: None. No edits, record commit or merge performed.
+```
