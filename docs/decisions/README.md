@@ -176,3 +176,5 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [2026-10-05 — M12-B nested notice board](owner-decision-m12-b-notice-board-2026-10-05.md).
 
 - [2026-10-05 — opening NPC direction and PM selection of Elspeth](owner-decision-opening-elspeth-2026-10-05.md).
+
+- [2026-10-05 — FEN-01 first south search route](pm-decision-fen01-south-search-2026-10-05.md): PM selection of four reciprocal fen rooms and optional visible clues under the no-wait and copy decisions.

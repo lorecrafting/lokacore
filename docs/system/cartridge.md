@@ -20,15 +20,21 @@ its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`
 `.json` file is `UNKNOWN_FIELD`. A source with rooms, text or an entry compiles to
 `loka-cartridge-v2`; v1 (manifest, facts, policies, actions) is the R4 form.
 
-The phone bundles `ashmere_missing_child@0.0.5`, titled **Ashmere — The Missing Child**,
+The phone bundles `ashmere_missing_child@0.0.6`, titled **Ashmere — The Missing Child**,
 in its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
-This chapter in progress retains ten Ashmere rooms and playable Maud S1 (five rats,
+This chapter in progress retains ten village and inn rooms and playable Maud S1 (five rats,
 earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
 Maud stands behind the Drowned Lantern bar. The opening label says “The Missing Child
 — in progress”; Q1 and the main search are not yet playable. The temporary Lantern
 errand, Bram NPC/dialogues, lantern item, story point, scene and `search_plan` are
-absent. The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
+absent. Four connected fen rooms form the first south search route: Ferry Landing south to
+Reed Path, south to Reed Bank, west to Willow Shade, south to Drowned Oak. Each exit has
+its reciprocal; a visible fox-prints detail at Reed Path and tracks at Reed Bank can be
+inspected without accepting a quest or waiting for the clock. This is geography and an
+optional clue, not Q2 discovery credit, a swim/tide gate, an item, a population, or a
+promise of onward exits ([FEN-01 decision](../decisions/pm-decision-fen01-south-search-2026-10-05.md)).
+The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 keeps Old Bram outside the active cast; Q1 awaits design from the actual Ashmere cast
 and rooms.
 
@@ -44,7 +50,7 @@ archived Elspeth Green/cottage schedule for the current opening
 The release retains API1.7, real_elapsed rate50/start64800, HP10, MV100, carrying
 ceiling12000, move cost1 and position recovery18/36 per3600 logical seconds from
 reviewed sampler source; installed mechanics and validation are unchanged. Its
-independent answer is `protocol/fixtures/missing_child_v005_hash.json`, derived
+independent answer is `protocol/fixtures/missing_child_v006_hash.json`, derived
 by `test/loka/cartridge_missing_child_hash.py`. Historical sampler/proof sources,
 release pins and [sampler evidence](../evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.

@@ -1,0 +1,8 @@
+{
+  "title": "room.willow_shade.title",
+  "description": "room.willow_shade.description",
+  "exits": {
+    "east": { "to": "reed_bank" },
+    "south": { "to": "drowned_oak" }
+  }
+}

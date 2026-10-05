@@ -50,13 +50,13 @@ registerHooks({
 const { default: Book } = await import('./Book.tsx');
 const bundle = JSON.parse(
   readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v005_hash.json', import.meta.url),
+    new URL('../../../protocol/fixtures/missing_child_v006_hash.json', import.meta.url),
     'utf8',
   ),
 );
-const landing = '251e7a71-b5ad-8d22-858b-533e52cc5415';
-const whistle = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2';
-const cellar = '15349791-fa65-81f7-b378-bb8212b808d2';
+const landing = '58ee172d-aa6f-8023-a3c1-a1d46af6d167';
+const whistle = '58cfbca8-0448-8e2e-af98-49d0a71d1a04';
+const cellar = 'b0711280-2a6c-8b4e-844c-3e902e0c2184';
 const whistleBody = 'Lost a tin whistle? Ask at the Drowned Lantern.';
 const cellarBody = 'Maud needs help clearing rats from the cellar. Speak to her at the bar.';
 const landingBody = 'Keep the landing clear. Tie boats to the mooring post.';
@@ -214,6 +214,50 @@ test('landing detail and two board children read exact targets and pop back with
   assert.ok(!a.text().includes(whistleBody) && !a.text().includes(cellarBody));
 });
 
+// Breaks: a south exit or its reciprocal is missing, or the first fen clues disappear from Book.
+test('the south search reaches the oak and returns through visible fox clues', (t) => {
+  const a = preview();
+  t.after(() => a.sql.close());
+  for (const [direction, title] of [
+    ['south', 'room.reed_path.title'],
+    ['south', 'room.reed_bank.title'],
+    ['west', 'room.willow_shade.title'],
+    ['south', 'room.drowned_oak.title'],
+    ['north', 'room.willow_shade.title'],
+    ['east', 'room.reed_bank.title'],
+    ['north', 'room.reed_path.title'],
+    ['north', 'room.ferry_landing.title'],
+  ]) {
+    a.walk(direction);
+    assert.equal(a.game.view().view.place.title.key, title);
+    if (title === 'room.reed_path.title' && direction === 'south') {
+      a.tap('Fox prints');
+      assert.equal(a.text()[0], 'Fox prints');
+      assert.ok(
+        a
+          .text()
+          .includes(
+            'The prints are small and close-set. They turn into the reeds; following them by sight ends at the first pool of dark water.',
+          ),
+      );
+      a.tap('Leave');
+    }
+    if (title === 'room.reed_bank.title' && direction === 'south') {
+      a.tap('Tracks');
+      assert.equal(a.text()[0], 'Tracks');
+      assert.ok(
+        a
+          .text()
+          .includes(
+            'Several narrow marks cross the bank toward the water. Wet reeds hide where they continue.',
+          ),
+      );
+      a.tap('Leave');
+    }
+  }
+  assert.deepEqual(a.game.view().view.journal, []);
+});
+
 // Break: cold Continue hides restored notice text, requiring another Read to display it,
 // or restores a child without its board and duplicates the committed message/receipt.
 test('cold Continue shows the confirmed notice once and restores its return route without Read', (t) => {
@@ -320,8 +364,8 @@ test('notice entries use available exact-target aliases and expose unavailable r
           : { op: 'not', item: { op: 'time_window', from: 18, to: 19 } },
       },
     });
-    c.actions['ashmere_missing_child@0.0.5:action/read'] = action('read', false);
-    if (alias) c.actions['ashmere_missing_child@0.0.5:action/consult'] = action('consult', true);
+    c.actions['ashmere_missing_child@0.0.6:action/read'] = action('read', false);
+    if (alias) c.actions['ashmere_missing_child@0.0.6:action/consult'] = action('consult', true);
     const canonical = JSON.stringify(sorted(c));
     return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
   };
@@ -350,7 +394,7 @@ const storyRows = (a: ReturnType<typeof preview>) =>
 test('Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
-  const elspeth = '05f6aca0-79cd-83fe-8096-bae95b0730e8';
+  const elspeth = '169f9a28-2c18-8ffe-8c39-fdb5ddd42d67';
   for (let hour = 0; hour < 24; hour++) {
     assert.ok(
       a.game

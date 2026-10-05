@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 ID = 'ashmere_missing_child'
-VERSION = '0.0.5'
+VERSION = '0.0.6'
 CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'
 def ref(kind, key):
     return dict(cartridge_id=ID, cartridge_version=VERSION, kind=kind, key=key)
@@ -25,7 +25,7 @@ v['policies'] = {}
 v['actions'] = {}
 # Literal reciprocal geometry; barrier faces share one reference.
 geometry = {
-    'ferry_landing': [('north', 'well_lane', None)],
+    'ferry_landing': [('north', 'well_lane', None), ('south', 'reed_path', None)],
     'well_lane': [('south', 'ferry_landing', None), ('east', 'drowned_lantern', None), ('north', 'village_green', None)],
     'village_green': [('north', 'north_gate', None), ('south', 'well_lane', None)],
     'north_gate': [('south', 'village_green', None), ('north', 'chapel_steps', None)],
@@ -34,10 +34,16 @@ geometry = {
     'drowned_lantern': [('west', 'well_lane', None), ('up', 'inn_rooms', None), ('down', 'lantern_cellar', None)],
     'inn_rooms': [('down', 'drowned_lantern', None), ('up', 'inn_attic', None)],
     'inn_attic': [('down', 'inn_rooms', None)],
-    'lantern_cellar': [('up', 'drowned_lantern', None)]}
+    'lantern_cellar': [('up', 'drowned_lantern', None)],
+    'reed_path': [('north', 'ferry_landing', None), ('south', 'reed_bank', None)],
+    'reed_bank': [('north', 'reed_path', None), ('west', 'willow_shade', None)],
+    'willow_shade': [('east', 'reed_bank', None), ('south', 'drowned_oak', None)],
+    'drowned_oak': [('north', 'willow_shade', None)]}
 v['rooms'] = {key('room', name): definition(name, title=f'room.{name}.title', description=f'room.{name}.description', exits={direction: dict(to=ref('room', dest), **(dict(barrier=ref('barrier', barrier)) if barrier else {})) for direction, dest, barrier in exits}) for name, exits in geometry.items()}
 # M12-A independently declared fixed detail metadata; no compiler supplies these answers.
 v['rooms'][key('room', 'ferry_landing')]['details'] = dict(notice=dict(aliases=['notice', 'landing_notice'], description='detail.notice.description', readable=dict(label='actions.read_notice', text='readable.notice', title='detail.notice.title')))
+v['rooms'][key('room', 'reed_path')]['details'] = dict(fox_prints=dict(aliases=['fox_prints', 'prints'], description='detail.fox_prints.description', readable=dict(label='actions.read_fox_prints', text='readable.fox_prints', title='detail.fox_prints.title')))
+v['rooms'][key('room', 'reed_bank')]['details'] = dict(tracks=dict(aliases=['tracks'], description='detail.tracks.description', readable=dict(label='actions.read_tracks', text='readable.tracks', title='detail.tracks.title')))
 v['rooms'][key('room', 'drowned_lantern')]['details'] = dict(
     rumor_board=dict(aliases=['rumor_board', 'board'], description='detail.rumor_board.description', notice_board=dict(title='detail.rumor_board.title', notices=[dict(detail='lost_whistle', title='detail.lost_whistle.title'), dict(detail='cellar_help', title='detail.cellar_help.title')])),
     lost_whistle=dict(aliases=['lost_whistle'], description='detail.lost_whistle.description', readable=dict(label='actions.read_lost_whistle', text='readable.lost_whistle')),
@@ -110,10 +116,10 @@ v['text'] = json.loads(Path('cartridges/ashmere_missing_child/text.json').read_t
 canonical = json.dumps(v, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 fixture = dict(description='Independent Python known answer: literal approved chapter semantics and compiler-owned defaults; only the chapter text catalog is copied from source. No compiler or kernel supplies expected values.', value=v, canonical=canonical, sha256=sha)
-Path('protocol/fixtures/missing_child_v005_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
+Path('protocol/fixtures/missing_child_v006_hash.json').write_text(json.dumps(fixture, indent=2, ensure_ascii=False)+'\n')
 print(sha)
-# Reviewed allocation order: character, body, ten rooms, board/notice details, five rats/Elspeth/Maud, six items, cloak holder.
-names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice'] + ['npc/'+name for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
+# Reviewed allocation order: character, body, fourteen rooms, six details, seven NPCs, six items, cloak holder.
+names = ['character', 'body'] + ['room/'+name for name in sorted(geometry)] + ['detail/cellar_help', 'detail/lost_whistle', 'detail/rumor_board', 'detail/notice', 'detail/tracks', 'detail/fox_prints'] + ['npc/'+name for name in ['cellar_rat_1', 'cellar_rat_2', 'cellar_rat_3', 'cellar_rat_4', 'cellar_rat_5', 'elspeth', 'maud']] + ['item/'+name for name in ['brass_key', 'cellar_key', 'storage_chest', 'tin_whistle', 'trunk', 'wool_cloak']] + ['slot/cloak']
 ids = {}
 for ordinal, name in enumerate(names):
     b = bytearray(hashlib.sha256(json.dumps(['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal], separators=(',', ':')).encode()).digest()[:16])
@@ -121,4 +127,4 @@ for ordinal, name in enumerate(names):
     b[8] = (b[8] & 63) | 128
     s = b.hex()
     ids[name] = '-'.join([s[:8], s[8:12], s[12:16], s[16:20], s[20:]])
-Path('protocol/fixtures/missing_child_v005_ids.json').write_text(json.dumps(ids, indent=2)+'\n')
+Path('protocol/fixtures/missing_child_v006_ids.json').write_text(json.dumps(ids, indent=2)+'\n')

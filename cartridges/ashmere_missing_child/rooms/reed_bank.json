@@ -1,0 +1,19 @@
+{
+  "title": "room.reed_bank.title",
+  "description": "room.reed_bank.description",
+  "exits": {
+    "north": { "to": "reed_path" },
+    "west": { "to": "willow_shade" }
+  },
+  "details": {
+    "tracks": {
+      "aliases": ["tracks"],
+      "description": "detail.tracks.description",
+      "readable": {
+        "label": "actions.read_tracks",
+        "text": "readable.tracks",
+        "title": "detail.tracks.title"
+      }
+    }
+  }
+}

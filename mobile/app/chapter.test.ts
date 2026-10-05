@@ -134,7 +134,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
     assert.equal(
       pin().content_hash,
-      '0994fec6833a701e20f6b2ba1dd896f691922a65ab5e74434126edcdf0371ad5',
+      '482e35cc9a5dc73ec43c3afbbd1f5950a648feb4c1029662d3cf6769a3f18b69',
     );
     assert.equal(globals.loka_session!.startOver(), undefined);
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
@@ -145,12 +145,65 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
   }
 });
 
+// Breaks: the new chapter silently opens an old exact pin or deletes it before explicit Start over.
+test('the 0.0.5 chapter save is refused intact until explicit Start over', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-chapter-pin-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'chapter.db');
+  const prior = JSON.parse(
+    readFileSync(
+      new URL('../../protocol/fixtures/missing_child_v005_hash.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const current = JSON.parse(
+    readFileSync(
+      new URL('../../protocol/fixtures/missing_child_v006_hash.json', import.meta.url),
+      'utf8',
+    ),
+  );
+  const host = {
+    kernel_version: `loka-kernel@${'0'.repeat(40)}`,
+    newId: randomUUID,
+    time: { wall: () => 10000, monotonic: () => 0 },
+  };
+  const old = new DatabaseSync(path);
+  openGame(adapt(old), prior, host);
+  old.close();
+  const before = createHash('sha256').update(readFileSync(path)).digest('hex');
+  const sql = new DatabaseSync(path);
+  let removed = false;
+  try {
+    const session = localSession(
+      () => adapt(sql),
+      () => {
+        removed = true;
+      },
+      current,
+      host,
+    );
+    assert.equal(session.game(), undefined);
+    assert.equal(session.failed()?.kind, 'pinned_release_missing');
+    assert.equal(createHash('sha256').update(readFileSync(path)).digest('hex'), before);
+    assert.equal(removed, false);
+    assert.equal(session.startOver(), undefined);
+    assert.ok(session.game());
+    assert.equal(
+      JSON.parse(sql.prepare('SELECT pin FROM save').get()!.pin as string).content_hash,
+      current.sha256,
+    );
+    assert.equal(removed, false);
+  } finally {
+    sql.close();
+  }
+});
+
 // The actual App module receives controlled platform clocks/events and real rollback-journal SQLite.
 // Native scheduling is controlled input; assertions concern confirmed worlds/checkpoints, not calls.
 function appHost() {
   const chapter = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v005_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/missing_child_v006_hash.json', import.meta.url),
       'utf8',
     ),
   );
