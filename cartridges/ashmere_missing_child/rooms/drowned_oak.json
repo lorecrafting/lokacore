@@ -1,0 +1,7 @@
+{
+  "title": "room.drowned_oak.title",
+  "description": "room.drowned_oak.description",
+  "exits": {
+    "north": { "to": "willow_shade" }
+  }
+}

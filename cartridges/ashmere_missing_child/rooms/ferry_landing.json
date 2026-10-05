@@ -4,6 +4,9 @@
   "exits": {
     "north": {
       "to": "well_lane"
+    },
+    "south": {
+      "to": "reed_path"
     }
   },
   "details": {

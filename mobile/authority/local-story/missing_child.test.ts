@@ -18,7 +18,7 @@ import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v005_hash.json');
+const bundle = read('protocol/fixtures/missing_child_v006_hash.json');
 const loaded = loadCartridge(
   new TextEncoder().encode(
     JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
@@ -32,16 +32,16 @@ const fresh = newWorld(
   [1, 2, 3, 4],
 );
 // Independent Python IdSource literals for this release, not allocated by the test.
-const keyId = '86b28f4e-f743-87f8-8375-2ead5c2c295c';
-const chestId = 'b59d54de-ea10-84e1-964c-16d1c776e738' as EntityId;
-const brassId = '2603d738-5a68-83d2-93fe-8e50819f9741';
-const maudId = 'd68b48e6-93a5-8899-81ec-808f7be333f8';
+const keyId = 'e918a5af-fc77-8a97-86ea-4a5ac3047213';
+const chestId = 'a443f590-c8d3-86d8-9972-75e09b637bed' as EntityId;
+const brassId = 'aae69ad9-ea5d-8dc0-b84a-5b427bedb688';
+const maudId = '71697171-efcc-8028-9a88-60b32e4a73ad';
 const entity = (kind: string, name: string) =>
-  fresh.entityIds[`ashmere_missing_child@0.0.5:${kind}/${name}`];
+  fresh.entityIds[`ashmere_missing_child@0.0.6:${kind}/${name}`];
 const ref = (name: string) =>
   ({
     cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.5',
+    cartridge_version: '0.0.6',
     kind: 'fact',
     key: name,
   }) as DefinitionRef;
@@ -111,7 +111,7 @@ function setup(path = ':memory:') {
 // or the chest uses the attic key / loses deposited custody on a real cold reopen.
 test('active chapter five actual kills, shrine return, Maud reward and cold-reopen storage', (t) => {
   // Breaks: adding details shifts entity allocation but release bindings retain stale IDs.
-  const expectedIds = read('protocol/fixtures/missing_child_v005_ids.json');
+  const expectedIds = read('protocol/fixtures/missing_child_v006_ids.json');
   assert.deepEqual(
     {
       character: fresh.character,
