@@ -1123,6 +1123,39 @@ current corpse location in `well_bottom` or `pool_bottom`. Containment transfers
 writer group/receipt. Preserve descendants/empty corpse, forced overload, no
 rewearing and no general remote Take. Malformed custody never creates an offer.
 
+## D9 reaction, cue and Study admission composition
+
+**Selected, pending implementation.** The existing child and bell choice
+producers emit their committed fact/quest events; D9 consumes them in the
+bounded reaction queue. Terminal fact writers are unchanged. Cast and Green
+profiles may be derived from current facts without a persisted mirror. A
+single typed hound suppression generation/deadline and one resume job carry
+the time-limited effect. Bell consequence delivery closes any current hound
+encounter and cancels its round in the same causal writer group; population
+jobs read the suppression and remain bounded. At deadline equality the resume
+job checks its generation and actual living count; stale jobs do nothing.
+If this composes into two conflicting writers on one encounter, stop for PM
+before changing the proposal conflict rule.
+
+The bell cue is bound to one accepted source event, its command/actor and the
+observer's room at that logical instant. Only an observer in the cartridge's
+explicit audible area receives it. The current accepted player command has a
+Belfry observer; controlled frames prove other area boundaries without adding
+another body or remote observer delivery. Subsequent projection is read-only
+and may render retained history as a past cue, never as a fresh sound or second event.
+No global sound bus, remote Scan or fabricated actor movement is selected.
+
+Share one read-only Study ingress check between direct `move` admission,
+ActionInvocation resolution, ExitView availability and actual movement. It
+checks the exact Nave-west edge, fox allegiance, actual actor ownership,
+corpse location in Study and direct nonempty custody at the current revision.
+An ordinary blocked ingress is `exit_closed`; an eligible owner enters by the
+ordinary `move` command and pays its ordinary fare. Study-east egress follows
+normal movement checks. A captured old exception is rechecked on invocation;
+forged corpse IDs, empty/foreign/moved corpses and stale offers cannot bypass
+the gate. The shared reciprocal barrier transition and door verbs are not
+changed. D6's `recover_corpse` remains restricted to its two underwater rooms.
+
 ## D12 Harvest method and Buy quote composition
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) extends only the existing Harvest command and action input with optional literal `method: "careful"`. A projected careful offer is `ActionInvocation {action_key: "gather_carefully", target_ids: [patch_detail_id], input: {method: "careful"}}`, with the ordinary actor/id context; it resolves to `{type: "harvest", actor_id, target_id: patch_detail_id, method: "careful"}`. `ActionInputParameter` registers `method`, and `ActionInput.method` plus `Command.harvest.method` accept only that literal. Ordinary Harvest has `input: {}` and omits the command method. A method requires the exact offered action's input declaration and the target's opted [careful metadata](cartridge.md#d12-practical-skill-declarations); neither an arbitrary detail nor ordinary Harvest input can invoke the benefit by name alone. Unsupported method/shape fails typed wire/admission validation before effects.
@@ -1142,3 +1175,11 @@ One narrow causal same-group exception handles a current bleed delivery and curr
 Add typed `bandage {actor_id: CharacterId, item_id: EntityId, effect_generation: positive integer}` and exact one-target `ActionInvocation {action_key: "bandage", target_ids: [item_id], input: {effect_generation}}`; accepted outcome `bandaged` binds that item, effect and generation. The current GameView offer and raw command resolve through the same pure query: living actor/body, C1 acquired and currently qualified skill, current matching generation, declared bandage item directly in the actor's body holder, and reachable current mode. After due preflight, recheck all of it. The one proposal transitions body-held item to D4's existing consumed holder, clears the matching status and owned job, and returns one receipt with authored narration. No HP adjustment, clock jump, round advance, encounter close or RNG. A missing/expired/wrong-generation effect refuses before consumption. A later same-command replay returns its original receipt; a new command on a spent item refuses.
 
 Extend the existing consumed-holder entry guard narrowly: a declared edible enters only through Eat; a declared bandage enters only through this exact C5 command/result from direct body custody. Neither may leave. The already generated holder and immutable known-entity metadata remain; do not add a second terminal holder or delete item rows. Admit `bandage` as the sole C5 exception to focused combat after ordinary ActionSet composition, in both projection and raw command admission. `perform`, Eat, other item actions, aliases resolving to them and Move remain barred during combat. Register only consumed command/action/input/outcome, status/delta/job/cause fields and API gate; add fixtures for every required/bounded schema field, the status transition and terminal custody in both foundation validators. Frozen existing fixtures stay unchanged.
+
+## D8 exact crow transport and Shoo composition (selected planning contract)
+
+The committed player Drop remains the only intent producer: its `item_dropped` event binds the exact item EntityId, direct room holder, command cause and one eligible current crow slot/member generation. One typed occurrence per crow binds its current job and phase (`acquire`, `leg`, `return` or `paused_return`), member generation, original nest EntityId, and the exact item only during acquire/leg; return/paused_return has no reserved item. No unbounded candidate scan, claim table or new generic scheduler is selected. A job advances one acquisition/transport/return leg in its own writer group under canonical `(due_time, job_id)` order and shared budgets; scheduling its successor uses the pinned cartridge interval. A stale occurrence completes harmlessly and cannot reassign the item. Never merge unrelated job writer groups or weaken `conflicting_write`.
+
+Job acquisition uses existing checked `entity.transfer` and `item_acquired` with the crow as holder and `run_job` causation. It is not a player Take; consumers requiring body acquisition still check the actual destination. Each leg uses ordinary NPC room transfer and `entity_entered_room` with job scope/cause. Deposit uses checked `entity.transfer` into the original open nest only at Oak Branches; its direct-root limit is checked before transfer. Failed capacity/location/open-edge conditions use a conserved transfer to the crow's present dry room and change the occurrence to return. Deposit also starts return. Each return job checks the same crow/slot/generation, current corridor room, home and job binding, then transfers the crow one adjacent edge toward home and schedules only the next return leg. If already at home, release clears the occurrence without a new job; otherwise the final home arrival clears it, after at most seven legs. No item stays reserved during return, but that crow remains unavailable for a new Drop until return ends. The same checked custody and query budget cover Shoo and Attack release. Neither fallback nor Shoo emits player acquisition or a reward. A malformed or no-longer-legal return edge faults without teleport or a zero-time retry.
+
+Add `shoo {actor_id: CharacterId, crow_id: EntityId}` with exact `ActionInvocation {action_key: "shoo", target_ids: [crow_id], input: {}}` and accepted `shooed` binding crow, item and destination room. Shared projection/execution admission requires a living standing co-located actor, current living plan member, direct held eligible item and its pending transport occurrence. Before any transfer, recheck generation/job/custody and destination. The existing Attack command keeps its own shape; accepted Attack against a carrying or returning crow drops any held root locally, cancels the due job and records `paused_return` in the same group before encounter creation. On encounter close, the combat owner clears a dead member's occurrence or schedules one return job for the surviving member at the next authored interval; no return job runs during the encounter. Death uses existing forced corpse custody for any direct held root. Population work skips a member with a due transport/return job at the same clock, whether it ran first or second, without writing that member or sharing the job writer group. A refused/stale action leaves all rows unchanged. Extend only necessary closed command/action/outcome/job/event shapes and both validators; every new required field and bound gets a negative fixture and mutant. Preserve all frozen fixtures, exact replay and final-head budget behavior.

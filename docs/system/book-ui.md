@@ -857,6 +857,25 @@ original light/fare/key. Later isolated browser proof covers remaining-time/Up o
 every bottom page, expiry, Chapel selection and refresh. No preview or owner save
 is authorized by this planning adoption; real SQLite faults remain separate proof.
 
+## D9 village reactions and bell cue
+
+**Selected, pending implementation.** Show current fact-derived cast dialogue,
+rumors and Green description for each of the five valid child/bell pairs,
+keeping `stays` distinct from `rescued`. The bell cue appears once in the
+eligible observer's confirmed chronological history; redisplay and refresh
+label it as past, with no new sound or consequence. Fen/isle frames do not
+claim they heard the bell. Flooded Fen text cannot hide a real dry exit.
+
+The Nave's west ExitView reports `exit_closed` after fox allegiance unless the
+actual player owns a nonempty corpse in the Study. While eligible, it offers
+ordinary Move with truthful fare; Study east remains offered when otherwise
+movable. Direct commands and captured taps use the same current admission.
+Show the actual reachable corpse and its contents through ordinary physical
+pages/Take; never advertise D6 Chapel `recover_corpse` for a Study corpse.
+Public Aldric/S2, Sedge lessons, Wren return and existing corpse routes remain
+available. A retained bell or death line is presented from confirmed receipts,
+not an optimistic display callback.
+
 ## D12 practical lessons and benefits
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
@@ -872,3 +891,9 @@ Pending, stale, refused or fenced actions claim no lesson, extra herb or discoun
 Wick's existing public detail offers one bound optional skill lesson and retains his B5 herb exchange. The Character page uses C1 acquired versus currently qualified status. A directly held opted bandage offers its exact use on item detail when a matching bleed is active; during combat the same current item and effect generation appear as one legal Bandage control on the Combat page beside Flee/Stand/Look. The control sends the typed exact-item/current-generation invocation, and the shared kernel query decides availability. A stale redraw or already-due expiry refuses without spending the item. Other item controls and recipes stay hidden/blocked in combat; Flee is never displaced.
 
 Confirmed treatment leaves HP and encounter/round state unchanged, removes the condition and item from Carrying, and routes its result to Combat if that encounter remains open or World otherwise. It does not reopen the consumed item detail. Cold reopen and replay recover the exact committed line once using the saved command ID, with no invented success from another receipt. Isolated browser proof follows real Wick teaching, B5 exchange, hound injury, Bandage, tick/expiry and refresh; headless authority and real SQLite proof are separate. Mobile/native and cosmetic UI blur remain deferred.
+
+## D8 crow carrying and nest recovery (selected planning interaction)
+
+World shows the actual crow in its current room and, while held, a truthful authored carrying line for the exact coin. It does not expose the crow's inventory as player-reachable Take. The current crow detail offers Shoo only when the shared kernel admission would accept that exact member/item; confirmed Shoo names the dropped same item once, then ordinary World item Take may recover it. Attack release, death and fallback likewise show only committed custody, with no promised nest loot. During a checked return, World shows the original crow at its actual room; no Shoo offer or second acquisition is promised. On home arrival it can again be selected for a later dropped coin.
+
+The player follows ordinary exits from Green through the authored corridor to Oak Branches. The real nest item has the existing item detail/Contents and open/Take admission, including full and moved states; original coin retrieval uses ordinary Take and carrying limits. Pending/refused/stale actions claim no move, deposit or acquisition. Isolated browser proof covers Drop→crow-held observation→legal route→nest Contents→Take, Shoo, full-nest fallback, lawful return home and a later Green Drop using the same living crow, plus refresh during crow custody and return. Headless TypeScript and real SQLite checks remain separate; mobile, owner save and cosmetic blur remain deferred.
