@@ -164,9 +164,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **20 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4). The latest source publication is
-[#239](https://github.com/lorecrafting/lokacore/pull/239), C4 hound aggression, pack assistance and flight.
+Local and GitHub `main` have completed **21 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, B9, C1, C2, C3, C4, D5, D2, D1, D4, D3). The latest source publication is
+[#243](https://github.com/lorecrafting/lokacore/pull/243), D3 western Ashmere mill, Hob and readable clues.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -327,10 +327,10 @@ Elspeth's Cottage, with finite Forage/Take apples and held-item Eat.
 approve, the local gate and isolated browser proof pass, and all six hosted
 checks are green on the exact reviewed head.
 
-D3 western Ashmere has a [brief](briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md)
-and independently approved provisional source for five rooms, Hob, and readable
-mill clues. Final predecessor re-pin, accumulated gate and browser proof follow
-D4/C4 integration.
+D3 western Ashmere's five mill/cottage rooms, Hob and readable clues are published in
+[#243](https://github.com/lorecrafting/lokacore/pull/243) at chapter v033/API1.28.
+The [final independent review](reviews/2026-10-06-d3-western-ashmere-final-review.md),
+full local gate, isolated Book browser routes and all exact-head hosted checks passed.
 
 D6 has a [selected D1-base PM contract](decisions/pm-decision-d6-water-depths-2026-10-06.md)
 and [amended brief](briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
