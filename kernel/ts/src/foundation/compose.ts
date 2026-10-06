@@ -132,6 +132,19 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return encounter(op, row, ctx);
     case 'patrol.transition':
       return transitionPatrol(op, row);
+    case 'population.control':
+      return check(
+        same(row ?? null, op.expected) &&
+          (row === undefined ||
+            op.value.next_wander_due >= (row as typeof op.value).next_wander_due) &&
+          (row === undefined || op.value.job_id !== (row as typeof op.value).job_id),
+        op.value as Json,
+      );
+    case 'population.slot':
+      return check(
+        same(row ?? null, op.expected) && populationSlot(row, op.value),
+        op.value as Json,
+      );
     case 'escort.transition':
       return transitionEscort(op, row);
     case 'time.advance':
@@ -140,6 +153,26 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
       return composeFuel(op, row, ctx.state);
     case 'resource.adjust':
       return composeAdjustment(op, row, ctx.state, ctx.horizon);
+    case 'resource.initialize': {
+      const created = ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }));
+      const origin = (created?.value as Obj | undefined)?.origin as Obj | undefined;
+      const spec =
+        origin?.kind === 'spawned'
+          ? (section(ctx.state, 'population_specs')[key(origin.by)] as Obj | undefined)
+          : undefined;
+      return check(
+        row === undefined &&
+          created?.group === op.writer_group &&
+          origin?.role === 'hound' &&
+          origin.member_id === op.entity_id &&
+          op.resource.kind === 'resource' &&
+          op.resource.key === 'hp' &&
+          op.at >= ctx.state.clock &&
+          op.at <= ctx.horizon &&
+          op.value === (spec?.hp as Obj | undefined)?.start,
+        { value: op.value, at: op.at },
+      );
+    }
     case 'cooldown.start':
       return check(same(row, op.from) && op.at === ctx.state.clock, op.at);
     case 'barrier.transition':
@@ -171,7 +204,11 @@ function transferOp(
   if (op.source_id !== null)
     return transfer(op.entity_id, op.source_id, op.destination_id, row, ctx);
   const created = ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }));
-  return check(initialPlacement(op, row, created?.group, ctx.state), op.destination_id);
+  const parent = ctx.overlay.get(key({ kind: 'entity', entity_id: op.destination_id }));
+  return check(
+    initialPlacement(op, row, created?.group, ctx.state, parent?.value, created?.value),
+    op.destination_id,
+  );
 }
 
 function transfer(e: string, source: string, d: string, row: Json | undefined, ctx: Ctx): Outcome {
@@ -217,6 +254,10 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':
       return get(section(s, 'patrols'), t.quest_instance_id);
+    case 'population_plan':
+      return get(section(s, 'population_plans'), key(t.plan));
+    case 'population_slot':
+      return get(section(s, 'population_slots'), key(t));
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
     case 'liquid':
@@ -258,4 +299,31 @@ function barrier(
 function assign(op: Extract<DeltaOp, { op: 'fact.assign' }>, row: Json | undefined, ctx: Ctx) {
   const now = row ?? get(section(ctx.state, 'fact_defaults'), key(op.fact));
   return check(now !== undefined && same(now, op.expected), op.value);
+}
+
+function populationSlot(
+  row: Json | undefined,
+  next: Extract<DeltaOp, { op: 'population.slot' }>['value'],
+) {
+  if (row === undefined)
+    return (
+      (next.generation === 0 && next.member_id === null && next.replacement_due === null) ||
+      (next.generation === 1 && next.member_id !== null && next.replacement_due === null)
+    );
+  const prior = row as typeof next;
+  if (prior.generation === 0)
+    return next.generation === 1 && next.member_id !== null && next.replacement_due === null;
+  if (prior.replacement_due === null)
+    return (
+      prior.member_id !== null &&
+      next.generation === prior.generation &&
+      next.member_id === prior.member_id &&
+      next.replacement_due !== null
+    );
+  return (
+    next.generation === prior.generation + 1 &&
+    next.member_id !== null &&
+    next.member_id !== prior.member_id &&
+    next.replacement_due === null
+  );
 }

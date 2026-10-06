@@ -2,6 +2,7 @@
 import { liquidRowsValid, liquidsHold } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
 import { patrolsHold } from './invariants_patrol.ts';
+import { populationsHold } from './invariants_population.ts';
 import { escortsHold } from './invariants_escort.ts';
 // Pure checks by id, twin of lib/loka/core/invariants.ex; step checks are TypeScript only.
 import { encountersHold } from './invariants_encounter.ts';
@@ -204,6 +205,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
       return false;
     if (!patrolsHold(state, delta.ops, result)) return false;
+    if (!populationsHold(state, delta.ops, result)) return false;
     const seen = new Map<string, Json | undefined>();
     const containers = new Map<string, string>(Object.entries(state.containers ?? {}));
     const quests = new Map<string, Any>(Object.entries(state.quests ?? {}));
@@ -211,7 +213,13 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
-      if (op.op === 'escort.transition' || op.op === 'patrol.transition' || op.op === 'liquid.set')
+      if (
+        op.op === 'escort.transition' ||
+        op.op === 'patrol.transition' ||
+        op.op.startsWith('population.') ||
+        op.op === 'liquid.set' ||
+        op.op === 'resource.initialize'
+      )
         continue;
       if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
       const k = key(target(op));

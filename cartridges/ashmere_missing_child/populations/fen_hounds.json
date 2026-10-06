@@ -1,0 +1,12 @@
+{
+  "bundle": "fen_hounds",
+  "home": "hound_run",
+  "area": ["hound_run", "adder_nest"],
+  "cap": 6,
+  "day_target": 4,
+  "night_target": 6,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 86400,
+  "wander_interval": 3600
+}

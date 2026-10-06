@@ -1,5 +1,5 @@
 defmodule Loka.Core.Creation do
-  @moduledoc "Pinned corpse provenance and initial placement guards."
+  @moduledoc "Pinned corpse and population provenance with initial placement guards."
   alias Loka.Core.{Canonical, Contracts}
 
   def initial_pair?(op, next) when is_map(next),
@@ -19,6 +19,23 @@ defmodule Loka.Core.Creation do
 
   defp provenance?(identity, state) do
     origin = identity["origin"]
+    if origin["kind"] == "spawned", do: spawned?(identity, state), else: death?(identity, state)
+  end
+
+  defp spawned?(identity, state) do
+    origin = identity["origin"]
+    spec = section(state, "population_specs")[key(origin["by"])]
+
+    spec != nil and origin["bundle"] == spec["bundle"] and
+      origin["slot"] <= spec["cap"] and identity["definition"] == spec[origin["role"]] and
+      if(origin["role"] == "hound",
+        do: origin["member_id"] == identity["id"],
+        else: origin["member_id"] != identity["id"]
+      )
+  end
+
+  defp death?(identity, state) do
+    origin = identity["origin"]
     victim = get_in(state, ["known_entities", origin["victim_id"]]) || %{}
     template = section(state, "corpse_templates")[key(identity["definition"])]
 
@@ -37,7 +54,20 @@ defmodule Loka.Core.Creation do
     group = op["writer_group"]
     same_group = match?({^group, _, _}, created)
     room = get_in(state, ["known_entities", op["destination_id"], "kind"]) == "room"
-    same_group and room
+    parent = overlay[key(%{"kind" => "entity", "entity_id" => op["destination_id"]})]
+    child = elem(created || {nil, nil, nil}, 2)
+    parent_identity = elem(parent || {nil, nil, nil}, 2)
+    child_origin = get_in(child || %{}, ["origin"]) || %{}
+    parent_origin = get_in(parent_identity || %{}, ["origin"]) || %{}
+
+    held =
+      child_origin["kind"] == "spawned" and child_origin["role"] == "pelt" and
+        parent_origin["kind"] == "spawned" and parent_origin["role"] == "hound" and
+        op["destination_id"] == parent_origin["member_id"] and
+        Map.take(child_origin, ~w(by bundle slot generation occurrence_id member_id)) ==
+          Map.take(parent_origin, ~w(by bundle slot generation occurrence_id member_id))
+
+    same_group and (room or held)
   end
 
   defp section(state, name), do: Map.get(state, name, %{})

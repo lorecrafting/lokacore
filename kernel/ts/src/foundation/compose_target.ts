@@ -31,11 +31,16 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'encounter', encounter_id: op.encounter_id };
     case 'patrol.transition':
       return { kind: 'patrol', quest_instance_id: op.quest_instance_id };
+    case 'population.control':
+      return { kind: 'population_plan', plan: op.plan };
+    case 'population.slot':
+      return { kind: 'population_slot', plan: op.plan, slot: op.slot };
     case 'escort.transition':
       return { kind: 'escort', actor_id: op.actor_id };
     case 'time.advance':
       return { kind: 'clock' };
     case 'resource.adjust':
+    case 'resource.initialize':
       return { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
     case 'cooldown.start':
       return { kind: 'cooldown', actor_id: op.actor_id, action: op.action };

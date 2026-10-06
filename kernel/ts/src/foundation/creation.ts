@@ -11,6 +11,9 @@ export function creationValid(identity: Json, state: State): boolean {
   if (validate('EntityIdentity', identity).length) return false;
   const i = identity as Obj;
   const origin = i.origin as Obj;
+  const spawned = origin.kind === 'spawned';
+  const population =
+    spawned && (section(state, 'population_specs')[key(origin.by)] as Obj | undefined);
   const victim = section(state, 'known_entities')[origin.victim_id as string] as Obj | undefined;
   const template = section(state, 'corpse_templates')[key(i.definition)];
   return (
@@ -18,10 +21,16 @@ export function creationValid(identity: Json, state: State): boolean {
     !Object.hasOwn(section(state, 'containers'), i.id as string) &&
     i.scope === undefined &&
     i.audience === undefined &&
-    origin.kind === 'death' &&
-    (template === 'player'
-      ? victim?.kind === 'body' && origin.owner_id === victim.owner_id
-      : template === 'npc' && victim?.kind === 'npc' && origin.owner_id === null)
+    (spawned
+      ? !!population &&
+        key(origin.bundle) === key(population.bundle) &&
+        (origin.slot as number) <= (population.cap as number) &&
+        key(i.definition) === key(population[origin.role as string]) &&
+        (origin.role === 'hound' ? origin.member_id === i.id : origin.member_id !== i.id)
+      : origin.kind === 'death' &&
+        (template === 'player'
+          ? victim?.kind === 'body' && origin.owner_id === victim.owner_id
+          : template === 'npc' && victim?.kind === 'npc' && origin.owner_id === null))
   );
 }
 
@@ -40,10 +49,25 @@ export function initialPlacement(
   row: Json | undefined,
   group: number | undefined,
   state: State,
+  parent?: Json,
+  identity?: Json,
 ): boolean {
+  const child = (identity as Obj | undefined)?.origin as Obj | undefined;
+  const holder = (parent as Obj | undefined)?.origin as Obj | undefined;
   return (
     row === undefined &&
     group === op.writer_group &&
-    (section(state, 'known_entities')[op.destination_id] as Obj | undefined)?.kind === 'room'
+    ((section(state, 'known_entities')[op.destination_id] as Obj | undefined)?.kind === 'room' ||
+      (child?.kind === 'spawned' &&
+        child.role === 'pelt' &&
+        holder?.kind === 'spawned' &&
+        holder.role === 'hound' &&
+        op.destination_id === holder.member_id &&
+        key(child.by) === key(holder.by) &&
+        key(child.bundle) === key(holder.bundle) &&
+        child.slot === holder.slot &&
+        child.generation === holder.generation &&
+        child.occurrence_id === holder.occurrence_id &&
+        child.member_id === holder.member_id))
   );
 }

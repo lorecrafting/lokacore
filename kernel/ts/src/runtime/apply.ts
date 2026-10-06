@@ -42,6 +42,7 @@ export const base = (world: World) =>
     fuel_specs: world.fuelSpecs,
     known_entities: world.knownEntities,
     corpse_templates: world.corpseTemplates,
+    population_specs: world.populationSpecs,
     fact_defaults: world.factDefaults,
     capacities: world.capacities,
     liquid_specs: world.liquidSpecs,

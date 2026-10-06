@@ -465,5 +465,20 @@
   "liquid.units": "quarter-litres",
   "item.spare_waterskin.description": "A second sturdy leather waterskin, with a pale cord around its neck. It holds four quarter-litres.",
   "action.drink": "Drink",
-  "watch.talk": "Watchman\u2019s Rounds"
+  "watch.talk": "Watchman\u2019s Rounds",
+  "room.hound_run.title": "Hound Run",
+  "room.hound_run.description": "A trampled path crosses the sedge. [Gnawed bones](gnawed_bones) lie beside the reeds.",
+  "room.adder_nest.title": "Adder Nest",
+  "room.adder_nest.description": "A dry mound rises above the water. An [empty nest](empty_nest) lies among the reeds.",
+  "detail.gnawed_bones.description": "Old bones are cracked and stripped clean.",
+  "detail.empty_nest.description": "The abandoned nest holds only dry reeds.",
+  "npc.fen_hound.short": "a fen hound",
+  "npc.fen_hound.room": "A [fen hound](fen_hound) watches the path.",
+  "npc.fen_hound.description": "A lean hound with a coarse marsh coat.",
+  "item.hound_pelt.short": "a hound pelt",
+  "item.hound_pelt.room": "A [hound pelt](hound_pelt) lies here.",
+  "item.hound_pelt.description": "The coarse hide of a fen hound.",
+  "item.hound_corpse.short": "a hound corpse",
+  "item.hound_corpse.room": "A [hound corpse](hound_corpse) lies here.",
+  "item.hound_corpse.description": "The body of a fen hound."
 }

@@ -1,0 +1,385 @@
+{
+  "cases": [
+    {
+      "id": "genesis-empty-slot",
+      "state": {
+        "clock": 205
+      },
+      "ops": [
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "slot": 1,
+          "expected": null,
+          "value": {
+            "generation": 0,
+            "member_id": null,
+            "replacement_due": null
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 0,
+              "member_id": null,
+              "replacement_due": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "first-birth",
+      "state": {
+        "clock": 205,
+        "population_slots": {
+          "{\"kind\":\"population_slot\",\"plan\":{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"},\"slot\":1}": {
+            "generation": 0,
+            "member_id": null,
+            "replacement_due": null
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 0,
+            "member_id": null,
+            "replacement_due": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": null
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 1,
+              "member_id": "11111111-1111-4111-8111-111111111111",
+              "replacement_due": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "fatal-slot-and-independent-control",
+      "state": {
+        "clock": 205,
+        "population_slots": {
+          "{\"kind\":\"population_slot\",\"plan\":{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"},\"slot\":1}": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": null
+          }
+        },
+        "population_plans": {
+          "{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"}": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.slot",
+          "writer_group": 1,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": 445
+          }
+        },
+        {
+          "op": "population.control",
+          "writer_group": 2,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "expected": {
+            "job_id": "33333333-3333-4333-8333-333333333333",
+            "next_wander_due": 210
+          },
+          "value": {
+            "job_id": "44444444-4444-4444-8444-444444444444",
+            "next_wander_due": 220
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_plan",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              }
+            },
+            "value": {
+              "job_id": "44444444-4444-4444-8444-444444444444",
+              "next_wander_due": 220
+            }
+          },
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 1,
+              "member_id": "11111111-1111-4111-8111-111111111111",
+              "replacement_due": 445
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "replacement",
+      "state": {
+        "clock": 205,
+        "population_slots": {
+          "{\"kind\":\"population_slot\",\"plan\":{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"},\"slot\":1}": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": 445
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": 445
+          },
+          "value": {
+            "generation": 2,
+            "member_id": "22222222-2222-4222-8222-222222222222",
+            "replacement_due": null
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "population_slot",
+              "plan": {
+                "cartridge_id": "fen",
+                "cartridge_version": "0.0.1",
+                "kind": "population",
+                "key": "hounds"
+              },
+              "slot": 1
+            },
+            "value": {
+              "generation": 2,
+              "member_id": "22222222-2222-4222-8222-222222222222",
+              "replacement_due": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "stale-fatal",
+      "state": {
+        "clock": 205,
+        "population_slots": {
+          "{\"kind\":\"population_slot\",\"plan\":{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"},\"slot\":1}": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": 445
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.slot",
+          "writer_group": 0,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": 445
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "population_slot",
+            "plan": {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "population",
+              "key": "hounds"
+            },
+            "slot": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "cross-writer-same-slot",
+      "state": {
+        "clock": 205,
+        "population_slots": {
+          "{\"kind\":\"population_slot\",\"plan\":{\"cartridge_id\":\"fen\",\"cartridge_version\":\"0.0.1\",\"key\":\"hounds\",\"kind\":\"population\"},\"slot\":1}": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": null
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "population.slot",
+          "writer_group": 1,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": null
+          },
+          "value": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": 445
+          }
+        },
+        {
+          "op": "population.slot",
+          "writer_group": 2,
+          "plan": {
+            "cartridge_id": "fen",
+            "cartridge_version": "0.0.1",
+            "kind": "population",
+            "key": "hounds"
+          },
+          "slot": 1,
+          "expected": {
+            "generation": 1,
+            "member_id": "11111111-1111-4111-8111-111111111111",
+            "replacement_due": 445
+          },
+          "value": {
+            "generation": 2,
+            "member_id": "22222222-2222-4222-8222-222222222222",
+            "replacement_due": null
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "population_slot",
+            "plan": {
+              "cartridge_id": "fen",
+              "cartridge_version": "0.0.1",
+              "kind": "population",
+              "key": "hounds"
+            },
+            "slot": 1
+          }
+        }
+      }
+    }
+  ]
+}

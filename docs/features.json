@@ -696,6 +696,33 @@
     ],
     "implemented_in": "TypeScript story semantics; Elixir and TypeScript portable composition"
   },
+  "population": {
+    "spec": "docs/system/mechanics.md C3 Living hounds; docs/system/protocol.md C3 spawned bundles and population composition; docs/system/cartridge.md C3 hound population and loot",
+    "contracts": [
+      "PopulationPlan",
+      "PopulationBundle",
+      "PopulationControl",
+      "PopulationSlot",
+      "EntityOrigin",
+      "DeltaOp",
+      "MutationTarget"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/population/shared.ts",
+      "kernel/ts/src/foundation/compose.ts",
+      "kernel/ts/src/runtime/created.ts",
+      "lib/loka/core/compose.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/population_composition.json"
+    ],
+    "invariants": [
+      "delta_preconditions_hold",
+      "one_container_per_item",
+      "containment_acyclic"
+    ],
+    "implemented_in": "C3 Living hounds: TypeScript story semantics and portable Elixir/TypeScript composition"
+  },
   "topics": {
     "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md B6 composition",
     "contracts": [

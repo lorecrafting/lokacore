@@ -334,6 +334,9 @@
             "discovered"
           ],
           "additionalProperties": false
+        },
+        "spawn_template": {
+          "const": true
         }
       },
       "required": [

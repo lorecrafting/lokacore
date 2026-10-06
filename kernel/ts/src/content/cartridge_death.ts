@@ -13,9 +13,14 @@ export function death(c: Obj, named: Checks['named']): Diagnostic[] {
   );
   for (const [ref, i] of templates) {
     const at = `.cartridge.items${step(ref)}`;
-    if (!d || ![d.player_corpse, d.npc_corpse].some((r) => refString(r) === ref))
-      bad(`${at}.location`);
-    if (i.container !== true) bad(`${at}.container`);
+    const ordinary = d && [d.player_corpse, d.npc_corpse].some((r) => refString(r) === ref);
+    const bundleRoles = Object.values(c.population_bundles ?? {}).flatMap((b: any) =>
+      ['item', 'corpse'].filter((role) => refString(b[role]) === ref),
+    );
+    if (!ordinary && bundleRoles.length === 0) bad(`${at}.location`);
+    if (ordinary || bundleRoles.includes('corpse')) {
+      if (i.container !== true) bad(`${at}.container`);
+    } else if (i.container !== undefined) bad(`${at}.container`);
     for (const field of ['capacity', 'slot', 'barrier'])
       if (i[field] !== undefined) bad(`${at}.${field}`);
   }

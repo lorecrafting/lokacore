@@ -5,7 +5,7 @@
   "title": "Ashmere \u2014 The Missing Child",
   "requires": {
     "kernel_api": {
-      "at_least": "1.22",
+      "at_least": "1.23",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -39,6 +39,7 @@
       "check": 1,
       "topics": 1,
       "liquid": 1
+      ,"population": 1
     },
     "client_features": []
   },

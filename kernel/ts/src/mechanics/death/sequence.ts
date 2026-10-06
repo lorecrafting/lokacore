@@ -9,6 +9,7 @@ import { wornIn } from '../equipment/rule.ts';
 import { fail } from '../patrol/sequence.ts';
 import { separate } from '../escort/shared.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { key } from '../../foundation/compose.ts';
 
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
@@ -36,7 +37,12 @@ export function deathSequence(
   const room_id = world.state.containers[victim_id];
   const id = mint() as DomainEvent['id'];
   const corpse_id = mint() as EntityId;
-  const definition = player ? settings.player_corpse : settings.npc_corpse;
+  const spawned = world.state.created?.[victim_id];
+  const population =
+    spawned?.origin.kind === 'spawned' && spawned.origin.role === 'hound'
+      ? world.populationSpecs[key(spawned.origin.by)]
+      : undefined;
+  const definition = player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
   const writer_group = loss.writer_group;
   const ops: DeltaOp[] = [
     {
@@ -57,6 +63,25 @@ export function deathSequence(
     },
   ];
   ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group));
+  if (population && spawned?.origin.kind === 'spawned') {
+    const plan = spawned.origin.by;
+    const slot = spawned.origin.slot;
+    const target = key({ kind: 'population_slot', plan, slot });
+    const before = world.state.population_slots?.[target];
+    if (!before || before.member_id !== victim_id || before.replacement_due !== null)
+      throw new KernelError('precondition_failed');
+    ops.push({
+      op: 'population.slot',
+      writer_group,
+      plan,
+      slot,
+      expected: before,
+      value: {
+        ...before,
+        replacement_due: (loss.at ?? world.state.clock) + population.plan.replacement_delay,
+      },
+    });
+  }
   if (player) ops.push(...returnBody(world, fatal));
   const died = deathEvent(world, command, fatal, id, corpse_id, player);
   return { ops, events: [died], corpse_id };
