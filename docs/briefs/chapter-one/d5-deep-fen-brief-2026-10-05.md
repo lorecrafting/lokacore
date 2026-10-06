@@ -80,7 +80,8 @@ Cold reopen at that intermediate. With zero light/gear, walk from Chapel Nave:
 south Steps → south North Gate → south Green → south Well Lane → south Ferry
 Landing → south Reed Path → south Reed Bank → south Mire → south Hollow → down
 Den. Talk/Rejoin must be projected and accepted for the same Wren, then walk up
-Hollow → north Mire and the inverse shrine route to Elspeth's Green return.
+Hollow → north Mire and the inverse shrine route through Green as travel only; turn in at Elspeth's
+installed Ferry Landing residence.
 Assert rescued only after the actual eligible turn-in; reaching Den grants none.
 Recover the actual corpse through ordinary Take, respecting load/locked contents;
 forced overload never becomes a recovery bypass.
