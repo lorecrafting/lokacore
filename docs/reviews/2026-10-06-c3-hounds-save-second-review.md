@@ -44,3 +44,26 @@ Validate complete writer-group bundles at final admission while keeping lawful p
 The existing equal-time tests exercise both actual combat/population job-ID orders and pass; no conflict or loot loss found in the lawful producer. The two-kernel comparison here follows independent literal composition answers and separately probes malformed births; agreement alone is not correctness.
 
 Ponytail Review: lean already; no additional dependency, scheduler, history ledger or speculative abstraction requested. Reuse the existing replay and creation/invariant seams. Findings remain open. Evidence/pins remain provisional; this review claims no hosted CI/publication, final release pin or new browser/native proof. The [retained handoff](../evidence/2026-10-05-c3-living-hounds/README.md) accurately keeps those gates separate.
+
+## Scoped fix round 1 — CHANGES REQUIRED
+
+Source `8e767434425658d27e1b13f7da99744b09302015`; evidence `7b8292691c6b5e1a3574163c706bbb41d2ee8e91`. No source mutation or broad-suite rerun during this scoped review.
+
+**S1 closed:** all six original population-only file forgeries and six bundled controls now refuse as typed `save_corrupt`, preserving altered file bytes. The retained isolated regression passes. **S2 partially fixed:** missing pelt, missing HP, room-born pelt and generation2 without membership now refuse; the literal complete pair and explicit nonfinal paired prefix pass.
+
+**S2 remains a blocker — `kernel/ts/src/foundation/creation.ts:143`, `kernel/ts/src/runtime/invariants_creation.ts:96`, and the corresponding Elixir reverse slot checks.** Append a second slot operation to the new complete-bundle fixture: same newborn/member/ordinal/group, different full plan. Both composers and independent precondition invariants accept. The real loaded world's final `apply` and `adopt` also accept that duplicate foreign-plan membership. Reverse matching omits full plan equality. A standalone occupied slot with no newborn also passes its no-hounds exemption. This is the existing complete-bundle/membership finding, not a new scope request; the required Astra proposal audit independently found the same residual seam.
+
+Five focused TypeScript/SQLite checks and three Elixir literal/prefix/differential checks pass. All ten retained evidence hashes verify and the evidence diff contains no source edits; its full gate passes but does not catch the residual membership case. Further source and evidence recheck remains pending.
+
+## Scoped fix round 2 — APPROVE
+
+Exact strict source `2dbf55b51cf7ae6bf930a550bb2dd61327a4127e`; retained evidence `ea3e39166a7acdb15f34a4cb9d5cf224270ba58f`. **S1 and S2 are closed.** No new save/protocol finding; the separate exact-source Astra proposal audit is approved.
+
+Every final occupied/no-due slot now requires a fresh same-group hound with matching full plan, ordinal, generation and member ID in both composers and independent guards. There is no population-spec bypass. Foreign-plan extra membership, a second writer group's extra slot, and standalone assignment to an existing/nonexistent hound refuse. The original missing-pelt/HP, initial room-parent and unbound-generation cases continue to refuse. Independent controlled runtime `apply` and final `adopt` on the loaded chapter now reject the previously accepted foreign-plan duplicate. Literal full births, death/due rows and explicit nonfinal prefixes retain their respective admitted behavior. The two row-only examples now pin final refusal and separately retain their original nonfinal algebra rows, as the amended protocol requires.
+
+- Nine focused TypeScript/SQLite tests and seven Elixir literal/prefix/differential tests pass; no broad suite rerun.
+- All six original isolated-population file forgeries plus six bundled controls still return typed `save_corrupt`, with byte-identical altered files after real connection close/reopen.
+- All twelve retained evidence hashes verify; the evidence head changes only evidence. Its full active check log reaches the passing formatting gate with 358 Elixir tests, and the retained eight isolated old-predicate controls are red/restored across both composers and independent guards.
+- D2's published v026/v027 hash/ID files and C3's provisional hash/ID files remain unchanged from the original reviewed source. No final successor pin, publication or new browser/native claim.
+
+Ponytail Review: the existing creation/receipt owners cover these fixes. Four direct predicates and explicit final/nonfinal composition suffice; no compatibility bypass, new ledger or dependency. This scoped approval closes only the save/protocol findings; primary Book findings and the final integration/publication gates retain their separate review ownership.
