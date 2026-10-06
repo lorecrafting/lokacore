@@ -162,9 +162,9 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **12 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, C1, C2). The latest source publication is
-[#214](https://github.com/lorecrafting/lokacore/pull/214), C2 Watchman's Rounds patrol and recovery.
+Local and GitHub `main` have completed **13 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, B8, C1, C2). The latest source publication is
+[#215](https://github.com/lorecrafting/lokacore/pull/215), B8 Maud's paid room, food and drink services.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -223,17 +223,19 @@ and [independently approved plan](reviews/2026-10-05-b8-maud-services-plan-revie
 The [brief](briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) now pins
 published B7's reviewed source and publication base `547f809c`, chapter
 0.0.22/API1.20 with 96 independent IDs. B3/B7/Rest behavioral dependencies are met.
-B8 source is implemented provisionally at `552717d5`, with primary and separate
-save/protocol scoped reviews both APPROVE after findings were fixed. Its review
-records are merged on the clean B8 branch at `50a92de5`. C2 is now published;
-B8 must integrate that predecessor, verify successor pins and full checks, then
-publish through its own reviewed PR. No B8 playable-publication claim yet.
+B8 source is published in [#215](https://github.com/lorecrafting/lokacore/pull/215)
+at chapter 0.0.25/API1.23, hash
+`c8bc55ca6aa55af4b7579e570b3e6f85fce370b80ebda766df16780fa8f8933a`
+and 111 IDs. Primary, separate save/protocol and scoped example/validator reviews
+approved after findings were fixed. The exact source passed the local full gate and
+all six hosted checks before merge. Native preview is paused.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
-on local base `10b023e8`. A3 is integrated; B8 has approved provisional source
-and awaits final C2-base publication. The [independent B9 plan review](reviews/2026-10-05-b9-lantern-dream-plan-review.md)
-approved; implementation and successor release/API/hash/ID/proof pins remain ahead.
+on local base `10b023e8`. A3 and B8 are published. The
+[independent B9 plan review](reviews/2026-10-05-b9-lantern-dream-plan-review.md)
+approved; implementation is active in an isolated branch, with successor
+release/API/hash/ID/proof pins still ahead.
 No playable S10 is claimed here.
 
 C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
