@@ -12,6 +12,7 @@ import { runInNewContext } from 'node:vm';
 import { checkpoint, elapsedHost } from '../authority/local-story/__tests__/elapsed-host.test.ts';
 import { localSession, openGame } from '../authority/local-story/session.ts';
 import type { Db } from '../authority/local-story/store.ts';
+import { webDb } from './sqlite-web.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -86,6 +87,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     'expo-sqlite': native,
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
+    './sqlite-web.ts': { webDb },
     './book/Book.tsx': {},
     './book/model.ts': { hint: () => ({}) },
     './SaveError': {},
@@ -134,7 +136,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
     assert.equal(
       pin().content_hash,
-      '0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8',
+      'e7333f694e6ec2c9f02a39944d994d4452f26fffc5534ff217346504471e4c71',
     );
     assert.equal(globals.loka_session!.startOver(), undefined);
     assert.equal(pin().cartridge_id, 'ashmere_missing_child');
@@ -268,6 +270,7 @@ function appHost() {
     },
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
+    './sqlite-web.ts': { webDb },
     './book/Book.tsx': { default: 'Book' },
     './book/model.ts': { hint: () => ({}) },
     './SaveError': {},

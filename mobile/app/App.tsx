@@ -14,6 +14,8 @@ import {
 } from 'expo-sqlite';
 import Storage from 'expo-sqlite/kv-store';
 import { KERNEL_ID, localSession } from '../authority/local-story/session';
+import type { Db } from '../authority/local-story/store.ts';
+import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
 import chapter from '../../protocol/fixtures/missing_child_v023_hash.json';
@@ -44,7 +46,7 @@ const g = globalThis as {
   loka_web_opening?: Promise<ReturnType<typeof localSession>>;
   loka_clock_cleanup?: () => void;
 };
-const createSession = (open: () => SQLiteDatabase) =>
+const createSession = (open: () => Db) =>
   (g.loka_session ??= localSession(
     open,
     () => {
@@ -167,7 +169,7 @@ function useWebSession() {
     g.loka_web_opening ??= openDatabaseAsync(NAME)
       .then((opened) => {
         db = opened;
-        return createSession(() => (db ??= openDatabaseSync(NAME)));
+        return createSession(() => webDb((db ??= openDatabaseSync(NAME))));
       })
       .catch((error) =>
         createSession(() => {
