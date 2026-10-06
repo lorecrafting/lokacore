@@ -81,6 +81,47 @@ test('crow acquisition survives real SQLite cold reopen and invocation replay', 
   assert.deepEqual(q.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), rows);
 });
 
+// Breaks: a living crow outside its two-room wander pair makes a lawful outbound or return save unreopenable.
+test('crow intention, corridor flight and delivered return cold-reopen at their exact custody', (t) => {
+  for (const [until, phase, room, holder] of [
+    [43200, 'acquire', 'village_green', 'village_green'],
+    [43500, 'leg', 'well_lane', 'crow'],
+    [44550, 'return', 'oak_branches', 'nest'],
+    [44700, 'return', 'drowned_oak', 'nest'],
+  ] as const) {
+    const dir = mkdtempSync(join(tmpdir(), 'loka-crow-flight-'));
+    t.after(() => rmSync(dir, { recursive: true }));
+    const path = join(dir, 'save.db');
+    const a = setup(path);
+    a.invoke('take', [a.coin]);
+    a.invoke('drop', [a.coin]);
+    a.elapsed(until);
+    const before = a.s.world().state;
+    const crow = Object.values(before.crows ?? {}).find((r) => r.phase === phase)!;
+    assert.ok(crow, `${until}: ${phase}`);
+    assert.equal(
+      before.containers[crow.member_id],
+      a.s.world().roomIds[`${prefix}:room/${room}`],
+      `${until}: ${phase}`,
+    );
+    assert.equal(
+      before.containers[a.coin],
+      holder === 'crow'
+        ? crow.member_id
+        : holder === 'nest'
+          ? entity(a.s.world(), 'item', 'crow_nest')
+          : a.s.world().roomIds[`${prefix}:room/${holder}`],
+    );
+    a.p.sql.close();
+    const q = elapsedHost(path, { wall: 10000, mono: 0 }, a.b);
+    t.after(() => q.sql.close());
+    const opened = openStory(q.db, a.releases, q.host);
+    assert.equal(opened.kind, 'open', `${until}: ${phase}`);
+    if (opened.kind === 'open')
+      assert.equal(encode(opened.world().state as never), encode(before as never));
+  }
+});
+
 // Breaks: a dead crow at a lawful corridor room becomes an unreopenable owner save.
 test('a crow killed beyond its wander pair cold-reopens at its actual corridor room', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-crow-death-'));
