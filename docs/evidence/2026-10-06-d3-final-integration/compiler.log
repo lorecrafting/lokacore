@@ -1,0 +1,11 @@
+command: mise exec -- mix test test/loka/content_missing_child_test.exs test/loka/content_light_test.exs test/loka/content_transport_test.exs --force
+Compiling 72 files (.ex)
+Generated loka app
+Running ExUnit with seed: 546510, max_cases: 16
+
+..........
+Finished in 1.5 seconds (1.5s async, 0.00s sync)
+
+Result: 10 passed
+
+exit: 0

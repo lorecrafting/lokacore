@@ -1,0 +1,20 @@
+COMMAND: node --test kernel/ts/test/western_ashmere.test.ts mobile/authority/local-story/western_ashmere.test.ts
+EXIT: 0
+✔ literal Western Ashmere route visits all five rooms and returns through the preserved east exit (124.174125ms)
+✔ original Hob starts at dusk in the loft and alternates at literal next-day schedule boundaries (147.715709ms)
+✔ illuminated Mill Cellar has no new NPC or rat population (68.803084ms)
+(node:6958) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Western rooms and both exact standalone Read histories survive cold SQLite reopen without story credit (1051.091ms)
+✔ Hob departure and return retain original identity and saved Conversation Leave at the two dawn/dusk boundaries (668.342583ms)
+✔ actual death returns gearless through Chapel and recovers original nested possessions in both dark mill branches (1204.532958ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3934.119083

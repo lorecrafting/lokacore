@@ -1,0 +1,26 @@
+COMMAND: mise exec -- mix test test/loka/content_rooms_test.exs test/loka/content_notice_boards_test.exs test/loka/content_priory_test.exs test/loka/content_dusk_test.exs test/loka/content_ferry_test.exs
+EXIT: 0
+==> boundary
+Compiling 15 files (.ex)
+Generated boundary app
+==> file_system
+Compiling 7 files (.ex)
+Generated file_system app
+==> bunt
+Compiling 2 files (.ex)
+Generated bunt app
+==> jason
+Compiling 10 files (.ex)
+Generated jason app
+==> credo
+Compiling 257 files (.ex)
+Generated credo app
+==> loka
+Compiling 67 files (.ex)
+Generated loka app
+Running ExUnit with seed: 756359, max_cases: 16
+
+.........................................
+Finished in 2.1 seconds (2.1s async, 0.00s sync)
+
+Result: 41 passed

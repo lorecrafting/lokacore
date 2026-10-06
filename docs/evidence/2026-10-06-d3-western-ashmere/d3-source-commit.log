@@ -1,0 +1,18 @@
+COMMAND: git commit: source 6964feed5d65739ac4f9dd6f68bde790ae0cc2fd; normal staged hooks
+EXIT: 0
+Checking formatting...
+All matched files use Prettier code style!
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+647 docs, 0 broken link(s), 0 unreachable
+[chapter1/d3-western-ashmere 6964feed] Add provisional Western Ashmere mill cottage and Hob content
+ 13 files changed, 649 insertions(+), 3 deletions(-)
+ create mode 100644 cartridges/ashmere_missing_child/dialogues/hob.json
+ create mode 100644 cartridges/ashmere_missing_child/npcs/hob.json
+ create mode 100644 cartridges/ashmere_missing_child/rooms/cottage_loft.json
+ create mode 100644 cartridges/ashmere_missing_child/rooms/empty_cottage.json
+ create mode 100644 cartridges/ashmere_missing_child/rooms/mill_cellar.json
+ create mode 100644 cartridges/ashmere_missing_child/rooms/mill_loft.json
+ create mode 100644 cartridges/ashmere_missing_child/rooms/old_mill.json
+ create mode 100644 kernel/ts/test/western_ashmere.test.ts
+ create mode 100644 mobile/authority/local-story/western_ashmere.test.ts

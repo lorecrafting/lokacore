@@ -1,0 +1,26 @@
+command: cd mobile/app && mise exec -- npm run test:e2e -- tests/western_ashmere.e2e.ts --workers 1 --output .e2e/d3-final --trace off --video off
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run tests/western_ashmere.e2e.ts --workers 1 --output .e2e/d3-final --trace off --video off
+
+
+ RUN  e2e v0.17.0 <WORKTREE>/mobile/app
+      run 01a11242-f105-7a93-bf1c-b5c87a541b4f · targets: web
+
+ ✓ target "web" command ready 916ms
+ ✓ |web| tests/western_ashmere.e2e.ts (2 tests) 16.73s
+   ✓ Western Ashmere documents and all dark stairs persist through browser reload 13.30s
+   ✓ Hob can be met at both scheduled destinations using an isolated controlled browser clock 3.42s
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  07:28:59
+   Duration  18.01s (startup 916ms)
+     Report  .e2e/d3-final/report.json
+
+
+exit: 0

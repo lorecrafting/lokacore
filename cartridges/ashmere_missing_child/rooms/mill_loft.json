@@ -1,0 +1,25 @@
+{
+  "title": "room.mill_loft.title",
+  "description": "room.mill_loft.description",
+  "exits": {
+    "down": {
+      "to": "old_mill"
+    }
+  },
+  "details": {
+    "owl": {
+      "aliases": [
+        "owl"
+      ],
+      "description": "detail.mill_loft.owl.description"
+    },
+    "loose_board": {
+      "aliases": [
+        "loose_board",
+        "board"
+      ],
+      "description": "detail.mill_loft.loose_board.description"
+    }
+  },
+  "dark_description": "room.mill_loft.dark"
+}
