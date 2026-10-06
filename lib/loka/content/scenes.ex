@@ -294,7 +294,12 @@ defmodule Loka.Content.Scenes do
 
   defp duplicates(scenes) do
     scenes
-    |> Enum.group_by(fn {_, _, s} -> s["on"] end)
+    |> Enum.group_by(fn {_, _, s} ->
+      case s["on"] do
+        %{"rest" => rest} -> {"rest", rest["room"], rest["detail"]}
+        on -> on
+      end
+    end)
     |> Enum.flat_map(fn {_, sites} -> colliding(sites) end)
   end
 

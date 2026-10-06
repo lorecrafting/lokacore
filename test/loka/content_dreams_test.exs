@@ -67,4 +67,71 @@ defmodule Loka.ContentDreamsTest do
       assert {:error, _} = Loka.Content.compile(source), file
     end)
   end
+
+  # Breaks: differing consequence refs let two dreams consume one Rest anchor, or normalization rejects distinct room/detail anchors.
+  @tag :duplicate_rest_trigger
+  test "Rest trigger identity is its room and detail, independent of consequence refs", %{
+    tmp_dir: dir
+  } do
+    File.cp_r!("cartridges/ashmere_missing_child", dir)
+    read = fn file -> JSON.decode!(File.read!(Path.join(dir, file))) end
+    write = fn file, value -> File.write!(Path.join(dir, file), JSON.encode!(value)) end
+    facts = read.("facts.json")
+
+    write.(
+      "facts.json",
+      facts
+      |> put_in(["facts", "annex_slept"], facts["facts"]["slept_at_lantern"])
+      |> put_in(["facts", "annex_seen"], facts["facts"]["dream_seen"])
+    )
+
+    write.(
+      "quests/annex_rest.json",
+      put_in(
+        read.("quests/a_room_at_the_lantern.json"),
+        ["objective", "policy", "root", "fact"],
+        "annex_seen"
+      )
+    )
+
+    room = read.("rooms/inn_rooms.json")
+
+    write.(
+      "rooms/inn_rooms.json",
+      put_in(
+        room,
+        ["details", "other_bed"],
+        Map.put(room["details"]["bed"], "aliases", ["other_bed"])
+      )
+    )
+
+    write.("rooms/dream_annex.json", room)
+
+    scene =
+      read.("scenes/dream_of_the_fen.json")
+      |> put_in(["on", "rest", "credit"], "annex_slept")
+      |> put_in(["on", "rest", "quest"], "annex_rest")
+      |> put_in(["on_end", "assign", Access.at(0), "fact"], "annex_seen")
+      |> put_in(["on_end", "quest"], "annex_rest")
+
+    for {room, detail} <- [{"dream_annex", "bed"}, {"inn_rooms", "other_bed"}] do
+      write.(
+        "scenes/another_dream.json",
+        scene
+        |> put_in(["on", "rest", "room"], room)
+        |> put_in(["on", "rest", "detail"], detail)
+      )
+
+      assert {:ok, _, _} = Loka.Content.compile(dir)
+    end
+
+    write.("rooms/inn_rooms.json", room)
+    write.("scenes/another_dream.json", scene)
+    assert {:error, diagnostics} = Loka.Content.compile(dir)
+
+    assert Enum.map(diagnostics, &{&1["code"], &1["path"]}) == [
+             {"DUPLICATE_DEFINITION", "scenes/another_dream.on"},
+             {"DUPLICATE_DEFINITION", "scenes/dream_of_the_fen.on"}
+           ]
+  end
 end

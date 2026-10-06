@@ -37,3 +37,11 @@ behavior remain exercised. No test checks production source text or mocks storag
 Limits: local candidate pins are provisional on the published B8 predecessor; D2/C3 ordering
 requires actual integration/re-pin and scoped recheck. No publication, fresh review verdict,
 browser/native layout, phone/Hermes/background/kill or owner-save claim is made here.
+
+
+B9-P1 correction audit: the compiler now groups Rest triggers by tagged room/detail
+identity, matching the existing loader, while other trigger maps retain their prior
+identity. No new helper, allowance or machinery. One isolated compiler test separates
+credit/memory/quest refs, proves different rooms and details still compile, and requires
+both same-anchor diagnostics. Its whole-map mutant leaves the older focused compiler
+checks green and this new test red; restored checks pass. Ponytail Review: Lean already.

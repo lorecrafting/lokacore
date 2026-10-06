@@ -12,6 +12,7 @@ new=node('kernel/ts/test/dream.test.ts')
 oldsave=node('mobile/authority/local-story/service.test.ts','mobile/authority/local-story/scene.test.ts','mobile/authority/local-story/vesper_message.test.ts')
 newsave=node('mobile/authority/local-story/dream.test.ts','mobile/app/book/dream.test.ts')
 mutants=[
+ ('compiler compares Rest consequences as trigger identity','lib/loka/content/scenes.ex','%{"rest" => rest} -> {"rest", rest["room"], rest["detail"]}','%{"rest" => _} -> s["on"]',['mise','exec','--','mix','test','--force','--exclude','duplicate_rest_trigger','test/loka/content_dreams_test.exs','test/loka/content_scenes_test.exs','test/loka/content_services_test.exs'],['mise','exec','--','mix','test','--force','--only','duplicate_rest_trigger','test/loka/content_dreams_test.exs']),
  ('missing typed Rest producer','kernel/ts/src/mechanics/position/rule.ts',"type === 'rest'","false",old,new),
  ('presentation checkpoint becomes modal','kernel/ts/src/mechanics/scene/shared.ts',"if (s.control !== 'modal') continue;",'',old,new),
  ('scene choice hijacks ordinary dialogue','kernel/ts/src/mechanics/dialogue/selection.ts',"c.source.kind === 'dialogue' &&",'',old,new),

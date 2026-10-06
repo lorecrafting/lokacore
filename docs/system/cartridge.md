@@ -1079,6 +1079,8 @@ full/short references, exact anchor/detail membership, Boolean player fact
 scopes/defaults, unique trigger and consequence ownership, position/scene/quest
 capability dependencies, bounded reachable beat graph, exactly declared choices,
 choice source/actor/anchor bindings and final-only memory/quest consequence.
+A Rest trigger is identified by its room/detail pair, independently of entitlement,
+credit, memory or quest references; different room/detail pairs remain distinct.
 Reject unknown targets/branches, repeated/unreachable consequence beats, modal
 choice mixing, body/container operations and a dream end declaring a completion
 report. Reserve engine cursor/choice ownership as for existing scenes; content

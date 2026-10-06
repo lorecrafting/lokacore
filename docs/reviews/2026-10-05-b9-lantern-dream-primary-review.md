@@ -66,3 +66,15 @@ interpreter, snapshot or second history verifier; no complexity finding. Review
 source changes and independent red controls restored cleanly. No browser/native
 layout, device lifecycle, owner-save or publication proof is claimed. Separate
 save/protocol opinion remains required by the workflow.
+
+
+## Developer disposition — B9-P1
+
+Rest duplicate grouping now uses the tagged room/detail pair, matching the existing
+TypeScript loader; existing modal identities are unchanged. The new compiler test
+uses distinct credit/memory/quest refs, accepts different rooms/details and refuses
+both same-anchor sites. Restoring whole-map comparison leaves the older focused
+compiler suites green and this test red. Evidence is retained in the
+[B9 behavior controls](../evidence/2026-10-05-b9-lantern-dream/behavior-controls.log)
+and [failed assertions](../evidence/2026-10-05-b9-lantern-dream/behavior-failing-assertions.log).
+Scoped independent recheck remains required; the original verdict above is preserved.
