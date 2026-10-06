@@ -1192,8 +1192,12 @@ Add typed `bandage {actor_id: CharacterId, item_id: EntityId, effect_generation:
 
 Bleed job scheduling and cancellation bind the body and generation together. A partial
 bleed binding, an orphan bleed generation beside another cancel discriminator, or a
-mixed bleed/sight schedule is refused. The two portable composers agree on these
-refusals; existing encounter, sight and water cancellation forms keep their frozen answers.
+mixed bleed/sight or bleed/water schedule is refused, including a lone water body.
+When a same-time round refreshes an already due expiry before the retained next tick,
+that completed expiry hands off to a new job at the unchanged future cadence without
+damage. Completion of a due tick advances cadence. Both portable composers enforce these
+transitions and refusals; existing encounter, sight and water cancellation forms keep their
+frozen answers.
 
 Extend the existing consumed-holder entry guard narrowly: a declared edible enters only through Eat; a declared bandage enters only through this exact C5 command/result from direct body custody. Neither may leave. The already generated holder and immutable known-entity metadata remain; do not add a second terminal holder or delete item rows. Admit `bandage` as the sole C5 exception to focused combat after ordinary ActionSet composition, in both projection and raw command admission. `perform`, Eat, other item actions, aliases resolving to them and Move remain barred during combat. Register only consumed command/action/input/outcome, status/delta/job/cause fields and API gate; add fixtures for every required/bounded schema field, the status transition and terminal custody in both foundation validators. Frozen existing fixtures stay unchanged.
 ## D10 knowledge and Knock composition
