@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [D11 real-consumer dependencies](2026-10-06-d11-consumer-dependencies-review.md): exact docs head `abf25758`, independent APPROVE; 30 implementation rows are acyclic, real D6 swim/D12 haggle precede D11, installed STR10/DEX10/PER5 and B6 difficulty5 verified, fey rule unchanged and quantities remain proposals. No findings; docs checks pass.
 - [D2 publication status](2026-10-06-d2-publication-status-review.md): exact status head `a71e8d8c` against `4bcb2eaf`, independent APPROVE; PR223 merged, six successful source/evidence checks and approvals recorded, 15/33 roadmap list and sole closed D2 tracker change verified; docs and Beads checks pass.
 - [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): original CHANGES REQUIRED; scoped fix source `c838cac423c037572f298f0fa920789fb115983c`, evidence `c7927528`, independent APPROVE, D2-P1/D2-H1 closed. Actual Book pulse/title retry red/green, 40 focused checks, exact history/route refusal and unchanged integrated pins verified; headless proof only.
 - [Corpse-loot Take detail](2026-10-06-corpse-loot-take-detail-review.md): exact docs head `44fbff3bb4c9480d4f48093ea5ec62a5ed7cd5ca`, independent APPROVE; no findings, no runtime proof claimed.
