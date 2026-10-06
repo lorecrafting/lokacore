@@ -1,7 +1,8 @@
 // Derived carrying admission (docs/system/mechanics.md containment@1). The context lives
 // only for this decision/list projection; custody and pinned item definitions remain authoritative.
 import { LIMITS, type EntityId } from '../../contracts.gen.ts';
-import { add } from '../../foundation/int.ts';
+import { liquidRowValid } from '../../foundation/compose_liquid.ts';
+import { add, mul } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
 import { refString } from '../../runtime/decision.ts';
@@ -118,7 +119,7 @@ function shell(c: Context, id: string): number | Failure {
     const grams = entity.mass_grams;
     return !Number.isInteger(grams) || grams === undefined || grams < 0 || grams > 2147483647
       ? 'precondition_failed'
-      : grams;
+      : effective(c.world, id, grams);
   }
   if (entity || id === c.body || Object.hasOwn(c.world.rooms, id)) return 0;
   const holder = slotHolder(c, id);
@@ -227,4 +228,27 @@ export function carryingExchange(
   const load = total(context, body);
   if (typeof load === 'string') return load;
   return add(load, net) > setting.max_grams ? ('too_heavy' as const) : undefined;
+}
+
+/** Positive acquisition within existing custody (Fill), without a second stored load. */
+export function carryingAdded(world: World, body: EntityId, grams: number, steps: Steps) {
+  const max = world.cartridge.world?.carry?.max_grams;
+  if (max === undefined) return;
+  if (!Number.isSafeInteger(max) || max < 0) return 'precondition_failed' as const;
+  const load = total({ world, body, steps, totals: new Map(), owned: new Map() }, body);
+  if (typeof load === 'string') return load;
+  return add(load, grams) > max ? ('too_heavy' as const) : undefined;
+}
+
+function effective(world: World, id: string, grams: number): number | Failure {
+  const spec = world.liquidSpecs[id];
+  if (!spec) return grams;
+  const row = world.state.liquids?.[id];
+  if (!liquidRowValid(row, spec)) return 'precondition_failed';
+  if (!row!.kind) return grams;
+  const density = world.cartridge.liquids?.[refString(row!.kind)]?.grams_per_unit;
+  if (!Number.isInteger(density) || density === undefined || density <= 0)
+    return 'precondition_failed';
+  const mass = add(grams, mul(row!.quantity, density));
+  return mass > 2147483647 ? 'precondition_failed' : mass;
 }

@@ -3,15 +3,13 @@ defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
   (docs/ROADMAP.md, verification harness). `kernel/ts/src/runtime/invariants.ts` is the TypeScript
-  twin; both run the `"invariants"` cases of
-  `protocol/fixtures/composition.json`.
+  twin; both run the portable composition invariant fixtures.
   `check(id, observation)` is true when the invariant holds. Observation fields:
   - `"state"`, `"delta"`, `"result"`: a base state, a StateDelta and its
     `Loka.Core.Compose.compose/2` result;
   - `"resolution"`: a TargetResolution;
   - `"decision"`, `"commit"`, `"published"`: a DecisionResult, the host's commit outcome
-    (`%{"status" => "committed", "revision" => n}`, `"failed"` or `"unknown"`) and what the
-    host published. An unknown id raises.
+    (committed, failed or unknown) and the host's publication. An unknown id raises.
   """
   alias Loka.Core.Compose
   @registry_path Path.expand("../../../protocol/error_registry.json", __DIR__)
@@ -32,6 +30,9 @@ defmodule Loka.Core.Invariants do
     ops = get_in(observation, ["delta", "ops"]) || []
     Loka.Core.InvariantsCreation.custody?(s, ops, r)
   end
+
+  def check("liquid_rows_valid", %{"state" => s, "result" => r}),
+    do: Loka.Core.InvariantsLiquid.rows_valid?(s, r)
 
   def check("containment_acyclic", %{"state" => s, "result" => r}) do
     final = Map.merge(Map.get(s, "containers", %{}), Map.new(moved(r)))
@@ -99,6 +100,7 @@ defmodule Loka.Core.Invariants do
     is_integer(s["clock"]) and Loka.Core.InvariantsCreation.holds?(s, ops, result) and
       Loka.Core.InvariantsEncounter.holds?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
+      Loka.Core.InvariantsLiquid.holds?(s, ops, result) and
       retirements_hold?(ops) and replay_preconditions(s, ops, result)
   end
 
@@ -127,6 +129,7 @@ defmodule Loka.Core.Invariants do
     do:
       Enum.any?(result["changes"], &(Compose.key(&1["target"]) == k and &1["value"] == expected))
 
+  defp replay_op(%{"op" => "liquid.set"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "escort.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "encounter." <> _}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "job." <> _}, _, _, ctx), do: {:cont, ctx}

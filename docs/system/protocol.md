@@ -645,6 +645,13 @@ admission share current custody, reach, compatibility, capacity and load checks.
 Use structured filled/poured/drank outcomes containing bound participant IDs,
 kind and actual quantity; no consumer reads success from narration.
 
+The concrete metadata is `LiquidDefinition {key, label, unit_label, grams_per_unit,
+drink_amount}`, optional `ItemDefinition.vessel {capacity, unit_label, initial}`,
+optional detail `liquid_source` and optional `CompiledCartridge.liquids`. Initial
+and stored rows use a full liquid DefinitionRef or null. Immutable `liquid_specs`
+observations bind each vessel to capacity and declared kinds; `liquid_rows_valid`
+checks these specifications in both foundation kernels.
+
 The missing primitive is a typed exact-instance liquid row and
 `liquid.set {item_id, from, to}` with whole-row equality precondition and one
 writer target per item. Quantity is a bounded nonnegative integer; null kind iff

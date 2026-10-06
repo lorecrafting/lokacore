@@ -108,9 +108,12 @@ test('composition known answers', () => {
 
 test('invariant checks known answers, a holding and a violated case per invariant checked in both kernels', () => {
   const covered = new Set<string>();
-  for (const c of fixture.invariants) {
+  for (const c of [
+    ...fixture.invariants,
+    ...read('protocol/fixtures/liquid_composition.json').invariants,
+  ]) {
     const obs = { ...c.observation };
-    if (obs.state) obs.state = state(obs.state);
+    if (typeof obs.state === 'string') obs.state = state(obs.state);
     assert.equal(check(c.id, obs), c.holds, `${c.id}: ${c.note}`);
     covered.add(`${c.id}:${c.holds}`);
   }

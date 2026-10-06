@@ -1,0 +1,25 @@
+✔ two real shop offers cost eight pennies and retain two empty shell identities (8.027083ms)
+✔ Fill, Drink, partial Pour and Drink conserve finite contents and affect no resource or clock (4.255917ms)
+✔ liquid refusal participants and custody leave every row unchanged while open nested skins work (2.312959ms)
+✔ Fill includes liquid mass, admits equality, and owned Pour/Drink remain legal while overloaded (3.479792ms)
+✔ Take and Buy reject filled mass above ceiling and GameView exposes exact current pairs (7.751583ms)
+✔ authored larger servings refuse a partial last drink and exhausted Pour keeps an empty shell (0.88575ms)
+✔ closed owned nested vessels and exact out-of-room sources refuse without a write (0.267125ms)
+✔ liquid pair projection fails at the same exhausted budget as direct admission (0.33275ms)
+✔ authored liquid overrides project the same availability as the exact invocation (77.563ms)
+(node:46795) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/liquid.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book preserves exact water pairs and invalidates changed quantities in displayed context (154.498417ms)
+✔ Book restores liquid narration on the exact saved source detail after SQLite reopen (158.439708ms)
+✔ loaded liquid aliases reach exact Book presses and matching target/input/policy refusal (1055.967167ms)
+✔ aliased liquid freshness refuses a stale pair after another committed drink (77.327541ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1669.066792

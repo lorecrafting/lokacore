@@ -1,0 +1,2034 @@
+{
+  "bases": {
+    "liquid_row": {
+      "contract": "LiquidRow",
+      "value": {
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": "water"
+        },
+        "quantity": 4
+      }
+    },
+    "empty_row": {
+      "contract": "LiquidRow",
+      "value": {
+        "kind": null,
+        "quantity": 0
+      }
+    },
+    "vessel_spec": {
+      "contract": "VesselSpec",
+      "value": {
+        "capacity": 4,
+        "unit_label": "liquid.units",
+        "initial": {
+          "kind": null,
+          "quantity": 0
+        }
+      }
+    },
+    "liquid_definition": {
+      "contract": "LiquidDefinition",
+      "value": {
+        "key": "water",
+        "label": "liquid.water",
+        "unit_label": "liquid.units",
+        "grams_per_unit": 250,
+        "drink_amount": 1
+      }
+    },
+    "liquid_view": {
+      "contract": "LiquidView",
+      "value": {
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": "water"
+        },
+        "quantity": 4,
+        "capacity": 4,
+        "unit_label": "liquid.units",
+        "label": "liquid.water"
+      }
+    },
+    "fill": {
+      "contract": "CommandPayload",
+      "variant": {
+        "field": "type",
+        "value": "fill"
+      },
+      "value": {
+        "type": "fill",
+        "actor_id": "b0000000-0000-4000-8000-000000000001",
+        "source_id": "b0000000-0000-4000-8000-000000000002",
+        "vessel_id": "b0000000-0000-4000-8000-000000000003"
+      }
+    },
+    "pour": {
+      "contract": "CommandPayload",
+      "variant": {
+        "field": "type",
+        "value": "pour"
+      },
+      "value": {
+        "type": "pour",
+        "actor_id": "b0000000-0000-4000-8000-000000000001",
+        "source_id": "b0000000-0000-4000-8000-000000000003",
+        "receiver_id": "b0000000-0000-4000-8000-000000000004"
+      }
+    },
+    "drink": {
+      "contract": "CommandPayload",
+      "variant": {
+        "field": "type",
+        "value": "drink"
+      },
+      "value": {
+        "type": "drink",
+        "actor_id": "b0000000-0000-4000-8000-000000000001",
+        "vessel_id": "b0000000-0000-4000-8000-000000000003"
+      }
+    },
+    "filled": {
+      "contract": "EventPayload",
+      "variant": {
+        "field": "type",
+        "value": "filled"
+      },
+      "value": {
+        "type": "filled",
+        "source_id": "b0000000-0000-4000-8000-000000000002",
+        "vessel_id": "b0000000-0000-4000-8000-000000000003",
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": "water"
+        },
+        "quantity": 4
+      }
+    },
+    "poured": {
+      "contract": "EventPayload",
+      "variant": {
+        "field": "type",
+        "value": "poured"
+      },
+      "value": {
+        "type": "poured",
+        "source_id": "b0000000-0000-4000-8000-000000000003",
+        "receiver_id": "b0000000-0000-4000-8000-000000000004",
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": "water"
+        },
+        "quantity": 3
+      }
+    },
+    "drank": {
+      "contract": "EventPayload",
+      "variant": {
+        "field": "type",
+        "value": "drank"
+      },
+      "value": {
+        "type": "drank",
+        "vessel_id": "b0000000-0000-4000-8000-000000000003",
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": "water"
+        },
+        "quantity": 1
+      }
+    },
+    "liquid_set": {
+      "contract": "DeltaOp",
+      "variant": {
+        "field": "op",
+        "value": "liquid.set"
+      },
+      "value": {
+        "op": "liquid.set",
+        "writer_group": 0,
+        "item_id": "b0000000-0000-4000-8000-000000000003",
+        "from": {
+          "kind": {
+            "cartridge_id": "liquid_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "liquid",
+            "key": "water"
+          },
+          "quantity": 4
+        },
+        "to": {
+          "kind": null,
+          "quantity": 0
+        }
+      }
+    },
+    "liquid_target": {
+      "contract": "MutationTarget",
+      "variant": {
+        "field": "kind",
+        "value": "liquid"
+      },
+      "value": {
+        "kind": "liquid",
+        "item_id": "b0000000-0000-4000-8000-000000000003"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "liquid_row-valid",
+      "base": "liquid_row",
+      "errors": []
+    },
+    {
+      "name": "liquid_row-missing-kind",
+      "base": "liquid_row",
+      "omit": "kind",
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-missing-quantity",
+      "base": "liquid_row",
+      "omit": "quantity",
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-closed-fields",
+      "base": "liquid_row",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-non-object",
+      "base": "liquid_row",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "empty_row-valid",
+      "base": "empty_row",
+      "errors": []
+    },
+    {
+      "name": "vessel_spec-valid",
+      "base": "vessel_spec",
+      "errors": []
+    },
+    {
+      "name": "vessel_spec-missing-capacity",
+      "base": "vessel_spec",
+      "omit": "capacity",
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-missing-unit_label",
+      "base": "vessel_spec",
+      "omit": "unit_label",
+      "errors": [
+        {
+          "path": "/unit_label",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-missing-initial",
+      "base": "vessel_spec",
+      "omit": "initial",
+      "errors": [
+        {
+          "path": "/initial",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-closed-fields",
+      "base": "vessel_spec",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-non-object",
+      "base": "vessel_spec",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-valid",
+      "base": "liquid_definition",
+      "errors": []
+    },
+    {
+      "name": "liquid_definition-missing-key",
+      "base": "liquid_definition",
+      "omit": "key",
+      "errors": [
+        {
+          "path": "/key",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-missing-label",
+      "base": "liquid_definition",
+      "omit": "label",
+      "errors": [
+        {
+          "path": "/label",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-missing-unit_label",
+      "base": "liquid_definition",
+      "omit": "unit_label",
+      "errors": [
+        {
+          "path": "/unit_label",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-missing-grams_per_unit",
+      "base": "liquid_definition",
+      "omit": "grams_per_unit",
+      "errors": [
+        {
+          "path": "/grams_per_unit",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-missing-drink_amount",
+      "base": "liquid_definition",
+      "omit": "drink_amount",
+      "errors": [
+        {
+          "path": "/drink_amount",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-closed-fields",
+      "base": "liquid_definition",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-non-object",
+      "base": "liquid_definition",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-valid",
+      "base": "liquid_view",
+      "errors": []
+    },
+    {
+      "name": "liquid_view-missing-kind",
+      "base": "liquid_view",
+      "omit": "kind",
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-missing-quantity",
+      "base": "liquid_view",
+      "omit": "quantity",
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-missing-capacity",
+      "base": "liquid_view",
+      "omit": "capacity",
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-missing-unit_label",
+      "base": "liquid_view",
+      "omit": "unit_label",
+      "errors": [
+        {
+          "path": "/unit_label",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-missing-label",
+      "base": "liquid_view",
+      "omit": "label",
+      "errors": [
+        {
+          "path": "/label",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-closed-fields",
+      "base": "liquid_view",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-non-object",
+      "base": "liquid_view",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "fill-valid",
+      "base": "fill",
+      "errors": []
+    },
+    {
+      "name": "fill-missing-type",
+      "base": "fill",
+      "omit": "type",
+      "errors": [
+        {
+          "path": "/type",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "fill-missing-actor_id",
+      "base": "fill",
+      "omit": "actor_id",
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "fill-missing-source_id",
+      "base": "fill",
+      "omit": "source_id",
+      "errors": [
+        {
+          "path": "/source_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "fill-missing-vessel_id",
+      "base": "fill",
+      "omit": "vessel_id",
+      "errors": [
+        {
+          "path": "/vessel_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "fill-closed-fields",
+      "base": "fill",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "fill-non-object",
+      "base": "fill",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "fill-unknown-discriminator",
+      "base": "fill",
+      "set": {
+        "type": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/type",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/type",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "pour-valid",
+      "base": "pour",
+      "errors": []
+    },
+    {
+      "name": "pour-missing-type",
+      "base": "pour",
+      "omit": "type",
+      "errors": [
+        {
+          "path": "/type",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "pour-missing-actor_id",
+      "base": "pour",
+      "omit": "actor_id",
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "pour-missing-source_id",
+      "base": "pour",
+      "omit": "source_id",
+      "errors": [
+        {
+          "path": "/source_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "pour-missing-receiver_id",
+      "base": "pour",
+      "omit": "receiver_id",
+      "errors": [
+        {
+          "path": "/receiver_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "pour-closed-fields",
+      "base": "pour",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "pour-non-object",
+      "base": "pour",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "pour-unknown-discriminator",
+      "base": "pour",
+      "set": {
+        "type": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/type",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/type",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "drink-valid",
+      "base": "drink",
+      "errors": []
+    },
+    {
+      "name": "drink-missing-type",
+      "base": "drink",
+      "omit": "type",
+      "errors": [
+        {
+          "path": "/type",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "drink-missing-actor_id",
+      "base": "drink",
+      "omit": "actor_id",
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "drink-missing-vessel_id",
+      "base": "drink",
+      "omit": "vessel_id",
+      "errors": [
+        {
+          "path": "/vessel_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "drink-closed-fields",
+      "base": "drink",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "drink-non-object",
+      "base": "drink",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "drink-unknown-discriminator",
+      "base": "drink",
+      "set": {
+        "type": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/type",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/type",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "filled-valid",
+      "base": "filled",
+      "errors": []
+    },
+    {
+      "name": "filled-missing-type",
+      "base": "filled",
+      "omit": "type",
+      "errors": [
+        {
+          "path": "/type",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "filled-missing-source_id",
+      "base": "filled",
+      "omit": "source_id",
+      "errors": [
+        {
+          "path": "/source_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "filled-missing-vessel_id",
+      "base": "filled",
+      "omit": "vessel_id",
+      "errors": [
+        {
+          "path": "/vessel_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "filled-missing-kind",
+      "base": "filled",
+      "omit": "kind",
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "filled-missing-quantity",
+      "base": "filled",
+      "omit": "quantity",
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "filled-closed-fields",
+      "base": "filled",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "filled-non-object",
+      "base": "filled",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "filled-unknown-discriminator",
+      "base": "filled",
+      "set": {
+        "type": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/type",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/type",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "poured-valid",
+      "base": "poured",
+      "errors": []
+    },
+    {
+      "name": "poured-missing-type",
+      "base": "poured",
+      "omit": "type",
+      "errors": [
+        {
+          "path": "/type",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "poured-missing-source_id",
+      "base": "poured",
+      "omit": "source_id",
+      "errors": [
+        {
+          "path": "/source_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "poured-missing-receiver_id",
+      "base": "poured",
+      "omit": "receiver_id",
+      "errors": [
+        {
+          "path": "/receiver_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "poured-missing-kind",
+      "base": "poured",
+      "omit": "kind",
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "poured-missing-quantity",
+      "base": "poured",
+      "omit": "quantity",
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "poured-closed-fields",
+      "base": "poured",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "poured-non-object",
+      "base": "poured",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "poured-unknown-discriminator",
+      "base": "poured",
+      "set": {
+        "type": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/type",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/type",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "drank-valid",
+      "base": "drank",
+      "errors": []
+    },
+    {
+      "name": "drank-missing-type",
+      "base": "drank",
+      "omit": "type",
+      "errors": [
+        {
+          "path": "/type",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "drank-missing-vessel_id",
+      "base": "drank",
+      "omit": "vessel_id",
+      "errors": [
+        {
+          "path": "/vessel_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "drank-missing-kind",
+      "base": "drank",
+      "omit": "kind",
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "drank-missing-quantity",
+      "base": "drank",
+      "omit": "quantity",
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "drank-closed-fields",
+      "base": "drank",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "drank-non-object",
+      "base": "drank",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "drank-unknown-discriminator",
+      "base": "drank",
+      "set": {
+        "type": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/type",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/type",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-valid",
+      "base": "liquid_set",
+      "errors": []
+    },
+    {
+      "name": "liquid_set-missing-op",
+      "base": "liquid_set",
+      "omit": "op",
+      "errors": [
+        {
+          "path": "/op",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-missing-writer_group",
+      "base": "liquid_set",
+      "omit": "writer_group",
+      "errors": [
+        {
+          "path": "/writer_group",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-missing-item_id",
+      "base": "liquid_set",
+      "omit": "item_id",
+      "errors": [
+        {
+          "path": "/item_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-missing-from",
+      "base": "liquid_set",
+      "omit": "from",
+      "errors": [
+        {
+          "path": "/from",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-missing-to",
+      "base": "liquid_set",
+      "omit": "to",
+      "errors": [
+        {
+          "path": "/to",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-closed-fields",
+      "base": "liquid_set",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-non-object",
+      "base": "liquid_set",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_set-unknown-discriminator",
+      "base": "liquid_set",
+      "set": {
+        "op": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/op",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/op",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "liquid_target-valid",
+      "base": "liquid_target",
+      "errors": []
+    },
+    {
+      "name": "liquid_target-missing-kind",
+      "base": "liquid_target",
+      "omit": "kind",
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_target-missing-item_id",
+      "base": "liquid_target",
+      "omit": "item_id",
+      "errors": [
+        {
+          "path": "/item_id",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_target-closed-fields",
+      "base": "liquid_target",
+      "set": {
+        "extra": 1
+      },
+      "errors": [
+        {
+          "path": "/extra",
+          "code": "unknown_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid_target-non-object",
+      "base": "liquid_target",
+      "replace": null,
+      "errors": [
+        {
+          "path": "",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_target-unknown-discriminator",
+      "base": "liquid_target",
+      "set": {
+        "kind": "unknown_liquid_variant"
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "unknown_variant"
+        }
+      ],
+      "variant_errors": [
+        {
+          "path": "/kind",
+          "code": "const_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-quantity-below-minimum",
+      "base": "liquid_row",
+      "set": {
+        "quantity": -1
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-quantity-above-maximum",
+      "base": "liquid_row",
+      "set": {
+        "quantity": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-quantity-fractional",
+      "base": "liquid_row",
+      "set": {
+        "quantity": 1.5
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-quantity-wrong-type",
+      "base": "liquid_row",
+      "set": {
+        "quantity": "1"
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-quantity-at-minimum",
+      "base": "liquid_row",
+      "set": {
+        "quantity": 0
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_row-quantity-at-maximum",
+      "base": "liquid_row",
+      "set": {
+        "quantity": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "vessel_spec-capacity-below-minimum",
+      "base": "vessel_spec",
+      "set": {
+        "capacity": 0
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-capacity-above-maximum",
+      "base": "vessel_spec",
+      "set": {
+        "capacity": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-capacity-fractional",
+      "base": "vessel_spec",
+      "set": {
+        "capacity": 1.5
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-capacity-wrong-type",
+      "base": "vessel_spec",
+      "set": {
+        "capacity": "1"
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "vessel_spec-capacity-at-minimum",
+      "base": "vessel_spec",
+      "set": {
+        "capacity": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "vessel_spec-capacity-at-maximum",
+      "base": "vessel_spec",
+      "set": {
+        "capacity": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_definition-grams_per_unit-below-minimum",
+      "base": "liquid_definition",
+      "set": {
+        "grams_per_unit": 0
+      },
+      "errors": [
+        {
+          "path": "/grams_per_unit",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-grams_per_unit-above-maximum",
+      "base": "liquid_definition",
+      "set": {
+        "grams_per_unit": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/grams_per_unit",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-grams_per_unit-fractional",
+      "base": "liquid_definition",
+      "set": {
+        "grams_per_unit": 1.5
+      },
+      "errors": [
+        {
+          "path": "/grams_per_unit",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-grams_per_unit-wrong-type",
+      "base": "liquid_definition",
+      "set": {
+        "grams_per_unit": "1"
+      },
+      "errors": [
+        {
+          "path": "/grams_per_unit",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-grams_per_unit-at-minimum",
+      "base": "liquid_definition",
+      "set": {
+        "grams_per_unit": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_definition-grams_per_unit-at-maximum",
+      "base": "liquid_definition",
+      "set": {
+        "grams_per_unit": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_definition-drink_amount-below-minimum",
+      "base": "liquid_definition",
+      "set": {
+        "drink_amount": 0
+      },
+      "errors": [
+        {
+          "path": "/drink_amount",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-drink_amount-above-maximum",
+      "base": "liquid_definition",
+      "set": {
+        "drink_amount": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/drink_amount",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-drink_amount-fractional",
+      "base": "liquid_definition",
+      "set": {
+        "drink_amount": 1.5
+      },
+      "errors": [
+        {
+          "path": "/drink_amount",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-drink_amount-wrong-type",
+      "base": "liquid_definition",
+      "set": {
+        "drink_amount": "1"
+      },
+      "errors": [
+        {
+          "path": "/drink_amount",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_definition-drink_amount-at-minimum",
+      "base": "liquid_definition",
+      "set": {
+        "drink_amount": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_definition-drink_amount-at-maximum",
+      "base": "liquid_definition",
+      "set": {
+        "drink_amount": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_view-quantity-below-minimum",
+      "base": "liquid_view",
+      "set": {
+        "quantity": -1
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-quantity-above-maximum",
+      "base": "liquid_view",
+      "set": {
+        "quantity": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-quantity-fractional",
+      "base": "liquid_view",
+      "set": {
+        "quantity": 1.5
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-quantity-wrong-type",
+      "base": "liquid_view",
+      "set": {
+        "quantity": "1"
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-quantity-at-minimum",
+      "base": "liquid_view",
+      "set": {
+        "quantity": 0
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_view-quantity-at-maximum",
+      "base": "liquid_view",
+      "set": {
+        "quantity": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_view-capacity-below-minimum",
+      "base": "liquid_view",
+      "set": {
+        "capacity": 0
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-capacity-above-maximum",
+      "base": "liquid_view",
+      "set": {
+        "capacity": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-capacity-fractional",
+      "base": "liquid_view",
+      "set": {
+        "capacity": 1.5
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-capacity-wrong-type",
+      "base": "liquid_view",
+      "set": {
+        "capacity": "1"
+      },
+      "errors": [
+        {
+          "path": "/capacity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-capacity-at-minimum",
+      "base": "liquid_view",
+      "set": {
+        "capacity": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_view-capacity-at-maximum",
+      "base": "liquid_view",
+      "set": {
+        "capacity": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "filled-quantity-below-minimum",
+      "base": "filled",
+      "set": {
+        "quantity": 0
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "filled-quantity-above-maximum",
+      "base": "filled",
+      "set": {
+        "quantity": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "filled-quantity-fractional",
+      "base": "filled",
+      "set": {
+        "quantity": 1.5
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "filled-quantity-wrong-type",
+      "base": "filled",
+      "set": {
+        "quantity": "1"
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "filled-quantity-at-minimum",
+      "base": "filled",
+      "set": {
+        "quantity": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "filled-quantity-at-maximum",
+      "base": "filled",
+      "set": {
+        "quantity": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "poured-quantity-below-minimum",
+      "base": "poured",
+      "set": {
+        "quantity": 0
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "poured-quantity-above-maximum",
+      "base": "poured",
+      "set": {
+        "quantity": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "poured-quantity-fractional",
+      "base": "poured",
+      "set": {
+        "quantity": 1.5
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "poured-quantity-wrong-type",
+      "base": "poured",
+      "set": {
+        "quantity": "1"
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "poured-quantity-at-minimum",
+      "base": "poured",
+      "set": {
+        "quantity": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "poured-quantity-at-maximum",
+      "base": "poured",
+      "set": {
+        "quantity": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "drank-quantity-below-minimum",
+      "base": "drank",
+      "set": {
+        "quantity": 0
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "drank-quantity-above-maximum",
+      "base": "drank",
+      "set": {
+        "quantity": 2147483648
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "above_maximum"
+        }
+      ]
+    },
+    {
+      "name": "drank-quantity-fractional",
+      "base": "drank",
+      "set": {
+        "quantity": 1.5
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "drank-quantity-wrong-type",
+      "base": "drank",
+      "set": {
+        "quantity": "1"
+      },
+      "errors": [
+        {
+          "path": "/quantity",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "drank-quantity-at-minimum",
+      "base": "drank",
+      "set": {
+        "quantity": 1
+      },
+      "errors": []
+    },
+    {
+      "name": "drank-quantity-at-maximum",
+      "base": "drank",
+      "set": {
+        "quantity": 2147483647
+      },
+      "errors": []
+    },
+    {
+      "name": "liquid_row-kind-wrong-type",
+      "base": "liquid_row",
+      "set": {
+        "kind": 1.5
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_row-malformed-reference",
+      "base": "liquid_row",
+      "set": {
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": 1.5
+        }
+      },
+      "errors": [
+        {
+          "path": "/kind/key",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-kind-wrong-type",
+      "base": "liquid_view",
+      "set": {
+        "kind": 1.5
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid_view-malformed-reference",
+      "base": "liquid_view",
+      "set": {
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": 1.5
+        }
+      },
+      "errors": [
+        {
+          "path": "/kind/key",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "filled-null-kind",
+      "base": "filled",
+      "set": {
+        "kind": null
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "poured-null-kind",
+      "base": "poured",
+      "set": {
+        "kind": null
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "drank-null-kind",
+      "base": "drank",
+      "set": {
+        "kind": null
+      },
+      "errors": [
+        {
+          "path": "/kind",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid-set-from-missing-row-kind",
+      "base": "liquid_set",
+      "set": {
+        "from": {
+          "quantity": 0
+        }
+      },
+      "errors": [
+        {
+          "path": "/from/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid-set-from-null-row",
+      "base": "liquid_set",
+      "set": {
+        "from": null
+      },
+      "errors": [
+        {
+          "path": "/from",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid-set-to-missing-row-kind",
+      "base": "liquid_set",
+      "set": {
+        "to": {
+          "quantity": 0
+        }
+      },
+      "errors": [
+        {
+          "path": "/to/kind",
+          "code": "missing_property"
+        }
+      ]
+    },
+    {
+      "name": "liquid-set-to-null-row",
+      "base": "liquid_set",
+      "set": {
+        "to": null
+      },
+      "errors": [
+        {
+          "path": "/to",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "liquid-set-negative-writer",
+      "base": "liquid_set",
+      "set": {
+        "writer_group": -1
+      },
+      "errors": [
+        {
+          "path": "/writer_group",
+          "code": "below_minimum"
+        }
+      ]
+    },
+    {
+      "name": "liquid-set-malformed-item",
+      "base": "liquid_set",
+      "set": {
+        "item_id": "not_a_uuid"
+      },
+      "errors": [
+        {
+          "path": "/item_id",
+          "code": "pattern_mismatch"
+        }
+      ]
+    },
+    {
+      "name": "fill-numeric-actor",
+      "base": "fill",
+      "set": {
+        "actor_id": 1
+      },
+      "errors": [
+        {
+          "path": "/actor_id",
+          "code": "invalid_type"
+        }
+      ]
+    },
+    {
+      "name": "pour-missing-target-identity",
+      "base": "pour",
+      "set": {
+        "receiver_id": null
+      },
+      "errors": [
+        {
+          "path": "/receiver_id",
+          "code": "invalid_type"
+        }
+      ]
+    }
+  ]
+}

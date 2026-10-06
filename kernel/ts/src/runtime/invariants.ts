@@ -1,4 +1,5 @@
 // size: allow 315, independent retirement pairing joins precondition replay
+import { liquidRowsValid, liquidsHold } from './invariants_liquid.ts';
 import { fuelValid } from './invariants_fuel.ts';
 import { escortsHold } from './invariants_escort.ts';
 // Pure invariant checks by id, twin of lib/loka/core/invariants.ex (its moduledoc states the
@@ -151,6 +152,7 @@ function extra(
 }
 
 const CHECKS: Record<string, (o: Any) => boolean> = {
+  liquid_rows_valid: ({ state, result }) => liquidRowsValid(state, result),
   one_container_per_item: ({ state, delta, result }) => {
     if ('fault' in result) return true;
     const created = new Set(
@@ -194,8 +196,9 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
   // size: allow 45, independent retirement pairing joins existing ordered precondition replay
   delta_preconditions_hold: ({ state, delta, result }) => {
     if ('fault' in result) return true;
-    if (!Number.isInteger(state.clock) || !creationsHold(state, delta.ops, result)) return false;
-    if (!retirementsHold(delta.ops)) return false;
+    if (!Number.isInteger(state.clock) || !retirementsHold(delta.ops)) return false;
+    if (!creationsHold(state, delta.ops, result) || !liquidsHold(state, delta.ops, result))
+      return false;
     if (!encountersHold(state, delta.ops, result) || !escortsHold(state, delta.ops, result))
       return false;
     const seen = new Map<string, Json | undefined>();
@@ -205,7 +208,7 @@ const CHECKS: Record<string, (o: Any) => boolean> = {
     let horizon = state.clock;
     for (const op of delta.ops) if (op.op === 'time.advance') horizon = op.to;
     for (const op of delta.ops) {
-      if (op.op === 'escort.transition') continue;
+      if (op.op === 'escort.transition' || op.op === 'liquid.set') continue;
       if (op.op.startsWith('encounter.') || op.op.startsWith('job.')) continue;
       const k = key(target(op));
       const [need, give] = link(op);

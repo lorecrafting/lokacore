@@ -55,6 +55,9 @@ const intentDigest = (i: ActionInvocation): string =>
 
 // The Command fields an invocation's ordered target_ids fill, by Command type.
 const TARGETS: Readonly<Record<string, readonly string[]>> = {
+  fill: ['source_id', 'vessel_id'],
+  pour: ['source_id', 'receiver_id'],
+  drink: ['vessel_id'],
   look: ['target_id'],
   read: ['target_id'],
   harvest: ['target_id'],

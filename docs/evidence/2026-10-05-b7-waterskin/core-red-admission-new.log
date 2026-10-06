@@ -1,0 +1,31 @@
+Admission bypass new exit 1
+✖ authored liquid overrides project the same availability as the exact invocation (4.104917ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 187.45325
+
+✖ failing tests:
+
+test at kernel/ts/test/liquid.test.ts:376:1
+✖ authored liquid overrides project the same availability as the exact invocation (4.104917ms)
+  AssertionError [ERR_ASSERTION]: fill/target
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file://[workspace]/kernel/ts/test/liquid.test.ts:424:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

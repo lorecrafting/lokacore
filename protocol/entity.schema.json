@@ -189,6 +189,9 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 100
+        },
+        "vessel": {
+          "$ref": "liquid.schema.json#/$defs/VesselSpec"
         }
       },
       "required": [

@@ -17,7 +17,7 @@ export function narrationLines(last: NarrationRecord | undefined, view: GameView
       (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
       view,
     )
-      .map((line) => text(line.key))
+      .map((line) => liquidLine(line, text))
       .join(' '),
   );
 }
@@ -77,3 +77,14 @@ export const combatResult = (d: Extract<DecisionResult, { kind: 'accepted' }> | 
   !!d &&
   (['engaged', 'fled'].includes(d.outcome) ||
     d.events.some((e) => e.payload.type === 'attack_result'));
+
+function liquidLine(line: NarrationRecord['lines'][number], text: Say): string {
+  const sentence = text(line.key);
+  if (!['liquid.filled', 'liquid.poured', 'liquid.drank'].includes(line.key)) return sentence;
+  const { kind, unit_label, quantity } = line.bindings ?? {};
+  return typeof kind === 'string' &&
+    typeof unit_label === 'string' &&
+    Number.isSafeInteger(quantity)
+    ? `${sentence}\n${text(kind)} · ${quantity} ${text(unit_label)}`
+    : sentence;
+}
