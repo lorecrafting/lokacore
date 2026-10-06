@@ -1142,3 +1142,18 @@ One narrow causal same-group exception handles a current bleed delivery and curr
 Add typed `bandage {actor_id: CharacterId, item_id: EntityId, effect_generation: positive integer}` and exact one-target `ActionInvocation {action_key: "bandage", target_ids: [item_id], input: {effect_generation}}`; accepted outcome `bandaged` binds that item, effect and generation. The current GameView offer and raw command resolve through the same pure query: living actor/body, C1 acquired and currently qualified skill, current matching generation, declared bandage item directly in the actor's body holder, and reachable current mode. After due preflight, recheck all of it. The one proposal transitions body-held item to D4's existing consumed holder, clears the matching status and owned job, and returns one receipt with authored narration. No HP adjustment, clock jump, round advance, encounter close or RNG. A missing/expired/wrong-generation effect refuses before consumption. A later same-command replay returns its original receipt; a new command on a spent item refuses.
 
 Extend the existing consumed-holder entry guard narrowly: a declared edible enters only through Eat; a declared bandage enters only through this exact C5 command/result from direct body custody. Neither may leave. The already generated holder and immutable known-entity metadata remain; do not add a second terminal holder or delete item rows. Admit `bandage` as the sole C5 exception to focused combat after ordinary ActionSet composition, in both projection and raw command admission. `perform`, Eat, other item actions, aliases resolving to them and Move remain barred during combat. Register only consumed command/action/input/outcome, status/delta/job/cause fields and API gate; add fixtures for every required/bounded schema field, the status transition and terminal custody in both foundation validators. Frozen existing fixtures stay unchanged.
+## D10 knowledge and Knock composition
+
+Typed character-owned visited-room and observed-NPC rows are the only new gameplay
+knowledge. Their delta operations are written by the accepted entry/Look decision and
+committed with the receipt; GameView, Map, Where and Knock never write them while
+projecting. Observation retains exact entity ID, last visible room and logical time.
+The loader rejects unknown room/NPC refs and evidence inconsistent with character
+ownership or visible committed observation. GameView carries only the actor's known
+rooms, observed targets and current-room door options, with no hidden coordinates,
+unobserved NPC names or live remote positions. Where resolves an exact present or
+remembered target through the host and returns `here`, `last_seen` or `unknown` from
+the same current state. Ambiguity retains sorted exact IDs; no unseen candidate enters
+the list. Knock's ActionSet key resolves to its door command with the exact local
+direction. View availability and invocation share that admission; narration belongs
+to the accepted command receipt, and retry does not produce a second response.

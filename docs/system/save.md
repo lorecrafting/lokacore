@@ -960,3 +960,16 @@ Cold reopen covers each legal Talk/Choose, learned-but-unqualified, careful two-
 Extend D4 terminal-holder recovery for the exact C5 bandage path. A historical accepted `bandaged` must bind its saved command ID/actor, the directly held opted item at that revision, acquired and then-current qualification, active matching effect generation, same-item transfer to the existing consumed holder, status/job removal and authored narration. Later qualifications, HP or item custody do not retroactively invalidate that accepted history. No unrelated item can enter or leave the holder. Cold reopen routes the confirmed bandage line once to Combat if the same encounter remains open, otherwise the World log; neither an inaccessible item page nor unrelated latest receipt may supply success. Pending/refused/faulted commands add none.
 
 Cold reopen after application, refresh, each tick, expiry, cure and fatal return, then exercise a later real consumer. Reopen both canonical same-due bleed/round orders after Flee and re-engagement, including round-first refresh of a former expiry and tick-first fatal cleanup. A forged paired occurrence, second bleed successor or missing current round/bleed job is corrupt; a foreign same-target job retains ordinary conflict refusal. Real SQLite failed COMMIT leaves all prior HP/status/job/item/encounter truth; uncertain absent/committed COMMIT fences input and elapsed until reconciliation. Lost acknowledgment and exact invocation replay consume the bandage once and never rerun cure. Unsupported release/API/hash refuses explicitly; preserve bytes and in-place Start over. Browser refresh and headless simulation supplement, not replace, this durability proof. Owner-save access and native testing remain paused.
+
+## D10 discovered-place and observation recovery
+
+A fresh save records its entry-room visit for the starting character. Each new visit
+and visible NPC observation commits changed knowledge rows with the body-entry or accepted
+Look receipt, before memory adopts the proposal. Reopen derives immutable map positions
+from the pinned release, never from saved coordinates. An unvisited current room,
+malformed rows, wrong actor ownership, impossible room/NPC references, duplicate IDs and
+invalid logical times are typed `save_corrupt` with in-place Start over; no row is
+silently repaired. Failed COMMIT keeps prior knowledge, both uncertain COMMIT outcomes
+reconcile to exactly prior or next knowledge, and lost acknowledgement/retry creates no
+second visit or newer invented observation. Pinned-release mismatch remains explicit
+refusal with no silent deletion or migration.

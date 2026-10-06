@@ -127,6 +127,17 @@ Map is a scrolling current-room projection, distinct from the enlarged joystick.
 exits and unavailable reasons, adjacent authored sight/entity names, door names/states and
 currently offered door/place actions. It invents no discovered multiroom coordinate map.
 
+The selected [D10 discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-pending-implementation)
+replaces this current-room-only Map after D10 source is installed. Then Map draws only
+visited rooms at their authored level/position and links whose two endpoints were visited.
+The current-room marker and a level stepper are visible; a room detail names that known
+room and its known exits. An unvisited endpoint, NPC or item is never drawn merely because
+the cartridge contains it or adjacent sight names it. Existing current-room exit and door
+controls retain live admission. Where labels distinguish `here`, `last seen` with the saved
+place/time, and `unknown`; a stale observation is never phrased as a current location.
+Knock appears on the actual local door's context card and uses its exact direction and
+freshness token. It leaves that card and Map reachable after its reply.
+
 In the web Book, unmodified Arrow Up/Down/Left/Right walk north/south/west/east and
 Page Up/Page Down use offered up/down exits. Keyboard movement uses the same captured
 exit, refusal and freshness path as the footer. A missing exit does nothing. Keys act only
