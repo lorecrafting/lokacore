@@ -3,6 +3,8 @@ d4-browser-roster-red.log: OK
 d4-integrated-full.log: OK
 d4-integrated-sim.log: OK
 d4-integrated-size-red.log: OK
+d4-redact-bypass-red.log: OK
+d4-redact-green.log: OK
 d4-schema-focused-green.log: OK
 d4-schema-full.log: OK
 d4-schema-sweep.log: OK

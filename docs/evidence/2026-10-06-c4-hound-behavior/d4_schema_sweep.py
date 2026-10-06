@@ -18,8 +18,19 @@ original = {p: p.read_bytes() for p in [*schemas.values(), *generated]}
 
 
 def redact(value):
-    return re.sub(r'/private/tmp/[^\s:]+', '<SCRATCH>',
-                  value.replace(str(root), '<WORKTREE>').replace(str(Path.home()), '<HOME>'))
+    value = re.sub(r'(?i)(/Containers/(?:Data/Application|Shared/AppGroup)/)[0-9a-f-]{36}',
+                   r'\1<APP-CONTAINER>', value)
+    value = value.replace(str(root), '<WORKTREE>').replace(str(Path.home()), '<HOME>')
+    value = re.sub(r'(?:/private)?/(?:tmp|var/folders)/[^\s:,]+', '<SCRATCH>', value)
+    value = re.sub(r'(?im)^\S+\s+(device|offline|unauthorized)(?=\s|$)',
+                   r'<DEVICE> \1', value)
+    return re.sub(
+        r'(?im)((?:adb[_ ]serial|ANDROID_SERIAL|UDID|ECID|(?:iPhone )?serial(?:[ _]?number)?|'
+        r'device[_ ]name|team[_ ]ID|(?:signing )?certificate(?:[ _](?:ID|name))?|'
+        r'provisioning(?:[ _]profile)?(?:[ _](?:ID|name))?|'
+        r'DEVELOPMENT_TEAM|CODE_SIGN_IDENTITY|PROVISIONING_PROFILE_SPECIFIER|'
+        r'app-container UUID)\s*[:=]\s*)[^\r\n,]+',
+        r'\1<REDACTED>', value)
 
 
 def path(*parts):
@@ -67,35 +78,40 @@ def run(*command):
     return subprocess.run(command, cwd=root, capture_output=True, text=True)
 
 
-log = evidence / 'd4-schema-sweep.log'
-try:
-    with log.open('w') as output:
-        for label, schema_name, parts in mutations:
-            restore()
-            schema_file = schemas[schema_name]
-            schema = json.loads(schema_file.read_text())
-            parent = schema
-            for segment in parts[:-1]:
-                parent = parent[segment]
-            last = parts[-1]
-            if isinstance(parent, list):
-                parent.remove(last)
-            else:
-                del parent[last]
-            schema_file.write_text(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')
-            generated_result = run('mise', 'exec', '--', 'elixir', 'bin/contracts.exs')
-            output.write(f'CASE {label}\nGEN_EXIT={generated_result.returncode}\n')
-            output.write(redact(generated_result.stdout + generated_result.stderr))
-            assert (generated_result.returncode != 0) == (label in generation_red), label
-            if generated_result.returncode:
-                print(f'{label}: RED generation', flush=True)
-                continue
-            tested = run('mise', 'exec', '--', 'node', '--test',
-                         'kernel/ts/test/c4_schema_contracts.test.ts')
-            output.write(f'TEST_EXIT={tested.returncode}\n')
-            output.write(redact(tested.stdout + tested.stderr))
-            assert tested.returncode != 0 and label in tested.stdout, f'{label} survived'
-            print(f'{label}: RED literal contract', flush=True)
-        output.write(f'TOTAL={len(mutations)} RED={len(mutations)}\n')
-finally:
-    restore()
+def main():
+    log = evidence / 'd4-schema-sweep.log'
+    try:
+        with log.open('w') as output:
+            for label, schema_name, parts in mutations:
+                restore()
+                schema_file = schemas[schema_name]
+                schema = json.loads(schema_file.read_text())
+                parent = schema
+                for segment in parts[:-1]:
+                    parent = parent[segment]
+                last = parts[-1]
+                if isinstance(parent, list):
+                    parent.remove(last)
+                else:
+                    del parent[last]
+                schema_file.write_text(json.dumps(schema, indent=2, ensure_ascii=False) + '\n')
+                generated_result = run('mise', 'exec', '--', 'elixir', 'bin/contracts.exs')
+                output.write(f'CASE {label}\nGEN_EXIT={generated_result.returncode}\n')
+                output.write(redact(generated_result.stdout + generated_result.stderr))
+                assert (generated_result.returncode != 0) == (label in generation_red), label
+                if generated_result.returncode:
+                    print(f'{label}: RED generation', flush=True)
+                    continue
+                tested = run('mise', 'exec', '--', 'node', '--test',
+                             'kernel/ts/test/c4_schema_contracts.test.ts')
+                output.write(f'TEST_EXIT={tested.returncode}\n')
+                output.write(redact(tested.stdout + tested.stderr))
+                assert tested.returncode != 0 and label in tested.stdout, f'{label} survived'
+                print(f'{label}: RED literal contract', flush=True)
+            output.write(f'TOTAL={len(mutations)} RED={len(mutations)}\n')
+    finally:
+        restore()
+
+
+if __name__ == '__main__':
+    main()

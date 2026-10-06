@@ -1,10 +1,10 @@
 CASE flight minimum
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (1.684709ms)
-✔ C4 encounter roster caps reject 65 members (1.500167ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.482792ms)
-✔ C4 population flight clock rejects negative time (0.102959ms)
+✖ C4 pack bounds and required fields reject invalid declarations (1.649166ms)
+✔ C4 encounter roster caps reject 65 members (1.381584ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.501083ms)
+✔ C4 population flight clock rejects negative time (0.112292ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -12,12 +12,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 95.722375
+ℹ duration_ms 96.771958
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (1.684709ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (1.649166ms)
   AssertionError [ERR_ASSERTION]: flight minimum
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -34,10 +34,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE flight maximum
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (1.968583ms)
-✔ C4 encounter roster caps reject 65 members (2.005958ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.520834ms)
-✔ C4 population flight clock rejects negative time (0.440291ms)
+✖ C4 pack bounds and required fields reject invalid declarations (1.802958ms)
+✔ C4 encounter roster caps reject 65 members (1.277792ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.450417ms)
+✔ C4 population flight clock rejects negative time (0.11425ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -45,12 +45,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 108.903042
+ℹ duration_ms 93.937625
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (1.968583ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (1.802958ms)
   AssertionError [ERR_ASSERTION]: flight maximum
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -97,10 +97,10 @@ cartridge.schema.json#/$defs/PopulationPlan/properties/pack/type: invalid
 CASE pack requires flight_below_percent
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (2.198875ms)
-✔ C4 encounter roster caps reject 65 members (1.695667ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.521209ms)
-✔ C4 population flight clock rejects negative time (0.121958ms)
+✖ C4 pack bounds and required fields reject invalid declarations (2.364417ms)
+✔ C4 encounter roster caps reject 65 members (1.701959ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.55925ms)
+✔ C4 population flight clock rejects negative time (0.145625ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -108,12 +108,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 122.894833
+ℹ duration_ms 118.843583
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (2.198875ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (2.364417ms)
   AssertionError [ERR_ASSERTION]: pack requires flight_below_percent
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -130,10 +130,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE pack requires flight_fare
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (1.96975ms)
-✔ C4 encounter roster caps reject 65 members (1.348333ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.458792ms)
-✔ C4 population flight clock rejects negative time (0.106334ms)
+✖ C4 pack bounds and required fields reject invalid declarations (2.637542ms)
+✔ C4 encounter roster caps reject 65 members (1.970541ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.636958ms)
+✔ C4 population flight clock rejects negative time (0.153792ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -141,12 +141,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 98.239042
+ℹ duration_ms 125.360208
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (1.96975ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (2.637542ms)
   AssertionError [ERR_ASSERTION]: pack requires flight_fare
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -163,10 +163,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE pack requires narration
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (2.064667ms)
-✔ C4 encounter roster caps reject 65 members (1.457875ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.420833ms)
-✔ C4 population flight clock rejects negative time (0.099167ms)
+✖ C4 pack bounds and required fields reject invalid declarations (2.426708ms)
+✔ C4 encounter roster caps reject 65 members (1.58175ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.496709ms)
+✔ C4 population flight clock rejects negative time (0.120958ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -174,12 +174,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 91.16775
+ℹ duration_ms 127.952167
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (2.064667ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (2.426708ms)
   AssertionError [ERR_ASSERTION]: pack requires narration
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -196,10 +196,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE narration requires helper_joined
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (2.159417ms)
-✔ C4 encounter roster caps reject 65 members (1.306916ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.46125ms)
-✔ C4 population flight clock rejects negative time (0.107542ms)
+✖ C4 pack bounds and required fields reject invalid declarations (2.966667ms)
+✔ C4 encounter roster caps reject 65 members (1.808667ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.57825ms)
+✔ C4 population flight clock rejects negative time (0.140208ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -207,12 +207,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 93.879459
+ℹ duration_ms 134.309042
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (2.159417ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (2.966667ms)
   AssertionError [ERR_ASSERTION]: narration requires helper_joined
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -229,10 +229,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE narration requires enemy_fled
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (2.18225ms)
-✔ C4 encounter roster caps reject 65 members (1.253917ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.416875ms)
-✔ C4 population flight clock rejects negative time (0.103958ms)
+✖ C4 pack bounds and required fields reject invalid declarations (2.233333ms)
+✔ C4 encounter roster caps reject 65 members (1.284125ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.441459ms)
+✔ C4 population flight clock rejects negative time (0.105417ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -240,12 +240,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 92.482667
+ℹ duration_ms 98.759125
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (2.18225ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (2.233333ms)
   AssertionError [ERR_ASSERTION]: narration requires enemy_fled
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -262,10 +262,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE narration requires primary_changed
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (2.285292ms)
-✔ C4 encounter roster caps reject 65 members (1.402875ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.429541ms)
-✔ C4 population flight clock rejects negative time (0.111958ms)
+✖ C4 pack bounds and required fields reject invalid declarations (2.284625ms)
+✔ C4 encounter roster caps reject 65 members (1.330334ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.440334ms)
+✔ C4 population flight clock rejects negative time (0.109625ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -273,12 +273,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 96.491417
+ℹ duration_ms 96.055292
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (2.285292ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (2.284625ms)
   AssertionError [ERR_ASSERTION]: narration requires primary_changed
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -295,10 +295,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE narration requires pack_withdrew
 GEN_EXIT=0
 TEST_EXIT=1
-✖ C4 pack bounds and required fields reject invalid declarations (5.244125ms)
-✔ C4 encounter roster caps reject 65 members (2.213917ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (1.081166ms)
-✔ C4 population flight clock rejects negative time (0.150917ms)
+✖ C4 pack bounds and required fields reject invalid declarations (2.935125ms)
+✔ C4 encounter roster caps reject 65 members (0.737125ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.473417ms)
+✔ C4 population flight clock rejects negative time (0.100917ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -306,12 +306,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 122.656791
+ℹ duration_ms 94.731166
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
-✖ C4 pack bounds and required fields reject invalid declarations (5.244125ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:14:1
+✖ C4 pack bounds and required fields reject invalid declarations (2.935125ms)
   AssertionError [ERR_ASSERTION]: narration requires pack_withdrew
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:34:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -328,10 +328,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:15:1
 CASE open roster cap
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (5.996791ms)
-✖ C4 encounter roster caps reject 65 members (1.17825ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.703833ms)
-✔ C4 population flight clock rejects negative time (0.193833ms)
+✔ C4 pack bounds and required fields reject invalid declarations (2.726042ms)
+✖ C4 encounter roster caps reject 65 members (0.687333ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.431583ms)
+✔ C4 population flight clock rejects negative time (0.123166ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -339,12 +339,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 175.735416
+ℹ duration_ms 93.75325
 
 ✖ failing tests:
 
 test at kernel/ts/test/c4_schema_contracts.test.ts:39:1
-✖ C4 encounter roster caps reject 65 members (1.17825ms)
+✖ C4 encounter roster caps reject 65 members (0.687333ms)
   AssertionError [ERR_ASSERTION]: open roster cap
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:49:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -363,10 +363,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:39:1
 CASE advance roster cap
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (3.598625ms)
-✖ C4 encounter roster caps reject 65 members (0.984959ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.526041ms)
-✔ C4 population flight clock rejects negative time (0.144042ms)
+✔ C4 pack bounds and required fields reject invalid declarations (2.714208ms)
+✖ C4 encounter roster caps reject 65 members (0.852666ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.44225ms)
+✔ C4 population flight clock rejects negative time (0.110542ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -374,12 +374,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 131.078917
+ℹ duration_ms 92.804625
 
 ✖ failing tests:
 
 test at kernel/ts/test/c4_schema_contracts.test.ts:39:1
-✖ C4 encounter roster caps reject 65 members (0.984959ms)
+✖ C4 encounter roster caps reject 65 members (0.852666ms)
   AssertionError [ERR_ASSERTION]: advance roster cap
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:49:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -398,10 +398,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:39:1
 CASE saved encounter roster cap
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (3.108833ms)
-✖ C4 encounter roster caps reject 65 members (1.132375ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.532083ms)
-✔ C4 population flight clock rejects negative time (0.120417ms)
+✔ C4 pack bounds and required fields reject invalid declarations (3.040458ms)
+✖ C4 encounter roster caps reject 65 members (1.088333ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.481417ms)
+✔ C4 population flight clock rejects negative time (0.112958ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -409,12 +409,12 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 121.081333
+ℹ duration_ms 120.242167
 
 ✖ failing tests:
 
 test at kernel/ts/test/c4_schema_contracts.test.ts:39:1
-✖ C4 encounter roster caps reject 65 members (1.132375ms)
+✖ C4 encounter roster caps reject 65 members (1.088333ms)
   AssertionError [ERR_ASSERTION]: saved encounter roster cap
       at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:49:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
@@ -433,10 +433,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:39:1
 CASE view roster minimum
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (3.185333ms)
-✔ C4 encounter roster caps reject 65 members (0.767792ms)
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.424458ms)
-✔ C4 population flight clock rejects negative time (0.11775ms)
+✔ C4 pack bounds and required fields reject invalid declarations (3.799833ms)
+✔ C4 encounter roster caps reject 65 members (0.973834ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.552917ms)
+✔ C4 population flight clock rejects negative time (0.147375ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -444,14 +444,14 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 102.643584
+ℹ duration_ms 133.137833
 
 ✖ failing tests:
 
 test at kernel/ts/test/c4_schema_contracts.test.ts:54:1
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.424458ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.552917ms)
   AssertionError [ERR_ASSERTION]: view roster minimum
-      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:63:43)
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:71:43)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -468,10 +468,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:54:1
 CASE view roster maximum
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (2.912292ms)
-✔ C4 encounter roster caps reject 65 members (0.736208ms)
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.744209ms)
-✔ C4 population flight clock rejects negative time (0.113334ms)
+✔ C4 pack bounds and required fields reject invalid declarations (7.393583ms)
+✔ C4 encounter roster caps reject 65 members (1.118833ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.959375ms)
+✔ C4 population flight clock rejects negative time (0.149334ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -479,14 +479,14 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 91.754583
+ℹ duration_ms 129.150708
 
 ✖ failing tests:
 
 test at kernel/ts/test/c4_schema_contracts.test.ts:54:1
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.744209ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.959375ms)
   AssertionError [ERR_ASSERTION]: view roster maximum
-      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:63:43)
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:71:43)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -503,10 +503,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:54:1
 CASE view member requires ID
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (2.922541ms)
-✔ C4 encounter roster caps reject 65 members (0.714459ms)
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.725875ms)
-✔ C4 population flight clock rejects negative time (0.110333ms)
+✔ C4 pack bounds and required fields reject invalid declarations (3.451375ms)
+✔ C4 encounter roster caps reject 65 members (0.893833ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.927333ms)
+✔ C4 population flight clock rejects negative time (0.137875ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -514,14 +514,14 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 94.626958
+ℹ duration_ms 129.922459
 
 ✖ failing tests:
 
 test at kernel/ts/test/c4_schema_contracts.test.ts:54:1
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.725875ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.927333ms)
   AssertionError [ERR_ASSERTION]: view member requires ID
-      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:63:43)
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:71:43)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -538,10 +538,10 @@ test at kernel/ts/test/c4_schema_contracts.test.ts:54:1
 CASE view member requires name
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (2.955ms)
-✔ C4 encounter roster caps reject 65 members (0.719416ms)
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.728416ms)
-✔ C4 population flight clock rejects negative time (0.1115ms)
+✔ C4 pack bounds and required fields reject invalid declarations (3.781042ms)
+✔ C4 encounter roster caps reject 65 members (0.931417ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.943708ms)
+✔ C4 population flight clock rejects negative time (0.184ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -549,14 +549,14 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 103.645791
+ℹ duration_ms 128.018584
 
 ✖ failing tests:
 
 test at kernel/ts/test/c4_schema_contracts.test.ts:54:1
-✖ C4 CombatView roster bounds and member identity reject malformed rows (0.728416ms)
+✖ C4 CombatView roster bounds and member identity reject malformed rows (0.943708ms)
   AssertionError [ERR_ASSERTION]: view member requires name
-      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:63:43)
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:71:43)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -579,10 +579,10 @@ gameview.schema.json#/$defs/CombatView/properties/active_opponents/items/type: i
 CASE flight clock minimum
 GEN_EXIT=0
 TEST_EXIT=1
-✔ C4 pack bounds and required fields reject invalid declarations (2.806875ms)
-✔ C4 encounter roster caps reject 65 members (0.732583ms)
-✔ C4 CombatView roster bounds and member identity reject malformed rows (0.472125ms)
-✖ C4 population flight clock rejects negative time (0.474208ms)
+✔ C4 pack bounds and required fields reject invalid declarations (2.852541ms)
+✔ C4 encounter roster caps reject 65 members (0.713791ms)
+✔ C4 CombatView roster bounds and member identity reject malformed rows (0.469042ms)
+✖ C4 population flight clock rejects negative time (0.45125ms)
 ℹ tests 4
 ℹ suites 0
 ℹ pass 3
@@ -590,14 +590,14 @@ TEST_EXIT=1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 92.502167
+ℹ duration_ms 93.312834
 
 ✖ failing tests:
 
-test at kernel/ts/test/c4_schema_contracts.test.ts:67:1
-✖ C4 population flight clock rejects negative time (0.474208ms)
+test at kernel/ts/test/c4_schema_contracts.test.ts:75:1
+✖ C4 population flight clock rejects negative time (0.45125ms)
   AssertionError [ERR_ASSERTION]: flight clock minimum
-      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:70:10)
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/c4_schema_contracts.test.ts:78:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)

@@ -19,7 +19,7 @@ The old origin-scoped browser save was left untouched after its correct
 The first D4-integrated gate failed only because the combined `compose.ts`
 exceeded its 300-line source limit; `d4-integrated-size-red.log` retains that
 failure. A narrow size reduction restored the gate. `SHA256SUMS` hashes all
-29 retained `.log` files and `SHA256SUMS.verify` records successful verification.
+31 retained `.log` files and `SHA256SUMS.verify` records successful verification.
 A fresh scoped carryover review remains required before publication.
 
 Review round 1 found one C4 schema-contract gap: deleting the flight-threshold
@@ -42,6 +42,14 @@ checking, C4/combat contract tests and Elixir compiler/composition tests.
 `d4-schema-full.log` is the full `bin/check_all.sh` run at the new source head,
 exit zero. C4 behavior, D4 fixture bytes, v032/API1.28/hash and genesis IDs
 are unchanged. A scoped save/protocol reviewer recheck remains open.
+
+The evidence capture's `redact()` now masks ordinary and private scratch paths,
+worktree and home paths, adb and iPhone identifiers, device names, team and
+signing identifiers, and app-container UUIDs. `d4-redact-bypass-red.log` records
+all 19 controlled forms failing when redaction is bypassed;
+`d4-redact-green.log` records all 19 passing with the actual function. The
+23-case schema sweep was rerun through the repaired capture and remained red
+for every deleted guard. This was an evidence-only change after the full gate.
 
 Deliberate Attack admits the selected living hound and bounded same-plan, co-present helpers. The repaired cursor picks one living member per round. An injured selected hound can take one legal exit, retain its injury and slot, and leave the fixed roster. On an even round, the player still gets the scheduled opportunity against a remaining hound. A flight stamp requires the selected member's actual same-group departure and the round's due time, even when elapsed advances farther. Final admission requires the complete group; partial prefix composition remains lawful. SQLite COMMIT failure leaves the old memory and disk state, and retry saves one flight and receipt.
 
