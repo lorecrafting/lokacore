@@ -459,6 +459,12 @@ and changed-row trust boundary, not a second money ledger or save migration.
 Receipt replay cannot pay or move the item again; malformed current-build truth
 leaves the save intact.
 
+## D11 character choice recovery
+
+**Selected planning contract; source pending.** D11's once-only selection belongs to the character identity, not the body returned from death. The selected ancestry, six values, initial acquired skill and initial Priory/Fen value commit with one command receipt through the existing changed-row transaction. No partially selected state may be adopted or rendered. Initial no-choice is legal only before that command and admits no ordinary gameplay. Reopen and reconciliation validate the pinned declaration against the exact character and selected effects; missing/null/malformed or contradictory rows and accepted receipt evidence return typed `save_corrupt` without repair or deletion. An inherited acquired skill needs that exact creation receipt as its alternate provenance under [C1 recovery](#c1-learned-skill-and-lesson-recovery); it is not a forged teacher grant. The starting faction change likewise needs the exact creation receipt as its alternate provenance under B2's revision-ordered faction validation, not an unexplained change from zero. Later lessons and faction changes retain their existing evidence rules. The existing explicit Start over remains available. A mismatch with a release not carried still refuses by pin, never reinterprets a previous character choice.
+
+Failed COMMIT leaves no selected state. For an uncertain COMMIT, fence input until receipt reconciliation proves either the full choice or its absence. Lost acknowledgement and same-invocation retry replay the one committed result; a new invocation with a different choice refuses without changing attribute, skill or faction rows. Cold reopen is required before and after choice, after later training, after death and owned-corpse recovery, and after a refused incompatible pin. The source PR selects the narrow row and receipt validation shape; it must prove these boundaries with real SQLite faults and keep structural sharing.
+
 ## C1 learned-skill and lesson recovery
 
 **API1.18 recovery contract.** [C1 acquisition](mechanics.md#c1-training-and-armed-defense-selected-contract)

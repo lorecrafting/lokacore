@@ -255,12 +255,15 @@ cartridge's `world.bands`, else the engine default table ([protocol.md](protocol
 
 ## attributes@1 (`kernel/ts/src/mechanics/policy.ts:60`)
 
-Ruleless, and no state. An attribute is a definition `AttributeSpec {key, start}` in the
+Ruleless. An attribute is a definition `AttributeSpec {key, start}` in the
 cartridge's `attributes` map (source `attributes.json`, [cartridge.md](cartridge.md#source-layout));
-the engine declares none, so the six 00 §4.3 stats are content. Every actor's value of an
-attribute is its `start`: nothing writes attributes yet, so no row, delta op or state hash
-carries them. The first writer (training, chapter three, or an ancestry modifier, LATER)
-decides whether a value belongs to the body or the character and how it is saved.
+the engine declares none, so the six 00 §4.3 stats are content. The installed
+pre-D11 implementation reads each actor's definition `start` and has no attribute
+state. The [selected D11 writer](#d11-character-choice-selected-contract) adds
+saved values owned by the chosen character, never its replaceable body. After that
+writer is installed, the selected player's checks read those values; NPCs and
+cartridges without character choice continue to read their definition starts.
+The exact changed row and operation syntax belong to D11's source protocol amendment.
 `attributes@1` owns two 06 §21 leaves, each `{<ref>, at_least}` (a ResourceInt; "below" is
 `not`, a range `all`): `stat_compare {attribute, at_least}` holds when the actor's value is at
 least `at_least`; `resource_compare {resource, at_least}` when the current value of the pool
@@ -269,12 +272,24 @@ Both fail closed: an actor without a body reads no pool, and the compiler and lo
 unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILITY`). Not
 `resource@1`'s: a new op would take `resource@2`, re-deriving every v2 lock and hash.
 
+## D11 character choice (selected contract)
+
+**PM-selected planning contract; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#d11-character-choice-interaction) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
+
+Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal. A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
+
+`stat_compare` and `attribute_threshold` read the selected character value after choice on each check; neither caches qualification. STR, DEX, INT and PER have installed check consumers. CON and SPI are saved/displayed but have no Chapter 1 stat-check consumer. Hill-folk's dark-sight exempts only the selected character from B4's missing-light visibility gate, both in their current room and when ordinary Scan projects a legal adjacent dark destination. It does not create a lit source or change `illuminated`; B6 `light_off` therefore retains its physical-light answer, including Seek and Talk for a hill-folk character. Barred passages still stop Scan, and hidden-exit, closed-door, custody and other perception checks still apply. No spell/mining/Crown track, derived resource or generic vision framework is selected. D6 swimming still requires real acquired and currently qualified Swim under its own no-CON rule; D12 Haggle follows its DEX/MV rule. B6 difficulty5 must remain immediately passable for all four selected ancestries.
+
+Source must select a minimal typed declaration/command/changed-row shape, amend the protocol clause before code, and reject unknown choices, partial or contradictory effects, malformed values and attempts to change identity. The new shape requires compiler/loader negatives, a planted failed guard, real SQLite fault/replay/reopen proof and exact-head independent reviews. Frozen old fixtures stay frozen; preproduction pin mismatch refuses explicitly without deleting a save.
+
 ## check@1 (`mechanics/action_recipe/rule.ts:109`)
 
 Ruleless, resolved inside `perform`: a `luck` check draws one uniform integer in [0, 100) from
 the world's RNG (at most 8 draws, `:103`) and passes below `chance`; a `threshold` check draws
 nothing and passes when the body's value of `resource` at admission (before costs) is at least
-`difficulty`. It emits `check_passed` or `check_failed` at position 1 and selects the
+`difficulty`. B6's `attribute_threshold` arm also draws nothing and compares the commanded
+actor's attribute to its authored difficulty; D11 selects the saved character value as its
+source after creation. It emits `check_passed` or `check_failed` at position 1 and selects the
 `success` or `failure` outcome. A rejected command draws no RNG.
 
 ## action_recipe@1 (`mechanics/action_recipe/rule.ts:49`)
@@ -895,6 +910,14 @@ raw IDs or guessed keywords cannot bypass this gate. Existing combat restriction
 still win. A visible Exit into a dark room remains traversable; a hidden object is
 not an equipment gate on movement.
 
+The [selected D11 hill-folk effect](#d11-character-choice-selected-contract) permits that
+character to perceive ordinary current-room and legal adjacent-room dark content
+without a physical source. This changes darkness visibility, including Look/Scan
+and direct-command admission, while `illuminated` remains false. B6 `light_off`
+continues to test actual carried/worn lit fuel; hill sight neither douses a source
+nor makes one lit. A barred exit, hidden passage or separate perception policy
+still wins over sight into darkness.
+
 Darkness exempts the actor's own actual corpses and their ordinary accessible
 contents. The ownership/custody walk, locked bag rules and positive-load Take checks
 remain authoritative; foreign corpses gain no exemption. Every known route back
@@ -1030,7 +1053,7 @@ source. Nested, dropped, stored and corpse-held lights follow B4 unchanged.
 Known exits and the actor's actual corpse remain accessible under B4 recovery.
 
 Seek uses a deterministic `check@1` attribute-threshold arm. Read the commanded
-actor's declared immutable attribute through the existing attributes query, pass
+actor's selected character attribute after D11 choice (otherwise its definition start), pass
 at equality, draw no RNG, and emit the owned `check_passed/check_failed` with the
 recipe reference. Its success sequence alone assigns the player discovery Boolean;
 failure leaves it false and offers immediate Seek again. Neither result grants S4

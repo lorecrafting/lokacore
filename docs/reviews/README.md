@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [D11 character choice plan](2026-10-06-d11-character-choice-plan-review.md): exact `80ce3885` CHANGES REQUIRED; scoped `627853a0` fix recheck APPROVE closes direct B6 attribute-threshold wiring, the stale attributes clause and B4 adjacent Scan/physical-light semantics. Docs-only independent review; source remains unbuilt.
+
 - [D9 village reactions planning draft](2026-10-06-d9-village-reactions-plan-review.md): exact planning `36f90ab0`, CHANGES REQUIRED for impossible ordinary-play Study-corpse browser precondition; bell observer proof needs clarification. Source remains unbuilt.
 
 - [D8 exact crow scavenging plan](2026-10-06-d8-crow-plan-review.md): initial `d3af934c` CHANGES REQUIRED; scoped fix `f6d012ee` APPROVE closes Green crow return/liveness and world-specific count validation; published D6 re-pin `a4f9412a` scoped APPROVE. D8 source proof remains pending.

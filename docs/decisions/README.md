@@ -32,6 +32,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [D11 character choice PM decision](pm-decision-d11-character-choice-2026-10-06.md): keep PER5, add CON/SPI10 and four saved ancestry effects without invented Chapter 1 stat gates; planning contract pending source review.
 - [D9 village reactions and Study access](pm-decision-d9-village-reactions-2026-10-06.md): selected five-pair cast response, bounded bell effect and exact owned-corpse ingress; planning review and source pending.
 - [D8 crow scavenging PM decision](pm-decision-d8-crow-scavenge-2026-10-06.md): selected exact old-coin transport and safe nest recovery; plan review and D6 publication gate source.
 

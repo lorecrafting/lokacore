@@ -1266,6 +1266,21 @@ Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
 shape remain null until actual source and independent derivation. Chapel Nave
 remains the death shrine; Isle Shrine is descriptive only.
 
+## D11 ancestry declarations (selected contract)
+
+**PM-selected chapter values; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
+
+| Ancestry | Selected attribute | Actual Chapter 1 effect |
+|---|---|---|
+| fen-born | PER6 | acquired Swim, `priory.fen_axis` −2 |
+| road-born | DEX11 | acquired Haggle; Crown points deferred |
+| hill-folk | CON11 | B4 dark-sight; mining deferred |
+| fey-touched | SPI11 | `priory.fen_axis` −2; spell word deferred |
+
+All other values retain their starts. The Priory/Fen axis starts at 0 for road-born and hill-folk; its selected −2 value is within the existing −10..10 bound and means Fen favor. Fen and fey share that numeric starting side but have different skill, sight and attribute outcomes. STR/DEX C1, INT/D12, DEX/D12 and PER/B6 consumers keep their authored thresholds; B6's PER5 difficulty remains immediately passable. D6 Swim has no CON floor. CON/SPI have no Chapter 1 stat-check consumer, so their selected values are truthful character data rather than a fabricated threshold. This preserves the [owner's fey content ruling](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
+
+Select the smallest closed source declaration that maps the four keys to these values/effects, with authored labels and no free-form script. The compiler and loader must reject missing/extra keys, unknown attributes/skills/faction reference, unsupported sight effects, unsafe/out-of-range integer values, an absent capability or an effect that cannot be applied atomically. A new release independently derives its pin/hash/IDs. Exact source field names, successor API and output remain null until the source PR amends the protocol and supplies independently checked answers.
+
 ## D9 village reaction content (selected, pending implementation)
 
 The five valid child/allegiance pairs and the Study rule are defined in
