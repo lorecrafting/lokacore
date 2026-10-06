@@ -259,8 +259,10 @@ last-reported phases, activities and check durations; it does not replace these 
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
   reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
-- Delegate mechanical work; clear the session after each merge and resume from the PM state
-  file. No plugin or CLAUDE.md changes mid-session (they bust the prompt cache).
+- Delegate mechanical work. At a stable publication checkpoint, update the
+  roadmap, Beads and shared handoff before a fresh session; do not reset during
+  an open review merely to shorten context. No plugin or `CLAUDE.md` changes
+  mid-session (they bust the prompt cache).
 - Subagent returns are rules-shaped, under 250 words (reviewer 300): paths with `file:line`, decisions with
   a reason, open items, no narrative.
 - PM state file: labeled "AS OF PR #N"; one "Open objectives" line; owner words only verbatim
@@ -268,6 +270,25 @@ last-reported phases, activities and check durations; it does not replace these 
 - Start a new slice agent with a self-contained brief and no inherited chat
   history; keep a visited path/revision list while following doc links. Reuse
   developer and reviewer context for scoped fixes only while it stays small.
+
+**Codex.** Spawn each new slice with `fork_turns: "none"` and a concise brief
+containing the worktree, exact base/head, governing sections, acceptance checks
+and open findings. Reuse an agent only for its own narrow fix or recheck; a new
+slice gets a fresh agent. Cap tool output, store complete check logs outside the
+conversation and report the failing lines or final counts. At a checkpoint,
+give the owner a copyable continuation prompt pointing to the current shared
+handoff and live Git/Beads state; a fresh session does not reset usage limits.
+
+**Claude Code.** Start a fresh developer and independent reviewer for each new
+slice from `.claude/agents/`; resume the same agent only for that slice's scoped
+fix/recheck while its context remains small. Send full check output to a
+scratchpad and return the short result specified by each role prompt. Before
+clearing or starting a new Claude session, write the same exact-head/open-finding
+handoff; read the index once on takeover and reopen only changed sections.
+
+Both routes preserve the brief, review records and failing evidence on disk;
+compaction or a fresh session never substitutes for a reviewed merge or
+silently closes unfinished work.
 
 ## Milestone gate
 

@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [Agent token hygiene](owner-decision-agent-token-hygiene-2026-10-06.md): shared read-once and compact evidence rules, with separate Codex and Claude Code agent/context handoffs.
+
 - [D6 water depths PM decision](pm-decision-d6-water-depths-2026-10-06.md): selected water deadline, admission, loot and Chapel recovery; selected-docs review approved, source proof pending.
 
 - [Corpse-loot Take detail](owner-decision-corpse-loot-take-detail-2026-10-06.md): confirmed Take from corpse Contents stays on that corpse detail with Back to World and one pickup line.
