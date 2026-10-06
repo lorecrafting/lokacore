@@ -23,13 +23,31 @@ its carries are scheduled in [ROADMAP](../ROADMAP.md#c1-carry-checkpoints).
 ## World and status entry
 
 World is one current-room page. Its centered title remains fixed above the scrolling authored
-description, projected entities, offered place actions and event log. Tapping that title invokes
+description, projected interactibles, offered place actions and event log. The description
+may contain underlined touch links for projected room fixtures: scenery, fixed doors or
+exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
+whether it appears mid-sentence or at the end of the last paragraph; the Book does not
+move it into a separate entity list or force a paragraph break. Tapping it opens the
+subject's detail when that detail is offered. A fixture remains at the room and never
+offers Take or Drop merely because it is linked. A concealed fixture or exit appears
+only when the current projection actually reveals it; text markup alone grants no
+visibility or action.
+
+Below the description, present players and NPCs have their own paragraph/list, and
+loose room items have a separate paragraph/list. Each projected subject can open its
+own detail. An item's Take option appears only when currently offered; an NPC or
+player uses its own offered interactions. Omit an empty group. Player presence is a
+future projection; the current Book has NPCs and items only. This distinction is
+presentation and custody, not a new entity kind: fixture, actor and item actions still
+come from the current GameView/ActionSet and its captured freshness context.
+
+Tapping the room title invokes
 the current offered Look under the [live action freshness rule](#live-action-freshness); it invents no refresh command. The [current sampler](cartridge.md)
 projects authentic Look under the
 [sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 Cartridges that do not offer Look retain a fixed text title.
 Only the body scrolls, so description and entities may leave view while the title stays visible.
-Current entities are projected NPCs and items; tapping either opens its full detail. Standalone exit directions, adjacent-sight listings and redundant navigation/
+Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
 to the actual room: after a confirmed accepted action changes place, clear the old-room log
