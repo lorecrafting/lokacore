@@ -14,15 +14,8 @@ const scratch = mkdtempSync(join(tmpdir(), 'loka-transport-source-'));
 let source: any;
 try {
   execFileSync(
-    'mise',
-    [
-      'exec',
-      '--',
-      'mix',
-      'loka.compile',
-      'cartridges/ashmere_missing_child',
-      join(scratch, 'artifact.json'),
-    ],
+    'mix',
+    ['loka.compile', 'cartridges/ashmere_missing_child', join(scratch, 'artifact.json')],
     { cwd: fileURLToPath(new URL('../../../', import.meta.url)), stdio: 'pipe' },
   );
   source = JSON.parse(readFileSync(join(scratch, 'artifact.json'), 'utf8')).cartridge;
