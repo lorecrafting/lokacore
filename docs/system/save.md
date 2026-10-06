@@ -945,6 +945,29 @@ entry/surface/expiry/recovery intermediate, genuinely failed COMMIT, uncertain
 committed/absent COMMIT, lost acknowledgment and replay using real SQLite;
 browser refresh is separate proof.
 
+## D9 village consequence recovery
+
+**Selected, pending implementation.** The accepted bell receipt and causal
+event bind exact actor, room, time and one cue occurrence. Cold reopen can
+reproduce its retained past narration without emitting a new cue or reapplying
+consequences. Persist the hound suppression generation/deadline, resume job,
+actual encounter cancellation and population state with the ordinary changed
+rows plus receipt. Reopen validates them against the committed bell cause,
+release pin and hound plan; malformed or mismatched rows are typed
+`save_corrupt`, with in-place Start over and no repair or item deletion.
+
+The Study gate is derived from fox history and current corpse rows/containment,
+not a second saved door state or recovery ledger. Use a controlled valid world
+or isolated seeded save to produce the Study corpse; ordinary chapter play has
+no Study death producer. Validate each legal intermediate: owner corpse
+created in Study with roots, owner entrance, each
+ordinary physical Take, emptied corpse, egress and later re-entry refusal.
+Receipt replay cannot create a second root transfer or reopen the gate from
+historical custody. D6 underwater recovery remains location-specific. Prove
+real SQLite cold reopen, failed COMMIT, both uncertain COMMIT outcomes, lost
+acknowledgement and same-invocation replay at bell suppression/resume and
+Study recovery boundaries; input/elapsed stays fenced until reconciliation.
+
 ## D12 lesson, careful Harvest and discount recovery
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) uses C1 reserved acquired facts and dialogue choice/history, B3 participating balances and B5 ordinary item custody. Each lesson, careful Harvest or Buy commits its complete changed rows, head and one receipt before memory adoption/reply; no skill table, saved qualification, quote row, stock count or extra money ledger is introduced.
