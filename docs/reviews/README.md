@@ -315,3 +315,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Feature-map red controls](2026-10-05-features-red-control-review.md): exact local source `4b451a5c35281110ec5aedda79f7236a9fffff73`, independent APPROVE; dynamic feature plants, unchanged extracted size cases and child failure propagation verified, both feature-guard mutations red; no findings.
 - [C1 Tobin primary implementation review](2026-10-05-c1-tobin-primary-review.md): source `e8bf456e`, initial CHANGES REQUIRED; scoped `caca4033`/`11a61c85` close all primary findings, APPROVE; post-approval size-only source `277925bb`, APPROVE, validation and diagnostic order retained. Focused checks and independent identity red control pass; no publication or native claim.
+
+- [C1 local completion status](2026-10-05-c1-local-completion-review.md): exact local status head `befceefd4d34830110bf67c205130b69ad7cbaf6`, independent APPROVE; closed primary/save findings, current release/hash/92-ID pins and accumulated local-check evidence verified; GitHub publication remains ahead, no findings.
