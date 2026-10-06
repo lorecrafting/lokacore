@@ -15,6 +15,7 @@ valid:
   - "import { exchangeTransfers } from './exchange.ts';"
   - "import { decideHarvest } from './harvest.ts';"
   - "import { choice } from '../patrol/sequence.ts';"
+  - "import { chosen } from '../scene/sequence.ts';"
 invalid:
   - "import { readFileSync } from 'node:fs';"
   - "import { decide } from '../movement/rule.ts';"

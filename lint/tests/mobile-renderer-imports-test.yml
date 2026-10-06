@@ -1,6 +1,10 @@
 id: mobile-renderer-imports
 valid:
   - |
+      import { DreamPage } from './DreamPage.tsx';
+      import { dreamAt } from './dreams.ts';
+      export { nextPosition } from './positions.ts';
+  - |
       import { Body } from './Body.tsx';
       import { serviceButtons, shopButtons } from './offers.ts';
   - import { NoticeEntries, NoticePage } from './notices.tsx';

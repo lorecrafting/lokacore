@@ -107,5 +107,5 @@ export function talks(world: World, actor: CharacterId): [string, Offered][] {
 /** `actor`'s pending choice, if it has one (at most one: talk refuses a second). */
 export const pending = (world: World, actor: CharacterId) =>
   Object.entries(world.state.choices ?? {}).find(
-    ([, c]) => c.status === 'pending' && c.actor_id === actor,
+    ([, c]) => c.source.kind === 'dialogue' && c.status === 'pending' && c.actor_id === actor,
   ) as [ContinuationId, ChoiceRow] | undefined;

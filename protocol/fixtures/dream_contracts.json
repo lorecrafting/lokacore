@@ -1,0 +1,2515 @@
+{
+  "description": "Independent malformed B9 wire boundaries from declared schema text; controls are literal JSON, validators never derive expected answers.",
+  "bases": {
+    "SceneDefinition": {
+      "contract": "SceneDefinition",
+      "value": {
+        "key": "bell_rung",
+        "on": {
+          "story_point": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "story_point",
+            "key": "lantern_resolved"
+          },
+          "outcome": "carry"
+        },
+        "control": "modal",
+        "steps": [
+          {
+            "type": "narrate",
+            "text": "scene.bell_rung.bell"
+          },
+          {
+            "type": "await_ack"
+          },
+          {
+            "type": "end"
+          }
+        ]
+      }
+    },
+    "SceneDefinition::modal": {
+      "contract": "SceneDefinition",
+      "value": {
+        "key": "bell_rung",
+        "on": {
+          "story_point": {
+            "cartridge_id": "ashmere_scene",
+            "cartridge_version": "0.0.1",
+            "kind": "story_point",
+            "key": "lantern_resolved"
+          },
+          "outcome": "carry"
+        },
+        "control": "modal",
+        "steps": [
+          {
+            "type": "narrate",
+            "text": "scene.bell_rung.bell"
+          },
+          {
+            "type": "await_ack"
+          },
+          {
+            "type": "end"
+          }
+        ]
+      },
+      "variant": {
+        "field": "control",
+        "value": "modal"
+      }
+    },
+    "SceneDefinition::presentation_only": {
+      "contract": "SceneDefinition",
+      "value": {
+        "key": "bell_rung",
+        "on": {
+          "rest": {
+            "room": {
+              "cartridge_id": "dream_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "room",
+              "key": "inn"
+            },
+            "detail": "bed",
+            "entitlement": {
+              "cartridge_id": "dream_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "paid"
+            },
+            "credit": {
+              "cartridge_id": "dream_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "rested"
+            },
+            "quest": {
+              "cartridge_id": "dream_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "quest",
+              "key": "room"
+            }
+          }
+        },
+        "control": "presentation_only",
+        "steps": [
+          {
+            "type": "narrate",
+            "text": "scene.bell_rung.bell"
+          }
+        ],
+        "title": "room.ferry_landing.title",
+        "description": "room.ferry_landing.title",
+        "on_end": {
+          "assign": [
+            {
+              "fact": {
+                "cartridge_id": "fox_spirit_of_yunmeng",
+                "cartridge_version": "1.2.0",
+                "kind": "npc",
+                "key": "old_ferryman"
+              },
+              "value": "player_led"
+            }
+          ],
+          "quest": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          },
+          "outcome": "talk"
+        }
+      },
+      "variant": {
+        "field": "control",
+        "value": "presentation_only"
+      }
+    },
+    "SceneStep": {
+      "contract": "SceneStep",
+      "value": {
+        "type": "narrate",
+        "text": "scene.bell_rung.bell"
+      }
+    },
+    "SceneStep::narrate": {
+      "contract": "SceneStep",
+      "value": {
+        "type": "narrate",
+        "text": "scene.bell_rung.bell"
+      },
+      "variant": {
+        "field": "type",
+        "value": "narrate"
+      }
+    },
+    "SceneStep::await_ack": {
+      "contract": "SceneStep",
+      "value": {
+        "type": "await_ack"
+      },
+      "variant": {
+        "field": "type",
+        "value": "await_ack"
+      }
+    },
+    "SceneStep::end": {
+      "contract": "SceneStep",
+      "value": {
+        "type": "end"
+      },
+      "variant": {
+        "field": "type",
+        "value": "end"
+      }
+    },
+    "SceneStep::choice": {
+      "contract": "SceneStep",
+      "value": {
+        "type": "choice",
+        "key": "fork",
+        "prompt": "dream.fork",
+        "choices": [
+          {
+            "choice_id": "follow_fox",
+            "label": "dream.follow",
+            "text": "dream.follow.final"
+          },
+          {
+            "choice_id": "wake",
+            "label": "dream.wake",
+            "text": "dream.wake.final"
+          }
+        ]
+      },
+      "variant": {
+        "field": "type",
+        "value": "choice"
+      }
+    },
+    "SceneStep::branch": {
+      "contract": "SceneStep",
+      "value": {
+        "type": "branch"
+      },
+      "variant": {
+        "field": "type",
+        "value": "branch"
+      }
+    },
+    "RestBinding": {
+      "contract": "RestBinding",
+      "value": {
+        "room": {
+          "cartridge_id": "dream_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "inn"
+        },
+        "detail": "bed",
+        "entitlement": {
+          "cartridge_id": "dream_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "paid"
+        },
+        "credit": {
+          "cartridge_id": "dream_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "rested"
+        },
+        "quest": {
+          "cartridge_id": "dream_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "quest",
+          "key": "room"
+        }
+      }
+    },
+    "DreamDraw": {
+      "contract": "DreamDraw",
+      "value": {
+        "scene": {
+          "cartridge_id": "dream_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "scene",
+          "key": "dream"
+        },
+        "line": 4,
+        "body_id": "11111111-2222-4333-8444-555555555555",
+        "room_id": "22222222-2222-4333-8444-555555555555",
+        "expected_revision": 3
+      }
+    },
+    "ActionInput": {
+      "contract": "ActionInput",
+      "value": {}
+    },
+    "ActionInputParameter": {
+      "contract": "ActionInputParameter",
+      "value": "until"
+    },
+    "CommandPayload": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "move",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "direction": "north"
+      }
+    },
+    "CommandPayload::move": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "move",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "direction": "north"
+      },
+      "variant": {
+        "field": "type",
+        "value": "move"
+      }
+    },
+    "CommandPayload::open": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "open",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "open"
+      }
+    },
+    "CommandPayload::close": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "close",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "close"
+      }
+    },
+    "CommandPayload::lock": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "lock",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "lock"
+      }
+    },
+    "CommandPayload::unlock": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "unlock",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "unlock"
+      }
+    },
+    "CommandPayload::look": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "look",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "look"
+      }
+    },
+    "CommandPayload::scan": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "scan",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "scan"
+      }
+    },
+    "CommandPayload::take": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "take",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "take"
+      }
+    },
+    "CommandPayload::drop": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "drop",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "drop"
+      }
+    },
+    "CommandPayload::give": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "give",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "recipient_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "give"
+      }
+    },
+    "CommandPayload::wear": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "wear",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "wear"
+      }
+    },
+    "CommandPayload::remove": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "remove",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "remove"
+      }
+    },
+    "CommandPayload::stand": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "stand",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "stand"
+      }
+    },
+    "CommandPayload::sit": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "sit",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "sit"
+      }
+    },
+    "CommandPayload::rest": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "rest",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "rest"
+      }
+    },
+    "CommandPayload::sleep": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "sleep",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+      },
+      "variant": {
+        "field": "type",
+        "value": "sleep"
+      }
+    },
+    "CommandPayload::perform": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "perform",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "action": "ring_bell"
+      },
+      "variant": {
+        "field": "type",
+        "value": "perform"
+      }
+    },
+    "CommandPayload::talk": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "talk",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "target_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "talk"
+      }
+    },
+    "CommandPayload::accept_quest": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "accept_quest",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "quest": {
+          "cartridge_id": "ferrymans_lantern",
+          "cartridge_version": "0.1.0",
+          "kind": "quest",
+          "key": "find_the_lantern"
+        }
+      },
+      "variant": {
+        "field": "type",
+        "value": "accept_quest"
+      }
+    },
+    "CommandPayload::choose": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "choose",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "continuation_id": "44444444-5555-8666-8777-888888888888",
+        "choice_id": "carry"
+      },
+      "variant": {
+        "field": "type",
+        "value": "choose"
+      }
+    },
+    "CommandPayload::close_choice": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "close_choice",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "continuation_id": "44444444-5555-8666-8777-888888888888"
+      },
+      "variant": {
+        "field": "type",
+        "value": "close_choice"
+      }
+    },
+    "CommandPayload::wait": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "wait",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "until": 19
+      },
+      "variant": {
+        "field": "type",
+        "value": "wait"
+      }
+    },
+    "CommandPayload::run_job": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "run_job",
+        "job_id": "66666666-7777-8888-8999-aaaaaaaaaaaa"
+      },
+      "variant": {
+        "field": "type",
+        "value": "run_job"
+      }
+    },
+    "CommandPayload::continue": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "continue",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "scene": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "line": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "continue"
+      }
+    },
+    "CommandPayload::elapsed": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "elapsed",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "run_id": "6f6f6f6f-1111-4222-8333-444444444444",
+        "from": 21600,
+        "until": 68400
+      },
+      "variant": {
+        "field": "type",
+        "value": "elapsed"
+      }
+    },
+    "CommandPayload::attack": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "attack",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "target_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "attack"
+      }
+    },
+    "CommandPayload::flee": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "flee",
+        "actor_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "flee"
+      }
+    },
+    "CommandPayload::put": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "put",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "11111111-2222-4333-8444-555555555555",
+        "container_id": "22222222-3333-4444-8555-666666666666"
+      },
+      "variant": {
+        "field": "type",
+        "value": "put"
+      }
+    },
+    "CommandPayload::read": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "read",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "target_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "read"
+      }
+    },
+    "CommandPayload::buy": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "buy",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "provider_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "quoted_price": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "buy"
+      }
+    },
+    "CommandPayload::sell": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "sell",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "provider_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "quoted_price": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "sell"
+      }
+    },
+    "CommandPayload::harvest": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "harvest",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "target_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "harvest"
+      }
+    },
+    "CommandPayload::fill": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "fill",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "source_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "vessel_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "fill"
+      }
+    },
+    "CommandPayload::pour": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "pour",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "source_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "receiver_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "pour"
+      }
+    },
+    "CommandPayload::drink": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "drink",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "vessel_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "drink"
+      }
+    },
+    "CommandPayload::ignite": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "ignite",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "ignite"
+      }
+    },
+    "CommandPayload::douse": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "douse",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "douse"
+      }
+    },
+    "CommandPayload::refuel": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "refuel",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "supply_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "refuel"
+      }
+    },
+    "CommandPayload::use_service": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "use_service",
+        "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "provider_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "service": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "quoted_price": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "use_service"
+      }
+    },
+    "ChoiceOption": {
+      "contract": "ChoiceOption",
+      "value": {
+        "available": true,
+        "choice_id": "carry",
+        "label": "choice.carry"
+      }
+    },
+    "ChoiceOption::True": {
+      "contract": "ChoiceOption",
+      "value": {
+        "available": true,
+        "choice_id": "carry",
+        "label": "choice.carry"
+      },
+      "variant": {
+        "field": "available",
+        "value": true
+      }
+    },
+    "ChoiceOption::False": {
+      "contract": "ChoiceOption",
+      "value": {
+        "available": false,
+        "choice_id": "talk",
+        "label": "room.ferry_landing.title",
+        "reason": {
+          "code": "exit_locked"
+        }
+      },
+      "variant": {
+        "field": "available",
+        "value": false
+      }
+    },
+    "NoticeView": {
+      "contract": "NoticeView",
+      "value": {
+        "id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "title": "detail.notice.title",
+        "description": "detail.notice.description"
+      }
+    },
+    "DreamView": {
+      "contract": "DreamView",
+      "value": {
+        "scene": {
+          "cartridge_id": "dream_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "scene",
+          "key": "dream"
+        },
+        "title": "dream.title",
+        "description": "dream.description",
+        "index": 1,
+        "count": 5,
+        "line": "dream.opening",
+        "available": true
+      }
+    },
+    "EventPayload": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "entity_entered_room",
+        "entity_id": "12121212-3434-4565-8787-909090909090",
+        "room_id": "33333333-4444-4555-8666-777777777777"
+      }
+    },
+    "EventPayload::entity_entered_room": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "entity_entered_room",
+        "entity_id": "12121212-3434-4565-8787-909090909090",
+        "room_id": "33333333-4444-4555-8666-777777777777"
+      },
+      "variant": {
+        "field": "type",
+        "value": "entity_entered_room"
+      }
+    },
+    "EventPayload::item_acquired": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "item_acquired",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "holder_id": "12121212-3434-4565-8787-909090909090"
+      },
+      "variant": {
+        "field": "type",
+        "value": "item_acquired"
+      }
+    },
+    "EventPayload::item_dropped": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "item_dropped",
+        "item_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "room_id": "22222222-3333-4444-8555-666666666666"
+      },
+      "variant": {
+        "field": "type",
+        "value": "item_dropped"
+      }
+    },
+    "EventPayload::quest_activated": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "quest_activated",
+        "quest": {
+          "cartridge_id": "ferrymans_lantern",
+          "cartridge_version": "0.1.0",
+          "kind": "quest",
+          "key": "find_the_lantern"
+        },
+        "instance_id": "55555555-6666-8777-8888-999999999999"
+      },
+      "variant": {
+        "field": "type",
+        "value": "quest_activated"
+      }
+    },
+    "EventPayload::quest_resolved": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "quest_resolved",
+        "quest": {
+          "cartridge_id": "ferrymans_lantern",
+          "cartridge_version": "0.1.0",
+          "kind": "quest",
+          "key": "find_the_lantern"
+        },
+        "instance_id": "55555555-6666-8777-8888-999999999999",
+        "outcome": "carry"
+      },
+      "variant": {
+        "field": "type",
+        "value": "quest_resolved"
+      }
+    },
+    "EventPayload::choice_opened": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "choice_opened",
+        "continuation_id": "44444444-5555-8666-8777-888888888888"
+      },
+      "variant": {
+        "field": "type",
+        "value": "choice_opened"
+      }
+    },
+    "EventPayload::choice_resolved": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "choice_resolved",
+        "continuation_id": "44444444-5555-8666-8777-888888888888",
+        "choice_id": "leave"
+      },
+      "variant": {
+        "field": "type",
+        "value": "choice_resolved"
+      }
+    },
+    "EventPayload::story_point_reached": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "story_point_reached",
+        "story_point": {
+          "cartridge_id": "ferrymans_lantern",
+          "cartridge_version": "0.1.0",
+          "kind": "story_point",
+          "key": "proof_terminal"
+        },
+        "outcome": "leave"
+      },
+      "variant": {
+        "field": "type",
+        "value": "story_point_reached"
+      }
+    },
+    "EventPayload::fact_changed": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "fact_changed",
+        "fact": {
+          "cartridge_id": "ferrymans_lantern",
+          "cartridge_version": "0.1.0",
+          "kind": "fact",
+          "key": "search_plan"
+        },
+        "old": "undecided",
+        "new": "party_led"
+      },
+      "variant": {
+        "field": "type",
+        "value": "fact_changed"
+      }
+    },
+    "EventPayload::custom_event": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "custom_event",
+        "event": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "event",
+          "key": "bell_rung"
+        },
+        "subject_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "custom_event"
+      }
+    },
+    "EventPayload::action_completed": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "action_completed",
+        "action": "ring_bell",
+        "subject_id": "11111111-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "action_completed"
+      }
+    },
+    "EventPayload::check_passed": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "check_passed",
+        "check": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "subject_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "check_passed"
+      }
+    },
+    "EventPayload::check_failed": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "check_failed",
+        "check": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "subject_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "check_failed"
+      }
+    },
+    "EventPayload::barrier_changed": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "barrier_changed",
+        "barrier": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "from": "open",
+        "to": "open"
+      },
+      "variant": {
+        "field": "type",
+        "value": "barrier_changed"
+      }
+    },
+    "EventPayload::scene_ended": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "scene_ended",
+        "scene": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        }
+      },
+      "variant": {
+        "field": "type",
+        "value": "scene_ended"
+      }
+    },
+    "EventPayload::entity_died": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "entity_died",
+        "victim_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "room_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "killer_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "credited_character_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+        "corpse_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a"
+      },
+      "variant": {
+        "field": "type",
+        "value": "entity_died"
+      }
+    },
+    "EventPayload::attack_result": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "attack_result",
+        "encounter_id": "11111111-2222-4333-8444-555555555555",
+        "attacker_id": "11111111-2222-4333-8444-555555555555",
+        "target_id": "11111111-2222-4333-8444-555555555555",
+        "hit": true,
+        "loss": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "attack_result"
+      }
+    },
+    "EventPayload::filled": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "filled",
+        "source_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "vessel_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "kind": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "quantity": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "filled"
+      }
+    },
+    "EventPayload::poured": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "poured",
+        "source_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "receiver_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "kind": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "quantity": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "poured"
+      }
+    },
+    "EventPayload::drank": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "drank",
+        "vessel_id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+        "kind": {
+          "cartridge_id": "fox_spirit_of_yunmeng",
+          "cartridge_version": "1.2.0",
+          "kind": "npc",
+          "key": "old_ferryman"
+        },
+        "quantity": 1
+      },
+      "variant": {
+        "field": "type",
+        "value": "drank"
+      }
+    },
+    "EventPayload::rested": {
+      "contract": "EventPayload",
+      "value": {
+        "type": "rested",
+        "body_id": "11111111-2222-4333-8444-555555555555",
+        "room_id": "22222222-2222-4333-8444-555555555555"
+      },
+      "variant": {
+        "field": "type",
+        "value": "rested"
+      }
+    },
+    "ReactionRule": {
+      "contract": "ReactionRule",
+      "value": {
+        "key": "gossip",
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "ashmere_green",
+            "cartridge_version": "0.0.1",
+            "kind": "fact",
+            "key": "green_busy"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "gossip_spread"
+            },
+            "value": true
+          }
+        ]
+      }
+    },
+    "ReactionRule:on:fact_changed": {
+      "contract": "ReactionRule",
+      "value": {
+        "key": "gossip",
+        "on": {
+          "event": "fact_changed",
+          "fact": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "gossip_spread"
+            },
+            "value": true
+          }
+        ]
+      }
+    },
+    "ReactionRule:on:entity_entered_room": {
+      "contract": "ReactionRule",
+      "value": {
+        "key": "gossip",
+        "on": {
+          "event": "entity_entered_room",
+          "room": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "gossip_spread"
+            },
+            "value": true
+          }
+        ]
+      }
+    },
+    "ReactionRule:on:quest_resolved": {
+      "contract": "ReactionRule",
+      "value": {
+        "key": "gossip",
+        "on": {
+          "event": "quest_resolved",
+          "quest": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          },
+          "outcome": "talk"
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "gossip_spread"
+            },
+            "value": true
+          }
+        ]
+      }
+    },
+    "ReactionRule:on:rested": {
+      "contract": "ReactionRule",
+      "value": {
+        "key": "gossip",
+        "on": {
+          "event": "rested",
+          "room": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          }
+        },
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "green_busy"
+            },
+            "equals": true
+          }
+        },
+        "apply": [
+          {
+            "op": "fact.assign",
+            "fact": {
+              "cartridge_id": "ashmere_green",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "gossip_spread"
+            },
+            "value": true
+          }
+        ]
+      }
+    }
+  },
+  "cases": [
+    {
+      "base": "SceneDefinition",
+      "name": "SceneDefinition valid",
+      "valid": true
+    },
+    {
+      "base": "SceneDefinition::modal",
+      "name": "SceneDefinition::modal valid",
+      "valid": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only valid",
+      "valid": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ required key",
+      "path": [
+        "key"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ required on",
+      "path": [
+        "on"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ required control",
+      "path": [
+        "control"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ required steps",
+      "path": [
+        "steps"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ required title",
+      "path": [
+        "title"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ required description",
+      "path": [
+        "description"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ required on_end",
+      "path": [
+        "on_end"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/ additionalProperties",
+      "path": [
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/key pattern",
+      "path": [
+        "key"
+      ],
+      "valid": false,
+      "value": "INVALID"
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/key maxLength",
+      "path": [
+        "key"
+      ],
+      "valid": false,
+      "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on required rest",
+      "path": [
+        "on",
+        "rest"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on additionalProperties",
+      "path": [
+        "on",
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/control const",
+      "path": [
+        "control"
+      ],
+      "valid": false,
+      "value": "b9_invalid"
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end required assign",
+      "path": [
+        "on_end",
+        "assign"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end required quest",
+      "path": [
+        "on_end",
+        "quest"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end required outcome",
+      "path": [
+        "on_end",
+        "outcome"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end additionalProperties",
+      "path": [
+        "on_end",
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end/assign minItems",
+      "path": [
+        "on_end",
+        "assign"
+      ],
+      "valid": false,
+      "value": []
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end/assign maxItems",
+      "path": [
+        "on_end",
+        "assign"
+      ],
+      "valid": false,
+      "value": [
+        {
+          "fact": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          },
+          "value": "player_led"
+        },
+        {
+          "fact": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          },
+          "value": "player_led"
+        },
+        {
+          "fact": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          },
+          "value": "player_led"
+        },
+        {
+          "fact": {
+            "cartridge_id": "fox_spirit_of_yunmeng",
+            "cartridge_version": "1.2.0",
+            "kind": "npc",
+            "key": "old_ferryman"
+          },
+          "value": "player_led"
+        }
+      ]
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end/assign/0 required fact",
+      "path": [
+        "on_end",
+        "assign",
+        0,
+        "fact"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end/assign/0 required value",
+      "path": [
+        "on_end",
+        "assign",
+        0,
+        "value"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneDefinition::presentation_only",
+      "name": "SceneDefinition::presentation_only/on_end/assign/0 additionalProperties",
+      "path": [
+        "on_end",
+        "assign",
+        0,
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "SceneStep",
+      "name": "SceneStep valid",
+      "valid": true
+    },
+    {
+      "base": "SceneStep::narrate",
+      "name": "SceneStep::narrate valid",
+      "valid": true
+    },
+    {
+      "base": "SceneStep::await_ack",
+      "name": "SceneStep::await_ack valid",
+      "valid": true
+    },
+    {
+      "base": "SceneStep::end",
+      "name": "SceneStep::end valid",
+      "valid": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice valid",
+      "valid": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/ required type",
+      "path": [
+        "type"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/ required key",
+      "path": [
+        "key"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/ required prompt",
+      "path": [
+        "prompt"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/ required choices",
+      "path": [
+        "choices"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/ additionalProperties",
+      "path": [
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/type const",
+      "path": [
+        "type"
+      ],
+      "valid": false,
+      "value": "b9_invalid"
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/choices minItems",
+      "path": [
+        "choices"
+      ],
+      "valid": false,
+      "value": [
+        {
+          "choice_id": "talk",
+          "label": "room.ferry_landing.title",
+          "text": "room.ferry_landing.title"
+        }
+      ]
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/choices maxItems",
+      "path": [
+        "choices"
+      ],
+      "valid": false,
+      "value": [
+        {
+          "choice_id": "talk",
+          "label": "room.ferry_landing.title",
+          "text": "room.ferry_landing.title"
+        },
+        {
+          "choice_id": "talk",
+          "label": "room.ferry_landing.title",
+          "text": "room.ferry_landing.title"
+        },
+        {
+          "choice_id": "talk",
+          "label": "room.ferry_landing.title",
+          "text": "room.ferry_landing.title"
+        }
+      ]
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/choices/0 required choice_id",
+      "path": [
+        "choices",
+        0,
+        "choice_id"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/choices/0 required label",
+      "path": [
+        "choices",
+        0,
+        "label"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/choices/0 required text",
+      "path": [
+        "choices",
+        0,
+        "text"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::choice",
+      "name": "SceneStep::choice/choices/0 additionalProperties",
+      "path": [
+        "choices",
+        0,
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "SceneStep::branch",
+      "name": "SceneStep::branch valid",
+      "valid": true
+    },
+    {
+      "base": "SceneStep::branch",
+      "name": "SceneStep::branch/ required type",
+      "path": [
+        "type"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "SceneStep::branch",
+      "name": "SceneStep::branch/ additionalProperties",
+      "path": [
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "SceneStep::branch",
+      "name": "SceneStep::branch/type const",
+      "path": [
+        "type"
+      ],
+      "valid": false,
+      "value": "b9_invalid"
+    },
+    {
+      "base": "RestBinding",
+      "name": "RestBinding valid",
+      "valid": true
+    },
+    {
+      "base": "RestBinding",
+      "name": "RestBinding/ required room",
+      "path": [
+        "room"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "RestBinding",
+      "name": "RestBinding/ required detail",
+      "path": [
+        "detail"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "RestBinding",
+      "name": "RestBinding/ required entitlement",
+      "path": [
+        "entitlement"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "RestBinding",
+      "name": "RestBinding/ required credit",
+      "path": [
+        "credit"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "RestBinding",
+      "name": "RestBinding/ required quest",
+      "path": [
+        "quest"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "RestBinding",
+      "name": "RestBinding/ additionalProperties",
+      "path": [
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw valid",
+      "valid": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/ required scene",
+      "path": [
+        "scene"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/ required line",
+      "path": [
+        "line"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/ required body_id",
+      "path": [
+        "body_id"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/ required room_id",
+      "path": [
+        "room_id"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/ required expected_revision",
+      "path": [
+        "expected_revision"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/ additionalProperties",
+      "path": [
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/line const",
+      "path": [
+        "line"
+      ],
+      "valid": false,
+      "value": "b9_invalid"
+    },
+    {
+      "base": "DreamDraw",
+      "name": "DreamDraw/expected_revision minimum",
+      "path": [
+        "expected_revision"
+      ],
+      "valid": false,
+      "value": -1
+    },
+    {
+      "base": "ActionInput",
+      "name": "ActionInput valid",
+      "valid": true
+    },
+    {
+      "base": "ActionInputParameter",
+      "name": "ActionInputParameter valid",
+      "valid": true
+    },
+    {
+      "base": "ActionInputParameter",
+      "name": "ActionInputParameter/ enum",
+      "path": [],
+      "valid": false,
+      "value": "b9_invalid"
+    },
+    {
+      "base": "CommandPayload",
+      "name": "CommandPayload valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::move",
+      "name": "CommandPayload::move valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::open",
+      "name": "CommandPayload::open valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::close",
+      "name": "CommandPayload::close valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::lock",
+      "name": "CommandPayload::lock valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::unlock",
+      "name": "CommandPayload::unlock valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::look",
+      "name": "CommandPayload::look valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::scan",
+      "name": "CommandPayload::scan valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::take",
+      "name": "CommandPayload::take valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::drop",
+      "name": "CommandPayload::drop valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::give",
+      "name": "CommandPayload::give valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::wear",
+      "name": "CommandPayload::wear valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::remove",
+      "name": "CommandPayload::remove valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::stand",
+      "name": "CommandPayload::stand valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::sit",
+      "name": "CommandPayload::sit valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::rest",
+      "name": "CommandPayload::rest valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::sleep",
+      "name": "CommandPayload::sleep valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::perform",
+      "name": "CommandPayload::perform valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::talk",
+      "name": "CommandPayload::talk valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::accept_quest",
+      "name": "CommandPayload::accept_quest valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::choose",
+      "name": "CommandPayload::choose valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::close_choice",
+      "name": "CommandPayload::close_choice valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::wait",
+      "name": "CommandPayload::wait valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::run_job",
+      "name": "CommandPayload::run_job valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::continue",
+      "name": "CommandPayload::continue valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::elapsed",
+      "name": "CommandPayload::elapsed valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::attack",
+      "name": "CommandPayload::attack valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::flee",
+      "name": "CommandPayload::flee valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::put",
+      "name": "CommandPayload::put valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::read",
+      "name": "CommandPayload::read valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::buy",
+      "name": "CommandPayload::buy valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::sell",
+      "name": "CommandPayload::sell valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::harvest",
+      "name": "CommandPayload::harvest valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::fill",
+      "name": "CommandPayload::fill valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::pour",
+      "name": "CommandPayload::pour valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::drink",
+      "name": "CommandPayload::drink valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::ignite",
+      "name": "CommandPayload::ignite valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::douse",
+      "name": "CommandPayload::douse valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::refuel",
+      "name": "CommandPayload::refuel valid",
+      "valid": true
+    },
+    {
+      "base": "CommandPayload::use_service",
+      "name": "CommandPayload::use_service valid",
+      "valid": true
+    },
+    {
+      "base": "ChoiceOption",
+      "name": "ChoiceOption valid",
+      "valid": true
+    },
+    {
+      "base": "ChoiceOption::True",
+      "name": "ChoiceOption::True valid",
+      "valid": true
+    },
+    {
+      "base": "ChoiceOption::False",
+      "name": "ChoiceOption::False valid",
+      "valid": true
+    },
+    {
+      "base": "NoticeView",
+      "name": "NoticeView valid",
+      "valid": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView valid",
+      "valid": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ required scene",
+      "path": [
+        "scene"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ required title",
+      "path": [
+        "title"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ required description",
+      "path": [
+        "description"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ required index",
+      "path": [
+        "index"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ required count",
+      "path": [
+        "count"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ required line",
+      "path": [
+        "line"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ required available",
+      "path": [
+        "available"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/ additionalProperties",
+      "path": [
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/index maximum",
+      "path": [
+        "index"
+      ],
+      "valid": false,
+      "value": 65
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/index minimum",
+      "path": [
+        "index"
+      ],
+      "valid": false,
+      "value": -2
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/count maximum",
+      "path": [
+        "count"
+      ],
+      "valid": false,
+      "value": 65
+    },
+    {
+      "base": "DreamView",
+      "name": "DreamView/count minimum",
+      "path": [
+        "count"
+      ],
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "EventPayload",
+      "name": "EventPayload valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::entity_entered_room",
+      "name": "EventPayload::entity_entered_room valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::item_acquired",
+      "name": "EventPayload::item_acquired valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::item_dropped",
+      "name": "EventPayload::item_dropped valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::quest_activated",
+      "name": "EventPayload::quest_activated valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::quest_resolved",
+      "name": "EventPayload::quest_resolved valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::choice_opened",
+      "name": "EventPayload::choice_opened valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::choice_resolved",
+      "name": "EventPayload::choice_resolved valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::story_point_reached",
+      "name": "EventPayload::story_point_reached valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::fact_changed",
+      "name": "EventPayload::fact_changed valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::custom_event",
+      "name": "EventPayload::custom_event valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::action_completed",
+      "name": "EventPayload::action_completed valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::check_passed",
+      "name": "EventPayload::check_passed valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::check_failed",
+      "name": "EventPayload::check_failed valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::barrier_changed",
+      "name": "EventPayload::barrier_changed valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::scene_ended",
+      "name": "EventPayload::scene_ended valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::entity_died",
+      "name": "EventPayload::entity_died valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::attack_result",
+      "name": "EventPayload::attack_result valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::filled",
+      "name": "EventPayload::filled valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::poured",
+      "name": "EventPayload::poured valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::drank",
+      "name": "EventPayload::drank valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::rested",
+      "name": "EventPayload::rested valid",
+      "valid": true
+    },
+    {
+      "base": "EventPayload::rested",
+      "name": "EventPayload::rested/ required type",
+      "path": [
+        "type"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "EventPayload::rested",
+      "name": "EventPayload::rested/ required body_id",
+      "path": [
+        "body_id"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "EventPayload::rested",
+      "name": "EventPayload::rested/ required room_id",
+      "path": [
+        "room_id"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "EventPayload::rested",
+      "name": "EventPayload::rested/ additionalProperties",
+      "path": [
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "EventPayload::rested",
+      "name": "EventPayload::rested/type const",
+      "path": [
+        "type"
+      ],
+      "valid": false,
+      "value": "b9_invalid"
+    },
+    {
+      "base": "ReactionRule",
+      "name": "ReactionRule valid",
+      "valid": true
+    },
+    {
+      "base": "ReactionRule:on:fact_changed",
+      "name": "ReactionRule:on:fact_changed valid",
+      "valid": true
+    },
+    {
+      "base": "ReactionRule:on:entity_entered_room",
+      "name": "ReactionRule:on:entity_entered_room valid",
+      "valid": true
+    },
+    {
+      "base": "ReactionRule:on:quest_resolved",
+      "name": "ReactionRule:on:quest_resolved valid",
+      "valid": true
+    },
+    {
+      "base": "ReactionRule:on:rested",
+      "name": "ReactionRule:on:rested valid",
+      "valid": true
+    },
+    {
+      "base": "ReactionRule:on:rested",
+      "name": "ReactionRule:on:rested/on required event",
+      "path": [
+        "on",
+        "event"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "ReactionRule:on:rested",
+      "name": "ReactionRule:on:rested/on required room",
+      "path": [
+        "on",
+        "room"
+      ],
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "ReactionRule:on:rested",
+      "name": "ReactionRule:on:rested/on additionalProperties",
+      "path": [
+        "on",
+        "b9_unknown"
+      ],
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "ReactionRule:on:rested",
+      "name": "ReactionRule:on:rested/on/event const",
+      "path": [
+        "on",
+        "event"
+      ],
+      "valid": false,
+      "value": "b9_invalid"
+    }
+  ]
+}

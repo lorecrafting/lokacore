@@ -14,7 +14,7 @@ defmodule Loka.ContentPrioryTest do
           {"items/ward_of_the_fen.json", ["readable", "topic"],
            %{
              "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => "0.0.27",
+             "cartridge_version" => "0.0.28",
              "kind" => "fact",
              "key" => "topic_ward_known"
            }, "UNRESOLVED_REFERENCE"},

@@ -11,6 +11,22 @@ implementation head/PR and review verdicts: null. Re-pin integrated A3/B8 source
 reviews and known answers before assignment. Implementation branch
 `chapter-1/b9-inn-dream` is not created. Docs only; no merge/push/play/save claim.
 
+## Assigned source checkpoint
+
+The planning base above is historical. The PM assigned
+`slice/b9-lantern-dream` from exact B8 PR215 source/evidence head `488612a3`,
+whose primary, save/protocol and scoped correction approvals are preserved in
+its review records. Published B8 prerequisite `594b8ae1` is now integrated in
+this isolated source branch. The consumed wire/UI declarations are specified in
+[protocol](../../system/protocol.md#b9-rest-occurrence-and-dream-composition)
+and [Book](../../system/book-ui.md#b9-bed-and-resumable-dream-details) before code.
+The provisional consumed source and its independent current answers are recorded in
+[local evidence](../../evidence/2026-10-05-b9-lantern-dream/README.md). D5 is now
+published and D2 is queued before B9; final source integration and successor pins
+follow the PM's actual order. D1/C3 remain isolated. B9 publication and fresh
+review verdicts remain null until their records exist. The planning claims above
+are historical; no owner save or native/browser preview is touched by this source work.
+
 ## Consumer and governing clauses
 
 B9: actual paid Inn Rooms Rest opens a resumable dream and final acknowledgement

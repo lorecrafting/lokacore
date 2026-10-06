@@ -1,3 +1,4 @@
+import { restStarts } from './rest.ts';
 // Shared scene@1 fact, running-line, modal and event-start queries (mechanics.md).
 import type {
   CharacterId,
@@ -27,6 +28,7 @@ export const fact = (world: World, scene: SceneDefinition) =>
 export function running(world: World, actor: CharacterId): SceneView | undefined {
   if (!has(world.cartridge.lock.capabilities, 'scene')) return undefined;
   for (const s of values(world.cartridge.scenes ?? {})) {
+    if (s.control !== 'modal') continue;
     const index = value(world, actor, fact(world, s));
     const count = s.steps.length - 2;
     if (typeof index !== 'number' || index < 1 || index > count) continue;
@@ -38,6 +40,10 @@ export function running(world: World, actor: CharacterId): SceneView | undefined
 
 /** Reaction-shaped deliveries: on is unused here; sequence consumes when and apply. */
 export function starts(world: World, e: DomainEvent): ReactionRule[] {
+  return [...restStarts(world, e), ...legacyStarts(world, e)];
+}
+
+function legacyStarts(world: World, e: DomainEvent): ReactionRule[] {
   if (
     !has(world.cartridge.lock.capabilities, 'scene') ||
     (e.payload.type !== 'story_point_reached' &&
@@ -49,6 +55,7 @@ export function starts(world: World, e: DomainEvent): ReactionRule[] {
   return values(world.cartridge.scenes ?? {})
     .filter(
       (s) =>
+        s.control === 'modal' &&
         ('action' in s.on && p.type === 'action_completed'
           ? s.on.action!.key === p.action &&
             e.actor_id !== undefined &&

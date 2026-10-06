@@ -18,6 +18,7 @@ const INPUTS: readonly string[] = [
   'line',
   'quoted_price',
   'service',
+  'dream',
   'patrol',
 ];
 
