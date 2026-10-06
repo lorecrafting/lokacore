@@ -67,7 +67,7 @@ valid combinations become playable before the whole world's optional surfaces.
 | **D5 Deep Fen:** explore the oak canopy, dry black pool edge, naturally lit fox den and fishing shallows ([adopted contract](decisions/pm-decision-d5-deep-fen-2026-10-05.md)). | B4, B6, Q2 returns | 0.3–0.5 |
 | **D6 Water depths:** use Sedge's earlier swim lesson to reach two bottom rooms through an explicit, recoverable water rule; S27 is not the first way to learn swim. | B4, C1, D1, D5 | 0.8–1.0 |
 | **D7 Deer:** observe bounded deer fleeing and conserved loot from deliberate fights. | C3, C4, D4 | 0.4–0.6 |
-| **D8 Crows:** follow scavenged eligible items to a bounded, reachable nest and recover them. | C3, D5 | 0.6–0.8 |
+| **D8 Crows:** follow scavenged eligible items to a bounded, reachable nest and recover them. | C3, D5, D6 (real old coin) | 0.6–0.8 |
 | **D9 Reactive village:** hear the bell where it carries and see distinct cast responses to child and allegiance outcomes. | A3, B2, C3, D1, D2, D4 | 0.7–0.9 |
 | **D10 Finding the way:** discover the full map, ask where and knock on a real accessible door. | all 57 rooms | 0.6–0.8 |
 | **D11 Character choice:** choose the reconciled ancestry/attributes once and use inherited skills in real swim/shop consumers. | B2, B4, B6, C1, D6, D12 | 0.6–0.8 |
