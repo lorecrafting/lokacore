@@ -360,4 +360,4 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [B8 Maud services validator refactor recheck](2026-10-05-b8-maud-services-primary-review.md#authoring-validator-refactor-recheck--approve): exact source `b411507b`, APPROVE; 16 controlled cases preserve complete ordered diagnostics, 15 focused tests and complexity/size checks pass, finite-stock bypass mutant fails as required. No findings.
 
-- [Review knowledge trail: preserve findings and link reusable rules/deferred work](2026-10-05-review-knowledge-trail-review.md): local draft `docs/review-knowledge-trail` at `2cd18ef1`, CHANGES REQUIRED; RKT-01 owner statement not retained verbatim.
+- [Review knowledge trail: preserve findings and link reusable rules/deferred work](2026-10-05-review-knowledge-trail-review.md): local draft `docs/review-knowledge-trail` at `2cd18ef1`, CHANGES REQUIRED; scoped fix round 1 `99f757a0`, APPROVE, RKT-01 closed by retained verbatim owner statement and labeled interpretation.

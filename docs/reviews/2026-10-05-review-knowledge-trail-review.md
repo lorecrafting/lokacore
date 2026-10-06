@@ -60,3 +60,22 @@ checks and hosted CI were not run by this reviewer.
 
 Ponytail Review: lean already; no actionable simplification. The remaining issue
 is evidence fidelity, not scope or complexity.
+
+## Scoped fix round 1
+
+Reviewed source head `99f757a0aaea5ec837b3f88963821b6fe4b72c93`, with only the
+owner-decision diff from `2cd18ef1b908464b107e4147c17d3fd4326f5507` in scope.
+
+**Final verdict: APPROVE. RKT-01 closed; no open findings.**
+
+The decision now retains the full owner statement and explicitly labels the
+following interpretation. Compared the statement with the owner words supplied
+by the PM, including the original double space after “if” clarified in the
+fix-round message; the review's initial PM-supplied quotation above had one space.
+The boundary that this direction does not adopt Beads remains explicit. The
+operational guidance and its existing consumers are unchanged.
+
+Ran `mise exec -- elixir bin/check_docs.exs` in the source worktree at the exact
+fix head: exit 0, 602 docs, zero broken links and zero unreachable files.
+`git diff --check 2cd18ef1 99f757a0`: exit 0. Docs-only mutation testing remains
+omitted. Ponytail Review: lean already; no actionable simplification.
