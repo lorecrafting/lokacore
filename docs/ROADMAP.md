@@ -162,11 +162,10 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local `main` has completed **10 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B7, C1). GitHub `main` has the first nine;
-the latest source publication is [#206](https://github.com/lorecrafting/lokacore/pull/206),
-B4 refillable light and safe dark-well recovery. B7 Well Lane waterskins and
-liquid actions await their publication PR.
+Local and GitHub `main` have completed **10 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B7, C1). The latest source publication is
+[#209](https://github.com/lorecrafting/lokacore/pull/209), B7 Well Lane waterskins
+and liquid actions.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -214,7 +213,7 @@ Its [primary source review](reviews/2026-10-05-b7-waterskin-primary-review.md) a
 approved after the authored-alias, Pour ownership and live-quantity findings were
 fixed. Local `main` carries chapter 0.0.22/API1.20, hash
 `0f744a6c12e8cde1c70cac454e16c733bf5ec27265fc6ad2cd7ad1b025e9dbf8`
-and 96 IDs. Accumulated local checks passed; hosted publication remains ahead.
+and 96 IDs. Accumulated local and all six hosted checks passed; it is published in #209.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
