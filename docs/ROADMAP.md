@@ -331,7 +331,10 @@ D7 deer has a [PM-selected planning proposal](decisions/pm-decision-d7-deer-2026
 and [re-pinned brief](briefs/chapter-one/d7-deer-brief-2026-10-05.md) on published
 C3/C4/D4. Three one-slot local populations replace the provisional nine-room
 corridor; delayed sight flight and typed deer/hide origin remain source work.
-Independent plan review, D7 release pins, checks and PR are pending.
+The [independent plan review](reviews/2026-10-06-d7-deer-plan-review.md) found three
+source-readiness gaps; the PM selected the night window, zero-hit deer profile and
+checked population-transfer sight cause in the local fix. Reviewer recheck, D7
+release pins, source checks and PR are pending.
 
 D3 western Ashmere has a [brief](briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md)
 and independently approved provisional source for five rooms, Hob, and readable
