@@ -363,3 +363,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [B8 Maud services validator refactor recheck](2026-10-05-b8-maud-services-primary-review.md#authoring-validator-refactor-recheck--approve): exact source `b411507b`, APPROVE; 16 controlled cases preserve complete ordered diagnostics, 15 focused tests and complexity/size checks pass, finite-stock bypass mutant fails as required. No findings.
 
 - [Review knowledge trail: preserve findings and link reusable rules/deferred work](2026-10-05-review-knowledge-trail-review.md): local draft `docs/review-knowledge-trail` at `2cd18ef1`, CHANGES REQUIRED; scoped fix round 1 `99f757a0`, APPROVE, RKT-01 closed by retained verbatim owner statement and labeled interpretation.
+
+- [D4 homes, finite apples and first held-food Eat plan](2026-10-05-d4-homes-orchard-plan-review.md): exact planning head `7779c0fe`, independent CHANGES REQUIRED; D4-P1 requires a visible, receipt-bound confirmed Eat result after its apple detail disappears, including replay/reopen. Terminal custody, finite Harvest, cartridge numbers, child truth, schedules and null source proof checked; docs-only.
