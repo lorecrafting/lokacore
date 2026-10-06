@@ -1,0 +1,22 @@
+COMMAND: node --test kernel/ts/test/transport.test.ts mobile/authority/local-story/light.test.ts
+EXIT: 0
+✔ paid outbound and free return join exact conserved balances and body entry (83.546583ms)
+✔ unaffordable and forged endpoint offers refuse atomically (101.038291ms)
+✔ recovery waiver uses actual death owner, isle room and contained roots (46.805ms)
+✔ Sedge teaches swim once freely through the original present dialogue (49.48ms)
+✔ loader rejects invalid endpoint, funding, action and free lesson bindings (273.568ms)
+✔ boarding remains inspectable with a disabled offer during a real encounter (45.241208ms)
+✔ actual torch oil and nested intervals survive cold reopen and sell/buyback with conserved pennies (177.206084ms)
+✔ real failed and unknown refill commits reconcile the entire writer group and exact retry (90.899666ms)
+✔ corrupt fuel and forged refills refuse without repairing SQLite (243.236ms)
+✔ dark lethal combat cold reopens and permits the gear-free owner corpse walk and exact recovery (225.502292ms)
+✔ a light-only cartridge reopens lawful refill history and rejects a bounded forged charge (9.862875ms)
+✔ undeclared fuel rows refuse in a cartridge without light metadata and leave SQLite untouched (5.505542ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1671.659

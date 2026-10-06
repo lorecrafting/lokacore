@@ -1237,3 +1237,6 @@ and scheduled departure retain existing admission. Movement, readable details,
 light perception and schedule jobs keep their existing state writers. No new
 command, capability or save shape is selected. Release/API/hash/allocation pins
 remain provisional until the ordered source integration and independent re-pin.
+
+See the [provisional D3 source proof](../evidence/2026-10-06-d3-western-ashmere/README.md)
+for focused checks and outstanding integration/publication work.
