@@ -30,3 +30,5 @@ Read the relevant [mechanics](../../lessons/mechanics.md), [storage](../../lesso
 Stop at PM for a re-pinned predecessor mismatch, spec conflict, unbound displayed quote, required path gated by training, new generic framework or portable foundation/proposal change. The policy is adopted, but this active-spec amendment requires fresh scoped review before publication/source GO; no D12 source, test, browser or save proof is claimed.
 
 Planning self-review: Ponytail finds no new framework, stock ledger, quote token, currency store or dependency. Correctness preserves acquire≠qualify≠use, literal alias input, current post-settlement pricing, combined carry and atomic finite-ID/payment custody. These are design checks only; no runtime tests, mutations or browser/native proof were run. Independent approval covers the prior policy draft only; this adoption amendment awaits scoped review.
+
+Provisional source/check checkpoint: [D12 local evidence](../../evidence/2026-10-06-d12-practical-skills/README.md). Independent source approval, final successor pins, browser proof and publication remain pending.

@@ -1,0 +1,35 @@
+$ mise exec -- node --test kernel/ts/test/practical_skills.test.ts kernel/ts/test/practical_skills_contracts.test.ts kernel/ts/test/training.test.ts kernel/ts/test/commerce.test.ts kernel/ts/test/infirmary.test.ts kernel/ts/test/training_contracts.test.ts kernel/ts/test/commerce_contracts.test.ts kernel/ts/test/infirmary_contracts.test.ts
+✔ buy at the carrying ceiling, sell and buyback conserve forty pennies and one identity (34.427ms)
+✔ projection and direct exchange refuse too-heavy, poor, absent and changed-quote purchases atomically (11.547916ms)
+✔ sell requires direct eligible custody and funded Peg (1.194417ms)
+✔ loader independently rejects malformed shop stock and funding (338.46025ms)
+✔ shop contracts reject missing fields and malformed positive prices (3.393458ms)
+✔ finite harvest selects the lowest real ID at equality and Drop/Take share stock (16.617875ms)
+✔ four immediate explicit exchanges conserve all twelve herbs/bandages and cap only S9 gain (296.556792ms)
+✔ exchange final load allows reducing overload and positive-net equality, refuses one gram over (17.962333ms)
+✔ bound turn-in refuses stale exact custody and older occurrence without effects (46.208ms)
+✔ global saturation spends no allowance and unrelated loss never refunds S9 contribution (52.64675ms)
+✔ exchange retains original Wick bindings after definition mapping drift (6.658666ms)
+✔ harvest, exchange and retirement retain required identities and bounded stock (5.774667ms)
+✔ loader independently rejects invalid authored exchange and harvest stock (597.904ms)
+✔ loaded careful alias resolves literal input and transfers the two lowest finite IDs (279.447584ms)
+✔ careful refuses atomically at each independent boundary while ordinary stock-one Harvest remains legal (480.336375ms)
+✔ one current quote applies all seven floors and conserves a controlled 10p Buy at 9p (241.009959ms)
+✔ method is literal and optional declarations enforce every new field and numeric boundary (1866.997833ms)
+✔ unqualified learning persists distinct acquisition and one-time exact payment and custody (92.066458ms)
+✔ lesson rechecks teacher, exact original gift, money and carry atomically (31.18025ms)
+✔ only qualified learned wield custody selects the sword at the due opportunity (103.496166ms)
+✔ strict dodge then shield block stop later draws on independent S3/S4 answers (56.365458ms)
+✔ sleeping cannot defend and lethal armed hits close before retaliation (36.227917ms)
+✔ new typed contracts require independent fields and reject boundary values (2.609875ms)
+✔ skill loader owns reserved acquisition, qualifications, teacher funding and real equipment shapes (297.604375ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2461.0885
+
+exit_status=0

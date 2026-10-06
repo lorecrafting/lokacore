@@ -1,0 +1,32 @@
+✖ corrupt two-item receipt and fully funded forged discounted quote refuse without rewriting the save (694.449833ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1185.433458
+
+✖ failing tests:
+
+test at mobile/authority/local-story/practical_skills.test.ts:167:1
+✖ corrupt two-item receipt and fully funded forged discounted quote refuse without rewriting the save (694.449833ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"open"}
+  + actual - expected
+  
+  + 'open'
+  - 'save_corrupt'
+  
+      at TestContext.<anonymous> (file://<WORKTREE>/mobile/authority/local-story/practical_skills.test.ts:214:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 'open',
+    expected: 'save_corrupt',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

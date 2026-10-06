@@ -1,0 +1,46 @@
+✖ loaded careful alias resolves literal input and transfers the two lowest finite IDs (88.255709ms)
+✔ careful refuses atomically at each independent boundary while ordinary stock-one Harvest remains legal (213.922542ms)
+✔ one current quote applies all seven floors and conserves a controlled 10p Buy at 9p (146.673292ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 612.653
+
+✖ failing tests:
+
+test at kernel/ts/test/practical_skills.test.ts:31:1
+✖ loaded careful alias resolves literal input and transfers the two lowest finite IDs (88.255709ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      [
+        '0556eeda-6c38-8679-bc0b-5a9848eba57a',
+        '65271e0f-75a2-82f3-a0a7-a15f7418ae6a',
+        '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+        0
+      ],
+  -   [
+  -     '37ef3668-8242-851e-94bc-66e562abebd7',
+  -     '65271e0f-75a2-82f3-a0a7-a15f7418ae6a',
+  -     '3d4829ad-9e43-81ef-bc10-66b1b267e157',
+  -     0
+  -   ]
+    ]
+  
+      at TestContext.<anonymous> (file://<WORKTREE>/kernel/ts/test/practical_skills.test.ts:59:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ [ '0556eeda-6c38-8679-bc0b-5a9848eba57a', '65271e0f-75a2-82f3-a0a7-a15f7418ae6a', '3d4829ad-9e43-81ef-bc10-66b1b267e157', 0 ] ],
+    expected: [ [ '0556eeda-6c38-8679-bc0b-5a9848eba57a', '65271e0f-75a2-82f3-a0a7-a15f7418ae6a', '3d4829ad-9e43-81ef-bc10-66b1b267e157', 0 ], [ '37ef3668-8242-851e-94bc-66e562abebd7', '65271e0f-75a2-82f3-a0a7-a15f7418ae6a', '3d4829ad-9e43-81ef-bc10-66b1b267e157', 0 ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

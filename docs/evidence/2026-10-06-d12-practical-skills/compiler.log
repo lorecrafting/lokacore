@@ -1,0 +1,10 @@
+$ mise exec -- mix test test/loka/content_practical_skills_test.exs test/loka/content_training_test.exs
+Compiling 4 files (.ex)
+Running ExUnit with seed: 850790, max_cases: 16
+
+....
+Finished in 1.3 seconds (1.3s async, 0.00s sync)
+
+Result: 4 passed
+
+exit_status=0

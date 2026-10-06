@@ -1,0 +1,15 @@
+✔ real SQLite reopens buy before acceptance, active, and both chronological payout orders (182.31775ms)
+✔ purchase receipt retry, sale and buyback cold reopen one exact item and conserved pennies (52.631084ms)
+✔ buy under an active and expired S2 retains the exact ledger and pending/failure truth (54.914375ms)
+✔ cold open refuses omitted debit, wrong recipient, false prior balance and reversed receipt order (210.7855ms)
+✔ shop failed COMMIT and both unknown outcomes retain all prior or all next rows (99.56725ms)
+✔ satchel Put/Take is immediately useful but active S2 ancestor Sell is refused (58.770625ms)
+✔ v018 ID pin binds the spawned world, purchased torch and worn slot after cold reopen (37.17175ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1120.621458
