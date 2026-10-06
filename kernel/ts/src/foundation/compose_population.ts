@@ -48,7 +48,7 @@ export function initializePopulationResource(
   return check(
     row === undefined &&
       created?.group === op.writer_group &&
-      origin?.role === 'hound' &&
+      origin?.role === ((spec as Obj | undefined)?.member_role ?? 'hound') &&
       origin.member_id === op.entity_id &&
       same(op.resource, { ...(origin.by as Obj), kind: 'resource', key: 'hp' }) &&
       op.at >= ctx.state.clock &&
@@ -67,21 +67,28 @@ function slotValid(
       (next.generation === 0 &&
         next.member_id === null &&
         next.replacement_due === null &&
-        next.last_flight_at == null) ||
+        next.last_flight_at == null &&
+        next.sight_job_id == null) ||
       born(next)
     );
   const prior = row as typeof next;
   if (prior.generation === 0) return born(next);
-  if (prior.replacement_due === null)
+  if (prior.replacement_due === null) {
+    if (
+      prior.member_id === null ||
+      next.generation !== prior.generation ||
+      next.member_id !== prior.member_id
+    )
+      return false;
+    if (next.replacement_due !== null)
+      return next.last_flight_at === prior.last_flight_at && next.sight_job_id == null;
+    const changedFlight = next.last_flight_at !== prior.last_flight_at;
+    const changedSight = next.sight_job_id !== prior.sight_job_id;
     return (
-      prior.member_id !== null &&
-      next.generation === prior.generation &&
-      next.member_id === prior.member_id &&
-      ((next.replacement_due !== null && next.last_flight_at === prior.last_flight_at) ||
-        (next.replacement_due === null &&
-          next.last_flight_at !== null &&
-          next.last_flight_at !== prior.last_flight_at))
+      (changedFlight && Number.isSafeInteger(next.last_flight_at) && next.sight_job_id == null) ||
+      (!changedFlight && changedSight)
     );
+  }
   return (
     next.generation === prior.generation + 1 &&
     next.member_id !== null &&

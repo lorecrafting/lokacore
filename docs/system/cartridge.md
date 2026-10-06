@@ -1329,6 +1329,20 @@ Compiler and loader reject unknown fields, unresolved skill/action/narration ref
 
 D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.
 
+## D7 deer planning declarations
+
+**PM-selected proposal; independent plan review and source proof pending.** The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
+
+| Plan | Initial home | Two-room legal area | Cap/targets | Replacement | Wander | Sight delay |
+|---|---|---|---|---|---|---|
+| Willow deer | Willow Shade | Willow Shade, Drowned Oak | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Oak deer | Drowned Oak | Drowned Oak, Willow Shade | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Orchard deer | Orchard | Orchard, Smithy | 1 / 1 day and night | 172800 | 3600 | 300 |
+
+The aggregate fresh and live cap is three. Each plan declares `night_start: 20` and `night_end: 6`, reusing the chapter hound window; equal day/night targets make that window neutral to deer count. Each bundle has one HP1 attackable deer with `attack {chance: 0, damage_min: 1, damage_max: 1}`, one directly held 100g hide and one public fixed-room corpse template. The zero chance satisfies the existing attack-profile schema and C1 strict roll `< chance`, so deer never land a retaliatory hit; the positive damage bounds satisfy schema but are unreachable. The player can still Attack the deer. Existing reciprocal ungated exits provide legal flight and wandering. Smithy is only a refuge, not an additional birth home. No deer can enter a hound area or cross the nine-room route through nonadjacent transfer.
+
+Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. Release/API/hash/allocation answers are derived independently only after source; the published C4 `v032` pin remains the predecessor. No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
+
 ## C5 bleed and bandage declarations
 
 **Selected planning values, not installed source.** [C5 mechanics](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) opts the existing C3 hound attack into one effect definition, `bleeding`, on actual positive surviving player HP loss. The narrow authored fields are hound attack `on_positive_hit: {effect: "bleeding"}`, effect `{duration: 300, tick_every: 100, hp_loss: 1}` and each existing bandage item's `bandage: {effect: "bleeding", skill: "bandage", action: "bandage", narration: "narration.bandage"}`. An unrefreshed wound ticks at +100 and +200, then expires without damage at +300. These are content values; the engine encodes no default. This limited loss lets the player treat or Flee while reading time continues, without requiring a Wait.

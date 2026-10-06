@@ -1,0 +1,27 @@
+✖ sight-only receipt cannot justify a later deer binding (26.473709ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 942.365292
+
+✖ failing tests:
+
+test at mobile/authority/local-story/deer.test.ts:170:1
+✖ sight-only receipt cannot justify a later deer binding (26.473709ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (<local-path>:224:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /inconsistent deer sight receipt/,
+    operator: 'throws',
+    diff: 'simple'
+  }

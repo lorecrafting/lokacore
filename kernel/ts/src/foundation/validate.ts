@@ -112,10 +112,10 @@ function keyword(k: string, arg: any, v: any, path: string, defs: Defs): Contrac
         Object.hasOwn(v, key) ? [] : err(child(path, key), 'missing_property'),
       );
     case 'requiredUnless': {
-      const [key, fields] = Object.entries(arg as Record<string, string[]>)[0]!;
-      return Object.hasOwn(v, key)
+      const alternatives = Object.entries(arg as Record<string, string[]>);
+      return alternatives.some(([key]) => Object.hasOwn(v, key))
         ? []
-        : fields.flatMap((field) =>
+        : alternatives[0]![1].flatMap((field) =>
             Object.hasOwn(v, field) ? [] : err(child(path, field), 'missing_property'),
           );
     }

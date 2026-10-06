@@ -332,6 +332,11 @@ D3 western Ashmere's five mill/cottage rooms, Hob and readable clues are publish
 The [final independent review](reviews/2026-10-06-d3-western-ashmere-final-review.md),
 full local gate, isolated Book browser routes and all exact-head hosted checks passed.
 
+D7 bounded deer is in final local integration after D6 publication. Its
+[reviewed provisional source](briefs/chapter-one/d7-deer-brief-2026-10-05.md)
+adds three cap-one deer, generation-bound delayed sight flight and conserved hides.
+The local successor is v036/API1.31 with independently derived hash `b0c0da219ee8d19a5d6bf0e9d6a18c138d9c5da1543c28e8b1949d5e17aebfc0` and 199 genesis IDs; exact-head reviews, checks and PR remain pending.
+
 D6 underwater routes, qualified swim, the drowning deadline and owned-bottom-corpse
 Chapel recovery are published in [#247](https://github.com/lorecrafting/lokacore/pull/247)
 at chapter v035/API1.30. The [selected contract](decisions/pm-decision-d6-water-depths-2026-10-06.md),

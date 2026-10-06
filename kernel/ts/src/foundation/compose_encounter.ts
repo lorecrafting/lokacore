@@ -224,11 +224,15 @@ export function composeJob(
   if (row?.status !== 'pending') return failed;
   if (op.op === 'job.cancel')
     return (
-      op.water_generation !== undefined
-        ? row.water_generation === op.water_generation &&
-          row.actor_id === op.actor_id &&
-          op.encounter_id === undefined
-        : op.encounter_id !== undefined && row.encounter_id === op.encounter_id
+      op.sight_member_id !== undefined
+        ? op.encounter_id === undefined &&
+          op.water_generation === undefined &&
+          (row.sight as Row | undefined)?.member_id === op.sight_member_id
+        : op.water_generation !== undefined
+          ? row.water_generation === op.water_generation &&
+            row.actor_id === op.actor_id &&
+            op.encounter_id === undefined
+          : op.encounter_id !== undefined && row.encounter_id === op.encounter_id
     )
       ? { value: { ...row, status: 'cancelled' } }
       : failed;
@@ -241,6 +245,15 @@ function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
       (op.actor_id === undefined) ||
     (op.quest_instance_id !== undefined &&
       (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+  )
+    return false;
+  if (
+    op.sight !== undefined &&
+    (op.job.kind !== 'population' ||
+      op.encounter_id !== undefined ||
+      op.quest_instance_id !== undefined ||
+      op.water_generation !== undefined ||
+      op.actor_id !== undefined)
   )
     return false;
   if (
@@ -270,5 +283,6 @@ function pendingJob(op: Extract<DeltaOp, { op: 'job.schedule' }>): Json {
     ...(op.quest_instance_id === undefined
       ? {}
       : { quest_instance_id: op.quest_instance_id, actor_id: op.actor_id }),
+    ...(op.sight === undefined ? {} : { sight: op.sight }),
   };
 }

@@ -115,8 +115,9 @@ defmodule Loka.Core.Contracts do
     do: check(Enum.count(keys, &Map.has_key?(v, &1)) == 1, path, :exclusive_properties)
 
   defp keyword("requiredUnless", r, v, path, _) do
-    [{key, fields}] = Map.to_list(r)
-    if Map.has_key?(v, key), do: [], else: keyword("required", fields, v, path, nil)
+    if Enum.any?(Map.keys(r), &Map.has_key?(v, &1)),
+      do: [],
+      else: keyword("required", r |> Map.values() |> hd(), v, path, nil)
   end
 
   # ponytail: recompiles the pattern on every call; precompile per contract if it shows up in profiles.

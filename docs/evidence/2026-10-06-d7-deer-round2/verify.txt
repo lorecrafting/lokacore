@@ -1,0 +1,8 @@
+README.md: OK
+capture.py: OK
+focused.log: OK
+full-gate.log: OK
+save-red.log: OK
+sight-only-red.log: OK
+sqlite.log: OK
+exit 0

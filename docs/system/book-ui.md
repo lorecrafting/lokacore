@@ -899,6 +899,12 @@ The Willow Shade patch shows current derived finite supply and its ordinary one-
 
 Pending, stale, refused or fenced actions claim no lesson, extra herb or discounted purchase. Confirmed receipts route teacher/patch/shop history once and refresh acquired status, currency and actual custody. Isolated browser interaction and refresh prove these loaded production controls; headless Node/kernel and real SQLite transaction/fault proof remain separate. Native sessions and owner-save access are outside D12's source assignment.
 
+## D7 deer sight and hide details (planning contract)
+
+**PM-selected proposal; independent plan review and source proof pending.** Project each co-present living deer as its own exact runtime NPC detail and Attack target through ordinary GameView/admission. The 300-unit pending sight job does not hide a present target; successful sight flight removes that exact deer from the room/detail and closes its Combat page when no opponent remains, including after a surviving equal-due round. If the encounter remains live, stale or blocked sight leaves Combat and its next round intact. Narrate only confirmed departure, with its actual adjacent direction; a stale pending or refused job claims none. Flight reveals no corpse or hide.
+
+A true combat death exposes that deer's real public corpse and exact conserved hide through ordinary Contents/Take/Carrying, including after refresh. A stale target never binds a new generation; render/entry alone gives no item or credit. Demonstrate a legal +150 attack-before-flight kill, an unengaged live sight departure, and a controlled missed attack whose surviving equal-due round hands off to +300 flight, with confirmed receipt routing and refresh. Native device work remains paused; this clause does not promise a Sell/use action for a hide without an admitted consumer.
+
 ## C5 bleeding and bandage details
 
 **Selected planning interaction; source pending.** Confirmed GameView condition data shows the one active bleed and its authored remaining time/loss on Character/status and the current Combat page. Read the active generation and times from projected state; the presenter never computes or writes an effect, damage or cure. Committed hit, refresh, tick, expiry and death lines use their own confirmed receipts/causes and appear once. Pending, stale or refused actions do not claim a cure. The existing world clock continues while any Book page is open.
