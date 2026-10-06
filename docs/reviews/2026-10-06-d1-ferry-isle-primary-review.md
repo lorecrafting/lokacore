@@ -130,3 +130,20 @@ Earlier provisional pin failures are resolved. Ponytail Review: lean; conserved
 owners and fixed checked transport shape suffice, and the escape fix is one
 operator change. No source edit, owner save, preview or native session occurred.
 Hosted CI/publication and browser layout remain separately gated.
+
+## Final read-only Sol review at PR #231 head `cf5f8cbe`
+
+The PM ran the required read-only hosted review after all six checks were green
+(the browser check passed on an unchanged-head rerun). Its answer is preserved
+verbatim below. Both findings remain open for the developer's fix and scoped
+re-review; the prior primary approval does not close them.
+
+```text
+CHANGES REQUIRED
+
+D1-1 | blocker | docs/evidence/2026-10-06-d1-ferry-isle-publication/README.md:26 @ cf5f8cbe1b2ace387b821cb1482d44fc6e4f266b
+Required D1 browser proof is absent. Hosted tests exercise movement and Maud’s dream, never ferry boarding, Sedge, return or corpse recovery. A browser-only broken boarding/lesson control could ship with all six checks green. Complete the route required by docs/system/book-ui.md:638.
+
+D1-2 | should-fix | mobile/app/tests/book.e2e.ts:29 @ cf5f8cbe1b2ace387b821cb1482d44fc6e4f266b
+The first hosted attempt reported successful navigation taps but then could not find Maud at line 32. Setup never verifies either destination, and CI discarded the failure screen. This leaves an actionable reliability failure unresolved; the passing rerun does not establish whether navigation input was lost or setup raced. Assert confirmed room transitions and retain failure diagnostics before classifying it as test-only.
+```
