@@ -1,6 +1,7 @@
 import { status } from '../mechanics/skills.ts';
 import { refString, type World } from '../runtime/decision.ts';
-import type { DefinitionRef } from '../contracts.gen.ts';
+import type { DefinitionRef, Key } from '../contracts.gen.ts';
+import { choice, value } from '../mechanics/attributes/shared.ts';
 
 export function skillViews(world: World, steps = { n: 0 }) {
   const ref = (kind: string, key: DefinitionRef['key']): DefinitionRef => ({
@@ -20,9 +21,27 @@ export function skillViews(world: World, steps = { n: 0 }) {
   });
   const attributes = Object.values(world.cartridge.attributes ?? {}).map((a) => ({
     attribute: ref('attribute', a.key),
-    value: a.start,
+    value: value(world, world.character, ref('attribute', a.key)),
   }));
-  return { ...(skills.length && { skills }), ...(attributes.length && { attributes }) };
+  const selected = choice(world, world.character);
+  return {
+    ...(skills.length && { skills }),
+    ...(attributes.length && { attributes }),
+    ...(selected && { ancestry: selected.ancestry }),
+    ...(!selected &&
+      world.cartridge.ancestries && {
+        ancestry_choices: Object.entries(world.cartridge.ancestries).map(([key, declaration]) => ({
+          key: key as Key,
+          label: declaration.label,
+          description: declaration.description,
+          attribute: declaration.attribute,
+          modifier: declaration.modifier,
+          ...(declaration.skill && { skill: declaration.skill }),
+          ...(declaration.faction && { faction: declaration.faction }),
+          ...(declaration.dark_sight && { dark_sight: true as const }),
+        })),
+      }),
+  };
 }
 
 /** Original free-bound lessons identify the existing actor SkillViews; no second acquisition projection. */

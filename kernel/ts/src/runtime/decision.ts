@@ -10,6 +10,7 @@ import {
   type BarrierState,
   type BleedRow,
   type CharacterId,
+  type CharacterChoice,
   type Command,
   type CommandPayload,
   type CompiledCartridge,
@@ -63,6 +64,7 @@ export type State = {
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
   readonly encounters?: Readonly<Record<string, EncounterRow>>;
   readonly created?: Readonly<Record<string, EntityIdentity>>;
+  readonly characters?: Readonly<Record<string, CharacterChoice>>;
   readonly clock: number;
   readonly containers: Readonly<Record<string, EntityId>>;
   readonly rng: RngState;
@@ -109,9 +111,7 @@ export type JobRow = {
   readonly bleed_generation?: number;
   readonly sight?: Extract<DeltaOp, { op: 'job.schedule' }>['sight'];
 };
-
 export { row } from './rows.ts';
-
 /** A QuestInstance as composition stores it (foundation/compose.ts quest; 03 §12, 06 §4). */
 export type QuestRow = {
   readonly quest: DefinitionRef;

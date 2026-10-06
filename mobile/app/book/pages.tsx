@@ -199,6 +199,7 @@ export function CharacterPage(
     <Sheet title="Character">
       {!known && <Text style={note}>Nothing is known about you yet.</Text>}
       {position && <Text style={prose}>{cap(position)}</Text>}
+      {p.view?.ancestry && <Text style={prose}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>}
       {p.view?.bleeding && <Text style={prose}>{p.text(p.view.bleeding.label)}</Text>}
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
@@ -206,6 +207,34 @@ export function CharacterPage(
           {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
         </Text>
       ))}
+    </Sheet>
+  );
+}
+
+export function AncestryPage(p: {
+  view: GameView;
+  text: Say;
+  buttons: Button[];
+  pending: boolean;
+  press: (b: Button) => void;
+}) {
+  return (
+    <Sheet title="Choose your ancestry">
+      <Text style={prose}>Choose once before your story begins.</Text>
+      {p.view.ancestry_choices?.map((choice) => {
+        const button = p.buttons.find(
+          (b) =>
+            b.action_key === 'choose_ancestry' &&
+            (b.input as { ancestry?: string }).ancestry === choice.key,
+        );
+        return (
+          <View key={choice.key}>
+            <Text style={prose}>{p.text(choice.description)}</Text>
+            {!p.pending && button && <Act b={button} press={p.press} />}
+          </View>
+        );
+      })}
+      {p.pending && <Text style={note}>Saving your choice…</Text>}
     </Sheet>
   );
 }

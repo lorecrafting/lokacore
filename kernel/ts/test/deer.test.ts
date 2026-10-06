@@ -67,9 +67,9 @@ function slot(w: World, member: string) {
 }
 
 // Breaks: a new plan shifts genesis allocation or mints a second member or hide.
-test('independent v036 genesis IDs include all three deer pairs and control jobs', () => {
+test('independent active genesis IDs include all three deer pairs and control jobs', () => {
   const w = fresh();
-  const expected = read('protocol/fixtures/missing_child_v036_ids.json');
+  const expected = read('protocol/fixtures/missing_child_v038_ids.json');
   for (const name of ['oak_deer', 'orchard_deer', 'willow_deer']) {
     for (const role of ['deer', 'hide']) {
       const id = Object.entries(w.state.created ?? {}).find(

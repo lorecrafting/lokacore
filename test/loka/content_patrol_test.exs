@@ -5,11 +5,11 @@ defmodule Loka.ContentPatrolTest do
   test "authored patrol references expand at their own boundary" do
     assert {:ok, bytes, []} = Loka.Content.compile("cartridges/ashmere_missing_child")
     c = JSON.decode!(bytes)["cartridge"]
-    q = c["quests"]["ashmere_missing_child@0.0.37:quest/watch_rounds"]
+    q = c["quests"]["ashmere_missing_child@0.0.38:quest/watch_rounds"]
 
     assert q["patrol"]["npc"] == %{
              "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => "0.0.37",
+             "cartridge_version" => "0.0.38",
              "kind" => "npc",
              "key" => "tobin"
            }
@@ -23,7 +23,7 @@ defmodule Loka.ContentPatrolTest do
              ~w(north_gate village_green east_gate watch_post)
 
     assert q["patrol"]["trust_fact"]["kind"] == "fact"
-    d = c["dialogues"]["ashmere_missing_child@0.0.37:dialogue/tobin_watch"]
+    d = c["dialogues"]["ashmere_missing_child@0.0.38:dialogue/tobin_watch"]
     assert d["choices"]["start"]["patrol"]["quest"] == d["choices"]["start"]["accept"]
     assert d["choices"]["continue"]["patrol"]["quest"]["kind"] == "quest"
   end

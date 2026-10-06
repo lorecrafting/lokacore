@@ -20,6 +20,8 @@ import { allocator, rejected, type Mint, type Rule, type Steps, type World } fro
 import { invariants as factInvariants } from '../mechanics/fact.ts';
 import { refusal } from '../commands/actions.ts';
 import * as action_recipe from '../mechanics/action_recipe/rule.ts';
+import * as attributes from '../mechanics/attributes/rule.ts';
+import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
 import * as food from '../mechanics/food/rule.ts';
 import * as bleed from '../mechanics/bleed/rule.ts';
@@ -45,6 +47,7 @@ import { newWorld, NIL } from './fresh.ts';
 
 // Each capability's rule; the key binds a module to the capability whose commands reach it.
 const RULES: { readonly [C in keyof Owned]?: Rule<C> } = {
+  attributes: attributes.decide,
   movement: movement.decide,
   combat: combat.decide,
   population: population.decide,
@@ -86,14 +89,13 @@ const RULELESS = [
   'reaction',
   'narration',
   'target_resolution',
-  'attributes',
   'skills',
   'topics',
 ];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */
 export const INSTALLED: Installed = {
-  kernel_api: '1.32',
+  kernel_api: '1.33',
   capabilities: Object.fromEntries([...Object.keys(RULES), ...RULELESS].map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,
@@ -115,6 +117,12 @@ export function step(
   action?: Key,
 ): Stepped {
   if (command.payload.type === 'elapsed') return { decision: rejected('permission_denied'), world };
+  if (
+    world.cartridge.ancestries &&
+    !characterChoice(world, world.character) &&
+    command.payload.type !== 'choose_ancestry'
+  )
+    return { decision: rejected('invalid_state'), world };
   const owner = ownerOf(CAPABILITY_OWNERS.command, command.payload.type) ?? '';
   const rule = RULES[owner as keyof Owned] as unknown as AnyRule | undefined;
   if (!rule || !Object.hasOwn(world.cartridge.lock.capabilities, owner))

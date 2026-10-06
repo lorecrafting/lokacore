@@ -11,7 +11,6 @@ import { key, same, target, type Result } from '../foundation/compose.ts';
 import { CAPABILITY_OWNERS, EVALUATION_FAULTS, type DeltaOp } from '../contracts.gen.ts';
 import { gameview_agrees_with_admission } from '../view/invariants_view.ts';
 import { validate } from '../foundation/validate.ts';
-
 // Observations are decoded JSON; fields are read loosely, as in the Elixir twin.
 type Any = any;
 const moved = (r: Result): [string, Json][] =>
@@ -34,7 +33,6 @@ function acyclic(final: Map<string, Json>): boolean {
   }
   return true;
 }
-
 // Each op reads one value of its target and leaves another (the Elixir twin's link/1).
 function link(op: Any): [Json | undefined, Json] {
   const fixed: Record<string, [Json | undefined, Json]> = {
@@ -46,6 +44,7 @@ function link(op: Any): [Json | undefined, Json] {
     'choice.attempt': ['pending', 'pending'],
   };
   if (fixed[op.op]) return fixed[op.op]!;
+  if (op.op === 'character.select') return [undefined, op.value];
   if (op.op === 'fact.assign') return [op.expected, op.value];
   if (op.op === 'bleed.transition') return [op.expected, op.value];
   if (op.op === 'entity.create') return [undefined, op.identity];
@@ -56,6 +55,7 @@ function link(op: Any): [Json | undefined, Json] {
 
 function initial(op: Any, s: Any): Json | undefined {
   const [family] = op.op.split('.');
+  if (op.op === 'character.select') return s.characters?.[op.character_id];
   if (op.op === 'fact.assign') return s.facts?.[key(target(op))] ?? s.fact_defaults?.[key(op.fact)];
   if (op.op === 'fuel.set') return s.fuel?.[op.item_id];
   if (op.op === 'entity.create') return s.created?.[op.identity.id];

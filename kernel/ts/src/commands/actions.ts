@@ -26,6 +26,7 @@ import * as scene from '../mechanics/scene/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import { VERBS } from './verbs.ts';
 import { engaged } from '../mechanics/combat/shared.ts';
+import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -78,6 +79,11 @@ function engine(world: World): ActionSet {
       .filter(
         ([verb]) => locked(verb) && !(verb === 'wait' && world.cartridge.manifest.time_policy),
       )
+      .filter(
+        ([verb]) =>
+          verb !== 'choose_ancestry' ||
+          (!!world.cartridge.ancestries && !characterChoice(world, world.character)),
+      )
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
@@ -120,6 +126,8 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
  * removes them; combat filters the result afterward), which lists never renders directly.
  */
 export function composed(world: World, actor: CharacterId): ActionSet {
+  if (world.cartridge.ancestries && !characterChoice(world, actor))
+    return { choose_ancestry: engine(world).choose_ancestry };
   if (scene.running(world, actor)) return scene.modal();
   const [verbs, own] = [engine(world), cartridge(world, actor)];
   const all = { ...verbs, ...own };
