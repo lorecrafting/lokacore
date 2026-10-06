@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [B9 Lantern Rest and dream primary source review](2026-10-05-b9-lantern-dream-primary-review.md): exact frozen source `8b9e5b52fffdffd34569cb0f6aa837090a7478df`, evidence `05b49b37e167a31e812dbef6b55b34d4aa83a0f5`, independent CHANGES REQUIRED; B9-P1 compiler accepts duplicate bed Rest trigger that loader refuses. Current player/SQLite/Book checks and independent red controls pass; pins provisional.
+
 - [C2 preserved terminal reopen evidence](2026-10-05-c2-terminal-reopen-evidence-review.md): exact local docs/evidence head `e29014d54d7e3534838d77ba650301c3f19fb7f7`, independent APPROVE; same preserved terminal save opens twice after published PR213, historical timeout retained, browser fatal/Restart still due by E3; no findings.
 
 - [C2 Watchman's Rounds staged browser proof scope](2026-10-05-c2-watchmans-rounds-docs-scope-review.md): exact local docs/evidence head `a0b77fbf6e80905451448c1351735a9025a8cfce`, independent APPROVE; fresh shared Book and cold reopen proven, browser fatal/Restart due by E3 and preserved terminal Web timeout open, no findings.
