@@ -3,7 +3,11 @@
 Frozen source: `7bc3f745658b6727ce252c639ea9116a637c833a` on
 `slice/b9-lantern-dream`. Published predecessor: `dec92357f6bdc6242e06ceb56f7c9da0abed8a84`,
 whose source merge `4bcb2eafd0a984c611b71c3e4dc1e0d26defd533` contains D5, D2 and PR224.
-Publication PR/merge and final integrated review-record heads: **null** until recorded.
+Publication PR/merge: **null** until recorded. Final integrated independent records
+are **APPROVE** on source `7bc3f745` / evidence `a39d698c`: primary `fab0881a`,
+save/protocol `e94a740b`, both merge-preserved.
+[Save carryover](../../reviews/2026-10-06-b9-lantern-dream-save-carryover-review.md) verifies
+the final source/evidence alongside the linked primary record.
 No owner save, native preview, phone or device lifecycle proof is claimed.
 
 The independent current answer is `ashmere_missing_child@0.0.28`, API1.25,
@@ -81,5 +85,4 @@ change reuses the existing action-label resolver, governed by the amended shared
 failure are retained. No new/raised source allowances.
 
 [Correctness and Ponytail self-review](self-review.md) and the
-[local draft PR](local-draft-pr.md) describe the final scope. Final reviewer records
-and hosted publication remain the PM's normal gates.
+[local draft PR](local-draft-pr.md) describe the final scope. Final reviewer approvals are recorded; hosted publication remains the PM's normal gate.

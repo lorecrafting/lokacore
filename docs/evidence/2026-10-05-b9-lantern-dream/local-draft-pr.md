@@ -25,5 +25,7 @@ pin/setup/size/contention failures are preserved; timeouts and allowances are un
 [Correctness and Ponytail self-review](self-review.md): existing composition and
 shared details, no unresolved developer findings. Obsolete development restricted-control
 diagnostic intentionally advances to unknown_variant while invalid input still refuses.
-Fresh integrated primary/save records and publication are pending; owner save/native
+[Final primary](../../reviews/2026-10-05-b9-lantern-dream-primary-review.md) and
+[save/protocol carryover](../../reviews/2026-10-06-b9-lantern-dream-save-carryover-review.md)
+reviews both APPROVE the exact final source/evidence. Hosted publication is pending; owner save/native
 verification remains untouched.
