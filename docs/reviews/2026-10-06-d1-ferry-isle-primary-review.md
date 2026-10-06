@@ -182,3 +182,67 @@ Independent bounded verification:
 This verifies the harness portability repair, not completion of hosted CI or
 publication. No gameplay, persistence, protocol, release pin, owner save,
 browser preview or native/device work is part of this recheck.
+
+## Final browser findings scoped recheck — APPROVE
+
+Fresh independent replacement primary reviewer; authored none of D1. Exact
+production source `b0f37b0768825f0952c8a2a1f525e992923fddfc`, evidence-only
+head `cd84ff6d3c6d81113eb0e52b57a25dfabe9a0ab7`. Scope is the changes after
+prior approval: Sol D1-1/D1-2, self-luminous Notice entry and its direct
+projection/invocation callers, active Book rule and retained browser evidence.
+Requirements were derived first from the adopted D1 brief and its governing
+Book/mechanics/save clauses. **Both findings are closed; no new findings.**
+
+- **D1-1:** the production browser journey now exercises the visible 2p boarding
+  offer, rapid double tap with one 20→18p debit, original Sedge's free lesson and
+  cold history, six-room exploration, free return and restored Boathouse/money.
+  The exact uncached zero-retry run passes 3/3. Retained missing-transport-control
+  mutation leaves both prior journeys green and fails the new route at Board;
+  its actual screen/image show the missing control. Controlled recovery passes
+  1/1 on the exact source using only the declared App chapter-import/port seam.
+  Authored lethal combat creates the actual dark-Loft corpse; ordinary Book
+  actions prove Chapel cold reopen without gear, penniless waiver, nested torch/
+  satchel Take, cold recovered inventory and free return. An emptied corpse
+  exposes 2p refusal. The generator/fixture/test/seam were inspected: this is a
+  controlled authored variant, not public-isle danger, injected runtime state or
+  an owner save. Exact item IDs/custody and storage fault claims remain covered
+  by the separately approved source/SQLite evidence.
+- **D1-2:** Maud setup awaits visible confirmed Ferry Landing, Well Lane and
+  Lantern room controls after each transition. Failure-only CI steps retain
+  redacted report, screen text, screenshots and logs; session/cache/trace ZIPs
+  are excluded. The original failed hosted attempt and unchanged-head green
+  retry are preserved. Its original failure screen was never uploaded, so the
+  cause remains unknown; timing/reset is explicitly an inference. No retry or
+  sleep was added to hide the failure.
+- **Notice fix:** entity Read entry keeps precedence. Only when it is absent
+  does entry use the exact Notice's actions; matching uses the projected action
+  key and Notice owner. Existing `noticeButtons` preserves authored target IDs
+  (empty for this recipe), and `intentOf` sends them without substituting the
+  marker ID. Existing confirmed history remains on the marker, with no World
+  leak. The active Book rule records that existing projection contract.
+
+Independent bounded verification in a detached exact-head checkout:
+
+- All **29 evidence hashes match**; no missing/unlisted artifact beyond README,
+  checksum inventory and verification output. Python independently recomputes
+  controlled canonical SHA-256
+  `6b1ec4279bdeee224cf7f460f5d71b2a28d9a2d5190a180562202aa7a5c6f3df`.
+- Actual Book/session polish tests pass **16/16**. Temporarily restoring pre-fix
+  Notice source makes the focused self-luminous test fail (exit 1, missing Marsh
+  glow control); restored exact source passes **1/1** (exit 0). Mutation restored.
+- Retained final Notice controls report **33 pass/1 intended fail** before fix,
+  **34/34** restored, and the full app reports **522 pass/1 intentional skip**,
+  zero failures. Production 3/3 and controlled 1/1 logs agree with their declared
+  exact source and zero-retry commands. Broad green suites/browser sessions were
+  not repeated by this reviewer.
+- Dark-Loft corpse and empty-corpse refusal screenshots were visually inspected;
+  they support the stated functional outcomes. Other captures' page-turn frames
+  remain explicitly limited, with no native/layout certification.
+- Actual diff and direct callers reviewed; `git diff --check` passes. Ponytail
+  Review: lean already; reuse Notice projection, bound buttons and existing
+  invocation/history owners, with no new dependency or machinery.
+
+Prior integrated source/pin and independent save/protocol approvals carry
+forward: cartridge, authority, persistence and protocol are unchanged here.
+This closes the scoped browser findings, not the PM's exact-head hosted CI and
+publication gate. No owner save, native session or source mutation remains.
