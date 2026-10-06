@@ -18,3 +18,9 @@ PR: none yet. Verdict: **CHANGES REQUIRED** for the planning draft; no source ap
 ## Checks and scope
 
 Read the archived chapter reaction and room clauses, current owner child-state decision, movement/barrier, combat/death, D6 water recovery and B2 public Aldric/ledger contracts. The Nave-west/Study-east room definitions are reciprocal and barrier-free; Aldric and the S2 ledger are in public Nave and Peg custody respectively. The proposed exact-edge admission avoids closing egress or S2. `git diff --check` passed. This docs-only review added no tests or mutations. Ponytail review found no new framework; D9-P1 removes an impossible proof obligation without reducing custody/replay checks.
+
+## Scoped fix recheck — `ae7f51dd`
+
+**APPROVE.** D9-P1 is closed: the brief and save clause now require a controlled valid world or isolated seeded save for the actual owned, nonempty Study corpse, exact physical Take, all legal cold-reopen intermediates, real SQLite failed/uncertain COMMIT outcomes, lost acknowledgement and replay. The browser list now covers reachable fox ingress refusal and Study egress, without inventing a Study death producer or changing the reciprocal barrier. D9-Q1 is answered: the real actor hears the Belfry cue; eligible and excluded room boundaries use controlled read-only projection frames over the same accepted event, with no second body or remote sound service. The directly adjacent mechanics and protocol clauses agree. No open findings; source implementation, source review and exact-head CI remain separate.
+
+Scoped `git diff --check` and docs link validation passed (709 docs, zero broken or unreachable links). This was a docs-only recheck; no source tests or mutations were claimed.
