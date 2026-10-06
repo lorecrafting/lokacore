@@ -1,3 +1,8 @@
+d4-browser-roster-green.log: OK
+d4-browser-roster-red.log: OK
+d4-integrated-full.log: OK
+d4-integrated-sim.log: OK
+d4-integrated-size-red.log: OK
 dead-cursor-ex-red.log: OK
 dead-cursor-ts-red.log: OK
 even-flight-red.log: OK

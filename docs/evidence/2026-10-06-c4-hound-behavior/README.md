@@ -2,6 +2,26 @@
 
 The scoped review-fix source head is `251b0bff4f90b7e89cf327f11effe60282791574` with evidence head `7b38aa1428eef28068b96b7e2e6e770ca3d8829c`; primary, save/protocol and foundation scoped rechecks each approved it. Their record-only commits retain separate authorship. The D1-integrated provisional successor source is `1cbbe571` on published ferry main `c20addb09431f1ab75b56402d422cc9a29cb8360`. Its independent `v031` / API `1.27` / 149-ID pin hashes to `cb85b32d7c71709ae761faf30fd860ce57fc0ff1b9796724dabfaf24e64362b2`. Published D4 `536c80bc` is integrated into the C4 branch. Its frozen `v031` / API `1.27` hash is `57e2943395340908161b6535a46fd55e4e982bc969ceb765c02ffc505c4e000b` with 167 genesis IDs. The independently derived C4 successor `v032` / API `1.28` hashes to `b8e7b783483c598e6a455d8c117674bd01b96aaab5edc80b6be8df9e3b8db2bd`, also with 167 genesis IDs. The final accumulated gate and scoped integrated carryover remain pending.
 
+The final integrated source head is `68be0345` on published D4 main
+`536c80bc`. The source-head `mise exec -- bin/check_all.sh` exited **0**:
+367 ExUnit tests, strict Credo, planted controls, kernel TypeScript tests and
+typechecks, size and formatting. The separate current headless simulator exited
+**0**: 18 tests, 503 sequences and 16,744 steps. The exact compiler pin test,
+focused C4/Book/real-SQLite line and mobile app TypeScript check also passed.
+A fresh-profile browser test reaches four current Hound Run instances, attacks
+one, and sees the selected target plus three helper-admission lines on Combat.
+Removing the roster projection makes that test fail at the target assertion;
+restored source passes. Earlier browser attempts failed on case-sensitive text,
+combined React Native text, and an incorrect expected Continue button after
+reload; their output was exploratory and is not counted as retained red control.
+The old origin-scoped browser save was left untouched after its correct
+`pinned_release_missing` refusal. No native or owner-save run was made.
+The first D4-integrated gate failed only because the combined `compose.ts`
+exceeded its 300-line source limit; `d4-integrated-size-red.log` retains that
+failure. A narrow size reduction restored the gate. `SHA256SUMS` hashes all
+25 retained `.log` files and `SHA256SUMS.verify` records successful verification.
+A fresh scoped carryover review remains required before publication.
+
 Deliberate Attack admits the selected living hound and bounded same-plan, co-present helpers. The repaired cursor picks one living member per round. An injured selected hound can take one legal exit, retain its injury and slot, and leave the fixed roster. On an even round, the player still gets the scheduled opportunity against a remaining hound. A flight stamp requires the selected member's actual same-group departure and the round's due time, even when elapsed advances farther. Final admission requires the complete group; partial prefix composition remains lawful. SQLite COMMIT failure leaves the old memory and disk state, and retry saves one flight and receipt.
 
 `review-fixes-focused.log` retains the scoped review-fix green commands and raw outputs: kernel and app TypeScript checks, 43 focused Node tests, 8 focused Elixir tests, strict Credo with zero findings, formatting, contracts, docs, and diff whitespace. `integrated-full.log` records the D1-integrated full `mise exec -- bin/check_all.sh` exit zero: 364 ExUnit, strict Credo, planted contract/architecture/docs controls, full TypeScript tests and typechecks, size gates and Prettier. The integrated C4 pack suite passes all 16 literal behavior cases; source and test size gates pass with no new exceptions. `SHA256SUMS` lists every retained raw log and `SHA256SUMS.verify` records a successful verification. Paths in logs are redacted; no device or owner-save data was used.
@@ -20,4 +40,4 @@ Retained red controls each failed on a planted source mutation that was restored
 
 The literal proposal fixture also refuses a healthy/no-encounter stamp, a stationary transfer, a missing same-group exit, a wrong plan/roster/cursor, and a mismatched final stamp; it accepts a legal flight when the elapsed endpoint exceeds the round due time. The corresponding TypeScript and Elixir composers and independent invariants match these literal answers. Earlier provisional mutants and a 360/361 ExUnit full-gate run were observed but their raw output was **not captured**; they are not part of retained evidence. The integrated gate logs retain real intermediate size, xref cycle, Credo and Prettier failures, then the passing run. `integrated-full-interrupted.log` records a run stopped to release D4’s heavy-check window; `integrated-full-temp-red.log` records the temporary red-control schema left by that interruption. Both were resolved before the passing run.
 
-Ponytail Review and correctness self-review: the mechanic reuses the existing encounter roster, population slot, delta composition, round resolver, and SQLite transaction path. Integration extracted cohesive pack/attack/invariant proof and a shared test fixture rather than adding size or Credo exceptions; no new dependency or compatibility adapter was added. Reviewed selected-ID repair over absent/dead members, same-group departure, occurrence time, even-round opportunity, final versus prefix admission, failed-COMMIT retry, D1 Notice/transport seams, independent hash and IDs, and every changed import after the source split. Remaining work is the full D4-integrated gate and scoped carryover review; no native build, owner save, preview, push, or PR was used.
+Ponytail Review and correctness self-review: the mechanic reuses the existing encounter roster, population slot, delta composition, round resolver, and SQLite transaction path. Integration extracted cohesive pack/attack/invariant proof and a shared test fixture rather than adding size or Credo exceptions; no new dependency or compatibility adapter was added. Reviewed selected-ID repair over absent/dead members, same-group departure, occurrence time, even-round opportunity, final versus prefix admission, failed-COMMIT retry, D1 Notice/transport seams, independent hash and IDs, and every changed import after the source split. Remaining work is scoped carryover review; no native build, owner save, preview, push, or PR was used.
