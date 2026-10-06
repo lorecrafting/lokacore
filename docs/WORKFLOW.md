@@ -77,12 +77,12 @@ Report at the end of the slice, not at every step.
    view-to-invocation check for any new availability rule. Where authored keys may differ from
    commands, include such an alias in that check. Reuse an existing same-layer check if it
    catches that break.
-3. **Build and self-review (developer).** Implement; run the full local check line from
-   AGENTS.md once for publication (the [provisional local lane](decisions/owner-decision-local-provisional-integration-2026-10-05.md) uses focused checks first; the pre-push hook is the final publication run: do not run it again right before the push); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
+3. **Build and self-review (developer).** Implement; run focused checks for the changed behavior
+   and required red controls, then let the [area-selected pre-push lane](decisions/owner-decision-preproduction-ci-scope-2026-10-06.md) make the final local publication run (do not repeat it immediately before pushing); run `/ponytail-review` (skill `ponytail:ponytail-review`, a user plugin) on the diff and a correctness pass over it
    (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
    docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
    both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
-   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full TypeScript checks. Commit, then publish
+   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full local checks. Commit, then publish
    the PR or keep a [local draft PR](#local-draft-pr-cadence) (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
    branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
    dispositions, deviations from the brief, open questions.
@@ -125,8 +125,8 @@ Report at the end of the slice, not at every step.
    whose CI you confirmed green, so a later push makes the merge fail instead of landing
    unchecked. The PM's own commits after the verdict (a `main` merge, a codex answer
    appended verbatim, an index line) need only green CI on the new head, and the PM puts them in one push; any
-   other commit after the verdict sends the PR back to the reviewer. CI skips the code jobs only when the head differs from a commit whose code jobs all passed by
-   Markdown files alone ([CHECKS](CHECKS.md)), so green CI on the head is enough. Right after the merge the PM writes the
+   other commit after the verdict sends the PR back to the reviewer. The scoped jobs may skip only after a relevant green ancestor and a classified safe diff
+   ([CHECKS](CHECKS.md)); an unrelated skipped job is not a passing test. Right after the merge the PM writes the
    ROADMAP status-only lines (slice done, PR link, slice count) as a direct commit on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)). Then tell the owner:
    PR link, verdict, notes. Owner decisions, and anything still open after fix round 2 and the
