@@ -1,8 +1,10 @@
 // Immediate service integration uses real rollback-journal SQLite and the installed receipt history verifier.
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { DatabaseSync } from 'node:sqlite';
+import type { Db } from './store.ts';
 import { test } from 'node:test';
 import {
   bundle,
@@ -150,7 +152,7 @@ test('room-before-Rest, meal, partial/empty ale reopen and exact retries preserv
 });
 
 // Breaks: bounded forged entitlement/stock/ale or altered service/payment/benefit receipts pass current-value checks.
-test('forged bounded service rows and swapped/omitted historical service evidence refuse without repair', () => {
+test('forged bounded service rows and swapped/omitted historical service evidence refuse without repair', (t) => {
   for (const mutation of [
     'entitlement',
     'meals',
@@ -216,10 +218,31 @@ test('forged bounded service rows and swapped/omitted historical service evidenc
       a.sql.close();
     }
   }
-  // No liquid vessels: room-only saves must still invoke the same accepted-history guard.
-  const a = setup(':memory:', (c) => {
+  // No other history triggers: the service guard alone must refuse an unearned paid entitlement.
+  const dir = mkdtempSync(join(tmpdir(), 'loka-service-only-')),
+    path = join(dir, 'save.db');
+  t.after(() => rmSync(dir, { recursive: true }));
+  const a = setup(path, (c) => {
     delete c.liquids;
-    for (const i of Object.values(c.items) as any[]) delete i.vessel;
+    for (const i of Object.values(c.items) as any[]) {
+      delete i.vessel;
+      delete i.fuel;
+    }
+    for (const q of Object.values(c.quests) as any[]) {
+      if (q.patrol)
+        q.objective = {
+          evidence: 'current_state',
+          policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        };
+      delete q.exchange;
+      delete q.repeatable;
+      delete q.patrol;
+    }
+    for (const d of Object.values(c.dialogues) as any[])
+      for (const o of Object.values(d.choices) as any[]) {
+        delete o.exchange;
+        delete o.patrol;
+      }
     for (const r of Object.values(c.rooms) as any[])
       for (const d of Object.values(r.details ?? {}) as any[]) delete d.liquid_source;
     delete c.services[`${prefix}:service/lantern_ale`];
@@ -236,9 +259,28 @@ test('forged bounded service rows and swapped/omitted historical service evidenc
       }),
       'true',
     );
-    assert.equal(a.refuse().kind, 'save_corrupt');
-  } finally {
+    const before = disk(a),
+      bytes = readFileSync(path);
     a.sql.close();
+    const sql = new DatabaseSync(path);
+    const db: Db = {
+      execSync: (q) => sql.exec(q),
+      runSync: (q, ...params) => sql.prepare(q).run(...params),
+      getFirstSync: <T>(q: string, ...params: (string | number | null)[]) =>
+        (sql.prepare(q).get(...params) ?? null) as T | null,
+      getAllSync: <T>(q: string, ...params: (string | number | null)[]) =>
+        sql.prepare(q).all(...params) as T[],
+      isInTransactionSync: () => sql.isTransaction,
+    };
+    try {
+      assert.equal(openStory(db, a.releases, a.host).kind, 'save_corrupt');
+      assert.deepEqual(disk({ ...a, sql }), before);
+      assert.deepEqual(readFileSync(path), bytes);
+    } finally {
+      sql.close();
+    }
+  } finally {
+    if (a.sql.isOpen) a.sql.close();
   }
 });
 

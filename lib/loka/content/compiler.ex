@@ -1,4 +1,3 @@
-# size: allow 310, service declarations join the existing source-kind and validation registry
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{Artifact, Checks, Dialogues, Links, Quests, Reactions, Recipes, Requires}
@@ -90,7 +89,7 @@ defmodule Loka.Content.Compiler do
   # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), calendar and
   # world (WorldSettings) and chapters; settings travel beside the manifest in the v2 cartridge.
   defp manifest([{rel, m}], registry) do
-    defs = source_defs()
+    defs = Loka.Content.Source.contracts()
 
     file = manifest_file(defs)
 
@@ -277,26 +276,10 @@ defmodule Loka.Content.Compiler do
 
   defp authored_key(_, _, _), do: []
 
-  defp validated(rel, steps, contract, value, defs \\ source_defs()) do
+  defp validated(rel, steps, contract, value, defs \\ Loka.Content.Source.contracts()) do
     case Contracts.validate(contract, value, defs) do
       :ok -> []
       {:error, es} -> schema(rel, steps, value, es)
     end
-  end
-
-  # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
-  defp source_defs do
-    defs = Contracts.defs()
-
-    defs
-    |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
-    |> Map.update!(
-      "LiquidRow",
-      &put_in(&1, ["properties", "kind", "anyOf"], [
-        %{"type" => "null"},
-        %{"$ref" => "Key"},
-        defs["DefinitionRef"]
-      ])
-    )
   end
 end

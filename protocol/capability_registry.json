@@ -328,7 +328,14 @@
     "key": "service",
     "version": 1,
     "portability": "portable",
-    "residency": "portable_capability"
+    "residency": "portable_capability",
+    "commands": [
+      "use_service"
+    ],
+    "definitions": [
+      "service",
+      "bed"
+    ]
   },
   {
     "key": "calendar",
@@ -448,19 +455,6 @@
     "residency": "portable_capability",
     "definitions": [
       "patrol"
-    ]
-  },
-  {
-    "key": "service",
-    "version": 1,
-    "portability": "portable",
-    "residency": "portable_capability",
-    "commands": [
-      "use_service"
-    ],
-    "definitions": [
-      "service",
-      "bed"
     ]
   }
 ]

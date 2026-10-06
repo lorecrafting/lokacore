@@ -3,6 +3,36 @@ defmodule Loka.Content.Services do
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   alias Loka.Content.Refs
 
+  defp service_benefit(b, m) do
+    fields =
+      case b["kind"] do
+        "entitlement" -> [{"fact", "fact"}]
+        "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
+        "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
+      end
+
+    Enum.reduce(fields, b, fn {field, kind}, result ->
+      Map.update!(result, field, &ref(&1, kind, m))
+    end)
+  end
+
+  def expand(%{"benefit" => b, "provider" => p, "currency" => c} = s, m) do
+    s
+    |> Map.put("provider", ref(p, "npc", m))
+    |> Map.put("currency", ref(c, "resource", m))
+    |> Map.put("benefit", service_benefit(b, m))
+  end
+
+  def bed(%{"bed" => %{"entitlement" => _} = b} = d, m),
+    do: Map.put(d, "bed", Map.update!(b, "entitlement", &ref(&1, "fact", m)))
+
+  def bed(d, _), do: d
+
+  def npc(%{"services" => services} = n, m),
+    do: Map.put(n, "services", Enum.map(services, &ref(&1, "service", m)))
+
+  def npc(n, _), do: n
+
   def check(nil, _, _), do: []
   def check(_, _, nil), do: []
 

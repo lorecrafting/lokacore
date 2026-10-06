@@ -7,7 +7,6 @@ import type { AdvertisedAction, EntityId, NoticeBoardView } from '../contracts.g
 import type { Steps, World } from '../runtime/decision.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 
-// size: allow 45, standalone detail projection includes the paid bed with ordinary Rest
 export function noticeViews(
   world: World,
   here: EntityId,
@@ -25,18 +24,7 @@ export function noticeViews(
           {
             id: id as EntityId,
             title: detailTitle(detail),
-            ...(detail.harvest && {
-              remaining: (() => {
-                const ids = selected(
-                  world,
-                  detail.harvest.items,
-                  here,
-                  detail.harvest.items.length,
-                  { n: 0 },
-                );
-                return typeof ids === 'string' ? 0 : ids.length;
-              })(),
-            }),
+            ...harvestRemaining(world, detail, here),
             description: description_variant.describe(world, world.character, detail, steps),
             ...(detail.bed && { bed: true as const }),
             ...offered(detail.bed ? bedActions(world, detail, steps) : actions(id)),
@@ -48,6 +36,12 @@ export function noticeViews(
     ...(boards.length > 0 && { notice_boards: boards }),
     ...(notices.length > 0 && { notices }),
   };
+}
+
+function harvestRemaining(world: World, detail: World['details'][string], here: EntityId) {
+  if (!detail.harvest) return {};
+  const ids = selected(world, detail.harvest.items, here, detail.harvest.items.length, { n: 0 });
+  return { remaining: typeof ids === 'string' ? 0 : ids.length };
 }
 
 // Membership is compiler/loader-validated; the current room has at most 64 details.

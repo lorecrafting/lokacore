@@ -198,4 +198,20 @@ defmodule Loka.Content.Source do
     end)
     |> elem(0)
   end
+
+  # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
+  def contracts do
+    defs = Loka.Core.Contracts.defs()
+
+    defs
+    |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+    |> Map.update!(
+      "LiquidRow",
+      &put_in(&1, ["properties", "kind", "anyOf"], [
+        %{"type" => "null"},
+        %{"$ref" => "Key"},
+        defs["DefinitionRef"]
+      ])
+    )
+  end
 end

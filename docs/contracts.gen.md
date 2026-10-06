@@ -48,7 +48,6 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | sense_cue@1 | portable | portable_capability |  |
 | escort@1 | portable | portable_capability |  |
 | patrol@1 | portable | portable_capability |  |
-| service@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
 

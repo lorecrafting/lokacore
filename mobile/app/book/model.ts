@@ -1,4 +1,4 @@
-// size: allow 390, finite shop and service quotes join the shared button/freshness builder
+// size: allow 350, current shop quotes join the shared button/freshness builder
 import type {
   ActionInput,
   EntityId,
@@ -7,6 +7,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button } from './presenter.ts';
+import { serviceButtons, shopButtons } from './offers.ts';
 import { reason, SENTENCE } from './words.ts';
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
@@ -286,36 +287,6 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...serviceButtons(v, text),
     ...asked(v, label),
   ];
-}
-
-function serviceButtons(v: GameView, text: Say): Press[] {
-  return v.entities.flatMap((e) =>
-    (e.services ?? [])
-      .filter((s) => s.action.available)
-      .map((s) => ({
-        label: `${text(s.label)} — ${s.price}p${s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`}`,
-        action_key: s.action.action_key,
-        command: s.action.command,
-        detail_id: e.id,
-        target_ids: [...(s.action.target_ids ?? [])],
-        input: { service: s.service, quoted_price: s.price },
-      })),
-  );
-}
-
-function shopButtons(v: GameView, text: Say): Press[] {
-  return v.entities.flatMap((e) =>
-    (e.shop ?? []).flatMap((o) =>
-      (['buy', 'sell'] as const)
-        .filter((verb) => o[verb].available)
-        .map((verb) => ({
-          label: `${cap(verb)} ${text(o.name)} — ${o[verb].price}p`,
-          action_key: verb,
-          target_ids: [e.id, o.item_id],
-          input: { quoted_price: o[verb].price },
-        })),
-    ),
-  );
 }
 
 function noticeButtons(

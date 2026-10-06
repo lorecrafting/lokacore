@@ -25,30 +25,17 @@ export function availability(world: World, p: Payload, steps: Steps = { n: 0 }, 
   return blocked ? { code: blocked as ErrorCode } : transition(world, p, steps);
 }
 
-// size: allow 45, one provider/payment query admits its typed immediate benefit before allocation
 export function transition(
   world: World,
   p: Payload,
   steps: Steps = { n: 0 },
 ): UnavailableReason | { ops: readonly DeltaOp[]; service: ServiceDefinition } {
   if (++steps.n > LIMITS.query_steps) return { code: 'budget_exceeded' as const };
-  const body = bodyOf(world, p.actor_id),
-    provider = world.entities[p.provider_id];
-  const service = world.cartridge.services?.[refString(p.service)];
+  const body = bodyOf(world, p.actor_id);
   if (!body || (level(world, body, resourceRef(world, 'hp')) ?? 0) <= 0 || engaged(world, body))
     return { code: 'invalid_state' as const };
-  if (
-    !service ||
-    provider?.kind !== 'npc' ||
-    world.entityIds[refString(service.provider)] !== p.provider_id ||
-    !provider.services?.some((r) => same(r, p.service))
-  )
-    return { code: 'invalid_target' as const };
-  if (
-    !living(world, p.provider_id) ||
-    world.state.containers[p.provider_id] !== world.state.containers[body]
-  )
-    return { code: 'not_present' as const };
+  const service = boundService(world, p, body);
+  if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const paid = transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
@@ -66,6 +53,24 @@ export function transition(
     ops = recovered.ops;
   }
   return { ops, service };
+}
+
+function boundService(world: World, p: Payload, body: EntityId) {
+  const provider = world.entities[p.provider_id],
+    service = world.cartridge.services?.[refString(p.service)];
+  if (
+    !service ||
+    provider?.kind !== 'npc' ||
+    world.entityIds[refString(service.provider)] !== p.provider_id ||
+    !provider.services?.some((r) => same(r, p.service))
+  )
+    return { code: 'invalid_target' as const };
+  if (
+    !living(world, p.provider_id) ||
+    world.state.containers[p.provider_id] !== world.state.containers[body]
+  )
+    return { code: 'not_present' as const };
+  return service;
 }
 
 function serviceRefusal(code: ErrorCode, message: string) {

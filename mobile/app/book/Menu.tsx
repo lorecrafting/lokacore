@@ -117,7 +117,6 @@ type NpcProps = {
   leave: () => void;
 };
 
-// size: allow 60, one ordered NPC detail joins description, history, dialogue and finite service offers
 export function NpcPage(p: NpcProps) {
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
@@ -144,19 +143,7 @@ export function NpcPage(p: NpcProps) {
         </Text>
       ))}
       {!choice && !actions.length && !p.log.length && <Text style={note}>Nothing to do here.</Text>}
-      {!choice &&
-        p.npc &&
-        'shop' in p.npc &&
-        p.npc.shop?.map((o) => (
-          <Text key={o.item_id} style={note}>
-            {p.text(o.name)}: Buy {o.buy.price}p
-            {o.buy.available
-              ? ''
-              : ` (${o.buy.reason === 'not_owned' ? 'sold out' : o.buy.reason?.replaceAll('_', ' ')})`}
-            ; Sell {o.sell.price}p
-            {o.sell.available ? '' : ` (${o.sell.reason?.replaceAll('_', ' ')})`}.
-          </Text>
-        ))}
+      {!choice && <ShopOptions {...p} />}
       {choice && <Choice {...p} choice={choice} />}
       {actions
         .filter((b) => b.command !== 'use_service')
@@ -212,6 +199,25 @@ export function Item(p: {
       open={(id) => p.open({ kind: 'thing', id })}
       leave={p.world}
     />
+  );
+}
+
+function ShopOptions(p: NpcProps) {
+  return (
+    <>
+      {p.npc &&
+        'shop' in p.npc &&
+        p.npc.shop?.map((o) => (
+          <Text key={o.item_id} style={note}>
+            {p.text(o.name)}: Buy {o.buy.price}p
+            {o.buy.available
+              ? ''
+              : ` (${o.buy.reason === 'not_owned' ? 'sold out' : o.buy.reason?.replaceAll('_', ' ')})`}
+            ; Sell {o.sell.price}p
+            {o.sell.available ? '' : ` (${o.sell.reason?.replaceAll('_', ' ')})`}.
+          </Text>
+        ))}
+    </>
   );
 }
 
