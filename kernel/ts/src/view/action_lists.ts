@@ -1,3 +1,4 @@
+import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
 import { harvest } from '../mechanics/containment/harvest.ts';
@@ -39,31 +40,21 @@ import { reach } from '../mechanics/lookups.ts';
  * resolve to remove. The place never lists an action resolving to the verb of the actor's current
  * position (position@1), which step refuses invalid_state.
  */
+const HIDDEN = ['read', 'fill', 'pour', 'drink', ...MODAL];
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
   const at = position.positionOf(world, actor);
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
-  const reachedItems = new Map<EntityId, boolean>();
-  let carry: ReturnType<typeof carrying> | undefined;
-  const take = (item: EntityId) => {
-    if (!body || world.entities[item]?.kind !== 'item') return 'invalid_target' as const;
-    if (world.state.containers[item] === body) return 'invalid_state' as const;
-    const reached = reachedItems.get(item) ?? reach(world, body, item, steps);
-    if (typeof reached === 'boolean') reachedItems.set(item, reached);
-    if (typeof reached === 'string') return reached;
-    if (!reached) return 'not_present' as const;
-    carry ??= carrying(world, body, steps);
-    return carry(item);
-  };
+  const take = takeAdmission(world, body, steps);
   const here = (a: Offered) =>
     !a.recipe ||
     (world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!] &&
       light.visible(world, actor, detailOf(world, a.recipe.target), steps));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
-      .filter((a) => fits(a) && here(a) && a.command !== 'read' && !MODAL.includes(a.command))
+      .filter((a) => fits(a) && here(a) && !HIDDEN.includes(a.command))
       .filter((a) => movable(world, a, id))
       .filter((a) => combatOffered(world, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
@@ -74,10 +65,12 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
           ? putPairs(world, body, id as EntityId, shown, steps)
           : [shown];
       });
+  const liquid = (id: string) => liquidActions(world, actor, id, set, steps);
   const readableRecipe = (a: Offered) =>
     !!a.recipe && !!world.details[detailOf(world, a.recipe.target)].readable;
   return {
-    notice: (id: string) => listed((a) => noticeOffer(world, a, id), id, 'inspectable_details'),
+    notice: (id: string) =>
+      listed((a) => noticeOffer(world, a, id), id, 'inspectable_details').concat(liquid(id)),
     place: [
       ...listed(
         (a) =>
@@ -94,10 +87,29 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
         set[b.action_key].priority - set[a.action_key].priority || cmp(a.action_key, b.action_key),
     ),
     of: (scope: string, id: string, nested = false) =>
-      listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope),
+      listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
+        liquid(id),
+      ),
     worn: (id: string) =>
-      listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id),
+      listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(
+        liquid(id),
+      ),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
+  };
+}
+
+function takeAdmission(world: World, body: EntityId | undefined, steps: { n: number }) {
+  const reachedItems = new Map<EntityId, boolean>();
+  let carry: ReturnType<typeof carrying> | undefined;
+  return (item: EntityId) => {
+    if (!body || world.entities[item]?.kind !== 'item') return 'invalid_target' as const;
+    if (world.state.containers[item] === body) return 'invalid_state' as const;
+    const reached = reachedItems.get(item) ?? reach(world, body, item, steps);
+    if (typeof reached === 'boolean') reachedItems.set(item, reached);
+    if (typeof reached === 'string') return reached;
+    if (!reached) return 'not_present' as const;
+    carry ??= carrying(world, body, steps);
+    return carry(item);
   };
 }
 

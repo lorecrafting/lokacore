@@ -1,0 +1,2590 @@
+{
+  "state": {
+    "clock": 0,
+    "liquid_specs": {
+      "a0000000-0000-4000-8000-000000000001": {
+        "capacity": 5,
+        "kinds": [
+          {
+            "cartridge_id": "liquid_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "liquid",
+            "key": "water"
+          }
+        ]
+      },
+      "a0000000-0000-4000-8000-000000000002": {
+        "capacity": 7,
+        "kinds": [
+          {
+            "cartridge_id": "liquid_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "liquid",
+            "key": "water"
+          }
+        ]
+      }
+    },
+    "liquids": {
+      "a0000000-0000-4000-8000-000000000001": {
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": "water"
+        },
+        "quantity": 5
+      },
+      "a0000000-0000-4000-8000-000000000002": {
+        "kind": {
+          "cartridge_id": "liquid_probe",
+          "cartridge_version": "1.0.0",
+          "kind": "liquid",
+          "key": "water"
+        },
+        "quantity": 4
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "partial-pour-5-4-to-2-7",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        },
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000002",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 7
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "liquid",
+              "item_id": "a0000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 2
+            }
+          },
+          {
+            "target": {
+              "kind": "liquid",
+              "item_id": "a0000000-0000-4000-8000-000000000002"
+            },
+            "value": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 7
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "emptied-shell-persists",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": null,
+            "quantity": 0
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "liquid",
+              "item_id": "a0000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "kind": null,
+              "quantity": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "same-writer-reads-overlay",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        },
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 1
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "liquid",
+              "item_id": "a0000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "prior-quantity-mismatch-discards-first-write",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        },
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000002",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 3
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 7
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000002"
+          }
+        }
+      }
+    },
+    {
+      "id": "prior-kind-mismatch",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "oil"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "same-writer-stale-base-row",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        },
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 1
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "duplicate-writer-conflict",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        },
+        {
+          "op": "liquid.set",
+          "writer_group": 1,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 1
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "conflict-before-precondition",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        },
+        {
+          "op": "liquid.set",
+          "writer_group": 1,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 1
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "conflicting_write",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "null-positive-kind",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": null,
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "known-kind-zero",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 0
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "overflow-discards-first-write",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        },
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000002",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 8
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000002"
+          }
+        }
+      }
+    },
+    {
+      "id": "undeclared-kind",
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "oil"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-row-is-not-empty",
+      "state": {
+        "clock": 0,
+        "liquid_specs": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "capacity": 5,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "capacity": 7,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          }
+        },
+        "liquids": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": null,
+            "quantity": 0
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "non-opted-item",
+      "state": {
+        "clock": 0,
+        "liquid_specs": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "capacity": 7,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          }
+        },
+        "liquids": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "malformed-base-not-repaired",
+      "state": {
+        "clock": 0,
+        "liquid_specs": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "capacity": 5,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "capacity": 7,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          }
+        },
+        "liquids": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "kind": null,
+            "quantity": 5
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": null,
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "malformed-kind-faults-without-canonical-throw",
+      "state": {
+        "clock": 0,
+        "liquid_specs": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "capacity": 5,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "capacity": 7,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          }
+        },
+        "liquids": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": 1.5
+            },
+            "quantity": 5
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "invalid-immutable-capacity-zero",
+      "state": {
+        "clock": 0,
+        "liquid_specs": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "capacity": 0,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "capacity": 7,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          }
+        },
+        "liquids": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "kind": null,
+            "quantity": 0
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": null,
+            "quantity": 0
+          },
+          "to": {
+            "kind": null,
+            "quantity": 0
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "invalid-immutable-capacity-fractional",
+      "state": {
+        "clock": 0,
+        "liquid_specs": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "capacity": 7.5,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "capacity": 7,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          }
+        },
+        "liquids": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    },
+    {
+      "id": "invalid-immutable-capacity-above-bound",
+      "state": {
+        "clock": 0,
+        "liquid_specs": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "capacity": 2147483648,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "capacity": 7,
+            "kinds": [
+              {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              }
+            ]
+          }
+        },
+        "liquids": {
+          "a0000000-0000-4000-8000-000000000001": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 4
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "liquid.set",
+          "writer_group": 0,
+          "item_id": "a0000000-0000-4000-8000-000000000001",
+          "from": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 5
+          },
+          "to": {
+            "kind": {
+              "cartridge_id": "liquid_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "liquid",
+              "key": "water"
+            },
+            "quantity": 2
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "liquid",
+            "item_id": "a0000000-0000-4000-8000-000000000001"
+          }
+        }
+      }
+    }
+  ],
+  "invariants": [
+    {
+      "note": "valid-empty-and-filled",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000001"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                },
+                "quantity": 2
+              }
+            },
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                },
+                "quantity": 7
+              }
+            }
+          ]
+        }
+      },
+      "holds": true
+    },
+    {
+      "note": "cartridge-without-liquid",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": true
+    },
+    {
+      "note": "null-positive",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": null,
+                "quantity": 2
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "known-zero",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                },
+                "quantity": 0
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "overflow",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                },
+                "quantity": 8
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "bad-kind",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "oil"
+                },
+                "quantity": 2
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "missing-field",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "quantity": 0
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "extra-field",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": null,
+                "quantity": 0,
+                "extra": 1
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "negative",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                },
+                "quantity": -1
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "fractional",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                },
+                "quantity": 1.5
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "unsafe-integer",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                },
+                "quantity": 9007199254740992
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "deleted-shell",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000002"
+              },
+              "value": null
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "unknown-item-target",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000003"
+              },
+              "value": {
+                "kind": null,
+                "quantity": 0
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "missing-required-base-row",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "invalid-unchanged-base-row",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 6
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "base-row-without-spec",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {},
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "malformed-fractional-kind",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 5
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": [
+            {
+              "target": {
+                "kind": "liquid",
+                "item_id": "a0000000-0000-4000-8000-000000000001"
+              },
+              "value": {
+                "kind": {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": 1.5
+                },
+                "quantity": 5
+              }
+            }
+          ]
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "invalid-spec-capacity-0",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 0,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": null,
+              "quantity": 0
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "invalid-spec-capacity--1",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": -1,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": null,
+              "quantity": 0
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "invalid-spec-capacity-1.5",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 1.5,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": null,
+              "quantity": 0
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "invalid-spec-capacity-9007199254740992",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 9007199254740992,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": null,
+              "quantity": 0
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    },
+    {
+      "note": "invalid-spec-capacity-2147483648",
+      "id": "liquid_rows_valid",
+      "observation": {
+        "state": {
+          "clock": 0,
+          "liquid_specs": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "capacity": 2147483648,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "capacity": 7,
+              "kinds": [
+                {
+                  "cartridge_id": "liquid_probe",
+                  "cartridge_version": "1.0.0",
+                  "kind": "liquid",
+                  "key": "water"
+                }
+              ]
+            }
+          },
+          "liquids": {
+            "a0000000-0000-4000-8000-000000000001": {
+              "kind": null,
+              "quantity": 0
+            },
+            "a0000000-0000-4000-8000-000000000002": {
+              "kind": {
+                "cartridge_id": "liquid_probe",
+                "cartridge_version": "1.0.0",
+                "kind": "liquid",
+                "key": "water"
+              },
+              "quantity": 4
+            }
+          }
+        },
+        "result": {
+          "changes": []
+        }
+      },
+      "holds": false
+    }
+  ]
+}

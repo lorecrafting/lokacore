@@ -175,6 +175,17 @@ defmodule Loka.Content.Checks do
       |> expand(m)
       |> Map.put("death_credit", Enum.map(credits, &Loka.Content.Combat.expand(&1, m)))
 
+  # Vessel initial rows and detail sources own only their precise liquid reference fields.
+  def expand(%{"kind" => k, "quantity" => _} = row, m) when is_binary(k),
+    do: Map.put(row, "kind", ref(k, "liquid", m))
+
+  def expand(%{"liquid_source" => k} = detail, m) when is_binary(k),
+    do:
+      detail
+      |> Map.delete("liquid_source")
+      |> expand(m)
+      |> Map.put("liquid_source", ref(k, "liquid", m))
+
   def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v

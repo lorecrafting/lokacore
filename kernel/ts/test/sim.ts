@@ -47,6 +47,7 @@ export const CHECKED = {
     'containment_acyclic',
     'no_last_writer_wins',
     'delta_preconditions_hold',
+    'liquid_rows_valid',
     'fault_discards_whole_proposal',
     'fault_codes_are_evaluation_faults',
     'target_candidates_ordered',
@@ -210,6 +211,8 @@ export const base = (w: World) => ({
   ...w.state,
   fact_defaults: w.factDefaults,
   capacities: w.capacities,
+  liquid_specs: w.liquidSpecs,
+  fuel_specs: w.fuelSpecs,
   resource_specs: w.resourceSpecs,
   entity_resource_specs: w.entityResourceSpecs,
   barrier_initial: w.barrierInitial,
@@ -323,6 +326,10 @@ function offered(world: World, g: Gen): Payload {
     if (o.input.includes('until')) return [{ type: 'wait', until: g.pick(boundaries(world)) }];
     return [{ type: o.command }];
   });
+  for (const n of view.notices ?? [])
+    for (const a of n.actions ?? [])
+      if (set[a.action_key]?.command === 'fill' && a.target_ids?.length === 2)
+        options.push(aimed('fill', a.target_ids[0], a.target_ids[1]));
   const inside = [...view.entities, ...view.inventory].flatMap((e) => e.contents ?? []);
   const items = [...view.entities, ...view.inventory, ...inside].filter((e) => e.kind === 'item');
   for (const o of Object.values(set))
@@ -351,14 +358,20 @@ function offered(world: World, g: Gen): Payload {
 
 // A command of `type` at entity `id`, by its payload's field; give's recipient `to`.
 const aimed = (type: string, id: string, to: string): Payload =>
-  type === 'look' || type === 'talk' || Object.hasOwn(MOVES, type)
-    ? { type, target_id: id }
-    : {
-        type,
-        item_id: id,
-        ...(type === 'give' && { recipient_id: to }),
-        ...(type === 'put' && { container_id: to }),
-      };
+  type === 'fill'
+    ? { type, source_id: id, vessel_id: to }
+    : type === 'pour'
+      ? { type, source_id: id, receiver_id: to }
+      : type === 'drink'
+        ? { type, vessel_id: id }
+        : type === 'look' || type === 'talk' || Object.hasOwn(MOVES, type)
+          ? { type, target_id: id }
+          : {
+              type,
+              item_id: id,
+              ...(type === 'give' && { recipient_id: to }),
+              ...(type === 'put' && { container_id: to }),
+            };
 
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 const DIRECTIONS = ['north', 'south', 'east', 'west', 'up', 'down', 'sideways', 'constructor'];

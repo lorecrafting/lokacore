@@ -1,0 +1,91 @@
+✔ two real shop offers cost eight pennies and retain two empty shell identities (4.32625ms)
+✖ Fill, Drink, partial Pour and Drink conserve finite contents and affect no resource or clock (2.402083ms)
+✔ liquid refusal participants and custody leave every row unchanged while open nested skins work (1.08975ms)
+✔ Fill includes liquid mass, admits equality, and owned Pour/Drink remain legal while overloaded (0.907542ms)
+✔ Take and Buy reject filled mass above ceiling and GameView exposes exact current pairs (3.48ms)
+✖ authored larger servings refuse a partial last drink and exhausted Pour keeps an empty shell (0.802167ms)
+✔ closed owned nested vessels and exact out-of-room sources refuse without a write (0.243042ms)
+✔ liquid pair projection fails at the same exhausted budget as direct admission (0.342125ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 6
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.830541
+
+✖ failing tests:
+
+test at kernel/ts/test/liquid.test.ts:112:1
+✖ Fill, Drink, partial Pour and Drink conserve finite contents and affect no resource or clock (2.402083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  ... Skipped lines
+  
+    [
+      {
+        kind: {
+          cartridge_id: 'ashmere_missing_child',
+          cartridge_version: '0.0.21',
+  ...
+        },
+  +     quantity: 4
+  -     quantity: 3
+      },
+      {
+        kind: {
+          cartridge_id: 'ashmere_missing_child',
+          cartridge_version: '0.0.21',
+  
+      at TestContext.<anonymous> (file://[workspace]/kernel/ts/test/liquid.test.ts:126:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { kind: [Object], quantity: 4 }, { kind: [Object], quantity: 4 } ],
+    expected: [ { kind: [Object], quantity: 3 }, { kind: [Object], quantity: 4 } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at kernel/ts/test/liquid.test.ts:285:1
+✖ authored larger servings refuse a partial last drink and exhausted Pour keeps an empty shell (0.802167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      {
+  +     kind: {
+  +       cartridge_id: 'ashmere_missing_child',
+  +       cartridge_version: '0.0.21',
+  +       key: 'water',
+  +       kind: 'liquid'
+  +     },
+  +     quantity: 2
+  -     kind: null,
+  -     quantity: 0
+      },
+      {
+        kind: {
+          cartridge_id: 'ashmere_missing_child',
+          cartridge_version: '0.0.21',
+  
+      at TestContext.<anonymous> (file://[workspace]/kernel/ts/test/liquid.test.ts:320:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ { kind: [Object], quantity: 2 }, { kind: [Object], quantity: 2 } ],
+    expected: [ { kind: null, quantity: 0 }, { kind: [Object], quantity: 2 } ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

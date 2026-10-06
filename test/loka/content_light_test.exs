@@ -6,7 +6,13 @@ defmodule Loka.ContentLightTest do
 
   defp compile(dir, replacements) do
     File.cp_r!(@src, dir)
-    for {path, value} <- replacements, do: File.write!(Path.join(dir, path), JSON.encode!(value))
+
+    for {path, value} <- replacements do
+      if value == nil,
+        do: File.rm!(Path.join(dir, path)),
+        else: File.write!(Path.join(dir, path), JSON.encode!(value))
+    end
+
     Loka.Content.compile(dir)
   end
 
@@ -87,7 +93,22 @@ defmodule Loka.ContentLightTest do
             into: %{},
             do: {path, Map.delete(source(path), field)}
 
-      result = compile(Path.join(dir, fields), Map.put(replacements, "cartridge.json", manifest))
+      # Isolate the light boundary from the later API1.20 liquid consumer.
+      water = %{
+        "liquids/water.json" => nil,
+        "items/waterskin.json" => Map.delete(source("items/waterskin.json"), "vessel"),
+        "items/spare_waterskin.json" =>
+          Map.delete(source("items/spare_waterskin.json"), "vessel"),
+        "rooms/well_lane.json" =>
+          update_in(
+            source("rooms/well_lane.json"),
+            ["details", "well"],
+            &Map.delete(&1, "liquid_source")
+          )
+      }
+
+      inputs = replacements |> Map.merge(water) |> Map.put("cartridge.json", manifest)
+      result = compile(Path.join(dir, fields), inputs)
 
       if fields == "unused" do
         assert {:ok, _, []} = result

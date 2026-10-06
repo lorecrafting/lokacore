@@ -1,0 +1,13 @@
+{
+  "mutants": 114,
+  "counts": {
+    "generation": 57,
+    "both_tests": 57
+  },
+  "survivors": [],
+  "required_entries": 47,
+  "numeric_bounds": 18,
+  "const": 8,
+  "types": 29,
+  "closed_shapes": 12
+}

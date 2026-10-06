@@ -1,0 +1,57 @@
+✔ a leftover transaction is settled before the trace catches up (18.911458ms)
+✔ a file that is not a database or has a corrupt page is save_corrupt (13.701667ms)
+✔ a head with a damaged column is save_corrupt; its new game recreates the head (9.735542ms)
+✔ at the cap a new game deletes the oldest run whole and keeps the current one (126.835542ms)
+✔ a run alone at the cap keeps its beginning and appends no more entries (123.548458ms)
+✔ a new game at the cap makes room for its header by deleting the old run (101.197083ms)
+✔ a run that drops an entry pair below the cap writes nothing more (97.644042ms)
+✔ catch-up at the cap boundary writes a missed entry at 4,998 rows and not at 4,999 (187.560584ms)
+(node:98031) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a scripted session survives a restart and plays on (41.106042ms)
+✔ an invalid press before a save does not make the next id collide after a restart (15.652208ms)
+✔ an unknown COMMIT shows pending, not a success; a restart shows what committed (12.109708ms)
+✔ a pending press is retried with its own id and replays what committed (13.377875ms)
+✔ a same-scope receipt from another allocator does not move the id counter (19.036583ms)
+✔ a failed write is not claimed unsaved; the next press retries it (9.852208ms)
+✔ a read error after a durable commit does not commit the press twice (9.030208ms)
+✔ a confirmed receipt that is not a decision is a conflict and ends the attempt (12.586417ms)
+✔ start over replaces a file that does not open with a fresh game (25.2175ms)
+✔ start over of a damaged identity keeps the file and its old run (12.993042ms)
+✔ a damaged receipt index fails the open with start over, which gives a fresh game (19.506541ms)
+✔ a newer app's save is never started over (11.408666ms)
+✔ a start over whose delete failed can be tried again (6.646792ms)
+✔ an open that fails but not as corrupt is never started over (4.899167ms)
+✔ a start over that fails during play keeps the game and its retry (8.209167ms)
+✔ a pending start over leaves no game to play until it settles (10.4885ms)
+✔ the gate tap script ends at its declared state, wherever the kills fall (48.713459ms)
+﹣ the save copied from the phone equals the reference (0.068458ms) # SKIP
+(node:98032) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[workspace]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [workspace]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ a corrupt report page: Start over gives a working save (78.410958ms)
+✔ a corrupt sqlite_autoindex_report_1 page: Start over gives a working save (48.576917ms)
+✔ a malformed report index record: Start over gives a working save (39.73275ms)
+✔ an intact report table survives Start over in place (21.362375ms)
+✔ the latest committed narration is read again on reopen, from the receipts (29.418375ms)
+✔ an older save reopens with its narration and keeps its report on Start over (30.304708ms)
+✔ a malformed receipt response: Start over keeps the pending report (23.052292ms)
+✔ a narration read that fails on a lock offers no Start over (23.439875ms)
+✔ a save with no body row: save_corrupt, Start over repairs it in place (20.926208ms)
+✔ a save with a null choice: save_corrupt, Start over repairs it in place (17.883042ms)
+✔ a save with an empty resource: save_corrupt, Start over repairs it in place (18.863917ms)
+✔ a receipt narration line that is null: save_corrupt at open, Start over repairs it (22.135083ms)
+✔ a receipt response that is not a decision replays as a conflict (8.569334ms)
+✔ elapsed NOTADB and page corruption recover only through explicit working Start over (23.8455ms)
+✔ unreadable elapsed opening refuses a newly readable replacement and waits on real SQLite uncertainty (17.105834ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 954.346084

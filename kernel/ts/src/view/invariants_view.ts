@@ -34,7 +34,9 @@ export const gameview_agrees_with_admission = ({
   action_key,
 }: Any): boolean => {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
-  const type = command.payload.type; // own keys only: an action may be keyed `constructor`
+  const type = command.payload.type;
+  if (['fill', 'pour', 'drink'].includes(type))
+    return liquidAgrees(view, command.payload, decision, action_key); // own keys only: an action may be keyed `constructor`
   const commandOf = (a: AdvertisedAction) =>
     Object.hasOwn(resolves, a.action_key) ? resolves[a.action_key] : undefined;
   const equip = (a: AdvertisedAction) => EQUIP_VERBS.includes(commandOf(a));
@@ -148,3 +150,29 @@ const entityView = (view: GameView, id: string): EntityView | ContentView | unde
     ...[...view.entities, ...view.inventory].flatMap((e) => e.contents ?? []),
     ...(view.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].find((e) => e.id === id);
+
+function liquidAgrees(view: GameView, p: Any, decision: Any, key?: string): boolean {
+  const targets =
+    p.type === 'fill'
+      ? [p.source_id, p.vessel_id]
+      : p.type === 'pour'
+        ? [p.source_id, p.receiver_id]
+        : [p.vessel_id];
+  const source =
+    p.type === 'fill'
+      ? (view.notices ?? []).find((n) => n.id === p.source_id)
+      : entityView(view, targets[0]);
+  const offers = source?.actions?.filter(
+    (a) =>
+      (key === undefined || a.action_key === key) &&
+      (a.command ?? a.action_key) === p.type &&
+      JSON.stringify(a.target_ids) === JSON.stringify(targets),
+  );
+  if (!offers?.length) return decision.kind !== 'accepted';
+  if (offers.some((a) => a.available))
+    return decision.kind === 'accepted' || decision.kind === 'fault';
+  return (
+    decision.kind === 'rejected' &&
+    offers.some((a) => !a.available && decision.error.code === a.reason.code)
+  );
+}

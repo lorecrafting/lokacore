@@ -28,6 +28,12 @@ export function ItemDetails(p: { thing?: Thing; text: (key: string) => string })
   return (
     <>
       {item?.description && <Text style={prose}>{plain(p.text(item.description))}</Text>}
+      {item?.liquid && (
+        <Text style={note}>
+          {p.text(item.liquid.label)}: {item.liquid.quantity}/{item.liquid.capacity}{' '}
+          {p.text(item.liquid.unit_label)}
+        </Text>
+      )}
       {item?.fuel && (
         <Text style={note}>
           Fuel {item.fuel.remaining} of {item.fuel.capacity}

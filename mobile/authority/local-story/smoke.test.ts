@@ -338,8 +338,8 @@ test('start over of a damaged identity keeps the file and its old run', () => {
 test('a damaged receipt index fails the open with start over, which gives a fresh game', () => {
   const b = app(damaged('sqlite_autoindex_receipt_2'));
   assert.equal(b.c.game(), undefined);
-  assert.match(b.c.failed()!.message, /malformed/);
-  assert.equal(b.c.failed()!.replace, true);
+  assert.equal(b.c.failed()!.kind, 'save_corrupt');
+  assert.equal(b.c.failed()!.startOver, true);
   b.c.startOver();
   assert.equal(b.now().place, 'Ferry Landing');
   assert.deepEqual(b.now().carrying, []);

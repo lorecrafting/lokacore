@@ -3,6 +3,8 @@ import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { Db } from './store.ts';
 
 export function defenseEvidence(events: readonly DomainEvent[]) {
+  if (!Array.isArray(events) || events.some((e) => typeof e?.payload?.type !== 'string'))
+    throw new SyntaxError('malformed JSON: invalid committed event evidence');
   for (const e of events) {
     const p = e.payload;
     if (
