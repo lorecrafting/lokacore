@@ -485,3 +485,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C6 Night in the Marsh planning review](2026-10-06-c6-night-marsh-plan-review.md): exact local plan `c1bfb0fb`, independent APPROVE WITH NOTES; five real no-wait entries, optional shelter, all-hours actual C4 danger, attempt failure/retry, one reward and save/Book obligations checked. C5 publication and source proof remain pending.
 
 - [C5 final primary source review](2026-10-06-c5-final-primary-review.md): exact source `93f7bb25`, CHANGES REQUIRED; alternating hound refresh faults, off-cadence expiry faults, noncombat death leaves bleeding active, and fatal bleed lacks its typed cause. Independent controlled reproductions; baseline 15/15 and schema sweep 56/56 pass.
+
+- [C5 final save/protocol second opinion](2026-10-06-c5-final-primary-review.md#independent-saveprotocol-second-opinion): verbatim CHANGES REQUIRED at source `93f7bb25`; confirms FP1/FP2 and adds SO3 Elixir mixed bleed/sight binding parity and SO4 partial cancellation binding validation.

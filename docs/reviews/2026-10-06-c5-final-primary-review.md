@@ -30,3 +30,28 @@ Actual positive surviving hound loss must create one body/effect generation. Fur
 - Reviewed the integration/helper split changes with the current composers, producer/job paths, keyed/raw admission, status projection, terminal custody and generic receipt replay. The confirmed receipt path and explicit mismatch refusal remain. Hosted checks and browser results are the PM's exact-head evidence; this review did not rerun a browser or use an owner save or native runtime.
 
 Ponytail Review: no additional framework or dependency is needed. Existing resource/death/job/receipt owners remain the right boundaries; fix these cases there. No separate over-engineering finding. The verdict remains CHANGES REQUIRED until C5-FP1 through C5-FP4 are closed.
+
+## Independent save/protocol second opinion
+
+The following answer is retained verbatim for source `93f7bb25`. SO1/SO2 overlap FP1/FP2; SO3 and SO4 add portable binding findings to the open fix list.
+
+```text
+CHANGES REQUIRED
+Head: 93f7bb25f47b62402463cfb73011cd72686b037a
+Base: 9efebfd563841977e712323dc35ff649af6747fa
+All locations below refer to that head.
+
+C5-SO1 | blocker | kernel/ts/src/mechanics/bleed/shared.ts:77
+A second pack hound’s positive hit replaces source_id, but both composers require the active source to remain unchanged. Reproduced against v037: wound at 64950, tick at 65050, next round at 65100 faults evaluator_error instead of refreshing. Preserve the retained source when refreshing.
+
+C5-SO2 | blocker | kernel/ts/src/foundation/compose_bleed.ts:47; lib/loka/core/compose_bleed.ex:23
+Off-cadence refresh cannot reach expiry. Example: application at T0, refresh at T150, end T450. The T400 tick advances next_tick_at to T500 and schedules expiry at T450, but both composers reject next_tick_at > ends_at. Reproduced precondition_failed; elapsed cannot advance through that tick. Permit the retained future cadence needed by an expiry delivery.
+
+C5-SO3 | blocker | lib/loka/core/compose_encounter.ex:236
+Portable composers disagree on mixed bleed/sight scheduling. A schema-valid job.schedule containing a complete bleed binding plus sight returns precondition_failed in TypeScript, but Elixir accepts it and drops sight. Reproduced directly in both runtimes. Reject the competing binding in Elixir and add a shared refusal fixture.
+
+C5-SO4 | should-fix | protocol/delta.schema.json:868
+The four-way discriminator does not reject partial bindings. Validation accepts bleed_body_id without bleed_generation, and encounter_id with an orphan bleed_generation. The latter can cancel an encounter job while ignoring the stray bleed field. Require complete binding fields and exclude partial competing bindings; the current sweep misses these cases.
+
+Checks/limits: 13 focused TypeScript tests passed; an in-memory cadence-guard mutant failed the expected fixture. The passing suite misses the reproduced scenarios above. Frozen v035/v036/combat fixtures are unchanged; v037 loads with the stated hash. Reviewed receipt replay, transaction fencing and six SQLite fault cases; did not rerun SQLite, full CI or mobile/native work. Browser retry remains a risk observation, not defect evidence. No files or comments changed.
+```
