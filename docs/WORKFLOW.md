@@ -82,7 +82,7 @@ Report at the end of the slice, not at every step.
    (`/code-review medium` on the branch, only for a non-tiny diff that changes code or bulk-edits
    docs; by hand otherwise, [owner decision](decisions/owner-decision-review-tools-2026-10-02.md)),
    both in the developer's worktree, never the main checkout; fix what they find. A PR that adds or changes a schema also runs the
-   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. Commit, then publish
+   schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. The pre-push hook compares a new branch with the pushed remote's main only when its local and advertised refs agree; otherwise it runs the full TypeScript checks. Commit, then publish
    the PR or keep a [local draft PR](#local-draft-pr-cadence) (description cites the `docs/system` sections and includes the ponytail result). Hand back a short note: what changed,
    branch and head SHA, the commands actually run (exit status, failing lines), self-review findings and
    dispositions, deviations from the brief, open questions.
