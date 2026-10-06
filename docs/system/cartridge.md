@@ -1189,8 +1189,9 @@ Vesper relocation, duplicate readable message, stone topic, far Scan, crow nest
 and next-day water-drift candidates for D5. Wren/Vesper retain their original
 instances and installed locations except for existing legal Wren escort travel.
 
-Author one `ward_stone` room detail with aliases `stone`, `ward`, `ward stone`,
-a noun title, description and ordinary readable label/text/title. Its fixed
+Author one `ward_stone` room detail with aliases `stone`, `ward`, `ward_stone`
+(the existing target normalization resolves player words `ward stone` to that
+last key), a noun title, description and ordinary readable label/text/title. Its fixed
 inscription describes the worn carving without asserting who holds the message,
 which return was selected or what Wren has done. Use the installed Fox Hollow
 readable detail shape, not an item-readable/topic extension or conditional page.
