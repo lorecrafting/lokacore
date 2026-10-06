@@ -75,6 +75,11 @@ test('loader validates opted liquid metadata and accepts exact maximum mass', ()
       'UNRESOLVED_REFERENCE',
     ],
     ['wrong kind', (c: any) => (item(c).vessel.initial.kind.kind = 'item'), 'UNRESOLVED_REFERENCE'],
+    [
+      'template vessel',
+      (c: any) => (item(c).location = read('protocol/fixtures/liquid_template.json').location),
+      'SCHEMA_VIOLATION',
+    ],
     ['missing mass', (c: any) => delete item(c).mass_grams, 'SCHEMA_VIOLATION'],
     ['maximum fill', (c: any) => (item(c).mass_grams = 2147482648), 'SCHEMA_VIOLATION'],
     [

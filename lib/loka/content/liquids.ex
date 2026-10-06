@@ -59,7 +59,10 @@ defmodule Loka.Content.Liquids do
         do: [],
         else: reference(rel, ["vessel", "initial"], {"kind", "liquid"}, row, m, defs)
 
-    shape ++ refs ++ mass(rel, item, v, defs) ++ texts(rel, ["vessel"], v, ["unit_label"], text)
+    template = if item["location"]["in"] == "template", do: [bad(at(rel, ["vessel"]))], else: []
+
+    template ++
+      shape ++ refs ++ mass(rel, item, v, defs) ++ texts(rel, ["vessel"], v, ["unit_label"], text)
   end
 
   defp mass(rel, item, v, defs) do

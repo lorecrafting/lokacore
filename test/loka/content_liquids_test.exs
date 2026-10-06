@@ -113,6 +113,12 @@ defmodule Loka.ContentLiquidsTest do
            &put_in(&1, ["vessel", "initial", "quantity"], 5), "SCHEMA_VIOLATION"},
           {"unknown kind", "items/lantern.json",
            &put_in(&1, ["vessel", "initial", "kind"], "missing"), "UNRESOLVED_REFERENCE"},
+          {"template vessel", "items/lantern.json",
+           &Map.put(
+             &1,
+             "location",
+             JSON.decode!(File.read!("protocol/fixtures/liquid_template.json"))["location"]
+           ), "SCHEMA_VIOLATION"},
           {"missing mass", "items/lantern.json", &Map.delete(&1, "mass_grams"),
            "SCHEMA_VIOLATION"},
           {"maximum fill", "items/lantern.json", &Map.put(&1, "mass_grams", 2_147_482_648),

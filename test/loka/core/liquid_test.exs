@@ -92,21 +92,21 @@ defmodule Loka.Core.LiquidTest do
     rows = Map.new(specs, fn {id, spec} -> {id, row(Enum.random(0..spec["capacity"]), spec)} end)
     state = Map.put(base, "liquids", rows)
 
-    ops =
-      for _ <- 1..Enum.random(0..4)//1 do
-        id = Enum.random(Map.keys(rows))
-        spec = specs[id]
-
-        %{
-          "op" => "liquid.set",
-          "writer_group" => Enum.random([0, 0, 1]),
-          "item_id" => id,
-          "from" => Enum.random([rows[id], row(Enum.random(0..8), spec)]),
-          "to" => row(Enum.random(0..8), spec)
-        }
-      end
-
+    ops = for _ <- 1..Enum.random(0..4)//1, do: random_op(rows, specs)
     %{"state" => state, "delta" => %{"ops" => ops}}
+  end
+
+  defp random_op(rows, specs) do
+    id = Enum.random(Map.keys(rows))
+    spec = specs[id]
+
+    %{
+      "op" => "liquid.set",
+      "writer_group" => Enum.random([0, 0, 1]),
+      "item_id" => id,
+      "from" => Enum.random([rows[id], row(Enum.random(0..8), spec)]),
+      "to" => row(Enum.random(0..8), spec)
+    }
   end
 
   defp row(0, _), do: %{"kind" => nil, "quantity" => 0}

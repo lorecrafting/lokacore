@@ -1,0 +1,6 @@
+{
+  "description": "A vessel on an item template must refuse: B7 initializes only authored live instances and owns no creation writer.",
+  "location": {
+    "in": "template"
+  }
+}

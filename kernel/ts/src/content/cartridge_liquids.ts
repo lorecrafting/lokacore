@@ -37,6 +37,7 @@ function vessel(
 ) {
   const bad = (path: string) =>
     out.push(diag('SCHEMA_VIOLATION', path, { error: 'invalid_value' }));
+  if (item.location.in === 'template') bad(`${at}.vessel`);
   const v = item.vessel,
     row = v.initial;
   if ((row.kind === null) !== (row.quantity === 0) || row.quantity > v.capacity)

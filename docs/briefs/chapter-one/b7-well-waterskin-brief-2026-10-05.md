@@ -47,6 +47,7 @@ liquid direction does not authorize broad needs, mixing or a fluid simulator.
   immutable observed specifications. Existing entity transfers move item custody,
   and resource adjustments do not represent finite vessel kind/capacity. Implement
   only this row mutation; no separate vessel entity, issuance ledger or factory.
+  Vessel-marked templates must refuse: only authored initial instances receive rows.
 - **Writer ownership:** liquid rule owns the three immediate commands and their
   registered events/outcomes. Two Pour writes share one existing writer group;
   apply/proposal owns generic atomic adoption and budgets. The carrying helper

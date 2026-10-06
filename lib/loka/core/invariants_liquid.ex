@@ -48,20 +48,26 @@ defmodule Loka.Core.InvariantsLiquid do
 
   defp replay(_, written, _), do: {:cont, written}
 
-  defp valid?(row, spec) when is_map(row) and is_map(spec) do
-    q = row["quantity"]
-
-    is_integer(spec["capacity"]) and spec["capacity"] > 0 and
-      spec["capacity"] <= 2_147_483_647 and is_list(spec["kinds"]) and
-      Map.keys(row) |> Enum.sort() == ~w(kind quantity) and is_integer(q) and
-      q >= 0 and q <= 9_007_199_254_740_991 and q <= spec["capacity"] and
-      if(q == 0,
-        do: row["kind"] == nil,
-        else:
-          Loka.Core.Contracts.validate("DefinitionRef", row["kind"]) == :ok and
-            row["kind"] in spec["kinds"]
-      )
+  defp valid?(%{"kind" => kind, "quantity" => quantity} = row, %{
+         "capacity" => capacity,
+         "kinds" => kinds
+       }) do
+    map_size(row) == 2 and capacity?(capacity) and quantity?(quantity, capacity) and
+      is_list(kinds) and kind?(kind, quantity, kinds)
   end
 
   defp valid?(_, _), do: false
+
+  defp capacity?(capacity),
+    do: is_integer(capacity) and capacity > 0 and capacity <= 2_147_483_647
+
+  defp quantity?(quantity, capacity),
+    do: is_integer(quantity) and quantity >= 0 and quantity <= capacity
+
+  defp kind?(nil, 0, _), do: true
+
+  defp kind?(kind, quantity, kinds) when quantity > 0,
+    do: Loka.Core.Contracts.validate("DefinitionRef", kind) == :ok and kind in kinds
+
+  defp kind?(_, _, _), do: false
 end

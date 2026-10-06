@@ -763,6 +763,10 @@ The B4 well-shaft plan is independent; preserve its exits if already merged.
 No new room or route is counted for B7. The well cannot be carried or targeted
 as a Pour receiver, and cannot be drunk from directly in this slice.
 
+Vessel metadata opts only authored initial item instances into B7. A template
+cannot be a vessel: no liquid-row creation writer exists for newly instantiated
+items. Ordinary non-vessel corpse templates remain unchanged.
+
 Source/compiler/loader validate positive integer opted vessel capacity, exact
 initial row, kind references, positive integer drink amount and grams/unit,
 source kind/room binding and safe maximum effective mass. Short DefinitionRefs expand through
