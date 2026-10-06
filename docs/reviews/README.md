@@ -255,6 +255,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Chapter 1 implementation and proof briefs](2026-10-05-chapter-one-briefs-review.md): PR #193 at `87b7bbca`, CHANGES REQUIRED; scoped fix `bdec64d8`, APPROVE, R193-1 D1/D6/C6 swim lesson handoff closed.
 - [Q3-B bell-first prior/lost](2026-10-05-q3-bell-lost-review.md): PR #196, primary and separate save/protocol APPROVE at `93b3531219685795e47a26577ae948101db0059d`; R196-1 and S1–S4 closed.
 - [Local Book web preview](2026-10-05-web-preview-review.md): PR #194 at `6a878fa2`, CHANGES REQUIRED; scoped fix `abef39cc`, APPROVE, R194-1/R194-2 closed; disposable browser corrupt-save recovery and worker red control pass.
+- [B6 Wisp riddle and ward primary](2026-10-05-b6-wisp-primary-review.md): local source `e7aeace7f369254e3fb4b3f197dc1b641b6e6e87`, APPROVE; no findings, focused portable/SQLite/Book checks and two independent mutants red. Hosted PR and exact-head CI pending.
 - [Read-once documentation rule](2026-10-05-read-once-docs-review.md): PR #195 at `fe73a47695aa17aa8868e521db626154bff6f7a1`, APPROVE; no findings.
 - [Builder's Guide reuse lessons](2026-10-05-builder-learning-review.md): PR #197 at `8971c7ed`, independent docs-only APPROVE; no findings.
 - [Book keyboard navigation](2026-10-05-book-keyboard-navigation-review.md): PR #200 at `f80ac75d`, CHANGES REQUIRED; scoped fix `9ef3bf15`, APPROVE, R200-1/R200-2 closed.
@@ -308,6 +309,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [B5 Infirmary Herbs primary implementation](2026-10-05-b5-infirmary-herbs-primary-review.md): exact source head `802edd92`, initially CHANGES REQUIRED; scoped fix `cbb11fce` at integrated `2df52d32`, independent APPROVE, B5-P1/B5-P2 closed. Scoped 36/36 pass; trusted elapsed and pinned-role red controls fail, restored regressions 3/3 pass.
 - [B5 Infirmary Herbs save/protocol second opinion](2026-10-05-b5-infirmary-herbs-save-second-review.md): initial exact head `802edd92` CHANGES REQUIRED; scoped integrated fix `2df52d32`, APPROVE, B5-S1/S2 closed by real elapsed SQLite cold-reopen/COMMIT/retry probes and independent TS/Elixir retirement pairing controls; no open findings.
+- [B6 Wisp save/protocol second opinion](2026-10-05-b6-wisp-save-second-review.md): exact source head `e7aeace7`, APPROVE; real SQLite reopen/COMMIT/replay, receipt associations, Q1/Q2 coexistence, portable contract pins and a forged-source red control checked; no open findings.
 - [Book component language](2026-10-05-book-component-language-review.md): initial local head `6b70d493`, CHANGES REQUIRED; scoped fix `aa988906`, independent docs-only APPROVE, BCL-1 closed by separating the planned bed-local dream from current modal scene/chapter components. Links and AGENTS budget pass; no open findings.
 
 - [B3 inherited Credo cleanup](2026-10-05-b3-credo-cleanup-review.md): exact local source head `0e0a0105`, independent APPROVE; no findings, 29 focused content tests and Credo pass, 15 shop probes/12 raw compiler comparisons match, funding and omitted-check mutants fail existing tests.

@@ -162,10 +162,10 @@ B1 — authored calendar and truthful Book sun/moon status — merged in
 [#201](https://github.com/lorecrafting/lokacore/pull/201). A2 Q3-F — the
 fox/silent-bell outcome after Wren's return — merged in
 [#202](https://github.com/lorecrafting/lokacore/pull/202) at chapter 0.0.15/API1.13.
-Local and GitHub `main` have completed **10 of the 33** proposed Chapter 1 completion slices
-(A1, B1, A2, B2, A3, B3, B4, B5, B7, C1). The latest source publication is
-[#209](https://github.com/lorecrafting/lokacore/pull/209), B7 Well Lane waterskins
-and liquid actions.
+Local and GitHub `main` have completed **11 of the 33** proposed Chapter 1 completion slices
+(A1, B1, A2, B2, A3, B3, B4, B5, B6, B7, C1). The latest source publication is
+[#210](https://github.com/lorecrafting/lokacore/pull/210), B6 Wisp riddle and ward;
+it also carries the reviewed B8 Maud-services brief re-pin.
 Supporting [#200](https://github.com/lorecrafting/lokacore/pull/200) adds Book keyboard
 exits. [#203](https://github.com/lorecrafting/lokacore/pull/203) adopts the B2
 Chandler's Debt quest contract, and [#204](https://github.com/lorecrafting/lokacore/pull/204)
@@ -198,12 +198,15 @@ paired quest retirement findings were fixed and independently approved
 [save/portable review](reviews/2026-10-05-b5-infirmary-herbs-save-second-review.md)).
 It is published in #205.
 
-B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6-wisp-2026-10-05.md)
-and [focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md)
-on local base `98cc60b1`. The route finding was fixed and its
-[independent plan review](reviews/2026-10-05-b6-wisp-plan-review.md) approved.
-B4 source is published in #206; B6 implementation is active in an isolated worktree,
-with final shared release/proof pins to follow B7 integration.
+B6 Wisp has an [adopted all-hours riddle/ward contract](decisions/pm-decision-b6-wisp-2026-10-05.md),
+[focused brief](briefs/chapter-one/b6-wisp-ward-riddle-brief-2026-10-05.md),
+[primary source review](reviews/2026-10-05-b6-wisp-primary-review.md) and
+[save/protocol second opinion](reviews/2026-10-05-b6-wisp-save-second-review.md).
+Both source reviews approved exact head `e7aeace7` with no findings. Chapter
+0.0.23/API1.21 has independently pinned hash
+`e7333f694e6ec2c9f02a39944d994d4452f26fffc5534ff217346504471e4c71`
+and 103 IDs. The accumulated local checks and all six hosted checks passed on
+the source and final review/evidence heads; B6 is published in #210.
 
 B7 Well and waterskin has an [adopted liquid contract](decisions/pm-decision-b7-well-waterskin-2026-10-05.md)
 and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
@@ -219,12 +222,13 @@ B8 Maud's paid room, food and drink services have an
 [adopted immediate-benefit contract](decisions/pm-decision-b8-mauds-services-2026-10-05.md)
 and [independently approved plan](reviews/2026-10-05-b8-maud-services-plan-review.md).
 The [brief](briefs/chapter-one/b8-mauds-services-brief-2026-10-05.md) now pins
-published B7's reviewed source and current GitHub main `547f809c`, chapter
+published B7's reviewed source and publication base `547f809c`, chapter
 0.0.22/API1.20 with 96 independent IDs. B3/B7/Rest behavioral dependencies are met.
-Full source assignment queues behind active B6 Wisp and C2 Tobin patrol shared
+Full source assignment queues behind published B6 Wisp and active C2 Tobin patrol shared
 contract/save/Book/release integration, then re-pins latest reviewed main; these
 are scheduling predecessors, not additional chapter dependencies. This docs-only
-re-pin still needs a short independent review. B8 source, successor pins and
+re-pin received a [short independent approval](reviews/2026-10-05-b8-services-source-repin-review.md)
+and was published in #210. B8 source, successor pins and
 playable service proof remain null.
 
 B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
