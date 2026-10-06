@@ -1,4 +1,4 @@
-// Provisional D3 source: real rollback-journal SQLite and existing Book presenter/routes.
+// D3 current compiled source: real rollback-journal SQLite and existing Book presenter/routes.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -20,6 +20,7 @@ import { pagesAfter } from '../../app/book/model.ts';
 const start = (c: any) => {
   c.entry = ref('room', 'ferry_landing');
   c.calendar.start = 64800;
+  c.resources[`${prefix}:resource/pennies`].start = 20;
 };
 function setup(path: string, change = start) {
   const b = bundle(change),
@@ -42,6 +43,7 @@ function setup(path: string, change = start) {
     directions.forEach((direction) => invoke('move', [], { direction }));
   return {
     initial,
+    content_hash: b.sha256,
     world,
     invoke,
     move,
@@ -128,6 +130,7 @@ test('Western rooms and both exact standalone Read histories survive cold SQLite
     a.reopen();
     assert.equal(a.view().place.id, room(a.initial, expected));
   }
+  assert.equal(a.content_hash, '5d48ad7fb4402de91c775dfe9395949ed1c1fe73d4bf0e13f2cb29717c1c1fdf');
 });
 // Break: Hob's saved schedule transfer or a departed dialogue speaker fails legal reopen.
 test('Hob departure and return retain original identity and saved Conversation Leave at the two dawn/dusk boundaries', (t) => {

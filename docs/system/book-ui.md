@@ -816,8 +816,10 @@ NPC identity. Clock jobs continue while details are open. Unlit Mill Loft and
 Mill Cellar show authored dark text, known up/down return exits and the actor's
 actual owned corpse/accessible contents under B4; ordinary Hob and detail links
 remain hidden. No light exemption, forced-overload Take or replacement gear is
-added. Headless Book/SQLite proof is distinct from browser refresh/interaction;
-native and browser preview sessions remain deferred during provisional source work.
+added. Headless Book/SQLite proof is distinct from
+[browser refresh/interaction proof](../evidence/2026-10-06-d3-final-integration/README.md);
+native verification remains paused.
+
 ## D6 water exits and Chapel recovery
 
 **PM-selected contract; selected-docs review approved, implementation pending.** Shaft/bank show Down with

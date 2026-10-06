@@ -1,0 +1,4 @@
+command: mise exec -- elixir bin/check_docs.exs && git diff --check
+686 docs, 0 broken link(s), 0 unreachable
+
+exit: 0

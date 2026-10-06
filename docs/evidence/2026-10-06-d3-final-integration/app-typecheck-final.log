@@ -1,0 +1,3 @@
+command: cd mobile/app && mise exec -- npx tsc
+
+exit: 0

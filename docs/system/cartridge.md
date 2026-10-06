@@ -1237,11 +1237,12 @@ his first job is due at 108000, followed by 151200. Both destinations exist.
 Flavor dialogue grants nothing and gates no required story action; darkness
 and scheduled departure retain existing admission. Movement, readable details,
 light perception and schedule jobs keep their existing state writers. No new
-command, capability or save shape is selected. Release/API/hash/allocation pins
-remain provisional until the ordered source integration and independent re-pin.
+command, capability or save shape is selected.
 
-See the [provisional D3 source proof](../evidence/2026-10-06-d3-western-ashmere/README.md)
-for focused checks and outstanding integration/publication work.
+The [final D3 integration proof](../evidence/2026-10-06-d3-final-integration/README.md)
+records the independently pinned successor and checks; the
+[provisional proof](../evidence/2026-10-06-d3-western-ashmere/README.md) is historical.
+
 ## D6 bottom rooms and water tuning (selected, pending implementation)
 
 **PM-selected contract; selected-docs review approved, implementation pending.** Reciprocal exits:
