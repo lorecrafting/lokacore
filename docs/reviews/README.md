@@ -1,5 +1,8 @@
 # Independent reviews
 
+- [Chapter 1 integration publication status](2026-10-06-chapter-one-integration-status-review.md): aggregate review of D1 publication, 18/33 completion, local WIP and D8/C5 planning corrections; D6 adoption wording corrected before final approval.
+
+- [C5 bandage supply and consumption readiness](2026-10-06-c5-consumption-readiness-review.md): exact planning head `fe7ef9bd3cc6a90e37011fc271ff270ee23a3dc3`, independent APPROVE; finite Wick exchange, B8 provider debit, conditional D4 terminal custody and C4/source adoption gates verified. No findings; docs/Beads checks pass.
 - [D1 ferry/isle save/protocol second opinion](2026-10-06-d1-ferry-save-second-review.md): original provisional source `8aa63fa9` APPROVE; integrated C3 successor source `4e217f60`, evidence `8de184ee`, scoped APPROVE, no findings. 25 TS/SQLite and 15 Elixir checks, twelve file-backed COMMIT cases, 27 byte-preserving forgeries, unavailable-pin refusal and relevant Book combat control pass; v030/API1.26/hash/all 149 IDs and all 25 publication evidence hashes verify. Hosted publication remains separate.
 
 - [C3 living hounds save/protocol second opinion](2026-10-06-c3-hounds-save-second-review.md): original `a692a2b8` CHANGES REQUIRED; first fix `8e767434` retains residual S2; strict source `2dbf55b5` APPROVE closes S1/S2. Published-B9 carryover source `f96e0245`, evidence `33163a1b`, scoped APPROVE: 22 TS/SQLite and 13 Elixir checks pass; integrated dream/population cold recovery and fifteen byte-preserving forgeries pass, all 140 v029/API1.25 IDs/hash and thirteen evidence hashes verify. Separate Astra approval; hosted publication remains ahead.
@@ -399,6 +402,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C3 published-B9 successor primary carryover](2026-10-06-c3-living-hounds-primary-review.md#b9-integrated-successor-carryover--approve): source `f96e0245`, frozen evidence `33163a1b`, APPROVE; R1/R2 remain closed. Independent v029/API1.25 canonical hash and all 140 actual genesis IDs verified, compiled bytes match, 25 focused and 15 Book polish cases pass, D2 remounts and both dream routes on actual v029 pass; 13 evidence hashes verified. No source edit, preview or native work.
 
 - [C3 publication status](2026-10-06-c3-publication-status-review.md): PM status head `2a809bd3`, independent APPROVE; actual PR229 merge/hosted jobs/review closure and v029 pins verified, 33 issues/17 closed, only C3 transition, portable acyclic export.
+- [D8 real-coin dependency](2026-10-06-d8-real-coin-dependency-review.md): independent APPROVE on planning head `4ab053d3`; D8 crow transport now waits for D6's real old coin, with the plan, brief and Beads edge aligned.
 
 - [D1 integrated C3 primary carryover](2026-10-06-d1-ferry-isle-primary-review.md#integrated-c3-carryover--approve): source `4e217f60`, frozen evidence `8de184ee`, APPROVE; no findings. Independent v030/API1.26 bytes/hash/all 149 actual IDs, 38 ferry/Book/SQLite/app cases, nine C3 and six combat cases pass. Virtual published-presenter red reproduces the escape leak; current routing and pickup restore green. Actual Book route and all 25 evidence hashes/inventory verified; no source edits, preview or native work.
 
