@@ -3,8 +3,8 @@
 Branch: `chapter-1/b6-wisp-ward`. Source assignment base:
 `fe25fe07702a957e4731eb4254ea4385e09b1e4b`; B7 predecessor:
 `547f809ccdd587498dee86cb14822f564efee642`. Exact implementation source:
-`e7aeace7f369254e3fb4b3f197dc1b641b6e6e87`. Hosted PR/CI, independent B6 primary and save/protocol
-reviews, browser/native proof: null.
+`e7aeace7f369254e3fb4b3f197dc1b641b6e6e87`. Independent B6 primary and save/protocol
+reviews: APPROVE on that source. Hosted PR/CI and browser/native proof: null.
 
 The player can reach Marsh Light, Old Causeway and Tide Flats at any hour, douse
 carried light, Seek the visible glow and accept the Wisp's optional riddle.
@@ -39,7 +39,7 @@ choice/receipt and Boolean fact machinery, and trimmed redundant module comments
 instead of raising size budgets. Actual-diff correctness review caught immutable role
 binding drift and restored saved-ID semantics with an independent declared-key guard.
 A broad Story/Book run caught unlabelled Talk routing drift; exact selection now opts
-in through authored labels. Independent review is still required.
+in through authored labels. Both independent reviews approved the exact source.
 
 Focused and full headless checks, mutation results and the schema sweep are retained in
 [proof](../../evidence/2026-10-05-b6-wisp/README.md). Native/mobile simulation remains paused.
