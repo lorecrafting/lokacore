@@ -1,0 +1,137 @@
+command: mise exec -- node --test kernel/ts/test/dream.test.ts kernel/ts/test/dream_contracts.test.ts kernel/ts/test/cartridge_dreams.test.ts kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/quest_dialogue.test.ts kernel/ts/test/missing_child.test.ts mobile/authority/local-story/dream.test.ts mobile/authority/local-story/service.test.ts mobile/authority/local-story/scene.test.ts mobile/authority/local-story/death.test.ts mobile/authority/local-story/vesper_message.test.ts mobile/app/book/dream.test.ts mobile/app/book/live_actions.test.ts mobile/app/book/notice_board.test.ts
+exit: 0
+✔ loader refuses impossible Rest, graph and exclusive end bindings (4978.960875ms)
+✔ talk opens one pending choice bound to EntityIds, stamped with its revision (105.41025ms)
+✔ an action that opens no choice shares the choices map (112.763625ms)
+✔ under loka play the stamp is the run revision and choose is accepted (9.940875ms)
+✔ the GameView shows the pending choice; a dropped lantern makes both options unavailable (8.799209ms)
+✔ the talk is listed on and accepts its speaker only (18.847791ms)
+✔ talk is unavailable and refused before accepting and after resolving (17.487958ms)
+✔ the rule enforces the target's dialogue policy whatever talk admitted it (85.484917ms)
+✔ a room contribution may subtract a dialogue's talk (11.123166ms)
+✔ leave hands the lantern to Bram, sets party_led and resolves quest and choice at once (26.857709ms)
+✔ carry keeps the lantern, sets player_led and resolves with outcome carry (4.663333ms)
+✔ a story point reports its declared outcome key, after choice_resolved (55.956709ms)
+✔ a choice reaches only a story point naming its own dialogue (5.517833ms)
+✔ close changes no outcome; a second talk opens another occurrence (32.855917ms)
+✔ a stale choice revalidates custody and presence; close still works (42.26625ms)
+✔ talk while pending, and choose or close of no pending continuation, are invalid_state (6.164209ms)
+✔ a lantern taken before accepting still lets leave resolve (3.87925ms)
+✔ choose pins the row bindings even if the definition would resolve elsewhere (41.663ms)
+✔ the loader checks dialogue references, roles, texts, facts, keys and the lock (163.12025ms)
+✔ the loader checks story point triggers, outcomes, keys and the lock (83.148542ms)
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (918.2825ms)
+✔ both exact branches keep World usable and award memory only after shown final acknowledgement (1038.271167ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (570.451583ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (854.443167ms)
+✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (641.752167ms)
+✔ a Rest occurrence cannot credit a nonliving body (379.216834ms)
+✔ dream contracts reject independent malformed boundaries and retain valid controls (12.597708ms)
+✔ the active Missing Child release keeps the simulator invariants on controlled seeds (13189.950125ms)
+✔ a fresh world: no position record, the same state as without position@1, standing (95.072458ms)
+✔ the position walk by invocation: only move needs standing, after the door (56.496834ms)
+✔ a cartridge alias of sit is listed and dropped with sit, with its own policy (9.040416ms)
+✔ no position changes regeneration: mv 1 at 0 is 19 at 3600, standing, resting or asleep (87.130625ms)
+✔ the loader refuses content writing the position fact, and a wrong or missing spec (99.553834ms)
+✔ elapsed Rest/Stand/Sit/Sleep settles old rates and retains literal metadata (92.285583ms)
+✔ opted births at zero and calendar start earn only their own elapsed interval (38.767083ms)
+✔ distinct authored Sit/Sleep rates select the commanded position (4.250625ms)
+✔ the public admitted proposal path faults rate/position disagreement before acceptance (2.185583ms)
+✔ recovery loader checks actual opt-in dependencies and arithmetic bound (5.790166ms)
+✔ an accept choice activates its quest; the talk opens the first dialogue that holds (179.057208ms)
+✔ a stale accept is invalid_state once the actor has an instance (19.563ms)
+✔ an accept is invalid_state while its quest's offer policy fails (6.397083ms)
+✔ the loader checks each accept: a quest, no dialogue quest, no hand_over (25.26ms)
+✔ every modal Continue requires its shown scene and line (232.203666ms)
+✔ fresh scenes keep the same state as their scene-free variant (12.956125ms)
+✔ story outcome starts line one and refuses every ordinary action at both boundaries (162.489583ms)
+✔ each continue advances one line, ends at minus one and composes its fact reaction (19.594792ms)
+✔ start needs only scene and never restarts an ended fact or a different outcome (77.95225ms)
+(node:64585) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (3506.082125ms)
+✔ uncertain paid Rest remount opens the first dream only when the original COMMIT settles (1391.797208ms)
+(node:64587) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/live_actions.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ after Bram acceptance an unchanged north drag crosses a pulse and commits exactly one move (512.423375ms)
+✔ sampler Bram offers at19:00 and receives the fetched lantern the next day without waiting (398.937125ms)
+✔ a captured north action never becomes north from a different origin room (96.451167ms)
+✔ Maud acceptance, position and item buttons survive elapsed-only redraws (244.718125ms)
+✔ an altered captured choice is refused without sending a new decision (28.525459ms)
+✔ old Leave and departed Bram actions keep stale refusal after context changes (330.032625ms)
+✔ a held answer refuses after its speaker departs during the elapsed pulse (27.529875ms)
+✔ combat context changes refuse old Look while an unchanged encounter tolerates a pulse (420.835167ms)
+✔ pending move retry adopts its original durable receipt once without a second action (136.2635ms)
+✔ withdrawn or changed-context Notice controls retain their captured stale token (111.176583ms)
+(node:64588) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/notice_board.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ landing detail and two board children read exact targets and pop back without navigation receipts (728.079333ms)
+✔ the south search reaches the oak and returns through visible fox clues (470.239125ms)
+✔ cold Continue shows the confirmed notice once and restores its return route without Read (468.428459ms)
+✔ an uncertain child read keeps an empty detail until its one receipt is confirmed (187.131167ms)
+✔ long elapsed redraw retains board route and a real room change prunes it (324.818084ms)
+✔ notice entries use available exact-target aliases and expose unavailable reasons (239.454291ms)
+✔ Elspeth stays reachable all day and her Book replies direct a newcomer along usable exits (955.072333ms)
+✔ Q1 drawing opens full item detail with Take and local Leave (130.461541ms)
+✔ plank and hollow open descriptive noun detail pages without story credit (148.156041ms)
+✔ Study is a detail-only empty-target control after Read/history and refreshes across elapsed redraw (276.708292ms)
+✔ pending Study retains its detail context and restores exactly once without World narration (351.295875ms)
+✔ corpse identity, worn roots and shrine return reopen atomically and receipt replay allocates nothing (288.602959ms)
+✔ an older release list refuses the corpse release without rewriting it (136.598333ms)
+✔ real FULL, failed COMMIT and committed-unknown COMMIT preserve all prior or all next corpse rows (209.716792ms)
+✔ save load refuses missing identity, unknown template and illegal corpse custody without repair (473.835625ms)
+✔ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (5725.959625ms)
+✔ cold open refuses forged dream truth and receipt producer evidence without changing file bytes (1047.434333ms)
+✔ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (1483.321625ms)
+✔ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (201.84975ms)
+✔ line two survives reopen and triggering receipt retry without duplicate effects (87.924334ms)
+(node:64670) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (3101.037042ms)
+✔ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (1982.965083ms)
+✔ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (1020.275125ms)
+✔ real Book captured alias press and lost acknowledgement restore one original-Maud line (436.607125ms)
+✔ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (474.911459ms)
+(node:64682) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ original message branch and terminal reopen with their own NPC narration and exact replay (1015.84325ms)
+✔ Drop and held-container Put reopen and recover the same item; stale handoff never prints success (608.940792ms)
+✔ fatal combat and cold reopen preserve the message through ordinary corpse recovery (438.200709ms)
+✔ elapsed redraw keeps an unchanged message choice usable (168.445792ms)
+▶ retained delivery evidence corruption is typed even behind an unrelated latest receipt
+  ✔ missing branch row (111.352042ms)
+  ✔ wrong message role (116.651542ms)
+  ✔ null retained source (70.664958ms)
+  ✔ branch fact reset (101.4725ms)
+  ✔ branch fact deleted (101.803666ms)
+  ✔ message in unrelated NPC (87.569292ms)
+  ✔ message nested in NPC-held container (210.7425ms)
+  ✔ malformed receipt command JSON (108.894333ms)
+  ✔ receipt transfer removed (94.724208ms)
+  ✔ receive narration names another speaker (103.023375ms)
+  ✔ terminal fact event missing (82.609958ms)
+  ✔ terminal status reset (89.283458ms)
+  ✔ terminal message returned to actor (104.49475ms)
+  ✔ terminal quest reopened (106.947667ms)
+✔ retained delivery evidence corruption is typed even behind an unrelated latest receipt (1494.519291ms)
+✔ failed and lost branch/terminal COMMIT keep narration and custody behind confirmed disk (616.988042ms)
+✔ v012 refuses the frozen v010 SQLite save and offers explicit Start over without changing it (49.97ms)
+✔ terminal quest without a message branch refuses reopen and requires explicit Start over (176.10425ms)
+ℹ tests 106
+ℹ suites 0
+ℹ pass 106
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14555.146

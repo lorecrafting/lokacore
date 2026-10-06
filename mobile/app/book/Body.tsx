@@ -1,3 +1,4 @@
+import { DreamPage } from './DreamPage.tsx';
 // Page dispatch for the current Book view and local detail stack.
 import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
@@ -24,6 +25,7 @@ type BodyProps = {
   startOver: () => void;
   chapterDone: () => void;
   world: () => void;
+  back: () => void;
 };
 
 export function Body(p: BodyProps) {
@@ -44,6 +46,7 @@ export function Body(p: BodyProps) {
         }
       />
     );
+  if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;
   if (page.kind === 'notice' || page.kind === 'board') return <NoticePage {...p} page={page} />;
   if (page.kind === 'thing') return <Item {...p} id={page.id} />;
   if (page.kind === 'contents') return <ContentsPage open={(kind: Section) => p.open({ kind })} />;

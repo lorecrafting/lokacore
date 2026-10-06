@@ -1,0 +1,1720 @@
+command: mise exec -- node docs/evidence/2026-10-05-b9-lantern-dream/trace-capture.mjs
+exit: 0
+{
+  "format": "b9-shared-sqlite-trace-v1",
+  "candidate": {
+    "version": "0.0.26",
+    "api": "1.24",
+    "provisional": true
+  },
+  "branches": [
+    {
+      "branch": "follow_fox",
+      "checkpoints": [
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 1,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 3,
+          "command": {
+            "id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "type": "rest"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "entity_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                  "from": 50,
+                  "next_rate": 36,
+                  "op": "resource.adjust",
+                  "resource": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "mv",
+                    "kind": "resource"
+                  },
+                  "to": 50,
+                  "writer_group": 0
+                },
+                {
+                  "expected": "standing",
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "position",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": "resting",
+                  "writer_group": 0
+                },
+                {
+                  "expected": false,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "slept_at_lantern",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": true,
+                  "writer_group": 1
+                },
+                {
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "op": "quest.activate",
+                  "quest": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "a_room_at_the_lantern",
+                    "kind": "quest"
+                  },
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "writer_group": 1
+                },
+                {
+                  "expected": 0,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 1,
+                  "writer_group": 1
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "996e7639-0485-8d9b-8876-16af2cef1c98",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "position",
+                    "kind": "fact"
+                  },
+                  "new": "resting",
+                  "old": "standing",
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "logical_time": 0,
+                "payload": {
+                  "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                  "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                  "type": "rested"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "causation_id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "ca80e82e-de4c-8344-a4b4-3d11e443f26a",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "slept_at_lantern",
+                    "kind": "fact"
+                  },
+                  "new": true,
+                  "old": false,
+                  "type": "fact_changed"
+                },
+                "position": 3,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "5cd9dd1d-214b-8100-a0fa-c67984aed564",
+                "logical_time": 0,
+                "payload": {
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "quest": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "a_room_at_the_lantern",
+                    "kind": "quest"
+                  },
+                  "type": "quest_activated"
+                },
+                "position": 4,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "causation_id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "0713247f-4280-8cef-bcac-5cda75321189",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 1,
+                  "old": 0,
+                  "type": "fact_changed"
+                },
+                "position": 5,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "outcome": "rested",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 2,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 4,
+          "command": {
+            "id": "c4c4e17f-bfbb-8d01-9f2e-69949c084fb6",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 1,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 1,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 2,
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "c4c4e17f-bfbb-8d01-9f2e-69949c084fb6",
+                "correlation_id": "c4c4e17f-bfbb-8d01-9f2e-69949c084fb6",
+                "id": "3668f939-758a-8f8a-ac96-8112c9d3fbf7",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 2,
+                  "old": 1,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.opening"
+              }
+            ],
+            "outcome": "continued",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 3,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 5,
+          "command": {
+            "id": "f04d271b-622e-8d2d-82ab-1cadf53302ea",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 2,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 2,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 3,
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "f04d271b-622e-8d2d-82ab-1cadf53302ea",
+                "correlation_id": "f04d271b-622e-8d2d-82ab-1cadf53302ea",
+                "id": "c21607e6-7666-859e-8e4c-1523f484a83b",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 3,
+                  "old": 2,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.fen"
+              }
+            ],
+            "outcome": "continued",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 4,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 6,
+          "command": {
+            "id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 3,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 3,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 4,
+                  "writer_group": 0
+                },
+                {
+                  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "beat": "fen_fork",
+                  "choice_ids": [
+                    "follow_fox",
+                    "wake"
+                  ],
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "op": "choice.open",
+                  "quest_instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "roles": [
+                    {
+                      "entity_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                      "role": "body"
+                    },
+                    {
+                      "entity_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                      "role": "anchor"
+                    }
+                  ],
+                  "source": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_of_the_fen",
+                    "kind": "scene"
+                  },
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "correlation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "id": "f5771fa7-042e-8b45-b432-f60ebdefc952",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 4,
+                  "old": 3,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "correlation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "id": "829a21e8-8435-812a-a03e-28f17a075fda",
+                "logical_time": 0,
+                "payload": {
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "type": "choice_opened"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.fox"
+              }
+            ],
+            "outcome": "continued",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 5,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": "follow_fox",
+          "revision": 7,
+          "command": {
+            "id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "choice_id": "follow_fox",
+              "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+              "dream": {
+                "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                "expected_revision": 6,
+                "line": 4,
+                "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                "scene": {
+                  "cartridge_id": "ashmere_missing_child",
+                  "cartridge_version": "0.0.26",
+                  "key": "dream_of_the_fen",
+                  "kind": "scene"
+                }
+              },
+              "type": "choose"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "choice_id": "follow_fox",
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "expected_revision": 6,
+                  "op": "choice.resolve",
+                  "writer_group": 0
+                },
+                {
+                  "expected": 4,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 5,
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "correlation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "id": "4ce61928-ed67-8b61-8a01-2e9e1cc801e0",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 5,
+                  "old": 4,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "correlation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "id": "2b0ba4ff-7c99-8d64-8e3a-ceea10959ae7",
+                "logical_time": 0,
+                "payload": {
+                  "choice_id": "follow_fox",
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "type": "choice_resolved"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.follow"
+              }
+            ],
+            "outcome": "choice_resolved",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": true,
+            "cursor": -1,
+            "quest": "resolved"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": "follow_fox",
+          "revision": 8,
+          "command": {
+            "id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 5,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 5,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": -1,
+                  "writer_group": 0
+                },
+                {
+                  "expected": false,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_seen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": true,
+                  "writer_group": 0
+                },
+                {
+                  "from": "active",
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "op": "quest.transition",
+                  "to": "objectives_complete",
+                  "writer_group": 0
+                },
+                {
+                  "from": "objectives_complete",
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "op": "quest.transition",
+                  "outcome": "acknowledged",
+                  "to": "resolved",
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "54560011-d00e-8a13-b186-f3fd4ea63466",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": -1,
+                  "old": 5,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "6528fdd5-99c5-8d15-b854-0a3c1e9dea6e",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_seen",
+                    "kind": "fact"
+                  },
+                  "new": true,
+                  "old": false,
+                  "type": "fact_changed"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "9d31cd77-de48-8f25-803a-1e8a780572ed",
+                "logical_time": 0,
+                "payload": {
+                  "scene": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_of_the_fen",
+                    "kind": "scene"
+                  },
+                  "type": "scene_ended"
+                },
+                "position": 3,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "de39a6bf-8dbc-88d7-841b-08e2216e1601",
+                "logical_time": 0,
+                "payload": {
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "outcome": "acknowledged",
+                  "quest": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "a_room_at_the_lantern",
+                    "kind": "quest"
+                  },
+                  "type": "quest_resolved"
+                },
+                "position": 4,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.follow.final"
+              }
+            ],
+            "outcome": "ended",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        }
+      ],
+      "completion_reports": 0
+    },
+    {
+      "branch": "wake",
+      "checkpoints": [
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 1,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 3,
+          "command": {
+            "id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "type": "rest"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "entity_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                  "from": 50,
+                  "next_rate": 36,
+                  "op": "resource.adjust",
+                  "resource": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "mv",
+                    "kind": "resource"
+                  },
+                  "to": 50,
+                  "writer_group": 0
+                },
+                {
+                  "expected": "standing",
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "position",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": "resting",
+                  "writer_group": 0
+                },
+                {
+                  "expected": false,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "slept_at_lantern",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": true,
+                  "writer_group": 1
+                },
+                {
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "op": "quest.activate",
+                  "quest": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "a_room_at_the_lantern",
+                    "kind": "quest"
+                  },
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "writer_group": 1
+                },
+                {
+                  "expected": 0,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 1,
+                  "writer_group": 1
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "996e7639-0485-8d9b-8876-16af2cef1c98",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "position",
+                    "kind": "fact"
+                  },
+                  "new": "resting",
+                  "old": "standing",
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "logical_time": 0,
+                "payload": {
+                  "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                  "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                  "type": "rested"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "causation_id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "ca80e82e-de4c-8344-a4b4-3d11e443f26a",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "slept_at_lantern",
+                    "kind": "fact"
+                  },
+                  "new": true,
+                  "old": false,
+                  "type": "fact_changed"
+                },
+                "position": 3,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "5cd9dd1d-214b-8100-a0fa-c67984aed564",
+                "logical_time": 0,
+                "payload": {
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "quest": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "a_room_at_the_lantern",
+                    "kind": "quest"
+                  },
+                  "type": "quest_activated"
+                },
+                "position": 4,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "causation_id": "44520228-d98d-8a50-b1c7-3e8b246d7da1",
+                "correlation_id": "e441f41c-cb58-86d1-b3d8-a03fd77e10f3",
+                "id": "0713247f-4280-8cef-bcac-5cda75321189",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 1,
+                  "old": 0,
+                  "type": "fact_changed"
+                },
+                "position": 5,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "outcome": "rested",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 2,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 4,
+          "command": {
+            "id": "c4c4e17f-bfbb-8d01-9f2e-69949c084fb6",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 1,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 1,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 2,
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "c4c4e17f-bfbb-8d01-9f2e-69949c084fb6",
+                "correlation_id": "c4c4e17f-bfbb-8d01-9f2e-69949c084fb6",
+                "id": "3668f939-758a-8f8a-ac96-8112c9d3fbf7",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 2,
+                  "old": 1,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.opening"
+              }
+            ],
+            "outcome": "continued",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 3,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 5,
+          "command": {
+            "id": "f04d271b-622e-8d2d-82ab-1cadf53302ea",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 2,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 2,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 3,
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "f04d271b-622e-8d2d-82ab-1cadf53302ea",
+                "correlation_id": "f04d271b-622e-8d2d-82ab-1cadf53302ea",
+                "id": "c21607e6-7666-859e-8e4c-1523f484a83b",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 3,
+                  "old": 2,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.fen"
+              }
+            ],
+            "outcome": "continued",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 4,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": null,
+          "revision": 6,
+          "command": {
+            "id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 3,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 3,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 4,
+                  "writer_group": 0
+                },
+                {
+                  "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "beat": "fen_fork",
+                  "choice_ids": [
+                    "follow_fox",
+                    "wake"
+                  ],
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "op": "choice.open",
+                  "quest_instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "roles": [
+                    {
+                      "entity_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                      "role": "body"
+                    },
+                    {
+                      "entity_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                      "role": "anchor"
+                    }
+                  ],
+                  "source": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_of_the_fen",
+                    "kind": "scene"
+                  },
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "correlation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "id": "f5771fa7-042e-8b45-b432-f60ebdefc952",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 4,
+                  "old": 3,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "correlation_id": "5c2f7bf9-b65d-81e0-ba3c-12ba41f0f8b7",
+                "id": "829a21e8-8435-812a-a03e-28f17a075fda",
+                "logical_time": 0,
+                "payload": {
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "type": "choice_opened"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.fox"
+              }
+            ],
+            "outcome": "continued",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": false,
+            "cursor": 5,
+            "quest": "active"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": "wake",
+          "revision": 7,
+          "command": {
+            "id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "choice_id": "wake",
+              "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+              "dream": {
+                "body_id": "3d4829ad-9e43-81ef-bc10-66b1b267e157",
+                "expected_revision": 6,
+                "line": 4,
+                "room_id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+                "scene": {
+                  "cartridge_id": "ashmere_missing_child",
+                  "cartridge_version": "0.0.26",
+                  "key": "dream_of_the_fen",
+                  "kind": "scene"
+                }
+              },
+              "type": "choose"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "choice_id": "wake",
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "expected_revision": 6,
+                  "op": "choice.resolve",
+                  "writer_group": 0
+                },
+                {
+                  "expected": 4,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": 5,
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "correlation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "id": "4ce61928-ed67-8b61-8a01-2e9e1cc801e0",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": 5,
+                  "old": 4,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "correlation_id": "b84be71a-0b57-8f3c-b6ef-37dc916afddf",
+                "id": "2b0ba4ff-7c99-8d64-8e3a-ceea10959ae7",
+                "logical_time": 0,
+                "payload": {
+                  "choice_id": "wake",
+                  "continuation_id": "a929868f-0670-8dc9-8ec0-b8b43323923a",
+                  "type": "choice_resolved"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.wake"
+              }
+            ],
+            "outcome": "choice_resolved",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "phase": {
+            "slept": true,
+            "seen": true,
+            "cursor": -1,
+            "quest": "resolved"
+          },
+          "mv": 50,
+          "clock": 0,
+          "branch": "wake",
+          "revision": 8,
+          "command": {
+            "id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+            "payload": {
+              "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+              "line": 5,
+              "scene": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.26",
+                "key": "dream_of_the_fen",
+                "kind": "scene"
+              },
+              "type": "continue"
+            },
+            "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+          },
+          "decision": {
+            "delta": {
+              "ops": [
+                {
+                  "expected": 5,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": -1,
+                  "writer_group": 0
+                },
+                {
+                  "expected": false,
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_seen",
+                    "kind": "fact"
+                  },
+                  "op": "fact.assign",
+                  "scope": {
+                    "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                    "kind": "player"
+                  },
+                  "value": true,
+                  "writer_group": 0
+                },
+                {
+                  "from": "active",
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "op": "quest.transition",
+                  "to": "objectives_complete",
+                  "writer_group": 0
+                },
+                {
+                  "from": "objectives_complete",
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "op": "quest.transition",
+                  "outcome": "acknowledged",
+                  "to": "resolved",
+                  "writer_group": 0
+                }
+              ]
+            },
+            "effects": [],
+            "events": [
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "54560011-d00e-8a13-b186-f3fd4ea63466",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "scene_dream_of_the_fen",
+                    "kind": "fact"
+                  },
+                  "new": -1,
+                  "old": 5,
+                  "type": "fact_changed"
+                },
+                "position": 1,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "6528fdd5-99c5-8d15-b854-0a3c1e9dea6e",
+                "logical_time": 0,
+                "payload": {
+                  "fact": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_seen",
+                    "kind": "fact"
+                  },
+                  "new": true,
+                  "old": false,
+                  "type": "fact_changed"
+                },
+                "position": 2,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "9d31cd77-de48-8f25-803a-1e8a780572ed",
+                "logical_time": 0,
+                "payload": {
+                  "scene": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "dream_of_the_fen",
+                    "kind": "scene"
+                  },
+                  "type": "scene_ended"
+                },
+                "position": 3,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              },
+              {
+                "actor_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                "causation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "correlation_id": "d449d7f4-c763-8a97-9058-e65a5e3c5bc4",
+                "id": "de39a6bf-8dbc-88d7-841b-08e2216e1601",
+                "logical_time": 0,
+                "payload": {
+                  "instance_id": "a43c7c49-a3a9-8df8-8a79-77309153cc74",
+                  "outcome": "acknowledged",
+                  "quest": {
+                    "cartridge_id": "ashmere_missing_child",
+                    "cartridge_version": "0.0.26",
+                    "key": "a_room_at_the_lantern",
+                    "kind": "quest"
+                  },
+                  "type": "quest_resolved"
+                },
+                "position": 4,
+                "scope": {
+                  "character_id": "bd595711-ea5f-89a5-abb0-046cd349d2f9",
+                  "kind": "player"
+                },
+                "world_context_id": "0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"
+              }
+            ],
+            "kind": "accepted",
+            "narration": [
+              {
+                "key": "dream.wake.final"
+              }
+            ],
+            "outcome": "ended",
+            "rng": [
+              1,
+              2,
+              3,
+              4
+            ]
+          }
+        }
+      ],
+      "completion_reports": 0
+    }
+  ]
+}

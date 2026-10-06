@@ -89,7 +89,7 @@ defmodule Loka.ContentScenesTest do
              %{"type" => "end"}
            ]), ".steps[1].type", "SCHEMA_VIOLATION", %{"error" => "not_in_enum"}},
           {Map.put(s, "control", "restricted"), ".control", "SCHEMA_VIOLATION",
-           %{"error" => "const_mismatch"}},
+           %{"error" => "unknown_variant"}},
           {update_in(s, ["on"], &Map.delete(&1, "story_point")), ".on", "SCHEMA_VIOLATION",
            %{"error" => "exclusive_properties"}},
           {put_in(s, ["on", "quest"], "bell_of_ashmere"), ".on", "SCHEMA_VIOLATION",

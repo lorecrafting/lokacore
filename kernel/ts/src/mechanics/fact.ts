@@ -51,27 +51,9 @@ export function assigned<R extends Assigned>(
   actor: CharacterId,
   r: R,
   s: { readonly fact: DefinitionRef; readonly value: FactValue },
-  owner?: 'skills' | 'patrol' | 'service',
+  owner?: 'skills' | 'patrol' | 'service' | 'scene',
 ): R {
-  if (
-    owner !== 'skills' &&
-    Object.values(world.cartridge.skills ?? {}).some((skill) => s.fact.key === `skill_${skill.key}`)
-  )
-    throw new KernelError('precondition_failed');
-  if (
-    owner !== 'patrol' &&
-    Object.values(world.cartridge.quests ?? {}).some(
-      (q) => q.patrol && same(q.patrol.trust_fact, s.fact),
-    )
-  )
-    throw new KernelError('precondition_failed');
-  if (
-    owner !== 'service' &&
-    Object.values(world.cartridge.services ?? {}).some(
-      (service) => service.benefit.kind === 'entitlement' && same(service.benefit.fact, s.fact),
-    )
-  )
-    throw new KernelError('precondition_failed');
+  ownership(world, s.fact, owner);
   const scope = scopeOf(world, actor, s.fact);
   const at = key({ kind: 'fact', fact: s.fact, scope });
   const expected = Object.hasOwn(r.facts, at) ? r.facts[at]! : value(world, actor, s.fact);
@@ -85,6 +67,41 @@ export function assigned<R extends Assigned>(
   } as const;
   const position = r.position + (same(expected, s.value) ? 0 : 1);
   return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
+}
+
+function ownership(
+  world: World,
+  ref: DefinitionRef,
+  owner?: 'skills' | 'patrol' | 'service' | 'scene',
+) {
+  if (
+    owner !== 'skills' &&
+    Object.values(world.cartridge.skills ?? {}).some((skill) => ref.key === `skill_${skill.key}`)
+  )
+    throw new KernelError('precondition_failed');
+  if (
+    owner !== 'patrol' &&
+    Object.values(world.cartridge.quests ?? {}).some(
+      (q) => q.patrol && same(q.patrol.trust_fact, ref),
+    )
+  )
+    throw new KernelError('precondition_failed');
+  if (
+    owner !== 'service' &&
+    Object.values(world.cartridge.services ?? {}).some(
+      (service) => service.benefit.kind === 'entitlement' && same(service.benefit.fact, ref),
+    )
+  )
+    throw new KernelError('precondition_failed');
+  if (
+    owner !== 'scene' &&
+    Object.values(world.cartridge.scenes ?? {}).some(
+      (scene) =>
+        scene.control === 'presentation_only' &&
+        (same(scene.on.rest.credit, ref) || scene.on_end.assign.some((a) => same(a.fact, ref))),
+    )
+  )
+    throw new KernelError('precondition_failed');
 }
 
 /** Dialogue bounded adjustment lowers to the existing assignment and sequence overlay. */

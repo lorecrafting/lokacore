@@ -1,3 +1,4 @@
+import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
@@ -52,9 +53,11 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     !a.recipe ||
     (world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!] &&
       light.visible(world, actor, detailOf(world, a.recipe.target), steps));
+  const hidden = (a: Offered) =>
+    HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
-      .filter((a) => fits(a) && here(a) && !HIDDEN.includes(a.command))
+      .filter((a) => fits(a) && here(a) && !hidden(a))
       .filter((a) => movable(world, a, id))
       .filter((a) => combatOffered(world, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)

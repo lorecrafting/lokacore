@@ -365,6 +365,7 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `filled`
   - `poured`
   - `drank`
+  - `rested`: An accepted actor-owned Rest after prior-rate settlement, at its actual body/room.
 
 ## Fact contracts (`protocol/fact.schema.json`)
 
@@ -401,6 +402,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **CombatView**: The current encounter and visible opponent presented to the player.
 - **ContentView**: An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.
 - **DoorView**: The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.
+- **DreamView**: Bed-local saved checkpoint; safe exact offers never replace ordinary World or dialogue.
 - **EntityView**: A visible entity (04 §14): the view model, never internal component state. Only entities the actor's AudiencePolicy admits appear (03 §6). An item with a barrier (c1-locks) carries its state and lists the container verbs (open, close, lock, unlock) admission and barrier@1 accept now, each with the item's scope as its entity target and no input. An item without a barrier or with an open one carries contents when it holds an item: every item inside it in reach (containment@1 custody), at any depth, flattened in DefinitionRefString order (a schema may not refer to itself), never an NPC's possessions. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.
 - **ExitView**: One exit of the current place (04 §14, §15 as amended by c1-doors; 00 §4.10 compass: disabled when unavailable, badge when locked), with the typed reason when moving through it is not legal now; the door it passes through, also when passable, and what is seen through it unless its door bars the way, also when the move is unaffordable.
   - `true`: Moving through it is legal now.
@@ -613,11 +615,17 @@ The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 0
 
 
 
-- **SceneDefinition**: Modal current_world text sequence; ordered narrate×n (n ≥ 1), await_ack, end validated by compiler/loader. mechanics.md scene@1; dated subset of 06 §33–§37, 21 §3.6.
+- **DreamDraw**: Captured original scene-owned choice occurrence at its shown choice beat.
+- **RestBinding**: One exact paid Rest binding: authored bed, first-credit fact and sole quest.
+- **SceneDefinition**: Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream.
+  - `modal`
+  - `presentation_only`
 - **SceneStep**: The installed closed scene step subset; no arbitrary writes.
   - `narrate`
   - `await_ack`
   - `end`
+  - `choice`
+  - `branch`
 
 ## Scope and audience contracts (`protocol/scope.schema.json`)
 

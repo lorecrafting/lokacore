@@ -12510,13 +12510,31 @@
   },
   {
     "contract": "Calendar",
-    "value": {"start": 3000, "units_per_hour": 0, "hours_per_day": 30, "subdivisions_per_hour": 10},
-    "errors": [{"path": "/units_per_hour", "code": "below_minimum"}]
+    "value": {
+      "start": 3000,
+      "units_per_hour": 0,
+      "hours_per_day": 30,
+      "subdivisions_per_hour": 10
+    },
+    "errors": [
+      {
+        "path": "/units_per_hour",
+        "code": "below_minimum"
+      }
+    ]
   },
   {
     "contract": "CalendarCut",
-    "value": {"at": -1, "phase": "new"},
-    "errors": [{"path": "/at", "code": "below_minimum"}]
+    "value": {
+      "at": -1,
+      "phase": "new"
+    },
+    "errors": [
+      {
+        "path": "/at",
+        "code": "below_minimum"
+      }
+    ]
   },
   {
     "contract": "ReactionRule",
@@ -15755,7 +15773,7 @@
     "errors": [
       {
         "path": "/control",
-        "code": "const_mismatch"
+        "code": "unknown_variant"
       }
     ]
   },

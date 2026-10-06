@@ -130,7 +130,9 @@ export function finaleSave(world: World, db: Db, meta: Meta, head: number) {
     selected.line > 0 &&
     (world.state.containers[world.body] !==
       world.roomIds[refString(ref(world, 'room', 'village_green'))] ||
-      Object.values(world.state.choices ?? {}).some((c) => c.status === 'pending') ||
+      Object.values(world.state.choices ?? {}).some(
+        (c) => c.source.kind === 'dialogue' && c.status === 'pending',
+      ) ||
       Object.values(world.state.encounters ?? {}).some((e) => e.status === 'open'))
   )
     invalid();

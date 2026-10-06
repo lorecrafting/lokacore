@@ -1,0 +1,21 @@
+{
+  "command": "choose",
+  "target": {
+    "kind": "none"
+  },
+  "input": [
+    "continuation_id",
+    "choice_id",
+    "dream"
+  ],
+  "label": "dream.choose",
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "accessibility": "dream.choose"
+}

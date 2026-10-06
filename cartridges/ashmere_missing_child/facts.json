@@ -332,6 +332,28 @@
         "player"
       ],
       "meaning": "The player paid Maud for the Inn Rooms bed in this lineage."
+    },
+    "slept_at_lantern": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "First actual paid Lantern Rest; only its declared Rest reaction grants this credit."
+    },
+    "dream_seen": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Local continuity memory player.dream_seen; only the acknowledged dream end writes it."
     }
   }
 }

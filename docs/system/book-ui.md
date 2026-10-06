@@ -664,7 +664,7 @@ retains its original identity and follows normal refusal/Leave rules.
 
 ## B9 bed and resumable dream details
 
-**Selected, source pending.** [S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+**Current consumed source; independent review pending.** [S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
 uses World→actual Inn Rooms bed→Dream nesting. The paid bed's accepted ordinary
 Rest may open its first dream at the confirmed first beat. Rental, menu opening,
 unpaid Rest or a pending save never does. First Rest commits beat1 even if
@@ -685,7 +685,7 @@ The shared implementation uses the existing bed notice detail and one nested
 `dream` page keyed by that same real detail ID. Resume and Close edit only the
 Book page stack; the dream uses existing Sheet/Act/Leave controls and its own
 receipt-bound detail history. Live first-Rest confirmation may open that nested
-page; a cold start retains World and offers Resume at the real bed. A scene-owned
+page; after the ordinary chapter Continue, a cold start retains World and offers Resume at the real bed. A scene-owned
 choice uses its own projected options, never the ordinary conversation page.
 
 Every captured control retains actor, anchor, scene, shown beat and exact choice

@@ -938,7 +938,7 @@ and receipt together before adopting memory or replying; no full-state copy occu
 
 ## B9 Rest occurrence and dream composition
 
-**Selected, source pending.** Register `rested {body_id, room_id}` as a
+**Current consumed source; independent review pending.** Register `rested {body_id, room_id}` as a
 position-owned DomainEvent for accepted `rest` only. Its full actor/player scope,
 world/time, root command cause/correlation and causal position bind the actual
 accepted body/room transition after prior-rate settlement. Root-to-event checks

@@ -482,5 +482,19 @@
   "service.unaffordable": "The exact penny payment is unavailable.",
   "service.already_paid": "You have already paid for the bed.",
   "service.full_mv": "Your MV is full.",
-  "service.sold_out": "Sold out."
+  "service.sold_out": "Sold out.",
+  "dream.title": "The Fen Dream",
+  "dream.description": "A dream waiting at the Lantern. Close it whenever you wish; its place will be kept.",
+  "dream.opening": "The Lantern falls quiet around you. Beyond the window, mist gathers over dark water.",
+  "dream.fen": "You stand among the reeds of the fen. A narrow track winds toward a light you cannot quite see.",
+  "dream.fox": "A red fox steps onto the track. It looks back once, waiting.",
+  "dream.choice": "The fox waits at a fork in the reeds.",
+  "dream.follow": "Follow the fox",
+  "dream.wake": "Wake",
+  "dream.choose": "Choose",
+  "dream.follow.final": "You follow the fox to the water\u2019s edge. Across the fen, a lantern shines through the mist.",
+  "dream.wake.final": "You turn toward the warmth of the Lantern. The fox slips between the reeds as the window brightens.",
+  "quest.lantern.title": "A Room at the Lantern",
+  "quest.lantern.active": "You have rested at the Lantern. A dream waits at the Inn Rooms bed; return there to resume it.",
+  "quest.lantern.resolved": "You rested at the Lantern and acknowledged the fen dream."
 }

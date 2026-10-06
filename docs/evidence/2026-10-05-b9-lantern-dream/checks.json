@@ -1,0 +1,148 @@
+{
+  "base": "594b8ae1b6c790891e49d160ff4d023c9db1e9f1",
+  "source_checkpoint": null,
+  "candidate_provisional": true,
+  "checks": [
+    {
+      "name": "pins",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "node",
+        "docs/evidence/2026-10-05-b9-lantern-dream/pins.mjs"
+      ],
+      "exit": 0,
+      "seconds": 1.812
+    },
+    {
+      "name": "focused",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "node",
+        "--test",
+        "kernel/ts/test/dream.test.ts",
+        "kernel/ts/test/dream_contracts.test.ts",
+        "kernel/ts/test/cartridge_dreams.test.ts",
+        "kernel/ts/test/position.test.ts",
+        "kernel/ts/test/scene.test.ts",
+        "kernel/ts/test/dialogue.test.ts",
+        "kernel/ts/test/quest_dialogue.test.ts",
+        "kernel/ts/test/missing_child.test.ts",
+        "mobile/authority/local-story/dream.test.ts",
+        "mobile/authority/local-story/service.test.ts",
+        "mobile/authority/local-story/scene.test.ts",
+        "mobile/authority/local-story/death.test.ts",
+        "mobile/authority/local-story/vesper_message.test.ts",
+        "mobile/app/book/dream.test.ts",
+        "mobile/app/book/live_actions.test.ts",
+        "mobile/app/book/notice_board.test.ts"
+      ],
+      "exit": 0,
+      "seconds": 9.479
+    },
+    {
+      "name": "elixir-focused",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "mix",
+        "test",
+        "--force",
+        "test/loka/content_dreams_test.exs",
+        "test/loka/content_services_test.exs",
+        "test/loka/content_scenes_test.exs",
+        "test/loka/content_missing_child_test.exs",
+        "test/loka/content_patrol_test.exs"
+      ],
+      "exit": 0,
+      "seconds": 12.557
+    },
+    {
+      "name": "kernel-types",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "npm",
+        "--prefix",
+        "kernel/ts",
+        "run",
+        "typecheck"
+      ],
+      "exit": 0,
+      "seconds": 7.5
+    },
+    {
+      "name": "app-types",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "mobile/app/node_modules/.bin/tsc",
+        "-p",
+        "mobile/app"
+      ],
+      "exit": 0,
+      "seconds": 2.21
+    },
+    {
+      "name": "renderer-imports",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "ast-grep",
+        "test",
+        "--skip-snapshot-tests",
+        "--filter",
+        "mobile-renderer-imports|ts-rule-module-imports"
+      ],
+      "exit": 0,
+      "seconds": 0.181
+    },
+    {
+      "name": "renderer-boundary",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "ast-grep",
+        "scan",
+        "--error",
+        "--filter",
+        "mobile-renderer-imports",
+        "mobile/app/book"
+      ],
+      "exit": 0,
+      "seconds": 0.128
+    },
+    {
+      "name": "docs",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "elixir",
+        "bin/check_docs.exs"
+      ],
+      "exit": 0,
+      "seconds": 1.317
+    },
+    {
+      "name": "trace-capture",
+      "command": [
+        "mise",
+        "exec",
+        "--",
+        "node",
+        "docs/evidence/2026-10-05-b9-lantern-dream/trace-capture.mjs"
+      ],
+      "exit": 0,
+      "seconds": 1.497
+    }
+  ]
+}

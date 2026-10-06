@@ -1,3 +1,4 @@
+import { dream } from './cartridge_dreams.ts';
 // scene@1's ordered subset, trigger/text references and engine FactSpec (mechanics.md).
 import type { Diagnostic } from '../contracts.gen.ts';
 import { checkers, diag, step, type Obj } from './cartridge_refs.ts';
@@ -26,6 +27,12 @@ export function scenes(c: Obj): Diagnostic[] {
   const triggers: Record<string, string[]> = {};
   for (const [k, s] of Object.entries((c.scenes ?? {}) as Obj)) {
     const at = `.cartridge.scenes${step(k)}`;
+    if (s.control === 'presentation_only') {
+      out.push(...dream(c, s, at, checkers(c, out)));
+      const trigger = `rest/${refString(s.on.rest.room)}/${s.on.rest.detail}`;
+      (triggers[trigger] ??= []).push(`${at}.on`);
+      continue;
+    }
     source(c, s, at, named, out);
     lines(s, at, text, out);
     ending(c, s, at, named, typedValue, out);

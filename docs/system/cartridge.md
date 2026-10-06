@@ -1084,5 +1084,7 @@ choice mixing, body/container operations and a dream end declaring a completion
 report. Reserve engine cursor/choice ownership as for existing scenes; content
 cannot assign their state. Extend A3's terminal consequence only enough to admit
 memory assignment plus typed quest resolution without a story-point declaration.
-Future integrated release/API/hash/allocated IDs remain null until B8 source and
-review merge and independent current answers are derived.
+Final integrated B9 release/API/hash/allocated-ID answers follow the integration owner's
+actual ordering with D2 and C3. B8 is published; the independently derived local
+B9 candidate and conditional pins are recorded in the
+[source evidence](../evidence/2026-10-05-b9-lantern-dream/README.md).

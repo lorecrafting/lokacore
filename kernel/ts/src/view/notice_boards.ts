@@ -1,3 +1,4 @@
+import { dreamView } from './dreams.ts';
 import { value } from '../mechanics/fact.ts';
 import { resolved, refusal } from '../commands/actions.ts';
 import { positionOf } from '../mechanics/position/shared.ts';
@@ -26,7 +27,7 @@ export function noticeViews(
             title: detailTitle(detail),
             ...harvestRemaining(world, detail, here),
             description: description_variant.describe(world, world.character, detail, steps),
-            ...(detail.bed && { bed: true as const }),
+            ...bedView(world, detail, steps),
             ...offered(detail.bed ? bedActions(world, detail, steps) : actions(id)),
           },
         ]
@@ -113,4 +114,10 @@ function bedActions(
         ? { ...offer, available: false, reason: { code } }
         : { ...offer, available: true };
     });
+}
+
+function bedView(world: World, detail: World['details'][string], steps: Steps) {
+  if (!detail.bed) return {};
+  const dream = dreamView(world, detail, steps);
+  return { bed: true as const, ...(dream && { dream }) };
 }

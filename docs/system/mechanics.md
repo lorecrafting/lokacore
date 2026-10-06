@@ -1268,7 +1268,7 @@ books given away need no replacement or mint and cannot strand a required path.
 
 ## S10 Lantern Rest and dream (B9 selected contract)
 
-**Selected, source pending.** The [PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
+**Current consumed source; independent review pending.** The [PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
 extends position/scene/quest at this first consumer. The first accepted actor-owned
 `rest` transition at actual `inn_rooms`, with B8 `lantern_bed_paid=true` and
 `slept_at_lantern=false`, sets that declared player fact true and activates the

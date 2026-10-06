@@ -20,9 +20,12 @@ its review records. Published B8 prerequisite `594b8ae1` is now integrated in
 this isolated source branch. The consumed wire/UI declarations are specified in
 [protocol](../../system/protocol.md#b9-rest-occurrence-and-dream-composition)
 and [Book](../../system/book-ui.md#b9-bed-and-resumable-dream-details) before code.
-C3 source remains isolated; final shared release pins follow the integration
-owner's actual ordering. B9 source/review/evidence/publication heads remain null
-until implementation and checks produce them.
+The provisional consumed source and its independent current answers are recorded in
+[local evidence](../../evidence/2026-10-05-b9-lantern-dream/README.md). D5 is now
+published and D2 is queued before B9; final source integration and successor pins
+follow the PM's actual order. D1/C3 remain isolated. B9 publication and fresh
+review verdicts remain null until their records exist. The planning claims above
+are historical; no owner save or native/browser preview is touched by this source work.
 
 ## Consumer and governing clauses
 

@@ -803,7 +803,7 @@ World/other-book narration fallback. Current-release pin refusal remains explici
 
 ## B9 dream recovery
 
-**Selected, source pending.** The [S10 Rest/dream](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+**Current consumed source; independent review pending.** The [S10 Rest/dream](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
 uses existing fact, quest, choice and receipt tables. There is no snapshot, new
 save format, dream ledger or save-on-display. First-Rest credit, S10 activation
 and scene beat1 start commit together even when presentation is deferred.
@@ -840,3 +840,12 @@ invocation replay preserves the original result and adds no credit/branch/memory
 Confirmed narration restores to the actual bed/dream nesting by committed command
 identity; when away, retain honest history and Resume availability on legal return,
 never an invented Inn Rooms backdrop or unconfirmed completion.
+
+The consumed source uses the installed revision-ordered accepted-receipt replay,
+already required by the real B8 entitlement producer. It introduces no second
+history checker. Ordinary dialogue/finale validators select dialogue-owned
+choices and leave the scene-owned row to that replay. Continue/Choose narration
+recovers to the UI-only `dream:<actual bed id>` detail owner from the retained
+scene binding; this is local history routing, not a saved row or invented entity.
+After the ordinary chapter Continue, cold launch stays at World. Resume is offered
+only at the projected safe bed, and retained history appears in its dream child.

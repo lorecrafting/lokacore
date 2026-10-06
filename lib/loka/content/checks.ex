@@ -36,6 +36,8 @@ defmodule Loka.Content.Checks do
   def expand(%{"benefit" => _, "provider" => _, "currency" => _} = s, m),
     do: Loka.Content.Services.expand(s, m)
 
+  def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
+
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
     field = fn {k, v} -> {k, ref(v, if(k == "to", do: "room", else: k), m)} end
@@ -183,7 +185,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
-    do: Map.put(trigger, "quest", ref(q, "quest", m))
+    do: trigger |> Map.delete("quest") |> expand(m) |> Map.put("quest", ref(q, "quest", m))
 
   def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
     do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
