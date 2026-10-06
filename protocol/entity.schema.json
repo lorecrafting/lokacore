@@ -624,7 +624,23 @@
         "skill",
         "attack"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "An equipped weapon's required skill and authored attack profile.",
+      "examples": [
+        {
+          "skill": {
+            "cartridge_id": "training",
+            "cartridge_version": "1.0.0",
+            "kind": "skill",
+            "key": "swords"
+          },
+          "attack": {
+            "chance": 95,
+            "damage_min": 3,
+            "damage_max": 3
+          }
+        }
+      ]
     }
   }
 }

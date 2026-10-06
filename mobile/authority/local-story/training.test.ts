@@ -3,7 +3,7 @@ import { living } from '../../../kernel/ts/src/mechanics/death/shared.ts';
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -211,6 +211,39 @@ test('forged lesson receipts and contradictory acquired rows reopen as save_corr
     assert.deepEqual(a.sql.prepare('SELECT * FROM state_row ORDER BY 1,2').all(), before);
     a.sql.close();
   }
+});
+
+// Breaks: linked choice/gift evidence borrows a foreign world, player scope or root correlation.
+test('each foreign lesson event identity refuses file-backed reopen after lawful later custody', (t) => {
+  const directory = mkdtempSync(join(tmpdir(), 'loka-training-identities-'));
+  t.after(() => rmSync(directory, { recursive: true }));
+  for (const type of ['choice_resolved', 'item_acquired'])
+    for (const field of ['correlation_id', 'world_context_id', 'scope']) {
+      const path = join(directory, `${type}-${field}.db`);
+      const a = setup(path);
+      try {
+        a.learn();
+        a.invoke('wear', [a.entity('item', 'sword')]);
+        a.reopen();
+        const row = a.sql
+          .prepare(
+            "SELECT invocation_id,response FROM receipt WHERE json_extract(command,'$.payload.type')='choose'",
+          )
+          .get()!;
+        const d = JSON.parse(row.response as string);
+        const event = d.events.find((e: any) => e.payload.type === type);
+        const foreign = 'aaaaaaaa-0000-4000-8000-000000000099';
+        event[field] = field === 'scope' ? { kind: 'player', character_id: foreign } : foreign;
+        a.sql
+          .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')
+          .run(JSON.stringify(d), row.invocation_id as string);
+        const before = readFileSync(path);
+        assert.equal(openStory(a.db, a.releases, a.host).kind, 'save_corrupt', `${type}/${field}`);
+        assert.deepEqual(readFileSync(path), before);
+      } finally {
+        a.sql.close();
+      }
+    }
 });
 
 // Breaks: lesson COMMIT adopts partial rows or an uncertain retry pays or grants twice.
