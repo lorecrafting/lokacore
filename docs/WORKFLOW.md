@@ -134,6 +134,17 @@ Report at the end of the slice, not at every step.
    [AGENTS.md, Hard-won lessons](../AGENTS.md#hard-won-lessons) says, and only if it changes a
    future decision and survives code drift; if a check could enforce it, write the check instead.
 
+### Review knowledge trail
+
+At each reviewed merge, retain the finding, fix disposition and exact source head
+in the review record. Link a lasting interaction rule from its owning active spec
+(including [Book UI](system/book-ui.md)), a recurring implementation hazard from
+the relevant [area lesson](../AGENTS.md#hard-won-lessons), and an enforceable
+invariant from its red-controlled check. Link unfinished work back to the finding
+from the roadmap or adopted task tracker. The review record stays the evidence;
+other records state only the reusable rule or next action, avoiding copied findings
+and speculative generalizations ([owner decision](decisions/owner-decision-review-knowledge-trail-2026-10-05.md)).
+
 ## Local edit loop
 
 ### Local draft-PR cadence
