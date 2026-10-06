@@ -1,5 +1,6 @@
 # Independent reviews
 
+- [Corpse-loot Take detail](2026-10-06-corpse-loot-take-detail-review.md): exact docs head `44fbff3bb4c9480d4f48093ea5ec62a5ed7cd5ca`, independent APPROVE; no findings, no runtime proof claimed.
 - [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): source `6791cc2d`; initial CHANGES REQUIRED for BRP-1, scoped fix `478f1b32`, APPROVE; the staged-export guard rejects a planted bad index blob and BRP-1 is closed.
 
 - [D1 ferry and Sedge plan](2026-10-05-d1-ferry-plan-review.md): exact planning head `323f9274`, initial CHANGES REQUIRED; scoped fix `19984c0d`, APPROVE, D1P-01 active owner-rules index link closed; no source or D1 proof claimed.
