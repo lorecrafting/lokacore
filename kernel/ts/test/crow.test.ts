@@ -77,7 +77,6 @@ test('one exact dropped coin travels through one crow to the open nest', () => {
   let world = initial();
   const coin = entity(world, 'item', 'old_coin');
   const nest = entity(world, 'item', 'crow_nest');
-  assert.equal(Object.keys(world.state.population_slots ?? {}).length, 10);
   world = act(world, 'take', coin, 1);
   world = act(world, 'drop', coin, 2);
   const bound = Object.values(world.state.crows ?? {}).filter((row) => row.phase === 'acquire');

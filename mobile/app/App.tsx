@@ -18,7 +18,7 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import chapter from '../../protocol/fixtures/missing_child_v038_hash.json';
+import chapter from '../../protocol/fixtures/missing_child_v039_hash.json';
 import { SaveError } from './SaveError';
 
 // The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.

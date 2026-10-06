@@ -3,7 +3,13 @@ import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, fresh, ref, entity, prefix } from '../../../kernel/ts/test/transport_fixture.ts';
+import { bundle, ref, entity, prefix } from '../../../kernel/ts/test/transport_fixture.ts';
+import {
+  INSTALLED,
+  loadCartridge,
+  newWorld,
+  type Cartridge,
+} from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -18,7 +24,16 @@ function setup(path = ':memory:') {
     };
   };
   const b = bundle(change);
-  const initial = fresh(change);
+  const loaded = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok);
+  const initial = newWorld(
+    loaded.cartridge as Cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
   const releases = [{ fresh: initial, content_hash: b.sha256 }] as const;
   const p = elapsedHost(path, { wall: 10000, mono: 0 }, b);
   const s = openStory(p.db, releases, p.host);
@@ -38,6 +53,7 @@ function setup(path = ':memory:') {
     if (result.kind === 'saved') assert.equal((result.decision as any).kind, 'accepted');
     return input;
   };
+  invoke('choose_ancestry', [], { ancestry: 'fey_touched' });
   const elapsed = (until: number) => {
     while (s.world().state.clock < until) {
       const from = s.world().state.clock;

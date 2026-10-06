@@ -723,7 +723,7 @@
       "kernel/ts/src/runtime/invariants_population.ts",
       "lib/loka/core/compose_population.ex",
       "lib/loka/core/invariants_population.ex",
-      "kernel/ts/src/mechanics/population/crow.ts"
+      "kernel/ts/src/mechanics/crow/behavior.ts"
     ],
     "fixtures": [
       "protocol/fixtures/population_composition.json",

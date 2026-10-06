@@ -6,12 +6,12 @@ defmodule Loka.ContentDeerTest do
   test "deer plan and bundle short references expand", %{tmp_dir: _dir} do
     assert {:ok, bytes, []} = Loka.Content.compile("cartridges/ashmere_missing_child")
     cartridge = JSON.decode!(bytes)["cartridge"]
-    id = "ashmere_missing_child@0.0.38:population/willow_deer"
+    id = "ashmere_missing_child@0.0.39:population/willow_deer"
     plan = cartridge["populations"][id]
 
     assert plan["home"] == %{
              "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => "0.0.38",
+             "cartridge_version" => "0.0.39",
              "kind" => "room",
              "key" => "willow_shade"
            }

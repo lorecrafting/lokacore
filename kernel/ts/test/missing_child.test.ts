@@ -7,7 +7,7 @@ import { read } from './read.ts';
 // Breaks: the active chapter is omitted from simulation or a chapter-only combination
 // violates a registered invariant; the frozen demo corpus alone cannot detect either.
 test('the active Missing Child release keeps the simulator invariants on controlled seeds', () => {
-  const pin = read('protocol/fixtures/missing_child_v038_hash.json');
+  const pin = read('protocol/fixtures/missing_child_v039_hash.json');
   const artifact = `{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`;
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   assert.ok(loaded.ok);
@@ -20,10 +20,10 @@ test('the active Missing Child release keeps the simulator invariants on control
   }
 });
 
-// Breaks: the D11 successor shifts any fresh identity allocation despite retaining the published chapter geometry.
-test('the D11 successor keeps its independently pinned fresh IDs', () => {
-  const pin = read('protocol/fixtures/missing_child_v038_hash.json');
-  const ids = read('protocol/fixtures/missing_child_v038_ids.json');
+// Breaks: the D8 successor shifts any fresh identity allocation despite retaining the published chapter geometry.
+test('the D8 successor keeps its independently pinned fresh IDs', () => {
+  const pin = read('protocol/fixtures/missing_child_v039_hash.json');
+  const ids = read('protocol/fixtures/missing_child_v039_ids.json');
   const loaded = loadCartridge(
     new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
     INSTALLED,
@@ -39,18 +39,18 @@ test('the D11 successor keeps its independently pinned fresh IDs', () => {
   for (const [name, id] of Object.entries(ids)) {
     const [kind, room, detail] = name.split('/');
     if (kind === 'room')
-      assert.equal(world.roomIds[`ashmere_missing_child@0.0.38:room/${room}`], id, name);
+      assert.equal(world.roomIds[`ashmere_missing_child@0.0.39:room/${room}`], id, name);
     if (kind === 'detail')
       assert.equal(
         Object.entries(world.details).find(
           ([, d]) =>
             d.key === detail &&
-            d.room === world.roomIds[`ashmere_missing_child@0.0.38:room/${room}`],
+            d.room === world.roomIds[`ashmere_missing_child@0.0.39:room/${room}`],
         )?.[0],
         id,
         name,
       );
     if (kind === 'item' || kind === 'npc')
-      assert.equal(world.entityIds[`ashmere_missing_child@0.0.38:${kind}/${room}`], id, name);
+      assert.equal(world.entityIds[`ashmere_missing_child@0.0.39:${kind}/${room}`], id, name);
   }
 });
