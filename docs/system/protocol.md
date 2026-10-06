@@ -1068,3 +1068,32 @@ rollback. Compiler/loader, ActionSet/verb, outcome/generated contracts, world/sa
 projection and both generic delta validators must agree on this consumed subset.
 No frozen fixture is rewritten; add independent literal terminal-transfer cases
 and applicable two-kernel differential cases if the foundation changes.
+
+## D6 water movement and corpse selection
+
+**PM-selected contract; implementation and fresh scoped review pending.** Use installed `move` and
+ActionInvocation. Descend: `action_key: "move"`, `target_ids: []`,
+`input: {direction: "down"}`; surface: same key/targets with `{direction: "up"}`.
+Trust actor/invocation/freshness fields normally. A shared read-only exact-edge
+admission serves ExitView, execution and captured-invocation proof. Descend reads
+skill/load/life/posture/encounter/MV/no-following-Wren and debits 10 MV instead of
+ordinary fare. Living Up bypasses ordinary posture/fare checks and costs 0 MV.
+Both preserve body transfer and `entity_entered_room`; other exits stay ordinary.
+
+Accepted descent commits one occupancy generation, absolute deadline and due
+job. On delivery, prove the same body remains below in that current generation.
+No per-drain successor exists. Surface/death invalidate it; stale jobs do nothing.
+Current expiry lowers positive HP to 0, passes that applied loss into the existing
+fatal sequence in the same writer group, and emits optional typed drowning cause
+with null killer/credit. MV 0 alone is not fatal. Settlement at the exact deadline
+precedes action admission, including Up; no command-ID tie may grant extra time.
+If existing scheduler ordering cannot express this locally, stop for PM rather
+than change global ordering silently. Compiler/loader/save and event validation
+must define the narrow occupancy/job/cause types before use.
+
+Chapel `recover_corpse {actor_id, corpse_id}` binds `action_key: "recover_corpse"`,
+`target_ids: [corpse_id]`, `input: {}`. Shared admission proves living actor at
+actual shrine, selected death-origin ownership, nonempty direct roots and
+current corpse location in `well_bottom` or `pool_bottom`. Containment transfers existing roots once in one accepted
+writer group/receipt. Preserve descendants/empty corpse, forced overload, no
+rewearing and no general remote Take. Malformed custody never creates an offer.

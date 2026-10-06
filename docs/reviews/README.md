@@ -408,3 +408,9 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [D1 integrated C3 primary carryover](2026-10-06-d1-ferry-isle-primary-review.md#integrated-c3-carryover--approve): source `4e217f60`, frozen evidence `8de184ee`, APPROVE; no findings. Independent v030/API1.26 bytes/hash/all 149 actual IDs, 38 ferry/Book/SQLite/app cases, nine C3 and six combat cases pass. Virtual published-presenter red reproduces the escape leak; current routing and pickup restore green. Actual Book route and all 25 evidence hashes/inventory verified; no source edits, preview or native work.
 
 - [D1 CI portability primary recheck](2026-10-06-d1-ferry-isle-primary-review.md#ci-portability-recheck--approve): fix source `f06f89a0`, frozen evidence/head `cf5f8cbe`, APPROVE; no new findings. Same pinned BEAM setup plus locked dependencies supplies the existing authored-source fixture; direct Mix invocation independently passes 6/6 with mise absent while the original fixture fails ENOENT. All five CI evidence hashes/inventory verified; player behavior and prior integrated approval unchanged.
+
+- [D6 historical plan review](2026-10-06-d6-water-depths-plan-review.md) and [historical adoption review](2026-10-06-d6-water-depths-adoption-review.md): prior local heads only; the D1-base replacement contract has no new independent approval.
+
+- [D6 independent Astra pacing advice](2026-10-06-d6-water-pacing-astra-advice.md): advice only; PM adopts separate replacement tuning; fresh scoped approval remains pending.
+
+- [D6 selected contract independent review](2026-10-06-d6-water-depths-selected-review.md): initial head `0ff5f75e`, CHANGES REQUIRED for D6-R1; [scoped recheck](2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) APPROVE at corrected contract `705e78a4`, preserving D1 recovery through underwater-only Chapel eligibility. Documentation only; source proof remains pending.

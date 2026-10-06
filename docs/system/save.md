@@ -916,3 +916,28 @@ Reopen must retain every new location, original separated Wren at its actual
 location, and original message custody without granting knowledge or Q2 credit.
 A failed/uncertain movement or Read COMMIT and exact invocation replay use the
 existing receipt rules; no source-change migration or repair is selected.
+
+## D6 water and owned-corpse recovery
+
+**PM-selected contract; implementation and fresh scoped review pending.** Accepted descent atomically
+commits entry MV debit, bottom custody, occupancy generation/absolute deadline/
+one due job, room-entry evidence, head and receipt before memory adopts/replies.
+Ordinary resource recovery continues; no periodic MV drain is stored. Current
+expiry commits positive-to-zero HP loss, drowning event, corpse roots and
+same-body Chapel return together and invalidates occupancy. Surface commits
+free movement/entry evidence and generation invalidation together.
+
+Cold reopen preserves the original deadline/current occurrence and settles
+trusted elapsed debt. At/past expiry, death settles before any subsequent action;
+reopen never renews the deadline. Canceled jobs cannot kill a surfaced or later
+re-entered body. Unknown COMMIT fences later input/elapsed delivery until the
+committed or absent branch is reconciled.
+
+Recovery receipt binds original actor/actual corpse, its eligible underwater
+room location at acceptance, existing roots and their source/destination custody. Replay transfers nothing twice. Later movement or
+another death cannot invalidate valid historical custody; emptied corpse remains.
+Malformed occupancy/deadline/job/cause/ownership yields typed `save_corrupt` with
+in-place Start over, no reset/repair/deletion. Prove cold reopen at every committed
+entry/surface/expiry/recovery intermediate, genuinely failed COMMIT, uncertain
+committed/absent COMMIT, lost acknowledgment and replay using real SQLite;
+browser refresh is separate proof.

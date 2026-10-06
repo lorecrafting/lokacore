@@ -1424,3 +1424,36 @@ topic, Q2 credit, branch choice, relationship or item. The original protected
 `vesper_message` remains the sole Q2 message with its existing custody, transfer
 and Elspeth admission. No D5 operation changes Q2 facts or evidence. Landscape
 prose adds no far Scan, fish interaction, crow holder, drift or bottom-room access.
+
+## D6 water depths and owned-corpse recovery (selected, pending implementation)
+
+**PM-selected contract; implementation and fresh scoped review pending.** The [PM decision](../decisions/pm-decision-d6-water-depths-2026-10-06.md)
+selects optional `well_bottom` and `pool_bottom` below Well Shaft and the dry
+Black Pool bank. Rescue/bell stays dry and open all hours. Sedge's free D1 lesson
+provides acquired swim before S27. Descending requires currently usable learned
+swim, load≤6000g with nested/worn mass counted once, living/standing/out of
+encounter and MV≥10. Refuse a bound following Wren without moving or separating
+either actor. D1 retains vacuous skill qualification; no CON/DEX gate,
+roll, percentage, tide or new lesson. Entry debits 10 MV instead of ordinary fare.
+Living actors below surface for 0 MV regardless of current skill/load/MV/posture/
+light. Both directions use existing `move` and normal room-entry evidence.
+
+One water occupancy generation binds one absolute submersion deadline and one
+due job. The selected chapter duration is in [cartridge](cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation).
+There is no periodic drain: MV 0 alone never drowns, and ordinary fractional
+resource recovery remains unchanged. Surface and every death invalidate water
+occupancy; stale/canceled/re-entry jobs cannot affect a later occupancy.
+At or past the deadline, before admitting an action at equal logical time,
+the current water producer lowers positive HP to 0 and invokes the existing
+same-body fatal sequence atomically. Death carries typed drowning, null killer/
+credit, one actual corpse/held-worn roots/descendants and Chapel return. Ordinary
+elapsed settlement and cold reopen cannot grant a fresh deadline or skip expiry.
+No second clock, wetness, drift, ghost mode or global movement rewrite.
+
+At Chapel, use `recover_corpse` only for an actual nonempty actor-owned corpse
+currently in `well_bottom` or `pool_bottom`. Transfer its actual direct corpse roots to
+held body custody in one proposal; preserve descendants and empty corpse
+identity, allow forced overload, never auto-equip/copy or restore rewards/
+deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings at Chapel.
+Ordinary physical corpse recovery remains available, including D1's fare-waived
+isle return. No general remote Take or replacement-gear system.
