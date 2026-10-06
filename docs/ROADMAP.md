@@ -199,6 +199,12 @@ and [focused brief](briefs/chapter-one/b7-well-waterskin-brief-2026-10-05.md)
 against local B3 integration at `4bfe252e`. Source implementation, successor
 release pins, independent plan review and proof remain ahead.
 
+B9 Room at the Lantern has an [adopted actual-Rest/dream contract](decisions/pm-decision-b9-lantern-dream-2026-10-05.md)
+and [focused brief](briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md)
+on local base `10b023e8`. A3 is integrated; B8 has an approved plan but no source.
+B8 source/review re-pins, independent B9 plan review, implementation and successor
+release/API/hash/ID/proof pins remain ahead; no playable S10 is claimed here.
+
 C1 Tobin training has an [adopted acquisition/qualification and armed-fight contract](decisions/pm-decision-c1-tobin-training-2026-10-05.md)
 and [focused brief](briefs/chapter-one/chapter-one-c1-tobin-training-brief-2026-10-05.md)
 against corrected provisional B3 integration `9c7e5379`; re-pin its scoped review

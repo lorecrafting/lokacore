@@ -842,3 +842,41 @@ B6 success and book Read compose on the same membership, so already-known grants
 are neutral. Rejected commands write neither knowledge nor read narration. Current
 scene/combat/freshness/retry rules remain in force. Authority commits changed facts
 and receipt together before adopting memory or replying; no full-state copy occurs.
+
+## B9 Rest occurrence and dream composition
+
+**Selected, source pending.** Register `rested {body_id, room_id}` as a
+position-owned DomainEvent for accepted `rest` only. Its full actor/player scope,
+world/time, root command cause/correlation and causal position bind the actual
+accepted body/room transition after prior-rate settlement. Root-to-event checks
+must reject a rental/Sleep/refusal/foreign actor/body/room producer. Emit it for
+accepted Rest generally; the cartridge's exact typed first-Rest binding selects
+its eligible room and entitlement. An outcome label alone is not event evidence.
+
+The guarded first-Rest delivery assigns its declared fact, activates the bound
+quest once, then starts the exact dream checkpoint at beat1 in the same proposal. All
+reads observe the proposal's causal prefix; all writes use registered fact,
+quest and choice operations with existing conflict/rollback/shared budgets.
+No new portable delta, dream row, clock op, scene queue or host callback is used.
+
+Add only the [consumed scene subset](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract).
+Continue binds the exact scene/beat; Resume/Close are local routes over
+projected saved truth. The existing Choose command
+binds its scene-owned continuation/expected revision and offered choice. A3's
+scene/line freshness remains for modal scenes. For this subset, beat4 is choice,
+beat5 the selected final narration; the saved ChoiceRow binds scene source,
+beat4, actor/body and authored room anchor and survives resolution/end. A fresh
+old occurrence or wrong branch/beat/control refuses; accepted-id replay is first.
+The explicit scene source must not enter ordinary dialogue pending-choice selection.
+
+GameView projects dream availability and exact controls under the real bed detail,
+with authored text and bound choice when open. The shared query admits them only
+at the safe anchor with no ordinary choice/modal/encounter, and confirms the same
+rules for direct commands. The normal World, position and combat sets remain;
+an outstanding presentation-only checkpoint does not create modal replacement.
+Resume does not infer a world move, sleep or memory. Modal precedence and
+combat suppression hide dream controls without erasing their checkpoint.
+Final acknowledged end lowers one `dream_seen` assignment and bound S10 resolution
+in one scene-owned writer sequence, with normal `scene_ended`/`quest_resolved`
+evidence, no `story_point_reached`. The authority only commits changed rows and
+receipt; the Book only emits captured invocations.

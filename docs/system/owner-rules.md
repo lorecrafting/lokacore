@@ -8,6 +8,8 @@ and not repeated here.
 
 ## Product and scope
 
+- B9 credits only the first accepted paid Inn Rooms Rest, preserves a closable anchored dream/branch, and commits S10 plus its once-only local memory only on final acknowledgement ([PM adoption](../decisions/pm-decision-b9-lantern-dream-2026-10-05.md)).
+
 - B8 immediately grants a durable paid-bed entitlement or consumes finite Maud stock for declared capped MV recovery, with conserved pennies and no rental-as-Rest/dream credit ([PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)).
 
 - D2 completes ten public Priory rooms with safe reciprocal routes and explicit held-book Read granting exact Ward/Bell topics; reuse B6 knowledge and ordinary custody/recovery ([PM adoption](../decisions/pm-decision-d2-priory-books-2026-10-05.md)).
@@ -180,6 +182,8 @@ and not repeated here.
   [owner direction](../decisions/owner-decision-story-realm-shared-mechanics-2026-10-04.md); the first Realm activity, unchanged-cartridge hosting and formal ADR-074 route remain open.
 
 ## Process
+
+- Update canonical Book interaction rules in the same mechanic slice that changes them, reuse the component language, and fix obvious navigation/UI correctness defects before that slice completes; use E3 for the larger visual consistency pass ([owner decision](../decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
 
 - Before the Chapter 1 E3 closure gate, run one Astra high audit of active project docs after A–D source integration; fix findings through reviewed docs work, archive only obsolete guidance with links repaired, and preserve decision/review history ([owner decision](../decisions/owner-decision-chapter-one-docs-audit-2026-10-05.md)).
 

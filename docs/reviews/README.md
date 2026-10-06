@@ -1,5 +1,7 @@
 # Independent reviews
 
+- [B9 Lantern Rest and dream plan](2026-10-05-b9-lantern-dream-plan-review.md): exact planning head `83ec4c3a08de11eda83f6e495f98f6e7126af0b0`, independent APPROVE; no findings, source dependency re-pins and later primary/save reviews remain required.
+
 Each record is written by a fresh agent that authored none of the reviewed work (AGENTS.md).
 One line per record: PR, commit reviewed, verdict, and the final round's commit and verdict
 when there were fixes. Findings, dispositions and cross-vendor (codex: Astra or Sol per [the workflow](../WORKFLOW.md)) reviews are in the records

@@ -4,6 +4,9 @@ Canonical presentation behavior for rebuilding the phone book. The host boundary
 [architecture](architecture.md#book-presenter); action admission, freshness and state come
 from [GameView](protocol.md#gameview). This specification changes presentation, not rules,
 authority, content, receipts or save formats.
+The [Book component guide](../BOOK-UI-COMPONENTS.md) maps these rules to the current
+shared client; the [delivery workflow](../WORKFLOW.md#book-interaction-delivery) requires
+interaction-rule updates in the mechanic slice that needs them.
 
 Governing direction: [C1 touch](../decisions/owner-decision-touch-resumption-2026-10-03.md),
 [room/details polish](../decisions/owner-decision-c1-playtest-polish-2026-10-03.md),
@@ -613,3 +616,30 @@ history identity without opening an obsolete detail or copying text to World.
 Ordinary notice entry keeps its existing automatic Read behavior. Ash/Hale have
 separate touch cards at the declared overlap; a departed novice's pending context
 retains its original identity and follows normal refusal/Leave rules.
+
+## B9 bed and resumable dream details
+
+**Selected, source pending.** [S10](mechanics.md#s10-lantern-rest-and-dream-b9-selected-contract)
+uses World→actual Inn Rooms bed→Dream nesting. The paid bed's accepted ordinary
+Rest may open its first dream at the confirmed first beat. Rental, menu opening,
+unpaid Rest or a pending save never does. First Rest commits beat1 even if
+presentation is deferred; the bed shows Resume dream once safely available.
+Resume is a local route, not a world-level shortcut or synthetic room.
+
+The dream is a detail page in canonical title/description, nonempty committed
+history, current options order. It shows the saved narration, then at the choice
+only Follow the fox/Wake, then the selected final line and Acknowledge. Choice
+selection alone claims no memory. Close returns to the real bed; Leave bed returns
+to World. Contents/World access, ordinary position controls, real travel and S2
+delivery stay usable. Close changes only the local route; the durable cursor and
+choice remain. Cold reopen offers Resume through the actual bed rather than forcing
+the dream. Moving away, combat/harm/return or modal precedence exits unavailable
+presentation to the actual current context and preserves its checkpoint.
+
+Every captured control retains actor, anchor, scene, shown beat and exact choice
+identity/revision where applicable. Freshness cannot be refreshed across a branch,
+beat, room, choice or modal/combat change. Refusal redraws saved truth; pending
+uses the original invocation and context and shows save not confirmed. Confirmed
+final acknowledgement displays the once-only memory and truthful resolved S10
+journal, also after lost reply/replay/reopen. There is no optimistic dream_seen,
+clock pause, body/map switch, second event transcript or presenter gameplay writer.

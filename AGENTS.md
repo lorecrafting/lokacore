@@ -144,8 +144,9 @@ uses focused checks first.
 
 ## Working rules
 
-- Every slice follows [the delivery workflow](docs/WORKFLOW.md): PM plans and briefs, a
-  developer builds and self-reviews, a fresh reviewer reviews, the same developer fixes.
+- Every slice follows [the delivery workflow](docs/WORKFLOW.md): PM plans, developer
+  builds and self-reviews, fresh reviewer reviews, developer fixes.
+- Update [Book UI](docs/system/book-ui.md) per mechanic; fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
 - Merge record-bearing PRs with merge commits, never squash.
