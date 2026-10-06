@@ -1182,6 +1182,41 @@ ordinary prerequisites hold, not an unconditional free escape. Outside combat,
 all hounds are passive, so gear-free corpse recovery and immediate deliberate
 retry of a surviving hound need no time gate. No behavior framework is required.
 
+## D1 paid ferry and Sedge lesson (selected contract)
+
+The first chapter ferry is an unattended rope ferry operated from an inspectable
+boarding detail at the Boathouse and Fen Isle Landing. A successful outbound
+crossing moves the living standing actor body from Boathouse to Fen Isle Landing
+once, charges **2 pennies** to Mother Sedge's declared balance, and carries a
+valid co-present following Wren at no extra charge. The return moves body and
+eligible follower from Fen Isle Landing to Boathouse for **0 pennies**. This is a
+transport action, not an ordinary compass exit or a B8 `service@1` benefit:
+that published command requires a co-located living NPC and its closed benefit
+union has no movement case. The transport admission binds the exact endpoint,
+destination, quoted fare and declared recipient. It reuses B3's exact two-party
+resource transfer for the positive fare and the existing movement/escort transfer
+consequences in one writer group. No MV charge or time jump is added; normal
+authority elapsed preflight still applies. Crossing is not Elspeth rescue credit.
+
+The outbound fare is waived only when the actor owns an actual nonempty corpse
+on the isle. Its current room custody and contained roots, including nested
+descendants, are checked through the existing corpse/containment owner. An empty
+corpse, someone else's corpse, a mainland corpse or client assertion cannot waive
+payment. The recovery passage remains available at zero balance and with no
+gear. A refused, stale or blocked crossing moves and charges nothing. Exact
+receipt replay moves and charges once; unknown commits fence input until resolved.
+Known exits and owned-corpse visibility in a dark Hut Loft obey B4; the isle
+route must permit gear-free recovery of actual belongings from the Chapel Nave
+death return. D1 does not move the shrine destination to Isle Shrine.
+
+Mother Sedge stays reachable in Isle Hut at every hour. Her co-located, free
+**Learn swim** dialogue choice uses C1's reserved `skills@1` acquisition owner.
+It grants learned swim once, refuses an already learned new choice without
+grant or charge, and survives death/reopen. Learning does not itself assert
+current water qualification or open D6 bottom rooms. S27 may acknowledge this
+existing lesson; it cannot gate it. No quest, discount, herbalism lesson, token,
+schedule or island enemy is part of D1.
+
 ## B8 Maud's immediate services (selected contract)
 
 **Implemented locally, publication pending.** The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)

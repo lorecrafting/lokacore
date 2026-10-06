@@ -958,6 +958,36 @@ their actual resolver semantics. No weapon/loot is required by the main story.
 C4 successor release/API/hash/fresh IDs remain null until integrated C1/C3 source
 and intervening shared release edits are reviewed and independently re-pinned.
 
+## D1 ferry and Isle declarations
+
+Add exactly six chapter rooms: Boathouse, Fen Isle Landing, Isle Hut, Hut Loft,
+Herb Garden and Isle Shrine. Ferry Landing west/east connects to Boathouse;
+Fen Isle Landing east/west connects to Isle Hut and south/north to Isle Shrine;
+Isle Hut east/west connects to Herb Garden and up/down to Hut Loft. The
+Boathouse–Fen Isle Landing crossing is declared only as the two boarding-detail
+transport endpoints, never as a free compass exit. Do not expose the future
+Boathouse–Old Mill edge. Isle Shrine is descriptive sanctuary/foreshadow;
+`chapel_nave` remains the actual death shrine.
+
+The cartridge declares an unattended rope ferry, outbound **2p**, return **0p**,
+the exact destination and Mother Sedge as the conserved fare recipient. Sedge is
+in Isle Hut at all hours and has an explicit bounded pennies balance to receive
+payment. Source definitions own fares, room links, text and balances. D1 adds
+`swim` to the C1 skill definitions with a vacuous `all: []` qualification
+policy: D1 has no water action or new attribute to qualify. Sedge's direct
+free dialogue choice uses `skill.acquire` and does not issue D6 water access
+early. D6 must re-pin its provisional CON threshold against the installed
+attribute vocabulary before implementing underwater admission. The optional
+dark Hut Loft retains B4's
+known-exit and owned-corpse recovery rules. Garden herbs do not imply D12
+herbalism, and no Bram NPC, token, S27 gate or island quest is declared.
+
+Compiler and loader reject a missing/nonreciprocal endpoint, unknown destination,
+wrong fare/recipient reference, unbounded recipient balance, forged transport
+action, or ordinary exit that bypasses the declared ferry. The final bundled
+release/API/hash/ID answers must be independently derived after the actual
+source predecessor lands; D1 planning assigns no successor values.
+
 ## B8 Maud's service declarations
 
 The [selected services](mechanics.md#b8-mauds-immediate-services-selected-contract)
