@@ -16,10 +16,10 @@ function cadence(prior: Op['value'] | undefined, next: Op['value'], overlay: Map
     next.source_id === prior.source_id &&
     (job?.status === 'completed'
       ? next.job_id !== oldJob &&
-        (next.next_tick_at! > prior.next_tick_at! ||
-          (next.next_tick_at === prior.next_tick_at &&
-            job.due_time !== undefined &&
-            job.due_time < prior.next_tick_at!)) &&
+        job.due_time !== undefined &&
+        (job.due_time < prior.next_tick_at!
+          ? next.next_tick_at === prior.next_tick_at
+          : next.next_tick_at! > prior.next_tick_at!) &&
         next.ends_at === prior.ends_at
       : next.job_id === oldJob &&
         next.next_tick_at === prior.next_tick_at &&

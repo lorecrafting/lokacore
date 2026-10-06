@@ -47,12 +47,14 @@ defmodule Loka.Core.ComposeBleed do
   defp cadence?(%{"active" => true}, %{"active" => true}, _), do: false
   defp cadence?(_, _, _), do: true
 
-  defp successor?(prior, next, due),
-    do:
-      next["job_id"] != prior["job_id"] and
-        (next["next_tick_at"] > prior["next_tick_at"] or
-           (next["next_tick_at"] == prior["next_tick_at"] and due < prior["next_tick_at"])) and
-        next["ends_at"] == prior["ends_at"]
+  defp successor?(prior, next, due) do
+    cadence =
+      if due < prior["next_tick_at"],
+        do: next["next_tick_at"] == prior["next_tick_at"],
+        else: next["next_tick_at"] > prior["next_tick_at"]
+
+    next["job_id"] != prior["job_id"] and cadence and next["ends_at"] == prior["ends_at"]
+  end
 
   defp refresh?(prior, next),
     do:

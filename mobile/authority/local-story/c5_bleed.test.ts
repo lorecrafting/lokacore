@@ -137,6 +137,75 @@ test('off-cadence final bleed job survives real SQLite reopen and expires', (t) 
   assert.equal(after.resources?.find((r) => r.resource.key === 'hp')?.current, hpBefore);
 });
 
+// Breaks: a refreshed former-expiry successor loses its retained cadence or receipt across reopen.
+test('refreshed early expiry replays and ticks after two real SQLite cold opens', (t) => {
+  const { bundle, initial, target } = managedBleedBundle();
+  const dir = mkdtempSync(join(tmpdir(), 'loka-c5-handoff-'));
+  t.after(() => rmSync(dir, { recursive: true }));
+  const path = join(dir, 'save.db');
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  const invoke = (action_key: string, target_ids: string[] = [], input = {}) =>
+    a.game.invoke({ action_key: action_key as never, target_ids: target_ids as never, input });
+  const pulse = (seconds: number) => {
+    a.clock.wall += seconds * 20;
+    a.clock.mono += seconds * 20;
+    assert.equal(a.game.pulse().kind, 'ready');
+  };
+  assert.equal(invoke('attack', [target]).kind, 'saved');
+  pulse(150);
+  assert.equal(invoke('flee').kind, 'saved');
+  pulse(25);
+  const from = a.game.view().view.place.id;
+  const room = initial.state.containers[target];
+  const direction = Object.entries(initial.rooms[from].exits).find(
+    ([, edge]) => initial.roomIds[refString(edge.to)] === room,
+  )?.[0];
+  assert.ok(direction);
+  assert.equal(invoke('move', [], { direction }).kind, 'saved');
+  assert.equal(invoke('attack', [target]).kind, 'saved');
+  pulse(75);
+  pulse(75);
+  assert.equal(a.game.view().view.bleeding?.ends_at, 65425);
+  assert.equal(invoke('flee').kind, 'saved');
+  pulse(25);
+  pulse(100);
+  assert.equal(invoke('move', [], { direction }).kind, 'saved');
+  assert.equal(invoke('attack', [target]).kind, 'saved');
+  pulse(100);
+  pulse(50);
+  assert.equal(a.game.view().view.bleeding?.ends_at, 65700);
+  assert.equal(a.game.view().view.bleeding?.next_tick_at, 65450);
+  assert.equal(invoke('flee').kind, 'saved');
+  a.sql.close();
+
+  const b = elapsedHost(path, { wall: a.clock.wall, mono: a.clock.mono }, bundle);
+  assert.equal(b.game.view().view.resources?.find((r) => r.resource.key === 'hp')?.current, 3);
+  assert.equal(b.game.view().view.bleeding?.ends_at, 65700);
+  const before = b.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n as number;
+  b.clock.wall += 25 * 20;
+  b.clock.mono += 25 * 20;
+  assert.equal(b.game.pulse().kind, 'ready');
+  assert.equal(b.game.view().view.time, 65425);
+  assert.equal(b.game.view().view.resources?.find((r) => r.resource.key === 'hp')?.current, 3);
+  assert.equal(b.game.view().view.bleeding?.next_tick_at, 65450);
+  assert.equal(b.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, before + 1);
+  b.sql.close();
+
+  const c = elapsedHost(path, { wall: b.clock.wall, mono: b.clock.mono }, bundle);
+  t.after(() => c.sql.close());
+  assert.equal(c.game.view().view.bleeding?.ends_at, 65700);
+  assert.equal(c.game.view().view.bleeding?.next_tick_at, 65450);
+  assert.equal(c.game.view().view.resources?.find((r) => r.resource.key === 'hp')?.current, 3);
+  assert.equal(c.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, before + 1);
+  c.clock.wall += 25 * 20;
+  c.clock.mono += 25 * 20;
+  assert.equal(c.game.pulse().kind, 'ready');
+  assert.equal(c.game.view().view.time, 65450);
+  assert.equal(c.game.view().view.bleeding?.next_tick_at, 65550);
+  assert.equal(c.game.view().view.resources?.find((r) => r.resource.key === 'hp')?.current, 2);
+  assert.equal(c.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, before + 2);
+});
+
 // Breaks: failed or uncertain tick/cure COMMIT leaks half of HP, wound, job or item custody;
 // an idempotent retry spends the bandage twice.
 test('active tick and exact cure reconcile real SQLite COMMIT faults and replay once', (t) => {
