@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Quest contracts",
-  "description": "QuestDefinition and its objective (06 \u00a71, \u00a72, \u00a73 Objective credit/causation policy, \u00a743; 04 \u00a75.2), owned by quest@1. The persisted lifecycle state is policy.schema.json QuestState.",
+  "description": "QuestDefinition and its objective (06 §1, §2, §3 Objective credit/causation policy, §43; 04 §5.2), owned by quest@1. The persisted lifecycle state is policy.schema.json QuestState.",
   "$defs": {
     "QuestDefinition": {
-      "description": "A quest with one objective (06 \u00a72; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
+      "description": "A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, recipe's or registered command's: DUPLICATE_DEFINITION); title, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.",
       "type": "object",
       "properties": {
         "key": {
@@ -165,6 +165,133 @@
             "narration"
           ],
           "additionalProperties": false
+        },
+        "expedition": {
+          "type": "object",
+          "properties": {
+            "start_room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "start_detail": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "shelter_room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "shelter_detail": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "route": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "direction": {
+                    "$ref": "action.schema.json#/$defs/Key"
+                  },
+                  "to": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "required": [
+                  "from",
+                  "direction",
+                  "to"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 32
+            },
+            "footprint": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 2,
+              "maxItems": 32
+            },
+            "survived_fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "faction": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "faction_delta": {
+              "type": "integer",
+              "minimum": -100,
+              "maximum": -1
+            },
+            "hound_population": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "narration": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "restart": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "shelter": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "failed": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "completed": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "required": [
+                "start",
+                "restart",
+                "shelter",
+                "failed",
+                "completed"
+              ],
+              "additionalProperties": false
+            },
+            "actions": {
+              "type": "object",
+              "properties": {
+                "start": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "restart": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "shelter": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "start",
+                "restart",
+                "shelter"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "start_room",
+            "start_detail",
+            "shelter_room",
+            "shelter_detail",
+            "route",
+            "footprint",
+            "survived_fact",
+            "faction",
+            "faction_delta",
+            "hound_population",
+            "narration",
+            "actions"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -235,7 +362,7 @@
       ]
     },
     "QuestObjective": {
-      "description": "A quest's one objective and its evidence policy (06 \u00a73 Objective credit/causation policy, \u00a743; 04 \u00a75.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).",
+      "description": "A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).",
       "oneOf": [
         {
           "type": "object",
@@ -280,6 +407,18 @@
             "evidence"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "evidence": {
+              "const": "expedition"
+            }
+          },
+          "required": [
+            "evidence"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -295,7 +434,7 @@
       ]
     },
     "QuestJournal": {
-      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 \u00a72, \u00a741; 04 \u00a715, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal and hints remain LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies.",
+      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal and hints remain LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies.",
       "type": "object",
       "properties": {
         "active": {

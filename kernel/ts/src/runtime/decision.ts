@@ -22,6 +22,7 @@ import {
   type EntityIdentity,
   type EscortRelation,
   type PatrolRelation,
+  type ExpeditionAttempt,
   type PopulationControl,
   type PopulationSlot,
   type PopulationPlan,
@@ -56,6 +57,7 @@ export type State = {
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;
   readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
+  readonly expeditions?: Readonly<Record<string, ExpeditionAttempt>>; // by QuestInstanceId
   readonly population_plans?: Readonly<Record<string, PopulationControl>>; // by plan ref
   readonly population_slots?: Readonly<Record<string, PopulationSlot>>; // by target
   readonly escorts?: Readonly<Record<string, EscortRelation>>; // by CharacterId
@@ -199,6 +201,7 @@ export type Mint = () => string;
  * (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give).
  */
 export const COMPOSES = {
+  expedition: ['quest'],
   transport: ['movement'],
   action_recipe: ['check'],
   schedule: ['movement', 'combat', 'death', 'quest'],

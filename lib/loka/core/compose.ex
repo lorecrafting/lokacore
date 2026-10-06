@@ -231,6 +231,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "patrol.transition"} = op, t, ctx),
     do: Loka.Core.ComposePatrol.transition(op, read(t, ctx))
 
+  defp apply_op(%{"op" => "expedition.transition"} = op, t, ctx),
+    do: Loka.Core.ComposeExpedition.transition(op, read(t, ctx))
+
   defp apply_op(%{"op" => "population." <> _} = op, t, ctx),
     do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
 
@@ -285,6 +288,9 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "bleed", "body_id" => b}, s), do: section(s, "bleeds")[b]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
+
+  defp base(%{"kind" => "expedition", "quest_instance_id" => q}, s),
+    do: section(s, "expeditions")[q]
 
   defp base(%{"kind" => "population_" <> _} = t, s), do: Loka.Core.ComposePopulation.base(t, s)
 

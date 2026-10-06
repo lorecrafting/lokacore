@@ -228,6 +228,15 @@ export function JournalPage({ view, text }: { view: GameView; text: Say }) {
                       : ''}
             </Text>
           )}
+          {q.expedition && (
+            <Text style={note}>
+              {q.expedition.cursor} of {q.expedition.required} entries.{' '}
+              {q.expedition.status === 'active' && q.expedition.next_title
+                ? `Next: ${q.expedition.direction} to ${text(q.expedition.next_title)}.`
+                : ''}{' '}
+              {q.expedition.sheltered ? 'Shelter used.' : ''}
+            </Text>
+          )}
           {q.journal && <Text style={prose}>{plain(text(q.journal))}</Text>}
         </View>
       ))}

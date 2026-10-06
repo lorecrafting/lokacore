@@ -6,6 +6,7 @@ import { KernelError } from '../foundation/error.ts';
 import { reach } from '../mechanics/lookups.ts';
 import { wornIn } from '../mechanics/equipment/rule.ts';
 import type { Offered } from './actions.ts';
+import { definition as expeditionDefinition } from '../mechanics/expedition/sequence.ts';
 
 // Payload fields that are ActionInput parameters (action.schema.json ActionInput).
 const INPUTS: readonly string[] = [
@@ -24,6 +25,10 @@ const INPUTS: readonly string[] = [
   'quoted_fare',
   'dream',
   'patrol',
+  'transition',
+  'quest_instance_id',
+  'attempt_id',
+  'cursor',
 ];
 
 /** Match the exact command, primary target/scope and input contract.
@@ -37,6 +42,9 @@ export function accepts(
   steps: Steps = { n: 0 },
 ): boolean {
   if (a.command !== payload.type) return false;
+  if (payload.type === 'expedition') {
+    if (expeditionDefinition(world).spec.actions[payload.transition] !== a.key) return false;
+  }
   if (payload.type === 'accept_quest') return a.quest !== undefined && same(a.quest, payload.quest);
   if (payload.type === 'close_choice') return payload.continuation_id === a.continuation;
   if (payload.type === 'talk' && payload.dialogue && !same(a.dialogue, payload.dialogue))
@@ -92,6 +100,7 @@ function inventory(
 }
 
 export function primaryTarget(payload: CommandPayload): EntityId | undefined {
+  if (payload.type === 'expedition') return payload.detail_id;
   if (payload.type === 'use_service') return payload.provider_id;
   if (payload.type === 'use_transport') return payload.endpoint_id;
   if (payload.type === 'fill' || payload.type === 'pour') return payload.source_id;

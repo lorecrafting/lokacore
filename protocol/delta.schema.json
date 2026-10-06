@@ -1270,6 +1270,41 @@
             "value"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "expedition.transition"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "quest_instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "relation.schema.json#/$defs/ExpeditionAttempt"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "relation.schema.json#/$defs/ExpeditionAttempt"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "quest_instance_id",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -1782,6 +1817,22 @@
           "required": [
             "kind",
             "actor_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "expedition"
+            },
+            "quest_instance_id": {
+              "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+            }
+          },
+          "required": [
+            "kind",
+            "quest_instance_id"
           ],
           "additionalProperties": false
         }

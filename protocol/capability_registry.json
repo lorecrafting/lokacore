@@ -511,5 +511,16 @@
       "water"
     ],
     "events": []
+  },
+  {
+    "key": "expedition",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "expedition"
+    ],
+    "definitions": [],
+    "events": []
   }
 ]

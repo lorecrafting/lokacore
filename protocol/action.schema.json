@@ -72,6 +72,24 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
+        },
+        "transition": {
+          "enum": [
+            "start",
+            "restart",
+            "shelter"
+          ]
+        },
+        "quest_instance_id": {
+          "$ref": "delta.schema.json#/$defs/QuestInstanceId"
+        },
+        "attempt_id": {
+          "$ref": "identity.schema.json#/$defs/CommandId"
+        },
+        "cursor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
         }
       },
       "required": [],
@@ -328,7 +346,11 @@
         "quoted_fare",
         "dream",
         "method",
-        "effect_generation"
+        "effect_generation",
+        "transition",
+        "quest_instance_id",
+        "attempt_id",
+        "cursor"
       ],
       "examples": [
         "until"

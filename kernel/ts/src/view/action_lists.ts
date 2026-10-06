@@ -29,6 +29,7 @@ import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
+import * as expedition from '../mechanics/expedition/sequence.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;
@@ -162,10 +163,13 @@ function advertise(
 ): AdvertisedAction {
   const aimed = scope !== undefined && door(a);
   const patch = id && a.command === 'harvest' && world.details[id]?.harvest;
-  const target_ids = lightTargets(world, actor, a, id);
+  const target_ids =
+    a.command === 'expedition' && id ? [id as EntityId] : lightTargets(world, actor, a, id);
   const shown = {
     action_key: a.key,
-    ...((light.VERBS.includes(a.command) || a.command === 'harvest') && { command: a.command }),
+    ...((light.VERBS.includes(a.command) || ['harvest', 'expedition'].includes(a.command)) && {
+      command: a.command,
+    }),
     label: patch && !a.input.includes('method') ? patch.label : a.label,
     target: aimed ? ({ kind: 'entity', scopes: [scope] } as TargetSpec) : a.target,
     input: aimed ? [] : a.input,
@@ -178,6 +182,10 @@ function advertise(
   const gathered =
     a.command === 'harvest' && target !== undefined
       ? harvestOffered(world, actor, a, target, steps)
+      : undefined;
+  const excursion =
+    a.command === 'expedition' && target !== undefined
+      ? expeditionAdmission(world, actor, a, target)
       : undefined;
   const talk =
     a.command === 'talk' &&
@@ -192,6 +200,7 @@ function advertise(
         : undefined) ||
       (typeof admitted === 'string' ? admitted : undefined) ||
       (typeof gathered === 'string' ? gathered : undefined) ||
+      excursion ||
       (a.command === 'take' && target !== undefined ? take(target) : undefined) ||
       (a.command === 'give' && target !== undefined
         ? giveRefused(world, target, steps)
@@ -287,6 +296,13 @@ function putPairs(
 
 function noticeOffer(world: World, a: Offered, id: string) {
   return (
+    (a.command === 'expedition' &&
+      Object.values(world.cartridge.quests ?? {}).some(
+        (q) =>
+          q.expedition &&
+          (expedition.detailFor(world, q.expedition, 'start') === id ||
+            expedition.detailFor(world, q.expedition, 'shelter') === id),
+      )) ||
     (a.command === 'harvest' &&
       !!world.details[id]?.harvest &&
       (!a.input.includes('method') || world.details[id]?.harvest?.careful?.action === a.key)) ||
@@ -296,6 +312,24 @@ function noticeOffer(world: World, a: Offered, id: string) {
         world.details[detailOf(world, a.recipe.target)]?.perception) &&
       detailOf(world, a.recipe.target) === id
     )
+  );
+}
+
+function expeditionAdmission(world: World, actor: CharacterId, a: Offered, target: EntityId) {
+  const spec = expedition.definition(world).spec;
+  const stage = (Object.keys(spec.actions) as ('start' | 'restart' | 'shelter')[]).find(
+    (k) => spec.actions[k] === a.key,
+  );
+  if (!stage) return 'invalid_target' as const;
+  const now = expedition.current(world, actor);
+  return expedition.refused(
+    world,
+    actor,
+    stage,
+    target,
+    now?.instance_id,
+    now?.attempt?.attempt_id,
+    now?.attempt?.cursor,
   );
 }
 

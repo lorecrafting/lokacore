@@ -1,4 +1,5 @@
 import { patrolSave } from './patrol-save.ts';
+import { expeditionSave } from './expedition-save.ts';
 import { riddleSave, selectorSave } from './riddle-save.ts';
 import { topicsSave } from './topics-save.ts';
 import { exchangeSave } from './exchange-save.ts';
@@ -15,6 +16,7 @@ import type { Db, Meta } from './store.ts';
 
 export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
   patrolSave(world);
+  expeditionSave(world, db, meta, revision);
   selectorSave(world, db, meta);
   riddleSave(world, db, meta);
   topicsSave(world, db, meta);

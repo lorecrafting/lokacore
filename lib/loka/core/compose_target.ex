@@ -28,6 +28,9 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "patrol.transition", "quest_instance_id" => q}),
     do: %{"kind" => "patrol", "quest_instance_id" => q}
 
+  def target(%{"op" => "expedition.transition", "quest_instance_id" => q}),
+    do: %{"kind" => "expedition", "quest_instance_id" => q}
+
   def target(%{"op" => "population.control", "plan" => p}),
     do: %{"kind" => "population_plan", "plan" => p}
 

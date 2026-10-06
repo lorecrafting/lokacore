@@ -89,6 +89,23 @@ defmodule Loka.Content.Checks do
   def expand(%{"patrol" => p} = o, m),
     do: o |> Map.delete("patrol") |> expand(m) |> Map.put("patrol", expand(p, m))
 
+  def expand(%{"start_room" => _, "survived_fact" => _} = expedition, m) do
+    expedition
+    |> Map.update!("start_room", &ref(&1, "room", m))
+    |> Map.update!("shelter_room", &ref(&1, "room", m))
+    |> Map.update!("survived_fact", &ref(&1, "fact", m))
+    |> Map.update!("faction", &ref(&1, "fact", m))
+    |> Map.update!("hound_population", &ref(&1, "population", m))
+    |> Map.update!("footprint", &Enum.map(&1, fn room -> ref(room, "room", m) end))
+    |> Map.update!("route", fn edges ->
+      Enum.map(edges, fn edge ->
+        edge
+        |> Map.update!("from", &ref(&1, "room", m))
+        |> Map.update!("to", &ref(&1, "room", m))
+      end)
+    end)
+  end
+
   def expand(%{"transition" => t, "quest" => q, "npc" => _} = p, m)
       when t in ~w(start continue rejoin restart), do: Map.put(p, "quest", ref(q, "quest", m))
 

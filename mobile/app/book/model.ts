@@ -296,15 +296,35 @@ function noticeButtons(
         (a) =>
           a.available &&
           (!a.input.length ||
+            a.command === 'expedition' ||
             (a.command === 'harvest' && a.input.length === 1 && a.input[0] === 'method')) &&
           (a.target.kind === 'none' || a.target_ids?.length),
       )
       .map((a) => ({
         ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
         ...(a.input.includes('method') && { input: { method: 'careful' } }),
+        ...(a.command === 'expedition' && { input: expeditionInput(v, a.input) }),
         detail_id: n.id,
       })),
   );
+}
+
+function expeditionInput(v: GameView, fields: readonly string[]) {
+  if (!fields.includes('attempt_id')) return { transition: 'start' };
+  const row = v.journal.find((q) => q.expedition)?.expedition;
+  if (!row) return {};
+  return fields.includes('cursor')
+    ? {
+        transition: 'shelter',
+        quest_instance_id: row.quest_instance_id,
+        attempt_id: row.attempt_id,
+        cursor: row.cursor,
+      }
+    : {
+        transition: 'restart',
+        quest_instance_id: row.quest_instance_id,
+        attempt_id: row.attempt_id,
+      };
 }
 
 export function actionContext(

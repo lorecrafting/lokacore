@@ -123,6 +123,10 @@ export function holdsNow(world: World, actor: CharacterId, quest: DefinitionRef,
     const q = questOf(world, actor, quest);
     return !!q && world.state.patrols?.[q[0]]?.status === 'completed';
   }
+  if (o.evidence === 'expedition') {
+    const q = questOf(world, actor, quest);
+    return !!q && world.state.expeditions?.[q[0]]?.status === 'completed';
+  }
   return o.evidence === 'current_state' && holds(world, actor, o.policy.root, { steps });
 }
 

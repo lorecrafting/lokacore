@@ -20,6 +20,7 @@ const SECTIONS: Readonly<
     | 'encounters'
     | 'escorts'
     | 'patrols'
+    | 'expeditions'
     | 'population_plans'
     | 'population_slots'
     | 'bleeds'
@@ -31,6 +32,7 @@ const SECTIONS: Readonly<
   encounter: 'encounters',
   escort: 'escorts',
   patrol: 'patrols',
+  expedition: 'expeditions',
   population_plan: 'population_plans',
   population_slot: 'population_slots',
   entity: 'created',
@@ -64,7 +66,7 @@ export const row = (t: MutationTarget) =>
             ? t.entity_id
             : t.kind === 'water'
               ? t.actor_id
-              : t.kind === 'patrol'
+              : t.kind === 'patrol' || t.kind === 'expedition'
                 ? t.quest_instance_id
                 : t.kind === 'escort'
                   ? t.actor_id

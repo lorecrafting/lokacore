@@ -36,6 +36,8 @@ export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':
       return get(section(s, 'patrols'), t.quest_instance_id);
+    case 'expedition':
+      return get(section(s, 'expeditions'), t.quest_instance_id);
     case 'water':
       return get(section(s, 'water'), t.actor_id);
     case 'escort':

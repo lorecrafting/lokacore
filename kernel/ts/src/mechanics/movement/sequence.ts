@@ -12,6 +12,7 @@ import {
 import * as water from '../water/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import * as patrol from '../patrol/sequence.ts';
+import * as expedition from '../expedition/sequence.ts';
 import { exitTo } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
@@ -56,12 +57,23 @@ export function moveSequence(
     room_id: there,
   });
   const joined = patrol.travel(world, command, here, there, ops, mint, steps);
+  const ventured = expedition.travel(
+    world,
+    command,
+    here,
+    there,
+    [...ops, ...joined.ops],
+    mint,
+    steps,
+  );
   return accepted(
     world,
     outcome,
-    [...ops, ...joined.ops],
-    [entered, ...joined.events],
-    joined.narration.length ? joined.narration : undefined,
+    [...ops, ...joined.ops, ...ventured.ops],
+    [entered, ...joined.events, ...ventured.events],
+    [...joined.narration, ...ventured.narration].length
+      ? [...joined.narration, ...ventured.narration]
+      : undefined,
   );
 }
 

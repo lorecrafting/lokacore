@@ -7,6 +7,7 @@ import { level, resourceRef, recoveryAdjustments, adjust } from '../resource.ts'
 import { fact, positionOf } from '../position/shared.ts';
 import { wornIn } from '../equipment/rule.ts';
 import { fail } from '../patrol/sequence.ts';
+import { fail as failExpedition } from '../expedition/sequence.ts';
 import { separate } from '../escort/shared.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { key } from '../../foundation/compose.ts';
@@ -176,6 +177,7 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
     ...leave(world, owner_id, writer_group),
     ...separate(world, owner_id, writer_group),
     ...fail(world, owner_id, writer_group),
+    ...failExpedition(world, owner_id, writer_group),
   ];
   ops.push({
     op: 'entity.transfer',
