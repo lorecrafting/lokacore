@@ -436,6 +436,71 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
+            },
+            "sight": {
+              "type": "object",
+              "properties": {
+                "member_id": {
+                  "$ref": "identity.schema.json#/$defs/EntityId"
+                },
+                "player_id": {
+                  "$ref": "identity.schema.json#/$defs/CharacterId"
+                },
+                "slot": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 64
+                },
+                "generation": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "seen_at": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "cause_kind": {
+                  "enum": [
+                    "player_entry",
+                    "population_transfer"
+                  ]
+                },
+                "cause_id": {
+                  "$ref": "identity.schema.json#/$defs/CommandId"
+                },
+                "source_id": {
+                  "anyOf": [
+                    {
+                      "$ref": "identity.schema.json#/$defs/EntityId"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "destination_id": {
+                  "$ref": "identity.schema.json#/$defs/EntityId"
+                }
+              },
+              "required": [
+                "member_id",
+                "player_id",
+                "slot",
+                "generation",
+                "seen_at",
+                "cause_kind",
+                "cause_id",
+                "source_id",
+                "destination_id"
+              ],
+              "additionalProperties": false
+            },
+            "water_generation": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "water_body_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
           "required": [
@@ -774,6 +839,16 @@
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
+            },
+            "sight_member_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "water_generation": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
             }
           },
           "required": [
@@ -792,8 +867,21 @@
           ],
           "exactlyOneRequired": [
             "encounter_id",
-            "bleed_body_id"
-          ]
+            "bleed_body_id",
+            "sight_member_id",
+            "water_generation"
+          ],
+          "requiredUnless": {
+            "sight_member_id": [
+              "encounter_id"
+            ],
+            "water_generation": [
+              "encounter_id"
+            ],
+            "bleed_body_id": [
+              "encounter_id"
+            ]
+          }
         },
         {
           "type": "object",
@@ -1135,6 +1223,41 @@
             "op",
             "writer_group",
             "body_id",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "water.transition"
+            },
+            "writer_group": {
+              "$ref": "#/$defs/WriterGroup"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "water.schema.json#/$defs/WaterOccupancy"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "water.schema.json#/$defs/WaterOccupancy"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "actor_id",
             "expected",
             "value"
           ],
@@ -1635,6 +1758,22 @@
           "required": [
             "kind",
             "body_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "water"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "kind",
+            "actor_id"
           ],
           "additionalProperties": false
         }

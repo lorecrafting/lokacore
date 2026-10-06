@@ -32,8 +32,9 @@ export function target(op: DeltaOp): MutationTarget {
       return { kind: 'encounter', encounter_id: op.encounter_id };
     case 'patrol.transition':
       return { kind: 'patrol', quest_instance_id: op.quest_instance_id };
+    case 'water.transition':
     case 'escort.transition':
-      return { kind: 'escort', actor_id: op.actor_id };
+      return { kind: op.op === 'water.transition' ? 'water' : 'escort', actor_id: op.actor_id };
     case 'time.advance':
       return { kind: 'clock' };
     case 'resource.adjust':

@@ -1,6 +1,8 @@
+import { waterValid } from '../../../kernel/ts/src/mechanics/water/saved.ts';
 import { receiptRecovery } from './receipt-save.ts';
 // size: allow 304, shared save boundary retains quest reference checks before receipt recovery
 import { encountersValid } from '../../../kernel/ts/src/mechanics/combat/saved.ts';
+import { sightsValid } from '../../../kernel/ts/src/mechanics/population/saved.ts';
 import { hydrate } from '../../../kernel/ts/src/runtime/created.ts';
 import { validOverrideRow } from '../../../kernel/ts/src/foundation/resource.ts';
 import { transaction } from './transaction.ts';
@@ -131,7 +133,8 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
     const world = hydrate(fresh, { ...state, clock: h.clock, rng } as World['state'], true);
-    if (!world || !encountersValid(world)) return undefined;
+    if (!world || !waterValid(world) || !encountersValid(world) || !sightsValid(world))
+      return undefined;
     if (
       Object.values(world.state.quests ?? {}).some(
         (q) =>

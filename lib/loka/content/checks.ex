@@ -1,4 +1,4 @@
-# size: allow 400, careful and discounted skill refs join the shared checked expansion boundary
+# size: allow 410, skill and bleed refs share the checked expansion boundary
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]

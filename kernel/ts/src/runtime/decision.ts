@@ -4,6 +4,7 @@
 // commit and GameView are in world.ts.
 import {
   DEFS,
+  type DeltaOp,
   type FuelRow,
   type FuelSpec,
   type BarrierState,
@@ -42,6 +43,7 @@ import {
   type StateScope,
   type Text,
   type WorldContextId,
+  type WaterOccupancy,
 } from '../contracts.gen.ts';
 import { key, type Stored } from '../foundation/compose.ts';
 import { id } from '../foundation/id_source.ts';
@@ -51,6 +53,7 @@ export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2'
 
 export type State = {
   readonly bleeds?: Readonly<Record<string, BleedRow>>;
+  readonly water?: Readonly<Record<string, WaterOccupancy>>;
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;
   readonly patrols?: Readonly<Record<string, PatrolRelation>>; // by QuestInstanceId
@@ -90,6 +93,8 @@ export type ChoiceRow = {
 
 /** A scheduled job as composition stores it (foundation/compose.ts job.schedule; 03 §13; 04 §5.4). */
 export type JobRow = {
+  readonly water_generation?: number;
+  readonly water_body_id?: EntityId;
   readonly job: DefinitionRef;
   readonly due_time: number;
   readonly status: 'pending' | 'completed' | 'cancelled';
@@ -98,6 +103,7 @@ export type JobRow = {
   readonly actor_id?: CharacterId;
   readonly bleed_body_id?: EntityId;
   readonly bleed_generation?: number;
+  readonly sight?: Extract<DeltaOp, { op: 'job.schedule' }>['sight'];
 };
 
 export { row } from './rows.ts';
@@ -132,8 +138,12 @@ export type World = {
       string,
       {
         readonly bundle: DefinitionRef;
-        readonly hound: DefinitionRef;
-        readonly pelt: DefinitionRef;
+        readonly hound?: DefinitionRef;
+        readonly pelt?: DefinitionRef;
+        readonly deer?: DefinitionRef;
+        readonly hide?: DefinitionRef;
+        readonly member_role: 'hound' | 'deer';
+        readonly loot_role: 'pelt' | 'hide';
         readonly corpse: DefinitionRef;
         readonly home: EntityId;
         readonly cap: number;

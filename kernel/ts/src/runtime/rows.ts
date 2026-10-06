@@ -5,6 +5,7 @@ import { key } from '../foundation/compose.ts';
 const SECTIONS: Readonly<
   Record<
     string,
+    | 'water'
     | 'liquids'
     | 'fuel'
     | 'containers'
@@ -24,6 +25,7 @@ const SECTIONS: Readonly<
     | 'bleeds'
   >
 > = {
+  water: 'water',
   liquid: 'liquids',
   fuel: 'fuel',
   encounter: 'encounters',
@@ -60,17 +62,19 @@ export const row = (t: MutationTarget) =>
           ? t.body_id
           : t.kind === 'containment' || t.kind === 'entity'
             ? t.entity_id
-            : t.kind === 'patrol'
-              ? t.quest_instance_id
-              : t.kind === 'escort'
-                ? t.actor_id
-                : t.kind === 'encounter'
-                  ? t.encounter_id
-                  : t.kind === 'quest'
-                    ? t.instance_id
-                    : t.kind === 'job'
-                      ? t.job_id
-                      : t.kind === 'choice'
-                        ? t.continuation_id
-                        : key(t),
+            : t.kind === 'water'
+              ? t.actor_id
+              : t.kind === 'patrol'
+                ? t.quest_instance_id
+                : t.kind === 'escort'
+                  ? t.actor_id
+                  : t.kind === 'encounter'
+                    ? t.encounter_id
+                    : t.kind === 'quest'
+                      ? t.instance_id
+                      : t.kind === 'job'
+                        ? t.job_id
+                        : t.kind === 'choice'
+                          ? t.continuation_id
+                          : key(t),
   ] as const);

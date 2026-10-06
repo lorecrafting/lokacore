@@ -29,3 +29,18 @@ test('active bleed rows and containing deltas require the complete occurrence', 
     [{ path: '/job_id', code: 'unknown_property' }],
   );
 });
+
+// Breaks: the fourth cancellation binding is omitted or can share a sight binding.
+test('bleed cancellation is the fourth exclusive job binding', () => {
+  const op = {
+    op: 'job.cancel',
+    writer_group: 0,
+    job_id: '11111111-2222-4333-8444-555555555555',
+    bleed_body_id: '11111111-2222-4333-8444-555555555555',
+    bleed_generation: 1,
+  };
+  assert.deepEqual(validate('DeltaOp', op), []);
+  assert.deepEqual(validate('DeltaOp', { ...op, sight_member_id: op.bleed_body_id }), [
+    { path: '', code: 'exclusive_properties' },
+  ]);
+});

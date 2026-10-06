@@ -51,6 +51,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | transport@1 | portable | portable_capability |  |
 | food@1 | portable | portable_capability |  |
 | bleed@1 | portable | portable_capability |  |
+| water@1 | portable | portable_capability |  |
 
 ## Other responsibilities (`protocol/residency.json`)
 
@@ -224,6 +225,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `use_transport`
   - `eat`: Eat one directly held opted edible item; its identity enters terminal custody.
   - `bandage`
+  - `recover_corpse`
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)
@@ -274,6 +276,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `population.slot`
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
   - `bleed.transition`: Checked transition of one body bleed generation.
+  - `water.transition`
 - **EncounterId**: One finite combat encounter, minted from the Attack command IdSource.
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
@@ -297,6 +300,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `population_plan`
   - `population_slot`
   - `bleed`
+  - `water`
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
 - **StateDelta**: A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.
@@ -693,3 +697,13 @@ Localized text as string ids plus bindings (04 §15; 05 §18; 06 §43), shared b
 Exact paired boarding endpoints, conserved fare and actor-owned corpse recovery.
 
 - **TransportDefinition**: Paired original boarding detail, destination, conserved fare recipient and corpse recovery rooms.
+
+## Bounded underwater occupancy contracts (`protocol/water.schema.json`)
+
+
+
+- **CorpseRecoveryView**: One actual owned nonempty underwater corpse currently eligible at the shrine, with its current bottom location and original direct-root identities/names.
+- **WaterJob**: One bound water occurrence: exact bottom DefinitionRef, due clock, actor/body/generation and pending, completed or cancelled status. Historical rows remain; only the current occurrence may drown.
+- **WaterOccupancy**: One actor-owned body and occupancy generation. Active rows bind bottom, entry clock, absolute deadline and one job. Cleared rows retain generation/body and null all occurrence fields.
+- **WaterSettings**: D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.
+- **WaterView**: Confirmed deadline, logical time remaining and real seconds rounded up from the authored elapsed rate. Presentation never advances or renews the deadline.

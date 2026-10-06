@@ -1,7 +1,5 @@
 // size: allow 315, typed quest reactions join the existing FIFO admission/causation path
-// The proposal of one admitted decision (04 §5.1-§5.4): admission of a rule's result, its whole
-// proposal (the root sequence, its due jobs and every reaction delivery in one FIFO causal
-// order), composition and adoption. runtime/world.ts routes each command here.
+// Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { encode } from '../foundation/canonical.ts';
 import { apply, base } from './apply.ts';
 import { counts, over, same, target, type Limit } from '../foundation/compose.ts';
@@ -26,6 +24,7 @@ import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { currentBleed } from '../mechanics/bleed/shared.ts';
 import { living } from '../mechanics/death/shared.ts';
+import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 
@@ -289,7 +288,11 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const pair = bleedRoundPair(at, job_id as JobId, current);
     const group = paired.get(job_id) ?? p.group + 1;
     if (pair) paired.set(pair, group);
-    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: group }));
+    const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
+    const own = ran.delta.ops.map((o) => ({
+      ...o,
+      writer_group: handoffGroup(o, handoff, group),
+    }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;

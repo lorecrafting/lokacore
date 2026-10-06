@@ -1,0 +1,30 @@
+✖ ordinary combat death below also invalidates the original water occurrence (141.884ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1634.21375
+
+✖ failing tests:
+
+test at kernel/ts/test/water.test.ts:391:1
+✖ ordinary combat death below also invalidates the original water occurrence (141.884ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  70800 !== null
+  
+      at TestContext.<anonymous> (file://[workspace]/kernel/ts/test/water.test.ts:407:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 70800,
+    expected: null,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

@@ -26,4 +26,20 @@ defmodule Loka.Core.BleedTest do
                {:error, [%{path: "/value/" <> field, code: :missing_property}]}
     end
   end
+
+  # Breaks: the fourth cancellation binding is omitted or can share a sight binding.
+  test "bleed cancellation is the fourth exclusive job binding" do
+    op = %{
+      "op" => "job.cancel",
+      "writer_group" => 0,
+      "job_id" => "11111111-2222-4333-8444-555555555555",
+      "bleed_body_id" => "11111111-2222-4333-8444-555555555555",
+      "bleed_generation" => 1
+    }
+
+    assert Contracts.validate("DeltaOp", op) == :ok
+
+    assert Contracts.validate("DeltaOp", Map.put(op, "sight_member_id", op["bleed_body_id"])) ==
+             {:error, [%{path: "", code: :exclusive_properties}]}
+  end
 end

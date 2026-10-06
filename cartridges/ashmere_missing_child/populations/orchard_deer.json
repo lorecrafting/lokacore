@@ -1,0 +1,22 @@
+{
+  "bundle": "orchard_deer",
+  "home": "orchard",
+  "area": [
+    "orchard",
+    "smithy"
+  ],
+  "cap": 1,
+  "day_target": 1,
+  "night_target": 1,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 172800,
+  "wander_interval": 3600,
+  "sight": {
+    "delay": 300,
+    "narration": {
+      "east": "combat.deer_fled_east",
+      "west": "combat.deer_fled_west"
+    }
+  }
+}

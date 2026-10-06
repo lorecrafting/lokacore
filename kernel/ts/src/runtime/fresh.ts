@@ -232,6 +232,8 @@ function populationSpecs(
     Object.entries(cartridge.populations ?? {}).map(([, plan]) => {
       const bundle = cartridge.population_bundles![refString(plan.bundle)]!;
       const npc = cartridge.npcs![refString(bundle.npc)]!;
+      const member_role = bundle.member_role ?? 'hound';
+      const loot_role = bundle.loot_role ?? 'pelt';
       return [
         key({
           cartridge_id: cartridge.manifest.id,
@@ -241,8 +243,10 @@ function populationSpecs(
         }),
         {
           bundle: plan.bundle,
-          hound: bundle.npc,
-          pelt: bundle.item,
+          [member_role]: bundle.npc,
+          [loot_role]: bundle.item,
+          member_role,
+          loot_role,
           corpse: bundle.corpse,
           home: roomIds[refString(plan.home)],
           cap: plan.cap,

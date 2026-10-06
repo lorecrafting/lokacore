@@ -1183,6 +1183,9 @@
             "$ref": "cartridge.schema.json#/$defs/DeathCredit"
           },
           "minItems": 1
+        },
+        "water": {
+          "$ref": "water.schema.json#/$defs/WaterSettings"
         }
       },
       "additionalProperties": false,
@@ -1605,6 +1608,12 @@
         },
         "corpse": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "member_role": {
+          "enum": ["hound", "deer"]
+        },
+        "loot_role": {
+          "enum": ["pelt", "hide"]
         }
       },
       "required": [
@@ -1737,6 +1746,19 @@
             "flight_fare",
             "narration"
           ],
+          "additionalProperties": false
+        },
+        "sight": {
+          "type": "object",
+          "properties": {
+            "delay": { "type": "integer", "minimum": 1 },
+            "narration": {
+              "type": "object",
+              "propertyNames": { "pattern": "^(north|south|east|west|up|down)$" },
+              "additionalProperties": { "$ref": "text.schema.json#/$defs/TextKey" }
+            }
+          },
+          "required": ["delay", "narration"],
           "additionalProperties": false
         }
       },

@@ -234,6 +234,9 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "population." <> _} = op, t, ctx),
     do: Loka.Core.ComposePopulation.transition(op, read(t, ctx), ctx)
 
+  defp apply_op(%{"op" => "water.transition"} = op, t, ctx),
+    do: Loka.Core.ComposeWater.transition(op, read(t, ctx), ctx, &read/2)
+
   defp apply_op(%{"op" => "escort.transition"} = op, t, ctx),
     do: Loka.Core.ComposeEscort.transition(op, read(t, ctx))
 
@@ -285,6 +288,7 @@ defmodule Loka.Core.Compose do
 
   defp base(%{"kind" => "population_" <> _} = t, s), do: Loka.Core.ComposePopulation.base(t, s)
 
+  defp base(%{"kind" => "water", "actor_id" => a}, s), do: section(s, "water")[a]
   defp base(%{"kind" => "escort", "actor_id" => a}, s), do: section(s, "escorts")[a]
   defp base(%{"kind" => "liquid", "item_id" => i}, s), do: section(s, "liquids")[i]
   defp base(%{"kind" => "clock"}, s), do: s["clock"]

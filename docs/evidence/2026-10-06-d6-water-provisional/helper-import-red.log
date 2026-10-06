@@ -1,0 +1,19 @@
+[warn] postinstall script did not run; falling back to runtime binary resolution.
+Enable postinstall to avoid the per-invocation overhead.
+Running 1 tests
+
+----------- Case Details -----------
+[Noisy] Expect ts-rule-module-imports to report no issue, but some issues found in:
+
+  import { recover } from './recovery.ts';
+
+[Noisy] Expect ts-rule-module-imports to report no issue, but some issues found in:
+
+  import { expiry } from '../water/expiry.ts';
+
+FAIL ts-rule-module-imports  .............NN.........
+
+Error: test failed. 0 passed; 1 failed;
+Help: You can use ast-grep playground to debug your rules and test cases.
+See also: https://ast-grep.github.io/playground.html
+

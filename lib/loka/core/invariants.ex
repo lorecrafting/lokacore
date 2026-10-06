@@ -1,4 +1,4 @@
-# size: allow 330, independent patrol and retirement pairing joins precondition replay
+# size: allow 340, patrol, water, and bleed pairing join precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure portable invariants in `protocol/invariants.json`; the TypeScript twin is
@@ -99,6 +99,7 @@ defmodule Loka.Core.Invariants do
     is_integer(s["clock"]) and entity_preconditions?(s, ops, result) and
       Loka.Core.InvariantsEscort.holds?(s, ops, result) and
       Loka.Core.InvariantsPatrol.holds?(s, ops, result) and
+      Loka.Core.InvariantsWater.holds?(s, ops, result) and
       Loka.Core.InvariantsLiquid.holds?(s, ops, result) and
       Loka.Core.InvariantsFood.holds?(s, ops) and
       retirements_hold?(ops) and replay_preconditions(s, ops, result)
@@ -135,6 +136,7 @@ defmodule Loka.Core.Invariants do
     do:
       Enum.any?(result["changes"], &(Compose.key(&1["target"]) == k and &1["value"] == expected))
 
+  defp replay_op(%{"op" => "water.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "patrol.transition"}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "population." <> _}, _, _, ctx), do: {:cont, ctx}
   defp replay_op(%{"op" => "resource.initialize"}, _, _, ctx), do: {:cont, ctx}

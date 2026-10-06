@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "silver_ring"
+  ],
+  "short": "item.silver_ring.short",
+  "room_line": "item.silver_ring.room",
+  "description": "item.silver_ring.description",
+  "mass_grams": 5,
+  "location": {
+    "in": "item",
+    "item": "sunken_chest"
+  }
+}

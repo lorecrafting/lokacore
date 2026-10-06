@@ -1,0 +1,19 @@
+{
+  "title": "room.well_bottom.title",
+  "description": "room.well_bottom.description",
+  "dark_description": "room.well_bottom.dark",
+  "exits": {
+    "up": {
+      "to": "well_shaft"
+    }
+  },
+  "details": {
+    "initials": {
+      "aliases": [
+        "initials",
+        "carving"
+      ],
+      "description": "detail.bottom_initials.description"
+    }
+  }
+}

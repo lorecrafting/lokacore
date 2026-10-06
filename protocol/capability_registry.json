@@ -46,7 +46,8 @@
       "drop",
       "give",
       "put",
-      "harvest"
+      "harvest",
+      "recover_corpse"
     ],
     "definitions": [
       "item",
@@ -499,5 +500,16 @@
     "definitions": [
       "bleed"
     ]
+  },
+  {
+    "key": "water",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [],
+    "definitions": [
+      "water"
+    ],
+    "events": []
   }
 ]

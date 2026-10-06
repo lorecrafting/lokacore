@@ -9,11 +9,14 @@ import {
   type Mint,
   type World,
 } from '../../runtime/decision.ts';
+import * as water from '../water/shared.ts';
+import { engaged } from '../combat/shared.ts';
 import * as patrol from '../patrol/sequence.ts';
 import { exitTo } from '../lookups.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { travel } from '../escort/shared.ts';
+import { entrySight } from '../population/behavior.ts';
 import { fare, passage } from './shared.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
@@ -28,7 +31,8 @@ export function moveSequence(
   outcome: string,
   steps = { n: 0 },
 ) {
-  const plan = movementPlan(world, command.payload.actor_id, command.payload.direction);
+  const { actor_id, direction } = command.payload;
+  const plan = movementPlan(world, actor_id, direction, steps, outcome === 'fled');
   if (typeof plan === 'string') return rejected(plan);
   const { body, here, there, paid } = plan;
   const transfer = {
@@ -41,8 +45,10 @@ export function moveSequence(
   const ops = [
     ...paid.ops,
     transfer,
-    ...travel(world, command.payload.actor_id, here, there),
+    ...water.travel(world, actor_id, there, plan.water?.entering, mint),
+    ...travel(world, actor_id, here, there),
     ...closeEncounter(world, body),
+    ...entrySight(world, here, there, command.id, mint, steps),
   ];
   const entered = event(world, command, mint, 1, {
     type: 'entity_entered_room',
@@ -60,7 +66,13 @@ export function moveSequence(
 }
 
 /** Read-only ordinary movement checks, reused before random escape selection. */
-export function movementPlan(world: World, actor_id: CharacterId, direction: Key) {
+export function movementPlan(
+  world: World,
+  actor_id: CharacterId,
+  direction: Key,
+  steps = { n: 0 },
+  escape = false,
+) {
   if (!COMPASS.includes(direction)) return 'invalid_target' as const;
   const body = bodyOf(world, actor_id);
   if (!body) return 'not_found' as const;
@@ -70,6 +82,12 @@ export function movementPlan(world: World, actor_id: CharacterId, direction: Key
   if (!there) return 'not_found' as const;
   const barred = passage(world, world.rooms[here], direction);
   if (barred) return barred;
+  const wet = water.edge(world, here, there, direction);
+  if (wet) {
+    const paid = water.admission(world, actor_id, wet.entering, steps);
+    return typeof paid === 'string' ? paid : { body, here, there, paid, water: wet };
+  }
+  if (engaged(world, body) && !escape) return 'invalid_state' as const;
   if (!standing(world, actor_id)) return 'invalid_state' as const;
   const paid = fare(world, body);
   if (!paid) return 'insufficient_resource' as const;

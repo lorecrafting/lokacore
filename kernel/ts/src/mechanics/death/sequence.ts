@@ -11,11 +11,14 @@ import { separate } from '../escort/shared.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { key } from '../../foundation/compose.ts';
 
+import { leave } from '../water/shared.ts';
+
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
 };
 type Loss = Extract<DeltaOp, { op: 'resource.adjust' }>;
 export type Fatal = {
+  cause?: 'drowning';
   loss: Loss;
   owner_id: CharacterId | null;
   killer_id: EntityId | null;
@@ -67,7 +70,7 @@ function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
   const settings = world.cartridge.world!.death!;
   const spawned = world.state.created?.[victim_id];
   const population =
-    spawned?.origin.kind === 'spawned' && spawned.origin.role === 'hound'
+    spawned?.origin.kind === 'spawned' && ['hound', 'deer'].includes(spawned.origin.role)
       ? world.populationSpecs[key(spawned.origin.by)]
       : undefined;
   return player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
@@ -75,7 +78,8 @@ function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
 
 function populationLoss(world: World, loss: Loss): DeltaOp[] {
   const spawned = world.state.created?.[loss.entity_id];
-  if (spawned?.origin.kind !== 'spawned' || spawned.origin.role !== 'hound') return [];
+  if (spawned?.origin.kind !== 'spawned' || !['hound', 'deer'].includes(spawned.origin.role))
+    return [];
   const plan = spawned.origin.by;
   const population = world.populationSpecs[key(plan)];
   const slot = spawned.origin.slot;
@@ -88,6 +92,16 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
   )
     throw new KernelError('precondition_failed');
   return [
+    ...(before.sight_job_id
+      ? [
+          {
+            op: 'job.cancel' as const,
+            writer_group: loss.writer_group,
+            job_id: before.sight_job_id,
+            sight_member_id: loss.entity_id,
+          },
+        ]
+      : []),
     {
       op: 'population.slot',
       writer_group: loss.writer_group,
@@ -97,6 +111,7 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
       value: {
         ...before,
         replacement_due: (loss.at ?? world.state.clock) + population.plan.replacement_delay,
+        ...(population.plan.sight && { sight_job_id: null }),
       },
     },
   ];
@@ -156,6 +171,7 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
   const writer_group = fatal.loss.writer_group;
   const room_id = world.state.containers[victim_id];
   const ops: DeltaOp[] = [
+    ...leave(world, owner_id, writer_group),
     ...separate(world, owner_id, writer_group),
     ...fail(world, owner_id, writer_group),
   ];
@@ -222,7 +238,7 @@ function deathEvent(
         kind: 'npc' as const,
         key: npc.key,
       };
-  const died: DeathEvent = {
+  return {
     id,
     world_context_id: world.context,
     scope: { kind: 'instance', world_context_id: world.context },
@@ -232,6 +248,7 @@ function deathEvent(
     correlation_id: command.id as string as DomainEvent['correlation_id'],
     payload: {
       type: 'entity_died',
+      ...(fatal.cause && { cause: fatal.cause }),
       victim_id,
       room_id,
       killer_id,
@@ -240,5 +257,4 @@ function deathEvent(
       ...(victim_definition && { victim_definition }),
     },
   };
-  return died;
 }

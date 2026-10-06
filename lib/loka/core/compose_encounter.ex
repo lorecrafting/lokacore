@@ -188,14 +188,14 @@ defmodule Loka.Core.ComposeEncounter do
       op["due_time"] <= horizon ->
         {:error, "nonfuture_job"}
 
-      not valid_bleed_job?(op) ->
+      not binding?(op) ->
         {:error, "precondition_failed"}
 
       true ->
         {:ok,
          Map.take(
            op,
-           ~w(job due_time encounter_id quest_instance_id actor_id bleed_body_id bleed_generation)
+           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id bleed_body_id bleed_generation)
          )
          |> Map.put("status", "pending")}
     end
@@ -204,24 +204,56 @@ defmodule Loka.Core.ComposeEncounter do
   def job(op, row, horizon) do
     cancel = op["op"] == "job.cancel"
 
-    valid =
-      if cancel,
-        do:
-          (op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]) or
-            (op["bleed_body_id"] != nil and row["bleed_body_id"] == op["bleed_body_id"] and
-               row["bleed_generation"] == op["bleed_generation"]),
-        else: row["due_time"] <= horizon
+    valid = if cancel, do: cancel_binding?(op, row), else: row["due_time"] <= horizon
 
     if row["status"] == "pending" and valid,
       do: {:ok, Map.put(row, "status", if(cancel, do: "cancelled", else: "completed"))},
       else: {:error, "precondition_failed"}
   end
 
-  defp valid_bleed_job?(op) do
-    bound = op["bleed_body_id"] != nil
+  defp cancel_binding?(op, row) do
+    cond do
+      op["bleed_body_id"] != nil ->
+        row["bleed_body_id"] == op["bleed_body_id"] and
+          row["bleed_generation"] == op["bleed_generation"] and op["encounter_id"] == nil
 
-    op["bleed_generation"] != nil == bound and
-      get_in(op, ["job", "kind"]) == "bleed" == bound and
-      (not bound or (op["encounter_id"] == nil and op["quest_instance_id"] == nil))
+      op["water_generation"] != nil ->
+        row["water_generation"] == op["water_generation"] and
+          row["actor_id"] == op["actor_id"] and op["encounter_id"] == nil
+
+      true ->
+        op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
+    end
+  end
+
+  defp binding?(op) do
+    if op["bleed_body_id"] != nil or op["bleed_generation"] != nil or
+         get_in(op, ["job", "kind"]) == "bleed",
+       do: bleed_binding?(op),
+       else: other_binding?(op)
+  end
+
+  defp bleed_binding?(op) do
+    op["bleed_body_id"] != nil and op["bleed_generation"] != nil and
+      get_in(op, ["job", "kind"]) == "bleed" and op["encounter_id"] == nil and
+      op["quest_instance_id"] == nil and op["water_generation"] == nil and
+      op["actor_id"] == nil
+  end
+
+  defp other_binding?(op) do
+    case {op["quest_instance_id"] != nil, op["water_generation"] != nil, op["actor_id"] != nil,
+          op["water_body_id"] != nil} do
+      {false, false, false, false} ->
+        true
+
+      {true, false, true, false} ->
+        get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil
+
+      {false, true, true, true} ->
+        get_in(op, ["job", "kind"]) == "room" and op["encounter_id"] == nil
+
+      _ ->
+        false
+    end
   end
 end

@@ -1,3 +1,4 @@
+import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
 import { fuel } from './cartridge_fuel.ts';
@@ -214,7 +215,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
-  out.push(...skills(c, check), ...topics(c, check));
+  out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
   // checkers push to out too
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));

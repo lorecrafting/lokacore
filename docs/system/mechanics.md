@@ -255,12 +255,15 @@ cartridge's `world.bands`, else the engine default table ([protocol.md](protocol
 
 ## attributes@1 (`kernel/ts/src/mechanics/policy.ts:60`)
 
-Ruleless, and no state. An attribute is a definition `AttributeSpec {key, start}` in the
+Ruleless. An attribute is a definition `AttributeSpec {key, start}` in the
 cartridge's `attributes` map (source `attributes.json`, [cartridge.md](cartridge.md#source-layout));
-the engine declares none, so the six 00 §4.3 stats are content. Every actor's value of an
-attribute is its `start`: nothing writes attributes yet, so no row, delta op or state hash
-carries them. The first writer (training, chapter three, or an ancestry modifier, LATER)
-decides whether a value belongs to the body or the character and how it is saved.
+the engine declares none, so the six 00 §4.3 stats are content. The installed
+pre-D11 implementation reads each actor's definition `start` and has no attribute
+state. The [selected D11 writer](#d11-character-choice-selected-contract) adds
+saved values owned by the chosen character, never its replaceable body. After that
+writer is installed, the selected player's checks read those values; NPCs and
+cartridges without character choice continue to read their definition starts.
+The exact changed row and operation syntax belong to D11's source protocol amendment.
 `attributes@1` owns two 06 §21 leaves, each `{<ref>, at_least}` (a ResourceInt; "below" is
 `not`, a range `all`): `stat_compare {attribute, at_least}` holds when the actor's value is at
 least `at_least`; `resource_compare {resource, at_least}` when the current value of the pool
@@ -269,12 +272,24 @@ Both fail closed: an actor without a body reads no pool, and the compiler and lo
 unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILITY`). Not
 `resource@1`'s: a new op would take `resource@2`, re-deriving every v2 lock and hash.
 
+## D11 character choice (selected contract)
+
+**PM-selected planning contract; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#d11-character-choice-interaction) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. Both policy `stat_compare` and the B6 Seek recipe's direct `attribute_threshold` check must read the selected actor's value; C1/D12 skill qualification, B4 darkness and B2 Priory/Fen axis also consume the selected state. No world number is hardcoded in the engine.
+
+Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal. A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
+
+`stat_compare` and `attribute_threshold` read the selected character value after choice on each check; neither caches qualification. STR, DEX, INT and PER have installed check consumers. CON and SPI are saved/displayed but have no Chapter 1 stat-check consumer. Hill-folk's dark-sight exempts only the selected character from B4's missing-light visibility gate, both in their current room and when ordinary Scan projects a legal adjacent dark destination. It does not create a lit source or change `illuminated`; B6 `light_off` therefore retains its physical-light answer, including Seek and Talk for a hill-folk character. Barred passages still stop Scan, and hidden-exit, closed-door, custody and other perception checks still apply. No spell/mining/Crown track, derived resource or generic vision framework is selected. D6 swimming still requires real acquired and currently qualified Swim under its own no-CON rule; D12 Haggle follows its DEX/MV rule. B6 difficulty5 must remain immediately passable for all four selected ancestries.
+
+Source must select a minimal typed declaration/command/changed-row shape, amend the protocol clause before code, and reject unknown choices, partial or contradictory effects, malformed values and attempts to change identity. The new shape requires compiler/loader negatives, a planted failed guard, real SQLite fault/replay/reopen proof and exact-head independent reviews. Frozen old fixtures stay frozen; preproduction pin mismatch refuses explicitly without deleting a save.
+
 ## check@1 (`mechanics/action_recipe/rule.ts:109`)
 
 Ruleless, resolved inside `perform`: a `luck` check draws one uniform integer in [0, 100) from
 the world's RNG (at most 8 draws, `:103`) and passes below `chance`; a `threshold` check draws
 nothing and passes when the body's value of `resource` at admission (before costs) is at least
-`difficulty`. It emits `check_passed` or `check_failed` at position 1 and selects the
+`difficulty`. B6's `attribute_threshold` arm also draws nothing and compares the commanded
+actor's attribute to its authored difficulty; D11 selects the saved character value as its
+source after creation. It emits `check_passed` or `check_failed` at position 1 and selects the
 `success` or `failure` outcome. A rejected command draws no RNG.
 
 ## action_recipe@1 (`mechanics/action_recipe/rule.ts:49`)
@@ -895,6 +910,14 @@ raw IDs or guessed keywords cannot bypass this gate. Existing combat restriction
 still win. A visible Exit into a dark room remains traversable; a hidden object is
 not an equipment gate on movement.
 
+The [selected D11 hill-folk effect](#d11-character-choice-selected-contract) permits that
+character to perceive ordinary current-room and legal adjacent-room dark content
+without a physical source. This changes darkness visibility, including Look/Scan
+and direct-command admission, while `illuminated` remains false. B6 `light_off`
+continues to test actual carried/worn lit fuel; hill sight neither douses a source
+nor makes one lit. A barred exit, hidden passage or separate perception policy
+still wins over sight into darkness.
+
 Darkness exempts the actor's own actual corpses and their ordinary accessible
 contents. The ownership/custody walk, locked bag rules and positive-load Take checks
 remain authoritative; foreign corpses gain no exemption. Every known route back
@@ -1030,7 +1053,7 @@ source. Nested, dropped, stored and corpse-held lights follow B4 unchanged.
 Known exits and the actor's actual corpse remain accessible under B4 recovery.
 
 Seek uses a deterministic `check@1` attribute-threshold arm. Read the commanded
-actor's declared immutable attribute through the existing attributes query, pass
+actor's selected character attribute after D11 choice (otherwise its definition start), pass
 at equality, draw no RNG, and emit the owned `check_passed/check_failed` with the
 recipe reference. Its success sequence alone assigns the player discovery Boolean;
 failure leaves it false and offers immediate Seek again. Neither result grants S4
@@ -1453,6 +1476,10 @@ the current water producer lowers positive HP to 0 and invokes the existing
 same-body fatal sequence atomically. Death carries typed drowning, null killer/
 credit, one actual corpse/held-worn roots/descendants and Chapel return. Ordinary
 elapsed settlement and cold reopen cannot grant a fresh deadline or skip expiry.
+A captured underwater Up reservation binds its original occupancy generation.
+If elapsed preflight expires or invalidates that generation, return `stale_view`
+with the body at Chapel and one corpse; never reinterpret it as a Chapel exit.
+Ordinary time settlement that retains the same occupancy does not block Surface.
 No second clock, wetness, drift, ghost mode or global movement rewrite.
 
 At Chapel, use `recover_corpse` only for an actual nonempty actor-owned corpse
@@ -1463,6 +1490,46 @@ deadlines. Foreign/forged/empty/non-underwater corpses cannot yield belongings a
 Ordinary physical corpse recovery remains available, including D1's fare-waived
 isle return. No general remote Take or replacement-gear system.
 
+## D9 village consequences and Prior Study access (selected, pending implementation)
+
+**PM selection, not installed behavior.** The five valid terminal pairs are
+`rescued/prior`, `rescued/fox`, `stays/prior`, `stays/fox` and `lost/prior`.
+`lost/fox` remains invalid. Child and bell quest owners alone write their
+terminal facts. Elspeth, Bram, Maud, the Green, Aldric, Vesper and Sedge read
+those committed facts for distinct authored responses; reading or rendering
+never changes them, reopens an ending or pays a reward. A missing child or
+unknown allegiance retains truthful search/base text.
+
+The actual accepted bell occurrence emits one committed cue for the actor's
+observer frame only when it is in the chapter's declared audible area. In the
+installed single-body chapter this frame is Belfry; other room eligibility is
+proved with controlled projection frames over that occurrence. The
+cue retains its event/command cause, actor, room and logical time; a later
+Look, Read, reopen or travel cannot generate another sound. The ordinary bell
+scene remains the initiating actor's immediate narration. Reed Path and Mire
+may describe flood after the bell, but their dry exits, rescue and corpse routes
+stay passable.
+
+The bell suppresses Fen hound spawning and aggression for the cartridge's
+172800 logical seconds from the accepted occurrence. Existing hounds remain
+living, present and loot-free; any open hound encounter closes without an
+attack/reward and cancels its current round. Suppressed population jobs
+advance harmlessly. At the exact deadline normal bounded population resumes
+from actual living count and current generation, with no accumulated spawn
+debt or duplicate job. Sedge's hostile/warm response never disables her
+existing lessons or recovery route.
+
+Fox allegiance restricts only **Nave west → Prior Study** ingress. The shared
+barrier state remains unchanged and no door Open/Unlock bypass is invented.
+Ordinary ingress refuses `exit_closed`. The owning living actor may enter when
+an actual actor-owned corpse is still in the Study with at least one direct
+item root. The opposite **Study east → Nave** exit always admits ordinary
+movement (subject to unrelated normal life/posture rules); taking the corpse's
+last root removes the ingress exception on the next decision. There is no
+remote Study recovery, duplicate item, item teleport or resurrection. The
+public Nave and Aldric's S2 turn-in remain accessible. The gate does not close
+Bell Tower, Belfry or any mandatory route. See the [D9 decision](../decisions/pm-decision-d9-village-reactions-2026-10-06.md).
+
 ## D12 practical skill consumers (selected contract)
 
 **PM-adopted policy, pending implementation.** The [D12 decision](../decisions/pm-decision-d12-practical-skills-2026-10-06.md) selects the first herbalism and haggle consumers; [chapter declarations](cartridge.md#d12-practical-skill-declarations) own all fees, starts, qualification thresholds, yields and price tuning. This extends C1 acquisition/qualification, B5 finite custody and B3 conserved exchange, without a new skills framework.
@@ -1472,6 +1539,14 @@ Original living, co-located Sedge and Peg teach their respective skills through 
 The existing Willow Shade patch opts into careful Harvest. Read current acquired/qualified/usable through the skills query; only usable herbalism permits the careful method. Select the authored number of distinct lowest lexicographic eligible EntityIds still directly held by the patch's room. Reject too few eligible IDs or combined carrying overflow before any transfer, event or allocation. Reuse the shared finite selection and `carryingExchange` query/budget, not independent checks against the original load for each incoming item. On success, transfer every selected identity room→actor body in one writer group and emit exactly one `item_acquired` event per transfer. Drop, storage, ordinary Take, S9 and death retain those same IDs. An omitted method retains ordinary one-item Harvest with no skill prerequisite; careful refusal cannot remove that legal ordinary route. No stock row, mint, regrowth or Herb Garden node is introduced.
 
 Peg's opted Buy quote uses current usable haggle after normal elapsed settlement. The effective quote is `max(minimum, floor(base_buy × numerator / denominator))` when usable, otherwise the authored base; Sell stays authored. The existing shared shelf/admission query supplies the effective price for display, exact invocation and execution. `quoted_price` must equal that current effective price before conserved currency/item transfer; stale cheap or dear quotes refuse without silently changing the charge. Recheck all B3 provider, item, custody, balance/overflow and carrying admission. No RNG, daily counter, reserved price, token, extra ledger or stock replacement is added. Qualification is derived at use and never stored; failed qualification never erases acquired membership.
+
+## D7 bounded deer and delayed sight flight (planning contract)
+
+**PM-selected proposal; independent plan review and source proof pending.** [D7 decision](../decisions/pm-decision-d7-deer-2026-10-06.md) composes three one-slot C3-style populations, not a new ecology. The [cartridge declarations](cartridge.md#d7-deer-planning-declarations) own all numbers and allowed rooms. Each living member is the original saved identity of its current slot generation; death alone makes that slot eligible for replacement and transfers its one held hide to its actual corpse. No sight, flight, arrival or render path births a deer, grants rat credit or produces loot.
+
+The first sight of a living deer on player entry binds one current one-shot job to that exact member and generation, due at sight clock plus the declared delay. A population due job that checks and transfers a deer into the player's current room binds or resets that sight job in the same writer group, using the exact transfer and population-job occurrence as cause; it needs no new generic arrival event. A later sight before dispatch replaces the pending occurrence and its deadline. At dispatch, revalidate current job, generation, life, player/deer co-location and legal adjacent destination in the plan's two-room area. Transfer the original deer once, preserving HP and hide. If sight runs first while an encounter is open, it closes that encounter and cancels its pending current round in the sight group. If its current round runs first at the same due clock, survives and advances the encounter, the later sight job may close that exact encounter through the narrow [round-to-sight handoff](protocol.md#d7-sight-flight-composition-planning-contract). A missing legal exit, stale sight or departure completes sight harmlessly and leaves any live successor round pending; a fatal round cancels its bound sight job. No damage, corpse, loot, credit, clock jump or RNG accompanies flight. Combat begun before the deadline remains legal; the pending job does not make a present deer untargetable.
+
+The plan's ordinary wander still skips engaged members and the member transferred by sight flight at that same clock, using C4's last-flight guard. At equal sight/combat/population deadlines preserve normal `(due_time, job_id)` order and distinct writer groups: a fatal round cancels its bound sight job; sight first moves the deer and makes a later round harmless; a surviving round first can hand off its exact successor for sight flight; an intervening population job sees engagement and may skip. Only the checked matching encounter closure and successor cancellation use the preceding round group in that handoff. Other same-target conflicts still fault atomically. No priority override, global sight scan or per-hound job is added.
 
 ## C5 hound bleeding and bandage (selected contract)
 
@@ -1484,3 +1559,64 @@ At a current tick strictly before `ends_at`, lose the authored fixed HP amount, 
 Wick's optional all-hours bound lesson uses C1 `skill.acquire`; acquisition is permanent, while use requires current qualification. Exact held bandage treatment is immediate, costs no HP/MA/MV or clock, spends no combat round/opportunity and gives no HP. It atomically transfers that one item to D4's terminal consumed holder, removes the current bleed and cancels its job, then returns a typed result. Refuse without any change if the actor is dead, unlearned/unqualified, another body/effect/generation is targeted, the bandage is not directly held and opted in, or the selected bleed is absent. Normal prerequisite due settlement can cause that last refusal. No remote, nested, worn or corpse-held treatment; retrieve the bandage through ordinary custody first.
 
 Amend the focused combat ActionSet for this exact bandage command after shared ordinary action composition. It may be offered and admitted during an open encounter together with Flee, Stand, Look and Scan. Other item actions, recipes, movement and equipment remain excluded; a raw command or alias cannot widen the exception. Treatment leaves the encounter and pending initiative intact. Flee remains immediate under its existing prerequisites. No required story path, death recovery or owner save depends on teaching, stock, waiting or UI polish.
+
+## D10 discovered places, observations and Knock (selected, pending implementation)
+
+Map knowledge belongs to the character. A new character knows only the entry room. An
+accepted body entry adds the destination room once, in the same proposal as its real
+transfer; this includes a paid ferry, a water surface move and a death respawn. Looking,
+adjacent sight, a refused or stale move and opening Map do not visit a room. The visited
+relation is monotone for that character and never grants an exit, changes a barrier or
+teleports an actor. The view joins visited room identities with static cartridge map
+positions and actual exits; it shows a connection only when both ends are visited. A
+visited connection outside the actor's current room is only a known static link, not a
+promise of current traversal. Only exits from the actor's current room show live
+availability from ordinary Move admission, including the D9 Study ingress rule. No
+remote admission simulation or automatic travel is selected.
+
+`where {target_id}` resolves an exact currently **visible and present** NPC or a previously
+observed exact NPC ID belonging to this character. `Here` requires the same current
+visibility gate as Look and direct target admission, whether the request arrived as a
+raw ID, alias or touch selection. A co-located NPC hidden by darkness or another
+visibility rule is not `here`: use the actor's saved last observation, or `unknown`
+when there is none. A prior observation reports its **last observed** room and logical
+time, never its live location. The observation is recorded only at a successful body
+entry or an accepted `look` in the actor's current room, for NPCs actually visible
+to that actor at that point; `look {target_id}` also observes its actual visible target.
+Recording an unchanged observation need not write a row. An unobserved, ambiguous or
+unresolvable name reveals no remote identity or location. Observation does not imply
+current presence, route availability or room visitation beyond the actor's own entry.
+An NPC hidden by darkness or another visibility rule cannot be observed.
+`where` itself is read only. It uses existing exact keyword/alias and ambiguity rules,
+extended to the actor's remembered IDs without leaking unknown candidates; touch passes
+the chosen ID. No schedule prediction or global tracker is selected.
+
+`knock {direction}` is offered only for a physical barrier on an exit from the actor's
+current room whose content declares a response. It resolves the same exact exit/barrier
+identity as the existing door verbs. A knock produces the authored local response as
+an accepted, receipt-bound narration with no barrier transition, actor movement,
+payment, quest or fact mutation. It remains usable whether the physical door is open
+or closed. A missing, remote or undeclared door refuses. The response cannot bypass
+the D9 Prior Study ingress predicate, which is not a physical barrier. The chapter's
+first selected door is the Chapel Steps north / Chapel Nave south pair, initially open;
+Knock is declared on the Steps north face only. Its response comes from the Nave
+only while the actual Aldric is present there.
+An absent Aldric yields the authored no-answer response, without asserting his location.
+
+## C6 S27 Night in the Marsh (selected planning contract)
+
+**Planning only; C5 source and C6 independent review remain gates.** The [C6 decision](../decisions/pm-decision-c6-night-marsh-2026-10-06.md), [chapter route](cartridge.md#c6-s27-expedition-declarations), [composition](protocol.md#c6-expedition-composition), [recovery](save.md#c6-expedition-recovery) and [Book](book-ui.md#c6-marsh-expedition) select one optional survival expedition. The owner's [no-wait rule](../decisions/owner-decision-no-wait-opening-2026-10-05.md) supersedes the archived night-window trigger: the title and historical `fen.night_survived` fact do not impose a clock condition.
+
+At any hour a standing living player at Hound Run deliberately starts S27 once. Starting binds an actor-owned quest occurrence and a five-entry ordered route attempt with cursor zero. Each later **accepted actual player Move or Flee** along the next authored edge advances that cursor exactly once. Starting co-location, NPC movement, replayed/refused movement, revisiting a room without the next edge, transport and pre-start visits earn nothing. The fifth accepted entry resolves the same quest and awards its selected consequences atomically. There is no idle survival timer, night boundary, arbitrary room-tag counter or new global objective interpreter.
+
+The opt-in Start also provokes the lowest-ID currently living co-present unengaged C3 hound, if one exists, through C4's bounded encounter admission in that same proposal; the player may fight, use C5's legal bandage or Flee under existing combat rules. This is the sole all-hours S27 hostility exception. An absent, dead, engaged or wandered-away hound does not block Start or cause a replacement wait. Outside an active Start, C4's passive hounds and ordinary safe corpse retrieval remain unchanged. No extra opponent opportunity, free strike, hound spawn or forced damage is granted. A real qualifying hound hit may cause C5 bleeding; S27 never writes a bleed directly.
+
+An accepted departure from the declared expedition footprint before completion fails only this attempt, retaining the quest active. A fatal event for the bound player body invalidates the attempt before Chapel return; death does not erase other quest progress. Either failure allows an immediate explicit Restart at Hound Run with a new attempt identity, cursor zero and the same quest occurrence. Old attempts cannot grant credit or rewards. No hound kill, item, swim qualification, clock, bell or faction state is a start/route gate. Completion is once only; Start/Restart disappear after resolution. At Drowned Oak after the third entry, one optional Use shelter action records a bound sheltered flag and narration; it is neither a completion gate nor Rest, healing or a time skip. The fifth entry returns to safe Reed Bank.
+
+## D8 crow scavenging (selected planning contract)
+
+[D8's PM decision](../decisions/pm-decision-d8-crow-scavenge-2026-10-06.md) selects one bounded consumer of C3 population, D5's real canopy, ordinary containment and scheduled jobs. Only a directly room-held `old_coin` dropped by the player in Village Green or Drowned Oak is eligible. It must be the exact D6 item, not a keyword match; no quest item, corpse, descendant, worn or nested item, container, or NPC-held item is eligible. A committed `item_dropped` can bind one living, co-located, idle crow (lowest EntityId) and that item to one acquisition job. The player can Take the coin before the job; the job then completes harmlessly. An idle crow carries at most one acquired root. There is no reservation or new ownership ledger.
+
+At the authored acquisition deadline, revalidate the exact drop cause, item custody, crow identity, life, room and idle job. Transfer that same item room→crow, emit `item_acquired` with the crow as actual holder and `run_job` cause, and schedule one transport leg. Never credit the player with Take, a quest acquisition or a reward. Each subsequent job revalidates current custody, member generation, life, location and original nest identity, then moves the crow by one legal adjacent exit along the authored Green-to-Branches corridor. That transport excursion is the only reason a live crow may be outside its plan's two-room ordinary wander pair; the plan retains its slot and ordinary wander skips that member while the transport or return occurrence is active. Deposit transfers crow→the open original nest in Oak Branches only while the nest is there and below its direct-root capacity. Successful deposit starts a bounded return to that crow's authored home, even if the player later Takes and drops the coin again. A return job moves the same living crow one checked adjacent corridor edge toward home every authored interval, with no item transfer; it ends at home and ordinary two-room wander resumes on a later boundary. From any corridor room, at most seven return legs are needed. The crow may be observed holding the coin between committed legs. No teleport, remote Take, pathfinder, item mint or clock skip is added.
+
+If a leg or deposit becomes impossible because the original nest is absent, closed or full, or the next edge is blocked, transfer the held coin to the crow's present dry room and start its return. A stale job after Take, Shoo, combat, death or generation replacement moves nothing. Shoo is a living co-located player action only on a crow currently carrying the eligible root; it moves that exact root to the present room and changes the current transport to a return, atomically. Accepted Attack on a carrying or returning crow releases any held coin to the present room, cancels its due job and pauses return while the encounter is open; a refused Attack changes neither. At encounter close, a surviving crow resumes return with one new job unless already home, when it becomes idle; actual death clears return and uses C3's ordinary same-ID corpse transfer for any still held property. The crow cannot acquire another drop while carrying, returning or paused. Ordinary population work skips a member that had a due transport/return job at the same clock even if that job ran first and reached home; writer groups stay distinct. Return never silently teleports or retires a live crow. This is one crow-item transport state, bounded by the four live population slots; no general scavenger system is selected.

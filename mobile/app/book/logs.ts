@@ -87,6 +87,8 @@ export const combatResult = (d: Extract<DecisionResult, { kind: 'accepted' }> | 
 
 function liquidLine(line: NarrationRecord['lines'][number], text: Say): string {
   const sentence = text(line.key);
+  if (line.key === 'item.recovered' && typeof line.bindings?.item === 'string')
+    return `${sentence} ${text(line.bindings.item)}.`;
   if (!['liquid.filled', 'liquid.poured', 'liquid.drank'].includes(line.key)) return sentence;
   const { kind, unit_label, quantity } = line.bindings ?? {};
   return typeof kind === 'string' &&

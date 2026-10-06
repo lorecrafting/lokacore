@@ -10,6 +10,9 @@
     },
     "south": {
       "to": "fishing_shallows"
+    },
+    "down": {
+      "to": "pool_bottom"
     }
   }
 }

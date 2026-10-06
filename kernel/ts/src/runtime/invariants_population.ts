@@ -40,20 +40,27 @@ function legal(kind: string, before: Any, after: Any): boolean {
       (after.generation === 0 &&
         after.member_id === null &&
         after.replacement_due === null &&
-        after.last_flight_at == null) ||
+        after.last_flight_at == null &&
+        after.sight_job_id == null) ||
       born(after)
     );
   if (before.generation === 0) return born(after);
-  if (before.replacement_due === null)
+  if (before.replacement_due === null) {
+    if (
+      before.member_id === null ||
+      after.generation !== before.generation ||
+      after.member_id !== before.member_id
+    )
+      return false;
+    if (after.replacement_due !== null)
+      return after.last_flight_at === before.last_flight_at && after.sight_job_id == null;
+    const flight = after.last_flight_at !== before.last_flight_at;
+    const sight = after.sight_job_id !== before.sight_job_id;
     return (
-      after.generation === before.generation &&
-      after.member_id === before.member_id &&
-      after.member_id !== null &&
-      ((after.replacement_due !== null && after.last_flight_at === before.last_flight_at) ||
-        (after.replacement_due === null &&
-          Number.isSafeInteger(after.last_flight_at) &&
-          after.last_flight_at !== before.last_flight_at))
+      (flight && Number.isSafeInteger(after.last_flight_at) && after.sight_job_id == null) ||
+      (!flight && sight)
     );
+  }
   return (
     after.generation === before.generation + 1 &&
     after.member_id !== null &&

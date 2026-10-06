@@ -15,7 +15,9 @@ type Draft = {
 /** A created corpse stays fixed; a spawned pelt uses ordinary item custody. */
 export function movable(world: World, id: EntityId): boolean {
   const origin = world.state.created?.[id]?.origin;
-  return !origin || (origin.kind === 'spawned' && origin.role === 'pelt');
+  return (
+    !origin || (origin.kind === 'spawned' && (origin.role === 'pelt' || origin.role === 'hide'))
+  );
 }
 
 export function hydrate(world: World, state: State, loading = false): World | undefined {
@@ -36,7 +38,13 @@ export function hydrate(world: World, state: State, loading = false): World | un
 
 function ordered(state: State) {
   const rank = (i: Identity) =>
-    !i?.origin ? 3 : i.origin.kind === 'spawned' ? (i.origin.role === 'hound' ? 0 : 1) : 2;
+    !i?.origin
+      ? 3
+      : i.origin.kind === 'spawned'
+        ? i.origin.role === 'hound' || i.origin.role === 'deer'
+          ? 0
+          : 1
+        : 2;
   return Object.entries(state.created ?? {}).sort(([, a], [, b]) => rank(a) - rank(b));
 }
 
@@ -52,19 +60,21 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
     })
   )
     return false;
-  const hound = identity.origin.kind === 'spawned' && identity.origin.role === 'hound';
-  const template = hound
+  const member =
+    identity.origin.kind === 'spawned' &&
+    (identity.origin.role === 'hound' || identity.origin.role === 'deer');
+  const template = member
     ? world.cartridge.npcs?.[refString(identity.definition)]
     : world.cartridge.items?.[refString(identity.definition)];
   if (
     !template ||
-    (hound
+    (member
       ? !houndValid(world, state, id, identity, draft)
       : !itemValid(world, state, id, identity, draft))
   )
     return false;
   draft.entities ??= { ...world.entities };
-  draft.entities[id] = { ...template, kind: hound ? 'npc' : 'item' } as Entity;
+  draft.entities[id] = { ...template, kind: member ? 'npc' : 'item' } as Entity;
   draft.knownEntities ??= { ...world.knownEntities };
   const entity = draft.entities[id];
   draft.knownEntities[id] = {

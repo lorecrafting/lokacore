@@ -208,7 +208,7 @@ test('independent fresh IDs include consumed custody before published population
   const w = fresh((c) => {
       c.calendar.start = 64800;
     }),
-    ids = read('protocol/fixtures/missing_child_v034_ids.json');
+    ids = read('protocol/fixtures/missing_child_v035_ids.json');
   const actual: Record<string, string> = {
     character: w.character,
     body: w.body,

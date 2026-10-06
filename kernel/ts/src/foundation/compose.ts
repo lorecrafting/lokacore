@@ -1,3 +1,4 @@
+// size: allow 310, water transitions join the closed delta composer
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
@@ -14,6 +15,8 @@ import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts
 import { openEncounter, changeEncounter, composeJob } from './compose_encounter.ts';
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
+import { sightHandoffValid } from './compose_sight.ts';
+import { sightRebindValid } from './compose_sight_rebind.ts';
 import { encode, type Json } from './canonical.ts';
 import { composeAdjustment } from './resource.ts';
 import {
@@ -23,7 +26,7 @@ import {
   type MutationTarget,
   type StateDelta,
 } from '../contracts.gen.ts';
-
+import { transitionWater } from './compose_water.ts';
 export type Obj = { readonly [key: string]: Json };
 export type State = { readonly clock: number } & { readonly [section: string]: Json };
 export type Change = { target: MutationTarget; value: Json };
@@ -33,7 +36,6 @@ export type Result = { changes: Change[] } | { fault: Fault };
 export type Written = { group: number; target: MutationTarget; value: Json };
 export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
-
 const DOOR: Record<string, string[]> = {
   closed: ['open', 'locked'],
   open: ['closed'],
@@ -48,7 +50,6 @@ export const get = (o: Json | undefined, k: string): Json | undefined =>
 const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
 const containment = (e: string): MutationTarget =>
   ({ kind: 'containment', entity_id: e }) as MutationTarget;
-
 export { target } from './compose_target.ts';
 export { current, type Stored } from './resource.ts';
 export function compose(state: State, delta: StateDelta, final = true): Result {
@@ -64,7 +65,12 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
       return fault('precondition_failed', t);
     const k = key(t);
     const prior = ctx.overlay.get(k);
-    if (prior && prior.group !== op.writer_group) return fault('conflicting_write', t);
+    if (
+      prior &&
+      prior.group !== op.writer_group &&
+      !sightRebindValid(state, ops, index, prior.group)
+    )
+      return fault('conflicting_write', t);
     const out = apply(op, read(t, ctx), ctx);
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
@@ -72,7 +78,8 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
-  if (final && !completeBirths(ops, state)) return fault('precondition_failed', { kind: 'clock' });
+  if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
+    return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
@@ -110,6 +117,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
+  if (op.op === 'fuel.set') return composeFuel(op, row, ctx.state);
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
   switch (op.op) {
     case 'fact.assign':
@@ -135,12 +143,12 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'population.control':
     case 'population.slot':
       return populationTransition(op, row);
+    case 'water.transition':
+      return transitionWater(op, row, ctx.state, read(containment(op.value.body_id), ctx));
     case 'escort.transition':
       return transitionEscort(op, row);
     case 'time.advance':
       return check(row === op.from && op.to > op.from, op.to);
-    case 'fuel.set':
-      return composeFuel(op, row, ctx.state);
     case 'resource.adjust':
       return composeAdjustment(op, row, ctx.state, ctx.horizon);
     case 'resource.initialize':
@@ -271,6 +279,8 @@ function read(t: MutationTarget, ctx: Ctx): Json | undefined {
       return get(section(s, 'encounters'), t.encounter_id);
     case 'patrol':
       return get(section(s, 'patrols'), t.quest_instance_id);
+    case 'water':
+      return get(section(s, 'water'), t.actor_id);
     case 'escort':
       return get(section(s, 'escorts'), t.actor_id);
     case 'liquid':

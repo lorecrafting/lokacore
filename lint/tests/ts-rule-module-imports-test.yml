@@ -15,6 +15,8 @@ valid:
   - "import { flee } from './flee.ts';"
   - "import { exchangeTransfers } from './exchange.ts';"
   - "import { decideHarvest } from './harvest.ts';"
+  - "import { recover } from './recovery.ts';"
+  - "import { expiry } from '../water/expiry.ts';"
   - "import { choice } from '../patrol/sequence.ts';"
   - "import { chosen } from '../scene/sequence.ts';"
 invalid:

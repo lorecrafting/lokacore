@@ -1,0 +1,15 @@
+Compiling 70 files (.ex)
+Generated loka app
+Running ExUnit with seed: 158271, max_cases: 16
+
+......
+Finished in 0.4 seconds (0.4s async, 0.00s sync)
+
+Result: 6 passed
+     warning: function binding?/1 is unused
+     │
+ 136 │   defp binding?(op) do
+     │        ~
+     │
+     └─ lib/loka/core/invariants_encounter.ex:136:8: Loka.Core.InvariantsEncounter (module)
+
