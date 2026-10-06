@@ -45,3 +45,19 @@ in the active owner rules.
 
 The developer's full-gate report was supplied as context, not independently rerun.
 Hosted execution is still publication evidence to obtain. Both findings remain open.
+
+## Scoped fix recheck — APPROVE
+
+Reviewed fix `596588d4` as integrated at `92b0c864`; limited to CI-S1, CI-S2
+and their direct callers. Both findings are closed; no open review findings.
+
+- **CI-S1 closed:** the fake GitHub command now evaluates the actual supplied jq
+  predicate over literal successful, skipped and failed job records. The retained
+  selector suite passes (exit 0). Independently removing only the browser success
+  condition makes the suite fail (exit 1) on both skipped-browser and failed-browser
+  controls. Restoring the condition restores green (exit 0).
+- **CI-S2 closed:** the Process section of the active owner rules now links the
+  pre-production CI scope decision and states the relevant green-ancestor condition.
+- Docs check: 682 documents, zero broken links, zero unreachable documents.
+  Ponytail recheck: no simplification finding. Source mutations were confined to
+  the reviewer checkout and restored; hosted publication evidence remains separate.
