@@ -43,7 +43,7 @@ The public plan owns the 33-row order and dependencies. These briefs add candida
 - **D8:** [D8 — Crows carry exact eligible items to a reachable bounded nest](d8-crow-scavenge-brief-2026-10-05.md)
 - **D9:** [D9 — Distinct village reactions, declared bell sound and safe consequence closure](d9-village-reactions-brief-2026-10-05.md)
 - **D10:** [D10 — Discovered map, truthful Where and a real Knock response](d10-map-where-knock-brief-2026-10-05.md)
-- **D11:** [D11 — Saved ancestry and six attributes with actual check consumers](d11-character-choice-brief-2026-10-05.md)
+- **D11:** [D11 — Saved ancestry and six attributes with real chapter effects](d11-character-choice-brief-2026-10-05.md)
 - **D12:** [D12 — Learn herbalism and haggle, then harvest and buy at the real benefit](d12-practical-skills-brief-2026-10-05.md)
 
 ## E. Proof and closure

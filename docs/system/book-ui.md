@@ -127,6 +127,21 @@ Map is a scrolling current-room projection, distinct from the enlarged joystick.
 exits and unavailable reasons, adjacent authored sight/entity names, door names/states and
 currently offered door/place actions. It invents no discovered multiroom coordinate map.
 
+The selected [D10 discovery contract](mechanics.md#d10-discovered-places-observations-and-knock-selected-pending-implementation)
+replaces this current-room-only Map after D10 source is installed. Then Map draws only
+visited rooms at their authored level/position and links whose two endpoints were visited.
+Remote visited links are drawn as known static connections without a current traversal
+claim; only exits from the actor's current room show live availability/refusal from
+ordinary Move admission, including D9's Study ingress rule.
+The current-room marker and a level stepper are visible; a room detail names that known
+room and its known exits. An unvisited endpoint, NPC or item is never drawn merely because
+the cartridge contains it or adjacent sight names it. Existing current-room exit and door
+controls retain live admission. Where labels distinguish currently visible `here`,
+`last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
+become `here`, and a stale observation is never phrased as a current location.
+Knock appears on the actual local door's context card and uses its exact direction and
+freshness token. It leaves that card and Map reachable after its reply.
+
 In the web Book, unmodified Arrow Up/Down/Left/Right walk north/south/west/east and
 Page Up/Page Down use offered up/down exits. Keyboard movement uses the same captured
 exit, refusal and freshness path as the footer. A missing exit does nothing. Keys act only
@@ -426,6 +441,12 @@ admission recheck the same offer when tapped. Only a confirmed receipt adds purc
 or sale narration to Peg's history and refreshes pennies, custody and inventory.
 Stale/refused/fenced results never claim success. Leave retains the existing NPC
 detail behavior and the world clock continues while the page is open.
+
+## D11 character choice interaction
+
+**Selected planning interaction; source pending.** A fresh Missing Child run presents four authored ancestry choices before World play. The Book sends the exact offered authority invocation using ordinary freshness, pending-save fencing and receipt replay. It does not select a default on render, elapsed update or browser refresh. The current choice page displays the authored attribute difference and actual chapter effects, including deferred Crown/mining/spell effects as deferred; it must not promise a CON/SPI check or a PER11 discovery gate. Pending, stale or refused results claim no selection and do not expose ordinary play. Once confirmed, the Book enters the saved run and the Character page shows the selected ancestry, six confirmed values, acquired skill and current qualification from GameView. Continue/refresh/death never reopens the picker for a selected run. A new game still requires explicit Start over confirmation under the existing pin rules.
+
+Isolated browser proof selects each ancestry on its own fresh run, refreshes/continues and exercises its actual Swim, Haggle, dark-sight or faction effect. Hill-folk sees ordinary current-room dark content and an adjacent dark destination through a legal Scan while a barred exit stays barred; with no actual lit source, B6's light-off Seek remains available. Authority and real SQLite fault proof are separate. Mobile/native verification and cosmetic UI blur remain deferred.
 
 ## C1 teaching and defense details
 
@@ -851,6 +872,25 @@ original light/fare/key. Later isolated browser proof covers remaining-time/Up o
 every bottom page, expiry, Chapel selection and refresh. No preview or owner save
 is authorized by this planning adoption; real SQLite faults remain separate proof.
 
+## D9 village reactions and bell cue
+
+**Selected, pending implementation.** Show current fact-derived cast dialogue,
+rumors and Green description for each of the five valid child/bell pairs,
+keeping `stays` distinct from `rescued`. The bell cue appears once in the
+eligible observer's confirmed chronological history; redisplay and refresh
+label it as past, with no new sound or consequence. Fen/isle frames do not
+claim they heard the bell. Flooded Fen text cannot hide a real dry exit.
+
+The Nave's west ExitView reports `exit_closed` after fox allegiance unless the
+actual player owns a nonempty corpse in the Study. While eligible, it offers
+ordinary Move with truthful fare; Study east remains offered when otherwise
+movable. Direct commands and captured taps use the same current admission.
+Show the actual reachable corpse and its contents through ordinary physical
+pages/Take; never advertise D6 Chapel `recover_corpse` for a Study corpse.
+Public Aldric/S2, Sedge lessons, Wren return and existing corpse routes remain
+available. A retained bell or death line is presented from confirmed receipts,
+not an optimistic display callback.
+
 ## D12 practical lessons and benefits
 
 **Selected, pending implementation.** [D12](mechanics.md#d12-practical-skill-consumers-selected-contract) reuses present NPC Talk/Choose, Character skill status, patch detail and the existing Peg shop. Sedge keeps her independent free swim choice and gains the herbalism lesson; Peg gains the haggle lesson. Display each authored fee and requirements, acquired/currently qualified status separately, and a confirmed bound teacher result once. Learning remains available without use qualification. Already learned status cannot promise or charge a second grant.
@@ -872,3 +912,15 @@ A true combat death exposes that deer's real public corpse and exact conserved h
 Wick's existing public detail offers one bound optional skill lesson and retains his B5 herb exchange. The Character page uses C1 acquired versus currently qualified status. A directly held opted bandage offers its exact use on item detail when a matching bleed is active; during combat the same current item and effect generation appear as one legal Bandage control on the Combat page beside Flee/Stand/Look. The control sends the typed exact-item/current-generation invocation, and the shared kernel query decides availability. A stale redraw or already-due expiry refuses without spending the item. Other item controls and recipes stay hidden/blocked in combat; Flee is never displaced.
 
 Confirmed treatment leaves HP and encounter/round state unchanged, removes the condition and item from Carrying, and routes its result to Combat if that encounter remains open or World otherwise. It does not reopen the consumed item detail. Cold reopen and replay recover the exact committed line once using the saved command ID, with no invented success from another receipt. Isolated browser proof follows real Wick teaching, B5 exchange, hound injury, Bandage, tick/expiry and refresh; headless authority and real SQLite proof are separate. Mobile/native and cosmetic UI blur remain deferred.
+
+## C6 marsh expedition
+
+**Selected planning interaction; source pending.** At any hour Hound Run's gnawed-bones detail offers one explicit Start or Restart when the shared kernel admission accepts it. The Journal shows the active attempt's next named route edge or immediate retry after failure, then one confirmed completion. It does not ask the player to wait for night or a replacement hound. If a present eligible hound is provoked at Start, the existing Combat page shows the actual encounter and its current Flee/Bandage options; no scripted hit or guaranteed safety is narrated. Ordinary hounds remain passive outside that opt-in.
+
+Map/World use confirmed player transfers for the five ordered entries. A wrong in-footprint move retains the honest next edge; a departure outside the footprint or death shows the attempt failed and the immediate Hound Run retry. The Drowned Oak midpoint may offer Use shelter once for this attempt, without Rest or a time jump. The fifth entry returns to Reed Bank. Only the accepted fifth entry can show `fen.night_survived`, the exact faction consequence and Sedge's later acknowledgement. Her earlier free swim lesson remains independently available. Pending/refused/stale/replayed actions produce no duplicate progress, reward or success line. Browser interaction and refresh prove the route, failure/retry, Book commands and resulting journal; headless and SQLite proof remain separate. Mobile sessions and cosmetic UI blur are deferred.
+
+## D8 crow carrying and nest recovery (selected planning interaction)
+
+World shows the actual crow in its current room and, while held, a truthful authored carrying line for the exact coin. It does not expose the crow's inventory as player-reachable Take. The current crow detail offers Shoo only when the shared kernel admission would accept that exact member/item; confirmed Shoo names the dropped same item once, then ordinary World item Take may recover it. Attack release, death and fallback likewise show only committed custody, with no promised nest loot. During a checked return, World shows the original crow at its actual room; no Shoo offer or second acquisition is promised. On home arrival it can again be selected for a later dropped coin.
+
+The player follows ordinary exits from Green through the authored corridor to Oak Branches. The real nest item has the existing item detail/Contents and open/Take admission, including full and moved states; original coin retrieval uses ordinary Take and carrying limits. Pending/refused/stale actions claim no move, deposit or acquisition. Isolated browser proof covers Drop→crow-held observation→legal route→nest Contents→Take, Shoo, full-nest fallback, lawful return home and a later Green Drop using the same living crow, plus refresh during crow custody and return. Headless TypeScript and real SQLite checks remain separate; mobile, owner save and cosmetic blur remain deferred.

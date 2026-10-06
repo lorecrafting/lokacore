@@ -1266,6 +1266,45 @@ Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
 shape remain null until actual source and independent derivation. Chapel Nave
 remains the death shrine; Isle Shrine is descriptive only.
 
+## D11 ancestry declarations (selected contract)
+
+**PM-selected chapter values; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
+
+| Ancestry | Selected attribute | Actual Chapter 1 effect |
+|---|---|---|
+| fen-born | PER6 | acquired Swim, `priory.fen_axis` −2 |
+| road-born | DEX11 | acquired Haggle; Crown points deferred |
+| hill-folk | CON11 | B4 dark-sight; mining deferred |
+| fey-touched | SPI11 | `priory.fen_axis` −2; spell word deferred |
+
+All other values retain their starts. The Priory/Fen axis starts at 0 for road-born and hill-folk; its selected −2 value is within the existing −10..10 bound and means Fen favor. Fen and fey share that numeric starting side but have different skill, sight and attribute outcomes. STR/DEX C1, INT/D12, DEX/D12 and PER/B6 consumers keep their authored thresholds; B6's PER5 difficulty remains immediately passable. D6 Swim has no CON floor. CON/SPI have no Chapter 1 stat-check consumer, so their selected values are truthful character data rather than a fabricated threshold. This preserves the [owner's fey content ruling](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
+
+Select the smallest closed source declaration that maps the four keys to these values/effects, with authored labels and no free-form script. The compiler and loader must reject missing/extra keys, unknown attributes/skills/faction reference, unsupported sight effects, unsafe/out-of-range integer values, an absent capability or an effect that cannot be applied atomically. A new release independently derives its pin/hash/IDs. Exact source field names, successor API and output remain null until the source PR amends the protocol and supplies independently checked answers.
+
+## D9 village reaction content (selected, pending implementation)
+
+The five valid child/allegiance pairs and the Study rule are defined in
+[mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation).
+Author distinct child responses for Elspeth and Bram, five truthful Maud rumor
+variants and Green descriptions, prior/fox Aldric and Vesper responses, and
+bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave.
+The Study remains the existing reciprocal Nave-west/Study-east edge; no new
+door/barrier definition or key is authored. Only its west ingress gets the
+conditional fox policy. No new room, NPC, token relationship fact or synthetic
+ferryman instance is needed.
+
+The audible area is the existing **25 Ashmere rooms and ten public Priory
+rooms**, excluding Fen and isle rooms. Author the area as explicit chapter
+room references with loader validation; a room's ordinary descriptive tags do
+not become sound authority. Flood variants affect Reed Path and Mire text only.
+The bell's hound suppression duration is **172800 logical seconds**, owned by
+the cartridge. Author its population-plan reference and resume bound against
+the existing hound plan; no new population cap, catch-up count or creature is
+declared. The published D6 predecessor is chapter v035/API1.30,
+[hash/190 IDs](../../protocol/fixtures/missing_child_v035_hash.json).
+D9 source successor release/API/hash/IDs remain null until its actual source
+is independently pinned.
+
 ## D12 practical skill declarations
 
 **Selected policy/data contract, pending implementation.** The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
@@ -1311,3 +1350,44 @@ Compiler and loader validate exact correct-kind home/area/bundle references, dis
 Add `skills/bandage.json` under the existing C1 skill shape: current qualification is DEX at least **10**, independent of permanent acquisition. Original Wick in the public all-hours Infirmary teaches it through one bound `Talk/Choose` and `skill.acquire`, with **0** lesson payment, duration and cooldown. An already acquired lesson is unavailable and cannot charge/grant again. Keep his B5 herb exchange and other conversation available. The bandage item family is the exact twelve existing B5 identities, each opted into one `bandage` use with authored action label and narration. Do not create replacement stock or a Chancellor sale from the archive.
 
 Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef and bumps the current API/release; successor hash/IDs remain null until independently derived from the final predecessor.
+## D10 map positions and Chapel door (selected, pending implementation)
+
+The chapter declares one static position `{x, y, z}` for each of its 57 current rooms.
+These integer drawing coordinates are content, not an engine inference from compass
+directions: the room graph contains ferry links and loops. Compilation and loading
+require exact room-key coverage, unique `(x, y, z)` positions and declared room refs;
+the rendered links still come only from real exits. Unknown map fields or duplicate
+positions fail before play. No coordinate changes movement cost, sight or reachability.
+
+The first chapter physical door is one barrier shared by Chapel Steps north and Chapel
+Nave south, starting open with no key. It admits ordinary existing Open/Close behavior
+and a declared Knock response on the Steps north face keyed to actual Aldric presence
+in the Nave. The public
+chapel remains reachable by opening a closed door. This differs from the archive's
+keyed Watch Cell candidate: the current Watch Cell is expressly open and optional, so
+D10 does not add Tobin-key or jail access machinery. The D9 Study restriction is an
+exact-edge predicate, not a barrier or Knock target. Wren's one boot is an actual
+recoverable Reed Bank item. Add ordinary `leather_boots` as a recoverable item in
+Chandler, with no sale or armor modifier in this slice. Both carry the `boot` keyword
+and can be held together for real resolver ambiguity; touch selects an exact item ID.
+Neither replaces Q2 drawing or message credit.
+
+## C6 S27 expedition declarations
+
+**Selected planning data; source pending C5 publication.** S27 `a_night_in_the_marsh` starts by an explicit no-cost/no-duration action on Hound Run's existing gnawed-bones detail. Its bounded route is five ordered accepted player entries: Hound Run **west→Reed Bank**, Reed Bank **west→Willow Shade**, Willow Shade **south→Drowned Oak**, Drowned Oak **north→Willow Shade**, Willow Shade **east→Reed Bank**. Add one inspectable Drowned Oak shelter detail with optional Use shelter at cursor3, without Rest, healing or clock advance; the final Reed Bank is a safe return boundary. Ordinary reciprocal exits already exist. The allowed attempt footprint is Hound Run, Adder Nest, Reed Bank, Willow Shade and Drowned Oak; Adder Nest accommodates a legal C4 Flee/deviation but earns no route credit. Any accepted exit to a room outside this set before completion fails the attempt. Other travel inside the footprint leaves the cursor unchanged until the exact next edge is later taken.
+
+The chapter names one original player-scoped quest and one original player Boolean `fen.night_survived`, initially false. Completion sets that fact true and applies **−1** to the existing bounded Priory/Fen axis at most once. It offers a Sedge acknowledgement of surviving the marsh; her D1 swim lesson remains free, independently accessible before S27 and idempotent if already acquired. No duplicate `skill.acquire`, second swim lesson, fee, item or attribute reward is granted by S27. Sedge's recognition is a fact-selected dialogue/text variant at her existing all-hours location, not a new NPC schedule or persistent behavior profile.
+
+At Start, if any current C3 plan-owned live unengaged hound is co-present, select the lowest current EntityId and use C4's already declared roster/encounter/round rules. If none is eligible, Start succeeds without hostility. The route does not wait for replacement or require an attack win, bandage, light, ferry, swim, food, tide or night. The existing safe main-story corridor and every corpse path remain traversable when no S27 attempt is active. All counts, rooms, rewards and narration are authored here or in the quest/dialogue definitions; engine and presenter hold no S27 literals. Compiler and loader reject missing/wrong-kind room edges, unknown route refs, noncontiguous steps, unreachable finish, invalid footprint, unresolved quest/fact/faction/hound/Sedge refs or an attempted generic room-tag shortcut. Bound route length and footprint before traversal. Release/API/hash and allocated IDs remain null until source is derived from its final published predecessor.
+
+## D8 crows, coin and reachable nest (selected planning contract)
+
+**D6 predecessor published; D8 source pending.** Published main `f57f1a8c` includes D6 [#247](https://github.com/lorecrafting/lokacore/pull/247), merge `61f4200c`, chapter `ashmere_missing_child@0.0.35`, API1.30, hash `560e16712f3c04538343e9a3ac767604093656bc527864360ccad6a8ab719581`, and 190 starting IDs in the frozen v035 fixtures. The installed sole `old_coin` is a 10g room item at dark Well Bottom, with reciprocal Up to Well Shaft; Pool Bottom instead holds the chest/ring. D5's Oak Branches route and all seven reciprocal dry corridor legs remain installed. D8's allowlist names that exact item definition in the new compiled chapter; its successor release/API/hash/ID answers and source head remain null until implementation.
+
+Declare four C3-style **cap-one two-room plans**: two with Green home and Well Lane as ordinary wander neighbor; one with Drowned Oak home and Willow Shade neighbor; one with Oak Branches home and Drowned Oak neighbor. Thus genesis has two Green, one Oak and one Branches crow. Each plan has day/night target one, no aggression window, **86400 logical second** replacement after actual death and **3600** ordinary wander interval. Existing two-room wander remains two-room; a crow on an evidenced transport or return excursion keeps its living slot while that plan skips its wander. After deposit, fallback or Shoo, a checked return job takes one adjacent corridor leg toward the member's authored home every **150 logical seconds** and finishes there in at most seven legs; ordinary wander resumes on a later boundary. Accepted combat pauses return until the encounter closes with the crow alive. This is a narrow crow corridor/location admission, not an N-room wander redesign. Crows have authored HP **1**, attack chance **0** and damage range **1..1**, so they do not initiate a fight. Their exact plan/bundle/corpse references, runtime generation, HP and room must be validated as for C3; one direct held coin goes to the crow's public corpse on death, without crow loot or player credit. Cap is the sum of the four cap-one plans, never historical dead identities.
+
+The C3 bundle currently requires and mints a directly held pelt. Crow bundles instead require the same NPC/corpse roles with the companion item **absent**; birth creates only the crow and HP. Compiler, loader, genesis, population invariants and save validate this closed optional shape. Do not mint a fake feather, marker or duplicate coin. Two Green plans may share the Green template/bundle; Oak and Branches use home-matched crow templates under the current home validation. No unrelated hound/deer bundle changes are selected.
+
+The one permitted transport corridor is Village Green → Well Lane → Ferry Landing → Reed Path → Reed Bank → Willow Shade → Drowned Oak → Oak Branches, using actual reciprocal exits one leg at a time; no path into underwater rooms. A selected acquisition or transport leg has an authored **150 logical second** delay. The nest is one real portable **250g** item, initially empty in Oak Branches, explicitly `container: true` with **8 direct-item roots** capacity and an authored lid initially open. Its text/barrier use the ordinary item declaration; do not create a detail-only or remote holder. If taken or moved, the original nest identity remains the target, but delivery falls back to the present dry room until it is again open in Oak Branches. The player can reach Branches and Take the delivered original coin by ordinary controls.
+
+Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonempty ordered reciprocal corridor with every declared adjacent edge, positive safe integer delays, each referenced plan's legal slot/home/bundle shape, container eligibility and declared capacity, and the allowlisted item's safe role. They validate this D8 declaration's actual references and relationships, without an engine rule that all cartridges have four cap-one plans, an eight-root nest or one shiny definition. Controlled chapter behavior and simulation assert the selected **4/8/one-coin** answers. D8 does not revise D6's coin source or frozen fixtures. These selected world values belong to this cartridge; no engine defaults or migration are added.
