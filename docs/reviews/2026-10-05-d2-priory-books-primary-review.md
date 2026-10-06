@@ -67,3 +67,11 @@ provisional; concurrent release/API/content/Book changes still need integration
 and independent final pins. Developer evidence reports a passing full active
 check; this reviewer did not rerun the full line. Native and browser proof: null.
 Ponytail Review: lean reuse of existing owners; no complexity finding.
+
+## Developer round-1 disposition — independent recheck pending
+
+D2-P1 is implemented in `827abc72`; combined source after published D5 integration
+and independent v027 pins is `de756710ea10322bd36ec339bd1d9abf1850067b`.
+[Exact-source checks, controls and integration evidence](../evidence/2026-10-05-d2-priory-books/round-1.md)
+retain the fix and its observed red/green controls. This disposition does not
+change the independent verdict.

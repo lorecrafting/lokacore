@@ -55,3 +55,11 @@ helpers; no new validator or save machinery is required.
   final restored contract/probes pass 4. All mutations and disposable probes removed.
 - Ponytail Review: lean existing reach/topic/receipt reuse; no complexity finding.
   Publication and coordinated C3/B9 release re-pin remain outside this local review.
+
+## Developer round-1 disposition — independent recheck pending
+
+D2-S1 is implemented in `827abc72`; combined source after published D5 integration
+and independent v027 pins is `de756710ea10322bd36ec339bd1d9abf1850067b`.
+[Exact-source checks, controls and integration evidence](../evidence/2026-10-05-d2-priory-books/round-1.md)
+retain the fix and its observed red/green controls. This disposition does not
+change the independent verdict.

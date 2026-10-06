@@ -1,5 +1,7 @@
 # D2 — public Priory and held-book Read: developer source handoff
 
+This initial handoff is superseded by [round-1 fixes and D5 integration](round-1.md).
+
 Source `de1ea634fdec61f5e13aa1acc0c3e59fda7137e0`, branch
 `chapter-one/d2-priory-books`, unpublished. The revalidated published prerequisites
 and source base are in the [adopted brief](../../briefs/chapter-one/d2-priory-books-brief-2026-10-05.md).

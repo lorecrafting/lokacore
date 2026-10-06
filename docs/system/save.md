@@ -822,6 +822,9 @@ custody changes. Retained Read narration routes once to that exact book detail;
 restore its currently reachable parent chain only when projected, with normal
 scene/chapter precedence. An unavailable book yields no invented visible route or
 World/other-book narration fallback. Current-release pin refusal remains explicit.
+Historical replay must also run when readable items are the only content requiring
+it; the isolated gate control is traced in the
+[D2-S1 review](../reviews/2026-10-05-d2-priory-books-save-second-review.md).
 
 ## B9 dream recovery
 
