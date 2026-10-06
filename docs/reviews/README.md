@@ -317,3 +317,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C1 Tobin primary implementation review](2026-10-05-c1-tobin-primary-review.md): source `e8bf456e`, initial CHANGES REQUIRED; scoped `caca4033`/`11a61c85` close all primary findings, APPROVE; post-approval size-only source `277925bb`, APPROVE, validation and diagnostic order retained. Focused checks and independent identity red control pass; no publication or native claim.
 
 - [C1 local completion status](2026-10-05-c1-local-completion-review.md): exact local status head `befceefd4d34830110bf67c205130b69ad7cbaf6`, independent APPROVE; closed primary/save findings, current release/hash/92-ID pins and accumulated local-check evidence verified; GitHub publication remains ahead, no findings.
+
+- [B7 waterskins and liquid actions save/protocol second opinion](2026-10-05-b7-waterskin-save-second-review.md): exact source `d31b47d8`, independent APPROVE; no findings, 73 Node/7 Elixir tests pass, five safety mutations fail, restored controls pass, current API/hash/all 96 IDs independently verified. Headless proof only; primary review and publication gates remain separate.
