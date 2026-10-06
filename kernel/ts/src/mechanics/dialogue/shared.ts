@@ -1,3 +1,4 @@
+import { membership } from '../skills.ts';
 import { exchangeBlocked } from './exchange.ts';
 import { refused as escortRefused } from '../escort/shared.ts';
 import { living } from '../death/shared.ts';
@@ -35,7 +36,7 @@ import { carrying } from '../containment/shared.ts';
 import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { questOf } from '../lookups.ts';
-import { transfer as payment } from '../resource.ts';
+import { choicePayment } from './payment.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
 export const definition = (world: World, source: DefinitionRef): DialogueDefinition =>
@@ -114,15 +115,14 @@ export function blocked(world: World, row: ChoiceRow, option: DialogueChoice, st
   if (roles) return roles;
   const escort = escortRefused(world, row, option);
   if (escort) return escort;
-  if (option.payment) {
-    const from = bound(option.payment.from);
-    if (
-      !from ||
-      !body ||
-      !payment(world, from, body, option.payment.resource, option.payment.amount)
-    )
-      return 'insufficient_resource' as const;
-  }
+  for (const step of option.sequence ?? [])
+    if (step.op === 'skill.acquire' && membership(world, row.actor_id, step.skill) !== false)
+      return 'invalid_state' as const;
+  if (
+    (option.payment || option.lesson_payment) &&
+    (!body || !choicePayment(world, row, option, body))
+  )
+    return 'insufficient_resource' as const;
   if (option.receive) {
     const item = bound(option.receive.item);
     if (!body || !item) return 'not_owned' as const;
@@ -175,7 +175,11 @@ function roleBlocked(
  * in the row's order, unavailable with blocked's code while it holds, else an accept with
  * acceptRefused's (choose refuses both).
  */
-export function choiceView(world: World, actor: CharacterId): PendingChoice | undefined {
+export function choiceView(
+  world: World,
+  actor: CharacterId,
+  steps = { n: 0 },
+): PendingChoice | undefined {
   const found = pending(world, actor);
   if (!found) return undefined;
   const [continuation_id, row] = found;
@@ -184,7 +188,6 @@ export function choiceView(world: World, actor: CharacterId): PendingChoice | un
     const r = d.roles[n]!;
     return r.role === 'npc' && same(r.npc, d.npc);
   });
-  const steps = { n: 0 };
   return {
     continuation_id,
     prompt: { key: d.prompt },

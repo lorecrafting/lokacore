@@ -439,6 +439,23 @@
         },
         "fuel": {
           "$ref": "#/$defs/FuelView"
+        },
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
+        "weapon": {
+          "$ref": "entity.schema.json#/$defs/WeaponProfile"
+        },
+        "block_chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "skill_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "skill_requirement": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -549,6 +566,23 @@
         },
         "fuel": {
           "$ref": "#/$defs/FuelView"
+        },
+        "slot": {
+          "$ref": "entity.schema.json#/$defs/SlotKey"
+        },
+        "weapon": {
+          "$ref": "entity.schema.json#/$defs/WeaponProfile"
+        },
+        "block_chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "skill_label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "skill_requirement": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [
@@ -984,6 +1018,18 @@
           },
           "minItems": 1,
           "maxItems": 64
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/SkillView"
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/AttributeView"
+          }
         }
       },
       "required": [
@@ -1815,6 +1861,54 @@
       ],
       "additionalProperties": false,
       "description": "Confirmed remaining fuel, capacity and effective lit state for the exact item; the presenter computes no elapsed burn."
+    },
+    "SkillView": {
+      "type": "object",
+      "properties": {
+        "skill": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "requirement": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "acquired": {
+          "type": "boolean"
+        },
+        "qualified": {
+          "type": "boolean"
+        },
+        "usable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "skill",
+        "label",
+        "requirement",
+        "acquired",
+        "qualified",
+        "usable"
+      ],
+      "additionalProperties": false
+    },
+    "AttributeView": {
+      "type": "object",
+      "properties": {
+        "attribute": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "value": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "attribute",
+        "value"
+      ],
+      "additionalProperties": false
     }
   }
 }

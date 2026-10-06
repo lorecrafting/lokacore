@@ -1,0 +1,124 @@
+import { decode } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
+import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
+import { acquisition } from '../../../kernel/ts/src/mechanics/skills.ts';
+import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
+import type {
+  DefinitionRef,
+  DecisionResult,
+  Command,
+  MutationTarget,
+} from '../../../kernel/ts/src/contracts.gen.ts';
+import { committedDialogue } from './dialogue-receipt.ts';
+import { checkRow } from './dialogue-save.ts';
+import type { Db, Meta } from './store.ts';
+
+export function skillsSave(world: World, db: Db, meta: Meta) {
+  if (!Object.keys(world.cartridge.skills ?? {}).length) return;
+  const rows = Object.entries(world.state.choices ?? {});
+  const scope = `story/${meta.lineage_id}/${world.character}`;
+  const grants = new Map<string, string[]>();
+  for (const [id, row] of rows) {
+    const d = world.cartridge.dialogues?.[refString(row.source)];
+    const option = row.choice_id && d?.choices[row.choice_id];
+    if (!option || row.status !== 'resolved') continue;
+    for (const s of option.sequence ?? []) {
+      if (s.op !== 'skill.acquire') continue;
+      checkRow(world, id, row);
+      committedDialogue(world, db, scope, id);
+      const ref = refString(s.skill);
+      grants.set(ref, [...(grants.get(ref) ?? []), id]);
+    }
+  }
+  memberships(world, grants);
+  reservedReceipts(world, db, scope, grants);
+}
+
+function reservedReceipts(world: World, db: Db, scope: string, grants: Map<string, string[]>) {
+  const invalid = () => {
+    throw new SyntaxError('malformed JSON: inconsistent skill receipt');
+  };
+  for (const r of db.getAllSync<{ command_id: string; command: string; response: string }>(
+    "SELECT command_id,command,response FROM receipt WHERE scope=? AND json_extract(response,'$.kind')='accepted'",
+    scope,
+  )) {
+    const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
+    for (const op of d.delta.ops) {
+      if (op.op !== 'fact.assign') continue;
+      const skill = Object.values(world.cartridge.skills ?? {}).find(
+        (s) => `skill_${s.key}` === op.fact.key,
+      );
+      if (!skill) continue;
+      const ids = grants.get(refString({ ...op.fact, kind: 'skill', key: skill.key })) ?? [];
+      if (!receiptBound(world, r, d, ids)) invalid();
+      if (
+        op.expected !== false ||
+        op.value !== true ||
+        !same(op.scope, { kind: 'player', character_id: world.character })
+      )
+        invalid();
+      if (
+        !d.delta.ops.some(
+          (o) =>
+            o.op === 'choice.resolve' &&
+            grants
+              .get(refString({ ...op.fact, kind: 'skill', key: skill.key }))
+              ?.includes(o.continuation_id),
+        )
+      )
+        invalid();
+    }
+  }
+}
+
+function memberships(world: World, grants: Map<string, string[]>) {
+  const invalid = () => {
+    throw new SyntaxError('malformed JSON: inconsistent skill acquisition');
+  };
+  for (const text of Object.keys(world.state.facts ?? {})) {
+    const target = decode(text) as Extract<MutationTarget, { kind: 'fact' }>;
+    if (
+      Object.values(world.cartridge.skills ?? {}).some(
+        (s) => `skill_${s.key}` === target.fact.key,
+      ) &&
+      !same(target.scope, { kind: 'player', character_id: world.character })
+    )
+      invalid();
+  }
+  for (const [ref, skill] of Object.entries(world.cartridge.skills ?? {})) {
+    const definition: DefinitionRef = {
+      cartridge_id: world.cartridge.manifest.id,
+      cartridge_version: world.cartridge.manifest.version,
+      kind: 'skill',
+      key: skill.key,
+    };
+    const at = key({
+      kind: 'fact',
+      fact: acquisition(definition),
+      scope: { kind: 'player', character_id: world.character },
+    });
+    const acquired = Object.hasOwn(world.state.facts ?? {}, at) ? world.state.facts![at] : false;
+    const count = grants.get(ref)?.length ?? 0;
+    if (typeof acquired !== 'boolean' || count > 1 || acquired !== (count === 1)) invalid();
+  }
+}
+
+function receiptBound(
+  world: World,
+  r: { command_id: string; command: string },
+  d: DecisionResult,
+  ids: string[],
+) {
+  const command = JSON.parse(r.command) as Command;
+  if (validate('Command', command).length || validate('DecisionResult', d).length) return false;
+  const payload = command.payload;
+  return (
+    command.id === r.command_id &&
+    command.world_context_id === world.context &&
+    payload.type === 'choose' &&
+    payload.actor_id === world.character &&
+    d.kind === 'accepted' &&
+    d.outcome === payload.choice_id &&
+    ids.includes(payload.continuation_id)
+  );
+}

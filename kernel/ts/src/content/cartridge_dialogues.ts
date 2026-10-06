@@ -1,3 +1,4 @@
+import { lesson, sequence } from './cartridge_skills.ts';
 // The loader's dialogue checks (dialogue@1; dialogue.schema.json DialogueDefinition; 06 §8
 // references exist, §17, §33), twin of lib/loka/content/dialogues.ex: what each dialogue uses, for
 // the lock stage (content/cartridge.ts): its own kind and each fact.assign's fact_changed (and each story
@@ -195,14 +196,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     if (d.quest) out.push(diag('OUTCOME_MISMATCH', `${path}.accept`));
     if (o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.hand_over`));
   }
-  (o.sequence ?? []).forEach((s: Obj, i: number) => {
-    named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
-    if (s.op === 'fact.adjust') {
-      const t = c.facts[refString(s.fact)]?.value_type;
-      if (t && (t.type !== 'int' || t.minimum === undefined || t.maximum === undefined))
-        out.push(diag('FACT_TYPE_MISMATCH', `${path}.sequence[${i}].fact`));
-    } else typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
-  });
+  out.push(...sequence(o, path, c, { named, typedValue, text }));
   if (o.receive) {
     if (o.hand_over) out.push(diag('OUTCOME_MISMATCH', `${path}.receive`));
     for (const [field, role] of [
@@ -231,6 +225,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);
   return out.concat(
+    lesson(o, d, path, c, { named, typedValue, text }),
     (['item', 'to'] as const)
       .filter((field) => wrong(field, field === 'to' ? 'npc' : 'item'))
       .map((field) =>

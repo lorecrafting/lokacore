@@ -32,6 +32,9 @@ defmodule Loka.Content.Requires do
 
   defp minimum_feature_api(m, all) do
     cond do
+      is_map_key(m["requires"]["capabilities"], "skills") ->
+        [1, 18]
+
       Enum.any?(all, fn {_, _, d} -> debt_feature?(d) end) ->
         [1, 14]
 

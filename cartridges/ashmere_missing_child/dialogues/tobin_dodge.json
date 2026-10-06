@@ -1,0 +1,45 @@
+{
+  "npc": "tobin",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "tobin"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "skill_swords",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "skill_dodge",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "prompt": "tobin.dodge.prompt",
+  "choices": {
+    "learn": {
+      "label": "tobin.dodge.choice",
+      "narration": "tobin.dodge.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "dodge"
+        }
+      ],
+      "lesson_payment": {
+        "to": "teacher",
+        "resource": "pennies",
+        "amount": 2
+      }
+    }
+  }
+}

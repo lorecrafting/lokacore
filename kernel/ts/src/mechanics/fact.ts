@@ -1,6 +1,7 @@
 // Typed scoped facts (fact@1; 03 §7, §13; 21 §3.9, §4 Fact): the value an actor reads, and the
 // facts_typed invariant. A world keeps each fact's default (newWorld) and the facts set since
 // (State.facts, by canonical MutationTarget text, the key composition writes).
+import { KernelError } from '../foundation/error.ts';
 import { add } from '../foundation/int.ts';
 import { decode } from '../foundation/canonical.ts';
 import { key, same } from '../foundation/compose.ts';
@@ -50,7 +51,13 @@ export function assigned<R extends Assigned>(
   actor: CharacterId,
   r: R,
   s: { readonly fact: DefinitionRef; readonly value: FactValue },
+  owner?: 'skills',
 ): R {
+  if (
+    owner !== 'skills' &&
+    Object.values(world.cartridge.skills ?? {}).some((skill) => s.fact.key === `skill_${skill.key}`)
+  )
+    throw new KernelError('precondition_failed');
   const scope = scopeOf(world, actor, s.fact);
   const at = key({ kind: 'fact', fact: s.fact, scope });
   const expected = Object.hasOwn(r.facts, at) ? r.facts[at]! : value(world, actor, s.fact);

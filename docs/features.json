@@ -646,5 +646,26 @@
     ],
     "invariants": [],
     "implemented_in": "B4 useful light"
+  },
+  "skills": {
+    "spec": "docs/system/mechanics.md C1 training and armed defense; docs/system/protocol.md C1 composition",
+    "contracts": [
+      "SkillDefinition",
+      "DialogueChoice",
+      "SkillView",
+      "WeaponProfile"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/skills.ts",
+      "kernel/ts/src/mechanics/dialogue/payment.ts",
+      "kernel/ts/src/mechanics/combat/round.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/missing_child_v020_hash.json"
+    ],
+    "invariants": [
+      "facts_typed"
+    ],
+    "implemented_in": "C1 Tobin lessons and actual equipped sword/dodge/shield combat (local implementation; independent review pending)"
   }
 }

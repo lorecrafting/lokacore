@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "wooden_shield",
+    "shield"
+  ],
+  "short": "item.wooden_shield.short",
+  "room_line": "item.wooden_shield.room",
+  "description": "item.wooden_shield.description",
+  "location": {
+    "in": "npc",
+    "npc": "peg"
+  },
+  "mass_grams": 400,
+  "block_chance": 25,
+  "slot": "off_hand"
+}

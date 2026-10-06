@@ -10,3 +10,6 @@ export const paper = {
 };
 export const head = 'IMFellEnglish';
 export const body = 'EBGaramond';
+
+export const prose = { fontFamily: body, fontSize: 18, lineHeight: 28, color: paper.fg };
+export const note = { ...prose, color: paper.dim };

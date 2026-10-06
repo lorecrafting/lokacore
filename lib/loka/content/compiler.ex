@@ -44,6 +44,7 @@ defmodule Loka.Content.Compiler do
       Entities.carry(manifest, defs, located) ++
       Loka.Content.Fuel.check(manifest, defs) ++
       Loka.Content.Commerce.check(manifest, defs) ++
+      Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
       Loka.Content.Death.check(manifest, defs, located) ++
       Loka.Content.Combat.check(manifest, defs, located, v2) ++
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry) ++
@@ -143,7 +144,8 @@ defmodule Loka.Content.Compiler do
     {"reaction", :reaction, "ReactionRule"},
     {"dialogue", :dialogue, "DialogueDefinition"},
     {"story_point", :story_point, "StoryPointDefinition"},
-    {"scene", :scene, "SceneDefinition"}
+    {"scene", :scene, "SceneDefinition"},
+    {"skill", :skill, "SkillDefinition"}
   ]
 
   defp definitions(files, m) do
@@ -153,8 +155,9 @@ defmodule Loka.Content.Compiler do
     {attributes, d3} = Resources.attributes(of(files, :attributes))
     {defs, d2} = kinds(files)
     {facts, d5} = Scenes.facts(facts, m, defs)
+    {facts, d6} = Loka.Content.Skills.facts(facts, m, defs)
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3 ++ d4 ++ d5}
+    {Map.merge(expanded(defs, m), loaded), d0 ++ d1 ++ d2 ++ d3 ++ d4 ++ d5 ++ d6}
   end
 
   # The one-file-per-definition kinds (@kinds) and their diagnostics.

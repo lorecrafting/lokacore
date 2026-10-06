@@ -25,12 +25,12 @@ import { entered, hourOf, jobId, nextHour, scheduleOf } from './behavior.ts';
 import { assigned, adjusted } from '../fact.ts';
 
 // size: allow 45, schedule dispatch retains its due job and elapsed clock paths
-export const decide: Rule<'schedule'> = (world, command, mint) => {
+export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 }) => {
   const { payload } = command;
   if (payload.type === 'run_job') {
     const row = world.state.jobs?.[payload.job_id];
     if (row?.status !== 'pending') return rejected('invalid_state');
-    if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint);
+    if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.quest_instance_id) return deadlineJob(world, payload.job_id, row);
     const schedule = scheduleOf(world, row.job);
     const npc = world.entityIds[refString(row.job)];

@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "tobin",
+    "guard",
+    "teacher"
+  ],
+  "short": "npc.tobin.short",
+  "room_line": "npc.tobin.room",
+  "description": "npc.tobin.description",
+  "room": "north_gate",
+  "resource_starts": {
+    "pennies": 0
+  }
+}

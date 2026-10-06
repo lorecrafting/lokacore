@@ -42,12 +42,11 @@ import { reach } from '../mechanics/lookups.ts';
  * position (position@1), which step refuses invalid_state.
  */
 // size: allow 60, one ActionSet projects item, worn light and exact-subject Notice offers
-export function lists(world: World, actor: CharacterId) {
+export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
   const at = position.positionOf(world, actor);
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
-  const steps = { n: 0 };
   const reachedItems = new Map<EntityId, boolean>();
   let carry: ReturnType<typeof carrying> | undefined;
   const take = (item: EntityId) => {
@@ -211,8 +210,8 @@ function fits(world: World, actor: CharacterId, a: Offered, item: string) {
 // True when step would accept door verb `a` by `actor` at `site` (an exit's direction or an
 // item's id) now: admission (refusal), then barrier@1's checks (barrier.transition).
 function usable(world: World, actor: CharacterId, a: Offered, site: barrier.Site) {
-  const payload = { type: a.command, ...site, actor_id: actor } as CommandPayload;
   const steps = { n: 0 };
+  const payload = { type: a.command, ...site, actor_id: actor } as CommandPayload;
   return (
     !refusal(world, payload, steps, a.key) &&
     typeof barrier.transition(world, actor, a.command, site, steps) !== 'string'

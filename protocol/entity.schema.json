@@ -181,6 +181,14 @@
         },
         "fuel": {
           "$ref": "#/$defs/FuelSpec"
+        },
+        "weapon": {
+          "$ref": "entity.schema.json#/$defs/WeaponProfile"
+        },
+        "block_chance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
         }
       },
       "required": [
@@ -577,6 +585,22 @@
         }
       ],
       "description": "Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys."
+    },
+    "WeaponProfile": {
+      "type": "object",
+      "properties": {
+        "skill": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "attack": {
+          "$ref": "entity.schema.json#/$defs/AttackProfile"
+        }
+      },
+      "required": [
+        "skill",
+        "attack"
+      ],
+      "additionalProperties": false
     }
   }
 }
