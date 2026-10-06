@@ -567,6 +567,32 @@ An all-hours fresh-game Book walk uses existing initial hounds in either allowed
 room, following adjacent sight now when home is empty. Required story, loot/corpse
 recovery and that walk never require waiting for respawn, wandering or darkness.
 
+## C4 pack response and enemy flight details
+
+**Selected, pending implementation.** [C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+uses the existing NPC Attack and Combat page. Each hound entry/detail retains its
+exact runtime target. GameView projects the current primary and actual active
+opponents so identical template labels never select another instance; no raw UUID
+needs to appear in prose. Committed admission narration names the assisting
+members, and their own attack results demonstrate real help. Flight names the
+departing member and real direction/destination; a primary change identifies the
+new target. Neither presenter nor elapsed redraw chooses a helper or moves one.
+
+While any opponent remains, keep Combat precedence and its current Flee/Stand/
+Look/Scan ActionSet; do not reveal Attack/Move/equipment or hide Flee behind an
+old NPC conversation. Flee retains current cost/standing refusal semantics.
+Final withdrawal/death/escape restores World and ordinary actions from saved
+state. Enemy flight grants no Carrying entry or corpse; only actual death exposes
+the ordinary real corpse/pelt Take path. All hounds remain passive during ordinary
+reading, room entry and corpse recovery at every hour.
+
+Pending-save fences and typed refusal/fault remain visible with no premature
+success. Membership/flight/primary narration routes once to retained Combat
+history, including same-receipt closure and cold reload. Stale Attack/detail
+targets revalidate after due settlement; a clock redraw cannot resurrect a dead,
+departed or replaced member. Prove real helper attacks, flight, whole-pack Flee,
+lethal loss/owned recovery and exact loot through Book; native work remains paused.
+
 ## B8 Maud and bed details
 
 **Selected, source pending.** Original Maud's detail follows the canonical

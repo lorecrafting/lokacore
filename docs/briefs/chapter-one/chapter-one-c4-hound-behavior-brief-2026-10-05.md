@@ -1,54 +1,249 @@
-# C4 — Hound aggression, real pack assistance and enemy flight
+# C4 — Hound response to aggression, real pack help and wounded flight
 
-> **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
+**Adopted PM plan; independent plan review and dependency re-pin required before
+source GO.** Source branch `chapter-1/c4-hound-behavior`, isolated developer worktree.
+Planning base `10b023e827cba4f056aa82870764afb07236938c` has chapter0.0.19 declaring
+kernel API at least1.17. C1 and C3 source are not complete. [C3's independent plan
+review](../../reviews/2026-10-05-c3-living-hounds-plan-review.md) approved corrected
+fix `0127bf4c9c02f944941008d3962982c1144fd2e2`;
+[C1 plan review](../../reviews/2026-10-05-c1-tobin-plan-review.md) is approved.
+Re-pin actual integrated reviewed C1/C3 source and intervening release edits before
+assignment. C4 successor release/API/hash/fresh IDs, source head, PR, independent
+verdicts and runtime/browser/SQLite/native proof: null. This is docs-only planning.
 
-2026-10-05. **Provisional PM draft; not adopted behavior/initiative contract or source GO.** Row C4 of [the public plan](../../MISSING-CHILD-PLAN.md), after [C3](chapter-one-c3-living-hounds-brief-2026-10-05.md). Suggested branch `c4-hound-behavior`; lift 0.8–1.0, high combat risk. Inspected PM baseline `0fbd284784f4e4756ea40e8bbcc46da6a3e02339`, chapter v011/API1.10; installed encounter has one NPC and excludes a second open encounter for the same body. Pack behavior is absent. Reviewed C3/C1/B1 pins and new release/API/hash/IDs/source/PR: **null**. No code/tests/runtime or owner-save work performed by this brief.
+## Player outcome and governing contract
 
-## Player outcome and dependencies
+C4: deliberate Attack makes exact living hounds respond as one bounded pack;
+helpers supply real rotating attacks, and wounded hounds leave through legal
+area exits with their actual pelts. Follow [PM selection](../../decisions/pm-decision-c4-hound-behavior-2026-10-05.md),
+[mechanics](../../system/mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract),
+[parameters](../../system/cartridge.md#c4-pack-response-and-wounded-flight),
+[composition](../../system/protocol.md#c4-pack-encounter-and-flight-composition),
+[save](../../system/save.md#c4-pack-and-flight-recovery) and
+[Book](../../system/book-ui.md#c4-pack-response-and-enemy-flight-details).
+Installed combat/death/Flee/elapsed and selected C1/C3 clauses remain governing
+except for the explicit roster/rotation/flight extension. One-rat no-defense
+[A/B/C answers](../../spec/conformance/first-encounter.md#frozen-input-sequence)
+remain current combat regression contracts.
 
-In an authored hostile hound area and time, a real nearby living hound can initiate combat. A co-present packmate can join and actually supply a later attack opportunity. A hurt hound below its content threshold can leave through a real legal exit; it ceases attacking in the old room. The player always retains immediate legal directionless Flee with its existing due settlement/fare/RNG, without off-room retaliation. Pack combat remains deterministic and persisted across reopen; the main rescue and corpse route stays safe.
+The earlier provisional night-auto-aggression recommendation is explicitly
+deferred. Attack alone initiates; entry, reading, elapsed/night and corpse recovery
+never do. This is the current roadmap's response-to-aggression consumer, not a
+generic AI framework or automatic hostile-room system. No late helper admission,
+retarget player command, pursuit, new verb, bleeding, spawn or population redesign.
 
-Re-pin reviewed C3 population/runtime provenance/member jobs, C1 armed-defense rules, B1 clock/calendar and installed M6 death/Flee/recovery. C2 Tobin remains the adopted required role; he is not a hidden mortal pack target. Existing one-rat fixtures remain the separate untrained one-opponent oracle. C5 bleeding is later and must consume actual positive-hit evidence from this PR.
+Read [mechanics](../../lessons/mechanics.md), [storage](../../lessons/storage.md),
+[contracts](../../lessons/contracts.md), [evidence](../../lessons/evidence.md) and,
+before Book/authority work, [mobile](../../lessons/mobile.md) lessons. Apply Ponytail,
+Ponytail Review and actual-diff correctness self-review. Native work stays paused.
 
-## Governing clauses and PM adoption packet
+## Immediate Book fight, flight and custody path
 
-Read `docs/system/architecture.md` composition/two-kernel rules; mechanics combat/death/movement/schedule/behavior; protocol encounter/job/admission/budgets/composition; save live-encounter/created-row/elapsed recovery; Book live-combat response/freshness; cartridge combat and merged C3 population authoring; `docs/NEXT-MECHANICS.md` M16-D; `docs/decisions/pm-decision-legend-mechanics-reconciliation-2026-10-04.md` pack amendment and recovery gate; frozen first-encounter A/B/C; archived 00a §4/§10 and 21 §10. Mechanics/storage/contracts/evidence lessons apply. Amend active spec and record the exact initiative/intent policy **before code**.
+Use C1's all-hours swords lesson and exact gifted rusty sword; if C2 integrated,
+use original Tobin's reachable Watch Post route. Equip before Attack. Ferry Landing
+south → Reed Path south → Reed Bank east → Hound Run, then east to Adder Nest if
+adjacent Scan shows the existing hounds there. Their current C3 members, not a
+replacement/day wait, provide the first proof. Inspect separate instance entries,
+Attack one, see exact helpers admitted and observe each member's real attack slot.
+The attacked member remains primary until actual death/departure, then the new
+primary is explicit. No shop/shield purchase is required to exercise this fight.
 
-**Recommended bounded pack initiative, provisional:** retain one encounter and one current round job for the body, with a canonical bounded set of admitted opponent EntityIds from the same pack. Retain the existing two opportunities per round: one player opportunity against the current primary, one opponent opportunity selected by deterministic round-robin from living co-present members in canonical identity order. Odd player-first/even opponent-first remains. Assistance means the helper takes that real opponent slot on its rotation, not an ambient message or an extra independent encounter. This preserves the shared eight-raw-draw round safety budget instead of giving each helper a new budget. PM must explicitly adopt this change in pack semantics; adding a swing for every hound requires another complete budget/initiative contract and cannot be inferred from the word assist.
+Run an actual controlled injured-hound Book branch to show legal flight and no
+old-room attack/loot. Its same pelt remains held by the survivor in the adjacent
+area room; no corpse or Carrying reward is shown. Other pack members keep Combat
+open; no survivor means immediate World restoration. Flight is an optional outcome,
+not a reason to chase or wait for wandering. Outside an open encounter, the same
+survivor is deliberately retryable at its actual reachable location now.
 
-If the primary dies/flees and other admitted opponents remain, choose the next living co-present primary canonically in the same transition and make it clear in GameView/narration. A body revived after death has no remaining old-round opportunity. When none remain, close once. No full retarget/formation engine. Keep old single-opponent closure/draw answers unchanged. Actual pack size is bounded by C3 cap6 before evaluation, and all candidate policy/work counters are shared by the command.
+For actual loot, C1's fixed3 rusty hits can kill the HP8 primary through8→5→2→0,
+never leaving a live HP below2. Actual misses, dodge and due order still apply.
+After the whole pack closes, open each real public corpse and Take its original
+pelt; overload uses ordinary Drop/Put and immediate retry. A fled member's pelt
+never appears in another member's corpse. No Sell/skin/rare loot is introduced.
 
-**Intent precedence to adopt:** dead/retired/absent actors do nothing; eligible low-HP flight precedes that hound's attack; eligible assist/aggression precedes ordinary wander. Tie-break eligible hounds by stable identity, not file/insertion order. Aggression is content-declared, initially the chosen night policy from archived20–6, in explicitly hostile optional rooms. Low-HP flight is deterministic when a legal exit exists, no unselected flee probability; threshold is content25% if retained. A failed flight with no legal exit leaves the hound in combat and permits only its ordinary selected opportunity, never an unbounded retry loop. All production policies/numbers not yet selected are **null**.
+Prove lethal player loss → same-body chapel return → chapel_steps → north_gate →
+village_green → well_lane → ferry_landing → reed_path → reed_bank → actual death
+room (Hound Run or reachable Adder Nest) → owned corpse recovery. No hound engages
+during that return; ordinary nested/worn/overload recovery preserves real items.
+Player Flee retains standing/exit/fare checks and closes the whole occurrence
+without retaliation when admitted. Required rescue/bell routes never need this
+optional fight, gear, Flee, pelt, night or replacement.
 
-No hostile population/aggression on the only Reed Bank/Mire/Fox Hollow/chapel corpse corridor. Prefer exclude those rooms in C3/C4 authored bounds rather than invent a global invulnerability corridor. An existing modal scene cannot unexpectedly lose its escape controls: do not initiate new hostility while that consumer holds a safe/resumable modal scene. Ordinary details/dialogue do not pause time; entering combat suppresses pending choices and exposes the existing Combat/Flee controls. Do not make reading a secret time pause or teleport the actor out.
+## Composition, agent identity and scheduler boundary
 
-## Composition and ownership
+Follow [composition](../../system/architecture.md#building-mechanics-by-composition).
+**Consumer:** one exact attacked hound, its co-present plan mates and actual flight.
+**Reads:** command actor/body, exact C3 slot/generation/provenance/HP/custody,
+encounter active roster/primary/cursor/current job, legal adjacent area edges,
+posture/C1 eligibility and shared query/RNG/work budgets. **Writes:** checked
+encounter/job transition, actual attack HP/events, same-group flight custody and
+that member's last-flight slot clock, or fatal victim slot/corpse/pelt; player
+escape/death closes every active opponent. **Owners:** combat owns encounter,
+rotation/closure and due job; movement owns validated NPC flight; population owns
+fixed membership/replacement and its one job; death owns custody/return; proposal
+owns ordering/conflicts/causation; authority commits/adopts once; Book projects.
 
-**Reads:** exact live spawned IDs/plan membership, co-presence, posture, aggression time/policy, encounter membership/current job/cursor, HP fraction, legal area exits, shared RNG/work budget. **Writes:** one encounter opening/join/membership/cursor/primary transition, owned round job; selected attack HP/event/death; actual enemy containment transfer and encounter departure; player Flee's existing movement/closure. **Owners:** behavior produces a bounded deterministic intent; combat validates/owns encounter and opportunities; movement owns legal flight; population owns provenance; death owns custody/return; proposal owns ordered atomic composition and causal events; authority commits once. No behavior callback writes after COMMIT and no Book AI.
+Internal run_job binds the validated encounter CharacterId/body and each exact
+attacker/target EntityId; it never substitutes `world.character`, a definition's
+first instance, a slot's replacement generation or a template-name match. Helpers
+come only from the attacked hound's full pinned plan, at admission time. Pack
+membership grants no S1 credit. Only actual positive HP loss is evidence for any
+future C5 consumer; assistance/flight narration is insufficient.
 
-Extend the single-opponent encounter only enough to represent the selected pack set/current primary/opponent cursor, with explicit uniqueness, life/location and job-generation invariants. Do not open six simultaneous encounters on one body, loosen the existing participant guard globally, or mint a job per helper. Admission of aggression/assist must be registered authority-internal semantics; a player cannot forge an assist target or bypass Attack's standing/co-location checks. Aggression may target a co-present living resting/sleeping body if the adopted policy says so; it does not silently stand the victim. The first incoming hit still sees pre-hit posture, then ordinary wake/recovery/death settles.
+Use one encounter and current round job. Snapshot canonical eligible members once,
+initial primary/cursor = attacked ID. Lock one opponent per round; if killed/fled
+before its slot, skip it, then rotate next round. Missing/departed members prune
+without off-room hits; no refill from the population. Actor opportunities still
+re-read actual state; player death closes before revival. NPC flight reads legal
+area movement without using the player's stance, held key or MV as an animal
+resource. Shared budgets cover every candidate and the complete round.
 
-At each opportunity and hydrated proposal prefix, re-read life, room, current encounter/job and member selection. A helper killed by the player's earlier opportunity cannot attack. Joining/fleeing revalidates exact pack provenance and co-presence; off-room packmates neither teleport nor hit. Evaluate flee candidates through shared legal NPC movement/area/barrier semantics, with the declared animal cost policy; never charge the player's MV for a hound. A successful hound flight transfers once and leaves the encounter atomically, preserving HP, identity and its actual carried loot. It is not death/credit/loot. C3 wandering remains paused for participants. Stale member/round/wander jobs close/cancel harmlessly and share proposal-local budget/RNG. Player Flee moves the same player/Wren follower if applicable and closes the whole pack occurrence with no retaliation.
+The only population-state extension is nullable `last_flight_at` per existing slot.
+Set it on actual flight in the combat group; retain through death and reset only
+for new generation. C3 wander skips engaged members and a member whose flight
+clock equals this occurrence, avoiding same-deadline double transfer in either
+allocated job-ID order. Population writes no unchanged slot. No priority override,
+new cooldown, per-hound scheduler, history scan, duplicate roster ledger or
+cross-writer conflict exemption. Generic checked encounter/slot transition fields
+need both foundations' literal fixtures and differential proof; story logic stays
+TypeScript until its first server consumer.
 
-Likely files: hound behavior/settings/narration/area policy; small behavior intent arbitration and shared combat open/round/flee/saved helpers; encounter/job delta/schema/targets/invariants and both portable twins for generic supplements; proposal dispatch only if the current route requires it; content compiler/loader/generated contracts; real local-story validation and elapsed delivery; GameView/Book primary/opponent/detail projection. Out: hunts/pursuit across the map, ecology, Tobin combat, custom behavior trees, parry/criticals/multi-swing, special actions, bleeding, native/UI blur and generic NPC armies.
+Likely in scope: C3 plan pack/flight settings and text; minimum combat helpers,
+schedule skip query and current slot field; encounter/state/delta/job/invariant
+schemas and both foundations where generic semantics change; compiler/short-ref/
+loader/generated contracts; real local-story validation/fault/reopen tests;
+GameView and existing Book Combat projection/history. Inspect callers before any
+necessary proposal change. Out: C3 births/caps/wander algorithm/new rooms, C5,
+deer/crows, Tobin mortality, unsolicited aggression, pursuit, generic intent engine,
+NPC defense catalog, per-helper swings, native work, UI style/navigation redesign.
 
-## Literal acceptance and red controls
+## Independent literal acceptance and red controls
 
-Controlled fixture identities H1 < H2 < H3 and body P are fixed independently. Their chosen HP/profile inputs are test settings, not production tuning; freeze exact IDs/RNG answers after PM adopts the pack contract.
+Freeze independent valid fixture UUIDs with canonical H1 < H2 < H3 (up to H6),
+their paired pelts L1..L6, body P and plan A/B. These symbols denote test identities;
+production fresh IDs remain null. Use S0..S4 from the independent raw/state table
+linked above, zero controlled recovery, accuracy100/fixed damage1 on both sides,
+no defenses, playerHP10, each hound maximum/startHP8 and threshold25 unless a case
+states otherwise. Keep inputs distinct from production tuning. Expected results
+are literal, not computed by combat helpers or the other kernel.
 
-1. Same-room H1/P at an admitted night boundary opens **one** encounter with one job and no Attack-time damage/RNG. Co-present eligible H2 joins once. H3 off-room, foreign-plan, dead, retired or already engaged never joins. Reversing source/map insertion order gives the identical membership/primary/cursor/result. Red controls: remove co-presence/provenance or use insertion order; focused cases fail.
-2. With admitted members [H1,H2], both hounds live, fixed attacks/defenses off and RNG S0, odd round player accuracy100/fixed1 hits H1 (**S1**), H1's accuracy100/fixed1 hits P (**S2**). Next even round's selected opponent is H2: raw5927040 hits (**S3**), then player's next raw70819200 hits H1 (**S4**). Each hound supplied one opponent opportunity across two rounds; there were **four** accuracy draws, no extra helper/damage draws. Adopt/pin the starting cursor explicitly. A single-member old A/B/C stays byte-for-byte unchanged. Mutate per-helper opportunities, conditional draw count or round cursor.
-3. A player-first lethal hit to H1 leaves H1 unable to act; when H2 remains, the next selected member/primary is H2 under the adopted ordering and no corpse/revival grants another old opportunity. Fatal player loss closes the **whole** pack before return, with one corpse and no post-return hound hit. Mutate dead-member revalidation or whole-encounter closure.
-4. Controlled maximum HP8 and threshold25%: current HP2 is **not below** threshold; HP1 is below. With one legal area exit, H1 at HP1 moves once to that destination, keeps HP1/its exact pelt, leaves the old encounter and does no old-room attack or RNG. No legal exit means no transfer, no free escape and one normal opportunity at most. Red controls: `<=` threshold, off-room attack after flight, or omit the atomic departure.
-5. Player Flee with zero/one/two legal exits retains existing literal refusal/deterministic/random behavior, shared policy-query and raw-draw budgets, one fare and no retaliation from any helper. Refused/overflowing/budget-exhausted proposal adopts none of the joins, transfers, HP/RNG/jobs. Plant a reset-per-candidate budget mutation if existing shared-budget regression does not already cover the new route.
-6. Actual hounds can aggro/assist/flee through Book; Flee remains visible during ordinary open detail/choice and a clock redraw does not resurrect a stale target. Execute actual lethal pack fight → chapel → safe route → exact owned corpse recovery, with forced overload/nested/worn roots intact. Run the Wren rescue journey through its mandatory corridor at **20:00**, **23:00** and **06:00** without unavoidable aggression. Mutate corridor eligibility and observe the recovery journey fail.
+Each new test names its plausible break. Apply its mutant to the old focused
+same-layer suite first and add only a missing regression; actually observe each
+claimed new guard fail, restore it and rerun. Reuse C1 defense/Flee and C3
+spawn/slot/death tests rather than duplicating their breaks.
 
-## Save/review and stop trigger
+1. **Helper selection aliases a template or accepts remote members:** Attack H2
+   at clock0 with H1/H2 co-present A members admits roster[H1,H2], primaryH2,
+   cursorH2, one pending job due5, unchanged HP/S0 and original pelts. H3 in the
+   other room, foreign B member, dead/retired or already engaged never joins.
+   A later entrant does not join. Reverse insertion order: identical active
+   identities/primary/cursor. Remove exact-plan/co-presence/generation/engagement
+   validation separately, or choose a template's first instance, and observe the
+   relevant literal case fail. Entry/reading/night alone opens zero encounters.
+2. **Assistance gives extra swings or never reaches a helper:** Attack H1 at0
+   admits[H1,H2], primary/cursorH1, due5. Round1: player hits H1 with raw11520,
+   H1 hits P with raw0; P9/H1=7/H2=8, S2, nextH2, due10. Round2: H2 hits P
+   with raw5927040, player hits H1 with raw70819200; P8/H1=6/H2=8, S4,
+   nextH1, due15. Exactly four accuracy draws and two real distinct NPC attackers.
+   Six-member pure round fixture with resting P/HP10 and zero recovery selects
+   H1,H2,H3,H4,H5,H6 then H1, one enemy opportunity each: final P3/all hounds8,
+   exactly seven incoming results, no player result or flight. Mutate per-helper attacks,
+   skipped rotation or insertion selection; require failure. Old non-pack
+   no-defense A/B/C keeps literal answers.
+3. **Dead selection inherits a helper strike or revived player is hit:** start
+   round1 with H1HP1/H2HP8, selected/primaryH1 and S0. Player kills H1: P10,
+   H1=0/H2=8, S1, same L1 in one H1 corpse, active[H2], primary/nextH2,
+   next job due10; H2 does not strike in the lost H1 slot. For even round2 start
+   playerHP1 standing, H1/H2HP8, selectedH2, S0: H2 kills P, S1, one owned
+   corpse, closed empty encounter/no successor, restored authored HP/MV/body
+   at chapel and no player/H1 opportunity. Pin actual restore values from the
+   integrated predecessor independently. Plant slot substitution or omitted
+   whole-pack closure. A slot replacement never joins an old occurrence.
+4. **Threshold equality flees or flight grants phantom loot:** with nonstanding
+   sitting P (no player draw), H1HP2/max8 selected in round1, it does not flee:
+   H1 stays2, P9, S1. With HP1, one legal area edge Hound Run east→Adder Nest:
+   P10, H1=1 at nest holding L1, S0, slot last-flight5, empty closed encounter,
+   no successor/corpse/credit. With two legal area exits in a small controlled
+   route, choose canonical direction first, no RNG. With no legal exit,
+   H1 remainsHP1/home holding L1, P9/S1, nextH1/due10, last-flight null.
+   Mutate `<` to `<=`, bypass a barrier/area, charge P's MV, allocate a corpse,
+   drop L1, or attack after flight; each applicable focused break must fail.
+5. **Equal-time population wander undoes flight or repeats a custody write:**
+   controlled six-live A at200, wander10/delay240/calendar24×10, H1HP2/max8,
+   H2–H6HP8, all co-present at home, zero recovery, fixed1/accuracy100, interval5.
+   Attack H1 at205 admits all six. Round210 and A population210 must both commit
+   in either actual allocated job-ID order. H1 flies to nest with L1/HP1, P10/S1,
+   active[H2,H3,H4,H5,H6] remain home, primary/nextH2, next round215. All six
+   original generations/pelts persist, slot1 last-flight210, other last-flight
+   values null, no replacement/corpse; control has one successor due220.
+   At a strictly later wander boundary, unengaged H1 may move normally. Use two
+   frozen valid lineage/command inputs producing opposite allocated job orders,
+   not forged IDs. Cold reopen/exact receipt retry preserves the answer. Remove
+   same-clock skip: combat-first must expose the wrong move/conflict and fail;
+   remove engagement skip: population-first must fail. Independently valid two
+   different-group same-slot writes still return `conflicting_write` with target
+   `{kind: population_slot, plan: A, slot: 1}` and no adopted changes. Include
+   this boundary in real failed and both unknown COMMIT controls.
+6. **Stale jobs/absence/budgets silently change world:** reopen lawful H1 departure
+   before round1/due5 with roster[H1,H2], primary/cursorH1 and S0. Prune H1,
+   select H2: P9/H2=7/S2, primary/nextH2, successor10, no H1 attack/draw. If all
+   members departed, P10/S0, closed empty roster/no successor. Cancelled/old
+   occurrence replay changes nothing: zero moves/draws/admissions. A shared
+   query-budget exhaustion across enemy exits and an eight-raw-draw round
+   exhaustion adopt no HP/RNG,
+   flight slot/custody/encounter/job changes. Reuse existing controlled budget
+   failures where they exercise this path; otherwise independently pin rejection/
+   defense inputs and plant per-candidate/per-helper resets. Player Flee's zero/
+   one/multiple-exit controls now assert whole roster closure/no retaliation,
+   not changed selection or fare formulas.
+7. **Saved membership/flight proof is forged or COMMIT splits state:** real
+   SQLite cold-open after admission, both selected-member rounds, primary death/
+   reselection, flight, lawful departure, final withdrawal, whole-pack Flee/death
+   and equal-time orders. Independently mutate duplicate/foreign admitted ID,
+   primary/cursor outside roster, mismatched character/body/job/round, wrong
+   flight clock/slot/member/generation/receipt cause/correlation or custody one
+   at a time: typed `save_corrupt`, unchanged bytes. Lawful later wander/death/
+   replacement/Take retains historical proof; an absent/dead member with valid
+   intervening evidence awaits due pruning rather than being falsely corrupt.
+   Real failed COMMIT, unknown-not-committed, unknown-committed and lost
+   acknowledgement yield complete all-old/all-new rows plus receipt; fenced
+   retry re-admits/rotates/transfers/draws nothing twice. Remove binding/atomic
+   flight persistence as red controls. Exact release mismatch refuses with no
+   deletion or automatic Start over.
+8. **Book hides escape or substitutes a corpse/instance:** execute real C1 lesson
+   → C3 adjacent Scan → exact Attack → distinct helper attacks → wounded flight,
+   whole-pack Flee, lethal loss/owned worn/nested/overload recovery, and rusty-sword
+   real corpse/Take. Repeat chapter-required rescue/bell route and hound-room corpse
+   return at calendar19:59,20:00,23:00,06:00 with zero unsolicited engagement.
+   Preserve current Combat actions/primary, once-only committed Combat history,
+   and pending/fault/refusal honesty across reload. Plant automatic night Attack,
+   stale detail target substitution or missing whole-pack close and require the
+   focused journey to fail. Browser proof does not certify native/SQLite faults.
 
-Cold-open one/two/six-member admission, joined helper, primary death/reselection, enemy flight, player Flee/death and stale due-job boundaries. Lawful enemy departure before a pending round must load and settle harmlessly; missing co-presence does not automatically mean a corrupt historical encounter. Validate row shape, unique/proven members, current primary/cursor/job and legal life/location states; impossible/null/forged rows return typed `save_corrupt`. Lost acknowledgement and real failed/both uncertain COMMIT outcomes retain all old/all new pack membership, custody, HP/RNG/jobs/receipt; never re-admit helpers or roll again on replay.
+## Checks, review and scope triggers
 
-Run focused pack/intent/Flee/death/content/portable-schema/Book/real SQLite tests, schema sweep and normal shared full gate. Actual Ponytail/correctness pass, fresh primary plus protocol/save/foundation opinion (Astra for proposal), scoped fixes and exact-head CI precede merge. The headless TypeScript sim remains correctness evidence; browser interaction is separate; native checks defer under reviewed owner policy.
+Focused source checks: compiler/loader/short refs/schema generation and required/
+bound mutants; both checked transition/creation/composition twins and differential;
+pack/rotation/flight/population equality/clock/combat/death/Flee/action/view tests;
+real SQLite saved-state binding/reopen/failed/both-unknown/lost-ack/receipt suites;
+changed Book/browser interaction. Keep simulator enabled and run appropriate
+regression seeds. Use the pinned `mise exec --` toolchain and task-local writable
+mise state. The provisional lane runs focused checks first; full active
+`bin/check_all.sh` and planted controls run at accumulated publication via the
+normal hook. Report exact commands/exits and red failures, never claim proof here.
+Fresh primary and separate protocol/save/foundation review are required for source;
+Astra audits `runtime/proposal.ts` if touched. Docs-only plan gets one fresh short
+independent review. No implementation, merge, push or native action in this task.
 
-**Stop trigger:** unresolved pack initiative/budget/cost policy, unmerged C3/C1 pins, need to grant per-NPC budgets, duplicate player/HP writers, allow off-room attacks or invent pursuit, break old single-rat oracles, hide Flee behind modal choices, or strand the sole rescue/corpse route. Ship actual assistance and flight together with their persisted membership, not UI claims over one-opponent code.
+Stop/escalate unresolved C1/C3 predecessor/release order, unplanned automatic
+hostility/late joining/pursuit/per-helper swings, new jobs/framework, failure to
+accept a lawful saved prefix or reconcile whole flight/encounter state, same-time
+writer collisions, unbounded historical scans, or a required journey/owned recovery
+needing a time/gear/loot gate. Split only if the actual footprint exceeds one
+complete bounded pack/flight outcome; never split by kernel/content/presenter.
 
-Planning self-review: applied Ponytail and checked this proposed boundary for correctness. Reuses existing ownership/transactions; no new dependencies or general framework are requested. Production decisions and future source pins remain explicit gates above. This is author self-review only; independent publication/implementation review remains required.
+Planning Ponytail Review: one encounter/job and C3 slots cover the concrete consumer;
+no behavior engine, spawning duplicate, corpse-immunity mechanism or new dependency.
+Correctness self-review checked selected-member death, primary/cursor repair,
+same-clock flight/wander, strict threshold, pelt custody, whole-pack closure and
+lawful cold states. This is author review, not independent approval or executed proof.

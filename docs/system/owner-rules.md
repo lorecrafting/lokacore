@@ -111,6 +111,8 @@ and not repeated here.
 
 ## Architecture and engine
 
+- C4 selects deliberate-aggression response, one rotating same-plan opponent opportunity and strict wounded flight; unsolicited night hostility is deferred ([PM selection](../decisions/pm-decision-c4-hound-behavior-2026-10-05.md)).
+
 - C3 living hounds have a [selected PM contract](../decisions/pm-decision-c3-living-hounds-2026-10-05.md) under mechanics delegation; implementation and independent proof remain ahead.
 
 - LegendMUD is the mechanical planning baseline; reconcile existing plans and verify the applicable

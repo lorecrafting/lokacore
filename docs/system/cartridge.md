@@ -911,6 +911,37 @@ S1 credits retain their declared consumer. Future deer/crows, bell disable and C
 must amend their actual additional contracts. Successor release/API/hash/fresh IDs
 remain null until the reviewed integrated predecessor is known.
 
+## C4 pack response and wounded flight
+
+**Selected, pending implementation.** [C4](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+opts the existing C3 `fen_hounds` plan into same-plan, admission-time pack assistance
+and strict below25% HP flight. These are cartridge declarations, not template-name
+checks or engine/presenter world constants. Enemy flight has zero fare, chooses
+the first canonical legal direction without RNG, and remains within Hound Run and
+Adder Nest. Reuse C3's cap6, HP8 and attack profile; do not add spawns, population
+jobs, slots, routes or loot. Exact same-generation slot `last_flight_at` belongs
+to the [transition contract](protocol.md#c4-pack-encounter-and-flight-composition).
+
+Compiler/loader validate the plan's pack/flight declarations and correct-kind
+refs, integer percentage1..100 with positive HP maximum, declared zero animal
+fare, bounded unique connected area and registered committed narration for helper
+admission, enemy flight, primary change and final withdrawal. Unknown or malformed
+fields refuse. Hounds cannot cross the existing west edge into Reed Bank when
+fleeing: it is outside their declared area. No gate can be bypassed and no player
+key is spent on an animal's behalf. With no legal area exit the selected hound
+retains its ordinary attack opportunity; no retry loop is authored.
+
+Deliberate Attack alone begins hostility, at every hour. The archived aggressive
+night rule and provisional unsolicited night initiation are deferred explicitly.
+Required Reed Bank/Mire/Fox Hollow routes and actual corpse recovery are safe even
+inside the optional hound rooms unless the player elects another Attack. No corpse
+immunity flag, temporary safe mode, extra return action or night wait is needed.
+C1's taught rusty sword can kill HP8 through successful fixed3 hits (8→5→2→0),
+without crossing the strict below25% live flight threshold; misses/defenses retain
+their actual resolver semantics. No weapon/loot is required by the main story.
+C4 successor release/API/hash/fresh IDs remain null until integrated C1/C3 source
+and intervening shared release edits are reviewed and independently re-pinned.
+
 ## B8 Maud's service declarations
 
 The [selected services](mechanics.md#b8-mauds-immediate-services-selected-contract)

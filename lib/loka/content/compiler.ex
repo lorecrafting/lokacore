@@ -39,22 +39,24 @@ defmodule Loka.Content.Compiler do
   defp split(lists), do: lists |> Enum.concat() |> Enum.split_with(&(&1["severity"] == "warning"))
 
   defp checks(manifest, defs, v2, located, registry) do
-    Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs) ++
-      Resources.check(manifest, defs, v2, located, registry) ++
-      Entities.carry(manifest, defs, located) ++
-      Loka.Content.Fuel.check(manifest, defs) ++
-      Loka.Content.Commerce.check(manifest, defs) ++
-      Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
-      Loka.Content.Death.check(manifest, defs, located) ++
-      Loka.Content.Combat.check(manifest, defs, located, v2) ++
-      Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry) ++
-      Checks.rooms(manifest, defs, v2, registry) ++
-      Recipes.check(manifest, defs, v2, registry) ++
-      Quests.check(manifest, defs, v2, registry) ++
-      Reactions.check(manifest, defs, v2, registry) ++
-      Dialogues.check(manifest, defs, v2, located, registry) ++
-      Links.check(defs, v2) ++
+    Enum.concat([
+      Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs),
+      Resources.check(manifest, defs, v2, located, registry),
+      Entities.carry(manifest, defs, located),
+      Loka.Content.Fuel.check(manifest, defs),
+      Loka.Content.Commerce.check(manifest, defs),
+      Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
+      Loka.Content.Death.check(manifest, defs, located),
+      Loka.Content.Combat.check(manifest, defs, located, v2),
+      Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
+      Checks.rooms(manifest, defs, v2, registry),
+      Recipes.check(manifest, defs, v2, registry),
+      Quests.check(manifest, defs, v2, registry),
+      Reactions.check(manifest, defs, v2, registry),
+      Dialogues.check(manifest, defs, v2, located, registry),
+      Links.check(defs, v2),
       final_checks(manifest, defs, v2, registry)
+    ])
   end
 
   defp final_checks(manifest, defs, v2, registry),

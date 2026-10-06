@@ -798,6 +798,47 @@ proposal, conflicts, shared work counters and changed-row transaction. No public
 spawn action, per-hound job, global ecology service or unbounded history scan is
 required. New schemas get invalid fixtures and required/bound mutant sweeps.
 
+## C4 pack encounter and flight composition
+
+**Selected, pending implementation.** [C4 mechanics](mechanics.md#c4-hound-response-pack-assistance-and-flight-selected-contract)
+adds only bounded active opponent IDs, primary and next-opponent ID to the owned
+encounter transition. Each write checks the complete prior encounter row, current
+job/round and exact character/body/room. Active IDs are unique, canonically ordered,
+bounded before iteration and proven current members of the same full plan ref;
+primary/cursor belong to that roster while open. Closed encounters have no active
+participants or pending round. A member cannot belong to two open encounters.
+This is combat-owned internal admission during Attack/run_job, never a public
+assist/damage verb or a player-forgeable behavior intent. Ordinary non-pack NPC
+admission remains one opponent. Generic state/delta/precondition changes require
+both portable twins, independent literal fixtures, then differential proof.
+
+For this actual scheduler seam, extend each separately targeted C3 slot with
+nullable `last_flight_at`, initially null and reset to null only on a new generation.
+A successful selected flight sets it to this occurrence's logical clock, checking
+the exact plan/slot/generation/member and complete prior row. Fatal slot transitions
+retain that generation's value. Population dispatch skips a living member when
+it is engaged or its last flight equals that dispatch clock. It writes no unchanged
+slot. The timestamp prevents combat-first flight followed by same-boundary wander
+from moving one hound twice or causing a cross-group custody conflict; it is not
+a cooldown, mirrored membership list or historical encounter scan.
+
+Canonical `(due_time, job_id)` order and separate groups remain. Population-first
+skips the still-engaged hound; combat-first records the same-clock flight so the
+later population group skips it. Both permit only other unengaged members' ordinary
+wander and one control successor. Flight writes its own slot/custody/encounter in
+the combat group; population writes separate control and actual birth/replacement
+slots. Same-slot or same-custody different-group writes still fault
+`conflicting_write`; no priority rewrite, group merging or conflict exemption.
+At a strictly later wander boundary an unengaged survivor may move normally.
+
+Combat owns admission/rotation/removal/closure and its job; movement owns validated
+flight; population owns slot provenance and its own job; death owns corpse/custody;
+proposal retains atomic conflicts, event causation and shared command budgets;
+authority alone commits changed rows plus the receipt. Flight/departure/primary
+narration binds actual runtime IDs and committed room/membership changes. Stale or
+cancelled round occurrences never move, hit, draw or revive membership. No new
+per-hound job, whole-state copy, receipt ledger or actor assumption is introduced.
+
 ## B8 immediate service composition
 
 **Selected, pending implementation.** A service invocation binds actor, exact

@@ -708,6 +708,41 @@ mismatched release pins refuse explicitly; only explicit Start over replaces the
 save. No save migration, periodic checkpoint or second population receipt ledger
 is selected. Browser reload/Book evidence is distinct from real SQLite faults.
 
+## C4 pack and flight recovery
+
+**Selected, pending implementation.** [C4](protocol.md#c4-pack-encounter-and-flight-composition)
+persists the encounter's exact active roster/primary/cursor/job, selected attacks,
+HP/RNG/death, enemy movement and per-slot last-flight clock with ordinary changed
+rows, head and receipt in one transaction. Reopen validates current pin, complete
+prior/result transitions and causal Attack/run_job/flight/death evidence; replay
+never re-admits helpers, rotates again, transfers a pelt or rolls again.
+
+Validate bounded unique same-plan current-generation IDs, original attacked
+primary/admission evidence, current primary/cursor membership and exact current
+job/round/due relation. Bind flight to the selected living hound, actual departure
+room/legal edge, threshold, slot generation and occurrence clock; later legitimate
+wandering, death, replacement and pelt Take do not invalidate historical flight.
+`last_flight_at` is null or a proven flight clock not greater than the saved clock,
+not a freely forgeable timestamp. Old HP0 victims remain valid historical corpse
+identities after C3 replacement; no loader heals, moves, deletes or repairs them.
+
+Accept lawful partial states after Attack, each helper's turn, primary death/
+reselection, successful or blocked flight, final withdrawal and whole-pack player
+Flee/death. A member may lawfully be absent before a pending round through another
+registered movement consumer; as in installed combat, validate its actual legal
+custody and evidence rather than require historical co-presence forever. The next
+round prunes it without remote attack, repairs selection and closes when empty.
+Unknown/malformed membership, forged flight/primary/cursor/slot/job or missing
+receipt linkage is typed `save_corrupt` without rewriting bytes.
+
+At equal flight/population deadlines, retain and reopen either lawful allocated
+job-ID order, including the same-clock wander suppression. Real failed COMMIT,
+unknown-not-committed, unknown-committed and lost acknowledgement reconcile the
+complete prior or next encounter, flight clock, custody, slots/control, HP/RNG,
+jobs, head and receipt. Fence input and elapsed until resolved. Pin mismatch is
+explicit refusal, with no silent deletion or compatibility adapter. Browser Book
+reload remains separate from real SQLite transaction/fault evidence.
+
 ## B8 service recovery
 
 **Selected, source pending.** [B8](mechanics.md#b8-mauds-immediate-services-selected-contract)
