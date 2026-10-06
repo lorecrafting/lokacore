@@ -39,3 +39,5 @@ Follow [the workflow](../../WORKFLOW.md): developer works in its own branch/work
 [Provisional source and red-control evidence](../../evidence/2026-10-06-d1-ferry-isle/README.md); publication proof and final successor pins remain pending PM integration.
 
 [Final integrated source proof](../../evidence/2026-10-06-d1-ferry-isle-publication/README.md) pins the local successor; hosted review/CI/publication remain pending.
+
+[TypeScript CI portability correction](../../evidence/2026-10-06-d1-ci-portability/README.md) retains the original hosted failure and controlled authored-source red/green proof.
