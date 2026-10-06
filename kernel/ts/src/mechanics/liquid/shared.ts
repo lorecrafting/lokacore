@@ -119,17 +119,25 @@ function fillPlan(
   return { ops: [change(world, p.vessel_id, kind, add(from.quantity, quantity))], kind, quantity };
 }
 
+/** Exact serving arithmetic shared with provider-owned services; custody stays with each consumer. */
+export function serving(world: World, source: EntityId, kind: DefinitionRef) {
+  const from = world.state.liquids?.[source];
+  if (!liquidRowValid(from, world.liquidSpecs[source])) return 'precondition_failed' as const;
+  if (!from?.kind || !same(from.kind, kind)) return 'invalid_state' as const;
+  const quantity = world.cartridge.liquids?.[refString(kind)]?.drink_amount ?? 0;
+  if (!Number.isSafeInteger(quantity) || quantity <= 0 || quantity > 2147483647)
+    return 'precondition_failed' as const;
+  if (from.quantity < quantity) return 'invalid_state' as const;
+  return { ops: [change(world, source, kind, sub(from.quantity, quantity))], kind, quantity };
+}
+
 function consumePlan(world: World, p: Extract<Payload, { type: 'drink' | 'pour' }>) {
   const source = p.type === 'drink' ? p.vessel_id : p.source_id;
   const from = world.state.liquids![source];
   if (!from.kind) return 'invalid_state' as const;
   const kind = from.kind;
   if (p.type === 'drink') {
-    const quantity = world.cartridge.liquids?.[refString(kind)]?.drink_amount ?? 0;
-    if (!Number.isSafeInteger(quantity) || quantity <= 0 || quantity > 2147483647)
-      return 'precondition_failed' as const;
-    if (from.quantity < quantity) return 'invalid_state' as const;
-    return { ops: [change(world, source, kind, sub(from.quantity, quantity))], kind, quantity };
+    return serving(world, source, kind);
   }
   const receiver = world.state.liquids![p.receiver_id];
   if (source === p.receiver_id || (receiver.kind && !same(kind, receiver.kind)))

@@ -51,7 +51,7 @@ export function assigned<R extends Assigned>(
   actor: CharacterId,
   r: R,
   s: { readonly fact: DefinitionRef; readonly value: FactValue },
-  owner?: 'skills' | 'patrol',
+  owner?: 'skills' | 'patrol' | 'service',
 ): R {
   if (
     owner !== 'skills' &&
@@ -62,6 +62,13 @@ export function assigned<R extends Assigned>(
     owner !== 'patrol' &&
     Object.values(world.cartridge.quests ?? {}).some(
       (q) => q.patrol && same(q.patrol.trust_fact, s.fact),
+    )
+  )
+    throw new KernelError('precondition_failed');
+  if (
+    owner !== 'service' &&
+    Object.values(world.cartridge.services ?? {}).some(
+      (service) => service.benefit.kind === 'entitlement' && same(service.benefit.fact, s.fact),
     )
   )
     throw new KernelError('precondition_failed');

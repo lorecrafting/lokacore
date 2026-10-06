@@ -1,3 +1,6 @@
+import { value } from '../mechanics/fact.ts';
+import { resolved, refusal } from '../commands/actions.ts';
+import { positionOf } from '../mechanics/position/shared.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { selected } from '../mechanics/containment/stock.ts';
 import type { AdvertisedAction, EntityId, NoticeBoardView } from '../contracts.gen.ts';
@@ -15,26 +18,16 @@ export function noticeViews(
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
     detail.room === here &&
     visible(world, world.character, id, steps) &&
-    (detail.readable || detail.harvest || detail.perception) &&
+    (detail.readable || detail.harvest || detail.perception || detail.bed) &&
     !grouped.has(id as EntityId)
       ? [
           {
             id: id as EntityId,
             title: detailTitle(detail),
-            ...(detail.harvest && {
-              remaining: (() => {
-                const ids = selected(
-                  world,
-                  detail.harvest.items,
-                  here,
-                  detail.harvest.items.length,
-                  { n: 0 },
-                );
-                return typeof ids === 'string' ? 0 : ids.length;
-              })(),
-            }),
+            ...harvestRemaining(world, detail, here),
             description: description_variant.describe(world, world.character, detail, steps),
-            ...offered(actions(id)),
+            ...(detail.bed && { bed: true as const }),
+            ...offered(detail.bed ? bedActions(world, detail, steps) : actions(id)),
           },
         ]
       : [],
@@ -43,6 +36,12 @@ export function noticeViews(
     ...(boards.length > 0 && { notice_boards: boards }),
     ...(notices.length > 0 && { notices }),
   };
+}
+
+function harvestRemaining(world: World, detail: World['details'][string], here: EntityId) {
+  if (!detail.harvest) return {};
+  const ids = selected(world, detail.harvest.items, here, detail.harvest.items.length, { n: 0 });
+  return { remaining: typeof ids === 'string' ? 0 : ids.length };
 }
 
 // Membership is compiler/loader-validated; the current room has at most 64 details.
@@ -83,7 +82,35 @@ function noticeBoards(
 const offered = (actions: AdvertisedAction[]) => (actions.length ? { actions } : {});
 
 const detailTitle = (detail: World['details'][string]) =>
+  detail.bed?.title ??
   detail.harvest?.title ??
   detail.perception?.title ??
   detail.readable!.title ??
   detail.readable!.label;
+
+function bedActions(
+  world: World,
+  detail: World['details'][string],
+  steps: Steps,
+): AdvertisedAction[] {
+  if (!detail.bed || value(world, world.character, detail.bed.entitlement) !== true) return [];
+  const p = { type: 'rest', actor_id: world.character } as const;
+  return Object.values(resolved(world, world.character))
+    .filter((a) => a.command === 'rest')
+    .map((a) => {
+      const code =
+        refusal(world, p, steps, a.key) ??
+        (positionOf(world, world.character) === 'resting' ? ('invalid_state' as const) : undefined);
+      const offer = {
+        action_key: a.key,
+        command: a.command,
+        label: a.label,
+        target: a.target,
+        input: a.input,
+        target_ids: [],
+      };
+      return typeof code === 'string'
+        ? { ...offer, available: false, reason: { code } }
+        : { ...offer, available: true };
+    });
+}

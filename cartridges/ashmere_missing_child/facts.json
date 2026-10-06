@@ -321,6 +321,17 @@
         "player"
       ],
       "meaning": "The actor learned the ward topic."
+    },
+    "lantern_bed_paid": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player paid Maud for the Inn Rooms bed in this lineage."
     }
   }
 }

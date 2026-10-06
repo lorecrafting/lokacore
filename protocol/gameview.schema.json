@@ -470,6 +470,12 @@
         },
         "liquid": {
           "$ref": "liquid.schema.json#/$defs/LiquidView"
+        },
+        "services": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ServiceOffer"
+          }
         }
       },
       "additionalProperties": false,
@@ -1785,6 +1791,9 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 64
+        },
+        "bed": {
+          "const": true
         }
       },
       "required": [
@@ -2040,6 +2049,77 @@
             "key": "str"
           },
           "value": 9
+        }
+      ]
+    },
+    "ServiceOffer": {
+      "type": "object",
+      "properties": {
+        "service": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "benefit": {
+          "$ref": "service.schema.json#/$defs/ServiceBenefit"
+        },
+        "action": {
+          "$ref": "#/$defs/AdvertisedAction"
+        }
+      },
+      "required": [
+        "service",
+        "label",
+        "price",
+        "benefit",
+        "action"
+      ],
+      "additionalProperties": false,
+      "description": "Current exact keyed provider quote, declared capped benefit and shared availability; no reservation.",
+      "examples": [
+        {
+          "service": {
+            "cartridge_id": "service_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "service",
+            "key": "room"
+          },
+          "label": "service.room",
+          "price": 3,
+          "benefit": {
+            "kind": "entitlement",
+            "fact": {
+              "cartridge_id": "service_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "paid"
+            }
+          },
+          "action": {
+            "available": true,
+            "action_key": "rent_room",
+            "command": "use_service",
+            "label": "service.room",
+            "target": {
+              "kind": "entity",
+              "scopes": [
+                "room_occupants"
+              ]
+            },
+            "input": [
+              "service",
+              "quoted_price"
+            ],
+            "target_ids": [
+              "11111111-2222-4333-8444-555555555555"
+            ]
+          }
         }
       ]
     }

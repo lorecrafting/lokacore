@@ -1,0 +1,252 @@
+omitted payment
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (88.188042ms)
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (35.361458ms)
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (246.908417ms)
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (90.964625ms)
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (103.71025ms)
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (300.839292ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:25:1
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (88.188042ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (35.361458ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:104:1
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (246.908417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:288:1
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (90.964625ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:337:1
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (103.71025ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:402:1
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (300.839292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+omitted meal stock
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (119.198375ms)
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (37.714375ms)
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (368.858167ms)
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (211.055625ms)
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (359.5025ms)
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (346.548709ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:25:1
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (119.198375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (37.714375ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at mobile/authority/local-story/service.test.ts:104:1
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (368.858167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:155:1
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (211.055625ms)
+  AssertionError [ERR_ASSERTION]: meals
+test at mobile/authority/local-story/service.test.ts:288:1
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (359.5025ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:402:1
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (346.548709ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+wrong bound service
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (113.010042ms)
+✖ service refusal rolls back every row and respects exact provider, quote and complete serving (776.983958ms)
+✖ loaded differently named service keys project exactly the captured invocation admission (53.703292ms)
+✖ old-rate elapsed settlement precedes meal and actual targetless bed Rest (52.934958ms)
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (55.533542ms)
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (342.124417ms)
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (107.24625ms)
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (332.34ms)
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (122.201ms)
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (206.209291ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:25:1
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (113.010042ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:66:1
+✖ service refusal rolls back every row and respects exact provider, quote and complete serving (776.983958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:161:1
+✖ loaded differently named service keys project exactly the captured invocation admission (53.703292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:203:1
+✖ old-rate elapsed settlement precedes meal and actual targetless bed Rest (52.934958ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (55.533542ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at mobile/authority/local-story/service.test.ts:104:1
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (342.124417ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"saved","replay":false,"revision":1,"decision":{"kind":"rejected","error":{"code":"invalid_state"}}}
+test at mobile/authority/local-story/service.test.ts:155:1
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (107.24625ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"saved","replay":false,"revision":1,"decision":{"kind":"rejected","error":{"code":"invalid_state"}}}
+test at mobile/authority/local-story/service.test.ts:288:1
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (332.34ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:337:1
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (122.201ms)
+test at mobile/authority/local-story/service.test.ts:402:1
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (206.209291ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"saved","replay":false,"revision":3,"decision":{"kind":"rejected","error":{"code":"invalid_state"}}}
+bypassed keyed view admission
+✖ loaded differently named service keys project exactly the captured invocation admission (103.120833ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:161:1
+✖ loaded differently named service keys project exactly the captured invocation admission (103.120833ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+Book key equals command filter
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (101.287584ms)
+✖ failing tests:
+test at mobile/authority/local-story/service.test.ts:337:1
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (101.287584ms)
+omitted service-only history guard
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (873.746583ms)
+✖ failing tests:
+test at mobile/authority/local-story/service.test.ts:155:1
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (873.746583ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+free entitlement writer
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (42.287333ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (42.287333ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+loader accepts regenerating service stock
+✖ loader refuses service bindings that cannot produce exact immediate outcomes (228.6975ms)
+✖ failing tests:
+test at kernel/ts/test/cartridge_services.test.ts:13:1
+✖ loader refuses service bindings that cannot produce exact immediate outcomes (228.6975ms)
+  AssertionError [ERR_ASSERTION]: regenerating stock
+compiler accepts regenerating service stock
+Result: 0/1 passed
+Failed: 1 test
+
+Final published-predecessor rerun at source 8fad8501, predecessor cb7fbc1c:
+omitted payment
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (88.414792ms)
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (35.663167ms)
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (237.138417ms)
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (78.859208ms)
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (95.87675ms)
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (278.615791ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:25:1
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (88.414792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (35.663167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:104:1
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (237.138417ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:288:1
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (78.859208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:337:1
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (95.87675ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:402:1
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (278.615791ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+omitted meal stock
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (89.191083ms)
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (38.564959ms)
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (278.025292ms)
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (181.569458ms)
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (322.005792ms)
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (355.221458ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:25:1
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (89.191083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (38.564959ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at mobile/authority/local-story/service.test.ts:104:1
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (278.025292ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:155:1
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (181.569458ms)
+  AssertionError [ERR_ASSERTION]: meals
+test at mobile/authority/local-story/service.test.ts:288:1
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (322.005792ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:402:1
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (355.221458ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+wrong bound service
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (108.891416ms)
+✖ service refusal rolls back every row and respects exact provider, quote and complete serving (745.4595ms)
+✖ loaded differently named service keys project exactly the captured invocation admission (61.249ms)
+✖ old-rate elapsed settlement precedes meal and actual targetless bed Rest (53.590084ms)
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (43.685458ms)
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (308.373667ms)
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (109.608583ms)
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (337.182208ms)
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (128.467125ms)
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (201.2265ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:25:1
+✖ literal room/meal/ale outcomes conserve exact money, stock and capped MV (108.891416ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:66:1
+✖ service refusal rolls back every row and respects exact provider, quote and complete serving (745.4595ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:161:1
+✖ loaded differently named service keys project exactly the captured invocation admission (61.249ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:203:1
+✖ old-rate elapsed settlement precedes meal and actual targetless bed Rest (53.590084ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (43.685458ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+test at mobile/authority/local-story/service.test.ts:104:1
+✖ room-before-Rest, meal, partial/empty ale reopen and exact retries preserve the next real consumer (308.373667ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"saved","replay":false,"revision":1,"decision":{"kind":"rejected","error":{"code":"invalid_state"}}}
+test at mobile/authority/local-story/service.test.ts:155:1
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (109.608583ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"saved","replay":false,"revision":1,"decision":{"kind":"rejected","error":{"code":"invalid_state"}}}
+test at mobile/authority/local-story/service.test.ts:288:1
+✖ real failed COMMIT and both uncertain outcomes keep room/meal/ale all old or all new (337.182208ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+test at mobile/authority/local-story/service.test.ts:337:1
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (128.467125ms)
+test at mobile/authority/local-story/service.test.ts:402:1
+✖ S1 remains reachable beside services and same-body fatal return reopens the paid bed truth (201.2265ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"saved","replay":false,"revision":3,"decision":{"kind":"rejected","error":{"code":"invalid_state"}}}
+bypassed keyed view admission
+✖ loaded differently named service keys project exactly the captured invocation admission (99.562084ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:161:1
+✖ loaded differently named service keys project exactly the captured invocation admission (99.562084ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+Book key equals command filter
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (73.799541ms)
+✖ failing tests:
+test at mobile/authority/local-story/service.test.ts:337:1
+✖ real Book captured alias press and lost acknowledgement restore one original-Maud line (73.799541ms)
+omitted service-only history guard
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (968.052167ms)
+✖ failing tests:
+test at mobile/authority/local-story/service.test.ts:155:1
+✖ forged bounded service rows and swapped/omitted historical service evidence refuse without repair (968.052167ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+free entitlement writer
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (35.191333ms)
+✖ failing tests:
+test at kernel/ts/test/service.test.ts:260:1
+✖ bound second provider pays and consumes its own stock; only service can assign entitlement (35.191333ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+loader accepts regenerating service stock
+✖ loader refuses service bindings that cannot produce exact immediate outcomes (206.034ms)
+✖ failing tests:
+test at kernel/ts/test/cartridge_services.test.ts:13:1
+✖ loader refuses service bindings that cannot produce exact immediate outcomes (206.034ms)
+  AssertionError [ERR_ASSERTION]: regenerating stock
+compiler accepts regenerating service stock
+Result: 0/1 passed
+Failed: 1 test

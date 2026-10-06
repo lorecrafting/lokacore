@@ -1,0 +1,1344 @@
+{
+  "bases": {
+    "room": {
+      "contract": "ServiceDefinition",
+      "value": {
+        "key": "lantern_room",
+        "provider": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "npc",
+          "key": "maud"
+        },
+        "currency": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "resource",
+          "key": "pennies"
+        },
+        "action": "rent_lantern_room",
+        "label": "service.room",
+        "narration": "service.room.used",
+        "price": 3,
+        "benefit": {
+          "kind": "entitlement",
+          "fact": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "fact",
+            "key": "lantern_bed_paid"
+          }
+        }
+      }
+    },
+    "meal": {
+      "contract": "ServiceDefinition",
+      "value": {
+        "key": "lantern_meal",
+        "provider": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "npc",
+          "key": "maud"
+        },
+        "currency": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "resource",
+          "key": "pennies"
+        },
+        "action": "eat_lantern_meal",
+        "label": "service.meal",
+        "narration": "service.meal.used",
+        "price": 2,
+        "benefit": {
+          "kind": "meal",
+          "stock": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "resource",
+            "key": "lantern_meals"
+          },
+          "debit": 1,
+          "recovery": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "amount": 12
+        }
+      }
+    },
+    "drink": {
+      "contract": "ServiceDefinition",
+      "value": {
+        "key": "lantern_ale",
+        "provider": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "npc",
+          "key": "maud"
+        },
+        "currency": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "resource",
+          "key": "pennies"
+        },
+        "action": "drink_lantern_ale",
+        "label": "service.ale",
+        "narration": "service.ale.used",
+        "price": 1,
+        "benefit": {
+          "kind": "drink",
+          "vessel": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "item",
+            "key": "lantern_ale_cask"
+          },
+          "liquid": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "liquid",
+            "key": "ale"
+          },
+          "recovery": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "resource",
+            "key": "mv"
+          },
+          "amount": 4
+        }
+      }
+    },
+    "command": {
+      "contract": "CommandPayload",
+      "value": {
+        "type": "use_service",
+        "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
+        "provider_id": "bbbbbbbb-0000-4000-8000-000000000001",
+        "service": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        "quoted_price": 3
+      },
+      "variant": {
+        "field": "type",
+        "value": "use_service"
+      }
+    },
+    "offer": {
+      "contract": "ServiceOffer",
+      "value": {
+        "service": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        "label": "service.room",
+        "price": 3,
+        "benefit": {
+          "kind": "entitlement",
+          "fact": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "fact",
+            "key": "lantern_bed_paid"
+          }
+        },
+        "action": {
+          "action_key": "rent_lantern_room",
+          "command": "use_service",
+          "available": true,
+          "label": "service.room",
+          "target": {
+            "kind": "entity",
+            "scopes": [
+              "room_occupants"
+            ]
+          },
+          "input": [
+            "service",
+            "quoted_price"
+          ],
+          "target_ids": [
+            "bbbbbbbb-0000-4000-8000-000000000001"
+          ]
+        }
+      }
+    },
+    "npc": {
+      "contract": "NpcDefinition",
+      "value": {
+        "key": "maud",
+        "keywords": [
+          "maud",
+          "widow",
+          "innkeeper"
+        ],
+        "short": "npc.maud.short",
+        "room_line": "npc.maud.room",
+        "description": "npc.maud.description",
+        "room": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "room",
+          "key": "drowned_lantern"
+        },
+        "resource_starts": {
+          "pennies": 10,
+          "lantern_meals": 4
+        },
+        "services": [
+          {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "service",
+            "key": "lantern_room"
+          },
+          {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "service",
+            "key": "lantern_meal"
+          },
+          {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "service",
+            "key": "lantern_ale"
+          }
+        ]
+      }
+    },
+    "bed": {
+      "contract": "InspectableDetail",
+      "value": {
+        "aliases": [
+          "bed"
+        ],
+        "description": "detail.bed.free",
+        "bed": {
+          "entitlement": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "fact",
+            "key": "lantern_bed_paid"
+          },
+          "title": "detail.bed.title"
+        },
+        "variants": [
+          {
+            "description": "detail.bed.paid",
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "ashmere_missing_child",
+                  "cartridge_version": "0.0.25",
+                  "kind": "fact",
+                  "key": "lantern_bed_paid"
+                },
+                "equals": true
+              }
+            }
+          }
+        ]
+      }
+    },
+    "notice": {
+      "contract": "NoticeView",
+      "value": {
+        "id": "bbbbbbbb-0000-4000-8000-000000000001",
+        "title": "bed.title",
+        "description": "bed.paid",
+        "bed": true
+      }
+    },
+    "input": {
+      "contract": "ActionInput",
+      "value": {
+        "service": {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        }
+      }
+    },
+    "cartridge": {
+      "contract": "CompiledCartridge",
+      "value_fixture": "protocol/fixtures/missing_child_v025_hash.json"
+    },
+    "entity": {
+      "contract": "EntityView",
+      "value": {
+        "id": "bbbbbbbb-0000-4000-8000-000000000001",
+        "name": "maud.name",
+        "kind": "npc",
+        "actions": [],
+        "services": [
+          {
+            "service": {
+              "cartridge_id": "ashmere_missing_child",
+              "cartridge_version": "0.0.25",
+              "kind": "service",
+              "key": "lantern_room"
+            },
+            "label": "service.room",
+            "price": 3,
+            "benefit": {
+              "kind": "entitlement",
+              "fact": {
+                "cartridge_id": "ashmere_missing_child",
+                "cartridge_version": "0.0.25",
+                "kind": "fact",
+                "key": "lantern_bed_paid"
+              }
+            },
+            "action": {
+              "action_key": "rent_lantern_room",
+              "command": "use_service",
+              "available": true,
+              "label": "service.room",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_occupants"
+                ]
+              },
+              "input": [
+                "service",
+                "quoted_price"
+              ],
+              "target_ids": [
+                "bbbbbbbb-0000-4000-8000-000000000001"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "room valid",
+      "base": "room",
+      "valid": true
+    },
+    {
+      "name": "meal valid",
+      "base": "meal",
+      "valid": true
+    },
+    {
+      "name": "drink valid",
+      "base": "drink",
+      "valid": true
+    },
+    {
+      "name": "command valid",
+      "base": "command",
+      "valid": true
+    },
+    {
+      "name": "offer valid",
+      "base": "offer",
+      "valid": true
+    },
+    {
+      "name": "npc valid",
+      "base": "npc",
+      "valid": true
+    },
+    {
+      "name": "bed valid",
+      "base": "bed",
+      "valid": true
+    },
+    {
+      "name": "notice valid",
+      "base": "notice",
+      "valid": true
+    },
+    {
+      "name": "input valid",
+      "base": "input",
+      "valid": true
+    },
+    {
+      "name": "cartridge valid",
+      "base": "cartridge",
+      "valid": true
+    },
+    {
+      "name": "entity valid",
+      "base": "entity",
+      "valid": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "key"
+      ],
+      "name": "room missing key",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "provider"
+      ],
+      "name": "room missing provider",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "currency"
+      ],
+      "name": "room missing currency",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "action"
+      ],
+      "name": "room missing action",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "label"
+      ],
+      "name": "room missing label",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "narration"
+      ],
+      "name": "room missing narration",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "price"
+      ],
+      "name": "room missing price",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "benefit"
+      ],
+      "name": "room missing benefit",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "surprise"
+      ],
+      "name": "room unknown property",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "key"
+      ],
+      "name": "meal missing key",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "provider"
+      ],
+      "name": "meal missing provider",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "currency"
+      ],
+      "name": "meal missing currency",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "action"
+      ],
+      "name": "meal missing action",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "label"
+      ],
+      "name": "meal missing label",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "narration"
+      ],
+      "name": "meal missing narration",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "price"
+      ],
+      "name": "meal missing price",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit"
+      ],
+      "name": "meal missing benefit",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "surprise"
+      ],
+      "name": "meal unknown property",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "key"
+      ],
+      "name": "drink missing key",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "provider"
+      ],
+      "name": "drink missing provider",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "currency"
+      ],
+      "name": "drink missing currency",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "action"
+      ],
+      "name": "drink missing action",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "label"
+      ],
+      "name": "drink missing label",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "narration"
+      ],
+      "name": "drink missing narration",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "price"
+      ],
+      "name": "drink missing price",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit"
+      ],
+      "name": "drink missing benefit",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "surprise"
+      ],
+      "name": "drink unknown property",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "command",
+      "path": [
+        "type"
+      ],
+      "name": "command missing type",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "command",
+      "path": [
+        "actor_id"
+      ],
+      "name": "command missing actor_id",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "command",
+      "path": [
+        "provider_id"
+      ],
+      "name": "command missing provider_id",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "command",
+      "path": [
+        "service"
+      ],
+      "name": "command missing service",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "command",
+      "path": [
+        "quoted_price"
+      ],
+      "name": "command missing quoted_price",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "command",
+      "path": [
+        "surprise"
+      ],
+      "name": "command unknown property",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "offer",
+      "path": [
+        "service"
+      ],
+      "name": "offer missing service",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "path": [
+        "label"
+      ],
+      "name": "offer missing label",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "path": [
+        "price"
+      ],
+      "name": "offer missing price",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "path": [
+        "benefit"
+      ],
+      "name": "offer missing benefit",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "path": [
+        "action"
+      ],
+      "name": "offer missing action",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "offer",
+      "path": [
+        "surprise"
+      ],
+      "name": "offer unknown property",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "benefit",
+        "kind"
+      ],
+      "name": "room missing benefit kind",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "benefit",
+        "fact"
+      ],
+      "name": "room missing benefit fact",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "benefit",
+        "surprise"
+      ],
+      "name": "room unknown benefit field",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "room",
+      "path": [
+        "benefit",
+        "kind"
+      ],
+      "name": "room wrong benefit kind",
+      "valid": false,
+      "value": "unknown"
+    },
+    {
+      "base": "room",
+      "path": [
+        "price"
+      ],
+      "name": "room numeric price 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "room",
+      "path": [
+        "price"
+      ],
+      "name": "room numeric price 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "room",
+      "path": [
+        "price"
+      ],
+      "name": "room numeric price 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "kind"
+      ],
+      "name": "meal missing benefit kind",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "stock"
+      ],
+      "name": "meal missing benefit stock",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "debit"
+      ],
+      "name": "meal missing benefit debit",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "recovery"
+      ],
+      "name": "meal missing benefit recovery",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "meal missing benefit amount",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "surprise"
+      ],
+      "name": "meal unknown benefit field",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "kind"
+      ],
+      "name": "meal wrong benefit kind",
+      "valid": false,
+      "value": "unknown"
+    },
+    {
+      "base": "meal",
+      "path": [
+        "price"
+      ],
+      "name": "meal numeric price 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "meal",
+      "path": [
+        "price"
+      ],
+      "name": "meal numeric price 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "meal",
+      "path": [
+        "price"
+      ],
+      "name": "meal numeric price 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "meal numeric benefit.amount 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "meal numeric benefit.amount 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "meal numeric benefit.amount 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "debit"
+      ],
+      "name": "meal numeric benefit.debit 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "debit"
+      ],
+      "name": "meal numeric benefit.debit 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "meal",
+      "path": [
+        "benefit",
+        "debit"
+      ],
+      "name": "meal numeric benefit.debit 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "kind"
+      ],
+      "name": "drink missing benefit kind",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "vessel"
+      ],
+      "name": "drink missing benefit vessel",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "liquid"
+      ],
+      "name": "drink missing benefit liquid",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "recovery"
+      ],
+      "name": "drink missing benefit recovery",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "drink missing benefit amount",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "surprise"
+      ],
+      "name": "drink unknown benefit field",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "kind"
+      ],
+      "name": "drink wrong benefit kind",
+      "valid": false,
+      "value": "unknown"
+    },
+    {
+      "base": "drink",
+      "path": [
+        "price"
+      ],
+      "name": "drink numeric price 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "drink",
+      "path": [
+        "price"
+      ],
+      "name": "drink numeric price 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "drink",
+      "path": [
+        "price"
+      ],
+      "name": "drink numeric price 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "drink numeric benefit.amount 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "drink numeric benefit.amount 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "drink",
+      "path": [
+        "benefit",
+        "amount"
+      ],
+      "name": "drink numeric benefit.amount 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "command",
+      "path": [
+        "quoted_price"
+      ],
+      "name": "command price 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "offer",
+      "path": [
+        "price"
+      ],
+      "name": "offer price 0",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "command",
+      "path": [
+        "quoted_price"
+      ],
+      "name": "command price 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "offer",
+      "path": [
+        "price"
+      ],
+      "name": "offer price 2147483648",
+      "valid": false,
+      "value": 2147483648
+    },
+    {
+      "base": "command",
+      "path": [
+        "quoted_price"
+      ],
+      "name": "command price 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "offer",
+      "path": [
+        "price"
+      ],
+      "name": "offer price 1.5",
+      "valid": false,
+      "value": 1.5
+    },
+    {
+      "base": "command",
+      "path": [
+        "type"
+      ],
+      "name": "wrong command type",
+      "valid": false,
+      "value": "other"
+    },
+    {
+      "base": "bed",
+      "path": [
+        "bed",
+        "title"
+      ],
+      "name": "bed missing title",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "bed",
+      "path": [
+        "bed",
+        "entitlement"
+      ],
+      "name": "bed missing entitlement",
+      "valid": false,
+      "omit": true
+    },
+    {
+      "base": "bed",
+      "path": [
+        "bed",
+        "surprise"
+      ],
+      "name": "bed unknown field",
+      "valid": false,
+      "value": true
+    },
+    {
+      "base": "notice",
+      "path": [
+        "bed"
+      ],
+      "name": "notice forged bed flag",
+      "valid": false,
+      "value": false
+    },
+    {
+      "base": "npc",
+      "path": [
+        "services"
+      ],
+      "name": "empty services",
+      "valid": false,
+      "value": []
+    },
+    {
+      "base": "npc",
+      "path": [
+        "services"
+      ],
+      "name": "too many services",
+      "valid": false,
+      "value": [
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        },
+        {
+          "cartridge_id": "ashmere_missing_child",
+          "cartridge_version": "0.0.25",
+          "kind": "service",
+          "key": "lantern_room"
+        }
+      ]
+    },
+    {
+      "base": "npc",
+      "path": [
+        "services",
+        0
+      ],
+      "name": "bad service ref",
+      "valid": false,
+      "value": "lantern_room"
+    },
+    {
+      "base": "input",
+      "path": [
+        "service"
+      ],
+      "name": "invalid input service ref",
+      "valid": false,
+      "value": "lantern_room"
+    },
+    {
+      "base": "entity",
+      "path": [
+        "services",
+        0,
+        "price"
+      ],
+      "name": "entity invalid service price",
+      "valid": false,
+      "value": 0
+    },
+    {
+      "base": "cartridge",
+      "path": [
+        "services"
+      ],
+      "name": "invalid service map key",
+      "valid": false,
+      "value": {
+        "bad": {
+          "key": "lantern_room",
+          "provider": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "npc",
+            "key": "maud"
+          },
+          "currency": {
+            "cartridge_id": "ashmere_missing_child",
+            "cartridge_version": "0.0.25",
+            "kind": "resource",
+            "key": "pennies"
+          },
+          "action": "rent_lantern_room",
+          "label": "service.room",
+          "narration": "service.room.used",
+          "price": 3,
+          "benefit": {
+            "kind": "entitlement",
+            "fact": {
+              "cartridge_id": "ashmere_missing_child",
+              "cartridge_version": "0.0.25",
+              "kind": "fact",
+              "key": "lantern_bed_paid"
+            }
+          }
+        }
+      }
+    },
+    {
+      "base": "cartridge",
+      "path": [
+        "services",
+        "ashmere_missing_child@0.0.25:service/lantern_room",
+        "price"
+      ],
+      "name": "invalid service map member",
+      "valid": false,
+      "value": 0
+    }
+  ]
+}

@@ -45,9 +45,9 @@ defmodule Loka.Content.RoomParts do
 
     readables =
       for {k, d} <- Map.get(r, "details", %{}),
-          field <- ~w(readable notice_board),
+          field <- ~w(readable notice_board bed),
           is_map_key(d, field),
-          do: {["details", k, field], "readable"}
+          do: {["details", k, field], if(field == "bed", do: "bed", else: "readable")}
 
     [{[], "room"} | details] ++
       if(r["dark_description"], do: [{["dark_description"], "darkness"}], else: []) ++

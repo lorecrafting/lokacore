@@ -995,8 +995,15 @@ service keys, absent balances, regenerating stock/currency, mismatched stock
 owner, non-MV recovery declarations and unbounded/unknown consequences. The
 minimal service subset covers only these consumed consequences, not an arbitrary
 Effect interpreter. Independently re-pin the integrated bundled release/API and
-known answers after the shared-source scheduling predecessors integrate; future
-B8 hashes/IDs/versions are null now.
+known answers after the shared-source scheduling predecessors integrate.
+
+The local B8 candidate is `ashmere_missing_child@0.0.25`, API1.23, with
+[independent hash](../../protocol/fixtures/missing_child_v025_hash.json) and
+[111 allocated IDs](../../protocol/fixtures/missing_child_v025_ids.json), derived
+and rechecked against published C2/main predecessor `cb7fbc1c`. Source and
+scoped correction reviews approve the implementation; the
+[final evidence](../evidence/2026-10-05-b8-maud-services/README.md) records the
+full gate and independent pin recheck. B8 publication remains pending.
 
 ## D2 public Priory and book authoring
 

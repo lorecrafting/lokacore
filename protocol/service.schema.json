@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Immediate services",
+  "description": "B8 typed finite paid entitlement, meal and provider-owned serving.",
+  "$defs": {
+    "ServiceDefinition": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "provider": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "action": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "label": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "narration": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "currency": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "price": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "benefit": {
+          "$ref": "service.schema.json#/$defs/ServiceBenefit"
+        }
+      },
+      "required": [
+        "key",
+        "provider",
+        "action",
+        "label",
+        "narration",
+        "currency",
+        "price",
+        "benefit"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "room",
+          "provider": {
+            "cartridge_id": "service_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "innkeeper"
+          },
+          "action": "rent_room",
+          "label": "service.room",
+          "narration": "service.rented",
+          "currency": {
+            "cartridge_id": "service_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "resource",
+            "key": "pennies"
+          },
+          "price": 3,
+          "benefit": {
+            "kind": "entitlement",
+            "fact": {
+              "cartridge_id": "service_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "paid"
+            }
+          }
+        }
+      ],
+      "description": "Exact original-provider action and conserved quote with one typed immediate benefit."
+    },
+    "ServiceBenefit": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "entitlement"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "kind",
+            "fact"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "meal"
+            },
+            "stock": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "debit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "recovery": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "kind",
+            "stock",
+            "debit",
+            "recovery",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "drink"
+            },
+            "vessel": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "liquid": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "recovery": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "kind",
+            "vessel",
+            "liquid",
+            "recovery",
+            "amount"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Closed paid entitlement, finite meal recovery or provider-owned complete liquid serving; recovery is MV only.",
+      "examples": [
+        {
+          "kind": "entitlement",
+          "fact": {
+            "cartridge_id": "service_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "paid"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -25,7 +25,6 @@ defmodule Loka.Content.Checks do
     "resource_compare" => "resource"
   }
   @enclosing 3
-
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
   def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m) do
@@ -47,6 +46,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"kind" => "source", "capacity" => _, "supply" => supply} = f, m),
     do: Map.put(f, "supply", ref(supply, "item", m))
+
+  def expand(%{"benefit" => _, "provider" => _, "currency" => _} = s, m),
+    do: Loka.Content.Services.expand(s, m)
 
   # A room (its title a text key): a details map may also have a detail keyed exits or title.
   def expand(%{"exits" => exits, "title" => t} = room, m) when is_map(exits) and is_binary(t) do
@@ -103,6 +105,7 @@ defmodule Loka.Content.Checks do
     schedule = Map.get(npc, "daily_schedule", %{})
 
     npc
+    |> Loka.Content.Services.npc(m)
     |> Map.delete("shop")
     |> Map.merge(if npc["shop"], do: %{"shop" => expand(npc["shop"], m)}, else: %{})
     |> Map.update!("room", &ref(&1, "room", m))
@@ -220,7 +223,9 @@ defmodule Loka.Content.Checks do
       |> expand(m)
       |> Map.put("liquid_source", ref(k, "liquid", m))
 
-  def expand(v, m) when is_map(v), do: Map.new(v, fn {k, x} -> {k, expand(x, m)} end)
+  def expand(v, m) when is_map(v),
+    do: v |> Map.new(fn {k, x} -> {k, expand(x, m)} end) |> Loka.Content.Services.bed(m)
+
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v
 

@@ -1,3 +1,4 @@
+// size: allow 515, the existing headless action generator also consumes exact service offers
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -330,6 +331,14 @@ function offered(world: World, g: Gen): Payload {
     for (const a of n.actions ?? [])
       if (set[a.action_key]?.command === 'fill' && a.target_ids?.length === 2)
         options.push(aimed('fill', a.target_ids[0], a.target_ids[1]));
+  for (const e of view.entities)
+    for (const s of e.services ?? [])
+      options.push({
+        type: 'use_service',
+        provider_id: e.id,
+        service: s.service,
+        quoted_price: s.price,
+      });
   const inside = [...view.entities, ...view.inventory].flatMap((e) => e.contents ?? []);
   const items = [...view.entities, ...view.inventory, ...inside].filter((e) => e.kind === 'item');
   for (const o of Object.values(set))

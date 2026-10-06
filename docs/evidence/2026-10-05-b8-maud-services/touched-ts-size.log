@@ -1,0 +1,10 @@
+kernel/ts/src/view/action_lists.ts:44: info: size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
+kernel/ts/src/view/action_lists.ts:142: info: size: allow 50, exact detail harvest joins shared action admission and projection
+kernel/ts/test/sim.ts:1: info: size: allow 515, the existing headless action generator also consumes exact service offers
+mobile/app/book/Book.tsx:186: info: size: allow 45, footer keeps standalone Leave and nested Back alongside status and faults
+mobile/app/book/Menu.tsx:66: info: size: allow 45, bounded tile editing and submission share one local buffer
+mobile/app/book/model.ts:1: info: size: allow 350, current shop quotes join the shared button/freshness builder
+mobile/app/book/model.ts:231: info: size: allow 60, one offer-to-button conversion serves place/entity/Notice and quoted shop actions
+mobile/app/book/notices.tsx:111: info: size: allow 45, ordered description/history/Notice options share one detail page
+mobile/authority/local-story/commerce-save.ts:27: info: size: allow 60, one ordered reconciliation loop joins exact money and custody evidence
+mobile/authority/local-story/commerce-save.ts:125: info: size: allow 50, bind one whole exchange to its command, item, payment and acquired event

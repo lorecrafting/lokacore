@@ -24,21 +24,13 @@ const SPEC = {
   meaning: "The character's position (position@1): only its rule writes it.",
 };
 
-// size: allow 50, one existing write-site walk checks scene, skill and patrol trust ownership
 export function reserved(c: Obj): Diagnostic[] {
-  const expected: Obj = Object.hasOwn(c.lock.capabilities, 'position') ? { position: SPEC } : {};
-  if (Object.hasOwn(c.lock.capabilities, 'scene'))
-    Object.values((c.scenes ?? {}) as Obj).forEach((s) => {
-      const lines = s.steps.filter((x: Obj) => x.type === 'narrate').length;
-      expected[`scene_${s.key}`] = spec(s.key, lines);
-    });
-  for (const p of Object.values((c.story_points ?? {}) as Obj))
-    if (Object.values(p.outcomes as Obj).some((t: Obj) => !!t.scene))
-      expected[`story_point_${p.key}`] = markerSpec(p.key, Object.keys(p.outcomes));
-  for (const s of Object.values((c.skills ?? {}) as Obj))
-    expected[`skill_${s.key}`] = skillSpec(s.key);
+  const expected = expectedFacts(c);
   const patrolRefs = Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
     q.patrol ? [refString(q.patrol.trust_fact)] : [],
+  );
+  const serviceRefs = Object.values((c.services ?? {}) as Obj).flatMap((s) =>
+    s.benefit.kind === 'entitlement' ? [refString(s.benefit.fact)] : [],
   );
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const out: Diagnostic[] = [];
@@ -48,7 +40,7 @@ export function reserved(c: Obj): Diagnostic[] {
   const write = (s: Obj, at: string) => {
     if (
       (s.op === 'fact.assign' || s.op === 'fact.adjust') &&
-      [...refs, ...patrolRefs].includes(refString(s.fact))
+      [...refs, ...patrolRefs, ...serviceRefs].includes(refString(s.fact))
     )
       out.push(diag('RESERVED_FACT', `${at}.fact`));
   };
@@ -70,4 +62,19 @@ export function reserved(c: Obj): Diagnostic[] {
       write({ ...a, op: 'fact.assign' }, `.cartridge.scenes${step(k)}.on_end.assign[${i}]`),
     );
   return out;
+}
+
+function expectedFacts(c: Obj): Obj {
+  const expected: Obj = Object.hasOwn(c.lock.capabilities, 'position') ? { position: SPEC } : {};
+  if (Object.hasOwn(c.lock.capabilities, 'scene'))
+    Object.values((c.scenes ?? {}) as Obj).forEach((s) => {
+      const lines = s.steps.filter((x: Obj) => x.type === 'narrate').length;
+      expected[`scene_${s.key}`] = spec(s.key, lines);
+    });
+  for (const p of Object.values((c.story_points ?? {}) as Obj))
+    if (Object.values(p.outcomes as Obj).some((t: Obj) => !!t.scene))
+      expected[`story_point_${p.key}`] = markerSpec(p.key, Object.keys(p.outcomes));
+  for (const s of Object.values((c.skills ?? {}) as Obj))
+    expected[`skill_${s.key}`] = skillSpec(s.key);
+  return expected;
 }

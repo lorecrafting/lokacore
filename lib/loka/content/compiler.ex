@@ -44,6 +44,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Topics.check(manifest, defs, v2),
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Population.check(manifest, defs, v2, located),
+      Loka.Content.Services.check(manifest, defs, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
@@ -64,7 +65,7 @@ defmodule Loka.Content.Compiler do
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid population population_bundle),
+         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service population population_bundle),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -89,7 +90,7 @@ defmodule Loka.Content.Compiler do
   # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), calendar and
   # world (WorldSettings) and chapters; settings travel beside the manifest in the v2 cartridge.
   defp manifest([{rel, m}], registry) do
-    defs = source_defs()
+    defs = Loka.Content.Source.contracts()
 
     file = manifest_file(defs)
 
@@ -148,7 +149,8 @@ defmodule Loka.Content.Compiler do
     {"topic", :topic, "TopicDefinition"},
     {"liquid", :liquid, "LiquidDefinition"},
     {"population", :population, "PopulationPlan"},
-    {"population_bundle", :population_bundle, "PopulationBundle"}
+    {"population_bundle", :population_bundle, "PopulationBundle"},
+    {"service", :service, "ServiceDefinition"}
   ]
 
   defp definitions(files, m) do
@@ -277,26 +279,10 @@ defmodule Loka.Content.Compiler do
 
   defp authored_key(_, _, _), do: []
 
-  defp validated(rel, steps, contract, value, defs \\ source_defs()) do
+  defp validated(rel, steps, contract, value, defs \\ Loka.Content.Source.contracts()) do
     case Contracts.validate(contract, value, defs) do
       :ok -> []
       {:error, es} -> schema(rel, steps, value, es)
     end
-  end
-
-  # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
-  defp source_defs do
-    defs = Contracts.defs()
-
-    defs
-    |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
-    |> Map.update!(
-      "LiquidRow",
-      &put_in(&1, ["properties", "kind", "anyOf"], [
-        %{"type" => "null"},
-        %{"$ref" => "Key"},
-        defs["DefinitionRef"]
-      ])
-    )
   end
 end

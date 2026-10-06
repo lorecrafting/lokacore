@@ -128,7 +128,17 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
   const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
   const resources = Object.fromEntries(
     Object.values(cartridge.resources ?? {})
-      .filter((s) => clock !== 0 || s.regen)
+      .filter(
+        (s) =>
+          (clock !== 0 ||
+            s.regen ||
+            Object.values(cartridge.services ?? {}).some(
+              (service) => service.currency.key === s.key,
+            )) &&
+          !Object.values(cartridge.services ?? {}).some(
+            (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
+          ),
+      )
       .map((s) => {
         const resource = { cartridge_id, cartridge_version, kind: 'resource', key: s.key };
         const row = {

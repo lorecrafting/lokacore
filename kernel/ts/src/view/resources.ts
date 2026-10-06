@@ -26,6 +26,12 @@ const BANDS: BandTable = (
 // minimum; maximum = minimum gives the top row; 32-bit ResourceInts keep every product exact).
 export function resources(world: World): ResourceView[] {
   return Object.values(world.resourceSpecs)
+    .filter(
+      (s) =>
+        !Object.values(world.cartridge.services ?? {}).some(
+          (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
+        ),
+    )
     .map(({ key: k, minimum, maximum, bands }) => {
       const resource = resourceRef(world, k);
       const current = level(world, world.body, resource)!;

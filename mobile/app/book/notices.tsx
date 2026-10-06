@@ -62,11 +62,12 @@ function NoticeLink(p: Props & { notice: Notice }) {
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
   const offer = noticeOffer(screen.view, notice.id);
-  if (notice.remaining !== undefined)
+  if (notice.bed || notice.remaining !== undefined)
     return (
       <Tap label={title} onPress={() => p.open({ kind: 'notice', id: notice.id })}>
         <Text style={{ ...prose, color: paper.accent }}>
-          {title} ({notice.remaining})
+          {title}
+          {notice.remaining === undefined ? '' : ` (${notice.remaining})`}
         </Text>
       </Tap>
     );

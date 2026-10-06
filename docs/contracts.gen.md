@@ -216,6 +216,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `ignite`
   - `douse`
   - `refuel`
+  - `use_service`
 - **LogicalTime**: Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
 
 ## Decision contracts (`protocol/decision.schema.json`)
@@ -422,6 +423,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **QuestView**: A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).
 - **ResourceView**: One of the viewer's body's resources (04 §15 as amended 2026-10-01 and 2026-10-02; 21 §4 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 §15 default table); the UI never computes a threshold (00 §4.10).
 - **SceneView**: Present iff a modal scene runs: its current narrate TextKey, one-based index and narrate count.
+- **ServiceOffer**: Current exact keyed provider quote, declared capped benefit and shared availability; no reservation.
 - **ShopAction**: The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).
 - **ShopItemView**: An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).
 - **SightView**: What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.
@@ -641,6 +643,16 @@ StateScope and AudiencePolicy (03 §6).
   - `party`: State shared by a party.
   - `instance`: State of one logical world instance.
   - `realm`: State of a persistent Realm.
+
+## Immediate services (`protocol/service.schema.json`)
+
+B8 typed finite paid entitlement, meal and provider-owned serving.
+
+- **ServiceBenefit**: Closed paid entitlement, finite meal recovery or provider-owned complete liquid serving; recovery is MV only.
+  - `entitlement`
+  - `meal`
+  - `drink`
+- **ServiceDefinition**: Exact original-provider action and conserved quote with one typed immediate benefit.
 
 ## Localized text contracts (`protocol/text.schema.json`)
 

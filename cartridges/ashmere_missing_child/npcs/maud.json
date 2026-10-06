@@ -7,5 +7,14 @@
   "short": "npc.maud.short",
   "room_line": "npc.maud.room",
   "description": "npc.maud.description",
-  "room": "drowned_lantern"
+  "room": "drowned_lantern",
+  "resource_starts": {
+    "pennies": 10,
+    "lantern_meals": 4
+  },
+  "services": [
+    "lantern_room",
+    "lantern_meal",
+    "lantern_ale"
+  ]
 }
