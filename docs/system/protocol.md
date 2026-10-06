@@ -973,3 +973,20 @@ Final acknowledged end lowers one `dream_seen` assignment and bound S10 resoluti
 in one scene-owned writer sequence, with normal `scene_ended`/`quest_resolved`
 evidence, no `story_point_reached`. The authority only commits changed rows and
 receipt; the Book only emits captured invocations.
+
+The consumed wire declarations are `SceneDefinition.control = presentation_only`
+and `on.rest {room, detail, entitlement, credit, quest}`. That one binding owns the
+first-Rest fact, quest activation and cursor start. Its exact steps are three
+`narrate` entries, one `choice {key, prompt, choices}` with two
+`{choice_id, label, text}` alternatives, one `branch`, `await_ack`, and `end`.
+`on_end {assign, quest, outcome}` is the memory/quest-only alternative to the
+existing story-point end. The scene cursor's maximum includes choice and branch.
+The existing choice row binds the scene reference and authored choice key, with
+exact `body` and `anchor` roles; no new row fields or portable operations are used.
+Choose's optional `dream {scene, line, body_id, room_id, expected_revision}` draw
+is mandatory only for scene-owned choices and must match the saved occurrence.
+The real bed's optional `DreamView` carries current saved text, safe availability,
+selected branch and exact Continue/choice offers. These controls preserve action
+keys and captured inputs; scene-owned choices never enter ordinary dialogue
+pending selection. This consumed subset requires API1.24; bundled release/hash/ID
+answers remain conditional on the actual integration order with parallel work.

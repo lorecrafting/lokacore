@@ -681,6 +681,13 @@ choice remain. Cold reopen offers Resume through the actual bed rather than forc
 the dream. Moving away, combat/harm/return or modal precedence exits unavailable
 presentation to the actual current context and preserves its checkpoint.
 
+The shared implementation uses the existing bed notice detail and one nested
+`dream` page keyed by that same real detail ID. Resume and Close edit only the
+Book page stack; the dream uses existing Sheet/Act/Leave controls and its own
+receipt-bound detail history. Live first-Rest confirmation may open that nested
+page; a cold start retains World and offers Resume at the real bed. A scene-owned
+choice uses its own projected options, never the ordinary conversation page.
+
 Every captured control retains actor, anchor, scene, shown beat and exact choice
 identity/revision where applicable. Freshness cannot be refreshed across a branch,
 beat, room, choice or modal/combat change. Refusal redraws saved truth; pending
