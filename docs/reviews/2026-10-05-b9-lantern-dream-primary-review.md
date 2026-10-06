@@ -106,3 +106,59 @@ source failures/history remain preserved. Current v026/API1.24 pins remain
 provisional for the actual published-predecessor integration. This scoped approval
 closes B9-P1 and supersedes the original primary verdict for corrected source only;
 no browser/native, owner-save or publication claim is added.
+
+## Published-predecessor integration recheck — APPROVE
+
+Final combined source: `7bc3f745658b6727ce252c639ea9116a637c833a`, including published
+D5/D2 source `4bcb2eafd0a984c611b71c3e4dc1e0d26defd533` and PR225 docs
+`dec92357`. Final evidence-only head: `a39d698c4399b352c19f150d3992b18d2db9ca7f`.
+
+Reviewed both-parent changes at the shared Book/schema/content boundaries. D2's
+exact item Read, open-container reach, receipt narration and pending remount/title
+retry routes remain; B9 adds its separate dream Page/owner/context without replacing
+those routes. Body receives the existing Back callback, so Dream Close returns to
+the real bed. Both short-reference expansion clauses and the renderer import union
+remain. B9 scene sequence/projection/Book dream modules and the P1 compiler identity
+fix are unchanged from the approved source; the consumed dream API floor advances
+to 1.25 while D2 item Read retains its 1.24 floor. No new finding.
+
+Independent checks on behavioral integration head `066bfda4`: **32** focused kernel, loader, Priory,
+actual Book and real-SQLite dream/Read tests pass; **13** forced compiler
+dream/Priory/modal/current chapter tests pass. Contracts generation and both
+renderer/rule import suites pass. The distinct-anchor and same-anchor compiler
+regression remains green. Prior red controls remain applicable to the unchanged
+B9 behavior; this read-only integration check adds no source mutation.
+
+Complete compiler bytes and all **127** initial allocations match v028/API1.25
+hash `424a4497cca18c9f00b333cc8489eb9e95ce52f5239d6a394e4fa25e3d1fb34e`.
+An independent Python canonical/hash and decoded predecessor comparison confirms
+only the B9 actions/facts/quest/scene/text additions and manifest requirement change;
+there are no inherited payload changes or removals. Published v027 predecessor
+literals and original B9 provisional fixtures are byte-unchanged.
+
+The later source-size correction at `e3517e7e` only shortened a comment in
+`checks.ex`; independently parsed before/after executable ASTs agree after metadata
+removal. The final five-file renderer correction reuses the existing action label
+closure for unavailable Notice notes and documents that [shared Book rule](../system/book-ui.md). PM visual
+QA found raw `action.rest` at the acknowledged bed; the [actual Book regression](../../mobile/app/book/dream.test.ts) now requires
+literal `Rest: not now`. No gameplay, save, schema or pin changes accompany it.
+Independent final-source dream/notice/Priory/live-action Book checks pass **26**
+tests, including both uncertain Read remount routes; app typecheck passes.
+
+Verified final evidence-only update: all **69** retained files appear exactly once
+in SHA256SUMS and verify; the manifest itself is the sole unlisted file. Inspected
+exact-source full gate records exit 0 with **351** Elixir tests and all active
+checks. Both actual Web routes pass on the final source, including captured dream
+choice reload/Resume and human `Rest: not now` after acknowledgement and cold
+reload. Viewed the final dream-choice and acknowledged-bed captures: the offered
+branches, Close, real bed and human unavailable label agree with the recorded route.
+
+The retained label red control fails the literal `Rest: not now` assertion on old
+production, then restoration passes. Retained Web choice-phase Resume omission
+keeps the older saved-movement route green and makes the new paid route fail at
+Resume. The integrated 17 behavior, 73 schema and four import controls restore
+cleanly; original setup, contention, size and pre-label outcomes remain preserved.
+
+Ponytail Review: Lean already. This approval covers the combined local source and
+retained integration proof, superseding the prior provisional-source scope;
+publication remains pending. No owner-save or native lifecycle proof is added.
