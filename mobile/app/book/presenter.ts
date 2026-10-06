@@ -153,7 +153,12 @@ function background(
     const [line, combat] = narrationLines(last, now, text);
     if (combat) s.combatLog.push(combat);
     if (line)
-      (now.choice ? detailLines(s, now.choice.speaker_id ?? 'conversation') : s.log).push(line);
+      (last.detail_id
+        ? detailLines(s, last.detail_id)
+        : now.choice
+          ? detailLines(s, now.choice.speaker_id ?? 'conversation')
+          : s.log
+      ).push(line);
     s.narrationId = last.command_id;
   }
 }

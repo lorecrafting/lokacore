@@ -9,6 +9,7 @@ import {
   POSITION_ACTIONS,
   pagesAfter,
   initialPages,
+  restoredItemPages,
   npcPage,
   nextPosition,
   type Hint,
@@ -96,6 +97,7 @@ export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
   const [stack, setStack] = useState<Page[]>(() => [
     ...restoredNoticePages(pr.screen()),
+    ...restoredItemPages(pr.screen().view, pr.screen().detail),
     ...initialPages(pr.screen().view),
   ]);
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });

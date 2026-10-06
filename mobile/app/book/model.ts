@@ -54,6 +54,23 @@ export const things = (v: GameView): Thing[] =>
     ...(v.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].flatMap((e) => [e, ...(e.contents ?? [])]);
 
+export function restoredItemPages(view: GameView, detail: (id: string) => unknown[]): Page[] {
+  if (view.combat || view.scene) return [];
+  const items = things(view);
+  const book = items.find(
+    (e) => detail(e.id).length && e.actions.some((a) => (a.command ?? a.action_key) === 'read'),
+  );
+  if (!book) return [];
+  const parents: Page[] = [];
+  let at: Thing | undefined = book;
+  while (at && 'container_id' in at) {
+    const parent: string = at.container_id;
+    at = items.find((e) => e.id === parent);
+    if (at) parents.unshift({ kind: 'thing', id: at.id });
+  }
+  return [{ kind: 'carrying' }, ...parents, { kind: 'thing', id: book.id }];
+}
+
 export function pagesAfter(stack: Page[], before: GameView, after: GameView): Page[] {
   if (after.combat) return stack.at(-1)?.kind === 'combat' ? stack : [{ kind: 'combat' }];
   if (before.combat || stack.some((page) => page.kind === 'combat')) return [];
@@ -238,7 +255,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
     ...(a.command && { command: a.command }),
-    ...(['refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
+    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });

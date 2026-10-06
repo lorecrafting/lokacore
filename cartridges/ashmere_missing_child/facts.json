@@ -332,6 +332,17 @@
         "player"
       ],
       "meaning": "The player paid Maud for the Inn Rooms bed in this lineage."
+    },
+    "topic_bell_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player deliberately read Bell Rites while lawfully holding its original book."
     }
   }
 }

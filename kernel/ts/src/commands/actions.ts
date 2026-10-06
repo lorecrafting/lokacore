@@ -192,7 +192,7 @@ export function refusal(
   const matching = Object.values(set ?? resolved(world, actor)).filter(
     (a) =>
       (action === undefined || a.key === action) &&
-      (perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload)),
+      (perform ? a.recipe && a.key === payload.action : accepts(world, actor, a, payload, steps)),
   );
   const unknown =
     (perform && !recipeKeys(world).includes(payload.action)) ||

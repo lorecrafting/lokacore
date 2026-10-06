@@ -37,7 +37,7 @@ export type Logs = {
 };
 
 export function restoredLogs(game: Game, text: Say): Logs {
-  const last = game.lastNarration();
+  const last = game.pending() ? undefined : game.lastNarration();
   const { view } = game.view();
   const [restored, combat] = narrationLines(last, view, text);
   const log = restored && !view.choice && !last?.detail_id ? [restored] : [];
