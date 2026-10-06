@@ -1,0 +1,36 @@
+{
+  "npc": "peg",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "peg"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "skill_haggle",
+      "equals": false
+    }
+  },
+  "prompt": "peg.haggle.prompt",
+  "choices": {
+    "learn": {
+      "label": "peg.haggle.choice",
+      "narration": "peg.haggle.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "haggle"
+        }
+      ],
+      "lesson_payment": {
+        "to": "teacher",
+        "resource": "pennies",
+        "amount": 2
+      }
+    }
+  },
+  "label": "peg.haggle.choice"
+}

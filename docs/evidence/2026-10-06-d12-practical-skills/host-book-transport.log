@@ -1,0 +1,72 @@
+$ mise exec -- node --test mobile/authority/local-story/practical_skills.test.ts mobile/authority/local-story/training.test.ts mobile/authority/local-story/commerce.test.ts mobile/authority/local-story/infirmary.test.ts mobile/authority/local-story/transport.test.ts mobile/app/book/practical_skills.test.ts mobile/app/book/training.test.ts mobile/app/book/infirmary.test.ts kernel/ts/test/transport.test.ts
+✔ paid outbound and free return join exact conserved balances and body entry (407.715417ms)
+✔ unaffordable and forged endpoint offers refuse atomically (734.945875ms)
+✔ recovery waiver uses actual death owner, isle room and contained roots (310.561ms)
+✔ Sedge teaches swim once freely through the original present dialogue (456.4965ms)
+✔ loader rejects invalid endpoint, funding, action and free lesson bindings (1828.818583ms)
+✔ boarding remains inspectable with a disabled offer during a real encounter (320.021625ms)
+(node:8847) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/infirmary.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book patch and Wick controls use confirmed exact targets, readiness and journal state (966.8705ms)
+(node:8848) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/practical_skills.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book teacher detail to learned patch/shop controls sends the exact loaded offer and refreshes after cold open (1819.650333ms)
+(node:8849) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/training.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Character draws projected attributes and acquired qualification with authored labels (69.44275ms)
+✔ item equipment detail copies current typed slot/profile/requirement and block chance (0.528542ms)
+✔ Book interaction teaches swords then dodge in Tobin detail and recovers each committed result once (1353.220125ms)
+✔ shared item detail draws confirmed fuel for lit and exhausted items (0.252458ms)
+✔ real SQLite reopens buy before acceptance, active, and both chronological payout orders (808.502875ms)
+✔ purchase receipt retry, sale and buyback cold reopen one exact item and conserved pennies (210.992584ms)
+✔ buy under an active and expired S2 retains the exact ledger and pending/failure truth (148.843417ms)
+✔ cold open refuses omitted debit, wrong recipient, false prior balance and reversed receipt order (858.345333ms)
+✔ shop failed COMMIT and both unknown outcomes retain all prior or all next rows (282.198083ms)
+✔ satchel Put/Take is immediately useful but active S2 ancestor Sell is refused (175.058167ms)
+✔ v018 ID pin binds the spawned world, purchased torch and worn slot after cold reopen (105.5655ms)
+✔ real SQLite reopens every immediate occurrence, exact replay and later ordinary bandage custody (2170.892791ms)
+✔ failed and lost COMMIT exchange outcomes reconcile all-prior or all-next rows (866.583583ms)
+✔ exchange history corruption refuses without rewriting the SQLite rows (1610.328667ms)
+✔ accepted herbs can be dropped, reopened and retrieved for the same exact occurrence (655.631083ms)
+✔ B2 and S9 faction receipts reopen in both composed orders without changing pennies (1399.918458ms)
+✔ reacceptance retirement and fresh activation reconcile as one real SQLite commit (1273.683708ms)
+✔ randomly seeded B5 lineage reopens and Start over preserves the drawn seed (162.775833ms)
+✔ trusted elapsed reopens before S9 and reaches the actual herb exchange consumer (711.079458ms)
+✔ both original 2p teachers learn below qualification, refuse low funds and replay one receipt on disk (2352.41425ms)
+✔ careful harvest and discounted Buy retain historical truth across cold opens and later custody/qualification (1215.181958ms)
+✔ all three new writers reconcile real failed COMMIT and lost acknowledgement, fence, reopen and replay once (6273.120917ms)
+✔ corrupt two-item receipt and fully funded forged discounted quote refuse without rewriting the save (1812.61475ms)
+✔ real SQLite cold reopen retains both lessons, exact replay, wear, Attack and defended due state (479.762125ms)
+✔ forged lesson receipts and contradictory acquired rows reopen as save_corrupt without rewriting (1059.062792ms)
+✔ each foreign lesson event identity refuses file-backed reopen after lawful later custody (692.044542ms)
+✔ real failed and lost-ack COMMIT keep all prior or all next lesson rows and retry once (238.42875ms)
+✔ defense hit/loss conjunction is guarded at saved-receipt and narration boundaries (265.696166ms)
+✔ trained player death cold reopens and recovers the exact worn lesson sword (283.130292ms)
+✔ authored training/shop/S2 orders retain conserved pennies and trained five-rat reward/storage (12519.863125ms)
+(node:8998) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ paid crossing, free Sedge lesson, six-room exploration and return reopen at committed boundaries (3404.94075ms)
+✔ forged ferry receipts and saved custody refuse typed corruption without changing the database (2908.778167ms)
+✔ real failed and uncertain COMMIT outcomes fence paid/free crossing and lesson then replay once (2926.796166ms)
+✔ Book projects an exact boarding control and restores one committed endpoint result (185.393042ms)
+✔ the original following Wren crosses once without rescue credit; separated Wren stays behind (505.7805ms)
+✔ actual Chapel death return reaches the dark-loft corpse without gear and retains every nested identity on cold reopen (1108.607083ms)
+✔ a transport-only cartridge validates crossing receipts without another producer (118.084458ms)
+ℹ tests 45
+ℹ suites 0
+ℹ pass 45
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19112.096416
+
+exit_status=0

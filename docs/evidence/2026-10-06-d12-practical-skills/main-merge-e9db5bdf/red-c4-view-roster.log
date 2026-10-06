@@ -1,0 +1,49 @@
+$ mise exec -- node --test --test-reporter=spec kernel/ts/test/c4_pack.test.ts
+✔ night admission visits each of six fixed slots once (41.241708ms)
+✖ attack H2 admits both exact co-present hounds with H2 as primary (36.001708ms)
+✔ admission omits an already engaged helper while retaining the free target (22.843875ms)
+✔ one pack round rotates the cursor and keeps one current job (17.640125ms)
+✔ two healthy rounds use the selected helper for its actual attack (14.669625ms)
+✔ due pruning repairs a departed primary before the player opportunity (12.114167ms)
+✔ an empty due roster closes once and narrates pack withdrawal (14.221291ms)
+✔ player Flee closes the whole roster and cancels its sole future round (19.966167ms)
+✔ player-first selected death skips retaliation and repairs to the surviving helper (21.2665ms)
+✔ even-round player death closes every pack member before shrine return (31.775833ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 9
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 937.87775
+
+✖ failing tests:
+
+test at kernel/ts/test/c4_pack.test.ts:21:1
+✖ attack H2 admits both exact co-present hounds with H2 as primary (36.001708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + undefined
+  - [
+  -   '00a60498-0ca6-8137-8172-7101d3767e0c',
+  -   '6c939a35-4efc-8a5c-8bc7-00f4c42bdfc2'
+  - ]
+  
+      at TestContext.<anonymous> (file://[redacted]/kernel/ts/test/c4_pack.test.ts:38:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [ '00a60498-0ca6-8137-8172-7101d3767e0c', '6c939a35-4efc-8a5c-8bc7-00f4c42bdfc2' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+exit_status=1

@@ -1,0 +1,39 @@
+(node:68462) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/food.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ actual Book Item Eat returns World once on normal and uncertain settlement and cold remount (1507.917209ms)
+(node:68463) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/practical_skills.test.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ Book teacher detail to learned patch/shop controls sends the exact loaded offer and refreshes after cold open (756.320875ms)
+✔ real SQLite carries the same apple through storage/drop/Forage/give/Eat and later consumers (1352.660625ms)
+✔ food-only cold-open refuses plausible bounded forgeries without writing bytes (460.204583ms)
+✔ real failed and committed/absent uncertain COMMIT preserve atomic Eat and exact retry (224.298583ms)
+✔ spent apple and another apple in a real fight corpse both reopen before a later Eat (428.619667ms)
+✔ both original 2p teachers learn below qualification, refuse low funds and replay one receipt on disk (924.081625ms)
+✔ careful harvest and discounted Buy retain historical truth across cold opens and later custody/qualification (531.746875ms)
+✔ all three new writers reconcile real failed COMMIT and lost acknowledgement, fence, reopen and replay once (1384.969208ms)
+✔ corrupt two-item receipt and fully funded forged discounted quote refuse without rewriting the save (353.103792ms)
+(node:68466) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://<WORKTREE>/mobile/app/book/presenter.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to <WORKTREE>/mobile/app/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ paid crossing, free Sedge lesson, six-room exploration and return reopen at committed boundaries (890.148208ms)
+✔ forged ferry receipts and saved custody refuse typed corruption without changing the database (773.990667ms)
+✔ real failed and uncertain COMMIT outcomes fence paid/free crossing and lesson then replay once (1379.3415ms)
+✔ Book projects an exact boarding control and restores one committed endpoint result (144.78125ms)
+✔ the original following Wren crosses once without rescue credit; separated Wren stays behind (335.73625ms)
+✔ actual Chapel death return reaches the dark-loft corpse without gear and retains every nested identity on cold reopen (1128.989375ms)
+✔ a transport-only cartridge validates crossing receipts without another producer (109.417166ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6955.429083
+
+exit_status=0

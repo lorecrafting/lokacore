@@ -122,6 +122,7 @@ function receipts(world: World, db: Db, meta: Meta, revision: number) {
   });
 }
 
+// Opted Buy quotes are already recomputed at their original revision by receiptHistory.
 // size: allow 50, bind one whole exchange to its command, item, payment and acquired event
 function shopReceipt(
   world: World,
@@ -140,7 +141,7 @@ function shopReceipt(
   if (
     p.provider_id !== provider ||
     !offer ||
-    p.quoted_price !== offer[p.type] ||
+    (!(p.type === 'buy' && shop.buy_discount) && p.quoted_price !== offer[p.type]) ||
     moves.length !== 1 ||
     !same(moves[0], {
       op: 'entity.transfer',

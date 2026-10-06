@@ -94,7 +94,14 @@ defmodule Loka.Content.RoomParts do
 
   defp harvest_text(detail),
     do:
-      for({k, v} <- Map.drop(Map.get(detail, "harvest", %{}), ["items"]), do: {["harvest", k], v})
+      for(
+        {k, v} <- Map.drop(Map.get(detail, "harvest", %{}), ["items", "careful"]),
+        do: {["harvest", k], v}
+      ) ++
+        if(detail["harvest"] && detail["harvest"]["careful"],
+          do: [{["harvest", "careful", "narration"], detail["harvest"]["careful"]["narration"]}],
+          else: []
+        )
 
   defp board_text(%{"notice_board" => board}) do
     [{["notice_board", "title"], board["title"]}] ++

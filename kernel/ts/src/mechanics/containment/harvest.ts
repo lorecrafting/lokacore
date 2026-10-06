@@ -10,18 +10,36 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import { selected } from './stock.ts';
-import { carrying } from './shared.ts';
+import { carryingExchange } from './shared.ts';
+import { status } from '../skills.ts';
 
-export function harvest(world: World, actor: CharacterId, target: EntityId, steps: Steps) {
+export function harvest(
+  world: World,
+  actor: CharacterId,
+  target: EntityId,
+  steps: Steps,
+  method?: 'careful',
+) {
   const detail = world.details[target],
     body = bodyOf(world, actor);
   if (!detail?.harvest || !body) return 'invalid_target' as const;
   if (detail.room !== world.state.containers[body]) return 'not_present' as const;
-  const ids = selected(world, detail.harvest.items, detail.room, 1, steps);
+  const careful = method && detail.harvest.careful;
+  if (method && (!careful || !status(world, actor, careful.skill, steps).usable))
+    return 'invalid_state' as const;
+  const count = careful ? careful.count : 1;
+  const ids = selected(world, detail.harvest.items, detail.room, count, steps);
   if (typeof ids === 'string') return ids;
-  if (!ids.length) return 'not_found' as const;
-  const code = carrying(world, body, steps)(ids[0]);
-  return code ?? { item: ids[0], body, detail };
+  if (ids.length !== count) return 'not_found' as const;
+  const code = carryingExchange(world, body, [], ids, steps);
+  return (
+    code ?? {
+      items: ids,
+      body,
+      detail,
+      narration: careful ? careful.narration : detail.harvest.narration,
+    }
+  );
 }
 
 export function decideHarvest(
@@ -31,7 +49,7 @@ export function decideHarvest(
   steps: Steps,
 ) {
   const p = command.payload;
-  const picked = harvest(world, p.actor_id, p.target_id, steps ?? { n: 0 });
+  const picked = harvest(world, p.actor_id, p.target_id, steps, p.method);
   if (typeof picked === 'string')
     return ['budget_exceeded', 'containment_cycle', 'precondition_failed'].includes(picked)
       ? {
@@ -39,24 +57,24 @@ export function decideHarvest(
           code: picked as 'budget_exceeded' | 'containment_cycle' | 'precondition_failed',
         }
       : rejected(picked);
-  const op = {
+  const ops = picked.items.map((item) => ({
     op: 'entity.transfer' as const,
     writer_group: 0,
-    entity_id: picked.item,
+    entity_id: item,
     source_id: picked.detail.room,
     destination_id: picked.body,
-  };
+  }));
   return accepted(
     world,
     'harvested',
-    [op],
-    [
-      event(world, command, mint, 1, {
+    ops,
+    picked.items.map((item, i) =>
+      event(world, command, mint, i + 1, {
         type: 'item_acquired',
-        item_id: picked.item,
+        item_id: item,
         holder_id: picked.body,
       }),
-    ],
-    [{ key: picked.detail.harvest!.narration, participants: { actor: picked.body } }],
+    ),
+    [{ key: picked.narration, participants: { actor: picked.body } }],
   );
 }

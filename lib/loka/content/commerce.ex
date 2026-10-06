@@ -25,8 +25,27 @@ defmodule Loka.Content.Commerce do
     items =
       for ref <- ids, not stocked?(ref, npc, m, defs), do: diag("UNRESOLVED_REFERENCE", path)
 
-    api ++ duplicate ++ funds ++ items
+    api ++ duplicate ++ funds ++ items ++ discount(m, defs, s, path)
   end
+
+  defp discount(m, defs, %{"buy_discount" => d, "offers" => offers}, path) do
+    valid =
+      m["requires"]["capabilities"]["skills"] == 1 and
+        match?({_, _, _}, Refs.resolve(d["skill"], "skill", m, defs)) and
+        d["numerator"] <= d["denominator"] and
+        prices?(offers, d["minimum"], d["numerator"])
+
+    if valid, do: [], else: [diag("RESOURCE_SPEC_INVALID", path)]
+  end
+
+  defp discount(_, _, _, _), do: []
+
+  defp prices?(offers, minimum, numerator),
+    do:
+      Enum.all?(
+        offers,
+        &(&1["buy"] >= minimum and &1["buy"] * numerator <= 9_007_199_254_740_991)
+      )
 
   defp api_check(manifest, path) do
     version =

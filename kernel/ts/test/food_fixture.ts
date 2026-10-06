@@ -5,15 +5,15 @@ import { read } from './read.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, newWorld, INSTALLED, type Cartridge, type World } from '../src/index.ts';
 import type { DefinitionRef, Command } from '../src/contracts.gen.ts';
-export const prefix = 'ashmere_missing_child@0.0.33';
+export const prefix = 'ashmere_missing_child@0.0.34';
 export const ref = (kind: string, key: string): DefinitionRef => ({
   cartridge_id: 'ashmere_missing_child' as never,
-  cartridge_version: '0.0.33' as never,
+  cartridge_version: '0.0.34' as never,
   kind,
   key: key as never,
 });
 export function bundle(change: (c: any) => void = () => {}) {
-  const c = structuredClone(read('protocol/fixtures/missing_child_v033_hash.json').value);
+  const c = structuredClone(read('protocol/fixtures/missing_child_v034_hash.json').value);
   c.entry.key = 'orchard';
   c.calendar.start = 0;
   c.resources[`${prefix}:resource/mv`].start = 50;

@@ -264,10 +264,9 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     if (next)
       placed.push({ ...button(next, ''), input: { scene: v.scene.scene, line: v.scene.index } });
   }
-  const notices = noticeButtons(v, button, names, text);
   return [
     ...placed,
-    ...notices,
+    ...noticeButtons(v, button, names, text),
     ...travel(v),
     ...doors,
     ...held,
@@ -288,10 +287,15 @@ function noticeButtons(
   return [...(v.notices ?? []), ...(v.notice_boards ?? []).flatMap((b) => b.notices)].flatMap((n) =>
     (n.actions ?? [])
       .filter(
-        (a) => a.available && !a.input.length && (a.target.kind === 'none' || a.target_ids?.length),
+        (a) =>
+          a.available &&
+          (!a.input.length ||
+            (a.command === 'harvest' && a.input.length === 1 && a.input[0] === 'method')) &&
+          (a.target.kind === 'none' || a.target_ids?.length),
       )
       .map((a) => ({
         ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
+        ...(a.input.includes('method') && { input: { method: 'careful' } }),
         detail_id: n.id,
       })),
   );
