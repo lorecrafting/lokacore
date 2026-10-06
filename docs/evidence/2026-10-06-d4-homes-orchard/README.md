@@ -3,7 +3,7 @@
 Source is built in `slice/d4-homes-orchard` from published B9 `b9dd1d9c`.
 The [adopted brief](../../briefs/chapter-one/d4-homes-orchard-brief-2026-10-05.md)
 and [decision](../../decisions/pm-decision-d4-homes-orchard-2026-10-05.md) govern it.
-Provisional source/evidence checkpoints are being frozen; integration with published C3/D1 remains required. Publication, browser and native proof
+Frozen provisional source: `347c8197303358136cfa7095016ca8b4bcff9fb4`. Branch: `slice/d4-homes-orchard`. Integration with published C3/D1, final release pins, and fresh independent primary/save/foundation review remain required. Publication, browser and native proof
 remain null; this task authorizes no preview or owner-save access. C3/D1 publication must
 be integrated before final successor pins and independent reviews.
 
@@ -60,3 +60,5 @@ Eat reuses ordinary transfer and recovery adjustment; receipt history remains th
 authority. Shared merge overlap: fresh allocation/known entities and containment (C3),
 item offers/invocation and presenter receipt routing (C3/D1), schemas/generated contracts/
 release pins (all). Preserve C3 corpse detail/Take and population guards during integration.
+
+The [checkpoint metadata](metadata.json) distinguishes completed local evidence from pending integration/review/publication. [SHA256SUMS](SHA256SUMS) covers retained evidence bytes; [verification](sha256-verify.log) is not self-listed. Normal hooks passed on the source commit (630 docs, zero broken/unreachable links).
