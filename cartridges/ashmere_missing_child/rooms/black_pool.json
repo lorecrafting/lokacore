@@ -1,0 +1,15 @@
+{
+  "title": "room.black_pool.title",
+  "description": "room.black_pool.description",
+  "exits": {
+    "north": {
+      "to": "drowned_oak"
+    },
+    "east": {
+      "to": "fox_hollow"
+    },
+    "south": {
+      "to": "fishing_shallows"
+    }
+  }
+}
