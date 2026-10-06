@@ -41,3 +41,5 @@ Follow [the workflow](../../WORKFLOW.md): developer works in its own branch/work
 [Final integrated source proof](../../evidence/2026-10-06-d1-ferry-isle-publication/README.md) pins the local successor; hosted review/CI/publication remain pending.
 
 [TypeScript CI portability correction](../../evidence/2026-10-06-d1-ci-portability/README.md) retains the original hosted failure and controlled authored-source red/green proof.
+
+Final browser Book proof and scoped review corrections: [production ferry journey and controlled real corpse recovery](../../evidence/2026-10-06-d1-browser-book/README.md).

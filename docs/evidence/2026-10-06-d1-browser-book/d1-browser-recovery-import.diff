@@ -1,0 +1,31 @@
+diff --git a/mobile/app/App.tsx b/mobile/app/App.tsx
+index 43395424..5b011752 100644
+--- a/mobile/app/App.tsx
++++ b/mobile/app/App.tsx
+@@ -18,7 +18,7 @@ import type { Db } from '../authority/local-story/store.ts';
+ import { webDb } from './sqlite-web.ts';
+ import Book, { type Shell } from './book/Book.tsx';
+ import { hint } from './book/model.ts';
+-import chapter from '../../protocol/fixtures/missing_child_v030_hash.json';
++import chapter from '../../protocol/fixtures/d1-recovery-browser-fixture.json';
+ import { SaveError } from './SaveError';
+ 
+ // The bundled fonts (OFL, book/fonts/OFL-*.txt); the shell loads them, the renderer only names them.
+diff --git a/mobile/app/e2e.config.ts b/mobile/app/e2e.config.ts
+index 1dd4cb9c..33678791 100644
+--- a/mobile/app/e2e.config.ts
++++ b/mobile/app/e2e.config.ts
+@@ -6,11 +6,11 @@ export default {
+     {
+       engine: web(),
+       app: {
+-        url: 'http://127.0.0.1:19106',
++        url: 'http://127.0.0.1:19216',
+         command: {
+           executable: 'node',
+           args: ['preview-server.cjs'],
+-          env: { LOKA_PREVIEW_PORT: '19106', LOKA_METRO_PORT: '19107' },
++          env: { LOKA_PREVIEW_PORT: '19216', LOKA_METRO_PORT: '19217' },
+           startupTimeout: 120_000,
+         },
+       },

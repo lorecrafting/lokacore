@@ -1,0 +1,5 @@
+Configured workflow redactor on controlled real checkout/scratch inputs: unredacted control rejects; configured redactor passes; JSON remains valid; exit 0.
+Independent Python SHA-256 over controlled fixture canonical bytes: 6b1ec4279bdeee224cf7f460f5d71b2a28d9a2d5190a180562202aa7a5c6f3df.
+Exact source b0f37b0768825f0952c8a2a1f525e992923fddfc: production browser exit 0; controlled browser exit 0; full headless app exit 0.
+Focused final Notice pre-fix control exit 1 (33 pass, one intended failure); restored focused suite exit 0 (34 pass).
+Transport controls hidden browser control exit 1 (old movement/Maud pass; D1 fails); restored production browser exit 0.
