@@ -487,3 +487,5 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [C5 final primary source review](2026-10-06-c5-final-primary-review.md): exact source `93f7bb25`, CHANGES REQUIRED; alternating hound refresh faults, off-cadence expiry faults, noncombat death leaves bleeding active, and fatal bleed lacks its typed cause. Independent controlled reproductions; baseline 15/15 and schema sweep 56/56 pass.
 
 - [C5 final save/protocol second opinion](2026-10-06-c5-final-primary-review.md#independent-saveprotocol-second-opinion): verbatim CHANGES REQUIRED at source `93f7bb25`; confirms FP1/FP2 and adds SO3 Elixir mixed bleed/sight binding parity and SO4 partial cancellation binding validation.
+
+- [C5 scoped fix round 1](2026-10-06-c5-final-primary-review.md#scoped-fix-round-1--changes-required): source `c04a5c0f`, CHANGES REQUIRED; FP1/FP3/FP4/SO3/SO4 closed, FP2 remains in round-first refresh of an off-cadence expiry. Independent real-command reproduction and six focused mutation controls; TS/SQLite19/19, Elixir12/12, schema59/59.

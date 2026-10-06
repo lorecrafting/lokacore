@@ -55,3 +55,30 @@ The four-way discriminator does not reject partial bindings. Validation accepts 
 
 Checks/limits: 13 focused TypeScript tests passed; an in-memory cadence-guard mutant failed the expected fixture. The passing suite misses the reproduced scenarios above. Frozen v035/v036/combat fixtures are unchanged; v037 loads with the stated hash. Reviewed receipt replay, transaction fencing and six SQLite fault cases; did not rerun SQLite, full CI or mobile/native work. Browser retry remains a risk observation, not defect evidence. No files or comments changed.
 ```
+## Scoped fix round 1 — CHANGES REQUIRED
+
+**Exact fix head:** `c04a5c0fd962c8e6fd9e79c5a99c472c1c33c940`, including spec-first commit `670c0fa6`. Reviewed only the six open findings, the fix diff and affected callers. **FP1, FP3, FP4, SO3 and SO4 are closed. FP2 remains open.** SO1 overlaps closed FP1; SO2 overlaps remaining FP2.
+
+- **FP1 closed:** active refresh retains the original source. The actual alternating pack opportunity now succeeds and preserves its pending job/cadence. Replacing retained source with current attacker again makes the focused second-hound test fail.
+- **FP3 closed:** shared player return clears C5 before restoring the body; cleanup avoids cancelling an already completed/cancelled occurrence. The real short-water expiry test returns HP10 with inactive bleed and a cancelled job, and the later old tick leaves HP10. Removing shared cleanup makes that test fail. Combat and bleed deaths still pass.
+- **FP4 closed:** fatal bleed supplies `cause: "bleeding"`; the existing death/event contract admits it, preserves original hound provenance and null credit, and produces no fake melee event. Removing that cause makes the actual fatal-tick assertion fail.
+- **SO3 closed:** Elixir explicitly rejects `sight` in a bleed schedule. The shared literal mixed-binding case fails if that rejection is removed; restored focused Elixir tests pass.
+- **SO4 closed:** standard `dependentRequired` is implemented in both validators and the schema compiler; the cancellation body/generation pair requires both fields, while the existing discriminator excludes competing complete bindings. Generated cancellation types preserve that relationship. Removing TypeScript dependent-required enforcement makes the partial-binding test fail. The new checks keep valid encounter/sight/water cancellation forms.
+
+### FP2 remaining direct-consumer failure
+
+**Blocker — `kernel/ts/src/foundation/compose_bleed.ts:19` and `lib/loka/core/compose_bleed.ex:52`.** Removing `next_tick_at <= ends_at` fixes ordinary off-cadence expiry, including real SQLite reopen. But the completed-job branch still requires strictly advancing `next_tick_at`, rejecting the explicitly selected no-damage reschedule when a round refreshes an expiry before the future cadence.
+
+Independent real-command reproduction on the corrected source, using the existing controlled C5 fixture (seed `[1,2,3,4]`, hound hit100%, player hit0%, no dodge):
+
+1. Attack at64800; first hound wound at64950. Flee; elapsed to64975; Move back along the reciprocal exit; Attack again.
+2. Settle tick65050 and round65125, which refreshes end65425. Flee; settle65150 and65250; elapsed to65275.
+3. Move back and Attack at65275, making the next round due65425. Choose a command ID whose resulting round JobId sorts before the bleed JobId (the independent control checked IDs20 through39 until that canonical order was present).
+4. Settle tick65350: active bleed has `next_tick_at=65450`, `ends_at=65425`, with its expiry job due65425. Both current jobs are confirmed due65425.
+5. Elapsed65425 runs the round first: its positive hit extends end65725. The following expiry delivery correctly requests a fresh job at65450 without HP loss and preserves `next_tick_at=65450`. Composition returns `fault/precondition_failed` on the bleed target because the completed-job cadence predicate requires `65450 > 65450`.
+
+Temporarily allowing equality in that predicate makes this exact real-command control pass with end65725 and cadence65450; the temporary edit was restored. The fix must distinguish a legitimate delivery before the next tick from an actual tick, preserving cadence advancement when damage is due and exact occurrence validation. Cover this round-first former-expiry path in both portable semantics and the real consumer, with reopen as appropriate. This is the affected direct consumer required by the existing C5 equal-time clause, not a reopened unrelated area.
+
+Verification on unchanged fix head: **19/19 focused TypeScript/kernel/real-SQLite tests; 12/12 Elixir bleed/contracts tests; schema sweep59/59**. Individually reverting FP1, ordinary FP2, FP3, FP4, SO3 and SO4 made their focused tests fail; Elixir used `mix test --force`. The independent remaining-FP2 control fails on the exact fix head. All mutations and temporary tests were restored; only this record/index are committed. No browser, native runtime or owner save was used in this re-review.
+
+Ponytail Review: the fixes reuse the existing provenance, death, delta and schema owners. No separate complexity finding. Keep the remaining fix within the current cadence check and its real job consumer.
