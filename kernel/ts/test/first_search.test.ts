@@ -106,7 +106,8 @@ test('quest resolution delivers activation to its evidenced actor and never rest
   assert.equal(d.events[0].actor_id, actor);
   assert.equal(d.events[0].causation_id as string, e.id);
   assert.equal(admit('reaction', d).kind, 'accepted');
-  assert.equal(admit('movement', d).kind, 'fault');
+  // Movement now composes quest for patrol; barrier remains an unrelated owner.
+  assert.equal(admit('barrier', d).kind, 'fault');
   for (const state of [
     'active',
     'objectives_complete',

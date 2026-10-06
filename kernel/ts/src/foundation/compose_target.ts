@@ -4,7 +4,6 @@ import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
  * Patrol uses the exact quest instance; escort retains its actor target.
  * Writer conflicts use this identity before any precondition is checked.
  */
-// size: allow 45, exhaustive mutation target mapping includes the separate patrol row
 export function target(op: DeltaOp): MutationTarget {
   if ('continuation_id' in op) return { kind: 'choice', continuation_id: op.continuation_id };
   if (op.op === 'liquid.set' || op.op === 'fuel.set')

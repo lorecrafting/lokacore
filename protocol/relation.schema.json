@@ -373,7 +373,8 @@
         "failed",
         "completed"
       ],
-      "description": "Together, awaiting ordinary player entry, explicitly paused, fatally failed or terminally completed."
+      "description": "Together, awaiting ordinary player entry, explicitly paused, fatally failed or terminally completed.",
+      "examples": ["together"]
     },
     "PatrolRelation": {
       "type": "object",
@@ -432,7 +433,20 @@
         "status"
       ],
       "additionalProperties": false,
-      "description": "Quest-instance-keyed original leader attempt: immutable actor/body/NPC/activation identity, accepted command attempt, bounded cursor/unique checkpoint credit and explicit recovery lifecycle."
+      "description": "Quest-instance-keyed original leader attempt: immutable actor/body/NPC/activation identity, accepted command attempt, bounded cursor/unique checkpoint credit and explicit recovery lifecycle.",
+      "examples": [{
+        "kind": "patrol",
+        "actor_id": "11111111-2222-4333-8444-555555555555",
+        "body_id": "22222222-2222-4333-8444-555555555555",
+        "npc_id": "33333333-2222-4333-8444-555555555555",
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "continuation_id": "55555555-2222-4333-8444-555555555555",
+        "choice_id": "start_rounds",
+        "attempt_id": "66666666-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "credit": [],
+        "status": "together"
+      }]
     },
     "PatrolDraw": {
       "type": "object",
@@ -459,7 +473,13 @@
         "status"
       ],
       "additionalProperties": false,
-      "description": "The exact quest instance, accepted attempt, occurrence cursor and lifecycle drawn on a patrol control; a fresh invocation cannot reuse a stale leg."
+      "description": "The exact quest instance, accepted attempt, occurrence cursor and lifecycle drawn on a patrol control; a fresh invocation cannot reuse a stale leg.",
+      "examples": [{
+        "quest_instance_id": "44444444-2222-4333-8444-555555555555",
+        "attempt_id": "66666666-2222-4333-8444-555555555555",
+        "cursor": 0,
+        "status": "together"
+      }]
     }
   }
 }
