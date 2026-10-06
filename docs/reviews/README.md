@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): source `de1ea634fdec61f5e13aa1acc0c3e59fda7137e0`, evidence `d5c2ea2f0da85f6474f281f10e2145c3f25368d8`, independent CHANGES REQUIRED; D2-P1 pending Read remount confirms history without recovering the actual Book route.
+- [D2 public Priory and held books primary review](2026-10-05-d2-priory-books-primary-review.md): original source `de1ea634`, CHANGES REQUIRED; scoped fix/integration source `de756710ea10322bd36ec339bd1d9abf1850067b`, evidence `c7139a67`, independent APPROVE, D2-P1 closed. Actual Book recovery red/green, 28 focused checks, route refusal/precedence and v027/D5 pins verified; headless proof only.
 - [Beads Rust pilot](2026-10-06-beads-rust-pilot-review.md): source `6791cc2d`; initial CHANGES REQUIRED for BRP-1, scoped fix `478f1b32`, APPROVE; the staged-export guard rejects a planted bad index blob and BRP-1 is closed.
 
 - [D1 ferry and Sedge plan](2026-10-05-d1-ferry-plan-review.md): exact planning head `323f9274`, initial CHANGES REQUIRED; scoped fix `19984c0d`, APPROVE, D1P-01 active owner-rules index link closed; no source or D1 proof claimed.

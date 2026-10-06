@@ -1,6 +1,9 @@
 # D2 public Priory and held books — independent primary review
 
-**Verdict: CHANGES REQUIRED.** Fresh independent Codex primary reviewer; authored
+**Current scoped verdict: APPROVE.** D2-P1 is closed by the independent round-1
+fix recheck below.
+
+**Initial verdict: CHANGES REQUIRED.** Fresh independent Codex primary reviewer; authored
 none of the implementation. Source `de1ea634fdec61f5e13aa1acc0c3e59fda7137e0`,
 evidence head `d5c2ea2f0da85f6474f281f10e2145c3f25368d8`, unpublished branch
 `chapter-one/d2-priory-books`. Review delta starts at its actual published base
@@ -75,3 +78,37 @@ and independent v027 pins is `de756710ea10322bd36ec339bd1d9abf1850067b`.
 [Exact-source checks, controls and integration evidence](../evidence/2026-10-05-d2-priory-books/round-1.md)
 retain the fix and its observed red/green controls. This disposition does not
 change the independent verdict.
+
+## Independent round-1 fix recheck — APPROVE
+
+Fresh independent primary fix reviewer; authored none of the implementation.
+Reviewed exact source `de756710ea10322bd36ec339bd1d9abf1850067b` through evidence-only
+head `c7139a6797484f7ef77eb48640e7d426ec805d09` in a separate detached checkout.
+Scope: D2-P1 fix/direct callers and D5/v027 integration; settled original mechanics
+were not reopened. **D2-P1 closed; no new findings.**
+
+Actual Book captures the invocation pending at mount, admits only its accepted
+Read completion and restores that exact projected item/parent route once beneath
+chapter Continue. Ward and Bell both exercise the real SQLite lost-acknowledgement
+path. Later World return and pulse do not restore it again. Controlled projected
+route probes preserve scene/combat precedence, refuse a missing target without
+another-book fallback, and suppress closed-container recovery while retaining the
+original item's exact history.
+
+Independent bounded verification, using `mise exec --`:
+
+- `node --test` across Book/authority Priory, kernel Priory/contract/Deep Fen and App
+  chapter files: 28/28 pass. App `tsc --noEmit`: exit 0.
+- In the throwaway checkout, removing only the settlement route makes the actual
+  Book regression fail with `[]` after Continue (exit 1). Restoring exact source
+  makes both Book Priory tests pass (2/2); no mutant or source edit is retained.
+- The v027 Python oracle reproduces hash
+  `2fda0a7f0a571c080c3d9d3969324a1a4920881ea48adab178684fc9330f94de`
+  and all 127 IDs without a fixture diff. Published D5 room rows/catalog values and
+  predecessor D5/provisional D2 fixture bytes remain intact; v027/API1.24 agree.
+- All 11 round-1 retained evidence hashes verify; observed developer red/green
+  outcomes agree with the independently repeated route control.
+
+Ponytail Review: lean already; no complexity finding. Full publication checks,
+save/protocol opinion, hosted CI and publication remain separate gates. Browser,
+native and owner-save proof remain null; this verdict claims headless proof only.
