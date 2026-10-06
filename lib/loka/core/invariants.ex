@@ -3,8 +3,7 @@ defmodule Loka.Core.Invariants do
   @moduledoc """
   Pure checks for the invariants `protocol/invariants.json` marks `elixir_and_typescript`, by id
   (docs/ROADMAP.md, verification harness). `kernel/ts/src/runtime/invariants.ts` is the TypeScript
-  twin; both run the portable composition invariant fixtures.
-  `check(id, observation)` is true when the invariant holds. Observation fields:
+  twin runs the same portable composition invariant fixtures.
   - `"state"`, `"delta"`, `"result"`: a base state, a StateDelta and its
     `Loka.Core.Compose.compose/2` result;
   - `"resolution"`: a TargetResolution;
@@ -267,6 +266,7 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "quest.transition"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "choice.open"}), do: {nil, "pending"}
   defp link(%{"op" => "choice.resolve"}), do: {"pending", "resolved"}
+  defp link(%{"op" => "choice.attempt"}), do: {"pending", "pending"}
   defp link(%{"op" => "choice.close"}), do: {"pending", "closed"}
   defp link(%{"op" => "time.advance"} = op), do: {op["from"], op["to"]}
   defp link(%{"op" => "fuel.set"} = op), do: {op["from"], op["to"]}

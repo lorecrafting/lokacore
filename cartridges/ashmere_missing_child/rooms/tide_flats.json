@@ -1,0 +1,9 @@
+{
+  "title": "room.tide_flats.title",
+  "description": "room.tide_flats.description",
+  "exits": {
+    "west": {
+      "to": "old_causeway"
+    }
+  }
+}

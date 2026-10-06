@@ -64,8 +64,14 @@ defmodule Loka.Core.Compose do
     pairs = Enum.zip(ops, Enum.drop(ops, 1) ++ [nil])
 
     case Enum.reduce_while(pairs, %{}, &step_pair(&1, &2, {state, horizon})) do
-      %{"fault" => _} = f -> f
-      overlay -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
+      %{"fault" => _} = f ->
+        f
+
+      overlay ->
+        case Loka.Core.ComposeChoice.pending_at_limit(overlay) do
+          nil -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
+          t -> fault("precondition_failed", t)
+        end
     end
   end
 
@@ -197,25 +203,13 @@ defmodule Loka.Core.Compose do
     )
   end
 
-  defp apply_op(%{"op" => "choice.open"} = op, t, ctx) do
-    row = Map.take(op, ~w(actor_id source beat roles choice_ids quest_instance_id))
-    check(read(t, ctx) == nil, Map.put(row, "status", "pending"))
-  end
-
-  defp apply_op(%{"op" => "choice.resolve", "choice_id" => c} = op, t, ctx) do
-    row = read(t, ctx)
-
-    check(
-      row["status"] == "pending" and c in row["choice_ids"] and
-        row["opened_revision"] == op["expected_revision"],
-      Map.merge(row || %{}, %{"status" => "resolved", "choice_id" => c})
-    )
-  end
-
-  defp apply_op(%{"op" => "choice.close"}, t, ctx) do
-    row = read(t, ctx)
-    check(row["status"] == "pending", Map.put(row || %{}, "status", "closed"))
-  end
+  defp apply_op(%{"op" => "choice." <> _} = op, t, ctx),
+    do:
+      Loka.Core.ComposeChoice.transition(
+        op,
+        read(t, ctx),
+        get_in(elem(ctx, 0), ["choices", op["continuation_id"]])
+      )
 
   defp apply_op(%{"op" => "job." <> _} = op, t, {_, horizon, _} = ctx),
     do: Loka.Core.ComposeEncounter.job(op, read(t, ctx), horizon)

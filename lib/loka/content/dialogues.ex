@@ -1,27 +1,6 @@
 # size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
-  @moduledoc """
-  Dialogues in a v2 source (dialogue.schema.json DialogueDefinition; 06 §8, §17, §33), twin of
-  `kernel/ts/src/content/cartridge_dialogues.ts`: each dialogue's owner (dialogue@1) and each
-  fact.assign's (fact@1, by its fact_changed) is required; its key is no registered command's,
-  action's, recipe's or quest's (DUPLICATE_DEFINITION: its talk is an ActionSet identity); its
-  prompt, labels and narrations have catalog entries (unless the catalog was rejected,
-  `:unknown`); its speaker, roles and quest name an NPC, item or quest of this cartridge; its
-  speaker is one of its npc roles (else UNRESOLVED_REFERENCE at npc); no role is named actor
-  (DUPLICATE_DEFINITION); it has a choice (SCHEMA_VIOLATION too_few_items: the subset has no
-  minProperties); each accept names a quest of this cartridge, in a dialogue without a quest, on a
-  choice without a hand_over (else OUTCOME_MISMATCH: accepting would resolve, or activation and
-  acquisition conflict); each hand_over gives an item role to an npc role (else
-  UNRESOLVED_REFERENCE); a speaker may have several dialogues;
-  each fact.assign names a fact with a value of its type. Its policy tree is checked with every
-  other (`conditions/1`, `Loka.Content.Checks`). Each story point (cartridge.schema.json
-  StoryPointDefinition; 23 §3) requires dialogue@1 (by its story_point_reached) and has an
-  outcome (SCHEMA_VIOLATION too_few_items); each outcome's trigger names a dialogue of this
-  cartridge and one of its choices (UNRESOLVED_REFERENCE), a site no other outcome names
-  (DUPLICATE_DEFINITION), in a dialogue that resolves a quest, so its choice is made once
-  (OUTCOME_MISMATCH). Chapter titles and story-point/outcome references resolve; only the opening
-  marker is unconditional, and counted quest/choice triggers are unambiguous (mechanics.md Chapters).
-  """
+  @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
 
@@ -217,10 +196,19 @@ defmodule Loka.Content.Dialogues do
   defp dialogue({rel, d}, ctx) do
     owned(at(rel, []), "dialogue", ctx.kinds) ++
       own(rel, d, ctx) ++
-      texts(rel, [{["prompt"], d["prompt"]}], ctx.text) ++
+      metadata(rel, d, ctx.text) ++
       riddle(rel, d, ctx) ++
       refs(rel, d, ctx) ++
       Enum.flat_map(d["choices"], &choice(rel, &1, d, ctx))
+  end
+
+  defp metadata(rel, d, text) do
+    bound =
+      if get_in(d, ["riddle", "wrong_limit"]) != nil and d["quest"] == nil,
+        do: [diag("OUTCOME_MISMATCH", at(rel, ["riddle", "wrong_limit"]))],
+        else: []
+
+    texts(rel, [{["prompt"], d["prompt"]}, {["label"], d["label"]}], text) ++ bound
   end
 
   defp riddle(rel, %{"riddle" => r, "choices" => choices}, ctx) do
@@ -288,7 +276,7 @@ defmodule Loka.Content.Dialogues do
 
   defp sequence(rel, steps, o, ctx) do
     Enum.flat_map(Enum.with_index(Map.get(o, "sequence", [])), fn {s, i} ->
-      if(s["op"] == "skill.acquire",
+      if(s["op"] in ["skill.acquire", "topic.grant"],
         do: [],
         else:
           owned(at(rel, steps ++ ["sequence", i, "op"]), "fact_changed", ctx.events) ++
@@ -361,6 +349,7 @@ defmodule Loka.Content.Dialogues do
 
   defp texts(rel, pairs, text) do
     for {steps, key} <- pairs,
+        key != nil,
         not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => key})
   end

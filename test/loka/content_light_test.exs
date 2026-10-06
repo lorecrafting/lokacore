@@ -6,13 +6,7 @@ defmodule Loka.ContentLightTest do
 
   defp compile(dir, replacements) do
     File.cp_r!(@src, dir)
-
-    for {path, value} <- replacements do
-      if value == nil,
-        do: File.rm!(Path.join(dir, path)),
-        else: File.write!(Path.join(dir, path), JSON.encode!(value))
-    end
-
+    for {path, value} <- replacements, do: File.write!(Path.join(dir, path), JSON.encode!(value))
     Loka.Content.compile(dir)
   end
 
@@ -79,48 +73,26 @@ defmodule Loka.ContentLightTest do
   end
 
   # Break: actual fuel or darkness compiles under API1.18 despite the API1.19 wire fields.
-  test "actual light fields enforce the API1.19 floor", %{tmp_dir: dir} do
+  test "actual light fields enforce the API1.19 floor" do
     manifest = put_in(source("cartridge.json"), ["requires", "kernel_api", "at_least"], "1.18")
 
-    for fields <- ~w(fuel darkness unused) do
-      replacements =
-        for {path, field, keep} <- [
-              {"items/torch.json", "fuel", "fuel"},
-              {"items/lamp_oil.json", "fuel", "fuel"},
-              {"rooms/well_shaft.json", "dark_description", "darkness"}
-            ],
-            fields != keep,
-            into: %{},
-            do: {path, Map.delete(source(path), field)}
+    for {name, fields} <- [
+          {"fuel", %{"fuel" => source("items/torch.json")["fuel"]}},
+          {"darkness", %{"dark_description" => "room.well_shaft.dark"}},
+          {"unused", %{}}
+        ] do
+      # Controlled source declarations keep this check independent of later chapter consumers.
+      result = Loka.Content.Requires.features(manifest, [{name, [], fields}])
 
-      # Isolate the light boundary from the later API1.20 liquid consumer.
-      water = %{
-        "liquids/water.json" => nil,
-        "items/waterskin.json" => Map.delete(source("items/waterskin.json"), "vessel"),
-        "items/spare_waterskin.json" =>
-          Map.delete(source("items/spare_waterskin.json"), "vessel"),
-        "rooms/well_lane.json" =>
-          update_in(
-            source("rooms/well_lane.json"),
-            ["details", "well"],
-            &Map.delete(&1, "liquid_source")
-          )
-      }
-
-      inputs = replacements |> Map.merge(water) |> Map.put("cartridge.json", manifest)
-      result = compile(Path.join(dir, fields), inputs)
-
-      if fields == "unused" do
-        assert {:ok, _, []} = result
+      if name == "unused" do
+        assert result == []
       else
-        assert {:error, diagnostics} = result
-
-        assert Enum.map(diagnostics, &Map.take(&1, ~w(code path))) == [
+        assert [
                  %{
                    "code" => "KERNEL_API_RANGE_INVALID",
                    "path" => "cartridge.requires.kernel_api.at_least"
                  }
-               ]
+               ] = result
       end
     end
   end

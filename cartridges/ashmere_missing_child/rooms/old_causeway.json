@@ -1,0 +1,20 @@
+{
+  "title": "room.old_causeway.title",
+  "description": "room.old_causeway.description",
+  "exits": {
+    "north": {
+      "to": "marsh_light"
+    },
+    "east": {
+      "to": "tide_flats"
+    }
+  },
+  "details": {
+    "carved_fox": {
+      "aliases": [
+        "fox"
+      ],
+      "description": "detail.carved_fox.description"
+    }
+  }
+}

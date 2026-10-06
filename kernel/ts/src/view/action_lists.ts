@@ -66,8 +66,6 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
           : [shown];
       });
   const liquid = (id: string) => liquidActions(world, actor, id, set, steps);
-  const readableRecipe = (a: Offered) =>
-    !!a.recipe && !!world.details[detailOf(world, a.recipe.target)].readable;
   return {
     notice: (id: string) =>
       listed((a) => noticeOffer(world, a, id), id, 'inspectable_details').concat(liquid(id)),
@@ -75,7 +73,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       ...listed(
         (a) =>
           a.target.kind === 'none' &&
-          !readableRecipe(a) &&
+          !detailRecipe(world, a) &&
           !door(a) &&
           !equip(a) &&
           !light.VERBS.includes(a.command) &&
@@ -172,8 +170,10 @@ function advertise(
       : undefined;
   const talk =
     a.command === 'talk' &&
-    (speaks(world, target) ? talkRefused(world, actor, target) && 'invalid_state' : 'not_found');
-  const code = !holds(world, actor, a.policy.root, { target, steps: { n: 0 } })
+    (speaks(world, target)
+      ? talkRefused(world, actor, target, a.dialogue, steps) && 'invalid_state'
+      : 'not_found');
+  const code = !holds(world, actor, a.policy.root, { target, steps })
     ? 'invalid_state'
     : talk ||
       (a.command === 'flee' && !escapeDirections(world, actor).length
@@ -263,7 +263,8 @@ function noticeOffer(world: World, a: Offered, id: string) {
     (a.command === 'harvest' && !!world.details[id]?.harvest) ||
     !!(
       a.recipe &&
-      world.details[detailOf(world, a.recipe.target)]?.readable &&
+      (world.details[detailOf(world, a.recipe.target)]?.readable ||
+        world.details[detailOf(world, a.recipe.target)]?.perception) &&
       detailOf(world, a.recipe.target) === id
     )
   );
@@ -288,3 +289,8 @@ function lightTargets(world: World, actor: CharacterId, a: Offered, id?: string)
     ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]
     : undefined;
 }
+
+const detailRecipe = (world: World, a: Offered) => {
+  const detail = a.recipe && world.details[detailOf(world, a.recipe.target)];
+  return !!detail && !!(detail.readable || detail.perception);
+};

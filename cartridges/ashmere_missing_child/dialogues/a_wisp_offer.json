@@ -1,0 +1,67 @@
+{
+  "npc": "wisp",
+  "label": "actions.accept_wisp",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "light_off"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_wisp_discovered",
+          "equals": true
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "any",
+            "items": [
+              {
+                "op": "quest_state",
+                "quest": "wisp_ward",
+                "state": "active"
+              },
+              {
+                "op": "quest_state",
+                "quest": "wisp_ward",
+                "state": "objectives_complete"
+              },
+              {
+                "op": "quest_state",
+                "quest": "wisp_ward",
+                "state": "resolved"
+              },
+              {
+                "op": "quest_state",
+                "quest": "wisp_ward",
+                "state": "failed"
+              },
+              {
+                "op": "quest_state",
+                "quest": "wisp_ward",
+                "state": "abandoned"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.wisp.offer",
+  "roles": {
+    "wisp": {
+      "role": "npc",
+      "npc": "wisp"
+    }
+  },
+  "choices": {
+    "accept": {
+      "label": "dialogue.wisp.accept",
+      "narration": "narration.wisp.accept",
+      "accept": "wisp_ward"
+    }
+  }
+}

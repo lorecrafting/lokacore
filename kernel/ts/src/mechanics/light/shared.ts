@@ -1,3 +1,5 @@
+import { living } from '../death/shared.ts';
+import { value } from '../fact.ts';
 import {
   LIMITS,
   type CharacterId,
@@ -86,9 +88,19 @@ export function visible(
   id: string,
   steps: Steps = { n: 0 },
 ): boolean {
-  if (!dark(w, actor, steps)) return true;
   const body = bodyOf(w, actor),
-    room = body && w.state.containers[body];
+    here = body && w.state.containers[body];
+  const detail = w.details[id];
+  const entity = w.entities[id];
+  if (entity?.kind === 'npc' && entity.perception)
+    return (
+      living(w, id as EntityId) &&
+      w.state.containers[id] === here &&
+      value(w, actor, entity.perception.discovered) === true
+    );
+  if (!dark(w, actor, steps)) return true;
+  if (detail?.room === here && detail.perception?.self_luminous) return true;
+  const room = here;
   let at: string | undefined = id,
     owned = false;
   const seen = new Set<string>();

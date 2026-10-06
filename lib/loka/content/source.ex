@@ -27,6 +27,7 @@ defmodule Loka.Content.Source do
              | :story_point
              | :scene
              | :skill
+             | :topic
              | :liquid, String.t()}
 
   @doc """
@@ -109,6 +110,7 @@ defmodule Loka.Content.Source do
     "story_points" => :story_point,
     "scenes" => :scene,
     "skills" => :skill,
+    "topics" => :topic,
     "liquids" => :liquid
   }
 

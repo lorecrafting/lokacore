@@ -1,6 +1,6 @@
 {
   "movement": {
-    "spec": "21 \u00a75 Place/Room, Connection; 05 \u00a717; 04 \u00a75; 00 \u00a74.1 scan, \u00a74.10",
+    "spec": "21 §5 Place/Room, Connection; 05 §17; 04 §5; 00 §4.1 scan, §4.10",
     "contracts": [
       "RoomDefinition",
       "Connection",
@@ -17,7 +17,7 @@
     "implemented_in": "R5 S1 (#34) move; R5 S8 scan"
   },
   "description_variant": {
-    "spec": "21 \u00a76 InspectableDetail, DescriptionVariant; 21 \u00a77 TargetResolution; 04 \u00a714, \u00a717-\u00a718; 00a \u00a712",
+    "spec": "21 §6 InspectableDetail, DescriptionVariant; 21 §7 TargetResolution; 04 §14, §17-§18; 00a §12",
     "contracts": [
       "CommandPayload",
       "InspectableDetail",
@@ -38,7 +38,7 @@
     "implemented_in": "R5 S1 (#34) look; R5 S2 look at a detail; R5 S3 description variants"
   },
   "inspectable_detail": {
-    "spec": "21 \u00a76 InspectableDetail; 14 \u00a7R5",
+    "spec": "21 §6 InspectableDetail; 14 §R5",
     "contracts": [
       "InspectableDetail",
       "Alias"
@@ -56,7 +56,7 @@
     "implemented_in": "R5 S2 details; R5 S3 lock requirement"
   },
   "target_resolution": {
-    "spec": "21 \u00a77 TargetSpec / TargetResolution; 04 \u00a717-\u00a718",
+    "spec": "21 §7 TargetSpec / TargetResolution; 04 §17-§18",
     "contracts": [
       "TargetSpec",
       "TargetResolution"
@@ -74,7 +74,7 @@
     "implemented_in": "R6P T"
   },
   "policy": {
-    "spec": "21 \u00a73.2, \u00a74 Policy; 06 \u00a721",
+    "spec": "21 §3.2, §4 Policy; 06 §21",
     "contracts": [
       "VersionedPolicy",
       "Policy"
@@ -91,7 +91,7 @@
     "implemented_in": "R5 S3 all, any, not"
   },
   "fact": {
-    "spec": "03 \u00a77, \u00a713; 21 \u00a73.9, \u00a74 Fact",
+    "spec": "03 §7, §13; 21 §3.9, §4 Fact",
     "contracts": [
       "FactSpec",
       "FactType",
@@ -111,7 +111,7 @@
     "implemented_in": "R5 S3 facts in state, fact_compare"
   },
   "resource": {
-    "spec": "21 \u00a74 Resource, \u00a77 Cost; 04 \u00a75.3 Resource adjustment, \u00a715 condition bands; 00 \u00a74 amendment, \u00a74.2 Regeneration, \u00a74.3 Resources",
+    "spec": "21 §4 Resource, §7 Cost; 04 §5.3 Resource adjustment, §15 condition bands; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources",
     "contracts": [
       "ResourceSpec",
       "RecipeCost",
@@ -136,7 +136,7 @@
     "implemented_in": "R5 S6b default HP/MA/MV pools, recipe costs and resource.adjust steps, 1 MV per move, hourly regeneration; Early R7/R8 G condition bands in GameView"
   },
   "containment": {
-    "spec": "21 \u00a78 Containment; 03 \u00a723; 04 \u00a75.3; 00 \u00a74.4; 00a \u00a75, \u00a712; mechanics.md containment@1 carrying",
+    "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12; mechanics.md containment@1 carrying",
     "contracts": [
       "ItemDefinition",
       "NpcDefinition",
@@ -168,7 +168,7 @@
     "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs; C1 c1-locks (#135) custody: take through open containers, contents in the GameView; M3 voluntary positive-load Take ceiling from cartridge mass/carry settings, bounded shared rule/projection query"
   },
   "action_recipe": {
-    "spec": "06 \u00a719 ActionSet algebra, \u00a720 ActionRecipe; 21 \u00a77 ActionRecipe / ComposedAction; 05 \u00a728; 04 \u00a75.2; ADR-016; 21 \u00a77 Check, Cost (time); 04 \u00a75.0",
+    "spec": "06 §19 ActionSet algebra, §20 ActionRecipe; 21 §7 ActionRecipe / ComposedAction; 05 §28; 04 §5.2; ADR-016; 21 §7 Check, Cost (time); 04 §5.0",
     "contracts": [
       "ActionRecipe",
       "RecipeStep",
@@ -194,7 +194,7 @@
     "implemented_in": "R5 S5 ActionSet algebra, perform, fact.assign and event.emit steps; R5 S6a luck check, failure outcome, duration"
   },
   "check": {
-    "spec": "21 \u00a77 Check; 21 \u00a74 Deterministic RNG; 04 \u00a75.0; 00a check_passed objectives",
+    "spec": "21 §7 Check; 21 §4 Deterministic RNG; 04 §5.0; 00a check_passed objectives",
     "contracts": [
       "RecipeCheck",
       "EventPayload",
@@ -214,7 +214,7 @@
     "implemented_in": "R5 S6a luck check in recipes, check_passed and check_failed; R5 S6b threshold check on a resource"
   },
   "schedule": {
-    "spec": "21 \u00a74 Time; 04 \u00a71, \u00a75.4; 00 \u00a74.2; command.schema.json LogicalTime; numeric-profile.md job CommandId",
+    "spec": "21 §4 Time; 04 §1, §5.4; 00 §4.2; command.schema.json LogicalTime; numeric-profile.md job CommandId",
     "contracts": [
       "CommandPayload",
       "LogicalTime",
@@ -240,7 +240,7 @@
     "implemented_in": "R5 S6a wait, time_window; Early R7/R8 S durable jobs, the due-job drain of every explicit advance (wait, a recipe's duration), run_job and its job CommandId"
   },
   "barrier": {
-    "spec": "21 \u00a75 Connection, Barrier; 05 \u00a717, \u00a725; 04 \u00a75.3 Lifecycle transition, \u00a77, \u00a719; 00 \u00a74.1 (amendment 2026-10-03: an item site)",
+    "spec": "21 §5 Connection, Barrier; 05 §17, §25; 04 §5.3 Lifecycle transition, §7, §19; 00 §4.1 (amendment 2026-10-03: an item site)",
     "contracts": [
       "BarrierDefinition",
       "BarrierState",
@@ -276,7 +276,7 @@
     "implemented_in": "R5 S7 open, close, lock, unlock, barrier_state, closed and locked exits; C1 c1-locks (#135) a barrier on an item (container lid), the door verbs by target_id"
   },
   "quest": {
-    "spec": "06 \u00a71, \u00a72, \u00a73 Objective credit/causation policy, \u00a74, \u00a75, \u00a743; 04 \u00a75.2; 03 \u00a712",
+    "spec": "06 §1, §2, §3 Objective credit/causation policy, §4, §5, §43; 04 §5.2; 03 §12",
     "contracts": [
       "QuestDefinition",
       "QuestObjective",
@@ -308,7 +308,7 @@
     "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal; C1 c1-journal (#138) selected lifecycle and outcome journal text"
   },
   "behavior": {
-    "spec": "06 \u00a713 Behavior/schedule profiles; 21 \u00a710",
+    "spec": "06 §13 Behavior/schedule profiles; 21 §10",
     "contracts": [
       "NpcDefinition"
     ],
@@ -326,7 +326,7 @@
     "implemented_in": "Early R7/R8 S an NPC's daily location schedule, run by schedule@1's jobs"
   },
   "calendar": {
-    "spec": "21 \u00a74 Time; command.schema.json LogicalTime",
+    "spec": "21 §4 Time; command.schema.json LogicalTime",
     "contracts": [
       "Calendar",
       "LogicalTime"
@@ -343,7 +343,7 @@
     "implemented_in": "Early R7/R8 S the start time of a fresh world; units stay the kernel's fixed ones"
   },
   "reaction": {
-    "spec": "21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4, \u00a79",
+    "spec": "21 §3.4, §11; 06 §14; 04 §5.2-§5.4, §9",
     "contracts": [
       "ReactionRule",
       "Policy",
@@ -367,7 +367,7 @@
     "implemented_in": "Early R7/R8 R reaction rules on fact_changed and entity_entered_room, a when policy, fact.assign consequences, delivered FIFO in the proposal under the deliveries, events and reaction_depth budgets"
   },
   "narration": {
-    "spec": "06 \u00a743; 04 \u00a75.2 steps 7-8, \u00a715; 21 \u00a74 NarrationSpec",
+    "spec": "06 §43; 04 §5.2 steps 7-8, §15; 21 §4 NarrationSpec",
     "contracts": [
       "Text",
       "RecipeNarration",
@@ -387,7 +387,7 @@
     "implemented_in": "Early R7/R8 N a recipe narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   },
   "dialogue": {
-    "spec": "06 \u00a717, \u00a718, \u00a733, \u00a737, \u00a738, \u00a743; 04 \u00a75.3 Choice/continuation resolution; 21 \u00a720; 03 \u00a714; 23 \u00a73; mechanics.md Chapters (C1 slice 9)",
+    "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3; mechanics.md Chapters (C1 slice 9)",
     "contracts": [
       "DialogueDefinition",
       "DialogueRole",
@@ -406,12 +406,16 @@
       "kernel/ts/src/commands/actions.ts",
       "kernel/ts/src/runtime/proposal.ts",
       "kernel/ts/src/view/view.ts",
-      "kernel/ts/src/content/cartridge_dialogues.ts"
+      "kernel/ts/src/content/cartridge_dialogues.ts",
+      "kernel/ts/src/mechanics/dialogue/selection.ts",
+      "kernel/ts/src/mechanics/dialogue/behavior.ts"
     ],
     "fixtures": [
       "protocol/fixtures/cartridge_ferry_hash.json",
       "protocol/fixtures/composition.json",
-      "protocol/fixtures/cartridge_chapters_hash.json"
+      "protocol/fixtures/cartridge_chapters_hash.json",
+      "protocol/fixtures/wisp_contracts.json",
+      "protocol/fixtures/wisp_attempts.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -420,7 +424,7 @@
     "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report; C1 c1-chapters derived chapter markers"
   },
   "attributes": {
-    "spec": "06 \u00a721 (amendment 2026-10-03); 00 \u00a74.3 (amendment 2026-10-03)",
+    "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
     "contracts": [
       "AttributeSpec",
       "Policy"
@@ -437,7 +441,7 @@
     "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare"
   },
   "equipment": {
-    "spec": "21 \u00a78 Equipment (amendment 2026-10-03); 00 \u00a74.4 (amendment 2026-10-03)",
+    "spec": "21 §8 Equipment (amendment 2026-10-03); 00 §4.4 (amendment 2026-10-03)",
     "contracts": [
       "SlotKey",
       "ItemDefinition",
@@ -462,7 +466,7 @@
     "implemented_in": "C1 c1-equipment (#134) twelve slots as holders in the body; wear and remove"
   },
   "position": {
-    "spec": "21 \u00a728 position@1 (amendment 2026-10-03); 00 \u00a74.3 Positions (amendment 2026-10-03)",
+    "spec": "21 §28 position@1 (amendment 2026-10-03); 00 §4.3 Positions (amendment 2026-10-03)",
     "contracts": [
       "CommandPayload",
       "GameView",
@@ -486,7 +490,7 @@
     "implemented_in": "C1 c1-position (#137) stand, sit, rest and sleep; move needs standing"
   },
   "scene": {
-    "spec": "06 \u00a735/\u00a737 modal text subset (amendment 2026-10-03); 21 \u00a73.6; 00a \u00a79; mechanics.md scene@1",
+    "spec": "06 §35/§37 modal text subset (amendment 2026-10-03); 21 §3.6; 00a §9; mechanics.md scene@1",
     "contracts": [
       "SceneDefinition",
       "SceneStep",
@@ -667,6 +671,25 @@
       "facts_typed"
     ],
     "implemented_in": "C1 Tobin lessons and actual equipped sword/dodge/shield combat (local implementation; independent review pending)"
+  },
+  "topics": {
+    "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md B6 composition",
+    "contracts": [
+      "TopicDefinition",
+      "DialogueChoice",
+      "GameView"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/topics/shared.ts"
+    ],
+    "fixtures": [
+      "protocol/fixtures/wisp_contracts.json",
+      "protocol/fixtures/missing_child_v023_hash.json"
+    ],
+    "invariants": [
+      "facts_typed"
+    ],
+    "implemented_in": "B6 declared Ward knowledge and exact public Aldric consumer (local implementation; independent review pending)"
   },
   "liquid": {
     "spec": "docs/system/mechanics.md B7; docs/system/protocol.md B7 liquid composition",

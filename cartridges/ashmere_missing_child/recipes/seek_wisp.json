@@ -1,0 +1,54 @@
+{
+  "label": "actions.seek_wisp",
+  "aliases": [
+    "seek"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "marsh_light",
+    "detail": "glow"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "light_off"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "fen_wisp_discovered",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "check": {
+    "kind": "attribute_threshold",
+    "key": "wisp_perception",
+    "attribute": "per",
+    "difficulty": 5
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "fen_wisp_discovered",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.seek_wisp"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.seek_wisp_failed"
+      }
+    }
+  }
+}

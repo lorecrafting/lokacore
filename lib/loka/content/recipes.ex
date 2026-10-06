@@ -118,7 +118,8 @@ defmodule Loka.Content.Recipes do
           do: d
 
     target(rel, r["target"], m, defs) ++
-      facts ++ resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
+      facts ++
+      attributes(rel, r, m, defs) ++ resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
   end
 
   # Each narration participant but the actor names this cartridge's npc or item its role says.
@@ -129,6 +130,11 @@ defmodule Loka.Content.Recipes do
         d <- reference(rel, ["outcomes", name, "narration", "participants", n], k, p, m, defs),
         do: d
   end
+
+  defp attributes(rel, %{"check" => %{"kind" => "attribute_threshold"} = c}, m, defs),
+    do: reference(rel, ["check"], "attribute", c, m, defs)
+
+  defp attributes(_, _, _, _), do: []
 
   defp resources(rel, r, m, defs),
     do: for({n, steps} <- resourced(r), d <- reference(rel, steps, "resource", n, m, defs), do: d)

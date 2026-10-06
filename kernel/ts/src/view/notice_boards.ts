@@ -15,12 +15,12 @@ export function noticeViews(
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
     detail.room === here &&
     visible(world, world.character, id, steps) &&
-    (detail.readable || detail.harvest) &&
+    (detail.readable || detail.harvest || detail.perception) &&
     !grouped.has(id as EntityId)
       ? [
           {
             id: id as EntityId,
-            title: detail.harvest?.title ?? detail.readable!.title ?? detail.readable!.label,
+            title: detailTitle(detail),
             ...(detail.harvest && {
               remaining: (() => {
                 const ids = selected(
@@ -81,3 +81,9 @@ function noticeBoards(
 }
 
 const offered = (actions: AdvertisedAction[]) => (actions.length ? { actions } : {});
+
+const detailTitle = (detail: World['details'][string]) =>
+  detail.harvest?.title ??
+  detail.perception?.title ??
+  detail.readable!.title ??
+  detail.readable!.label;

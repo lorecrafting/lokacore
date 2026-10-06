@@ -1,29 +1,9 @@
+import { grant } from '../topics/shared.ts';
+import { wrongAnswer } from './behavior.ts';
 import { acquire } from '../skills.ts';
 import { exchangeRoles, contribution, exchangeDefinition, exchangeTransfers } from './exchange.ts';
 import { questOf } from '../lookups.ts';
-// dialogue@1 (capability_registry.json; 06 §17, §33, §37, §38, §43; 04 §5.3 Choice/continuation
-// resolution; 21 §20): talk, choose and close_choice. talk: a target that is no dialogue's speaker
-// is not_found; else it opens the first of its dialogues, in key order, whose own policy holds
-// (enforced here, since a cartridge action with command talk (an alias) passes admission on its own
-// policy): none, or a pending choice of the actor's, is invalid_state; else one choice.open of a
-// new continuation (its id the command's IdSource ordinal 0: each talk is a distinct occurrence),
-// beat the dialogue's key, each role bound to its EntityId in role-name order, the choice ids in
-// key order, and its choice_opened. choose: a continuation that is not pending, not the actor's or
-// does not offer choice_id is invalid_state (a resolved or closed one is never chosen again); then
-// a bound NPC not in the actor's room not_present, then a bound item the actor's body does not hold
-// not_owned (mechanics/dialogue/shared.ts blocked, the GameView's availability too); then the dialogue's quest
-// resolves with outcome choice_id (mechanics/quest/lifecycle.ts resolution on the world before this decision:
-// invalid_state or quest_requirement), or the choice's accept activates its quest (quest.ts
-// activation; invalid_state if the actor already has an instance: the talk-time policy may be
-// stale). Accepted, outcome choice_id, in one decision: the hand_over (an entity.transfer of the
-// bound item to the bound NPC and its item_acquired, as give), the choice's fact.assign steps
-// (mechanics/fact.ts assigned), the quest's transitions and quest_resolved (or its quest.activate and
-// quest_activated), the choice.resolve at the revision its continuation was opened at, and
-// choice_resolved; one narration line, its participants the actor's body and every bound role, read
-// from the row (06 §43: never re-resolved by name); after choice_resolved, if a story point's
-// outcome names this dialogue and choice, its story_point_reached (23 §3). close_choice: the
-// actor's pending continuation (the ActionSet fills it) closes, nothing else changes (06 §37, §43);
-// else invalid_state.
+// Dialogue lowers bound choices, quest transitions and facts in one writer group.
 import type {
   CharacterId,
   DefinitionRef,
@@ -84,7 +64,7 @@ export const decide: Rule<'dialogue'> = (world, command, mint, steps = { n: 0 })
 function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) {
   const p = command.payload;
   if (!speaks(world, p.target_id)) return rejected('not_found');
-  const d = spokenBy(world, p.actor_id, p.target_id, steps);
+  const d = spokenBy(world, p.actor_id, p.target_id, steps, p.dialogue);
   if (!d || pending(world, p.actor_id)) return rejected('invalid_state');
   const continuation_id = continuationId(mint);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
@@ -97,10 +77,13 @@ function talk(world: World, command: Command<'talk'>, mint: Mint, steps: Steps) 
     beat: d.key,
     roles: [...bind(world, d), ...exchangeRoles(world, p.actor_id, d, steps)],
     ...(d.quest &&
-      values(d.choices).some((o) => o.exchange) && {
+      (d.riddle?.wrong_limit !== undefined || values(d.choices).some((o) => o.exchange)) && {
         quest_instance_id: questOf(world, p.actor_id, d.quest)?.[0],
       }),
     choice_ids: choiceIds(d),
+    ...(d.riddle?.wrong_limit !== undefined && {
+      attempts: { count: 0, limit: d.riddle.wrong_limit },
+    }),
   } as const;
   const opened = { type: 'choice_opened', continuation_id } as const;
   return accepted(world, 'choice_opened', [op], [event(world, command, mint, 1, opened)]);
@@ -129,7 +112,7 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   if (riddle ? answer === undefined || !answerFits(riddle.bank, answer) : answer !== undefined)
     return rejected('invalid_state');
   if (riddle && answer!.toLowerCase() !== riddle.answer)
-    return accepted<never>(world, 'riddle_wrong', [], [], [{ key: riddle.wrong, participants }]);
+    return wrongAnswer(world, command, row, riddle, participants);
   return applyChoice(world, command, mint, row, used, participants);
 }
 
@@ -147,11 +130,13 @@ function sequence(
   };
   for (const step of option.sequence ?? []) {
     const next =
-      step.op === 'skill.acquire'
-        ? acquire(world, actor, run, step.skill)
-        : step.op === 'fact.adjust'
-          ? adjusted(world, actor, run, step)
-          : assigned(world, actor, run, step);
+      step.op === 'topic.grant'
+        ? grant(world, actor, run, step.topic)
+        : step.op === 'skill.acquire'
+          ? acquire(world, actor, run, step.skill)
+          : step.op === 'fact.adjust'
+            ? adjusted(world, actor, run, step)
+            : assigned(world, actor, run, step);
     if (!next) return undefined;
     run = next;
   }

@@ -712,11 +712,11 @@ this cartridge; no engine or Book fenwort count/faction literal is permitted.
 
 ## B4 well and fuel
 
-The current local successor is `ashmere_missing_child@0.0.21`, API1.19:
+B4 introduced `ashmere_missing_child@0.0.21`, API1.19:
 [independent payload](../../protocol/fixtures/missing_child_v021_hash.json),
 [94-ID answer](../../protocol/fixtures/missing_child_v021_ids.json),
 [derivation](../../protocol/fixtures/generate_missing_child_v021.py).
-Independent B4 review and final C1 dependency fixes remain pending.
+B4 is reviewed; its successor pins are retained as frozen answers.
 
 The [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
 adds `well_shaft`, reached by Well Lane down and returning up to Well Lane. Both
@@ -828,7 +828,15 @@ reviewed C1/B5 integration is re-pinned and independently derived.
 
 ## B6 marsh route and tuning
 
-The planned [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
+The current local source release is `ashmere_missing_child@0.0.23`, API1.21,
+with [independent payload](../../protocol/fixtures/missing_child_v023_hash.json),
+[103 initial IDs](../../protocol/fixtures/missing_child_v023_ids.json) and
+[derivation from reviewed B7 v022](../../protocol/fixtures/generate_missing_child_v023.py).
+Its SHA-256 is `e7333f694e6ec2c9f02a39944d994d4452f26fffc5534ff217346504471e4c71`.
+Independent B6 source and save/protocol reviews remain pending.
+
+
+The [S4 mechanic](mechanics.md#s4-all-hours-wisp-b6-selected-contract)
 adds exactly three rooms. Mire Crossing east ↔ Marsh Light west is an all-hours
 public path on existing firm footing; preserve the already always-passable mire
 and all existing exits. Marsh Light south ↔ Old Causeway north and Old Causeway
