@@ -15,3 +15,12 @@ Reviewed planning head `aa1f29af5dde5b480d9a51e0499677f1fa6c49f9` as a fresh rev
 2. **D10-P2, should-fix — `docs/system/mechanics.md:1501` and `docs/system/book-ui.md:133`.** The plan says a *visited* connection's displayed current availability comes from ordinary Move admission. Move admission is scoped to the actor's current room/body and may depend on position, resources, encounter and D9's Study edge predicate. When the actor is at Landing, evaluating a visited Study or Chapel link as though the actor were there can promise a route that would refuse on arrival, or requires a second remote admission model. Limit live availability to the actor's current-room exits; other visited links can be shown as known connections without a traversal promise. Keep the real current-room door controls and D9 refusal.
 
 The other selected boundaries are coherent at this head: static coordinates do not grant exits, the Chapel door starts open and shares reciprocal faces, Knock is a receipt-bound local response, and the Watch Cell remains public. D8/D9 source and D10 implementation are still pending. This docs-only review ran no implementation tests or browser check.
+
+## Scoped fix recheck — APPROVE
+
+Reviewed planning fix `c097150879b0ac6180e893276074d0073689ea1c` only against D10-P1/P2 and their direct brief/decision/Book/protocol clauses.
+
+- **D10-P1 closed.** Mechanics and protocol now gate `here` through current Look/direct-target visibility, including raw ID, alias and touch. Hidden co-location falls back to actor-owned saved `last_seen` or `unknown`; the brief names the B4 dark-room regression.
+- **D10-P2 closed.** Mechanics, Book and brief now present remote visited links as static known connections without a live traversal claim. Only current-room exits use ordinary Move admission, including D9's Study refusal.
+
+No open planning findings. This is docs-only approval; source, tests, browser proof, final dependency re-pin and publication remain pending. `git diff --check` passed for the fix.
