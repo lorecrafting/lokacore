@@ -2081,7 +2081,47 @@
         "action"
       ],
       "additionalProperties": false,
-      "description": "Current exact keyed provider quote, declared capped benefit and shared availability; no reservation."
+      "description": "Current exact keyed provider quote, declared capped benefit and shared availability; no reservation.",
+      "examples": [
+        {
+          "service": {
+            "cartridge_id": "service_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "service",
+            "key": "room"
+          },
+          "label": "service.room",
+          "price": 3,
+          "benefit": {
+            "kind": "entitlement",
+            "fact": {
+              "cartridge_id": "service_probe",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "paid"
+            }
+          },
+          "action": {
+            "available": true,
+            "action_key": "rent_room",
+            "command": "use_service",
+            "label": "service.room",
+            "target": {
+              "kind": "entity",
+              "scopes": [
+                "room_occupants"
+              ]
+            },
+            "input": [
+              "service",
+              "quoted_price"
+            ],
+            "target_ids": [
+              "11111111-2222-4333-8444-555555555555"
+            ]
+          }
+        }
+      ]
     }
   }
 }

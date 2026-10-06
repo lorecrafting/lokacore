@@ -157,7 +157,18 @@
           "additionalProperties": false
         }
       ],
-      "description": "Closed paid entitlement, finite meal recovery or provider-owned complete liquid serving; recovery is MV only."
+      "description": "Closed paid entitlement, finite meal recovery or provider-owned complete liquid serving; recovery is MV only.",
+      "examples": [
+        {
+          "kind": "entitlement",
+          "fact": {
+            "cartridge_id": "service_probe",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "paid"
+          }
+        }
+      ]
     }
   }
 }

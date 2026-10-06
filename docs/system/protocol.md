@@ -912,7 +912,8 @@ provider, exact authored action key, currency, price, label/narration and one
 closed `ServiceBenefit`: entitlement fact, meal stock/debit/MV, or provider-held
 vessel/liquid/MV. NPC definitions list exact service references. `ServiceOffer`
 projects the captured provider target, service reference/quote, declared benefit
-and keyed admission. Existing `UnavailableReason.message` distinguishes already
+and keyed admission. `ServiceBenefit` and `ServiceOffer` each declare a literal
+valid example checked by the shared contract suite. Existing `UnavailableReason.message` distinguishes already
 paid, full MV, sold out and unavailable exact payment without changing error codes.
 The actual bed is an inspectable detail with `bed {title, entitlement}`; its
 local projection emits ordinary targetless Rest and never changes raw Rest admission.
