@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [D1 ferry and Sedge plan](2026-10-05-d1-ferry-plan-review.md): exact planning head `323f9274`, independent CHANGES REQUIRED; D1P-01 missing active owner-rules index link, no substantive design finding; no source or D1 proof claimed.
+- [D1 ferry and Sedge plan](2026-10-05-d1-ferry-plan-review.md): exact planning head `323f9274`, initial CHANGES REQUIRED; scoped fix `19984c0d`, APPROVE, D1P-01 active owner-rules index link closed; no source or D1 proof claimed.
 
 - [C2 preserved terminal reopen evidence](2026-10-05-c2-terminal-reopen-evidence-review.md): exact local docs/evidence head `e29014d54d7e3534838d77ba650301c3f19fb7f7`, independent APPROVE; same preserved terminal save opens twice after published PR213, historical timeout retained, browser fatal/Restart still due by E3; no findings.
 

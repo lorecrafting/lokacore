@@ -73,3 +73,19 @@ Ponytail Review: **Lean already.** Existing payment, escort, skills, containment
 receipt transaction and Book patterns suffice; no speculative machinery found.
 Docs-only review: no gameplay tests, mutants, full publication gate, source build,
 preview, owner save, native work, push or merge claimed.
+
+## Scoped fix round 1 — APPROVE
+
+Exact fixed planning head `19984c0d192d7624bcf0bb87f63d4cdf9ade7f7e`,
+parent reviewed head `323f9274dd50f3b3d7e7349a1155b534b908184a`. The sole
+source delta adds a short linked D1 adoption line at
+`docs/system/owner-rules.md:11`. **D1P-01 closed; no open findings.**
+The active-rules index now exposes the selected fare, waiver, immediate free
+lesson and retained Chapel death destination, linking to the governing PM record.
+The earlier review remains historical; this recheck covers only that disposition.
+
+Independent exact-head `mise exec -- elixir bin/check_docs.exs`: exit 0,
+602 docs, no broken links or unreachable files. Exact fix diff whitespace check
+passes; only `owner-rules.md` changed. Ponytail Review: one linked rule is the
+smallest complete correction, with no machinery or duplicated full contract.
+No source edit, gameplay proof, publication approval, push, PR or merge claimed.
