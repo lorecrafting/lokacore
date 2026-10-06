@@ -8,7 +8,7 @@ while read -r _ local _ remote; do
     *[!0]*) ;;
     *) remote=$1/main # new branch: trust the local main only if the remote agrees
        tracked=$(git rev-parse -q --verify "$remote" 2>/dev/null)
-       advertised=$(git ls-remote "$1" refs/heads/main 2>/dev/null | cut -f1)
+       advertised=$(git ls-remote "$2" refs/heads/main 2>/dev/null | cut -f1)
        [ -n "$tracked" ] && [ "$tracked" = "$advertised" ] || { ts=; continue; } ;;
   esac
   git diff --quiet "$remote" "$local" -- kernel/ts mobile protocol bin/check_ts_size.mjs bin/ts_size_red_controls.sh bin/kernel_red_controls.sh .prettierrc.json .prettierignore package.json package-lock.json 2>/dev/null || ts=
