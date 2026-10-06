@@ -35,6 +35,7 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 - [Book UI as mechanics land](owner-decision-book-ui-as-you-build-2026-10-05.md): update the canonical interaction rule in the same slice, fix broken navigation immediately and reuse the component language.
 
 - [Chapter 1 documentation audit](owner-decision-chapter-one-docs-audit-2026-10-05.md): one Astra high congruence and archive-candidate pass after A–D source integration, before E3 closes.
+- [Chapter 1 architecture audit](owner-decision-chapter-one-architecture-audit-2026-10-05.md): one Astra high end-to-end seam and ownership pass after A–D source integration, before E3 closes.
 - [B9 Lantern Rest and dream PM decision](pm-decision-b9-lantern-dream-2026-10-05.md): first paid Rest, anchored resumable choice and final-only local memory.
 
 - [B8 Maud services PM decision](pm-decision-b8-mauds-services-2026-10-05.md): immediate paid-bed entitlement and finite meal/ale MV recovery with conserved payment.
