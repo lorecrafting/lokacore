@@ -32,6 +32,8 @@ this index; the rules still in force are listed in [owner-rules.md](../system/ow
 
 ## Post-R3
 
+- [D11 character choice PM decision](pm-decision-d11-character-choice-2026-10-06.md): keep PER5, add CON/SPI10 and four saved ancestry effects without invented Chapter 1 stat gates; planning contract pending source review.
+
 - [Agent token hygiene](owner-decision-agent-token-hygiene-2026-10-06.md): shared read-once and compact evidence rules, with separate Codex and Claude Code agent/context handoffs.
 - [Room interactibles](owner-decision-room-interactables-2026-10-06.md): inline, immovable fixture links in room prose; separate actor and loose-item paragraphs with detail routes.
 

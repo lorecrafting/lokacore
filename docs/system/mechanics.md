@@ -269,6 +269,16 @@ Both fail closed: an actor without a body reads no pool, and the compiler and lo
 unresolved reference or a leaf whose owner the lock lacks (`UNDECLARED_CAPABILITY`). Not
 `resource@1`'s: a new op would take `resource@2`, re-deriving every v2 lock and hash.
 
+## D11 character choice (selected contract)
+
+**PM-selected planning contract; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) selects four immutable, once-only character ancestries before ordinary play. [Chapter declarations](cartridge.md#d11-ancestry-declarations-selected-contract) own the six starting values, four modifiers and ancestry effects; [save](save.md#d11-character-choice-recovery) owns durable choice identity; [Book](book-ui.md#d11-character-choice-interaction) owns the initial control. This extends `attributes@1` from definition-only starts to per-character values. The active `stat_compare` query, C1/D12 skill qualification, B6 discovery, B4 darkness and B2 Priory/Fen axis consume the selected state; no world number is hardcoded in the engine.
+
+Fresh play requires one selected key from the pinned chapter's four declarations. No elapsed timer, default choice, preview render or browser refresh selects one. One accepted authority command commits that exact character's choice, its six values, starting acquired skill where declared and initial faction adjustment in one proposal. A different later choice refuses without change; replay of the same invocation returns its original receipt. No training or equipment writer is added. Death moves the body/custody as already specified but retains character identity, attributes, skill and faction. New game uses the existing explicit Start over boundary.
+
+`stat_compare` reads the selected character value after choice and uses its current saved value on each policy check; it does not cache qualification. STR, DEX, INT and PER have installed check consumers. CON and SPI are saved/displayed but have no Chapter 1 stat-check consumer. Hill-folk's dark-sight exempts only the selected character from B4's missing-light visibility gate; all other visibility, hidden-exit, closed-door and custody checks still apply. No spell/mining/Crown track, derived resource or generic vision framework is selected. D6 swimming still requires real acquired and currently qualified Swim under its own no-CON rule; D12 Haggle follows its DEX/MV rule. B6 difficulty5 must remain immediately passable for all four selected ancestries.
+
+Source must select a minimal typed declaration/command/changed-row shape, amend the protocol clause before code, and reject unknown choices, partial or contradictory effects, malformed values and attempts to change identity. The new shape requires compiler/loader negatives, a planted failed guard, real SQLite fault/replay/reopen proof and exact-head independent reviews. Frozen old fixtures stay frozen; preproduction pin mismatch refuses explicitly without deleting a save.
+
 ## check@1 (`mechanics/action_recipe/rule.ts:109`)
 
 Ruleless, resolved inside `perform`: a `luck` check draws one uniform integer in [0, 100) from

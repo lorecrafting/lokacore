@@ -427,6 +427,12 @@ or sale narration to Peg's history and refreshes pennies, custody and inventory.
 Stale/refused/fenced results never claim success. Leave retains the existing NPC
 detail behavior and the world clock continues while the page is open.
 
+## D11 character choice interaction
+
+**Selected planning interaction; source pending.** A fresh Missing Child run presents four authored ancestry choices before World play. The Book sends the exact offered authority invocation using ordinary freshness, pending-save fencing and receipt replay. It does not select a default on render, elapsed update or browser refresh. The current choice page displays the authored attribute difference and actual chapter effects, including deferred Crown/mining/spell effects as deferred; it must not promise a CON/SPI check or a PER11 discovery gate. Pending, stale or refused results claim no selection and do not expose ordinary play. Once confirmed, the Book enters the saved run and the Character page shows the selected ancestry, six confirmed values, acquired skill and current qualification from GameView. Continue/refresh/death never reopens the picker for a selected run. A new game still requires explicit Start over confirmation under the existing pin rules.
+
+Isolated browser proof selects each ancestry on its own fresh run, refreshes/continues and exercises its actual Swim, Haggle, dark-sight or faction effect; authority and real SQLite fault proof are separate. Mobile/native verification and cosmetic UI blur remain deferred.
+
 ## C1 teaching and defense details
 
 **API1.18 interaction contract.** Tobin's NPC page offers the current bound
