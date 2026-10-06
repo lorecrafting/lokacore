@@ -1,6 +1,6 @@
 # Independent reviews
 
-- [Agent token hygiene](2026-10-06-agent-token-hygiene-review.md): exact docs head `07e68cd7` against `3ff6cdd4`, independent APPROVE; Codex and Claude Code handoffs preserve the existing review gate, docs and word-budget checks pass. The checkpoint prompt remains a future PM action.
+- [Agent token hygiene](2026-10-06-agent-token-hygiene-review.md): exact docs head `07e68cd7` against `3ff6cdd4`, independent APPROVE; scoped Beads pilot integration recheck at `8049a5f0` APPROVE. Docs and word-budget checks pass; the checkpoint prompt remains a future PM action.
 
 - [D9 dependency correction](2026-10-06-d9-dependency-correction-review.md): exact planning head `0a3673f9`, independent APPROVE; C4/D6 full-scope blockers, underwater-only D6 recovery and the separately pending Study barrier/retrieval rule align across plan, brief and Beads. Docs/export/graph checks pass; source remains gated.
 
