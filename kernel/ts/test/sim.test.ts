@@ -131,6 +131,29 @@ test('a door verb listed under an alias key agrees with admission through its co
   assert.equal(agrees(refused), false);
 });
 
+// Breaks: a foreign-world envelope refusal is mistaken for an available service mismatch,
+// or its exception hides a refused current-world offer or an accepted foreign command.
+test('service admission distinguishes foreign-world envelopes from current-world offers', () => {
+  const service = { kind: 'service', id: 'meal' };
+  const view = {
+    entities: [{ id: 'maud', services: [{ service, price: 2, action: { available: true } }] }],
+  };
+  const payload = { type: 'use_service', provider_id: 'maud', service, quoted_price: 2 };
+  const refused = { kind: 'rejected', error: { code: 'not_found' } };
+  const agrees = (world: string, decision: object) =>
+    check('gameview_agrees_with_admission', {
+      world_context_id: 'current',
+      view,
+      command: { world_context_id: world, payload },
+      decision,
+    });
+  assert.equal(agrees('foreign', refused), true);
+  assert.equal(agrees('current', refused), false);
+  assert.equal(agrees('current', { kind: 'accepted' }), true);
+  assert.equal(agrees('foreign', { kind: 'accepted' }), false);
+  assert.equal(agrees('foreign', { kind: 'rejected', error: { code: 'invalid_state' } }), false);
+});
+
 // Breaks: an invariant registered with no per-step check and no stated reason.
 test('every registered invariant is checked per step, or says why not', () => {
   const ids = read('protocol/invariants.json').map((i: { id: string }) => i.id);
