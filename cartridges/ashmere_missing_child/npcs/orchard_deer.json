@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "deer",
+    "orchard_deer"
+  ],
+  "short": "npc.orchard_deer.short",
+  "room_line": "npc.orchard_deer.room",
+  "description": "npc.orchard_deer.description",
+  "room": "orchard",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 1,
+    "start": 1,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

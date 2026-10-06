@@ -36,7 +36,7 @@ import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
 import { status as calendarStatus } from '../mechanics/calendar.ts';
-import { carrying } from '../mechanics/population/behavior.ts';
+import { carrying } from '../mechanics/crow/behavior.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant

@@ -29,6 +29,8 @@ export function population(c: Obj): Diagnostic[] {
       reciprocal(rooms, p.area);
     const template = bundle && templateValid(c, bundle, p.home);
     if (!packValid(c, p, rooms)) out.push(diag('SCHEMA_VIOLATION', `${at}.pack.narration`));
+    if (!sightValid(c, p, rooms, bundle))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.sight.narration`));
     if (!bundle || !template) out.push(diag('SCHEMA_VIOLATION', `${at}.bundle`));
     if (!scavengeValid(c, p, bundle)) out.push(diag('SCHEMA_VIOLATION', `${at}.scavenge`));
     if (!area) out.push(diag('SCHEMA_VIOLATION', `${at}.area`));
@@ -38,6 +40,25 @@ export function population(c: Obj): Diagnostic[] {
       out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'population' }, ['population@1']));
   }
   return out;
+}
+
+function sightValid(c: Obj, p: Obj, rooms: Obj[], bundle?: Obj): boolean {
+  const sight = p.sight;
+  if (!sight) return true;
+  const directions: string[] = rooms.flatMap((room: Obj) =>
+    room
+      ? Object.entries(room.exits ?? {})
+          .filter(([, edge]: [string, any]) => p.area.some((r: Obj) => ref(r) === ref(edge.to)))
+          .map(([direction]) => direction)
+      : [],
+  );
+  return (
+    bundle?.member_role === 'deer' &&
+    bundle.loot_role === 'hide' &&
+    sight.delay > 0 &&
+    directions.every((direction) => sight.narration[direction]) &&
+    Object.values(sight.narration).every((key) => c.text?.[key as string])
+  );
 }
 
 function packValid(c: Obj, p: Obj, rooms: Obj[]): boolean {
@@ -77,6 +98,8 @@ function templateValid(c: Obj, bundle: Obj, home: Obj): boolean {
   const item = bundle.item && c.items?.[ref(bundle.item)];
   const corpse = c.items?.[ref(bundle.corpse)];
   return (
+    ((bundle.member_role === undefined && bundle.loot_role === undefined) ||
+      (bundle.member_role === 'deer' && bundle.loot_role === 'hide')) &&
     npc?.spawn_template === true &&
     ref(npc.room) === ref(home) &&
     !!npc.hp &&

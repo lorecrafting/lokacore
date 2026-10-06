@@ -1,6 +1,7 @@
 // Independent creation/initial-custody proof, without compose's creation guard or result oracle.
 import { validate } from '../foundation/validate.ts';
 import { key, same } from '../foundation/compose.ts';
+import { sightSlot } from './invariants_sight.ts';
 
 // Decoded portable observations, as in invariants.ts.
 type Any = any;
@@ -18,7 +19,7 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
         previous.identity.id !== op.entity_id ||
         previous.writer_group !== op.writer_group ||
         ((state.known_entities?.[op.destination_id]?.kind !== 'room' ||
-          previous.identity.origin?.role === 'pelt' ||
+          ['pelt', 'hide'].includes(previous.identity.origin?.role) ||
           (previous.identity.origin?.kind === 'spawned' &&
             state.population_specs?.[key(previous.identity.origin.by)]?.home !==
               op.destination_id)) &&
@@ -56,13 +57,13 @@ function complete(state: Any, ops: Any[]): boolean {
     (op) =>
       op.op === 'entity.create' &&
       op.identity.origin?.kind === 'spawned' &&
-      op.identity.origin.role === 'hound',
+      ['hound', 'deer'].includes(op.identity.origin.role),
   );
   const pelts = ops.filter(
     (op) =>
       op.op === 'entity.create' &&
       op.identity.origin?.kind === 'spawned' &&
-      op.identity.origin.role === 'pelt',
+      ['pelt', 'hide'].includes(op.identity.origin.role),
   );
   const slots = ops.filter((op) => op.op === 'population.slot');
   for (const h of hounds) {
@@ -103,7 +104,8 @@ function complete(state: Any, ops: Any[]): boolean {
             h.identity.origin.slot === s.slot &&
             h.identity.origin.generation === s.value.generation,
         ) ||
-        flightSlot(state, ops, s),
+        flightSlot(state, ops, s) ||
+        sightSlot(state, ops, s),
     ) && peltsMatch(pelts, hounds)
   );
 }
@@ -113,71 +115,6 @@ function peltsMatch(pelts: Any[], hounds: Any[]) {
     hounds.some(
       (h) => h.writer_group === p.writer_group && p.identity.origin.member_id === h.identity.id,
     ),
-  );
-}
-
-function flightSlot(state: Any, ops: Any[], s: Any) {
-  const id = s.value.member_id;
-  const origin = state.created?.[id]?.origin;
-  const round = ops.find(
-    (op) =>
-      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
-      op.writer_group === s.writer_group &&
-      op.expected?.active_ids?.includes(id) &&
-      selectedFlight(state, op.expected, id) &&
-      (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
-  );
-  const due = round && state.jobs?.[round.job_id]?.due_time;
-  return (
-    id &&
-    s.expected?.member_id === id &&
-    s.expected.generation === s.value.generation &&
-    s.expected.replacement_due === null &&
-    s.value.replacement_due === null &&
-    Number.isSafeInteger(due) &&
-    s.value.last_flight_at === due &&
-    s.expected.last_flight_at !== due &&
-    origin?.kind === 'spawned' &&
-    origin.role === 'hound' &&
-    origin.member_id === id &&
-    same(origin.by, s.plan) &&
-    origin.slot === s.slot &&
-    origin.generation === s.value.generation &&
-    state.population_specs?.[key(s.plan)]?.plan?.pack &&
-    ops.filter(
-      (op) =>
-        op.op === 'entity.transfer' &&
-        op.writer_group === s.writer_group &&
-        op.entity_id === id &&
-        op.source_id === state.containers?.[id] &&
-        op.destination_id !== op.source_id,
-    ).length === 1
-  );
-}
-
-function selectedFlight(state: Any, row: Any, id: string) {
-  const present = row.active_ids.filter((member: string) => {
-    const origin = state.created?.[member]?.origin;
-    const slot =
-      origin &&
-      state.population_slots?.[
-        key({ kind: 'population_slot', plan: origin.by, slot: origin.slot })
-      ];
-    return (
-      state.containers?.[member] === row.room_id &&
-      origin?.kind === 'spawned' &&
-      origin.role === 'hound' &&
-      origin.member_id === member &&
-      slot?.member_id === member &&
-      slot.generation === origin.generation &&
-      slot.replacement_due === null
-    );
-  });
-  const cursor = row.next_opponent_id;
-  return (
-    (present.includes(cursor)
-      ? cursor
-      : (present.find((member: string) => member > cursor) ?? present[0])) === id
   );
 }
 
@@ -195,7 +132,7 @@ function initialized(
   const target = { kind: 'resource', resource: op.resource, entity_id: op.entity_id };
   if (
     !i ||
-    origin.role !== 'hound' ||
+    !['hound', 'deer'].includes(origin.role) ||
     origin.member_id !== op.entity_id ||
     !spec ||
     op.writer_group !==
@@ -226,7 +163,9 @@ function provenance(state: Any, i: Any): boolean {
       same(i.origin.bundle, spec.bundle) &&
       i.origin.slot <= spec.cap &&
       same(i.definition, spec[i.origin.role]) &&
-      (i.origin.role === 'hound' ? i.origin.member_id === i.id : i.origin.member_id !== i.id)
+      (['hound', 'deer'].includes(i.origin.role)
+        ? i.origin.member_id === i.id
+        : i.origin.member_id !== i.id)
     );
   }
   const victim = state.known_entities?.[i.origin.victim_id];
@@ -244,9 +183,9 @@ function paired(parent: Any, child: Any): boolean {
     b = child?.origin;
   return (
     a?.kind === 'spawned' &&
-    a.role === 'hound' &&
+    ['hound', 'deer'].includes(a.role) &&
     b?.kind === 'spawned' &&
-    b.role === 'pelt' &&
+    ((a.role === 'hound' && b.role === 'pelt') || (a.role === 'deer' && b.role === 'hide')) &&
     parent.id === b.member_id &&
     ['by', 'bundle', 'slot', 'generation', 'occurrence_id', 'member_id'].every((field) =>
       same(a[field], b[field]),
@@ -260,5 +199,87 @@ function rowsMatch(result: Any, i: Any): boolean {
       (c: Any) => c.target.kind === 'entity' && c.target.entity_id === i.id && same(c.value, i),
     ) &&
     result.changes.some((c: Any) => c.target.kind === 'containment' && c.target.entity_id === i.id)
+  );
+}
+
+function flightSlot(state: Any, ops: Any[], s: Any) {
+  const id = s.value.member_id;
+  const origin = state.created?.[id]?.origin;
+  const due = flightTime(state, ops, s, id);
+  return (
+    id &&
+    s.expected?.member_id === id &&
+    s.expected.generation === s.value.generation &&
+    s.expected.replacement_due === null &&
+    s.value.replacement_due === null &&
+    Number.isSafeInteger(due) &&
+    s.value.last_flight_at === due &&
+    s.expected.last_flight_at !== due &&
+    origin?.kind === 'spawned' &&
+    ['hound', 'deer'].includes(origin.role) &&
+    origin.member_id === id &&
+    same(origin.by, s.plan) &&
+    origin.slot === s.slot &&
+    origin.generation === s.value.generation &&
+    (origin.role === 'deer'
+      ? state.population_specs?.[key(s.plan)]?.plan?.sight && s.value.sight_job_id == null
+      : state.population_specs?.[key(s.plan)]?.plan?.pack) &&
+    ops.filter(
+      (op) =>
+        op.op === 'entity.transfer' &&
+        op.writer_group === s.writer_group &&
+        op.entity_id === id &&
+        op.source_id === state.containers?.[id] &&
+        op.destination_id !== op.source_id,
+    ).length === 1
+  );
+}
+
+function flightTime(state: Any, ops: Any[], s: Any, id: string) {
+  const origin = state.created?.[id]?.origin;
+  const round = ops.find(
+    (op) =>
+      (op.op === 'encounter.advance' || op.op === 'encounter.close') &&
+      op.writer_group === s.writer_group &&
+      op.expected?.active_ids?.includes(id) &&
+      selectedFlight(state, op.expected, id) &&
+      (op.op === 'encounter.close' || !op.active_ids?.includes(id)),
+  );
+  const sight = s.expected?.sight_job_id && state.jobs?.[s.expected.sight_job_id];
+  const deerFlight =
+    origin?.role === 'deer' &&
+    sight?.sight &&
+    ops.some(
+      (op) =>
+        op.op === 'job.complete' &&
+        op.writer_group === s.writer_group &&
+        op.job_id === s.expected.sight_job_id,
+    );
+  return deerFlight ? sight.due_time : round && state.jobs?.[round.job_id]?.due_time;
+}
+
+function selectedFlight(state: Any, row: Any, id: string) {
+  const present = row.active_ids.filter((member: string) => {
+    const origin = state.created?.[member]?.origin;
+    const slot =
+      origin &&
+      state.population_slots?.[
+        key({ kind: 'population_slot', plan: origin.by, slot: origin.slot })
+      ];
+    return (
+      state.containers?.[member] === row.room_id &&
+      origin?.kind === 'spawned' &&
+      origin.role === 'hound' &&
+      origin.member_id === member &&
+      slot?.member_id === member &&
+      slot.generation === origin.generation &&
+      slot.replacement_due === null
+    );
+  });
+  const cursor = row.next_opponent_id;
+  return (
+    (present.includes(cursor)
+      ? cursor
+      : (present.find((member: string) => member > cursor) ?? present[0])) === id
   );
 }

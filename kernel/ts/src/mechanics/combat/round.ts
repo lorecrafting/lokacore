@@ -26,7 +26,7 @@ import { npcRef, participantsPresent } from './shared.ts';
 import { eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
 import { packRound, successor, narrate } from './round_flow.ts';
-import { settled as crowSettled } from '../population/behavior.ts';
+import { settled as crowSettled } from '../crow/behavior.ts';
 
 export type CombatEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'attack_result' | 'entity_died' }>;

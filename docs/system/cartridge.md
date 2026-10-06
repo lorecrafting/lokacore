@@ -1266,6 +1266,45 @@ Its fixtures stay frozen. D6 successor release/API/hash/IDs and typed water
 shape remain null until actual source and independent derivation. Chapel Nave
 remains the death shrine; Isle Shrine is descriptive only.
 
+## D11 ancestry declarations (selected contract)
+
+**PM-selected chapter values; source pending.** The [D11 decision](../decisions/pm-decision-d11-character-choice-2026-10-06.md) retains installed `attributes.json` STR10, DEX10, PER5 and INT10 and adds CON10 and SPI10. These six values are authored content, not an engine default or Legend formula. Each declared ancestry adds exactly +1 to its named attribute, never to pool maxima, carry, old combat answers or other unselected checks. The selected chapter answers are:
+
+| Ancestry | Selected attribute | Actual Chapter 1 effect |
+|---|---|---|
+| fen-born | PER6 | acquired Swim, `priory.fen_axis` −2 |
+| road-born | DEX11 | acquired Haggle; Crown points deferred |
+| hill-folk | CON11 | B4 dark-sight; mining deferred |
+| fey-touched | SPI11 | `priory.fen_axis` −2; spell word deferred |
+
+All other values retain their starts. The Priory/Fen axis starts at 0 for road-born and hill-folk; its selected −2 value is within the existing −10..10 bound and means Fen favor. Fen and fey share that numeric starting side but have different skill, sight and attribute outcomes. STR/DEX C1, INT/D12, DEX/D12 and PER/B6 consumers keep their authored thresholds; B6's PER5 difficulty remains immediately passable. D6 Swim has no CON floor. CON/SPI have no Chapter 1 stat-check consumer, so their selected values are truthful character data rather than a fabricated threshold. This preserves the [owner's fey content ruling](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
+
+Select the smallest closed source declaration that maps the four keys to these values/effects, with authored labels and no free-form script. The compiler and loader must reject missing/extra keys, unknown attributes/skills/faction reference, unsupported sight effects, unsafe/out-of-range integer values, an absent capability or an effect that cannot be applied atomically. A new release independently derives its pin/hash/IDs. Exact source field names, successor API and output remain null until the source PR amends the protocol and supplies independently checked answers.
+
+## D9 village reaction content (selected, pending implementation)
+
+The five valid child/allegiance pairs and the Study rule are defined in
+[mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-pending-implementation).
+Author distinct child responses for Elspeth and Bram, five truthful Maud rumor
+variants and Green descriptions, prior/fox Aldric and Vesper responses, and
+bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave.
+The Study remains the existing reciprocal Nave-west/Study-east edge; no new
+door/barrier definition or key is authored. Only its west ingress gets the
+conditional fox policy. No new room, NPC, token relationship fact or synthetic
+ferryman instance is needed.
+
+The audible area is the existing **25 Ashmere rooms and ten public Priory
+rooms**, excluding Fen and isle rooms. Author the area as explicit chapter
+room references with loader validation; a room's ordinary descriptive tags do
+not become sound authority. Flood variants affect Reed Path and Mire text only.
+The bell's hound suppression duration is **172800 logical seconds**, owned by
+the cartridge. Author its population-plan reference and resume bound against
+the existing hound plan; no new population cap, catch-up count or creature is
+declared. The published D6 predecessor is chapter v035/API1.30,
+[hash/190 IDs](../../protocol/fixtures/missing_child_v035_hash.json).
+D9 source successor release/API/hash/IDs remain null until its actual source
+is independently pinned.
+
 ## D12 practical skill declarations
 
 **Selected policy/data contract, pending implementation.** The [D12 mechanic](mechanics.md#d12-practical-skill-consumers-selected-contract) retains the current chapter's immutable attribute starts and adds only `attributes.int.start: 10`. Define `skills/herbalism.json` and `skills/haggle.json` with C1's existing `label`, `requirement`, and VersionedPolicy `qualification`; compiler-generated acquired facts remain reserved to `skills@1`.
@@ -1290,6 +1329,20 @@ Compiler and loader reject unknown fields, unresolved skill/action/narration ref
 
 D12 implementation head, final predecessor re-pin, successor release/API/hash/allocation answers, PR and source checks/proof are **null** until source work. The assignment must re-pin its actual published predecessor before deriving new answers independently. Existing frozen conformance fixtures remain unchanged; explicit incompatible-pin refusal preserves saves without an adapter, migration or deletion.
 
+## D7 deer planning declarations
+
+**PM-selected proposal; independent plan review and source proof pending.** The [D7 brief](../briefs/chapter-one/d7-deer-brief-2026-10-05.md) replaces its provisional nine-room corridor with three one-slot instance plans. The archived three named rooms are the fresh origins; an adjacent refuge is required so each can visibly flee.
+
+| Plan | Initial home | Two-room legal area | Cap/targets | Replacement | Wander | Sight delay |
+|---|---|---|---|---|---|---|
+| Willow deer | Willow Shade | Willow Shade, Drowned Oak | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Oak deer | Drowned Oak | Drowned Oak, Willow Shade | 1 / 1 day and night | 172800 | 3600 | 300 |
+| Orchard deer | Orchard | Orchard, Smithy | 1 / 1 day and night | 172800 | 3600 | 300 |
+
+The aggregate fresh and live cap is three. Each plan declares `night_start: 20` and `night_end: 6`, reusing the chapter hound window; equal day/night targets make that window neutral to deer count. Each bundle has one HP1 attackable deer with `attack {chance: 0, damage_min: 1, damage_max: 1}`, one directly held 100g hide and one public fixed-room corpse template. The zero chance satisfies the existing attack-profile schema and C1 strict roll `< chance`, so deer never land a retaliatory hit; the positive damage bounds satisfy schema but are unreachable. The player can still Attack the deer. Existing reciprocal ungated exits provide legal flight and wandering. Smithy is only a refuge, not an additional birth home. No deer can enter a hound area or cross the nine-room route through nonadjacent transfer.
+
+Compiler and loader validate exact correct-kind home/area/bundle references, distinct reciprocal rooms, targets/cap, period bounds, sight delay and narration, plus the deer/hide spawned roles. Any new short reference is expanded by the compiler and rejected when malformed at load. Release/API/hash/allocation answers are derived independently only after source; the published C4 `v032` pin remains the predecessor. No shop sale, recipe, eating or skinning behavior is inferred from the hide label.
+
 ## C5 bleed and bandage declarations
 
 **Selected planning values, not installed source.** [C5 mechanics](mechanics.md#c5-hound-bleeding-and-bandage-selected-contract) opts the existing C3 hound attack into one effect definition, `bleeding`, on actual positive surviving player HP loss. The narrow authored fields are hound attack `on_positive_hit: {effect: "bleeding"}`, effect `{duration: 300, tick_every: 100, hp_loss: 1}` and each existing bandage item's `bandage: {effect: "bleeding", skill: "bandage", action: "bandage", narration: "narration.bandage"}`. An unrefreshed wound ticks at +100 and +200, then expires without damage at +300. These are content values; the engine encodes no default. This limited loss lets the player treat or Flee while reading time continues, without requiring a Wait.
@@ -1297,6 +1350,35 @@ D12 implementation head, final predecessor re-pin, successor release/API/hash/al
 Add `skills/bandage.json` under the existing C1 skill shape: current qualification is DEX at least **10**, independent of permanent acquisition. Original Wick in the public all-hours Infirmary teaches it through one bound `Talk/Choose` and `skill.acquire`, with **0** lesson payment, duration and cooldown. An already acquired lesson is unavailable and cannot charge/grant again. Keep his B5 herb exchange and other conversation available. The bandage item family is the exact twelve existing B5 identities, each opted into one `bandage` use with authored action label and narration. Do not create replacement stock or a Chancellor sale from the archive.
 
 Compiler and loader validate the closed positive safe-integer duration, interval and loss, interval < duration, local HP pool, supported hound producer/effect reference, required skill/action/text references and bandage-only noncontainer/nonwearable/nonedible opt-in. The bandages' existing 10g mass, custody and supply remain B5's. The D4 consumed holder is reused; only the terminal admission expands to declared bandage items with the exact C5 result. Reject unknown fields, absent effect, invalid skill qualification or a nonhound producer. Source expands short refs at every new DefinitionRef and bumps the current API/release; successor hash/IDs remain null until independently derived from the final predecessor.
+## D10 map positions and Chapel door (selected, pending implementation)
+
+The chapter declares one static position `{x, y, z}` for each of its 57 current rooms.
+These integer drawing coordinates are content, not an engine inference from compass
+directions: the room graph contains ferry links and loops. Compilation and loading
+require exact room-key coverage, unique `(x, y, z)` positions and declared room refs;
+the rendered links still come only from real exits. Unknown map fields or duplicate
+positions fail before play. No coordinate changes movement cost, sight or reachability.
+
+The first chapter physical door is one barrier shared by Chapel Steps north and Chapel
+Nave south, starting open with no key. It admits ordinary existing Open/Close behavior
+and a declared Knock response on the Steps north face keyed to actual Aldric presence
+in the Nave. The public
+chapel remains reachable by opening a closed door. This differs from the archive's
+keyed Watch Cell candidate: the current Watch Cell is expressly open and optional, so
+D10 does not add Tobin-key or jail access machinery. The D9 Study restriction is an
+exact-edge predicate, not a barrier or Knock target. Wren's one boot is an actual
+recoverable Reed Bank item. Add ordinary `leather_boots` as a recoverable item in
+Chandler, with no sale or armor modifier in this slice. Both carry the `boot` keyword
+and can be held together for real resolver ambiguity; touch selects an exact item ID.
+Neither replaces Q2 drawing or message credit.
+
+## C6 S27 expedition declarations
+
+**Selected planning data; source pending C5 publication.** S27 `a_night_in_the_marsh` starts by an explicit no-cost/no-duration action on Hound Run's existing gnawed-bones detail. Its bounded route is five ordered accepted player entries: Hound Run **west→Reed Bank**, Reed Bank **west→Willow Shade**, Willow Shade **south→Drowned Oak**, Drowned Oak **north→Willow Shade**, Willow Shade **east→Reed Bank**. Add one inspectable Drowned Oak shelter detail with optional Use shelter at cursor3, without Rest, healing or clock advance; the final Reed Bank is a safe return boundary. Ordinary reciprocal exits already exist. The allowed attempt footprint is Hound Run, Adder Nest, Reed Bank, Willow Shade and Drowned Oak; Adder Nest accommodates a legal C4 Flee/deviation but earns no route credit. Any accepted exit to a room outside this set before completion fails the attempt. Other travel inside the footprint leaves the cursor unchanged until the exact next edge is later taken.
+
+The chapter names one original player-scoped quest and one original player Boolean `fen.night_survived`, initially false. Completion sets that fact true and applies **−1** to the existing bounded Priory/Fen axis at most once. It offers a Sedge acknowledgement of surviving the marsh; her D1 swim lesson remains free, independently accessible before S27 and idempotent if already acquired. No duplicate `skill.acquire`, second swim lesson, fee, item or attribute reward is granted by S27. Sedge's recognition is a fact-selected dialogue/text variant at her existing all-hours location, not a new NPC schedule or persistent behavior profile.
+
+At Start, if any current C3 plan-owned live unengaged hound is co-present, select the lowest current EntityId and use C4's already declared roster/encounter/round rules. If none is eligible, Start succeeds without hostility. The route does not wait for replacement or require an attack win, bandage, light, ferry, swim, food, tide or night. The existing safe main-story corridor and every corpse path remain traversable when no S27 attempt is active. All counts, rooms, rewards and narration are authored here or in the quest/dialogue definitions; engine and presenter hold no S27 literals. Compiler and loader reject missing/wrong-kind room edges, unknown route refs, noncontiguous steps, unreachable finish, invalid footprint, unresolved quest/fact/faction/hound/Sedge refs or an attempted generic room-tag shortcut. Bound route length and footprint before traversal. Release/API/hash and allocated IDs remain null until source is derived from its final published predecessor.
 
 ## D8 crows, coin and reachable nest (selected planning contract)
 

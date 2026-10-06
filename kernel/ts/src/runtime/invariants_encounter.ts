@@ -161,6 +161,8 @@ function job(op: Any, row: Any, horizon: number): Any {
       next.crow_generation = op.crow_generation;
       next.crow_phase = op.crow_phase;
     }
+    if (op.sight !== undefined) next.sight = op.sight;
+
     return next;
   }
   if (row?.status !== 'pending') return undefined;
@@ -169,12 +171,17 @@ function job(op: Any, row: Any, horizon: number): Any {
       op.crow_member_id !== undefined
         ? row.crow_member_id === op.crow_member_id &&
           row.crow_generation === op.crow_generation &&
-          op.encounter_id === undefined
-        : op.water_generation !== undefined
-          ? row.water_generation === op.water_generation &&
-            row.actor_id === op.actor_id &&
-            op.encounter_id === undefined
-          : op.encounter_id !== undefined && row.encounter_id === op.encounter_id
+          op.encounter_id === undefined &&
+          op.sight_member_id === undefined
+        : op.sight_member_id !== undefined
+          ? op.encounter_id === undefined &&
+            op.water_generation === undefined &&
+            row.sight?.member_id === op.sight_member_id
+          : op.water_generation !== undefined
+            ? row.water_generation === op.water_generation &&
+              row.actor_id === op.actor_id &&
+              op.encounter_id === undefined
+            : op.encounter_id !== undefined && row.encounter_id === op.encounter_id
     )
       ? { ...row, status: 'cancelled' }
       : undefined;
@@ -205,6 +212,15 @@ function bindingValid(op: Any) {
       (op.actor_id === undefined) ||
     (op.quest_instance_id !== undefined &&
       (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+  )
+    return false;
+  if (
+    op.sight !== undefined &&
+    (op.job.kind !== 'population' ||
+      op.encounter_id !== undefined ||
+      op.quest_instance_id !== undefined ||
+      op.water_generation !== undefined ||
+      op.actor_id !== undefined)
   )
     return false;
   if (

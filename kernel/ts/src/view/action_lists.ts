@@ -28,7 +28,7 @@ import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused, engaged } from '../mechanics/combat/shared.ts';
-import { shooRefused } from '../mechanics/population/behavior.ts';
+import { shooRefused } from '../mechanics/crow/behavior.ts';
 import { reach } from '../mechanics/lookups.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail;

@@ -180,7 +180,7 @@ defmodule Loka.Core.Contracts.Schema do
   defp keyword(k, n, _, at, _) when k in ~w(minimum maximum), do: ok(is_integer(n), at)
 
   defp keyword(k, _, _, at, _)
-       when k in ~w(properties oneOf propertyNames anyOf exactlyOneRequired),
+       when k in ~w(properties oneOf propertyNames anyOf exactlyOneRequired requiredUnless),
        do: ["#{at}: invalid"]
 
   defp keyword(_, _, _, _, _), do: []

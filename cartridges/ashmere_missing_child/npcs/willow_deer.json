@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "deer",
+    "willow_deer"
+  ],
+  "short": "npc.willow_deer.short",
+  "room_line": "npc.willow_deer.room",
+  "description": "npc.willow_deer.description",
+  "room": "willow_shade",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 1,
+    "start": 1,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

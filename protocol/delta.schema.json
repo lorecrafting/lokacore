@@ -424,6 +424,22 @@
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"
             },
+            "sight": {
+              "type": "object",
+              "properties": {
+                "member_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+                "player_id": { "$ref": "identity.schema.json#/$defs/CharacterId" },
+                "slot": { "type": "integer", "minimum": 1, "maximum": 64 },
+                "generation": { "type": "integer", "minimum": 1 },
+                "seen_at": { "type": "integer", "minimum": 0 },
+                "cause_kind": { "enum": ["player_entry", "population_transfer"] },
+                "cause_id": { "$ref": "identity.schema.json#/$defs/CommandId" },
+                "source_id": { "anyOf": [{ "$ref": "identity.schema.json#/$defs/EntityId" }, { "type": "null" }] },
+                "destination_id": { "$ref": "identity.schema.json#/$defs/EntityId" }
+              },
+              "required": ["member_id", "player_id", "slot", "generation", "seen_at", "cause_kind", "cause_id", "source_id", "destination_id"],
+              "additionalProperties": false
+            },
             "water_generation": {
               "type": "integer",
               "minimum": 1
@@ -771,6 +787,9 @@
             "encounter_id": {
               "$ref": "delta.schema.json#/$defs/EncounterId"
             },
+            "sight_member_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
             "water_generation": {
               "type": "integer",
               "minimum": 1
@@ -793,9 +812,9 @@
           ],
           "requiredUnless": {
             "crow_member_id": ["encounter_id"],
-            "water_generation": [
-              "encounter_id"
-            ]
+            "sight_member_id": ["encounter_id"],
+            "water_generation": ["encounter_id"]
+
           },
           "additionalProperties": false,
           "examples": [

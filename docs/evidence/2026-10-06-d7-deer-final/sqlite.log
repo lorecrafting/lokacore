@@ -1,0 +1,13 @@
+✔ pending sight and confirmed flight cold-reopen with conserved deer custody (23.867333ms)
+✔ missed round and +300 flight cold-reopen with closed combat (28.418667ms)
+✔ forged current sight binding refuses without changing saved bytes (9.765708ms)
+✔ fatal deer and its owned hide cold-reopen without replacement (20.772208ms)
+✔ real COMMIT faults preserve all-prior or all-next deer rows and one replayable receipt (111.606833ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1714.982417
