@@ -110,3 +110,24 @@ Independent focused verification on the exact integrated tree:
 Ponytail Review: no new complexity finding. This scoped carryover claims no browser,
 native, owner-save, hosted-CI or publication proof; primary/save reviews remain
 separate requirements.
+
+## Final hosted source-head Astra review
+
+The PM ran a read-only independent `codex exec` review after all six hosted checks
+passed on PR #229 at `32514c83ef0c41896272a443af90f07c8e8e94ec`.
+The output below is reproduced verbatim:
+```text
+APPROVE
+
+PR #229 — head 32514c83ef0c41896272a443af90f07c8e8e94ec against base 257c9a8b6adae3dccfe09c60496274711178b6da.
+
+Findings: none.
+
+Correctness: final adoption enforces complete birth writer groups; nonfinal composition remains confined to proposal-local reads. TS/Elixir guards agree on full-plan, slot, generation, member and writer-group membership. Population-only receipt replay, forged-save refusal, night-only replacement, equal-time combat/population ordering, conserved corpse/pelt custody and receipt-bound Take/remount routing remain intact. No overlooked failure found in the reviewed B9 dream/paid Rest interactions. Source matches the previously approved integrated source.
+
+Independent verification: 15 focused kernel tests and four Book tests passed. Five process-local, in-memory guard mutations produced the expected focused failures, covering composer/invariant completeness, reverse full-plan membership and birth-free occupied-slot refusal. No files were edited. Diff whitespace checks passed; working tree remains clean.
+
+Elixir execution and file-backed save controls were assessed from source and retained primary/save/Astra evidence, not rerun. No broad suites ran; hosted CI status is supplied by the review request.
+
+Ponytail assessment: lean already. Existing creation, scheduler, custody and receipt-replay mechanisms carry the change without a new dependency, duplicate ledger or speculative framework.
+```
