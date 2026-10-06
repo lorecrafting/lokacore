@@ -1,0 +1,43 @@
+command: mise exec -- npm run test:e2e -- --grep paid Lantern
+source_checkpoint: 066bfda44dfe2947467d1a36eb93ee0c80d7fe68
+exit: 1
+
+> loka-app@0.0.0 pretest:e2e
+> node patch-sqlite-web.cjs
+
+
+> loka-app@0.0.0 test:e2e
+> E2E_TELEMETRY_DISABLED=1 e2e run --grep paid Lantern
+
+
+ RUN  e2e v0.17.0 [worktree]/mobile/app
+      run 01a110af-f06b-7464-b0cc-0999bdf760f4 · targets: web
+
+ ✓ target "web" command ready 1.19s
+ ❯ |web| tests/book.e2e.ts (1 test | 1 failed) 38.21s
+   × paid Lantern Rest resumes its captured dream choice after browser reload 38.21s
+     → locator matched no nodes within getByRole("button", name: "Resume dream")
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| tests/book.e2e.ts > paid Lantern Rest resumes its captured dream choice after browser reload
+LOCATOR_NOT_FOUND: locator matched no nodes within getByRole("button", name: "Resume dream")
+ ❯ tests/book.e2e.ts:49:3
+     47|   await screen.getByRole('button', 'Continue').tap();
+     48|   await screen.getByRole('button', 'Bed').tap();
+     49|   await screen.getByRole('button', 'Resume dream').tap();
+       |   ^
+     50|   await expect(screen.getByRole('button', 'Follow the fox')).toBeVisi…
+     51|   await screen.getByRole('button', 'Wake').tap();
+ ❯ at http://127.0.0.1:19106/
+ ❯ screen .e2e/artifacts/web/tests_book.e2e.ts__paid_20Lantern_20Rest_20resumes_20its_20captured_20dream_20choice_20after_20browser_20reload-cf44183f/default/attempt-0/failure/screen.txt
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 0 passed (1)
+      Tests  1 failed | 0 passed (1)
+   Start at  00:08:48
+   Duration  39.86s (startup 1.19s)
+     Report  .e2e/report.json
+

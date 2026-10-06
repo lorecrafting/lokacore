@@ -1,0 +1,34 @@
+command: bin/check_all.sh
+source_checkpoint: 066bfda44dfe2947467d1a36eb93ee0c80d7fe68
+exit: 1
+Resolving Hex dependencies...
+Resolution completed in 0.012s
+Unchanged:
+  boundary 0.11.0
+  bunt 1.0.0
+  credo 1.7.19
+  file_system 1.1.1
+  jason 1.4.5
+All dependencies have been fetched
+No cycles found
+Running ExUnit with seed: 30090, max_cases: 16
+
+...............................................................................................................................................................................................................................................................................................................................................................
+Finished in 59.5 seconds (59.5s async, 0.05s sync)
+
+Result: 351 passed
+Checking 133 source files (this might take a while) ...
+
+Please report incorrect results: https://github.com/rrrene/credo/issues
+
+Analysis took 0.1 seconds (0.06s to load, 0.06s running 4 checks on 133 files)
+1385 mods/funs, found no issues.
+
+Use `mix credo explain` to explain issues, `mix credo --help` for options.
+lib/loka/content/checks.ex:1: info: size: allow 380, patrol refs and bounded topics join the shared checked expansion boundary
+lib/loka/content/checks.ex:1: file, 382 lines, limit 380
+lib/loka/content/dialogues.ex:1: info: size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
+lib/loka/content/scenes.ex:1: info: size: allow 320, action-started scenes validate source and end exports beside modal rules
+lib/loka/core/compose.ex:1: info: size: allow 330, typed patrol and terminal quest replacement joins portable composition
+lib/loka/core/invariants.ex:1: info: size: allow 330, independent patrol and retirement pairing joins precondition replay
+test/loka/core/compose_test.exs:1: info: size: allow 520, patrol and liquid cases share the existing randomized differential pool

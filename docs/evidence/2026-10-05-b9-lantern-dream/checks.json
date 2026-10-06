@@ -1,7 +1,7 @@
 {
-  "base": "594b8ae1b6c790891e49d160ff4d023c9db1e9f1",
-  "source_checkpoint": null,
-  "candidate_provisional": true,
+  "base": "dec92357f6bdc6242e06ceb56f7c9da0abed8a84",
+  "source_checkpoint": "7bc3f745658b6727ce252c639ea9116a637c833a",
+  "candidate_provisional": false,
   "checks": [
     {
       "name": "pins",
@@ -13,7 +13,7 @@
         "docs/evidence/2026-10-05-b9-lantern-dream/pins.mjs"
       ],
       "exit": 0,
-      "seconds": 2.01
+      "seconds": 1.028
     },
     {
       "name": "focused",
@@ -41,7 +41,7 @@
         "mobile/app/book/notice_board.test.ts"
       ],
       "exit": 0,
-      "seconds": 12.403
+      "seconds": 7.266
     },
     {
       "name": "elixir-focused",
@@ -59,7 +59,7 @@
         "test/loka/content_patrol_test.exs"
       ],
       "exit": 0,
-      "seconds": 12.033
+      "seconds": 7.71
     },
     {
       "name": "kernel-types",
@@ -74,7 +74,7 @@
         "typecheck"
       ],
       "exit": 0,
-      "seconds": 8.106
+      "seconds": 5.526
     },
     {
       "name": "app-types",
@@ -87,7 +87,7 @@
         "mobile/app"
       ],
       "exit": 0,
-      "seconds": 3.054
+      "seconds": 2.735
     },
     {
       "name": "renderer-imports",
@@ -102,7 +102,7 @@
         "mobile-renderer-imports|ts-rule-module-imports"
       ],
       "exit": 0,
-      "seconds": 0.209
+      "seconds": 0.095
     },
     {
       "name": "renderer-boundary",
@@ -118,7 +118,7 @@
         "mobile/app/book"
       ],
       "exit": 0,
-      "seconds": 0.121
+      "seconds": 0.116
     },
     {
       "name": "docs",
@@ -130,7 +130,7 @@
         "bin/check_docs.exs"
       ],
       "exit": 0,
-      "seconds": 1.157
+      "seconds": 1.098
     },
     {
       "name": "trace-capture",
@@ -142,7 +142,45 @@
         "docs/evidence/2026-10-05-b9-lantern-dream/trace-capture.mjs"
       ],
       "exit": 0,
-      "seconds": 1.797
+      "seconds": 1.384
     }
-  ]
+  ],
+  "focused_tested_source": "066bfda44dfe2947467d1a36eb93ee0c80d7fe68",
+  "full_gate": {
+    "command": [
+      "bin/check_all.sh"
+    ],
+    "exit": 0,
+    "source_checkpoint": "7bc3f745658b6727ce252c639ea9116a637c833a",
+    "log": "integrated-full-gate.log"
+  },
+  "label_checks": {
+    "book": {
+      "exit": 0,
+      "tests": 26,
+      "log": "unavailable-label-restored.log"
+    },
+    "app_types": {
+      "exit": 0,
+      "log": "label-app-types.log"
+    },
+    "web": {
+      "exit": 0,
+      "tests": 2,
+      "source_checkpoint": "7bc3f745658b6727ce252c639ea9116a637c833a",
+      "log": "integrated-book-web.log"
+    },
+    "red_old_production": {
+      "exit": 1,
+      "log": "unavailable-label-red.log"
+    }
+  },
+  "pre_label_full_app": {
+    "exit": 0,
+    "tests": 508,
+    "passed": 507,
+    "skipped": 1,
+    "source_checkpoint": "066bfda44dfe2947467d1a36eb93ee0c80d7fe68",
+    "log": "pre-label-integrated-app.log"
+  }
 }

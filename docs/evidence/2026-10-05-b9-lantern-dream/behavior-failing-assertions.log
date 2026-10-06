@@ -1,24 +1,53 @@
+compiler compares Rest consequences as trigger identity
+old command: mise exec -- mix test --force --exclude duplicate_rest_trigger test/loka/content_dreams_test.exs test/loka/content_scenes_test.exs test/loka/content_services_test.exs
+focused command: mise exec -- mix test --force --only duplicate_rest_trigger test/loka/content_dreams_test.exs
+Compiling 63 files (.ex)
+Generated loka app
+Running ExUnit with seed: 92897, max_cases: 16
+Excluding tags: [:test]
+Including tags: [:duplicate_rest_trigger]
+
+
+
+  1) test Rest trigger identity is its room and detail, independent of consequence refs (Loka.ContentDreamsTest)
+     test/loka/content_dreams_test.exs:73
+     match (=) failed
+     code:  assert {:error, diagnostics} = Loka.Content.compile(dir)
+     left:  {:error, diagnostics}
+     right: {:ok,
+             "{\"cartridge\":{\"actions\":{\"ashmere_missing_child@0.0.28:action/dream_choose\":{\"accessibility\":\"dream.choose\",\"command\":\"choose\",\"input\":[\"continuation_id\",\"choice_id\",\"dream\"],\"key\":\"dream_choose\",\"label\":\"dream.choose\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.28:action/dream_next\":{\"accessibility\":\"action.continue\",\"command\":\"continue\",\"input\":[\"scene\",\"line\"],\"key\":\"dream_next\",\"label\":\"action.continue\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.28:action/drink_lantern_ale\":{\"accessibility\":\"service.ale\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"drink_lantern_ale\",\"label\":\"service.ale\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.28:action/eat_lantern_meal\":{\"accessibility\":\"service.meal\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"eat_lantern_meal\",\"label\":\"service.meal\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.28:action/rent_lantern_room\":{\"accessibility\":\"service.room\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"rent_lantern_room\",\"label\":\"service.room\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"attributes\":{\"ashmere_missing_child@0.0.28:attribute/dex\":{\"key\":\"dex\",\"start\":10},\"ashmere_missing_child@0.0.28:attribute/per\":{\"key\":\"per\",\"start\":5},\"ashmere_missing_child@0.0.28:attribute/str\":{\"key\":\"str\",\"start\":10}},\"barriers\":{\"ashmere_missing_child@0.0.28:barrier/storage_chest_lid\":{\"initial\":\"locked\",\"key\":\"storage_chest_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"cellar_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"storage_chest_lid\"],\"short\":\"barrier.storage_chest_lid.short\"},\"ashmere_missing_child@0.0.28:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"calendar\":{\"hours_per_day\":24,\"lunar\":{\"origin\":0,\"period\":2419200,\"phases\":[{\"at\":0,\"phase\":\"new\"},{\"at\":302400,\"phase\":\"waxing_crescent\"},{\"at\":604800,\"phase\":\"first_quarter\"},{\"at\":907200,\"phase\":\"waxing_gibbous\"},{\"at\":1209600,\"phase\":\"full\"},{\"at\":1512000,\"phase\":\"waning_gibbous\"},{\"at\":1814400,\"phase\":\"last_quarter\"},{\"at\":2116800,\"phase\":\"waning_crescent\"}]},\"solar\":[{\"at\":18000,\"phase\":\"dawn\"},{\"at\":25200,\"phase\":\"day\"},{\"at\":64800,\"phase\":\"dusk\"},{\"at\":72000,\"phase\":\"night\"}],\"start\":64800,\"subdivisions_per_hour\":60,\"units_per_hour\":3600},\"chapters\":[{\"title\":\"chapter.missing_child\"},{\"story_point\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"prologue_completed\",\"kind\":\"story_point\"},\"title\":\"chapter.prologue_complete\"}],\"dialogues\":{\"ashmere_missing_child@0.0.28:dialogue/a_aldric_debt\":{\"choices\":{\"late\":{\"availability\":{\"from\":151201,\"through\":237600},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.late\",\"narration\":\"narration.aldric_debt.late\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"priory_tithe_delivered\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"late\"},{\"amount\":-1,\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"priory_fen_axis\",\"kind\":\"fact\"},\"op\":\"fact.adjust\"}]},\"on_time\":{\"availability\":{\"through\":151200},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.on_time\",\"narration\":\"narration.aldric_debt.on_time\",\"payment\":{\"amount\":10,\"from\":\"aldric\",\"resource\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"pennies\",\"kind\":\"resource\"}},\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missi" <> ...,
+             []}
+     stacktrace:
+       test/loka/content_dreams_test.exs:130: (test)
+
+
+Finished in 0.4 seconds (0.4s async, 0.00s sync)
+
+Result: 0/1 passed, 1 excluded
+Failed: 1 test
+
 missing typed Rest producer
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (102.878917ms)
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (58.743292ms)
-✖ first credit defers presentation behind the unchanged ordinary choice (56.433125ms)
-✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (50.290667ms)
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (49.41325ms)
-ℹ tests 5
+✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (81.471666ms)
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (51.507917ms)
+✖ first credit defers presentation behind the unchanged ordinary choice (47.521125ms)
+✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (42.187ms)
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (42.949042ms)
+✖ a Rest occurrence cannot credit a nonliving body (42.052709ms)
+ℹ tests 6
 ℹ suites 0
 ℹ pass 0
-ℹ fail 5
+ℹ fail 6
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 542.996625
+ℹ duration_ms 474.853834
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:18:1
-✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (102.878917ms)
+test at kernel/ts/test/dream.test.ts:20:1
+✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (81.471666ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
   + actual - expected
   
@@ -32,7 +61,7 @@ test at kernel/ts/test/dream.test.ts:18:1
   -   slept: true
     }
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:28:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:30:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
@@ -45,10 +74,10 @@ test at kernel/ts/test/dream.test.ts:18:1
     diff: 'simple'
   }
 
-test at kernel/ts/test/dream.test.ts:66:1
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (58.743292ms)
+test at kernel/ts/test/dream.test.ts:89:1
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (51.507917ms)
   TypeError: Cannot read properties of undefined (reading 'action')
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:74:25)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:97:25)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -56,8 +85,8 @@ test at kernel/ts/test/dream.test.ts:66:1
       at Test.run (node:internal/test_runner/test:1467:12)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
 
-test at kernel/ts/test/dream.test.ts:165:1
-✖ first credit defers presentation behind the unchanged ordinary choice (56.433125ms)
+test at kernel/ts/test/dream.test.ts:199:1
+✖ first credit defers presentation behind the unchanged ordinary choice (47.521125ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
   + actual - expected
   
@@ -71,7 +100,7 @@ test at kernel/ts/test/dream.test.ts:165:1
   -   slept: true
     }
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:176:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:210:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -86,8 +115,8 @@ test at kernel/ts/test/dream.test.ts:165:1
     diff: 'simple'
   }
 
-test at kernel/ts/test/dream.test.ts:184:1
-✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (50.290667ms)
+test at kernel/ts/test/dream.test.ts:218:1
+✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (42.187ms)
   AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"invalid_state"}}
   + actual - expected
   
@@ -95,7 +124,7 @@ test at kernel/ts/test/dream.test.ts:184:1
   - 'accepted'
   
       at Object.invoke (file://[worktree]/kernel/ts/test/dream_fixture.ts:69:12)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:191:35)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:225:35)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -110,8 +139,8 @@ test at kernel/ts/test/dream.test.ts:184:1
     diff: 'simple'
   }
 
-test at kernel/ts/test/dream.test.ts:248:1
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (49.41325ms)
+test at kernel/ts/test/dream.test.ts:282:1
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (42.949042ms)
   AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"invalid_state"}}
   + actual - expected
   
@@ -119,7 +148,7 @@ test at kernel/ts/test/dream.test.ts:248:1
   - 'accepted'
   
       at Object.invoke (file://[worktree]/kernel/ts/test/dream_fixture.ts:69:12)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:251:35)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:285:35)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -133,28 +162,41 @@ test at kernel/ts/test/dream.test.ts:248:1
     operator: 'strictEqual',
     diff: 'simple'
   }
+
+test at kernel/ts/test/dream.test.ts:344:1
+✖ a Rest occurrence cannot credit a nonliving body (42.052709ms)
+  TypeError: Cannot read properties of undefined (reading 'payload')
+      at restStarts (file://[worktree]/kernel/ts/src/mechanics/scene/rest.ts:10:19)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:361:20)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
 
 presentation checkpoint becomes modal
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (102.022291ms)
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (67.655125ms)
-✖ first credit defers presentation behind the unchanged ordinary choice (55.991458ms)
-✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (43.405292ms)
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (43.493333ms)
-ℹ tests 5
+✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (89.263875ms)
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (48.598292ms)
+✖ first credit defers presentation behind the unchanged ordinary choice (50.859375ms)
+✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (45.095667ms)
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (52.068ms)
+✔ a Rest occurrence cannot credit a nonliving body (47.771042ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 0
+ℹ pass 1
 ℹ fail 5
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 500.51975
+ℹ duration_ms 507.796625
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:18:1
-✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (102.022291ms)
+test at kernel/ts/test/dream.test.ts:20:1
+✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (89.263875ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   + actual - expected
   
@@ -164,30 +206,30 @@ test at kernel/ts/test/dream.test.ts:18:1
   +   line: 'dream.opening',
   +   scene: {
   +     cartridge_id: 'ashmere_missing_child',
-  +     cartridge_version: '0.0.26',
+  +     cartridge_version: '0.0.28',
   +     key: 'dream_of_the_fen',
   +     kind: 'scene'
   +   }
   + }
   - undefined
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:34:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:36:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
       at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
     generatedMessage: true,
     code: 'ERR_ASSERTION',
-    actual: { scene: { cartridge_id: 'ashmere_missing_child', cartridge_version: '0.0.26', kind: 'scene', key: 'dream_of_the_fen' }, line: 'dream.opening', index: 1, count: 5 },
+    actual: { scene: { cartridge_id: 'ashmere_missing_child', cartridge_version: '0.0.28', kind: 'scene', key: 'dream_of_the_fen' }, line: 'dream.opening', index: 1, count: 5 },
     expected: undefined,
     operator: 'strictEqual',
     diff: 'simple'
   }
 
-test at kernel/ts/test/dream.test.ts:66:1
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (67.655125ms)
+test at kernel/ts/test/dream.test.ts:89:1
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (48.598292ms)
   TypeError: Cannot read properties of undefined (reading 'action_key')
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:78:27)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:101:27)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -195,8 +237,8 @@ test at kernel/ts/test/dream.test.ts:66:1
       at Test.run (node:internal/test_runner/test:1467:12)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
 
-test at kernel/ts/test/dream.test.ts:165:1
-✖ first credit defers presentation behind the unchanged ordinary choice (55.991458ms)
+test at kernel/ts/test/dream.test.ts:199:1
+✖ first credit defers presentation behind the unchanged ordinary choice (50.859375ms)
   AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"unsupported_capability"}}
   + actual - expected
   
@@ -204,7 +246,7 @@ test at kernel/ts/test/dream.test.ts:165:1
   - 'accepted'
   
       at Object.invoke (file://[worktree]/kernel/ts/test/dream_fixture.ts:69:12)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:179:5)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:213:5)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -219,8 +261,8 @@ test at kernel/ts/test/dream.test.ts:165:1
     diff: 'simple'
   }
 
-test at kernel/ts/test/dream.test.ts:184:1
-✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (43.405292ms)
+test at kernel/ts/test/dream.test.ts:218:1
+✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (45.095667ms)
   AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"unsupported_capability"}}
   + actual - expected
   
@@ -228,7 +270,7 @@ test at kernel/ts/test/dream.test.ts:184:1
   - 'accepted'
   
       at Object.invoke (file://[worktree]/kernel/ts/test/dream_fixture.ts:69:12)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:191:35)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:225:35)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -243,8 +285,8 @@ test at kernel/ts/test/dream.test.ts:184:1
     diff: 'simple'
   }
 
-test at kernel/ts/test/dream.test.ts:248:1
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (43.493333ms)
+test at kernel/ts/test/dream.test.ts:282:1
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (52.068ms)
   AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"unsupported_capability"}}
   + actual - expected
   
@@ -252,7 +294,7 @@ test at kernel/ts/test/dream.test.ts:248:1
   - 'accepted'
   
       at Object.invoke (file://[worktree]/kernel/ts/test/dream_fixture.ts:69:12)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:251:35)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:285:35)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -270,28 +312,29 @@ test at kernel/ts/test/dream.test.ts:248:1
 scene choice hijacks ordinary dialogue
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (159.7475ms)
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (56.600166ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (48.764583ms)
-✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (41.290292ms)
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (39.079542ms)
-ℹ tests 5
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (132.593209ms)
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (58.926166ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (53.094583ms)
+✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (46.821458ms)
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (45.840916ms)
+✔ a Rest occurrence cannot credit a nonliving body (43.194959ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 2
+ℹ pass 3
 ℹ fail 3
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 539.433417
+ℹ duration_ms 547.185125
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:66:1
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (56.600166ms)
+test at kernel/ts/test/dream.test.ts:89:1
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (58.926166ms)
   TypeError: Cannot read properties of undefined (reading 'roles')
       at choiceView (file://[worktree]/kernel/ts/src/mechanics/dialogue/shared.ts:212:33)
       at gameView (file://[worktree]/kernel/ts/src/view/view.ts:67:38)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:125:18)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:148:18)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -299,8 +342,8 @@ test at kernel/ts/test/dream.test.ts:66:1
       at Test.run (node:internal/test_runner/test:1467:12)
       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
 
-test at kernel/ts/test/dream.test.ts:184:1
-✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (41.290292ms)
+test at kernel/ts/test/dream.test.ts:218:1
+✖ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (46.821458ms)
   AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"invalid_state"}}
   + actual - expected
   
@@ -308,8 +351,8 @@ test at kernel/ts/test/dream.test.ts:184:1
   - 'accepted'
   
       at Object.invoke (file://[worktree]/kernel/ts/test/dream_fixture.ts:69:12)
-      at talk (file://[worktree]/kernel/ts/test/dream.test.ts:196:7)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:206:3)
+      at talk (file://[worktree]/kernel/ts/test/dream.test.ts:230:7)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:240:3)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -324,13 +367,13 @@ test at kernel/ts/test/dream.test.ts:184:1
     diff: 'simple'
   }
 
-test at kernel/ts/test/dream.test.ts:248:1
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (39.079542ms)
+test at kernel/ts/test/dream.test.ts:282:1
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (45.840916ms)
   TypeError: Cannot read properties of undefined (reading 'roles')
       at choiceView (file://[worktree]/kernel/ts/src/mechanics/dialogue/shared.ts:212:33)
       at gameView (file://[worktree]/kernel/ts/src/view/view.ts:67:38)
-      at dream (file://[worktree]/kernel/ts/test/dream.test.ts:15:48)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:252:13)
+      at dream (file://[worktree]/kernel/ts/test/dream.test.ts:17:48)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:286:13)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -341,24 +384,25 @@ test at kernel/ts/test/dream.test.ts:248:1
 missing acknowledged memory
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (126.852417ms)
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (59.196125ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (48.514208ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (72.603334ms)
-✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (81.311375ms)
-ℹ tests 5
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (177.430917ms)
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (88.126042ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (70.772167ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (114.964583ms)
+✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (114.328333ms)
+✔ a Rest occurrence cannot credit a nonliving body (51.816833ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 4
+ℹ pass 5
 ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 542.212666
+ℹ duration_ms 853.449125
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:66:1
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (59.196125ms)
+test at kernel/ts/test/dream.test.ts:89:1
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (88.126042ms)
   AssertionError [ERR_ASSERTION]: {"kind":"rejected","error":{"code":"quest_requirement"}}
   + actual - expected
   
@@ -366,7 +410,7 @@ test at kernel/ts/test/dream.test.ts:66:1
   - 'accepted'
   
       at Object.invoke (file://[worktree]/kernel/ts/test/dream_fixture.ts:69:12)
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:149:21)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:174:21)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -384,31 +428,32 @@ test at kernel/ts/test/dream.test.ts:66:1
 foreign captured draw accepted
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (124.420542ms)
-✔ both exact branches keep World usable and award memory only after shown final acknowledgement (118.4795ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (47.991042ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (70.48825ms)
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (41.707833ms)
-ℹ tests 5
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (171.957125ms)
+✔ both exact branches keep World usable and award memory only after shown final acknowledgement (159.634959ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (68.353375ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (96.458542ms)
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (52.649042ms)
+✔ a Rest occurrence cannot credit a nonliving body (48.672041ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 4
+ℹ pass 5
 ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 558.710375
+ℹ duration_ms 800.206709
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:248:1
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (41.707833ms)
-  AssertionError [ERR_ASSERTION]: {"kind":"accepted","outcome":"choice_resolved","delta":{"ops":[{"op":"choice.resolve","writer_group":0,"continuation_id":"3ab6a302-d72b-8b95-91c5-01dea9b441b8","expected_revision":106,"choice_id":"follow_fox"},{"op":"fact.assign","writer_group":0,"fact":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.26","kind":"fact","key":"scene_dream_of_the_fen"},"scope":{"kind":"player","character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9"},"expected":4,"value":5}]},"events":[{"id":"482cfdcc-56ac-8cd8-bedf-aa9f274c7d13","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f","logical_time":0,"causation_id":"cccccccc-2222-4333-8444-000000000080","correlation_id":"cccccccc-2222-4333-8444-000000000080","actor_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9","scope":{"kind":"player","character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9"},"position":1,"payload":{"type":"fact_changed","fact":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.26","kind":"fact","key":"scene_dream_of_the_fen"},"old":4,"new":5}},{"id":"72c9904b-21b4-87ee-a50e-de11b0c1dc66","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f","scope":{"kind":"player","character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9"},"actor_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9","logical_time":0,"position":2,"causation_id":"cccccccc-2222-4333-8444-000000000080","correlation_id":"cccccccc-2222-4333-8444-000000000080","payload":{"type":"choice_resolved","continuation_id":"3ab6a302-d72b-8b95-91c5-01dea9b441b8","choice_id":"follow_fox"}}],"effects":[],"rng":[1,2,3,4],"narration":[{"key":"dream.follow"}]}
+test at kernel/ts/test/dream.test.ts:282:1
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (52.649042ms)
+  AssertionError [ERR_ASSERTION]: {"kind":"accepted","outcome":"choice_resolved","delta":{"ops":[{"op":"choice.resolve","writer_group":0,"continuation_id":"3ab6a302-d72b-8b95-91c5-01dea9b441b8","expected_revision":106,"choice_id":"follow_fox"},{"op":"fact.assign","writer_group":0,"fact":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.28","kind":"fact","key":"scene_dream_of_the_fen"},"scope":{"kind":"player","character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9"},"expected":4,"value":5}]},"events":[{"id":"482cfdcc-56ac-8cd8-bedf-aa9f274c7d13","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f","logical_time":0,"causation_id":"cccccccc-2222-4333-8444-000000000080","correlation_id":"cccccccc-2222-4333-8444-000000000080","actor_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9","scope":{"kind":"player","character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9"},"position":1,"payload":{"type":"fact_changed","fact":{"cartridge_id":"ashmere_missing_child","cartridge_version":"0.0.28","kind":"fact","key":"scene_dream_of_the_fen"},"old":4,"new":5}},{"id":"72c9904b-21b4-87ee-a50e-de11b0c1dc66","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f","scope":{"kind":"player","character_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9"},"actor_id":"bd595711-ea5f-89a5-abb0-046cd349d2f9","logical_time":0,"position":2,"causation_id":"cccccccc-2222-4333-8444-000000000080","correlation_id":"cccccccc-2222-4333-8444-000000000080","payload":{"type":"choice_resolved","continuation_id":"3ab6a302-d72b-8b95-91c5-01dea9b441b8","choice_id":"follow_fox"}}],"effects":[],"rng":[1,2,3,4],"narration":[{"key":"dream.follow"}]}
   + actual - expected
   
   + 'accepted'
   - 'rejected'
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:273:12)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:307:12)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -426,26 +471,27 @@ test at kernel/ts/test/dream.test.ts:248:1
 free dream memory writer
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (126.74125ms)
-✔ both exact branches keep World usable and award memory only after shown final acknowledgement (119.810875ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (47.615458ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (70.722458ms)
-✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (81.946708ms)
-ℹ tests 5
+✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (177.467292ms)
+✔ both exact branches keep World usable and award memory only after shown final acknowledgement (152.716375ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (71.731417ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (92.337625ms)
+✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (105.540167ms)
+✔ a Rest occurrence cannot credit a nonliving body (50.215709ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 4
+ℹ pass 5
 ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 602.707375
+ℹ duration_ms 860.95425
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:18:1
-✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (126.74125ms)
+test at kernel/ts/test/dream.test.ts:20:1
+✖ only a new actual paid Rest starts one checkpoint without giving its end consequence (177.467292ms)
   AssertionError [ERR_ASSERTION]: Missing expected exception.
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:53:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:76:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
@@ -461,29 +507,30 @@ test at kernel/ts/test/dream.test.ts:18:1
 bed view bypasses keyed policy
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (124.019584ms)
-✔ both exact branches keep World usable and award memory only after shown final acknowledgement (129.783833ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (49.041917ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (72.905958ms)
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (84.947791ms)
-ℹ tests 5
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (175.738917ms)
+✔ both exact branches keep World usable and award memory only after shown final acknowledgement (171.114167ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (69.406916ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (94.833ms)
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (98.945416ms)
+✔ a Rest occurrence cannot credit a nonliving body (48.391209ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 4
+ℹ pass 5
 ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 616.876708
+ℹ duration_ms 867.661
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:248:1
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (84.947791ms)
+test at kernel/ts/test/dream.test.ts:282:1
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (98.945416ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   
   true !== false
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:290:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:324:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -501,28 +548,29 @@ test at kernel/ts/test/dream.test.ts:248:1
 save binds scene row as dialogue
 old command: mise exec -- node --test mobile/authority/local-story/service.test.ts mobile/authority/local-story/scene.test.ts mobile/authority/local-story/vesper_message.test.ts
 focused command: mise exec -- node --test mobile/authority/local-story/dream.test.ts mobile/app/book/dream.test.ts
-(node:11137) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
+(node:75260) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
-✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (325.126458ms)
-✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (538.720792ms)
-✔ cold open refuses forged dream truth and receipt producer evidence without changing file bytes (511.106708ms)
-✖ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (333.277917ms)
-✖ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (110.225667ms)
-ℹ tests 5
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (374.997583ms)
+✔ uncertain paid Rest remount opens the first dream only when the original COMMIT settles (209.10575ms)
+✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (598.799209ms)
+✔ cold open refuses forged dream truth and receipt producer evidence without changing file bytes (515.623417ms)
+✖ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (291.391416ms)
+✖ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (96.01225ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 1
+ℹ pass 2
 ℹ fail 4
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1751.163375
+ℹ duration_ms 1735.455667
 
 ✖ failing tests:
 
 test at mobile/app/book/dream.test.ts:132:1
-✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (325.126458ms)
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (374.997583ms)
   Error: save_corrupt
       at openGame (file://[worktree]/mobile/authority/local-story/session.ts:94:50)
       at TestContext.<anonymous> (file://[worktree]/mobile/app/book/dream.test.ts:174:23)
@@ -534,10 +582,10 @@ test at mobile/app/book/dream.test.ts:132:1
     cause: "{ kind: 'save_corrupt', newGame: [Function: newGame] }"
   }
 
-test at mobile/authority/local-story/dream.test.ts:16:1
-✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (538.720792ms)
+test at mobile/authority/local-story/dream.test.ts:17:1
+✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (598.799209ms)
   Error: database is not open
-      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:68:13)
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:69:13)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
@@ -545,17 +593,17 @@ test at mobile/authority/local-story/dream.test.ts:16:1
     code: 'ERR_INVALID_STATE'
   }
 
-test at mobile/authority/local-story/dream.test.ts:134:1
-✖ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (333.277917ms)
+test at mobile/authority/local-story/dream.test.ts:160:1
+✖ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (291.391416ms)
   AssertionError [ERR_ASSERTION]: {"kind":"save_corrupt"}
   + actual - expected
   
   + 'save_corrupt'
   - 'open'
   
-      at open (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:16:12)
-      at Object.reopen (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:64:15)
-      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:193:11)
+      at open (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:17:12)
+      at Object.reopen (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:65:15)
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:219:11)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -570,17 +618,17 @@ test at mobile/authority/local-story/dream.test.ts:134:1
     diff: 'simple'
   }
 
-test at mobile/authority/local-story/dream.test.ts:206:1
-✖ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (110.225667ms)
+test at mobile/authority/local-story/dream.test.ts:232:1
+✖ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (96.01225ms)
   AssertionError [ERR_ASSERTION]: {"kind":"save_corrupt"}
   + actual - expected
   
   + 'save_corrupt'
   - 'open'
   
-      at open (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:16:12)
-      at Object.reopen (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:64:15)
-      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:228:5)
+      at open (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:17:12)
+      at Object.reopen (file://[worktree]/mobile/authority/local-story/__tests__/dream-host.test.ts:65:15)
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:254:5)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -598,28 +646,29 @@ test at mobile/authority/local-story/dream.test.ts:206:1
 receipt routes dream to World
 old command: mise exec -- node --test mobile/authority/local-story/service.test.ts mobile/authority/local-story/scene.test.ts mobile/authority/local-story/vesper_message.test.ts
 focused command: mise exec -- node --test mobile/authority/local-story/dream.test.ts mobile/app/book/dream.test.ts
-(node:11266) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
+(node:75403) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
-✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (332.13475ms)
-✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (448.316ms)
-✔ cold open refuses forged dream truth and receipt producer evidence without changing file bytes (419.102667ms)
-✔ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (782.480458ms)
-✔ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (128.136833ms)
-ℹ tests 5
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (466.762792ms)
+✔ uncertain paid Rest remount opens the first dream only when the original COMMIT settles (260.632709ms)
+✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (661.389458ms)
+✔ cold open refuses forged dream truth and receipt producer evidence without changing file bytes (626.971ms)
+✔ Rest, choice opening, branch selection and final ack settle uncertain COMMIT all old or all new (1079.967875ms)
+✔ real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed (164.73575ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 3
+ℹ pass 4
 ℹ fail 2
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1998.241584
+ℹ duration_ms 2817.94825
 
 ✖ failing tests:
 
 test at mobile/app/book/dream.test.ts:132:1
-✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (332.13475ms)
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (466.762792ms)
   AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
   
     assert.ok(!cold.text().includes('A red fox steps onto the track. It looks back once, waiting.'))
@@ -638,15 +687,15 @@ test at mobile/app/book/dream.test.ts:132:1
     diff: 'simple'
   }
 
-test at mobile/authority/local-story/dream.test.ts:16:1
-✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (448.316ms)
+test at mobile/authority/local-story/dream.test.ts:17:1
+✖ every intermediate checkpoint and both ended branches cold-open and replay the exact original result once (661.389458ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   + actual - expected
   
   + undefined
-  - 'dream:7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0'
+  - 'dream:41f5d4b9-8494-82cd-b350-2650f8a9efd4'
   
-      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:59:18)
+      at TestContext.<anonymous> (file://[worktree]/mobile/authority/local-story/dream.test.ts:60:18)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.start (node:internal/test_runner/test:1262:17)
@@ -654,7 +703,7 @@ test at mobile/authority/local-story/dream.test.ts:16:1
     generatedMessage: true,
     code: 'ERR_ASSERTION',
     actual: undefined,
-    expected: 'dream:7e36bf9c-d2fa-876f-aa4f-7cc991ac48b0',
+    expected: 'dream:41f5d4b9-8494-82cd-b350-2650f8a9efd4',
     operator: 'strictEqual',
     diff: 'simple'
   }
@@ -662,7 +711,7 @@ test at mobile/authority/local-story/dream.test.ts:16:1
 loader accepts unsafe dream graph
 old command: mise exec -- node --test kernel/ts/test/cartridge_services.test.ts kernel/ts/test/scene.test.ts
 focused command: mise exec -- node --test kernel/ts/test/cartridge_dreams.test.ts
-✖ loader refuses impossible Rest, graph and exclusive end bindings (429.678ms)
+✖ loader refuses impossible Rest, graph and exclusive end bindings (362.892542ms)
 ℹ tests 1
 ℹ suites 0
 ℹ pass 0
@@ -670,12 +719,12 @@ focused command: mise exec -- node --test kernel/ts/test/cartridge_dreams.test.t
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 604.07225
+ℹ duration_ms 532.08075
 
 ✖ failing tests:
 
 test at kernel/ts/test/cartridge_dreams.test.ts:13:1
-✖ loader refuses impossible Rest, graph and exclusive end bindings (429.678ms)
+✖ loader refuses impossible Rest, graph and exclusive end bindings (362.892542ms)
   AssertionError [ERR_ASSERTION]: different graph
   
   true !== false
@@ -698,16 +747,16 @@ old command: mise exec -- mix test --force test/loka/content_scenes_test.exs tes
 focused command: mise exec -- mix test --force test/loka/content_dreams_test.exs
 Compiling 63 files (.ex)
 Generated loka app
-Running ExUnit with seed: 262611, max_cases: 16
+Running ExUnit with seed: 758557, max_cases: 16
 
-
+.
 
   1) test Rest dream source expands its current bindings and rejects impossible declarations (Loka.ContentDreamsTest)
      test/loka/content_dreams_test.exs:6
      ** (MatchError) no match of right hand side value:
 
          {:ok,
-          "{\"cartridge\":{\"actions\":{\"ashmere_missing_child@0.0.26:action/dream_choose\":{\"accessibility\":\"dream.choose\",\"command\":\"choose\",\"input\":[\"continuation_id\",\"choice_id\",\"dream\"],\"key\":\"dream_choose\",\"label\":\"dream.choose\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.26:action/dream_next\":{\"accessibility\":\"action.continue\",\"command\":\"continue\",\"input\":[\"scene\",\"line\"],\"key\":\"dream_next\",\"label\":\"action.continue\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.26:action/drink_lantern_ale\":{\"accessibility\":\"service.ale\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"drink_lantern_ale\",\"label\":\"service.ale\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.26:action/eat_lantern_meal\":{\"accessibility\":\"service.meal\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"eat_lantern_meal\",\"label\":\"service.meal\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.26:action/rent_lantern_room\":{\"accessibility\":\"service.room\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"rent_lantern_room\",\"label\":\"service.room\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"attributes\":{\"ashmere_missing_child@0.0.26:attribute/dex\":{\"key\":\"dex\",\"start\":10},\"ashmere_missing_child@0.0.26:attribute/per\":{\"key\":\"per\",\"start\":5},\"ashmere_missing_child@0.0.26:attribute/str\":{\"key\":\"str\",\"start\":10}},\"barriers\":{\"ashmere_missing_child@0.0.26:barrier/storage_chest_lid\":{\"initial\":\"locked\",\"key\":\"storage_chest_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"cellar_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"storage_chest_lid\"],\"short\":\"barrier.storage_chest_lid.short\"},\"ashmere_missing_child@0.0.26:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"calendar\":{\"hours_per_day\":24,\"lunar\":{\"origin\":0,\"period\":2419200,\"phases\":[{\"at\":0,\"phase\":\"new\"},{\"at\":302400,\"phase\":\"waxing_crescent\"},{\"at\":604800,\"phase\":\"first_quarter\"},{\"at\":907200,\"phase\":\"waxing_gibbous\"},{\"at\":1209600,\"phase\":\"full\"},{\"at\":1512000,\"phase\":\"waning_gibbous\"},{\"at\":1814400,\"phase\":\"last_quarter\"},{\"at\":2116800,\"phase\":\"waning_crescent\"}]},\"solar\":[{\"at\":18000,\"phase\":\"dawn\"},{\"at\":25200,\"phase\":\"day\"},{\"at\":64800,\"phase\":\"dusk\"},{\"at\":72000,\"phase\":\"night\"}],\"start\":64800,\"subdivisions_per_hour\":60,\"units_per_hour\":3600},\"chapters\":[{\"title\":\"chapter.missing_child\"},{\"story_point\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"prologue_completed\",\"kind\":\"story_point\"},\"title\":\"chapter.prologue_complete\"}],\"dialogues\":{\"ashmere_missing_child@0.0.26:dialogue/a_aldric_debt\":{\"choices\":{\"late\":{\"availability\":{\"from\":151201,\"through\":237600},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.late\",\"narration\":\"narration.aldric_debt.late\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"priory_tithe_delivered\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"late\"},{\"amount\":-1,\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"priory_fen_axis\",\"kind\":\"fact\"},\"op\":\"fact.adjust\"}]},\"on_time\":{\"availability\":{\"through\":151200},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.on_time\",\"narration\":\"narration.aldric_debt.on_time\",\"payment\":{\"amount\":10,\"from\":\"aldric\",\"resource\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"pennies\",\"kind\":\"resource\"}},\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missi" <> ...,
+          "{\"cartridge\":{\"actions\":{\"ashmere_missing_child@0.0.28:action/dream_choose\":{\"accessibility\":\"dream.choose\",\"command\":\"choose\",\"input\":[\"continuation_id\",\"choice_id\",\"dream\"],\"key\":\"dream_choose\",\"label\":\"dream.choose\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.28:action/dream_next\":{\"accessibility\":\"action.continue\",\"command\":\"continue\",\"input\":[\"scene\",\"line\"],\"key\":\"dream_next\",\"label\":\"action.continue\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.28:action/drink_lantern_ale\":{\"accessibility\":\"service.ale\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"drink_lantern_ale\",\"label\":\"service.ale\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.28:action/eat_lantern_meal\":{\"accessibility\":\"service.meal\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"eat_lantern_meal\",\"label\":\"service.meal\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.28:action/rent_lantern_room\":{\"accessibility\":\"service.room\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"rent_lantern_room\",\"label\":\"service.room\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"attributes\":{\"ashmere_missing_child@0.0.28:attribute/dex\":{\"key\":\"dex\",\"start\":10},\"ashmere_missing_child@0.0.28:attribute/per\":{\"key\":\"per\",\"start\":5},\"ashmere_missing_child@0.0.28:attribute/str\":{\"key\":\"str\",\"start\":10}},\"barriers\":{\"ashmere_missing_child@0.0.28:barrier/storage_chest_lid\":{\"initial\":\"locked\",\"key\":\"storage_chest_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"cellar_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"storage_chest_lid\"],\"short\":\"barrier.storage_chest_lid.short\"},\"ashmere_missing_child@0.0.28:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"calendar\":{\"hours_per_day\":24,\"lunar\":{\"origin\":0,\"period\":2419200,\"phases\":[{\"at\":0,\"phase\":\"new\"},{\"at\":302400,\"phase\":\"waxing_crescent\"},{\"at\":604800,\"phase\":\"first_quarter\"},{\"at\":907200,\"phase\":\"waxing_gibbous\"},{\"at\":1209600,\"phase\":\"full\"},{\"at\":1512000,\"phase\":\"waning_gibbous\"},{\"at\":1814400,\"phase\":\"last_quarter\"},{\"at\":2116800,\"phase\":\"waning_crescent\"}]},\"solar\":[{\"at\":18000,\"phase\":\"dawn\"},{\"at\":25200,\"phase\":\"day\"},{\"at\":64800,\"phase\":\"dusk\"},{\"at\":72000,\"phase\":\"night\"}],\"start\":64800,\"subdivisions_per_hour\":60,\"units_per_hour\":3600},\"chapters\":[{\"title\":\"chapter.missing_child\"},{\"story_point\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"prologue_completed\",\"kind\":\"story_point\"},\"title\":\"chapter.prologue_complete\"}],\"dialogues\":{\"ashmere_missing_child@0.0.28:dialogue/a_aldric_debt\":{\"choices\":{\"late\":{\"availability\":{\"from\":151201,\"through\":237600},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.late\",\"narration\":\"narration.aldric_debt.late\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"priory_tithe_delivered\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"late\"},{\"amount\":-1,\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"priory_fen_axis\",\"kind\":\"fact\"},\"op\":\"fact.adjust\"}]},\"on_time\":{\"availability\":{\"through\":151200},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.on_time\",\"narration\":\"narration.aldric_debt.on_time\",\"payment\":{\"amount\":10,\"from\":\"aldric\",\"resource\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.28\",\"key\":\"pennies\",\"kind\":\"resource\"}},\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missi" <> ...,
           []}
 
      code: Enum.with_index(changes, fn {file, change}, n ->
@@ -718,9 +767,9 @@ Running ExUnit with seed: 262611, max_cases: 16
        test/loka/content_dreams_test.exs:62: (test)
 
 
-Finished in 1.1 seconds (1.1s async, 0.00s sync)
+Finished in 1.8 seconds (1.8s async, 0.00s sync)
 
-Result: 0/1 passed
+Result: 1/2 passed
 Failed: 1 test
     warning: variable "want" is unused (if the variable is not meant to be used, prefix it with an underscore)
     │
@@ -733,29 +782,30 @@ Failed: 1 test
 checker ignores wrong authored key
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (137.869833ms)
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (47.1145ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (53.360083ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (76.910083ms)
-✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (89.829292ms)
-ℹ tests 5
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (183.534709ms)
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (63.620208ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (67.098667ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (108.29875ms)
+✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (111.057709ms)
+✔ a Rest occurrence cannot credit a nonliving body (49.617375ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 4
+ℹ pass 5
 ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 576.730459
+ℹ duration_ms 804.463792
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:66:1
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (47.1145ms)
+test at kernel/ts/test/dream.test.ts:89:1
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (63.620208ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   
   true !== false
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:109:14)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:132:14)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -773,24 +823,25 @@ test at kernel/ts/test/dream.test.ts:66:1
 Book substitutes semantic Choose
 old command: mise exec -- node --test mobile/app/book/liquid.test.ts mobile/app/book/live_actions.test.ts
 focused command: mise exec -- node --test mobile/app/book/dream.test.ts
-(node:11653) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
+(node:75981) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file://[worktree]/mobile/app/book/dream.test.ts is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to [worktree]/mobile/app/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)
-✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (457.52775ms)
-ℹ tests 1
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (332.822584ms)
+✔ uncertain paid Rest remount opens the first dream only when the original COMMIT settles (172.556083ms)
+ℹ tests 2
 ℹ suites 0
-ℹ pass 0
+ℹ pass 1
 ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1017.66375
+ℹ duration_ms 951.185209
 
 ✖ failing tests:
 
 test at mobile/app/book/dream.test.ts:132:1
-✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (457.52775ms)
+✖ live first Rest, nested Close/Resume, captured branches, final ack and cold World resume use the actual bed (332.822584ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
   + actual - expected
   
@@ -818,24 +869,25 @@ test at mobile/app/book/dream.test.ts:132:1
 eligibility ignores shared query budget
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (151.370125ms)
-✔ both exact branches keep World usable and award memory only after shown final acknowledgement (158.300708ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (66.463583ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (111.047667ms)
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (126.313042ms)
-ℹ tests 5
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (133.254667ms)
+✔ both exact branches keep World usable and award memory only after shown final acknowledgement (142.812708ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (63.351208ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (94.747041ms)
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (104.536166ms)
+✔ a Rest occurrence cannot credit a nonliving body (43.019542ms)
+ℹ tests 6
 ℹ suites 0
-ℹ pass 4
+ℹ pass 5
 ℹ fail 1
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 823.861833
+ℹ duration_ms 743.676333
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:248:1
-✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (126.313042ms)
+test at kernel/ts/test/dream.test.ts:282:1
+✖ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (104.536166ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   + actual - expected
   
@@ -850,26 +902,26 @@ test at kernel/ts/test/dream.test.ts:248:1
   +       rest: [Object: null prototype] {
   +         credit: [Object: null prototype] {
   +           cartridge_id: 'ashmere_missing_child',
-  +           cartridge_version: '0.0.26',
+  +           cartridge_version: '0.0.28',
   +           key: 'slept_at_lantern',
   +           kind: 'fact'
   +         },
   +         detail: 'bed',
   +         entitlement: [Object: null prototype] {
   +           cartridge_id: 'ashmere_missing_child',
-  +           cartridge_version: '0.0.26',
+  +           cartridge_version: '0.0.28',
   +           key: 'lantern_bed_paid',
   +           kind: 'fact'
   +         },
   +         quest: [Object: null prototype] {
   +           cartridge_id: 'ashmere_missing_child',
-  +           cartridge_version: '0.0.26',
+  +           cartridge_version: '0.0.28',
   +           key: 'a_room_at_the_lantern',
   +           kind: 'quest'
   +         },
   +         room: [Object: null prototype] {
   +           cartridge_id: 'ashmere_missing_child',
-  +           cartridge_version: '0.0.26',
+  +           cartridge_version: '0.0.28',
   +           key: 'inn_rooms',
   +           kind: 'room'
   +         }
@@ -880,7 +932,7 @@ test at kernel/ts/test/dream.test.ts:248:1
   +         [Object: null prototype] {
   +           fact: [Object: null prototype] {
   +             cartridge_id: 'ashmere_missing_child',
-  +             cartridge_version: '0.0.26',
+  +             cartridge_version: '0.0.28',
   +             key: 'dream_seen',
   +             kind: 'fact'
   +           },
@@ -890,7 +942,7 @@ test at kernel/ts/test/dream.test.ts:248:1
   +       outcome: 'acknowledged',
   +       quest: [Object: null prototype] {
   +         cartridge_id: 'ashmere_missing_child',
-  +         cartridge_version: '0.0.26',
+  +         cartridge_version: '0.0.28',
   +         key: 'a_room_at_the_lantern',
   +         kind: 'quest'
   +       }
@@ -941,7 +993,7 @@ test at kernel/ts/test/dream.test.ts:248:1
   + }
   - 'budget_exceeded'
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:299:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:333:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -959,12 +1011,12 @@ test at kernel/ts/test/dream.test.ts:248:1
 Rest delivery credits a nonliving body
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (124.009375ms)
-✔ both exact branches keep World usable and award memory only after shown final acknowledgement (119.274291ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (48.969834ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (71.700084ms)
-✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (84.309459ms)
-✖ a Rest occurrence cannot credit a nonliving body (44.379042ms)
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (141.863041ms)
+✔ both exact branches keep World usable and award memory only after shown final acknowledgement (129.148208ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (50.389875ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (76.119791ms)
+✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (86.763667ms)
+✖ a Rest occurrence cannot credit a nonliving body (41.723041ms)
 ℹ tests 6
 ℹ suites 0
 ℹ pass 5
@@ -972,12 +1024,12 @@ focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 650.643541
+ℹ duration_ms 689.510625
 
 ✖ failing tests:
 
-test at kernel/ts/test/dream.test.ts:333:1
-✖ a Rest occurrence cannot credit a nonliving body (44.379042ms)
+test at kernel/ts/test/dream.test.ts:344:1
+✖ a Rest occurrence cannot credit a nonliving body (41.723041ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
   + actual - expected
   
@@ -987,7 +1039,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   +       {
   +         fact: [Object: null prototype] {
   +           cartridge_id: 'ashmere_missing_child',
-  +           cartridge_version: '0.0.26',
+  +           cartridge_version: '0.0.28',
   +           key: 'slept_at_lantern',
   +           kind: 'fact'
   +         },
@@ -998,7 +1050,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   +         op: 'quest.activate',
   +         quest: [Object: null prototype] {
   +           cartridge_id: 'ashmere_missing_child',
-  +           cartridge_version: '0.0.26',
+  +           cartridge_version: '0.0.28',
   +           key: 'a_room_at_the_lantern',
   +           kind: 'quest'
   +         }
@@ -1006,7 +1058,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   +       {
   +         fact: {
   +           cartridge_id: 'ashmere_missing_child',
-  +           cartridge_version: '0.0.26',
+  +           cartridge_version: '0.0.28',
   +           key: 'scene_dream_of_the_fen',
   +           kind: 'fact'
   +         },
@@ -1019,7 +1071,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   +       event: 'rested',
   +       room: [Object: null prototype] {
   +         cartridge_id: 'ashmere_missing_child',
-  +         cartridge_version: '0.0.26',
+  +         cartridge_version: '0.0.28',
   +         key: 'inn_rooms',
   +         kind: 'room'
   +       }
@@ -1032,7 +1084,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   +             equals: true,
   +             fact: [Object: null prototype] {
   +               cartridge_id: 'ashmere_missing_child',
-  +               cartridge_version: '0.0.26',
+  +               cartridge_version: '0.0.28',
   +               key: 'lantern_bed_paid',
   +               kind: 'fact'
   +             },
@@ -1042,7 +1094,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   +             equals: false,
   +             fact: [Object: null prototype] {
   +               cartridge_id: 'ashmere_missing_child',
-  +               cartridge_version: '0.0.26',
+  +               cartridge_version: '0.0.28',
   +               key: 'slept_at_lantern',
   +               kind: 'fact'
   +             },
@@ -1052,7 +1104,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   +             equals: 0,
   +             fact: {
   +               cartridge_id: 'ashmere_missing_child',
-  +               cartridge_version: '0.0.26',
+  +               cartridge_version: '0.0.28',
   +               key: 'scene_dream_of_the_fen',
   +               kind: 'fact'
   +             },
@@ -1066,7 +1118,7 @@ test at kernel/ts/test/dream.test.ts:333:1
   + ]
   - []
   
-      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:350:10)
+      at TestContext.<anonymous> (file://[worktree]/kernel/ts/test/dream.test.ts:361:10)
       at Test.runInAsyncScope (node:async_hooks:227:14)
       at Test.run (node:internal/test_runner/test:1402:25)
       at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
@@ -1084,12 +1136,12 @@ test at kernel/ts/test/dream.test.ts:333:1
 wrong declared final quest outcome
 old command: mise exec -- node --test kernel/ts/test/position.test.ts kernel/ts/test/scene.test.ts kernel/ts/test/dialogue.test.ts kernel/ts/test/resources.test.ts
 focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
-✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (133.227125ms)
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (65.667625ms)
-✔ first credit defers presentation behind the unchanged ordinary choice (48.705625ms)
-✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (72.109167ms)
-✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (82.241ms)
-✔ a Rest occurrence cannot credit a nonliving body (45.541375ms)
+✔ only a new actual paid Rest starts one checkpoint without giving its end consequence (135.618625ms)
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (65.590666ms)
+✔ first credit defers presentation behind the unchanged ordinary choice (52.51625ms)
+✔ a dormant dream choice survives the actual S2 message handoff and the Bell modal scene (76.564708ms)
+✔ captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth (86.554709ms)
+✔ a Rest occurrence cannot credit a nonliving body (40.165584ms)
 ℹ tests 6
 ℹ suites 0
 ℹ pass 5
@@ -1097,12 +1149,12 @@ focused command: mise exec -- node --test kernel/ts/test/dream.test.ts
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 626.51525
+ℹ duration_ms 618.520709
 
 ✖ failing tests:
 
 test at kernel/ts/test/dream.test.ts:89:1
-✖ both exact branches keep World usable and award memory only after shown final acknowledgement (65.667625ms)
+✖ both exact branches keep World usable and award memory only after shown final acknowledgement (65.590666ms)
   AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
   + actual - expected
   
@@ -1123,32 +1175,4 @@ test at kernel/ts/test/dream.test.ts:89:1
     operator: 'strictEqual',
     diff: 'simple'
   }
-
-compiler compares Rest consequences as trigger identity
-old command: mise exec -- mix test --force --exclude duplicate_rest_trigger test/loka/content_dreams_test.exs test/loka/content_scenes_test.exs test/loka/content_services_test.exs
-focused command: mise exec -- mix test --force --only duplicate_rest_trigger test/loka/content_dreams_test.exs
-Compiling 63 files (.ex)
-Generated loka app
-Running ExUnit with seed: 833858, max_cases: 16
-Excluding tags: [:test]
-Including tags: [:duplicate_rest_trigger]
-
-
-
-  1) test Rest trigger identity is its room and detail, independent of consequence refs (Loka.ContentDreamsTest)
-     test/loka/content_dreams_test.exs:73
-     match (=) failed
-     code:  assert {:error, diagnostics} = Loka.Content.compile(dir)
-     left:  {:error, diagnostics}
-     right: {:ok,
-             "{\"cartridge\":{\"actions\":{\"ashmere_missing_child@0.0.26:action/dream_choose\":{\"accessibility\":\"dream.choose\",\"command\":\"choose\",\"input\":[\"continuation_id\",\"choice_id\",\"dream\"],\"key\":\"dream_choose\",\"label\":\"dream.choose\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.26:action/dream_next\":{\"accessibility\":\"action.continue\",\"command\":\"continue\",\"input\":[\"scene\",\"line\"],\"key\":\"dream_next\",\"label\":\"action.continue\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"none\"}},\"ashmere_missing_child@0.0.26:action/drink_lantern_ale\":{\"accessibility\":\"service.ale\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"drink_lantern_ale\",\"label\":\"service.ale\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.26:action/eat_lantern_meal\":{\"accessibility\":\"service.meal\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"eat_lantern_meal\",\"label\":\"service.meal\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}},\"ashmere_missing_child@0.0.26:action/rent_lantern_room\":{\"accessibility\":\"service.room\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"rent_lantern_room\",\"label\":\"service.room\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"attributes\":{\"ashmere_missing_child@0.0.26:attribute/dex\":{\"key\":\"dex\",\"start\":10},\"ashmere_missing_child@0.0.26:attribute/per\":{\"key\":\"per\",\"start\":5},\"ashmere_missing_child@0.0.26:attribute/str\":{\"key\":\"str\",\"start\":10}},\"barriers\":{\"ashmere_missing_child@0.0.26:barrier/storage_chest_lid\":{\"initial\":\"locked\",\"key\":\"storage_chest_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"cellar_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"storage_chest_lid\"],\"short\":\"barrier.storage_chest_lid.short\"},\"ashmere_missing_child@0.0.26:barrier/trunk_lid\":{\"initial\":\"locked\",\"key\":\"trunk_lid\",\"key_item\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"brass_key\",\"kind\":\"item\"},\"keywords\":[\"lid\",\"trunk_lid\"],\"short\":\"barrier.trunk_lid.short\"}},\"calendar\":{\"hours_per_day\":24,\"lunar\":{\"origin\":0,\"period\":2419200,\"phases\":[{\"at\":0,\"phase\":\"new\"},{\"at\":302400,\"phase\":\"waxing_crescent\"},{\"at\":604800,\"phase\":\"first_quarter\"},{\"at\":907200,\"phase\":\"waxing_gibbous\"},{\"at\":1209600,\"phase\":\"full\"},{\"at\":1512000,\"phase\":\"waning_gibbous\"},{\"at\":1814400,\"phase\":\"last_quarter\"},{\"at\":2116800,\"phase\":\"waning_crescent\"}]},\"solar\":[{\"at\":18000,\"phase\":\"dawn\"},{\"at\":25200,\"phase\":\"day\"},{\"at\":64800,\"phase\":\"dusk\"},{\"at\":72000,\"phase\":\"night\"}],\"start\":64800,\"subdivisions_per_hour\":60,\"units_per_hour\":3600},\"chapters\":[{\"title\":\"chapter.missing_child\"},{\"story_point\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"prologue_completed\",\"kind\":\"story_point\"},\"title\":\"chapter.prologue_complete\"}],\"dialogues\":{\"ashmere_missing_child@0.0.26:dialogue/a_aldric_debt\":{\"choices\":{\"late\":{\"availability\":{\"from\":151201,\"through\":237600},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.late\",\"narration\":\"narration.aldric_debt.late\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"priory_tithe_delivered\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":\"late\"},{\"amount\":-1,\"fact\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"priory_fen_axis\",\"kind\":\"fact\"},\"op\":\"fact.adjust\"}]},\"on_time\":{\"availability\":{\"through\":151200},\"hand_over\":{\"item\":\"ledger\",\"to\":\"aldric\"},\"label\":\"dialogue.aldric_debt.on_time\",\"narration\":\"narration.aldric_debt.on_time\",\"payment\":{\"amount\":10,\"from\":\"aldric\",\"resource\":{\"cartridge_id\":\"ashmere_missing_child\",\"cartridge_version\":\"0.0.26\",\"key\":\"pennies\",\"kind\":\"resource\"}},\"sequence\":[{\"fact\":{\"cartridge_id\":\"ashmere_missi" <> ...,
-             []}
-     stacktrace:
-       test/loka/content_dreams_test.exs:130: (test)
-
-
-Finished in 0.5 seconds (0.5s async, 0.00s sync)
-
-Result: 0/1 passed, 1 excluded
-Failed: 1 test
 

@@ -45,3 +45,14 @@ identity. No new helper, allowance or machinery. One isolated compiler test sepa
 credit/memory/quest refs, proves different rooms and details still compile, and requires
 both same-anchor diagnostics. Its whole-map mutant leaves the older focused compiler
 checks green and this new test red; restored checks pass. Ponytail Review: Lean already.
+
+
+Integrated audit: published D5/D2 geometry, held-book/topic rules, item-pages and
+exact uncertain Read/remount/tap-retry paths are preserved. B9's final successor
+is independently derived from the actual published predecessor; provisional
+fixtures/generator remain immutable. Existing source ceilings are retained; the
+merge-only comment trim has identical executable AST. The observed raw unavailable
+Rest label is fixed by reusing the existing label closure, with old-production red
+and restored Book/Web proof. No new display resolver or machinery. Actual captured
+choice/acknowledged bed layout uses the shared detail grammar. Ponytail Review:
+Lean already. No unresolved developer source finding after this correction.

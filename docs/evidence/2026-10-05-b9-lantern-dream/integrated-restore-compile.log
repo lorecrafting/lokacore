@@ -1,0 +1,5 @@
+command: mise exec -- mix compile --force --warnings-as-errors
+source_checkpoint: 066bfda44dfe2947467d1a36eb93ee0c80d7fe68
+exit: 0
+Compiling 63 files (.ex)
+Generated loka app
